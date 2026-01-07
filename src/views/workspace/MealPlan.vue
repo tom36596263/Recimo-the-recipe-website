@@ -11,8 +11,9 @@ import { ref, onMounted } from 'vue';
 </template>
 
 <style lang="scss" scoped>
+h1 {
+    // color: $primary-color-800;
+}
 
 //  lang="scss": 告訴 Vue 這裡要用 Scss 編譯
-//  scoped: 確保這裡寫的 CSS 只會影響目前這個頁面，不會「跑去污染」到其他頁面的樣式。
-
-</style>
+//  scoped: 確保這裡寫的 CSS 只會影響目前這個頁面，不會「跑去污染」到其他頁面的樣式。</style>

@@ -63,7 +63,7 @@
     .logo a {
         font-size: 24px;
         font-weight: bold;
-        color: $primary-color;
+        color: $primary-color-800;
         text-decoration: none;
     }
 }
@@ -79,18 +79,18 @@
         transition: color 0.3s;
 
         &:hover {
-            color: $primary-color;
+            color: $primary-color-800;
         }
 
         &.router-link-active:not(.login-btn) {
-            color: $primary-color;
+            color: $primary-color-800;
             font-weight: bold;
         }
     }
 
     // 讓 router-link 看起來依然像原本的按鈕
     .login-btn {
-        background-color: $primary-color;
+        background-color: $primary-color-800;
         color: white;
         padding: 8px 20px;
         border-radius: 20px;

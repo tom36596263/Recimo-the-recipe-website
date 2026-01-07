@@ -54,7 +54,7 @@ const route = useRoute();
     }
 
     .router-link-active {
-        color: $primary-color;
+        color: $primary-color-800;
         font-weight: bold;
     }
 }
