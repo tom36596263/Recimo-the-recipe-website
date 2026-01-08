@@ -10,6 +10,9 @@
 @import '/src/assets/scss/components-scss/input';
 @import '/src/assets/scss/components-scss/btn';
 
+//版面配置
+@import '/src/assets/scss/layouts/grid';
+
 // 此檔案用於存放全域css
 body {
   margin: 0;
