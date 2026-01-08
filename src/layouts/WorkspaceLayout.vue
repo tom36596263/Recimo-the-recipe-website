@@ -13,6 +13,7 @@
 
         <div class="main-container">
             <WorkspaceTopBar v-if="!route.meta.hideTopBar" />
+            
 
             <main class="page-content">
                 <router-view />
@@ -29,45 +30,42 @@ const route = useRoute();
 </script>
 
 <style lang="scss" scoped>
-.workspace-layout {
-    display: flex;
-    height: 100vh;
-}
+    @import '@/assets/scss/layouts/workspace-layout';
+// .workspace-layout {
+//     display: flex;
+//     height: 100vh;
+// }
 
-.sidebar {
-    width: 250px;
-    background: #f8f9fa;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-}
+// .sidebar {
+//     width: 250px;
+//     background: #f8f9fa;
+//     display: flex;
+//     flex-direction: column;
+//     padding: 20px;
+// }
 
-.workspace-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 30px;
+// .workspace-nav {
+//     display: flex;
+//     flex-direction: column;
+//     gap: 15px;
+//     margin-top: 30px;
 
-    a {
-        text-decoration: none;
-        color: #666;
-    }
+//     a {
+//         text-decoration: none;
+//         color: #666;
+//     }
 
-    .router-link-active {
-        color: $primary-color-800;
-        font-weight: bold;
-    }
-}
+//     .router-link-active {
+//         color: $primary-color-800;
+//         font-weight: bold;
+//     }
+// }
 
-.main-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
 
-.page-content {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-}
+
+// .page-content {
+//     flex: 1;
+//     padding: 20px;
+//     overflow-y: auto;
+// }
 </style>

@@ -152,68 +152,67 @@ const routes = [
   // ==========================================
   {
     path: '/admin',
-    component: () => import('@/layouts/AdminLayout.vue'),
     redirect: '/admin/members', // 進入後台預設導向會員管理
     children: [
       {
         path: 'members',
         name: 'AdminMembers',
         component: () => import('@/views/admin/MemberAdmin.vue'),
-        meta: { title: '會員管理' }
+        meta: { title: '會員管理', layout: 'admin' }
       },
       {
         path: 'ingredients',
         name: 'AdminIngredients',
         component: () => import('@/views/admin/IngredientAdmin.vue'),
-        meta: { title: '食材管理' }
+        meta: { title: '食材管理', layout: 'admin' }
       },
       {
         path: 'recipes',
         name: 'AdminRecipes',
         component: () => import('@/views/admin/RecipeAdmin.vue'),
-        meta: { title: '食譜管理' }
+        meta: { title: '食譜管理', layout: 'admin' }
       },
       {
         path: 'reports',
         name: 'AdminReports',
         component: () => import('@/views/admin/ReportAdmin.vue'),
-        meta: { title: '檢舉管理' }
+        meta: { title: '檢舉管理', layout: 'admin' }
       },
       {
         path: 'support',
         name: 'AdminSupport',
         component: () => import('@/views/admin/SupportAdmin.vue'),
-        meta: { title: '客服表單' }
+        meta: { title: '客服表單', layout: 'admin' }
       },
       {
         path: 'products',
         name: 'AdminProducts',
         component: () => import('@/views/admin/ProductAdmin.vue'),
-        meta: { title: '商品管理' }
+        meta: { title: '商品管理', layout: 'admin' }
       },
       {
         path: 'orders',
         name: 'AdminOrders',
         component: () => import('@/views/admin/OrderAdmin.vue'),
-        meta: { title: '訂單管理' }
+        meta: { title: '訂單管理', layout: 'admin' }
       },
       {
         path: 'notifications',
         name: 'AdminNotifications',
         component: () => import('@/views/admin/NotificationAdmin.vue'),
-        meta: { title: '通知管理' }
+        meta: { title: '通知管理', layout: 'admin' }
       },
       {
         path: 'faqs',
         name: 'AdminFaqs',
         component: () => import('@/views/admin/FaqAdmin.vue'),
-        meta: { title: '常見問題管理' }
+        meta: { title: '常見問題管理', layout: 'admin' }
       },
       {
         path: 'staff',
         name: 'AdminStaff',
         component: () => import('@/views/admin/StaffAdmin.vue'),
-        meta: { title: '後台人員管理' }
+        meta: { title: '後台人員管理', layout: 'admin' }
       }
     ]
   }
