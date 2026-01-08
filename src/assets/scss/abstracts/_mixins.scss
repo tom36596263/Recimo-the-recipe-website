@@ -1,0 +1,26 @@
+
+//中文標題
+@mixin heading-zh($min-size, $max-size, $font-weight: 400) {
+font-family: $font-family-zh;
+line-height: $lh-standard;
+letter-spacing: $ls-heading-zh;
+font-weight: $font-weight;
+font-size: unquote("clamp(#{$min-size}, 4vw, #{$max-size})");
+}
+
+//英文標題
+@mixin heading-en($min-size, $max-size, $font-weight: 400) {
+font-family: $font-family-en;
+line-height: $lh-standard;
+letter-spacing: $ls-heading-en;
+}
+
+
+//內文
+@mixin text-style($size, $line-height: $lh-standard) {
+font-size: $size;
+line-height: $line-height;
+letter-spacing: $ls-body;
+font-family: $font-family-zh;
+}
+
