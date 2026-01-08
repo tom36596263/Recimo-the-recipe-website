@@ -1,0 +1,14 @@
+{
+    "singleQuote": true,
+    "semi": true,
+    "tabWidth": 2,
+    "trailingComma": "none",
+    "overrides": [
+        {
+            "files": "*.scss",
+            "options": {
+                "parser": "scss"
+            }
+        }
+    ]
+}
