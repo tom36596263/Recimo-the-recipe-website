@@ -25,7 +25,9 @@ export default defineConfig({
       scss: {
         // 2. 自動引入你的變數檔案（請確認你有建立 src/assets/scss/_variables.scss）
         // 注意：使用 modern 編譯器寫法
-        additionalData: `@use "@/assets/scss/abstracts/_variables.scss" as *;`
+        additionalData: `@use "@/assets/scss/abstracts/_variables.scss" as *;`,
+        additionalData: `@use "@/assets/scss/base/_reset.scss" as *;`
+
       }
     }
   }
