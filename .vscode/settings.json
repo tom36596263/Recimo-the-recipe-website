@@ -9,5 +9,7 @@
   },
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "prettier.documentSelectors": ["**/*.scss", "**/*.json"]
+  
 }
