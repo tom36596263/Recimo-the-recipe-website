@@ -1,29 +1,53 @@
 <script setup>
-// 引入你架構中定義的後台組件
-import AdminSidebar from '@/components/admin/AdminSidebar.vue';
-// 假設你有一個頂部列來顯示「主要管理員」
-import WorkspaceTopBar from '@/components/workspace/WorkspaceTopBar.vue';
+import { computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+
+const router = useRouter();
+const route = useRoute();
+
+// 篩選出 /admin 下所有的子路由，用來生成選單
+const adminMenuItems = computed(() => {
+  const adminRoute = router.options.routes.find((r) => r.path === '/admin');
+  return adminRoute
+    ? adminRoute.children.filter((child) => child.meta && child.meta.title)
+    : [];
+});
+
+// 判斷是否為目前選中的頁面
+const isActive = (path) => {
+  return route.path === `/admin/${path}`;
+};
 </script>
 
 <template>
-  <div class="admin-container">
-    <AdminSidebar class="admin-sidebar" />
+  <div class="admin">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar__logo">
+        <h2>Recimo 後台</h2>
+      </div>
+      <nav class="admin-sidebar__nav">
+        <router-link
+          v-for="item in adminMenuItems"
+          :key="item.path"
+          :to="`/admin/${item.path}`"
+          class="admin-sidebar__link"
+          :class="{ 'admin-sidebar__link--active': isActive(item.path) }"
+        >
+          {{ item.meta.title }}
+        </router-link>
+      </nav>
+    </aside>
 
-    <main class="admin-main">
-      <header class="admin-header">
-        <WorkspaceTopBar />
-      </header>
-
-      <section class="admin-view-content">
+    <div class="main-container">
+      <main class="page-content">
         <router-view />
-      </section>
-    </main>
+      </main>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-// 使用標準 SCSS 進行佈局
-.admin-container {
+.admin {
   display: flex;
   width: 100%;
   height: 100vh;
@@ -31,30 +55,57 @@ import WorkspaceTopBar from '@/components/workspace/WorkspaceTopBar.vue';
 }
 
 .admin-sidebar {
-  width: 240px; // 側邊欄寬度
-  height: 100%;
+  width: 250px;
+  height: 100vh;
   flex-shrink: 0;
-  background-color: #f4f7f4; // 參考圖片的淺綠背景色
+  background-color: #fff;
   border-right: 1px solid #e0e0e0;
-}
-
-.admin-main {
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  background-color: #ffffff;
+
+  &__logo {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+    h2 {
+      color: #4a6741;
+      margin: 0;
+      font-size: 1.2rem;
+    }
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+    overflow-y: auto;
+  }
+
+  &__link {
+    padding: 15px 25px;
+    text-decoration: none;
+    color: #555;
+    transition: background 0.3s;
+    &:hover {
+      background-color: #ebf0eb;
+    }
+    &--active {
+      background-color: #dceddc;
+      color: #2d4029;
+      font-weight: bold;
+      border-left: 4px solid #4a6741;
+    }
+  }
 }
 
-.admin-header {
-  height: 60px;
-  width: 100%;
-  border-bottom: 1px solid #eeeeee;
-}
-
-.admin-view-content {
+.main-container {
   flex-grow: 1;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+}
+
+.page-content {
   padding: 30px;
-  overflow-y: auto; // 如果內容太長則顯示捲軸
 }
 </style>
