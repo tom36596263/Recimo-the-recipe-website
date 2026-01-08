@@ -1,14 +1,16 @@
 {
-    "singleQuote": true,
-    "semi": true,
-    "tabWidth": 2,
-    "trailingComma": "none",
-    "overrides": [
-        {
-            "files": "*.scss",
-            "options": {
-                "parser": "scss"
-            }
-        }
-    ]
+  "singleQuote": true,
+  "semi": true,
+  "tabWidth": 2,
+  "trailingComma": "none",
+  "overrides": [
+    {
+      "files": "*.scss",
+      "options": { "parser": "scss" }
+    },
+    {
+      "files": ["*.json", "*.jsonc", ".prettierrc", "settings.json"],
+      "options": { "parser": "json" }
+    }
+  ]
 }
