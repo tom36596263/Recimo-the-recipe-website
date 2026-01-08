@@ -8,7 +8,7 @@ import { ref, onMounted } from 'vue';
 
 <template>
     <h1>Recimo商城</h1>
-    <input type="text" class="form-input ">
+    <input type="text" class="form-input is-error " placeholder="搜尋">
 </template>
 
 <style lang="scss" scoped>
