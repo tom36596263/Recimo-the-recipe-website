@@ -1,75 +1,137 @@
+//引入變數
+@import '/src/assets/scss/abstracts/variables';
+@import '/src/assets/scss/abstracts/font';
+@import '/src/assets/scss/abstracts/color';
+
+//函式庫
+@import '/src/assets/scss/abstracts/mixins';
+
+//組件
 @import '/src/assets/scss/components-scss/input';
 @import '/src/assets/scss/components-scss/btn';
-@import '/src/assets/scss/abstracts/variables';
-@import '/src/assets/scss/abstracts/mixins';
 
 // 此檔案用於存放全域css
 body {
-    margin: 0;
-    font-family: sans-serif;
-    background-color: #f9f9f9;
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #f9f9f9;
 }
 
 //中文標題迴圈
 $heading-config-zh: (
-"h1":      (28px, 36px, 400),
-"h1-bold": (28px, 36px, 700),
-"h2":      (24px, 28px, 400),
-
-"h2-bold": (24px, 28px, 700),
- "h3":   (20px, 24px, 400),
-
-"h3-bold": (20px, 24px, 700),
-
- "h4":   (18px, 20px, 400),
-
-"h4-bold": (18px, 20px, 700),
-
-"h5":   (14px, 18px, 400),
-
-"h5-bold": (14px, 18px, 700),
+  'h1': (
+    28px,
+    36px,
+    400
+  ),
+  'h1-bold': (
+    28px,
+    36px,
+    700
+  ),
+  'h2': (
+    24px,
+    28px,
+    400
+  ),
+  'h2-bold': (
+    24px,
+    28px,
+    700
+  ),
+  'h3': (
+    20px,
+    24px,
+    400
+  ),
+  'h3-bold': (
+    20px,
+    24px,
+    700
+  ),
+  'h4': (
+    18px,
+    20px,
+    400
+  ),
+  'h4-bold': (
+    18px,
+    20px,
+    700
+  ),
+  'h5': (
+    14px,
+    18px,
+    400
+  ),
+  'h5-bold': (
+    14px,
+    18px,
+    700
+  )
 );
 @each $name, $values in $heading-config-zh {
-$min: nth($values, 1);
-$max: nth($values, 2);
-$weight: nth($values, 3);
+  $min: nth($values, 1);
+  $max: nth($values, 2);
+  $weight: nth($values, 3);
 
-.zh-#{$name} {
-@include heading-zh($min, $max, $weight);
-}
+  .zh-#{$name} {
+    @include heading-zh($min, $max, $weight);
+  }
 }
 
 // 英文標題迴圈
-$heading-config-en:(
-"h1":      (30px, 30px, 400),
-"h1-bold": (30px, 30px, 700),
-"h2":      (24px, 24px, 400),
-
-"h2-bold": (24px, 24px, 700),
- "h3":   (16px, 16px, 400),
-
-"h3-bold": (16px, 16px, 700),
-
+$heading-config-en: (
+  'h1': (
+    30px,
+    30px,
+    400
+  ),
+  'h1-bold': (
+    30px,
+    30px,
+    700
+  ),
+  'h2': (
+    24px,
+    24px,
+    400
+  ),
+  'h2-bold': (
+    24px,
+    24px,
+    700
+  ),
+  'h3': (
+    16px,
+    16px,
+    400
+  ),
+  'h3-bold': (
+    16px,
+    16px,
+    700
+  )
 );
 @each $name, $values in $heading-config-en {
-$min: nth($values, 1);
-$max: nth($values, 2);
-$weight: nth($values, 3);
+  $min: nth($values, 1);
+  $max: nth($values, 2);
+  $weight: nth($values, 3);
 
-.en-#{$name} {
-@include heading-en($min, $max, $weight);
-}
+  .en-#{$name} {
+    @include heading-en($min, $max, $weight);
+  }
 }
 
 //內文
 .p-p1 {
-@include text-style(16px, $lh-body);
+  @include text-style(16px, $lh-body);
 }
 
 .p-p2 {
-@include text-style(14px);
+  @include text-style(14px);
 }
 
 .p-p3 {
-@include text-style(12px);
+  @include text-style(12px);
 }
