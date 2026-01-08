@@ -1,19 +1,10 @@
-// _variables.scss
-
-// 顏色定義
-$c-border-default: #d9d9d9;
-$c-border-focus:   #a8c6fa; // 假設的 Focus 顏色
-$c-error:          #ff4d4f; // 紅色 (錯誤)
-$c-success:        #52c41a; // 綠色 (正確)
-$c-text:           #333333;
-$c-placeholder:    #bfbfbf;
-$c-bg-white:       #ffffff;
 
 // 形狀定義
-$radius-base:      8px;   // 一般 Input 的圓角
-$radius-pill:      50px;  // 搜尋框的圓角 (Pill shape)
-$height-base:      25px;  // 預設高度
-$height-lg:        50px;  // 大搜尋框高度
+$radius-base:      10px;   // 一般 Input 的圓角
+$radius-pill:      30px;  // 搜尋框的圓角 (Pill shape)
+$height-base:      45px;  // 預設高度
+$height-lg:        60px;  // 大搜尋框高度
+$height-min:       40px;  // 小搜尋框高度
 // _mixins.scss
 
 @mixin input-style(
