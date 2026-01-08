@@ -1,62 +1,3 @@
-
-// 形狀與尺寸定義
-$radius-base:       8px;   // 一般 Input 的圓角
-$radius-pill:       50px;  // 搜尋框的圓角 (Pill shape)
-
-// 一般表單高度
-$height-base:       40px; 
-
-// 搜尋框專用高度 (新增)
-$height-search-sm:  40px;  // 小搜尋框
-$height-search-lg:  60px;  // 大搜尋框 (圖片看起來比較高)
-
-// 一般表單輸入框樣式
-@mixin input-style(
-  $width: 100%, 
-  $radius: $radius-base, 
-  $border-color: $neutral-color-400,
-  $height: $height-base
-) {
-  display: block;
-  width: $width;
-  height: $height;
-  padding: 8px 12px;
-  font-size: 16px;
-  color: $neutral-color-black;
-  background-color: $neutral-color-white;
-  border: 1px solid $border-color;
-  border-radius: $radius;
-  outline: none;
-  transition: all 0.3s ease;
-
-  &::placeholder {
-    color: $neutral-color-700;
-  }
-
-  &:focus {
-    border-color: $neutral-color-black; 
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    background-color: $neutral-color-100; // 建議加上禁用背景色
-  }
-}
-
-// 狀態呈現 (錯誤/正確)
-@mixin input-status($color) {
-  border-color: $color;
-  
-  &:focus {
-    box-shadow: 0 0 0 2px rgba($color, 0.2);
-  }
-  
-  & + .input-message {
-    color: $neutral-color-black;
-    display: block; 
-  }
-}
-
 // 一般表單 Input (維持原本設計)
 .form-input {
   @include input-style();
@@ -74,7 +15,7 @@ $height-search-lg:  60px;  // 大搜尋框 (圖片看起來比較高)
 .input-message {
   font-size: 12px;
   margin-top: 4px;
-  display: none; 
+  display: none;
 }
 
 // =========================================
@@ -87,7 +28,7 @@ $height-search-lg:  60px;  // 大搜尋框 (圖片看起來比較高)
   width: 100%;
   background-color: $neutral-color-white;
   border: 1px solid $primary-color-700; // ★ 重點：綠色邊框設在容器上
-  border-radius: $radius-pill;          // ★ 重點：膠囊狀圓角
+  border-radius: $radius-pill; // ★ 重點：膠囊狀圓角
   overflow: hidden; // 防止內容超出圓角
   transition: all 0.3s ease;
 
@@ -97,9 +38,9 @@ $height-search-lg:  60px;  // 大搜尋框 (圖片看起來比較高)
     align-items: center;
     justify-content: center;
     color: $neutral-color-800; // 深灰色 Icon
-    margin-left: 16px;         // 左側距離
-    margin-right: 8px;         // 與文字的距離
-    flex-shrink: 0;            // 防止 Icon 被擠壓
+    margin-left: 16px; // 左側距離
+    margin-right: 8px; // 與文字的距離
+    flex-shrink: 0; // 防止 Icon 被擠壓
   }
 
   // 3. 搜尋框 Input 本體
@@ -107,35 +48,39 @@ $height-search-lg:  60px;  // 大搜尋框 (圖片看起來比較高)
     // 移除預設樣式，讓它填滿容器
     width: 100%;
     height: 100%;
-    border: none;       // 移除 Input 自己的邊框
-    background: none;   // 透明背景
-    outline: none;      // 移除藍色外框
+    border: none; // 移除 Input 自己的邊框
+    background: none; // 透明背景
+    outline: none; // 移除藍色外框
     padding: 0 16px 0 0; // 右側留白
-    
+
     // 文字樣式
     font-size: 16px;
     color: $neutral-color-800; // 輸入時文字顏色 (深灰，易讀)
 
     // Placeholder 樣式 (圖片中的綠色提示字)
     &::placeholder {
-      color: $primary-color-700; 
+      color: $primary-color-700;
       opacity: 1;
       letter-spacing: 1px;
     }
   }
 
-
   // ==========================
   // 尺寸變體 (Modifiers)
   // ==========================
-  
+
   // 大尺寸 (Large)
   &.search-lg {
     height: $height-search-lg; // 60px
-    max-width: 600px;          // 可選：限制最大寬度
+    max-width: 600px; // 可選：限制最大寬度
 
-    .icon-search { font-size: 20px; margin-left: 24px; }
-    .search-input { font-size: 18px; }
+    .icon-search {
+      font-size: 20px;
+      margin-left: 24px;
+    }
+    .search-input {
+      font-size: 18px;
+    }
   }
 
   // 小尺寸 (Small)
@@ -143,7 +88,12 @@ $height-search-lg:  60px;  // 大搜尋框 (圖片看起來比較高)
     height: $height-search-sm; // 40px
     max-width: 320px;
 
-    .icon-search { font-size: 16px; margin-left: 16px; }
-    .search-input { font-size: 14px; }
+    .icon-search {
+      font-size: 16px;
+      margin-left: 16px;
+    }
+    .search-input {
+      font-size: 14px;
+    }
   }
 }
