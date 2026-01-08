@@ -35,3 +35,21 @@ $secondary-color-danger-200:#FFCFCF;
 $secondary-color-info-700:#5AABFF;
 $secondary-color-info-400:#90C6FF;
 $secondary-color-info-200:#D3E9FF;
+
+// 字體家族
+$font-family-en: 'Karla', sans-serif;
+$font-family-zh: 'Noto Sans TC', 'Noto Sans', sans-serif;
+
+// 字體權重
+$weight-regular: 400;
+$weight-bold: 700;
+
+// 行高 (Line Height)
+$lh-standard: 1.5;
+$lh-body: 1.8;
+
+// 字距 (Letter Spacing) - 將百分比轉換為 em
+// 公式: 6% = 0.06em
+$ls-heading-en: 0.06em;
+$ls-heading-zh: 0;
+$ls-body: 0.12em;
