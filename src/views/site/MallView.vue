@@ -8,7 +8,24 @@ import { ref, onMounted } from 'vue';
 
 <template>
     <h1>Recimo商城</h1>
-    <input type="text" class="form-input is-error " placeholder="搜尋">
+    <div style="width: 150px;">
+        <input type="text" class="form-input   " placeholder="搜尋">
+    </div>
+    <div class="search-bar search-sm">
+  <i class="fa-solid fa-magnifying-glass icon-search"></i>
+  <input type="text" class="search-input" placeholder="尋找靈感食譜..." />
+</div>
+    
+    
+  
+        <div class="btn-recipe">
+            <p>尋找食譜</p>
+            <div class="icon-circle ">
+                <i class="fa-solid fa-arrow-right"></i>
+            </div>
+        </div>
+  
+    
 </template>
 
 <style lang="scss" scoped>

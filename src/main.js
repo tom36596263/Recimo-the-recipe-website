@@ -4,6 +4,7 @@ import App from './App.vue'
 import router from './router' // 引入路由設定
 import '@/assets/scss/base/_reset.scss' //引入全域css reset
 import '@/assets/scss/main.scss' // 引入全域樣式
+import '@fortawesome/fontawesome-free/css/all.css' // 引入fontawesome
 
 const app = createApp(App) // 建立 Vue 應用程式實體
 const pinia = createPinia() // 建立 Pinia 全域狀態管理實體
