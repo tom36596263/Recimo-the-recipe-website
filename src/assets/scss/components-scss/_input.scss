@@ -1,0 +1,115 @@
+// _variables.scss
+
+// 顏色定義
+$c-border-default: #d9d9d9;
+$c-border-focus:   #a8c6fa; // 假設的 Focus 顏色
+$c-error:          #ff4d4f; // 紅色 (錯誤)
+$c-success:        #52c41a; // 綠色 (正確)
+$c-text:           #333333;
+$c-placeholder:    #bfbfbf;
+$c-bg-white:       #ffffff;
+
+// 形狀定義
+$radius-base:      8px;   // 一般 Input 的圓角
+$radius-pill:      50px;  // 搜尋框的圓角 (Pill shape)
+$height-base:      25px;  // 預設高度
+$height-lg:        50px;  // 大搜尋框高度
+// _mixins.scss
+
+@mixin input-style(
+  $width: 100%, 
+  $radius: $radius-base, 
+  $border-color: $c-border-default,
+  $height: $height-base
+) {
+  // 基礎結構
+  display: block;
+  width: $width; // 這裡控制寬度
+  height: $height;
+  padding: 8px 12px;
+  font-size: 16px;
+  color: $c-text;
+  background-color: $c-bg-white;
+  border: 1px solid $border-color;
+  border-radius: $radius;
+  outline: none;
+  transition: all 0.3s ease;
+
+  // Placeholder 樣式
+  &::placeholder {
+    color: $c-placeholder;
+  }
+
+  // Focus 狀態 (變色 + 陰影)
+  &:focus {
+    border-color: darken($c-border-default, 20%); 
+    // 或者使用特定 focus 顏色
+    // border-color: $c-border-focus; 
+  }
+
+  // 禁用狀態
+  &:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+  }
+}
+
+// 狀態呈現 Mixin (錯誤/正確)
+@mixin input-status($color) {
+  border-color: $color;
+  
+  &:focus {
+    box-shadow: 0 0 0 2px rgba($color, 0.2);
+  }
+  
+  // 處理下方的提示文字 (假設 HTML 結構是 input + p.message)
+  & + .input-message {
+    color: $color;
+    display: block; // 顯示訊息
+  }
+}
+// style.scss
+
+.form-input {
+  // 呼叫 mixin，使用預設值
+  @include input-style();
+
+  // 狀態 Class
+  &.is-error {
+    @include input-status($c-error);
+  }
+
+  &.is-success {
+    @include input-status($c-success);
+  }
+}
+
+// 提示文字預設隱藏
+.input-message {
+  font-size: 12px;
+  margin-top: 4px;
+  display: none; // 預設不顯示，有狀態時才顯示
+}
+.search-bar {
+  position: relative; // 為了定位 Icon
+  
+  // 搜尋框 Input 本體
+  .search-input {
+    @include input-style(
+      $width: 100%, 
+      $radius: $radius-pill, // 改用 Pill 圓角
+      $height: $height-lg    // 改用大高度
+    );
+    padding-left: 40px; // 預留位置給 Icon
+    border-color: #999; // 假設搜尋框邊框比較深
+  }
+
+  // 搜尋 Icon
+  .icon-search {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+  }
+}
