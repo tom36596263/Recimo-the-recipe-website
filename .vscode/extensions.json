@@ -1,6 +1,7 @@
 {
   "recommendations": [
-    "Vue.volar",               // Vue 3 核心插件
-    "mhutchie.git-graph",      // Git Graph 插件
+    "Vue.volar", // Vue 3 核心插件
+    "mhutchie.git-graph", // Git Graph 插件
+    "esbenp.prettier-vscode", // Prettier 插件
   ]
 }
