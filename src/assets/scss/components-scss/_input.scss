@@ -1,20 +1,24 @@
 
-// 形狀定義
-$radius-base:      8px;   // 一般 Input 的圓角
-$radius-pill:      50px;  // 搜尋框的圓角 (Pill shape)
-$height-base:      40px;  // 預設高度
-$height-lg:        50px;  // 大搜尋框高度
-// _mixins.scss
+// 形狀與尺寸定義
+$radius-base:       8px;   // 一般 Input 的圓角
+$radius-pill:       50px;  // 搜尋框的圓角 (Pill shape)
 
+// 一般表單高度
+$height-base:       40px; 
+
+// 搜尋框專用高度 (新增)
+$height-search-sm:  40px;  // 小搜尋框
+$height-search-lg:  60px;  // 大搜尋框 (圖片看起來比較高)
+
+// 一般表單輸入框樣式
 @mixin input-style(
   $width: 100%, 
   $radius: $radius-base, 
   $border-color: $neutral-color-400,
   $height: $height-base
 ) {
-  // 基礎結構
   display: block;
-  width: $width; // 這裡控制寬度
+  width: $width;
   height: $height;
   padding: 8px 12px;
   font-size: 16px;
@@ -25,25 +29,21 @@ $height-lg:        50px;  // 大搜尋框高度
   outline: none;
   transition: all 0.3s ease;
 
-  Placeholder 樣式
   &::placeholder {
     color: $neutral-color-700;
   }
 
-  // Focus 狀態 (變色 + 陰影)
   &:focus {
-    // border-color: darken($neutral-color-black, 20%); 
     border-color: $neutral-color-black; 
   }
 
-  // 禁用狀態
   &:disabled {
-    //  border-color:$secondary-color-danger-700;
     cursor: not-allowed;
+    background-color: $neutral-color-100; // 建議加上禁用背景色
   }
 }
 
-// 狀態呈現 Mixin (錯誤/正確)
+// 狀態呈現 (錯誤/正確)
 @mixin input-status($color) {
   border-color: $color;
   
@@ -51,19 +51,16 @@ $height-lg:        50px;  // 大搜尋框高度
     box-shadow: 0 0 0 2px rgba($color, 0.2);
   }
   
-  // 處理下方的提示文字 (假設 HTML 結構是 input + p.message)
   & + .input-message {
     color: $neutral-color-black;
-    display: block; // 顯示訊息
+    display: block; 
   }
 }
-// style.scss
 
+// 一般表單 Input (維持原本設計)
 .form-input {
-  // 呼叫 mixin，使用預設值
   @include input-style();
 
-  // 狀態 Class
   &.is-error {
     @include input-status($secondary-color-danger-700);
   }
@@ -73,32 +70,80 @@ $height-lg:        50px;  // 大搜尋框高度
   }
 }
 
-// 提示文字預設隱藏
+// 提示文字
 .input-message {
   font-size: 12px;
   margin-top: 4px;
-  display: none; // 預設不顯示，有狀態時才顯示
+  display: none; 
 }
+
+// =========================================
+// 新版搜尋框 (取代舊版)
+// =========================================
 .search-bar {
-  position: relative; // 為了定位 Icon
-  
-  // 搜尋框 Input 本體
-  .search-input {
-    @include input-style(
-      $width: 100%, 
-      $radius: $radius-pill, // 改用 Pill 圓角
-      $height: $height-lg    // 改用大高度
-    );
-    padding-left: 40px; // 預留位置給 Icon
-    border-color:$secondary-color-success-700; 
+  // 1. 容器設定 (Flexbox 讓 Icon 與 Input 排成一列)
+  display: flex;
+  align-items: center; // 垂直置中
+  width: 100%;
+  background-color: $neutral-color-white;
+  border: 1px solid $primary-color-700; // ★ 重點：綠色邊框設在容器上
+  border-radius: $radius-pill;          // ★ 重點：膠囊狀圓角
+  overflow: hidden; // 防止內容超出圓角
+  transition: all 0.3s ease;
+
+  // 2. 搜尋 Icon
+  .icon-search {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $neutral-color-800; // 深灰色 Icon
+    margin-left: 16px;         // 左側距離
+    margin-right: 8px;         // 與文字的距離
+    flex-shrink: 0;            // 防止 Icon 被擠壓
   }
 
-  // 搜尋 Icon
-  .icon-search {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color:$neutral-color-800;
+  // 3. 搜尋框 Input 本體
+  .search-input {
+    // 移除預設樣式，讓它填滿容器
+    width: 100%;
+    height: 100%;
+    border: none;       // 移除 Input 自己的邊框
+    background: none;   // 透明背景
+    outline: none;      // 移除藍色外框
+    padding: 0 16px 0 0; // 右側留白
+    
+    // 文字樣式
+    font-size: 16px;
+    color: $neutral-color-800; // 輸入時文字顏色 (深灰，易讀)
+
+    // Placeholder 樣式 (圖片中的綠色提示字)
+    &::placeholder {
+      color: $primary-color-700; 
+      opacity: 1;
+      letter-spacing: 1px;
+    }
+  }
+
+
+  // ==========================
+  // 尺寸變體 (Modifiers)
+  // ==========================
+  
+  // 大尺寸 (Large)
+  &.search-lg {
+    height: $height-search-lg; // 60px
+    max-width: 600px;          // 可選：限制最大寬度
+
+    .icon-search { font-size: 20px; margin-left: 24px; }
+    .search-input { font-size: 18px; }
+  }
+
+  // 小尺寸 (Small)
+  &.search-sm {
+    height: $height-search-sm; // 40px
+    max-width: 320px;
+
+    .icon-search { font-size: 16px; margin-left: 16px; }
+    .search-input { font-size: 14px; }
   }
 }
