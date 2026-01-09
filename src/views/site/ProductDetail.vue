@@ -2,99 +2,118 @@
 //  setup: 這是 Vue 3 的語法糖，讓你不用寫 export default {}，且能直接使用變數和函式，開發效率最高。
 // 所有的變數、函式、或是從 JSON 引入的資料都寫在script裡面。
 import { ref, onMounted } from 'vue';
+// ==========================================
+// 加入購物車pina
+// ==========================================
+import { useCartStore } from '@/stores/cartStore';
+const cartStore = useCartStore();
+
+const product = { id: 1, name: '舒肥雞胸', price: 160 }; // 假資料
+
+const addCart = () => {
+  cartStore.addToCart(product, 1);
+};
 </script>
 
 <template>
-  <section class="product-detail">
-    <div class="product-detail__gallery">
-      <img src="https://picsum.photos/763/558/?random=10" />
-      <img src="https://picsum.photos/146/95/?random=11" />
-      <img src="https://picsum.photos/146/95/?random=12" />
-    </div>
-    <div class="product-detail__info">
-      <h1>舒肥雞胸藜麥飯</h1>
-      <hr />
-      <p class="product-detail__description">
-        想吃得健康，又不想犧牲美味？我們的「舒肥雞胸藜麥飯」專為忙碌的現代人、健身族與體重管理者設計。採用低溫烹調技術鎖住肉汁，搭配超級食物大軍，讓你每一口都吃進飽足感與純淨營養。
-      </p>
-      <p class="product-detail__price">$160</p>
-      <div class="product-detail__options">
-        <p class="product-detail__label">數量</p>
-        <div class="product-detail__quantity-selector"></div>
+  <section class="product-detail container">
+    <div class="row">
+      <div class="col-7 col-md-12 col-lg-12">
+        <div class="product-detail__gallery">
+          <img src="https://picsum.photos/500/500/?random=10" />
+          <img src="https://picsum.photos/146/95/?random=11" />
+          <img src="https://picsum.photos/146/95/?random=12" />
+        </div>
       </div>
-      <div class="product-detail__actions">
-        <button>加入購物車</button>
-        <button>直接購買</button>
-      </div>
-      <table>
-        <tr>
-          <th>項目</th>
-          <th>每份含量</th>
-          <th>項目</th>
-          <th>每份含量</th>
-        </tr>
-        <tr>
-          <td>熱量</td>
-          <td>250g</td>
-          <td>碳水化合物</td>
-          <td>42.0g</td>
-        </tr>
-        <tr>
-          <td>總脂肪</td>
-          <td>4.2g</td>
-          <td>飽和脂肪</td>
-          <td>0.8g</td>
-        </tr>
-        <tr>
-          <td>蛋白質</td>
-          <td>28.5g</td>
-          <td>膳食纖維</td>
-          <td>5.5g</td>
-        </tr>
-        <tr>
-          <td>鈉</td>
-          <td>420mg</td>
-          <td>糖</td>
-          <td>0.5g</td>
-        </tr>
-      </table>
-      <p class="nutrition-table__note">一人份的營養成分表示/一份250g</p>
-      <div class="product-detail__extra">
-        <div>
-          <h3 class="product-detail__section">食材內容：</h3>
-          <ol>
-            <li>嚴選低溫舒肥嫩雞胸</li>
-            <li>黃金兩色藜麥糙米飯(三色藜麥、優質糙米)</li>
-            <li>
-              五彩均衡鮮蔬(青花菜、鮮甜紅蘿蔔 / 黃玉米筍、栗子地瓜 /
-              烤南瓜、毛豆仁)
-            </li>
-          </ol>
-        </div>
-        <div class="product-detail__section">
-          <h3>使用方法：</h3>
-          <ol>
-            <li>微波加熱： 撕開包裝一角以800W 加熱約2-3分鐘。</li>
-            <li>
-              隔水加熱：
-              整包放入熱水中浸泡5-8分鐘（不建議沸騰加熱以維持肉質嫩度）。
-            </li>
-            <li>電鍋加熱： 解凍後放入內鍋，外鍋加少許水，跳起即可。</li>
-          </ol>
-        </div>
-        <div class="product-detail__section">
-          <h3>保存期限：</h3>
-          <p>冷凍保存 12 個月。</p>
-        </div>
-        <div class="product-detail__section">
-          <h3>貼心提醒：</h3>
-          <p>本產品含有穀類製品，過敏者請留意。</p>
+      <div class="col-5 col-md-12 col-lg-12">
+        <div class="product-detail__info">
+          <h1>舒肥雞胸藜麥飯</h1>
+          <hr />
+          <p class="product-detail__description">
+            想吃得健康，又不想犧牲美味？我們的「舒肥雞胸藜麥飯」專為忙碌的現代人、健身族與體重管理者設計。採用低溫烹調技術鎖住肉汁，搭配超級食物大軍，讓你每一口都吃進飽足感與純淨營養。
+          </p>
+          <p class="product-detail__price">$160</p>
+          <div class="product-detail__options">
+            <p class="product-detail__label">數量</p>
+            <div class="product-detail__quantity-selector"></div>
+          </div>
+          <div class="product-detail__actions">
+            <button>加入購物車</button>
+            <button>直接購買</button>
+          </div>
+          <table>
+            <tbody>
+              <tr>
+                <th>項目</th>
+                <th>每份含量</th>
+                <th>項目</th>
+                <th>每份含量</th>
+              </tr>
+              <tr>
+                <td>熱量</td>
+                <td>250g</td>
+                <td>碳水化合物</td>
+                <td>42.0g</td>
+              </tr>
+              <tr>
+                <td>總脂肪</td>
+                <td>4.2g</td>
+                <td>飽和脂肪</td>
+                <td>0.8g</td>
+              </tr>
+              <tr>
+                <td>蛋白質</td>
+                <td>28.5g</td>
+                <td>膳食纖維</td>
+                <td>5.5g</td>
+              </tr>
+              <tr>
+                <td>鈉</td>
+                <td>420mg</td>
+                <td>糖</td>
+                <td>0.5g</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="nutrition-table__note">一人份的營養成分表示/一份250g</p>
+          <div class="product-detail__extra">
+            <div>
+              <h3 class="product-detail__section">食材內容：</h3>
+              <ol>
+                <li>嚴選低溫舒肥嫩雞胸</li>
+                <li>黃金兩色藜麥糙米飯(三色藜麥、優質糙米)</li>
+                <li>
+                  五彩均衡鮮蔬(青花菜、鮮甜紅蘿蔔 / 黃玉米筍、栗子地瓜 /
+                  烤南瓜、毛豆仁)
+                </li>
+              </ol>
+            </div>
+            <div class="product-detail__section">
+              <h3>使用方法：</h3>
+              <ol>
+                <li>微波加熱： 撕開包裝一角以800W 加熱約2-3分鐘。</li>
+                <li>
+                  隔水加熱：
+                  整包放入熱水中浸泡5-8分鐘（不建議沸騰加熱以維持肉質嫩度）。
+                </li>
+                <li>電鍋加熱： 解凍後放入內鍋，外鍋加少許水，跳起即可。</li>
+              </ol>
+            </div>
+            <div class="product-detail__section">
+              <h3>保存期限：</h3>
+              <p>冷凍保存 12 個月。</p>
+            </div>
+            <div class="product-detail__section">
+              <h3>貼心提醒：</h3>
+              <p>本產品含有穀類製品，過敏者請留意。</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </section>
   <section>
-    <h2>推薦商品</h2>
+    <!-- <h2>推薦商品</h2>
     <div class="product-card">
       <img src="https://picsum.photos/282/211/?random=16" class=".product-card__img" />
       <div class="product-card__content">
@@ -124,9 +143,9 @@ import { ref, onMounted } from 'vue';
       <div class="product-card__content">
         <h4 class="product-card__title">麻婆豆腐燒</h4>
         <p class="product-card__price">$160</p>
-        <button>加入購物車</button>
+        <button @click="addCart">加入購物車</button>
       </div>
-    </div>
+    </div> -->
   </section>
 </template>
 
