@@ -94,6 +94,15 @@ const routes = [
         }
       },
       {
+        path: 'edit-plan',
+        name: 'edit-meal-plan', // 編輯備餐計畫
+        component: () => import('@/views/workspace/EditMealPlan.vue'),
+        meta: {
+          layout: 'workspace',
+          requiresAuth: true
+        }
+      },
+      {
         path: 'recipes',
         name: 'workspace-recipes', // 食譜總覽(工作區)
         component: () => import('@/views/workspace/RecipeOverview.vue'),
