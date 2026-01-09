@@ -184,3 +184,17 @@
   }
 }
 
+//sidebar btn
+.workspace-nav{
+  
+  .side-nav-item{
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+
+    @include nav-item-state($neutral-color-800, $primary-color-700, $primary-color-800);
+  }
+}

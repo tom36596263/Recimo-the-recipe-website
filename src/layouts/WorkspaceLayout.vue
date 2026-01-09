@@ -3,11 +3,41 @@
         <aside class="sidebar">
             <div class="logo">Recimo</div>
             <nav class="workspace-nav">
-                <router-link to="/workspace/my-recipes">我的食譜</router-link>
-                <router-link to="/workspace/lab">烹飪實驗室</router-link>
-                <router-link to="/workspace/plan">備餐計畫</router-link>
-                <router-link to="/workspace/recipes">食譜總覽</router-link>
-                <router-link to="/mall">Recimo商城</router-link> <router-link to="/workspace/orders">訂單查詢</router-link>
+                <router-link 
+                to="/workspace/my-recipes" 
+                class="side-nav-item">
+                <i-material-symbols-fork-spoon />
+                    我的食譜
+                </router-link>
+                <router-link 
+                to="/workspace/lab" 
+                class="side-nav-item">
+                <i-material-symbols-Skillet-outline />
+                    烹飪實驗室
+                </router-link>
+                <router-link 
+                to="/workspace/plan" 
+                class="side-nav-item">
+                <i-material-symbols-Hand-Meal-outline />
+                    備餐計畫
+                </router-link>
+                <router-link 
+                to="/workspace/recipes" 
+                class="side-nav-item">
+                <i-material-symbols-Inbox-Text-Person-outline />
+                    食譜總覽
+                </router-link>
+                <router-link 
+                to="/mall" 
+                class="side-nav-item">
+                <i-material-symbols-Shopping-Cart-outline />
+                Recimo商城</router-link>
+                <router-link 
+                to="/workspace/orders" 
+                class="side-nav-item">
+                <i-material-symbols-Assignment-outline />
+                    訂單查詢
+                </router-link>
             </nav>
         </aside>
 

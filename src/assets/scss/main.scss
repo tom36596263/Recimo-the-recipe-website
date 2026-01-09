@@ -10,9 +10,13 @@
 @import '/src/assets/scss/components-scss/input';
 @import '/src/assets/scss/components-scss/btn';
 @import '/src/assets/scss/components-scss/pagination';
+@import '/src/assets/scss/components-scss/tag';
 
 //版面配置
 @import '/src/assets/scss/layouts/grid';
+@import '/src/assets/scss/layouts/admin-layout';
+@import '/src/assets/scss/layouts/default-layout';
+@import '/src/assets/scss/layouts/workspace-layout';
 
 // 此檔案用於存放全域css
 body {
