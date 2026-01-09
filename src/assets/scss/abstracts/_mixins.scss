@@ -55,7 +55,7 @@
   }
 }
 
-// 狀態呈現 (錯誤/正確)
+// 表單狀態呈現 (錯誤/正確)
 @mixin input-status($color) {
   border-color: $color;
 
@@ -66,5 +66,51 @@
   & + .input-message {
     color: $neutral-color-black;
     display: block;
+  }
+}
+
+//tag
+@mixin tag-base(
+  // 1. 尺寸參數
+  $height,
+  // 必填：高度
+  $font-size,
+  // 必填：字體大小
+  $width: auto,
+  // 選填：寬度 (預設內容撐開)
+  $padding-x: 12px,
+
+  // 選填：左右內距 (防止文字貼邊)
+  // 2. 顏色參數 (預設用變數)
+  $bg-color: $primary-color-100,
+  $text-color: $neutral-color-800,
+  $radius: 10px
+) {
+  // --- 結構設定 ---
+  display: inline-flex;
+  align-items: center; // 垂直置中 (關鍵)
+  justify-content: center; // 水平置中
+
+  // --- 尺寸設定 ---
+  width: $width;
+  height: $height; // 由這裡控制高度
+  padding: 0 $padding-x; // 上下0，只留左右距離
+
+  // --- 外觀設定 ---
+  background-color: $bg-color;
+  color: $text-color;
+  font-size: $font-size;
+  border-radius: $radius;
+  font-weight: 500;
+  line-height: 1; // 避免行高影響垂直置中
+  white-space: nowrap; // 防止換行
+  transition: all 0.3s ease;
+
+  // --- Icon 微調 (讓 Icon 跟文字對齊) ---
+  i,
+  span {
+    margin-right: 4px;
+    font-size: 1.5em; // 跟隨字體大小
+    display: inline-block;
   }
 }
