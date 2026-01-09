@@ -114,3 +114,19 @@
     display: inline-block;
   }
 }
+
+
+//sidebar btn
+@mixin nav-item-state($default-color, $hover-color, $active-color){
+  color: $default-color;
+  transition: color 0.2s ease;
+  &:hover{
+    color: $hover-color;
+  }
+  &.is-active{
+    color: $active-color;
+    &:hover {
+      color: $hover-color;
+    }
+  }
+}
