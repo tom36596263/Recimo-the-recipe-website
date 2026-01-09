@@ -1,0 +1,53 @@
+// 1. 大型互動標籤 (高度 32px)
+// 對應：+ 新增分類
+.tag-action {
+  @include tag-base(
+    $height: 32px,
+    // ★ 指定高度
+    $font-size: 16px,
+    // 字體大小
+    $width: 100%,
+    // 寬度跟隨外層 (如不需要可改 auto)
+    $padding-x: 16px // 左右留寬一點比較好看
+  );
+
+  cursor: pointer;
+  user-select: none;
+
+  // Hover 效果
+  &:hover {
+    background-color: $primary-color-400; // 深綠
+    color: $neutral-color-white; // 白字
+  }
+
+  // 按壓效果
+  &:active {
+    transform: scale(0.98);
+  }
+
+  // 加號微調
+  .plus-sign {
+    font-weight: 300;
+    margin-right: 6px;
+    transform: translateY(-1px); // 視覺微調
+  }
+}
+
+// 2. 小型展示標籤 (高度 21px)
+// 對應：小標籤
+.tag-label {
+  @include tag-base(
+    $height: 21px,
+    // ★ 指定高度
+    $font-size: 14px,
+    // 字體縮小配合高度
+    $width: auto,
+    // 寬度依內容
+    $padding-x: 8px,
+    // 小標籤左右距離窄一點
+    $radius: 4px
+  );
+
+  cursor: default;
+  // 如果小標籤不需要 hover 變色，這裡就結束了
+}
