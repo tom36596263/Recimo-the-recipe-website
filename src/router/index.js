@@ -6,55 +6,55 @@ const routes = [
   // ==========================================
   {
     path: '/',
-    name: 'home', // 首頁
+    name: 'home',
     component: () => import('@/views/site/HomeView.vue'),
     meta: { title: '首頁', showInMenu: true, layout: 'default' }
   },
   {
     path: '/search',
-    name: 'site-search', //站內搜尋頁
+    name: 'site-search',
     component: () => import('@/views/site/SearchView.vue'),
-    meta: {layout: 'default' }
+    meta: { layout: 'default' }
   },
   {
     path: '/about',
-    name: 'about', // 關於Recimo
+    name: 'about',
     component: () => import('@/views/site/AboutView.vue'),
     meta: { title: '關於Recimo', showInMenu: true, layout: 'default' }
   },
   {
     path: '/recipes',
-    name: 'recipes-overview', // 食譜總覽
+    name: 'recipes-overview',
     component: () => import('@/views/site/RecipeOverview.vue'),
     meta: { title: '食譜總覽', showInMenu: true, layout: 'default' }
   },
   {
     path: '/mall',
-    name: 'mall', // Recimo商城
+    name: 'mall',
     component: () => import('@/views/site/MallView.vue'),
     meta: { title: 'Recimo商城', showInMenu: true, layout: 'default' }
   },
   {
     path: '/mall/:id',
-    name: 'product-detail', //商品詳情頁
+    name: 'product-detail',
     component: () => import('@/views/site/ProductDetail.vue'),
     meta: { layout: 'default' }
   },
   {
     path: '/benefits',
-    name: 'benefits', // 會員權益
+    name: 'benefits',
     component: () => import('@/views/site/BenefitsView.vue'),
     meta: { title: '會員權益', showInMenu: true, layout: 'default' }
   },
   {
     path: '/cart',
-    name: 'cart', // 購物車
+    name: 'cart',
     component: () => import('@/views/site/CartView.vue'),
     meta: { layout: 'default' }
   },
   {
     path: '/checkout',
-    name: 'checkout', //結帳
+    name: 'checkout',
     component: () => import('@/views/site/CheckoutView.vue'),
     meta: { layout: 'default' }
   },
@@ -64,14 +64,14 @@ const routes = [
   // ==========================================
   {
     path: '/workspace',
-    redirect: '/workspace/my-recipes', // 進入工作區自動導向我的食譜
+    redirect: '/workspace/my-recipes',
     children: [
       {
         path: 'my-recipes',
-        name: 'my-recipes', // 我的食譜
+        name: 'my-recipes',
         component: () => import('@/views/workspace/MyRecipes.vue'),
         meta: {
-          title: '我的食譜', 
+          title: '我的食譜',
           icon: 'i-material-symbols-fork-spoon',
           layout: 'workspace',
           requiresAuth: true
@@ -79,10 +79,10 @@ const routes = [
       },
       {
         path: 'lab',
-        name: 'cooking-lab', //烹飪實驗室
+        name: 'cooking-lab',
         component: () => import('@/views/workspace/CookingLab.vue'),
         meta: {
-          title: '烹飪實驗室', 
+          title: '烹飪實驗室',
           icon: 'i-material-symbols-Skillet-outline',
           layout: 'workspace',
           requiresAuth: true
@@ -90,10 +90,10 @@ const routes = [
       },
       {
         path: 'plan',
-        name: 'meal-plan', // 備餐計畫
+        name: 'meal-plan',
         component: () => import('@/views/workspace/MealPlan.vue'),
         meta: {
-          title: '備餐計畫', 
+          title: '備餐計畫',
           icon: 'i-material-symbols-Hand-Meal-outline',
           layout: 'workspace',
           requiresAuth: true
@@ -101,54 +101,47 @@ const routes = [
       },
       {
         path: 'edit-plan',
-        name: 'edit-meal-plan', // 編輯備餐計畫
+        name: 'edit-meal-plan',
         component: () => import('@/views/workspace/EditMealPlan.vue'),
-        meta: {
-          layout: 'workspace',
-          requiresAuth: true
-        }
+        meta: { layout: 'workspace', requiresAuth: true }
       },
       {
         path: 'recipes',
-        name: 'workspace-recipes', // 食譜總覽(工作區)
+        name: 'workspace-recipes',
         component: () => import('@/views/workspace/RecipeOverview.vue'),
         meta: {
-          title: '食譜總覽', 
+          title: '食譜總覽',
           icon: 'i-material-symbols-Inbox-Text-Person-outline',
           layout: 'workspace',
           requiresAuth: true
         }
-      },// 商城連結：直接給絕對路徑 /mall
+      }, // 商城連結：直接給絕對路徑 /mall
       {
         path: '/mall',
-        meta: { 
-          title: 'Recimo商城', 
+        meta: {
+          title: 'Recimo商城',
           icon: 'i-material-symbols-Shopping-Cart-outline',
-          requiresAuth: true 
+          requiresAuth: true
         }
       },
       {
         path: 'recipe-detail/:id',
-        name: 'workspace-recipe-detail', // 食譜詳情頁
+        name: 'workspace-recipe-detail',
         component: () => import('@/views/workspace/RecipeDetail.vue'),
-        meta: { layout: 'workspace', requiresAuth: true, hideTopBar: false }
+        meta: { layout: 'workspace', requiresAuth: true }
       },
       {
         path: 'edit-recipe',
-        name: 'edit-recipe', // 食譜編輯
+        name: 'edit-recipe',
         component: () => import('@/views/workspace/EditRecipe.vue'),
-        meta: {
-          layout: 'workspace',
-          requiresAuth: true,
-          hideTopBar: true // 在 WorkspaceLayout.vue 裡有寫 v-if 判斷是否隱藏topbar
-        }
+        meta: { layout: 'workspace', requiresAuth: true, hideTopBar: true }
       },
       {
         path: 'orders',
-        name: 'order-inquiry', // 訂單查詢
+        name: 'order-inquiry',
         component: () => import('@/views/workspace/OrderInquiry.vue'),
         meta: {
-          title: '訂單查詢', 
+          title: '訂單查詢',
           icon: 'i-material-symbols-Assignment-outline',
           layout: 'workspace',
           requiresAuth: true
@@ -156,86 +149,22 @@ const routes = [
       },
       {
         path: 'profile',
-        name: 'user-profile', //個人主頁
+        name: 'user-profile',
         component: () => import('@/views/workspace/ProfileView.vue'),
-        meta: { layout: 'workspace', requiresAuth: true, hideTopBar: false }
+        meta: { layout: 'workspace', requiresAuth: true }
       },
       {
         path: 'settings',
-        name: 'user-settings', //會員中心(設定)
+        name: 'user-settings',
         component: () => import('@/views/workspace/SettingsView.vue'),
-        meta: { layout: 'workspace', requiresAuth: true, hideTopBar: false }
+        meta: { layout: 'workspace', requiresAuth: true }
       }
     ]
   },
-  // ==========================================
-  // 3. 後台
-  // ==========================================
+  // 404 處理：若輸入不存在的網址（包含舊的 /admin），導回首頁
   {
-    path: '/admin',
-    redirect: '/admin/members', // 進入後台預設導向會員管理
-    children: [
-      {
-        path: 'members',
-        name: 'AdminMembers',
-        component: () => import('@/views/admin/MemberAdmin.vue'),
-        meta: { title: '會員管理', layout: 'admin' }
-      },
-      {
-        path: 'ingredients',
-        name: 'AdminIngredients',
-        component: () => import('@/views/admin/IngredientAdmin.vue'),
-        meta: { title: '食材管理', layout: 'admin' }
-      },
-      {
-        path: 'recipes',
-        name: 'AdminRecipes',
-        component: () => import('@/views/admin/RecipeAdmin.vue'),
-        meta: { title: '食譜管理', layout: 'admin' }
-      },
-      {
-        path: 'reports',
-        name: 'AdminReports',
-        component: () => import('@/views/admin/ReportAdmin.vue'),
-        meta: { title: '檢舉管理', layout: 'admin' }
-      },
-      {
-        path: 'support',
-        name: 'AdminSupport',
-        component: () => import('@/views/admin/SupportAdmin.vue'),
-        meta: { title: '客服表單', layout: 'admin' }
-      },
-      {
-        path: 'products',
-        name: 'AdminProducts',
-        component: () => import('@/views/admin/ProductAdmin.vue'),
-        meta: { title: '商品管理', layout: 'admin' }
-      },
-      {
-        path: 'orders',
-        name: 'AdminOrders',
-        component: () => import('@/views/admin/OrderAdmin.vue'),
-        meta: { title: '訂單管理', layout: 'admin' }
-      },
-      {
-        path: 'notifications',
-        name: 'AdminNotifications',
-        component: () => import('@/views/admin/NotificationAdmin.vue'),
-        meta: { title: '通知管理', layout: 'admin' }
-      },
-      {
-        path: 'faqs',
-        name: 'AdminFaqs',
-        component: () => import('@/views/admin/FaqAdmin.vue'),
-        meta: { title: '常見問題管理', layout: 'admin' }
-      },
-      {
-        path: 'staff',
-        name: 'AdminStaff',
-        component: () => import('@/views/admin/StaffAdmin.vue'),
-        meta: { title: '後台人員管理', layout: 'admin' }
-      }
-    ]
+    path: '/:pathMatch(.*)*',
+    redirect: '/'
   }
 ];
 
@@ -243,7 +172,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    return { top: 0};
+    return { top: 0 };
   }
 });
 
