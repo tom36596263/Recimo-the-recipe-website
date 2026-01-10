@@ -1,5 +1,3 @@
-
-
 // =========================================
 // 2. 通用按鈕樣式 (Base Button)
 // =========================================
@@ -10,26 +8,35 @@
   justify-content: center;
   align-items: center;
   width: $btn-width-full; // 寬度由外層 div 決定
-  
+
   // 外觀
-  border-radius: 6px;
+  border-radius: $radius-base;
   border: 1px solid transparent; // 預留邊框寬度
   cursor: pointer;
   font-family: inherit;
   font-weight: 500;
   letter-spacing: 1px;
   text-decoration: none;
-  
+
   // 動畫過渡
   transition: all 0.3s ease;
-  
+
   // icon 間距
   gap: 8px;
 
   // --- 高度變數 (Sizes) ---
-  &.h-30 { height: 30px; font-size: 14px; }
-  &.h-40 { height: 40px; font-size: 16px; }
-  &.h-50 { height: 50px; font-size: 20px; }
+  &.h-30 {
+    height: 30px;
+    font-size: 14px;
+  }
+  &.h-40 {
+    height: 40px;
+    font-size: 16px;
+  }
+  &.h-50 {
+    height: 50px;
+    font-size: 20px;
+  }
 
   // --- 樣式變體 (Variants) ---
 
@@ -51,15 +58,15 @@
   &.btn-outline {
     background-color: transparent;
     border-color: $primary-color-700; // 預設綠框
-    color: $primary-color-700;       // 預設綠字
+    color: $primary-color-700; // 預設綠字
 
     &:hover {
       border-color: $accent-color-700; // Hover 變橘框
-      color: $accent-color-700;       // Hover 變橘字
-      background-color: $accent-color-100;   // 維持透明背景
+      color: $accent-color-700; // Hover 變橘字
+      background-color: $accent-color-100; // 維持透明背景
     }
   }
-  
+
   // 3. 禁用狀態 (Disabled)
   // 預設灰色，不產生 Hover 效果
   &.btn-disabled {
@@ -67,12 +74,12 @@
     border-color: $neutral-color-400;
     color: $neutral-color-400;
     cursor: not-allowed;
-    
+
     // 如果是實心的 Disabled
     &.btn-solid {
-       background-color: $neutral-color-400;
-       color: $neutral-color-white;
-       border-color: transparent;
+      background-color: $neutral-color-400;
+      color: $neutral-color-white;
+      border-color: transparent;
     }
 
     &:hover {
@@ -105,17 +112,18 @@
   .icon-circle {
     width: 76px;
     height: 76px;
-    border-radius: 50%;
+    border-radius: $radius-pill;
     margin-left: -18px;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: -1;
     transition: color 0.3s ease; // 只過渡顏色
-    
+
     // 箭頭動畫設定
-    i, svg {
-      transition: transform 0.3s ease; 
+    i,
+    span {
+      transition: transform 0.3s ease;
     }
   }
 
@@ -123,8 +131,9 @@
   &:hover {
     // 讓內部的箭頭往右移 (圓圈不動)
     .icon-circle {
-      i, svg {
-        transform: translateX(5px); 
+      i,
+      span {
+        transform: translateX(5px);
       }
     }
   }
@@ -133,7 +142,7 @@
   // --- 樣式 A: 預設綠色 (Original Green) ---
   // 適合放在淺色/白色背景
   // =========================================
-  
+
   // 預設文字顏色
   color: $primary-color-700;
 
@@ -146,7 +155,7 @@
   // 綠色版的 Hover 變色邏輯
   &:hover {
     color: $accent-color-700; // 字變橘
-    
+
     .icon-circle {
       color: $accent-color-700; // 箭頭變橘
       // 背景維持白色不動
@@ -158,16 +167,16 @@
   // 需加上 class="mode-white"
   // 適合放在深色/圖片背景 (Hero Section)
   // =========================================
-  
+
   &.mode-white {
     // 文字改為白色
     color: $neutral-color-white;
 
-    .icon-circle {      
+    .icon-circle {
       // 背景改為半透明綠色
-      background-color: rgba($primary-color-400, 0.5); 
-    //   box-shadow: none; // 通常深色背景不需要陰影，可視需求調整
-      
+      background-color: rgba($primary-color-400, 0.5);
+      //   box-shadow: none; // 通常深色背景不需要陰影，可視需求調整
+
       // 箭頭改為白色
       color: $neutral-color-white;
     }
@@ -185,9 +194,8 @@
 }
 
 //sidebar btn
-.workspace-nav{
-  
-  .side-nav-item{
+.workspace-nav {
+  .side-nav-item {
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -195,6 +203,10 @@
     padding: 14px 18px;
     cursor: pointer;
 
-    @include nav-item-state($neutral-color-800, $primary-color-700, $primary-color-800);
+    @include nav-item-state(
+      $neutral-color-800,
+      $primary-color-700,
+      $primary-color-800
+    );
   }
 }

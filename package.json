@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/noto-sans-tc": "^5.2.8",
     "@fortawesome/fontawesome-free": "^7.1.0",
+    "axios": "^1.13.2",
     "datatables.net-dt": "^2.3.6",
     "datatables.net-vue3": "^3.0.4",
     "pinia": "^3.0.4",

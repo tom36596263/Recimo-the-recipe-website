@@ -1,12 +1,14 @@
-<script setup></script>
+<script setup>
+import { ref, computed, onMounted, markRaw, shallowRef } from 'vue';
+</script>
 
 <template>
   <div class="day-column">
     <div class="day-column__date">15</div>
 
-    <div class="day-column__slot">+<br />新增菜色</div>
-    <div class="day-column__slot">+<br />新增菜色</div>
-    <div class="day-column__slot">+<br />新增菜色</div>
+    <div v-for="index in 3" :key="index" class="day-column__slot">
+      +<br />新增菜色
+    </div>
 
     <div class="day-column__kcal">1866kcal</div>
   </div>
@@ -16,7 +18,7 @@
 .day-column {
   display: flex;
   flex-direction: column;
-  width: 130px;
+  width: 12.5%;
   text-align: center;
   gap: 4px;
   cursor: pointer;
