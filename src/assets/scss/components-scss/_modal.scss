@@ -42,6 +42,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: 20px;
     margin-bottom: 15px;
     color: $neutral-color-white;
     font-size: 28px;
@@ -86,6 +87,7 @@
       justify-content: center;
       transition: all 0.2s;
       max-width: 150px; // 限制按鈕不要太寬
+      margin-bottom: -40px;
     }
   }
 

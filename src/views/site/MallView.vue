@@ -8,7 +8,6 @@ const showLoginFail = ref(false);
 const showDelete = ref(false);
 const showSuccess = ref(false);
 
-// 測試用：觸發加入購物車成功
 const handleAddToCart = () => {
   // 做一些邏輯...
   showSuccess.value = true;
@@ -57,9 +56,7 @@ const handleAddToCart = () => {
     >
       <template #actions>
         <button class="btn-solid" @click="showUnsaved = false">留在頁面</button>
-        <button class="btn-outline" @click="showUnsaved = false">
-          捨棄並離開
-        </button>
+        <button class="btn-outline">捨棄並離開</button>
       </template>
     </BaseModal>
 
