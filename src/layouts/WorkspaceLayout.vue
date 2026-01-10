@@ -1,6 +1,15 @@
+<script setup>
+    import { useRoute } from 'vue-router';
+    import WorkspaceTopBar from '@/components/workspace/WorkspaceTopBar.vue';
+    import WorkspaceSideBar from '@/components/workspace/WorkspaceSideBar.vue';
+
+    const route = useRoute();
+</script>
+
 <template>
     <div class="workspace-layout">
-        <aside class="sidebar">
+        <WorkspaceSideBar />
+        <!-- <aside class="sidebar">
             <div class="logo">Recimo</div>
             <nav class="workspace-nav">
                 <router-link 
@@ -39,20 +48,13 @@
                     訂單查詢
                 </router-link>
             </nav>
-        </aside>
+        </aside> -->
         <main class="page-content">
             <WorkspaceTopBar v-if="!route.meta.hideTopBar" />
             <router-view />
         </main>
     </div>
 </template>
-
-<script setup>
-import { useRoute } from 'vue-router';
-import WorkspaceTopBar from '@/components/workspace/WorkspaceTopBar.vue';
-
-const route = useRoute();
-</script>
 
 <style lang="scss" scoped>
     @import '@/assets/scss/layouts/workspace-layout';

@@ -14,7 +14,7 @@ const routes = [
     path: '/search',
     name: 'site-search',
     component: () => import('@/views/site/SearchView.vue'),
-    meta: {layout: 'default' }
+    meta: { layout: 'default' }
   },
   {
     path: '/about',
@@ -70,19 +70,34 @@ const routes = [
         path: 'my-recipes',
         name: 'my-recipes',
         component: () => import('@/views/workspace/MyRecipes.vue'),
-        meta: { layout: 'workspace', requiresAuth: true }
+        meta: {
+          title: '我的食譜',
+          icon: 'i-material-symbols-fork-spoon',
+          layout: 'workspace',
+          requiresAuth: true
+        }
       },
       {
         path: 'lab',
         name: 'cooking-lab',
         component: () => import('@/views/workspace/CookingLab.vue'),
-        meta: { layout: 'workspace', requiresAuth: true }
+        meta: {
+          title: '烹飪實驗室',
+          icon: 'i-material-symbols-Skillet-outline',
+          layout: 'workspace',
+          requiresAuth: true
+        }
       },
       {
         path: 'plan',
         name: 'meal-plan',
         component: () => import('@/views/workspace/MealPlan.vue'),
-        meta: { layout: 'workspace', requiresAuth: true }
+        meta: {
+          title: '備餐計畫',
+          icon: 'i-material-symbols-Hand-Meal-outline',
+          layout: 'workspace',
+          requiresAuth: true
+        }
       },
       {
         path: 'edit-plan',
@@ -94,7 +109,20 @@ const routes = [
         path: 'recipes',
         name: 'workspace-recipes',
         component: () => import('@/views/workspace/RecipeOverview.vue'),
-        meta: { layout: 'workspace', requiresAuth: true }
+        meta: {
+          title: '食譜總覽',
+          icon: 'i-material-symbols-Inbox-Text-Person-outline',
+          layout: 'workspace',
+          requiresAuth: true
+        }
+      }, // 商城連結：直接給絕對路徑 /mall
+      {
+        path: '/mall',
+        meta: {
+          title: 'Recimo商城',
+          icon: 'i-material-symbols-Shopping-Cart-outline',
+          requiresAuth: true
+        }
       },
       {
         path: 'recipe-detail/:id',
@@ -112,7 +140,12 @@ const routes = [
         path: 'orders',
         name: 'order-inquiry',
         component: () => import('@/views/workspace/OrderInquiry.vue'),
-        meta: { layout: 'workspace', requiresAuth: true }
+        meta: {
+          title: '訂單查詢',
+          icon: 'i-material-symbols-Assignment-outline',
+          layout: 'workspace',
+          requiresAuth: true
+        }
       },
       {
         path: 'profile',
@@ -137,7 +170,10 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    return { top: 0 };
+  }
 });
 
 export default router;
