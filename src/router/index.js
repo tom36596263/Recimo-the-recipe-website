@@ -8,31 +8,31 @@ const routes = [
     path: '/',
     name: 'home', // 首頁
     component: () => import('@/views/site/HomeView.vue'),
-    meta: { layout: 'default' }
+    meta: { title: '首頁', showInMenu: true, layout: 'default' }
   },
   {
     path: '/search',
     name: 'site-search', //站內搜尋頁
     component: () => import('@/views/site/SearchView.vue'),
-    meta: { layout: 'default' }
+    meta: {layout: 'default' }
   },
   {
     path: '/about',
     name: 'about', // 關於Recimo
     component: () => import('@/views/site/AboutView.vue'),
-    meta: { layout: 'default' }
+    meta: { title: '關於Recimo', showInMenu: true, layout: 'default' }
   },
   {
     path: '/recipes',
     name: 'recipes-overview', // 食譜總覽
     component: () => import('@/views/site/RecipeOverview.vue'),
-    meta: { layout: 'default' }
+    meta: { title: '食譜總覽', showInMenu: true, layout: 'default' }
   },
   {
     path: '/mall',
     name: 'mall', // Recimo商城
     component: () => import('@/views/site/MallView.vue'),
-    meta: { layout: 'default' }
+    meta: { title: 'Recimo商城', showInMenu: true, layout: 'default' }
   },
   {
     path: '/mall/:id',
@@ -44,7 +44,7 @@ const routes = [
     path: '/benefits',
     name: 'benefits', // 會員權益
     component: () => import('@/views/site/BenefitsView.vue'),
-    meta: { layout: 'default' }
+    meta: { title: '會員權益', showInMenu: true, layout: 'default' }
   },
   {
     path: '/cart',
