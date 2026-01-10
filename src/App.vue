@@ -1,21 +1,20 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import DefaultLayout from '@/layouts/DefaultLayout.vue'; // 引入官網layout
-import WorkspaceLayout from '@/layouts/WorkspaceLayout.vue'; //引入工作區layout
-import AdminLayout from '@/layouts/AdminLayout.vue'; // 引入後台layout
+import DefaultLayout from '@/layouts/DefaultLayout.vue'; // 官網版面
+import WorkspaceLayout from '@/layouts/WorkspaceLayout.vue'; // 工作區版面
 
 const route = useRoute();
 
-// 根據目前路由的 meta.layout 決定要顯示哪一個組件
+/**
+ * 根據路由的 meta.layout 切換版面
+ * 現在只剩兩種：workspace 或預設的 default
+ */
 const layoutComponent = computed(() => {
   if (route.meta.layout === 'workspace') {
     return WorkspaceLayout;
   }
-  if (route.meta.layout === 'admin') {
-    return AdminLayout;
-  }
-  // 預設（或標記為 default）時顯示官網版面
+  // 如果不是 workspace，就統一使用官網版面
   return DefaultLayout;
 });
 </script>
@@ -27,5 +26,5 @@ const layoutComponent = computed(() => {
 </template>
 
 <style lang="scss">
-/* 這裡可以放全站共用的基礎 CSS */
+/* 全站共用基礎 CSS */
 </style>
