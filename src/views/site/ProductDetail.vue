@@ -1,7 +1,7 @@
 <script setup>
 //  setup: 這是 Vue 3 的語法糖，讓你不用寫 export default {}，且能直接使用變數和函式，開發效率最高。
 // 所有的變數、函式、或是從 JSON 引入的資料都寫在script裡面。
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 // ==========================================
 // 增減商品數量
 // ==========================================
@@ -18,9 +18,68 @@ const count = ref(1); // 預設數量是 1
 // const addCart = () => {
 //   cartStore.addToCart(product, 1);
 // };
+
+// ==========================================
+// axios
+// ==========================================
+// import axios from 'axios'
+// const productList = ref([])
+// // 快速計算陣列數量結果
+// const listCount = computed(() => {
+//   return productList.value.length
+// })
+// const noData = computed(() => productList.value.length === 0)
+// const fetchData = () => {
+//   axios
+//     .get('@/data/mall/products.json')
+//     .then((response) => {
+//       // 檢查點：確保 response.data 真的是那 20 筆陣列
+//       console.log("抓到的資料：", response.data);
+//       productList.value = response.data;
+//     })
+//     .catch((error) => {
+//       console.error("讀取 JSON 失敗，請檢查路徑是否正確", error);
+//     });
+// };
+// onMounted(() => {
+//   fetchData()
+// })
+
+// ==========================================
+// 不用axios用import
+// ==========================================
+import products from '@/data/mall/products.json'
+
+const productList = ref([])
+
+onMounted(() => {
+  productList.value = products
+})
+
+// ==========================================
+// 雙向綁定
+// ==========================================
+const searchStr = ref('')
+const colors = ref('#rrggbb')
+const fontSizeValue = ref('10')
+const resultList = ref([])
+const search = () => {
+  resultList.value = productList.value.filter((item) => {
+    return item.name.includes(searchStr.value)
+    console.log(item)
+  })
+}
+const filteredProducts = computed(() => {
+  if (!searchStr.value) return productList.value
+
+  return productList.value.filter(item =>
+    item.name.includes(searchStr.value)
+  )
+})
 </script>
 
 <template>
+
   <section class="product-detail container">
     <div class="row">
       <!-- ==========================================
@@ -149,7 +208,7 @@ const count = ref(1); // 預設數量是 1
       </div>
     </div>
   </section>
-  <section class="product-recommendations">
+  <!-- <section class="product-recommendations">
     <h2 class="zh-h2">推薦商品</h2>
     <div class="container">
       <div class="row">
@@ -157,8 +216,8 @@ const count = ref(1); // 預設數量是 1
           <div class="product-card">
             <img src="https://picsum.photos/282/211/?random=16" class=".product-card__img" />
             <div class="product-card__content">
-              <h4 class="p-p1 product-card__title">舒肥雞胸藜麥飯</h4>
-              <p class="en-h2-bold  product-card__price">$160</p>
+              <h4 class="p-p1 product-card__title">舒肥雞胸藜麥飯{{ name }}</h4>
+              <p class="en-h2-bold  product-card__price">$160{{ price }}</p>
               <div style="width: 109px">
                 <button class="btn h-30 btn-solid">加入購物車</button>
               </div>
@@ -203,7 +262,68 @@ const count = ref(1); // 預設數量是 1
         </div>
       </div>
     </div>
-  </section>
+  </section> -->
+
+  <!-- ==========================================
+上課
+========================================== -->
+  <!-- <input type="text" v-model="searchStr" />
+  {{ searchStr }} -->
+  <!-- <button @click="search">搜尋</button> -->
+  <br>
+
+  <input type="color" v-model="colors" />
+  {{ colors }}
+  <br>
+
+  <h5 :style="{ fontSize: `${fontSizeValue}px` }">商品</h5>
+  <input type="number" v-model="fontSizeValue" />
+  {{ typeof fontSizeValue }}
+  <br>
+
+  <div :style="{ backgroundColor: colors }"></div>
+  <!-- <section class="product-recommendations">
+    <h2 class="zh-h2">推薦商品</h2>
+    <div class="container">
+      <div class="row">
+        <div v-for="item in productList" :key="item.id" class="col-3 col-md-6 mb-4">
+          <div class="product-card">
+            <img :src="item.img_url" class="product-card__img" />
+
+            <div class="product-card__content">
+              <h4 class="p-p1 product-card__title">{{ item.name }}</h4>
+
+              <p class="en-h2-bold product-card__price">${{ item.price }}</p>
+
+              <div style="width: 109px">
+                <button class="btn h-30 btn-solid">加入購物車</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="noData" class="col-12 text-center">
+          載入中或目前無商品資料...
+        </div>
+      </div>
+    </div>
+  </section> -->
+  <input type="text" v-model="searchStr" placeholder="搜尋商品" />
+
+  <div v-for="item in filteredProducts" :key="item.id" class="col-3 col-md-6 mb-4">
+    <div class="product-card">
+      <img :src="item.img_url" class="product-card__img" />
+
+      <div class="product-card__content">
+        <h4 class="p-p1 product-card__title">{{ item.name }}</h4>
+        <p class="en-h2-bold product-card__price">${{ item.price }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="filteredProducts.length === 0">
+    查無商品
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -327,23 +447,23 @@ const count = ref(1); // 預設數量是 1
 table {
   text-align: center;
   width: 100%;
-  // 一定要用 separate，圓角才會生效
-  border-collapse: separate;
+  border-collapse: separate; // 一定要用 separate，圓角才會生效
   border-spacing: 0;
   border: 1px solid #757575;
   border-radius: 10px;
   overflow: hidden; // 確保內層的儲存格不會超出圓角邊界
+  border-spacing: 0;
 }
 
 tr :nth-child(2) {
   border-right: 1px solid #757575;
-  ;
 }
 
 th {
   background-color: $primary-color-100;
   height: 40px;
   vertical-align: middle;
+  background-clip: padding-box; // 解決背景色蓋住邊框的問題
 }
 
 td {

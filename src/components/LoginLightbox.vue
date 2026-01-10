@@ -142,7 +142,7 @@ onMounted(() => {
         ========================================== -->
         <button @click="handleClose">x</button>
         <div>
-          <h1 class="auth-form__title">會員登入</h1>
+          <h1 class="zh-h3 auth-form__title">會員登入</h1>
           <div class="auth-form">
             <form novalidate>
               <label for="email">電子信箱</label>
