@@ -70,9 +70,9 @@ const navItems = computed(() => {
         .page-link{
             background-color: $neutral-color-white;
             display: flex;
-            gap: 32px;
+            gap: 24px;
             align-items: center;
-            padding: 0 50px;
+            padding: 0 0 0 50px;
             border-radius: 50px 0 0 50px;
         }
     }

@@ -77,6 +77,8 @@ const routes = [
         name: 'my-recipes', // 我的食譜
         component: () => import('@/views/workspace/MyRecipes.vue'),
         meta: {
+          title: '我的食譜', 
+          icon: 'i-material-symbols-fork-spoon',
           layout: 'workspace',
           requiresAuth: true
         }
@@ -86,6 +88,8 @@ const routes = [
         name: 'cooking-lab', //烹飪實驗室
         component: () => import('@/views/workspace/CookingLab.vue'),
         meta: {
+          title: '烹飪實驗室', 
+          icon: 'i-material-symbols-Skillet-outline',
           layout: 'workspace',
           requiresAuth: true
         }
@@ -95,6 +99,8 @@ const routes = [
         name: 'meal-plan', // 備餐計畫
         component: () => import('@/views/workspace/MealPlan.vue'),
         meta: {
+          title: '備餐計畫', 
+          icon: 'i-material-symbols-Hand-Meal-outline',
           layout: 'workspace',
           requiresAuth: true
         }
@@ -113,8 +119,18 @@ const routes = [
         name: 'workspace-recipes', // 食譜總覽(工作區)
         component: () => import('@/views/workspace/RecipeOverview.vue'),
         meta: {
+          title: '食譜總覽', 
+          icon: 'i-material-symbols-Inbox-Text-Person-outline',
           layout: 'workspace',
           requiresAuth: true
+        }
+      },// 商城連結：直接給絕對路徑 /mall
+      {
+        path: '/mall',
+        meta: { 
+          title: 'Recimo商城', 
+          icon: 'i-material-symbols-Shopping-Cart-outline',
+          requiresAuth: true 
         }
       },
       {
@@ -138,6 +154,8 @@ const routes = [
         name: 'order-inquiry', // 訂單查詢
         component: () => import('@/views/workspace/OrderInquiry.vue'),
         meta: {
+          title: '訂單查詢', 
+          icon: 'i-material-symbols-Assignment-outline',
           layout: 'workspace',
           requiresAuth: true
         }
@@ -229,7 +247,10 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    return { top: 0};
+  }
 });
 
 export default router;
