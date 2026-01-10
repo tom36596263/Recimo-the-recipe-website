@@ -1,5 +1,7 @@
 <script setup>
     import heroImg from '@/assets/images/site/hero.png'
+    import CircleBtn from '@/components/common/CircleBtn.vue'
+    import BaseBtn from '@/components/common/BaseBtn.vue'
 </script>
 <template>
     <header class="hero container">
@@ -13,17 +15,13 @@
                 <p class="p-p1">這裡沒有標準答案，只有你對美食的熱情<br>
                     隨手記下每一次烹飪的小發現，看見每一天自己的成長<br>
                     把煮飯變成最療癒的創作</p>
-                <div class="btn-recipe">
-                    <a href="">尋找食譜</a>
-                    <div class="icon-circle">
-                    <i class="fa-solid fa-arrow-right"></i>
-                    </div>
-                </div>
+                <CircleBtn title="尋找食譜" href="/recipes"/>
+                <BaseBtn variant="solid" title="開始烹飪" :disabled="true" height="50" href="/recipes" />
+
             </div>
             
         </div>
         <img :src="heroImg" />
-        <!-- <img src="@/assets/images/site/hero.png" alt="首頁圖片"> -->
     </header>
 </template>
 <style lang="scss" scoped>

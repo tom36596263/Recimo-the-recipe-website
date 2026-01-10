@@ -1,6 +1,6 @@
 <script setup>
     import { useRouter } from 'vue-router';
-import { computed } from 'vue';
+    import { computed } from 'vue';
 
 const router = useRouter();
 

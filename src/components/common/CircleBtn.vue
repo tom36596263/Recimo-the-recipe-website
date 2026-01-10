@@ -30,7 +30,7 @@ const buttonClass = computed(() => {
 
 <template>
     <div :class="buttonClass">
-        <a :href="href">{{ title }}</a>
+        <a :href="href" class="zh-h5-bold">{{ title }}</a>
         <div class="icon-circle">
         <i class="fa-solid fa-arrow-right"></i>
         </div>
@@ -40,20 +40,16 @@ const buttonClass = computed(() => {
 <style lang="scss" scoped>
 // 這裡放你原本的 SCSS 內容
 .btn-recipe {
-    display: flex;
     align-items: center;
     justify-content: center;
-    width: $btn-width-full; // 確保你的全域變數已匯入
-    height: 76px;
-    font-size: 20px;
+    display: inline-flex;
     text-decoration: none;
-    letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.3s ease;
 
     a {
         z-index: 1;
-        color: inherit; // 讓 a 繼承外層顏色
+        color: inherit;
         text-decoration: none;
     }
 

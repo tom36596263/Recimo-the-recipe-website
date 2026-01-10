@@ -3,14 +3,12 @@ import Hero from '@/components/site/home/HeroSection.vue';
 //  setup: 這是 Vue 3 的語法糖，讓你不用寫 export default {}，且能直接使用變數和函式，開發效率最高。
 // 所有的變數、函式、或是從 JSON 引入的資料都寫在script裡面。
 import { ref, onMounted } from 'vue';
-import BaseButton from '../../components/BaseButton.vue';
 
 </script>
 
 <template>
     <!-- <h1>首頁</h1> -->
     <Hero />
-    <BaseButton title="開始烹飪" type="white"/>
 </template>
 
 <style lang="scss" scoped>
