@@ -18,12 +18,14 @@
 @import '/src/assets/scss/layouts/admin-layout';
 @import '/src/assets/scss/layouts/default-layout';
 @import '/src/assets/scss/layouts/workspace-layout';
+@import '/src/assets/scss/layouts/share-layout';
 
 // 此檔案用於存放全域css
 body {
   margin: 0;
   font-family: sans-serif;
-  background-color: #f9f9f9;
+  background-color: $neutral-color-400;
+  color: $neutral-color-800;
 }
 
 //中文標題迴圈

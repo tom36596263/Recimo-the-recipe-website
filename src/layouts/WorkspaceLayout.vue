@@ -40,15 +40,10 @@
                 </router-link>
             </nav>
         </aside>
-
-        <div class="main-container">
+        <main class="page-content">
             <WorkspaceTopBar v-if="!route.meta.hideTopBar" />
-            
-
-            <main class="page-content">
-                <router-view />
-            </main>
-        </div>
+            <router-view />
+        </main>
     </div>
 </template>
 
@@ -61,41 +56,4 @@ const route = useRoute();
 
 <style lang="scss" scoped>
     @import '@/assets/scss/layouts/workspace-layout';
-// .workspace-layout {
-//     display: flex;
-//     height: 100vh;
-// }
-
-// .sidebar {
-//     width: 250px;
-//     background: #f8f9fa;
-//     display: flex;
-//     flex-direction: column;
-//     padding: 20px;
-// }
-
-// .workspace-nav {
-//     display: flex;
-//     flex-direction: column;
-//     gap: 15px;
-//     margin-top: 30px;
-
-//     a {
-//         text-decoration: none;
-//         color: #666;
-//     }
-
-//     .router-link-active {
-//         color: $primary-color-800;
-//         font-weight: bold;
-//     }
-// }
-
-
-
-// .page-content {
-//     flex: 1;
-//     padding: 20px;
-//     overflow-y: auto;
-// }
 </style>
