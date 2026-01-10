@@ -1,0 +1,35 @@
+[
+  {
+    "planId": 1001,
+    "userId": 88,
+    "title": "2024春季增肌減脂計畫",
+    "coverType": 1,
+    "customCoverUrl": null,
+    "coverTemplateId": 5,
+    "isPreset": false,
+    "startDate": "2024-03-01",
+    "endDate": "2024-03-07"
+  },
+  {
+    "planId": 1002,
+    "userId": 105,
+    "title": "五月生日週大餐規劃",
+    "coverType": 0,
+    "customCoverUrl": "https://storage.myapp.com/uploads/user_105/cover_bday.jpg",
+    "coverTemplateId": 1,
+    "isPreset": false,
+    "startDate": "2024-05-20",
+    "endDate": "2024-05-26"
+  },
+  {
+    "planId": 2001,
+    "userId": 1,
+    "title": "新手入門：低碳飲食七日衝刺",
+    "coverType": 2,
+    "customCoverUrl": null,
+    "coverTemplateId": 12,
+    "isPreset": true,
+    "startDate": "2024-01-01",
+    "endDate": "2024-01-07"
+  }
+]
