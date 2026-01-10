@@ -95,118 +95,120 @@
 // 3. 特殊按鈕：尋找食譜 (Find Recipe)
 // =========================================
 
-.btn-recipe {
-  // --- 1. 共用結構 (Layout & Animation) ---
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: $btn-width-full;
-  height: 76px;
-  font-size: 20px;
-  text-decoration: none;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+// .btn-recipe {
+//   // --- 1. 共用結構 (Layout & Animation) ---
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   width: $btn-width-full;
+//   height: 76px;
+//   font-size: 20px;
+//   text-decoration: none;
+//   letter-spacing: 1px;
+//   cursor: pointer;
+//   transition: all 0.3s ease;
+//   a{
+//     z-index: 1;
+//   }
+//   // 共用的圓圈基礎設定
+//   .icon-circle {
+//     width: 76px;
+//     height: 76px;
+//     border-radius: $radius-pill;
+//     margin-left: -18px;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//     // z-index: -1;
+//     transition: color 0.3s ease; // 只過渡顏色
 
-  // 共用的圓圈基礎設定
-  .icon-circle {
-    width: 76px;
-    height: 76px;
-    border-radius: $radius-pill;
-    margin-left: -18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: -1;
-    transition: color 0.3s ease; // 只過渡顏色
+//     // 箭頭動畫設定
+//     i,
+//     span {
+//       transition: transform 0.3s ease;
+//     }
+//   }
 
-    // 箭頭動畫設定
-    i,
-    span {
-      transition: transform 0.3s ease;
-    }
-  }
+//   // 共用的 Hover 動作 (箭頭位移)
+//   &:hover {
+//     // 讓內部的箭頭往右移 (圓圈不動)
+//     .icon-circle {
+//       i,
+//       span {
+//         transform: translateX(5px);
+//       }
+//     }
+//   }
 
-  // 共用的 Hover 動作 (箭頭位移)
-  &:hover {
-    // 讓內部的箭頭往右移 (圓圈不動)
-    .icon-circle {
-      i,
-      span {
-        transform: translateX(5px);
-      }
-    }
-  }
+//   // =========================================
+//   // --- 樣式 A: 預設綠色 (Original Green) ---
+//   // 適合放在淺色/白色背景
+//   // =========================================
 
-  // =========================================
-  // --- 樣式 A: 預設綠色 (Original Green) ---
-  // 適合放在淺色/白色背景
-  // =========================================
+//   // 預設文字顏色
+//   color: $primary-color-700;
 
-  // 預設文字顏色
-  color: $primary-color-700;
+//   .icon-circle {
+//     background-color: $neutral-color-white; // 純白背景
+//     color: $primary-color-700; // 綠箭頭
+//     // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+//   }
 
-  .icon-circle {
-    background-color: $neutral-color-white; // 純白背景
-    color: $primary-color-700; // 綠箭頭
-    // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
+//   // 綠色版的 Hover 變色邏輯
+//   &:hover {
+//     color: $accent-color-700; // 字變橘
 
-  // 綠色版的 Hover 變色邏輯
-  &:hover {
-    color: $accent-color-700; // 字變橘
+//     .icon-circle {
+//       color: $accent-color-700; // 箭頭變橘
+//       // 背景維持白色不動
+//     }
+//   }
 
-    .icon-circle {
-      color: $accent-color-700; // 箭頭變橘
-      // 背景維持白色不動
-    }
-  }
+//   // =========================================
+//   // --- 樣式 B: 白色半透明 (Mode White) ---
+//   // 需加上 class="mode-white"
+//   // 適合放在深色/圖片背景 (Hero Section)
+//   // =========================================
 
-  // =========================================
-  // --- 樣式 B: 白色半透明 (Mode White) ---
-  // 需加上 class="mode-white"
-  // 適合放在深色/圖片背景 (Hero Section)
-  // =========================================
+//   &.mode-white {
+//     // 文字改為白色
+//     color: $neutral-color-white;
 
-  &.mode-white {
-    // 文字改為白色
-    color: $neutral-color-white;
+//     .icon-circle {
+//       // 背景改為半透明綠色
+//       background-color: rgba($primary-color-400, 0.5);
+//       //   box-shadow: none; // 通常深色背景不需要陰影，可視需求調整
 
-    .icon-circle {
-      // 背景改為半透明綠色
-      background-color: rgba($primary-color-400, 0.5);
-      //   box-shadow: none; // 通常深色背景不需要陰影，可視需求調整
+//       // 箭頭改為白色
+//       color: $neutral-color-white;
+//     }
 
-      // 箭頭改為白色
-      color: $neutral-color-white;
-    }
+//     // 白色版的 Hover 變色邏輯
+//     &:hover {
+//       color: $accent-color-700; // 字變橘
 
-    // 白色版的 Hover 變色邏輯
-    &:hover {
-      color: $accent-color-700; // 字變橘
+//       .icon-circle {
+//         color: $accent-color-700; // 箭頭變橘
+//         // 背景維持半透明綠色不動
+//       }
+//     }
+//   }
+// }
 
-      .icon-circle {
-        color: $accent-color-700; // 箭頭變橘
-        // 背景維持半透明綠色不動
-      }
-    }
-  }
-}
+// //sidebar btn
+// .workspace-nav {
+//   .side-nav-item {
+//     text-decoration: none;
+//     display: flex;
+//     align-items: center;
+//     gap: 12px;
+//     padding: 14px 18px;
+//     cursor: pointer;
 
-//sidebar btn
-.workspace-nav {
-  .side-nav-item {
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-    cursor: pointer;
-
-    @include nav-item-state(
-      $neutral-color-800,
-      $primary-color-700,
-      $primary-color-800
-    );
-  }
-}
+//     @include nav-item-state(
+//       $neutral-color-800,
+//       $primary-color-700,
+//       $primary-color-800
+//     );
+//   }
+// }

@@ -1,5 +1,5 @@
 <script setup>
-    import Navbar from '@/components/site/home/Navbar.vue';
+    import Navbar from '@/components/site/Navbar.vue';
 /**
  * 暫時移除 handleLoginClick 邏輯，
  * 等待未來串接登入燈箱與 Pinia。
@@ -11,20 +11,17 @@
         <header class="site-header">
             <div class="container">
                 <div class="row">
-                    <Navbar /> 
+                    <div class="col-12">
+                        <Navbar /> 
+                    </div>
+                    
                 </div>
                 
             </div>
             <div class="box"></div>
         </header>
         <main class="page-content">
-            <div class="container">
-                <div class="row">
-                    <router-view />
-                </div>
-                
-            </div>
-            
+            <router-view />            
         </main>
 
         <footer class="site-footer">
