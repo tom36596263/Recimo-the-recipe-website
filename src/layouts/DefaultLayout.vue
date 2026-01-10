@@ -38,7 +38,7 @@
 <style lang="scss" scoped>
     @import '@/assets/scss/layouts/default-layout';
     .box{
-        width: 200px;
+        width: 100px;
         height: 50px;
         background-color: $neutral-color-white;
         position: absolute;
