@@ -36,4 +36,50 @@
     </aside>
     
 </template>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+    // 側邊欄固定寬度
+    .sidebar {
+        width: $sidebar-width;
+        background: $primary-color-100;
+        display: flex;
+        text-decoration: none;;
+        flex-direction: column;
+        padding: 24px;
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: $primary-color-800;
+            margin-bottom: 2rem;
+        }
+    }
+
+    // 導覽連結樣式
+    .workspace-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 1rem;
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s;
+
+            &:hover {
+                color: $accent-color-700;
+            }
+
+            &.router-link-active {
+                color: $primary-color-800;
+                // background: rgba($primary-color-800, 0.1);
+                font-weight: bold;
+                &:hover {
+                    color: $accent-color-700;
+                }
+            }
+        }
+    }
+</style>

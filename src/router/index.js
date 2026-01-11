@@ -8,7 +8,7 @@ const routes = [
     path: '/',
     name: 'home',
     component: () => import('@/views/site/HomeView.vue'),
-    meta: { title: '首頁', showInMenu: true, layout: 'default' }
+    meta: { layout: 'default' }
   },
   {
     path: '/search',

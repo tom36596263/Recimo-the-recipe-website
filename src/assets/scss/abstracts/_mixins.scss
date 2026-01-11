@@ -1,26 +1,51 @@
-//中文標題
-@mixin heading-zh($min-size, $max-size, $font-weight: 400) {
+// //中文標題
+// @mixin heading-zh($min-size, $max-size, $font-weight: 400) {
+//   font-family: $font-family-zh;
+//   line-height: $lh-standard;
+//   letter-spacing: $ls-heading-zh;
+//   font-weight: $font-weight;
+//   font-size: unquote('clamp(#{$min-size}, 2vw, #{$max-size})');
+// }
+
+// //英文標題
+// @mixin heading-en($min-size, $max-size, $font-weight: 400) {
+//   font-family: $font-family-en;
+//   line-height: $lh-standard;
+//   letter-spacing: $ls-heading-en;
+// }
+
+// //內文
+// @mixin text-style($size, $line-height: $lh-standard) {
+//   font-size: $size;
+//   line-height: $line-height;
+//   letter-spacing: $ls-body;
+//   font-family: $font-family-zh;
+// }
+// 中文標題 Mixin
+@mixin heading-zh($min-size, $max-size, $weight: 400) {
   font-family: $font-family-zh;
-  line-height: $lh-standard;
+  font-weight: $weight;
+  line-height: $lh-heading;
   letter-spacing: $ls-heading-zh;
-  font-weight: $font-weight;
-  font-size: unquote('clamp(#{$min-size}, 4vw, #{$max-size})');
+  font-size: clamp(#{$min-size}, #{get-fluid-val($min-size, $max-size)}, #{$max-size});
 }
 
-//英文標題
-@mixin heading-en($min-size, $max-size, $font-weight: 400) {
+// 英文標題 Mixin
+@mixin heading-en($min-size, $max-size, $weight: 400) {
   font-family: $font-family-en;
-  line-height: $lh-standard;
-  letter-spacing: $ls-heading-en;
+  font-weight: $weight;
+  line-height: $lh-heading;
+  font-size: clamp(#{$min-size}, #{get-fluid-val($min-size, $max-size)}, #{$max-size});
 }
 
-//內文
+// 內文 Mixin (內文通常不建議縮放太劇烈，所以簡化處理)
 @mixin text-style($size, $line-height: $lh-standard) {
   font-size: $size;
   line-height: $line-height;
   letter-spacing: $ls-body;
   font-family: $font-family-zh;
 }
+
 
 // 一般表單輸入框樣式
 @mixin input-style(
