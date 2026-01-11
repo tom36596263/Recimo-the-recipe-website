@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 
 const props = defineProps({
-  // ★ 新增：文字內容屬性
+  // 文字內容
   text: {
     type: String,
     default: ''
@@ -12,6 +12,11 @@ const props = defineProps({
     type: String,
     default: 'label',
     validator: (value) => ['action', 'label'].includes(value)
+  },
+  // ★ 新增：控制 Action 模式下是否顯示圖示 (預設顯示)
+  showIcon: {
+    type: Boolean,
+    default: true
   },
   // 寬度
   width: {
@@ -33,6 +38,7 @@ const customStyle = computed(() => {
 });
 
 const handleClick = (event) => {
+  // 只有 action 模式才允許點擊觸發
   if (props.variant === 'action') {
     emit('click', event);
   }
@@ -46,11 +52,13 @@ const handleClick = (event) => {
     :style="customStyle"
     @click="handleClick"
   >
-    <i v-if="variant === 'action'" class="fa-solid fa-plus plus-sign"></i>
+    <i
+      v-if="variant === 'action' && showIcon"
+      class="fa-solid fa-plus plus-sign"
+    ></i>
 
     <span class="tag-content">
       <template v-if="text">{{ text }}</template>
-
       <slot v-else></slot>
     </span>
   </div>
