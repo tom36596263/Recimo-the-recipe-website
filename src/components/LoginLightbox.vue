@@ -170,7 +170,7 @@ onMounted(() => {
                 </div>
               </div>
             </form>
-            <button>登入</button>
+            <BaseBtn title="登入" variant="solid" @click="handleLogin" :width="244" :height="50" />
             <p>更多登入方式</p>
             <div>
               <a href="#"><img src="https://picsum.photos/40/40/?random=10" /></a>
@@ -209,7 +209,7 @@ onMounted(() => {
                 </div>
                 <input type="password" class="form-input" placeholder="請再輸入一次密碼" />
               </form>
-              <button>註冊</button>
+              <BaseBtn title="註冊" variant="solid" @click="handleRegister" :width="244" :height="50" />
             </div>
           </div>
         </div>
@@ -226,7 +226,7 @@ onMounted(() => {
             <div>
               <h3>還不是會員嗎？</h3>
               <h4>快來一起加入Recimo吧~</h4>
-              <button @click="handleToggleMode">前往註冊</button>
+              <BaseBtn title="前往註冊" variant="solid" @click="goToRegister" :width="244" :height="50" />
             </div>
           </div>
         </div>
@@ -241,7 +241,7 @@ onMounted(() => {
             <div>
               <h3>歡迎回來Recimo</h3>
               <h4>如果已經有會員就直接登入吧~</h4>
-              <button @click="handleToggleMode">前往登入</button>
+              <BaseBtn title="前往註冊" variant="solid" @click="goToLogin" :width="244" :height="50" />
             </div>
           </div>
         </div>

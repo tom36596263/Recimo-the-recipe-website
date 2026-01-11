@@ -105,12 +105,8 @@ onMounted(() => {
             </div>
           </div>
           <div class="product-detail__actions">
-            <div style="width: 260px">
-              <button class="btn h-50 btn-solid">加入購物車</button>
-            </div>
-            <div style="width: 260px">
-              <button class="btn h-50 btn-outline">直接購買</button>
-            </div>
+            <BaseBtn title="加入購物車" variant="solid" @click="addToCart" :width="260" :height="50" />
+            <BaseBtn title="直接購買" variant="outline" @click="buyNow" :width="260" :height="50" />
           </div>
           <table class="col-12">
             <tbody>

@@ -20,9 +20,9 @@ const baseURL = import.meta.env.BASE_URL
         <img :src="baseURL + item.images[0]">
         <div class="product-card__content">
             <h4 class="p-p1 product-card__title">{{ item.product_name }}</h4>
-            <p class="en-h2-bold product-card__price">{{ item.price }}</p>
-            <div class="inline" style="width: 109px">
-                <button class="btn h-30 btn-solid">加入購物車</button>
+            <div class="product-card__action">
+                <p class="en-h2-bold product-card__price">{{ item.price }}</p>
+                <BaseBtn title="加入購物車" variant="solid" @click="addToCart" :width="110" :height="30" />
             </div>
         </div>
     </div>
@@ -34,7 +34,7 @@ const baseURL = import.meta.env.BASE_URL
     background-color: #fff;
     border: 1px solid $primary-color-700;
     border-radius: 10px;
-    padding: 10px;
+    padding: 15px;
 }
 
 .product-card img {
@@ -42,7 +42,8 @@ const baseURL = import.meta.env.BASE_URL
     display: block;
 }
 
-.product-card p>div {
-    display: inline;
+.product-card__action {
+    display: flex;
+    justify-content: space-between;
 }
 </style>
