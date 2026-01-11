@@ -1,7 +1,12 @@
 <script setup>
-//  setup: 這是 Vue 3 的語法糖，讓你不用寫 export default {}，且能直接使用變數和函式，開發效率最高。
-// 所有的變數、函式、或是從 JSON 引入的資料都寫在script裡面。
 import { ref, onMounted, computed } from 'vue';
+import productrmd from '@/components/mall/ProductRmd.vue';
+
+// ==========================================
+// vue上課教：以後部屬比較不會有問題
+// ==========================================
+const baseURL = import.meta.env.BASE_URL
+
 // ==========================================
 // 增減商品數量
 // ==========================================
@@ -20,66 +25,35 @@ const count = ref(1); // 預設數量是 1
 // };
 
 // ==========================================
-// axios
+// axios：先把商品卡片引入json檔
 // ==========================================
-// import axios from 'axios'
-// const productList = ref([])
-// // 快速計算陣列數量結果
-// const listCount = computed(() => {
-//   return productList.value.length
-// })
-// const noData = computed(() => productList.value.length === 0)
-// const fetchData = () => {
-//   axios
-//     .get('@/data/mall/products.json')
-//     .then((response) => {
-//       // 檢查點：確保 response.data 真的是那 20 筆陣列
-//       console.log("抓到的資料：", response.data);
-//       productList.value = response.data;
-//     })
-//     .catch((error) => {
-//       console.error("讀取 JSON 失敗，請檢查路徑是否正確", error);
-//     });
-// };
-// onMounted(() => {
-//   fetchData()
-// })
-
-// ==========================================
-// 不用axios用import
-// ==========================================
-import products from '@/data/mall/products.json'
-
+import axios from 'axios'
 const productList = ref([])
-
+// 快速計算陣列數量結果
+const listCount = computed(() => {
+  return productList.value.length
+})
+const noData = computed(() => productList.value.length === 0)
+const fetchData = () => {
+  axios
+    .get('/data/mall/products.json')
+    .then((response) => {
+      // 檢查點：確保 response.data 真的是那 20 筆陣列
+      console.log("抓到的資料：", response.data);
+      productList.value = response.data;
+    })
+    .catch((error) => {
+      console.error("讀取 JSON 失敗，請檢查路徑是否正確", error);
+    });
+};
 onMounted(() => {
-  productList.value = products
+  fetchData()
 })
 
-// ==========================================
-// 雙向綁定
-// ==========================================
-const searchStr = ref('')
-const colors = ref('#rrggbb')
-const fontSizeValue = ref('10')
-const resultList = ref([])
-const search = () => {
-  resultList.value = productList.value.filter((item) => {
-    return item.name.includes(searchStr.value)
-    console.log(item)
-  })
-}
-const filteredProducts = computed(() => {
-  if (!searchStr.value) return productList.value
 
-  return productList.value.filter(item =>
-    item.name.includes(searchStr.value)
-  )
-})
 </script>
 
 <template>
-
   <section class="product-detail container">
     <div class="row">
       <!-- ==========================================
@@ -88,18 +62,22 @@ const filteredProducts = computed(() => {
       <div class="col-7 col-lg-12">
         <div class="product-detail__gallery">
           <div class="gallery__main">
-            <img src="https://picsum.photos/500/500/?random=10" />
+            <!-- <img :src="img1"> -->
+
+            <!-- <img :src="parseAssetsIcon('PROD-001_main.jpg')">
+            <img src="/assets/images/mall/PROD-001_main.jpg"> -->
+            <img :src="`${baseURL}public/img/mall/PROD-001_01.jpg`">
           </div>
 
           <div class="row">
             <div class="col-2 col-md-3 col-sm-4">
               <div class="gallery__thumb">
-                <img src="https://picsum.photos/146/95/?random=11" />
+                <img :src="`${baseURL}public/img/mall/PROD-001_02.jpg`">
               </div>
             </div>
             <div class="col-2 col-md-3 col-sm-4">
               <div class="gallery__thumb">
-                <img src="https://picsum.photos/146/95/?random=12" />
+                <img :src="`${baseURL}public/img/mall/PROD-001_03.jpg`">
               </div>
             </div>
           </div>
@@ -207,129 +185,13 @@ const filteredProducts = computed(() => {
         </div>
       </div>
     </div>
+
+    <productrmd />
   </section>
-  <!-- <section class="product-recommendations">
-    <h2 class="zh-h2">推薦商品</h2>
-    <div class="container">
-      <div class="row">
-        <div class="col-3 col-md-6">
-          <div class="product-card">
-            <img src="https://picsum.photos/282/211/?random=16" class=".product-card__img" />
-            <div class="product-card__content">
-              <h4 class="p-p1 product-card__title">舒肥雞胸藜麥飯{{ name }}</h4>
-              <p class="en-h2-bold  product-card__price">$160{{ price }}</p>
-              <div style="width: 109px">
-                <button class="btn h-30 btn-solid">加入購物車</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-3 col-md-6">
-          <div class="product-card">
-            <img src="https://picsum.photos/282/211/?random=15" class=".product-card__img" />
-            <div class="product-card__content">
-              <h4 class="p-p1  product-card__title">豆腐漢堡排佐野菇</h4>
-              <p class="en-h2-bold roduct-card__price">$150</p>
-              <div style="width: 109px">
-                <button class="btn h-30 btn-solid">加入購物車</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-3 col-md-6">
-          <div class="product-card">
-            <img src="https://picsum.photos/282/211/?random=14" class=".product-card__img" />
-            <div class="product-card__content">
-              <h4 class="p-p1 product-card__title">白酒蒜香蛤蜊麵</h4>
-              <p class="en-h2-bold product-card__price">$185</p>
-              <div style="width: 109px">
-                <button class="btn h-30 btn-solid">加入購物車</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-3 col-md-6">
-          <div class="product-card">
-            <img src="https://picsum.photos/282/211/?random=13" class=".product-card__img" />
-            <div class="product-card__content">
-              <h4 class="p-p1 product-card__title">麻婆豆腐燒</h4>
-              <p class="en-h2-bold product-card__price">$160</p>
-              <div style="width: 109px">
-                <button class="btn h-30 btn-solid">加入購物車</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section> -->
 
-  <!-- ==========================================
-上課
-========================================== -->
-  <!-- <input type="text" v-model="searchStr" />
-  {{ searchStr }} -->
-  <!-- <button @click="search">搜尋</button> -->
-  <br>
-
-  <input type="color" v-model="colors" />
-  {{ colors }}
-  <br>
-
-  <h5 :style="{ fontSize: `${fontSizeValue}px` }">商品</h5>
-  <input type="number" v-model="fontSizeValue" />
-  {{ typeof fontSizeValue }}
-  <br>
-
-  <div :style="{ backgroundColor: colors }"></div>
-  <!-- <section class="product-recommendations">
-    <h2 class="zh-h2">推薦商品</h2>
-    <div class="container">
-      <div class="row">
-        <div v-for="item in productList" :key="item.id" class="col-3 col-md-6 mb-4">
-          <div class="product-card">
-            <img :src="item.img_url" class="product-card__img" />
-
-            <div class="product-card__content">
-              <h4 class="p-p1 product-card__title">{{ item.name }}</h4>
-
-              <p class="en-h2-bold product-card__price">${{ item.price }}</p>
-
-              <div style="width: 109px">
-                <button class="btn h-30 btn-solid">加入購物車</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="noData" class="col-12 text-center">
-          載入中或目前無商品資料...
-        </div>
-      </div>
-    </div>
-  </section> -->
-  <input type="text" v-model="searchStr" placeholder="搜尋商品" />
-
-  <div v-for="item in filteredProducts" :key="item.id" class="col-3 col-md-6 mb-4">
-    <div class="product-card">
-      <img :src="item.img_url" class="product-card__img" />
-
-      <div class="product-card__content">
-        <h4 class="p-p1 product-card__title">{{ item.name }}</h4>
-        <p class="en-h2-bold product-card__price">${{ item.price }}</p>
-      </div>
-    </div>
-  </div>
-
-  <div v-if="filteredProducts.length === 0">
-    查無商品
-  </div>
 </template>
 
 <style lang="scss" scoped>
-//  lang="scss": 告訴 Vue 這裡要用 Scss 編譯
-//  scoped: 確保這裡寫的 CSS 只會影響目前這個頁面，不會「跑去污染」到其他頁面的樣式。
-
 // ==========================================
 // 商品圖
 // ==========================================
@@ -490,27 +352,5 @@ td {
 .product-detail__actions,
 .nutrition-table__note {
   margin-bottom: 20px;
-}
-
-// ==========================================
-// 推薦商品
-// ==========================================
-.product-recommendations {
-  height: 630px;
-}
-
-.product-recommendations h2 {
-  text-align: center;
-  margin-bottom: 35px;
-}
-
-.product-card {
-  width: 100%; // 預設撐滿格子
-  max-width: 315px; // 【重點】設定它的最大上限
-}
-
-.product-card img {
-  width: 100%;
-  display: block;
 }
 </style>
