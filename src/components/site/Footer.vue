@@ -109,7 +109,6 @@
                 border-radius: 50px;
                 
                 &:hover{
-                    // background-color: $accent-color-700;
                     background-position: left bottom;
                     color: $neutral-color-white;
                 }
@@ -140,7 +139,7 @@
             }
         }
     }
-    @media screen and (max-width: 1200px){
+    @media screen and (max-width: 1024px){
         .footer{
             .logo{
                 justify-content: center;
@@ -154,9 +153,8 @@
             }
             .follow-us{
                 span{
-                    margin-right: 24px;
+                    margin-bottom: 6px;
                 }
-                flex-direction: row;
                 align-items: center;
                 justify-content: center;
             }
@@ -177,6 +175,9 @@
                     justify-content: center;
                     border-bottom: 1px solid $neutral-color-700;
                 }
+                .login-btn{
+                    border-bottom: none;
+                }
             }
             .info-group{
                 flex-direction: column;
@@ -185,6 +186,7 @@
                     margin-bottom:4px;
                 }
             }
+            
         }
     }
 </style>
