@@ -37,11 +37,11 @@
             margin-bottom: 30px;
             .zh-h2{
                 margin-bottom: 4px;
-                color: $primary-color-700;
+                color: $primary-color-800;
             }
             .zh-h1-bold{
                 margin-bottom: 10px;
-                color: $primary-color-700;
+                color: $primary-color-800;
             }
         }
         .p-p1{
