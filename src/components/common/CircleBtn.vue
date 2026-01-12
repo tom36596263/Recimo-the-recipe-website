@@ -30,7 +30,7 @@ const buttonClass = computed(() => {
 
 <template>
     <div :class="buttonClass">
-        <a :href="href" class="zh-h5-bold">{{ title }}</a>
+        <a :href="href" class="zh-h5">{{ title }}</a>
         <div class="icon-circle">
         <i class="fa-solid fa-arrow-right"></i>
         </div>

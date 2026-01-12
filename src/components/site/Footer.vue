@@ -2,6 +2,8 @@
     import { useRouter } from 'vue-router';
     import { computed } from 'vue';
 
+    import SearchBar from '@/components/common/SearchBar.vue'
+
     const router = useRouter();
 
     // 篩選出 Default 佈局下的子路由
@@ -37,10 +39,7 @@
                 </router-link>
             </div>
             <div class="col-3 col-lg-12">
-                <div class="search-bar search-sm">
-                    <i class="fa-solid fa-magnifying-glass icon-search"></i>
-                    <input type="text" class="search-input" placeholder="尋找靈感食譜..." />
-                </div>
+                <SearchBar />
             </div>
             <div class="col-9 col-lg-12 info-group">
                 <div class="info">

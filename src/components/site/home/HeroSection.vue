@@ -35,6 +35,17 @@
         left: 0;
         .title{
             margin-bottom: 30px;
+            .zh-h2{
+                margin-bottom: 4px;
+                color: $primary-color-700;
+            }
+            .zh-h1-bold{
+                margin-bottom: 10px;
+                color: $primary-color-700;
+            }
+        }
+        .p-p1{
+            margin-bottom: 40px;
         }
         img{
             height: 100%;

@@ -64,7 +64,7 @@ const navItems = computed(() => {
         }
         .link-group{
             display:flex;
-            gap: 16px;
+            gap: 24px;
             height: 50px;
             .search-btn{
                 background-color: $accent-color-700;
