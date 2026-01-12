@@ -1,8 +1,20 @@
 <script setup>
     import { useRouter } from 'vue-router';
-    import { computed } from 'vue';
+    import { computed, ref } from 'vue';
+    import LogoWhite from '@/assets/images/site/Recimo-logo-white.svg'
+    import LogoBlack from '@/assets/images/site/Recimo-logo-Black.svg'
+    import BaseBtn from '@/components/common/BaseBtn.vue'
 
 const router = useRouter();
+const isMenuOpen = ref(false);
+
+const toggleMenu = () => {
+    isMenuOpen.value = !isMenuOpen.value;
+};
+//點擊後自動關閉
+const closeMenu = () => {
+    isMenuOpen.value = false;
+}
 
 // 篩選出 Default 佈局下的子路由
 const navItems = computed(() => {
@@ -14,18 +26,25 @@ const navItems = computed(() => {
         title: route.meta.title
     }));
 });
+
 </script>
 <template>
     <nav class="site-nav">
         <div class="container">
             <div class="row">
                 <div class="col-12 content">
+                    <div class="hb" :class="{'menu-open': isMenuOpen}" @click="toggleMenu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                     <div class="logo">
-                        <router-link to="/"><img src="@/assets/images/site/Recimo-logo-black.svg" alt=""></router-link>
+                        <router-link to="/"><img :src="LogoBlack" alt=""></router-link>
                     </div>
                     <div class="link-group">
                         <router-link to="/search" class="search-btn p-p1">搜尋好料理</router-link>
-                        <div class="page-link">
+
+                        <div class="page-link" :class="{ 'mobile-active': isMenuOpen }">
                             <router-link 
                             v-for="item in navItems" 
                             :key="item.path" 
@@ -33,20 +52,33 @@ const navItems = computed(() => {
                             class="p-p1">
                             {{ item.title }}
                             </router-link>
-                            
+                            <div class="nav-icon-link">
+                                <router-link to="/workspace" class="cart-btn" @click="closeMenu">
+                                    <span class="btn-text  p-p1">我的購物車</span>
+                                    <i-material-symbols-Shopping-Cart-outline class="btn-icon" />
+                                </router-link>
+
+                                <router-link to="/workspace" class="login-btn" @click="closeMenu">
+                                    <span class="btn-text p-p1">我的廚房</span>
+                                    <i-material-symbols-Account-Circle-outline class="btn-icon" />
+                                </router-link>
+                            </div>
+                            <div class="side-menu-only">
+                                <router-link to="/"><img :src="LogoWhite" alt="Recimo" /></router-link>
+                                <BaseBtn title="登出" height="30" />
+                            </div>
                         </div>
-                        <router-link to="/workspace" class="cart-btn">
-                            <i-material-symbols-Shopping-Cart-outline />
-                        </router-link>
-                        <router-link to="/workspace" class="login-btn">
-                            <i-material-symbols-Account-Circle-outline />
-                        </router-link>
+                        
                     </div>
-                    <div class="box"></div>
+                    
+                    <div class="nav-box"></div>
                 </div>
             </div>
         </div>
-        
+        <div class="overlay" 
+        :class="{ 'show': isMenuOpen }"
+        @click="closeMenu"
+        ></div>
         
     </nav>
 </template>
@@ -56,11 +88,11 @@ const navItems = computed(() => {
             justify-content: space-between;
             display: flex;
             flex-direction: row;
+            position: relative;
         }
         
         .logo img {
             height: 80%;
-
         }
         .link-group{
             display:flex;
@@ -80,13 +112,23 @@ const navItems = computed(() => {
                 }
             }
             .page-link{
+                .btn-text, .side-menu-only{
+                    display: none;
+                }
+                
                 background-color: $primary-color-800;
                 display: flex;
-                gap: 24px;
+                gap: 20px;
                 align-items: center;
                 padding: 0 0 0 50px;
                 border-radius: 50px 0 0 50px;
                 margin-right:12px;
+                .nav-icon-link{
+                    display: flex;
+                    flex-direction: row;
+                    gap: 14px;
+                    
+                }
             }
         }
         a {
@@ -117,7 +159,7 @@ const navItems = computed(() => {
                 color: $accent-color-400;
             }
         }
-        .box{
+        .nav-box{
             width: 1000px;
             height: 50px;
             background-color: $primary-color-800;
@@ -126,11 +168,202 @@ const navItems = computed(() => {
             right: -500px;
             z-index: -1;
         }
+        .hb{
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.6);
+            // position: relative;
+            z-index: 10;
+            display: none;
+            transition: .3s ease;
+            cursor: pointer;
+            span{
+                display: block;
+                height: 2px;
+                width: 60%;
+                position: absolute;
+                background-color: $neutral-color-800;
+                opacity: 1;
+                margin: auto;
+                left: 0;
+                right: 0;
+                transition: transform 1s ease, top 1.3s ease, opacity 1s ease;
+            }
+            span:first-child{
+                top: 12px;
+                transform: rotate(0deg);
+            }
+            &.menu-open span:first-child{
+                top: 21.5px;
+                transform: rotate(45deg);
+            }
+            span:nth-child(2){
+                top: 21.5px;
+                transform: rotate(0deg);
+            }
+            &.menu-open span:nth-child(2){
+                opacity: 0;
+            }
+            span:nth-child(3){
+                top: 31px;
+                transform: rotate(0deg);
+            }
+            &.menu-open span:nth-child(3){
+                top: 21.5px;
+                transform: rotate(135deg);
+            }
+        }
     }
     @media screen and (max-width: 1000px){
         .site-nav{
-            
+            .link-group{
+                .search-btn{
+                    display: none;
+                }
+            }
+            .logo img {
+                height: 70%;
+            }
         }
         
+    }
+    @media screen and (max-width: 810px){
+        .site-nav{
+            .link-group{
+                .page-link{
+                    position: fixed;
+                    top:0;
+                    left:0;
+                    width: 300px;
+                    height: 100vh;
+                    transform: translateX(-100%);
+                    transition: transform 0.4s ease;
+                    border-radius: 0;
+                    flex-direction: column;
+                    padding:0;
+                    margin:0;
+                    gap: 0px;
+                    z-index: 15;
+
+                    &.mobile-active{
+                        transform: translateX(0);
+                        padding: 100px 30px 0;
+                        .p-p1,
+                        .nav-icon-link a{
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 100%;
+                            height:45px;
+                        }
+                        .nav-icon-link{
+                            position: static;
+                            flex-direction: column;
+                            gap: 0px;
+                            width: 100%;
+                            
+                            .btn-text{
+                                color:$neutral-color-white;
+                                &:hover {
+                                    color: $accent-color-700;
+                                }
+                                .p-p1{
+                                    display: block;
+                                    font-size: 1rem;
+                                }
+                                
+                            }
+                            .btn-icon{
+                                display: none;
+                            }
+                            .cart-btn, .login-btn{
+                                background-color: transparent;
+                                width:100%;
+                            }
+                        }
+                        .side-menu-only{
+                            display:flex;
+                            margin-top: 80px;
+                            flex-direction: column;
+
+                            img { 
+                                margin-bottom: 20px; 
+                                width: 150px; 
+                            }
+                        }
+                    }
+                    &:not(.mobile-active){
+                        .nav-icon-link{
+                            position: fixed;
+                            margin-top: 30px;
+                            right: 10%;
+                            display: flex;
+                            flex-direction: row;
+                            transform: translateX(94vw);
+                            right: 0;
+                            top:0;
+                        }
+                    }
+                    .p-p1{
+                        display: none;
+                    }
+                } 
+            }
+            .content{
+                .logo img {
+                    display: inline-block;
+                    align-items: center;
+                    justify-content: center;
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                    height: 50px
+                }
+            }
+                .hb{
+                    display: block;
+                    opacity: .8;
+                    height: 45px;
+                    width: 45px;
+                    z-index: 20;
+                }
+            
+            
+            .cart-btn, .login-btn{
+                color: $neutral-color-800;
+                width: 45px;
+                height: 45px;
+                background-color: rgba(255, 255, 255, 0.6);
+                border-radius: 50%;
+                justify-content: center;
+                align-items: center;
+                transition: .3s ease;
+                &:hover{
+                    color: $primary-color-700;
+                }
+            }
+            
+        }
+        .overlay{
+            position: fixed;
+            top:0;
+            left: 0;
+            background-color: rgba(0, 0, 0, .7);
+            width: 100vw;
+            height:100vh;
+            opacity: 0;
+            visibility: hidden;
+            transition: all .4 ease;
+            &.show{
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+        .nav-box{
+            display: none;
+        }
     }
 </style>
