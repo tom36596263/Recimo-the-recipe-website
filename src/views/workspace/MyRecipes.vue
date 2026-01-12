@@ -7,11 +7,11 @@ import { ref, onMounted } from 'vue';
 </script>
 
 <template>
-    <h1>我的食譜</h1>
+    <!-- <h1>我的食譜</h1> -->
     <div class="container">
         <div class="row">
-            <div class="col-6 col-md-12"><div class="test-box">左側欄位有 padding</div></div>
-            <div class="col-6 col-md-12"><div class="test-box">右側欄位有 padding</div></div>
+            <div class="col-6 col-md-12"></div>
+            <div class="col-6 col-md-12"></div>
         </div>
     </div>
     

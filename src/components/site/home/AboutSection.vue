@@ -1,6 +1,6 @@
 <script setup>
-    import { ref, markRaw } from 'vue'
-    import CircleBtn from '@/components/common/CircleBtn.vue'
+    import { ref, markRaw } from 'vue';
+    import CircleBtn from '@/components/common/CircleBtn.vue';
     import IconWandStars from '~icons/material-symbols/Wand-Stars-outline';
     import IconLocalFireDepartment from '~icons/material-symbols/Local-Fire-Department-outline';
     import IconInboxTextPerson from '~icons/material-symbols/Inbox-Text-Person-outline';

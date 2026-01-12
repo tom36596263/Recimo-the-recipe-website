@@ -1,6 +1,24 @@
 <script setup>
-    import {computed} from 'vue';
-    import {useRouter} from 'vue-router';
+    import {computed} from 'vue'
+    import {useRouter} from 'vue-router'
+    import { ref, markRaw } from 'vue'
+    import LogoBlack from '@/assets/images/site/Recimo-logo-Black.svg'
+    
+    // import IconForkSpoon from 'virtual:icons/material-symbols/Fork-Spoon-outline'
+    // import IconSkillet from 'virtual:icons/material-symbols/Skillet-outline'
+    // import IconHandMeal from 'virtual:icons/material-symbols/Hand-Meal-outline'
+    // import IconTextPerson from 'virtual:icons/material-symbols/Text-Person-outline'
+    // import IconShoppingCart from 'virtual:icons/material-symbols/Shopping-Cart-outline'
+    // import IconAssignment from 'virtual:icons/material-symbols/Assignment-outline'
+
+    // const pageicon = [
+    //     markRaw(IconForkSpoon),
+    //     markRaw(IconSkillet),
+    //     markRaw(IconHandMeal),
+    //     markRaw(IconTextPerson),
+    //     markRaw(IconShoppingCart),
+    //     markRaw(IconAssignment)
+    // ];
 
     const router = useRouter();
 
@@ -15,13 +33,15 @@
             path: child.path.startsWith('/') ? child.path : `/workspace/${child.path}`,
             title: child.meta.title,
             icon: child.meta.icon
-        }))
+        }));
     });
 
 </script>
 <template>
     <aside class="sidebar">
-        <div class="logo">Recimo</div>
+        <div class="logo">
+            <router-link to="/"><img :src="LogoBlack" alt=""></router-link>
+        </div>
         <div class="workspace-nav">
             <router-link v-for="item in menuItems" 
             :key="item.path"
@@ -39,47 +59,31 @@
 <style lang="scss" scoped>
     // 側邊欄固定寬度
     .sidebar {
-        width: $sidebar-width;
-        background: $primary-color-100;
-        display: flex;
-        text-decoration: none;;
-        flex-direction: column;
-        padding: 24px;
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: $primary-color-800;
-            margin-bottom: 2rem;
-        }
-    }
-
-    // 導覽連結樣式
+        .logo{
+            img {
+                width: 120px;
+            }
+        } 
     .workspace-nav {
         display: flex;
         flex-direction: column;
-        gap: 12px;
-        margin-top: 1rem;
-
+        gap: 6px;
         a {
             text-decoration: none;
             color: inherit;
-            padding: 8px 12px;
-            border-radius: 6px;
+            padding: 12px 0;
             transition: all 0.3s;
-
-            &:hover {
+            &:hover { 
                 color: $accent-color-700;
             }
-
             &.router-link-active {
                 color: $primary-color-800;
-                // background: rgba($primary-color-800, 0.1);
                 font-weight: bold;
                 &:hover {
                     color: $accent-color-700;
                 }
             }
         }
+    }
     }
 </style>
