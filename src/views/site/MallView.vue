@@ -1,46 +1,27 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import card from '@/components/mall/ProductCard.vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
-//取資料
+// --- 資料與狀態 ---
 const baseURL = import.meta.env.BASE_URL;
 const productList = ref([]);
+const activeTag = ref('ALL'); // 目前選中的標籤
+const currentPage = ref(1); // 目前在第幾頁
+const pageSize = 8; // 一頁顯示幾筆 (4欄 x 2排 = 8筆)
+const router = useRouter();
 
-// --- 新增這段邏輯 ---
-const randomProducts = computed(() => {
-  if (productList.value.length === 0) return [];
-  const shuffled = [...productList.value].sort(() => 0.5 - Math.random());
-
-  // 這裡只取 3 筆，給上方的熱銷區用
-  return shuffled.slice(0, 3);
-});
-// ------------------
-
-const listCount = computed(() => {
-  return productList.value.length;
-});
-const noData = computed(() => productList.value.length === 0);
-
-const fetchData = () => {
-  axios
-    .get('/data/mall/products.json')
-    .then((response) => {
-      console.log('抓到的資料：', response.data);
-      productList.value = response.data;
-    })
-    .catch((error) => {
-      console.error('讀取 JSON 失敗，請檢查路徑是否正確', error);
-    });
+//進入商品詳情
+const goToDetail = (id) => {
+  router.push({
+    //放進瀏覽器裡的陣列(瀏覽器的歷史紀錄)
+    name: 'product-detail',
+    params: { id: id } //左邊id:目標欄位,右邊id:實際內容
+  });
 };
 
-onMounted(() => {
-  fetchData();
-});
-
-//tag標籤
-const activeTag = ref('ALL'); //預設
-// 2. 定義標籤的資料
+// --- 標籤設定 ---
 const tags = [
   { text: 'ALL', width: '62px' },
   { text: '低卡健身系列', width: '138px' },
@@ -48,10 +29,70 @@ const tags = [
   { text: '歐美西式系列', width: '138px' },
   { text: '台式家常系列', width: '138px' }
 ];
-//觸發
+
+// --- 核心邏輯步驟 1：先過濾資料 (Filter) ---
+const filteredProducts = computed(() => {
+  //經過篩選後的所有商品清單
+  if (activeTag.value === 'ALL') {
+    return productList.value;
+  }
+  // 注意：這裡假設你的 JSON 資料裡有一個屬性叫做 category (或 tag)
+  // 且內容跟上面的 text 完全一樣 (例如 "低卡健身系列")
+  return productList.value.filter((item) => item.category === activeTag.value);
+});
+
+// --- 核心邏輯步驟 2：計算總頁數 ---
+const totalPages = computed(() => {
+  return Math.ceil(filteredProducts.value.length / pageSize);
+}); //Math.ceil 無條件進位
+
+// --- 核心邏輯步驟 3：切分出當前頁面要顯示的資料 (Slice) ---
+const displayedProducts = computed(() => {
+  const startIndex = (currentPage.value - 1) * pageSize; //currentPage.value：目前在第幾頁。
+  const endIndex = startIndex + pageSize;
+  // 從過濾後的清單中，取出這一段
+  return filteredProducts.value.slice(startIndex, endIndex);
+});
+
+// --- 其他 Computed ---
+const randomProducts = computed(() => {
+  if (productList.value.length === 0) return [];
+  const shuffled = [...productList.value].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 3);
+  //... 是「展開運算子 (Spread Operator)」。意思是把 productList 裡面的東西全部倒出來，放進一個新的 [] 裡面
+  //sort(() => 0.5 - Math.random()) 是洗牌的概念
+});
+
+// --- 事件處理 ---
+const fetchData = () => {
+  axios
+    .get('/data/mall/products.json')
+    .then((response) => {
+      //.then是抓到資料後做函視裡面的動作,response：這是 Axios 幫你打包好的一個包裹。
+      // console.log('抓到的資料：', response.data);
+      productList.value = response.data;
+    })
+    .catch((error) => {
+      console.error('讀取 JSON 失敗', error);
+    });
+};
+
 const selectTag = (tagName) => {
   activeTag.value = tagName;
+  currentPage.value = 1; // 切換標籤時，要切回第一頁，不然使用者會迷路
 };
+
+const setPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    // 建議：換頁後通常會把視窗滾動到商品區上方，體驗較好
+    // window.scrollTo({ top: 500, behavior: 'smooth' });
+  }
+};
+
+onMounted(() => {
+  fetchData(); //當網頁畫面全部準備好（掛載完成）的那一瞬間，請幫我執行 fetchData 這個函式,fetchData 去倉庫搬貨，搬回來後更新了 productList.value。
+});
 
 // 模擬圖片資料 (您可以換成 API 取得的資料)
 // 這裡將圖片分成 4 欄 (columns)
@@ -103,6 +144,7 @@ const columns = ref([
             v-for="item in randomProducts"
             :key="item.id"
             class="col-4 col-md-12"
+            @click="goToDetail(item.id)"
           >
             <card :item="item" />
           </div>
@@ -114,6 +156,7 @@ const columns = ref([
   <div class="product-title">
     <h2 class="zh-h2">Recimo料理包</h2>
   </div>
+  <!-- 標籤 -->
   <div class="tag">
     <BaseTag
       v-for="item in tags"
@@ -129,18 +172,55 @@ const columns = ref([
     <!-- 商品 -->
     <div class="container">
       <div class="row mobile-scroll">
-        <div v-for="item in productList" :key="item.id" class="col-3 col-md-12">
+        <div
+          v-if="displayedProducts.length === 0"
+          class="col-12"
+          style="text-align: center; padding: 40px"
+        >
+          目前沒有此分類的商品
+        </div>
+        <div
+          v-for="item in displayedProducts"
+          :key="item.id"
+          class="col-3 col-md-12"
+          @click="goToDetail(item.id)"
+        >
           <card :item="item" />
         </div>
       </div>
     </div>
 
     <!-- 頁碼 -->
-    <div class="pagination">
-      <a href="#" class="page-link active">1</a>
-      <a href="#" class="page-link">2</a>
-      <a href="#" class="page-link">3</a>
-      <a href="#" class="page-link">4</a>
+    <div class="pagination" v-if="totalPages > 1">
+      <!-- <a
+        href="#"
+        class="page-link"
+        @click.prevent="setPage(currentPage - 1)"
+        :class="{ disabled: currentPage === 1 }"
+      >
+        &lt;
+      </a> -->
+
+      <a
+        href="#"
+        class="page-link"
+        v-for="page in totalPages"
+        :key="page"
+        :class="{ active: currentPage === page }"
+        @click.prevent="setPage(page)"
+      >
+        {{ page }}
+      </a>
+      <!-- 如果這顆按鈕代表的數字 (page) 等於你目前所在的頁碼 (currentPage)。 -->
+      <!-- 加上 active 這個 class。這通常會讓按鈕變色（例如變成藍底白字），告訴使用者「你現在在這裡」。 -->
+      <!-- <a
+        href="#"
+        class="page-link"
+        @click.prevent="setPage(currentPage + 1)"
+        :class="{ disabled: currentPage === totalPages }"
+      >
+        &gt;
+      </a> -->
     </div>
   </section>
 
@@ -240,11 +320,14 @@ const columns = ref([
 
 .row {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
+  border: 1px solid red;
 }
 
 .product-card {
   margin-bottom: 13px;
+  cursor: pointer;
+  border: 1px solid blue;
 }
 
 //頁碼

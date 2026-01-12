@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import productrmd from '@/components/mall/ProductRmd.vue';
+import ProductRmd from '@/components/mall/ProductRmd.vue';
+import axios from 'axios';
 
 // ==========================================
 // vue上課教：以後部屬比較不會有問題
@@ -8,9 +9,44 @@ import productrmd from '@/components/mall/ProductRmd.vue';
 const baseURL = import.meta.env.BASE_URL
 
 // ==========================================
+// 點小圖秀大圖
+// ==========================================
+const productImages = [
+  `${baseURL}img/mall/PROD-001_01.jpg`,
+  `${baseURL}img/mall/PROD-001_02.jpg`,
+  `${baseURL}img/mall/PROD-001_03.jpg`
+];
+
+// 預設顯示第一張
+const mainImage = ref(productImages[0]);
+const activeImage = ref(productImages[0]);
+
+const changeImage = (imgSrc) => {
+  mainImage.value = imgSrc;
+  activeImage.value = imgSrc; // 讓點擊的小圖變色
+};
+
+// ==========================================
 // 增減商品數量
 // ==========================================
 const count = ref(1); // 預設數量是 1
+
+// ==========================================
+// 加入購物車
+// ==========================================
+// 按鈕動作定義 (避免 Template 報錯)
+const addToCart = () => {
+  // 詳情頁的資料在 productInfo 裡
+  if (productInfo.value) {
+    console.log("把商品", productInfo.value.product_name, "數量", count.value, "加入購物車");
+  }
+};
+
+const buyNow = () => {
+  if (productInfo.value) {
+    console.log("直接購買商品", productInfo.value.product_name, "數量", count.value);
+  }
+};
 
 // ==========================================
 // 加入購物車pina
@@ -25,59 +61,73 @@ const count = ref(1); // 預設數量是 1
 // };
 
 // ==========================================
-// axios：先把商品卡片引入json檔
+// 引入 useRoute 獲取網址 ID
 // ==========================================
-import axios from 'axios'
-const productList = ref([])
-// 快速計算陣列數量結果
-const listCount = computed(() => {
-  return productList.value.length
-})
-const noData = computed(() => productList.value.length === 0)
-const fetchData = () => {
-  axios
-    .get('/data/mall/products.json')
-    .then((response) => {
-      // 檢查點：確保 response.data 真的是那 20 筆陣列
-      console.log("抓到的資料：", response.data);
-      productList.value = response.data;
-    })
-    .catch((error) => {
-      console.error("讀取 JSON 失敗，請檢查路徑是否正確", error);
-    });
-};
-onMounted(() => {
-  fetchData()
-})
+import { useRoute } from 'vue-router';
+const route = useRoute();
+const productId = computed(() => route.params.id); // 將 ID 改為 computed，確保網址變了它也跟著變
 
+const productInfo = ref(null); // 儲存當前商品的所有資訊
+
+const fetchData = async () => {
+  try {
+    const response = await axios.get(`${baseURL}data/mall/products.json`);
+    // 從 20 筆資料中，找 ID 跟網址一樣的那一筆
+    const item = response.data.find(p => p.id === Number(productId.value));
+
+    if (item) {
+      productInfo.value = item;
+      // 拿到資料後，初始化大圖為圖片陣列的第一張
+      const firstImg = `${baseURL}${item.images[0]}`;
+      mainImage.value = firstImg;
+      activeImage.value = firstImg;
+      // 切換商品時，數量重置為 1
+      count.value = 1;
+    }
+  } catch (error) {
+    console.error("抓取失敗", error);
+  }
+};
+import { watch } from 'vue';
+
+// 監聽 ID，當從推薦商品點擊進入不同 ID 時，重新抓資料
+watch(() => productId.value, () => {
+  fetchData();
+});
+
+onMounted(() => {
+  fetchData();
+});
 
 </script>
 
 <template>
-  <section class="product-detail container">
+
+  <section v-if="productInfo" class="product-detail container">
     <div class="row">
+
       <!-- ==========================================
             商品圖
       ========================================= -->
       <div class="col-7 col-lg-12">
-        <div class="product-detail__gallery">
-          <div class="gallery__main">
-            <!-- <img :src="img1"> -->
 
-            <!-- <img :src="parseAssetsIcon('PROD-001_main.jpg')">
-            <img src="/assets/images/mall/PROD-001_main.jpg"> -->
-            <img :src="`${baseURL}public/img/mall/PROD-001_01.jpg`">
+        <div class="product-detail__gallery">
+          <nav class="breadcrumb">
+            <ul class="breadcrumb__list">
+              <li><router-link to="/" class="p-p1">首頁</router-link></li>
+              <li><router-link to="/mall" class="p-p1">Recimo商城</router-link></li>
+              <li class="active p-p1">{{ productInfo?.product_name }}</li>
+            </ul>
+          </nav>
+          <div class="gallery__main">
+            <img :src="mainImage" id="gallery-preview-img">
           </div>
 
           <div class="row">
-            <div class="col-2 col-md-3 col-sm-4">
-              <div class="gallery__thumb">
-                <img :src="`${baseURL}public/img/mall/PROD-001_02.jpg`">
-              </div>
-            </div>
-            <div class="col-2 col-md-3 col-sm-4">
-              <div class="gallery__thumb">
-                <img :src="`${baseURL}public/img/mall/PROD-001_03.jpg`">
+            <div v-for="(img, index) in productInfo.images" :key="index" class="col-2 col-md-3 col-sm-4">
+              <div class="gallery__thumb" :class="{ 'is-active': activeImage === `${baseURL}${img}` }"
+                @click="changeImage(`${baseURL}${img}`)">
+                <img :src="`${baseURL}${img}`" :alt="productInfo.product_name">
               </div>
             </div>
           </div>
@@ -88,13 +138,13 @@ onMounted(() => {
       ========================================= -->
       <div class="col-5 col-lg-12">
         <div class="product-detail__info">
-          <h1 class="zh-h1">舒肥雞胸藜麥飯</h1>
+          <h1 class="zh-h1">{{ productInfo.product_name }}</h1>
           <hr />
           <p class="p-p1 product-detail__description">
-            想吃得健康，又不想犧牲美味？我們的「舒肥雞胸藜麥飯」專為忙碌的現代人、健身族與體重管理者設計。採用低溫烹調技術鎖住肉汁，搭配超級食物大軍，讓你每一口都吃進飽足感與純淨營養。
+            {{ productInfo.description }}
           </p>
           <div class="product-detail__purchase">
-            <p class="zh-h2 product-detail__price">$160</p>
+            <p class="zh-h2-bold product-detail__price">${{ productInfo.price }}</p>
             <div class="quantity-selector-box">
               <p class="p-p1">數量</p>
               <div class="quantity-selector-control">
@@ -108,113 +158,115 @@ onMounted(() => {
             <BaseBtn title="加入購物車" variant="solid" @click="addToCart" :width="260" :height="50" />
             <BaseBtn title="直接購買" variant="outline" @click="buyNow" :width="260" :height="50" />
           </div>
-          <table class="col-12">
-            <tbody>
-              <tr class="p-p1-bold">
-                <th class="col-3">項目</th>
-                <th class="col-3">每份含量</th>
-                <th class="col-3">項目</th>
-                <th class="col-3">每份含量</th>
-              </tr>
-              <tr class="p-p1">
-                <td>熱量</td>
-                <td>250g</td>
-                <td>碳水化合物</td>
-                <td>42.0g</td>
-              </tr>
-              <tr class="p-p1">
-                <td>總脂肪</td>
-                <td>4.2g</td>
-                <td>飽和脂肪</td>
-                <td>0.8g</td>
-              </tr>
-              <tr class="p-p1">
-                <td>蛋白質</td>
-                <td>28.5g</td>
-                <td>膳食纖維</td>
-                <td>5.5g</td>
-              </tr>
-              <tr class="p-p1">
-                <td>鈉</td>
-                <td>420mg</td>
-                <td>糖</td>
-                <td>0.5g</td>
-              </tr>
-            </tbody>
-          </table>
-          <p class="p-p2 nutrition-table__note">一人份的營養成分表示/一份250g</p>
+          <div class="table-wrap">
+            <table class="col-12">
+              <tbody>
+                <tr class="p-p1-bold">
+                  <th class="col-3">項目</th>
+                  <th class="col-3">每份含量</th>
+                  <th class="col-3">項目</th>
+                  <th class="col-3">每份含量</th>
+                </tr>
+                <tr class="p-p1">
+                  <td>熱量</td>
+                  <td>{{ productInfo.calories }}</td>
+                  <td>碳水化合物</td>
+                  <td>{{ productInfo.carbohydrates }}</td>
+                </tr>
+                <tr class="p-p1">
+                  <td>總脂肪</td>
+                  <td>{{ productInfo.total_fat }}</td>
+                  <td>飽和脂肪</td>
+                  <td>{{ productInfo.dietary_fiber }}</td>
+                </tr>
+                <tr class="p-p1">
+                  <td>蛋白質</td>
+                  <td>{{ productInfo.protein }}</td>
+                  <td>膳食纖維</td>
+                  <td>{{ productInfo.saturated_fat }}</td>
+                </tr>
+                <tr class="p-p1">
+                  <td>鈉</td>
+                  <td>{{ productInfo.sodium }}</td>
+                  <td>糖</td>
+                  <td>{{ productInfo.sugar }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="p-p2 nutrition-table__note">一人份的營養成分表示/一份250g</p>
+          </div>
           <div class="product-detail__extra">
             <div class="product-detail__section">
-              <h3 class="zh-h5">食材內容：</h3>
-              <ol>
-                <li class="p-p1">嚴選低溫舒肥嫩雞胸</li>
-                <li class="p-p1">黃金兩色藜麥糙米飯(三色藜麥、優質糙米)</li>
-                <li class="p-p1">
-                  五彩均衡鮮蔬(青花菜、鮮甜紅蘿蔔 / 黃玉米筍、栗子地瓜 /
-                  烤南瓜、毛豆仁)
-                </li>
-              </ol>
+              <h3 class="zh-h5-bold">食材內容：</h3>
+              <p class="p-p1">{{ productInfo.ingredients }}
+              </p>
             </div>
             <div class="product-detail__section">
               <hr>
-              <h3 class="zh-h5">使用方法：</h3>
-              <ol>
-                <li class="p-p1">微波加熱： 撕開包裝一角以800W 加熱約2-3分鐘。</li>
-                <li class="p-p1">
-                  隔水加熱：
-                  整包放入熱水中浸泡5-8分鐘（不建議沸騰加熱以維持肉質嫩度）。
-                </li>
-                <li class="p-p1">電鍋加熱： 解凍後放入內鍋，外鍋加少許水，跳起即可。</li>
-              </ol>
+              <h3 class="zh-h5-bold">使用方法：</h3>
+              <p class="p-p1">
+                {{ productInfo.instructions }}
+              </p>
               <hr>
             </div>
             <div class="product-detail__section">
-              <h3 class="zh-h5">保存期限：</h3>
-              <p class="p-p1">冷凍保存 12 個月。</p>
+              <h3 class="zh-h5-bold">保存期限：</h3>
+              <p class="p-p1"> {{ productInfo.shelf_life }}</p>
               <hr>
             </div>
             <div class="product-detail__section">
-              <h3 class="zh-h5">貼心提醒：</h3>
-              <p class="p-p1">本產品含有穀類製品，過敏者請留意。</p>
+              <h3 class="zh-h5-bold">貼心提醒：</h3>
+              <p class="p-p1"> {{ productInfo.note }}</p>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <productrmd />
+    <ProductRmd class="detail-recommend-section" />
   </section>
 
 </template>
 
 <style lang="scss" scoped>
+@import "@/assets/scss/layouts/_grid.scss";
+
+
 // ==========================================
 // 商品圖
 // ==========================================
+.product-detail__gallery {
+  position: sticky; //左邊商品圖固定
+  top: 100px; // 避開 Navbar 高度
+
+  // 在平板/手機版（堆疊狀態）時取消固定
+  @media screen and (max-width: map-get($breakpoints, "lg")) {
+    position: static;
+  }
+}
+
 .gallery__main {
   width: 100%;
-  margin-bottom: 10px;
+  height: 65vh;
+  margin-bottom: 15px;
+  // 設定一個最小與最大極限，防止在超大或超小螢幕破圖
+  min-height: 350px;
+  max-height: 560px;
+
+  @media screen and (max-width: map-get($breakpoints, "lg")) {
+    height: 430px; // 手機版回到你原本設定的高度
+    max-height: none;
+  }
 }
 
 .gallery__main img {
   width: 100%;
-  height: 560px;
+  height: 100%;
   object-fit: cover; // 避免圖片在固定高度下被拉扁或擠壓
   display: block;
-
-  @media screen and (max-width: 1320px) {
-    height: 450px;
-  }
-
-  @media screen and (max-width: 810px) {
-    height: 400px;
-  }
-
-  @media screen and (max-width: 390px) {
-    height: 300px;
-  }
+  border-radius: 10px;
+  overflow: hidden; // 隱藏超出部分
 }
-
 
 .row {
   // 抵銷最左與最右的間距，讓它跟大圖切齊
@@ -228,27 +280,60 @@ onMounted(() => {
   }
 }
 
-
 .gallery__thumb {
   aspect-ratio: 4 / 3;
-  object-fit: cover; // 確保圖片不變形
   cursor: pointer;
+  border-radius: 10px;
+  border: 2px solid transparent; // 預設透明邊框，防止抖動
+  overflow: hidden; // 隱藏超出部分
+  object-fit: cover; // 確保圖片不變形
+  transition: all 0.5s ease;
+
+  // 當外層 div 有 is-active 時變色
+  &.is-active {
+    border-color: $accent-color-700;
+    // 使用 box-shadow 可以讓選中感更強烈且不影響尺寸
+    box-shadow: 0 0 3px rgba($accent-color-700, 0.3);
+
+    img {
+      opacity: 0.6; // 讓選中的圖稍微變淡，使用者看更清楚
+    }
+  }
+
+  &:not(.is-active):hover {
+    border-color: $accent-color-400;
+  }
 }
 
 .gallery__thumb img {
   width: 100%;
-  display: block;
+  height: 100%;
+  object-fit: cover;
 }
 
 // ==========================================
 // 商品介紹
 // ==========================================
+.product-detail__info>* {
+  margin-bottom: 25px;
+}
+
 .product-detail__info {
-  gap: 100px;
+  padding-left: 40px; // 增加與左側圖片的間距
+
+  // 當螢幕變小時（變成上下堆疊），把間距拿掉，改為增加上方間距
+  @media screen and (max-width: map-get($breakpoints, "lg")) {
+    padding-left: 0;
+    margin-top: 30px;
+  }
 }
 
 .product-detail__info h1 {
   text-align: center;
+}
+
+.product-detail__price {
+  align-self: center;
 }
 
 .product-detail__purchase {
@@ -333,20 +418,58 @@ td {
   text-align: right;
 }
 
-.product-detail__section ol {
-  list-style-position: inside; // 讓數字乖乖待在容器內
-  list-style-type: decimal;
-  padding-left: 0;
-}
-
-.product-detail__description,
-.product-detail__purchase,
-.product-detail__section table {
+.product-detail__section>* {
   margin-bottom: 10px;
 }
 
-.product-detail__actions,
-.nutrition-table__note {
-  margin-bottom: 20px;
+.product-detail__section p {
+  white-space: pre-line; // 讓json 的 \n 生效
+}
+
+// ==========================================
+// 推薦商品
+// ==========================================
+.detail-recommend-section {
+  margin-top: 100px;
+
+  @media screen and (max-width: map-get($breakpoints, "lg")) {
+    margin-top: 60px;
+  }
+}
+
+// ==========================================
+// 麵包屑
+// ==========================================
+.breadcrumb {
+  padding-bottom: 10px;
+
+  .breadcrumb__list {
+    display: flex;
+    color: black;
+
+    .active {
+      color: $primary-color-800;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+
+      // 製作中間的分隔斜線
+      &:not(:last-child)::after {
+        content: "/";
+        margin: 0 10px;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+
+        &:hover {
+          color: $accent-color-700;
+        }
+      }
+    }
+  }
 }
 </style>

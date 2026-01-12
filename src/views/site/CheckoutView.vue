@@ -2,7 +2,21 @@
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
+const orderItems = ref([
+  {
+    id: 101, // 訂單項目的唯一 ID (隨便寫)
+    productId: 1, // ⚠️ 重要：這裡必須對應你 products.json 裡面有的 ID
+    quantity: 2 // 數量
+  },
+  {
+    id: 102,
+    productId: 2, // ⚠️ 這裡也要確認 json 裡有 ID 為 2 的商品
+    quantity: 1
+  }
+]);
+
 const router = useRouter();
+
 // 資料打包
 const form = ref({
   // 訂購人
@@ -425,20 +439,14 @@ const handleDelete = () => {
     <div class="card-container">
       <div class="row reverse-layout">
         <div class="col-12 col-md-10">
-          <div class="checkout-container"></div>
-        </div>
-        <div class="col-12 col-md-10">
           <div class="product-container">
-            <div class="card-wrap">
-              <div class="img-box">
-                <img src="https://picsum.photos/282/211/?random=10" />
-              </div>
-              <div class="card-text">
-                <div class="priductname"><p class="p-p1">香草烤雞</p></div>
-                <div class="price"><p class="p-p1">價格 : 165元/一包</p></div>
-                <div class="quanity"><p class="p-p1">數量 : 2</p></div>
-                <div class="subtotal"><p class="p-p1">小計 : $330</p></div>
-              </div>
+            <div class="order-list">
+              <CheckoutItem
+                v-for="item in orderItems"
+                :key="item.id"
+                :product-id="item.productId"
+                :quantity="item.quantity"
+              />
             </div>
           </div>
         </div>
