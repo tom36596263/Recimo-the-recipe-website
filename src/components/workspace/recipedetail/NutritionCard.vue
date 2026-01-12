@@ -10,15 +10,11 @@ const emit = defineEmits(["change-servings"]);
 
 const calculateTotal = (fieldName) => {
   if (!props.ingredients.length) return 0;
-
   const oneServingTotal = props.ingredients.reduce((sum, item) => {
-    // 總重 = 數量 * 單個單位重 (g)
     const weight = (item.amount || 0) * (item.unit_weight || 1);
-    // 營養素 = (重量 / 100) * 每100g數值
     const nutrientValue = (weight / 100) * (item[fieldName] || 0);
     return sum + nutrientValue;
   }, 0);
-
   return Math.round(oneServingTotal * props.servings);
 };
 
@@ -34,43 +30,146 @@ const updateServings = (delta) => {
 </script>
 
 <template>
-  <div class="nutrition-card bg-[#F9FAFB] rounded-[2.5rem] p-10 border border-gray-100 shadow-sm">
-    <div class="text-center mb-8">
-      <h4 class="text-lg font-bold text-gray-800 tracking-tight">營養小清單</h4>
-      <span class="text-[10px] text-gray-300 font-normal uppercase tracking-widest block mt-1">Nutrition List</span>
+  <div class="nutrition-card">
+    <header class="card-header">
+      <div class="zh-h3">營養小清單</div>
+      <div class="en-h3">Nutrition List</div>
+    </header>
+
+    <div class="servings-control">
+      <button 
+        type="button"
+        @click="updateServings(-1)" 
+        :disabled="servings <= 1" 
+        class="control-btn"
+      > − </button>
+      
+      <div class="servings-display p-p1">{{ servings }} 人份</div>
+      
+      <button 
+        type="button"
+        @click="updateServings(1)" 
+        :disabled="servings >= 20" 
+        class="control-btn"
+      > + </button>
     </div>
 
-    <div class="flex items-center justify-between bg-white border border-gray-200 rounded-2xl p-2 mb-10 shadow-inner">
-      <button @click="updateServings(-1)" :disabled="servings <= 1" class="w-10 h-10 flex items-center justify-center bg-emerald-800 text-white rounded-xl shadow-md hover:bg-emerald-900 transition-colors disabled:opacity-30">
-        <span class="text-xl font-bold">−</span>
-      </button>
-      <span class="font-bold text-gray-700 text-sm">{{ servings }} 人份</span>
-      <button @click="updateServings(1)" :disabled="servings >= 20" class="w-10 h-10 flex items-center justify-center bg-emerald-800 text-white rounded-xl shadow-md hover:bg-emerald-900 transition-colors">
-        <span class="text-xl font-bold">+</span>
-      </button>
+    <div class="total-calories-box">
+      <span class="fire-icon">🔥</span>
+      <span class="calories-value">{{ totalCalories }}</span>
+      <span class="unit">kcal</span>
     </div>
 
-    <div class="text-center mb-10">
-      <span class="text-[10px] text-gray-400 block uppercase tracking-[0.2em] mb-2 font-bold">Total Energy</span>
-      <div class="flex items-baseline justify-center gap-1">
-        <span class="text-5xl font-black text-gray-800">{{ totalCalories }}</span>
-        <span class="text-sm text-gray-400 font-bold uppercase tracking-widest">kcal</span>
+    <div class="nutrients-content">
+      <div class="nutrient-item">
+        <p class="value p-p1">{{ totalProtein }}g</p>
+        <p class="label p-p2">蛋白質</p>
+      </div>
+      <div class="nutrient-item">
+        <p class="value p-p1">{{ totalFat }}g</p>
+        <p class="label p-p2">脂質</p>
+      </div>
+      <div class="nutrient-item">
+        <p class="value p-p1">{{ totalCarbs }}g</p>
+        <p class="label p-p2">碳水化合物</p>
       </div>
     </div>
 
-    <div class="grid grid-cols-3 gap-3">
-      <div class="bg-white p-4 rounded-[2rem] text-center shadow-sm border border-white">
-        <span class="block text-xl font-black text-gray-800">{{ totalProtein }}g</span>
-        <span class="text-[9px] text-gray-400 font-bold uppercase">蛋白質</span>
-      </div>
-      <div class="bg-white p-4 rounded-[2rem] text-center shadow-sm border border-white">
-        <span class="block text-xl font-black text-gray-800">{{ totalFat }}g</span>
-        <span class="text-[9px] text-gray-400 font-bold uppercase">脂質</span>
-      </div>
-      <div class="bg-white p-4 rounded-[2rem] text-center shadow-sm border border-white">
-        <span class="block text-xl font-black text-gray-800">{{ totalCarbs }}g</span>
-        <span class="text-[9px] text-gray-400 font-bold uppercase">碳水</span>
-      </div>
+    <div class="tags-row" v-if="totalProtein > 10">
+      <span class="tag">豐富蛋白質</span>
+      <span class="tag">低脂肪含量</span>
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+@import '@/assets/scss/abstracts/_color.scss';
+
+.nutrition-card {
+  background-color: #f8f8f8;
+  border-radius: 15px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 修正後的 CSS */
+.card-header {
+  display: flex;             
+  flex-direction: column;    
+  align-items: flex-start;   
+
+  .zh-h3 { 
+    margin-bottom: 10px;      
+  }
+}
+
+.servings-control {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 1.5px solid $primary-color-700;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 48px;
+  width: 300px;
+  margin: 0 auto;
+
+  .control-btn {
+    width: 50px;
+    height: 100%;
+    // 這裡強制設定背景色，避免被預設樣式覆蓋
+    background-color: $primary-color-700 !important; 
+    color: white !important;
+    font-size: 24px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:disabled {
+      background-color: #ccc !important;
+      cursor: not-allowed;
+    }
+  }
+
+  .servings-display {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+.total-calories-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  .unit { font-size: 18px; color: #666; }
+}
+
+.nutrients-content {
+  display: flex;
+  gap: 12px;
+}
+
+.nutrient-item {
+  flex: 1;
+  background-color: white;
+  height: 90px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.tags-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  .tag { background-color: #e8f5e9; color: #4caf50; padding: 4px 12px; border-radius: 6px; font-size: 12px; }
+}
+</style>
