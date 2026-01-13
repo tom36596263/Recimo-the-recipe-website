@@ -1,12 +1,14 @@
 <script setup>
     import { useRouter } from 'vue-router';
-    import { computed, ref } from 'vue';
+    import { computed, ref, onMounted, onUnmounted} from 'vue';
     import LogoWhite from '@/assets/images/site/Recimo-logo-white.svg'
     import LogoBlack from '@/assets/images/site/Recimo-logo-Black.svg'
     import BaseBtn from '@/components/common/BaseBtn.vue'
 
 const router = useRouter();
 const isMenuOpen = ref(false);
+const isVisible = ref(true);  //控制顯示隱藏
+const lastScrollTop = ref(0);  //紀錄上次捲動位置
 
 const toggleMenu = () => {
     isMenuOpen.value = !isMenuOpen.value;
@@ -16,9 +18,26 @@ const closeMenu = () => {
     isMenuOpen.value = false;
 }
 
+//監聽滾動事件
+const handleScroll = () => {
+    const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    if(isMenuOpen.value) return;
+    if(currentScrollTop > lastScrollTop.value && currentScrollTop > 100){
+        isVisible.value = false;
+    }else{
+        isVisible.value = true;
+    }
+    lastScrollTop.value = currentScrollTop <= 0 ? 0 : currentScrollTop;
+}
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll);
+});
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+})
+
 // 篩選出 Default 佈局下的子路由
 const navItems = computed(() => {
-  // 直接拿取所有路由，篩選出 layout 為 default 且 meta.showInMenu 為 true 的項目
     return router.getRoutes()
     .filter(route => route.meta?.layout === 'default' && route.meta?.showInMenu)
     .map(route => ({
@@ -29,7 +48,7 @@ const navItems = computed(() => {
 
 </script>
 <template>
-    <nav class="site-nav">
+    <nav class="site-nav" :class="{ 'nav--hidden': !isVisible }">
         <div class="container">
             <div class="row">
                 <div class="col-12 content">
@@ -84,6 +103,11 @@ const navItems = computed(() => {
 </template>
 <style lang="scss" scoped>
     .site-nav {
+        transition: transform 0.4s ease, opacity .4s ease;
+        &.nav--hidden{
+            opacity: 0;
+            pointer-events: none;
+        }
         .content{
             justify-content: space-between;
             display: flex;
