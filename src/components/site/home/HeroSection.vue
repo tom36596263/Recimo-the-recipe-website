@@ -48,7 +48,6 @@
             margin-bottom: 40px;
         }
         img{
-            height: 100%;
             z-index: -1;
             position: absolute;
             top: 50%;
