@@ -1,24 +1,8 @@
 <script setup>
     import {computed} from 'vue'
     import {useRouter} from 'vue-router'
-    // import { ref, markRaw } from 'vue'
+    import BaseBtn from '@/components/common/BaseBtn.vue'
     import LogoBlack from '@/assets/images/site/Recimo-logo-Black.svg'
-    
-    // import IconForkSpoon from 'virtual:icons/material-symbols/Fork-Spoon'
-    // import IconSkillet from 'virtual:icons/material-symbols/Skillet-outline'
-    // import IconHandMeal from 'virtual:icons/material-symbols/Hand-Meal-outline'
-    // import IconTextPerson from 'virtual:icons/material-symbols/Text-Person-outline'
-    // import IconShoppingCart from 'virtual:icons/material-symbols/Shopping-Cart-outline'
-    // import IconAssignment from 'virtual:icons/material-symbols/Assignment-outline'
-
-    // const pageicon = [
-    //     markRaw(IconForkSpoon),
-    //     markRaw(IconSkillet),
-    //     markRaw(IconHandMeal),
-    //     markRaw(IconTextPerson),
-    //     markRaw(IconShoppingCart),
-    //     markRaw(IconAssignment)
-    // ];
 
     const router = useRouter();
 
@@ -53,6 +37,7 @@
                 </div>
             </router-link>
         </div>
+        <BaseBtn title="登出" height="30" />
     </aside>
     
 </template>
@@ -65,7 +50,7 @@
         flex-direction: column;
         padding: 24px;
         .logo {
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             img {
                 width: 120px;
             }
@@ -74,7 +59,6 @@
         .workspace-nav {
             display: flex;
             flex-direction: column;
-            gap: 6px;
             .side-nav-item {
                 text-decoration: none;
                 color: inherit;
@@ -120,5 +104,9 @@
             }
         }
     }
-
+    @media screen and (max-width: 810px){
+        .workspace-sidebar{
+            display: none;
+        }
+    }
 </style>

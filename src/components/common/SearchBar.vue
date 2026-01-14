@@ -76,7 +76,6 @@
 
         &:hover{
             border-color: $primary-color-800;
-            background-color: rgba($primary-color-100, 0.1)
         }
         &::placeholder {
         color: $primary-color-700;
