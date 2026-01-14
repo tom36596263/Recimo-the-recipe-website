@@ -25,8 +25,9 @@
 </script>
 
 <template>
-    <div class="col-12">
-        <h2 class="zh-h2 service-title">Recimo核心服務</h2>
+    <div class="col-12 service-title">
+        <h2 class="zh-h2">Recimo核心服務</h2>
+        <h2 class="en-h3">Recimo Service</h2>
     </div>
     <div class="col-4 col-lg-3">
         <ServiceTipsBtn
@@ -64,6 +65,9 @@
         margin: 20px 0 50px 0;
         color: $primary-color-700;
         text-align: center;
+        .zh-h2{
+            margin-bottom: 10px;
+        }
     }
     .my-swiper{
         height:570px;

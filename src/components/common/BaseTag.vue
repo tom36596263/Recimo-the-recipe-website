@@ -90,7 +90,7 @@ const handleClick = (event) => {
   width: $width;
   padding: 0 $padding-x;
   background-color: $primary-color-100;
-  color: $neutral-color-black;
+  color: $neutral-color-800;
   transition: all 0.2s ease;
   box-sizing: border-box;
 }

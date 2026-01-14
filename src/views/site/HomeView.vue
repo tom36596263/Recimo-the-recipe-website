@@ -3,7 +3,7 @@
     import About from '@/components/site/home/AboutSection.vue';
     import AboutIcons from '@/components/site/home/AboutSectionIcons.vue';
     import Service from '@/components/site/home/ServiceSection.vue';
-
+    import HotRecipe from '@/components/site/home/HotRecipeSection.vue';
 </script>
 
 <template>
@@ -32,6 +32,14 @@
             <Service />
         </div>
     </section>
+    <div class="hot-recipe-bg">
+        <section class="hot-recipe-section container">
+            <div class="row">
+                <HotRecipe />
+            </div>
+        </section>
+    </div>
+    
     
 </template>
 
@@ -59,6 +67,10 @@
     }
     .service-section{
         padding: 60px 0;
+    }
+    .hot-recipe-bg{
+        background-color: $neutral-color-100;
+        padding:80px 0;
     }
     @media screen and (max-width: 810px){
         .about-section-bg{

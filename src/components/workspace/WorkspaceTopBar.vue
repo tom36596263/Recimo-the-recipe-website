@@ -8,14 +8,14 @@ const route = useRoute();
     <header class="workspace-top-bar container">
         <div class="row">
             <div class="col-6 personal-info">
-                    <div class="personal-img">
-                        <img src="@/assets/images/site/Recimo-logo-black.svg" alt="">
-                    </div>
-                    
-                    <div class="title">
-                        <h3 class="en-h3">Hi,<span>Recimo</span></h3>
-                        <h5 class="zh-h5">一起來發現食譜的新創意吧!</h5>
-                    </div>
+                <div class="personal-img">
+                    <img src="@/assets/images/site/Recimo-logo-black.svg" alt="">
+                </div>
+                
+                <div class="title">
+                    <h3 class="en-h3">Hi,<span>Recimo</span></h3>
+                    <h5 class="zh-h5">一起來發現食譜的新創意吧!</h5>
+                </div>
             </div>
             <div class="col-6 tool-group">
                 <SearchBar />
