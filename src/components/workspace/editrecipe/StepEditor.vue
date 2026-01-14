@@ -3,12 +3,13 @@ import { ref, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps(['steps', 'ingredients', 'isEditing']);
 const activeStepId = ref(null);
+
 const showTimerPop = ref(false);
 const showIngPop = ref(false);
-const popStyle = ref({ top: '0px', left: '0px' });
+const popStyle = ref({ top: '0px', left: '0px', position: 'absolute' });
 
 const addStep = () => {
-  props.steps.push({ id: 's' + Date.now(), title: '', text: '', time: 5, tags: [], img: null });
+  props.steps.push({ id: 's' + Date.now(), title: '', text: '', time: 0, tags: [], img: null });
 };
 
 const removeStep = (id) => {
@@ -36,23 +37,34 @@ const uploadStepImg = (step) => {
   input.click();
 };
 
-// --- 修正後的彈窗定位 ---
 const openPop = (e, stepId, type) => {
   if (!props.isEditing) return;
   activeStepId.value = stepId;
-  const rect = e.target.getBoundingClientRect();
   
-  // 使用 fixed 定位時，不應加上 window.scrollY，否則滾動後位置會跑掉
-  popStyle.value = { 
-    top: `${rect.bottom + 8}px`, 
-    left: `${rect.left}px` 
-  };
+  const rect = e.currentTarget.getBoundingClientRect();
+  
+  // RWD 彈窗定位邏輯：手機版固定在螢幕中央，桌面版跟隨按鈕
+  if (window.innerWidth <= 810) {
+    popStyle.value = { 
+      top: '50%', 
+      left: '50%', 
+      transform: 'translate(-50%, -50%)',
+      position: 'fixed' 
+    };
+  } else {
+    popStyle.value = { 
+      top: `${rect.bottom + window.scrollY + 8}px`, 
+      left: `${rect.left + window.scrollX}px`,
+      transform: 'none',
+      position: 'absolute' 
+    };
+  }
   
   if (type === 'timer') {
-    showTimerPop.value = true;
+    showTimerPop.value = !showTimerPop.value;
     showIngPop.value = false;
   } else {
-    showIngPop.value = true;
+    showIngPop.value = !showIngPop.value;
     showTimerPop.value = false;
   }
 };
@@ -62,99 +74,319 @@ const closePops = () => {
   showIngPop.value = false;
 };
 
-// --- 生命週期管理：確保監聽器被正確移除，避免干擾滾動 ---
-onMounted(() => {
-  window.addEventListener('click', closePops);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('click', closePops);
-});
-
-// 輔助函式：取得當前操作的步驟物件
 const getActiveStep = () => props.steps.find(s => s.id === activeStepId.value);
+
+onMounted(() => window.addEventListener('click', closePops));
+onUnmounted(() => window.removeEventListener('click', closePops));
 </script>
 
 <template>
-  <h2 class="text-xl font-bold mb-6 flex justify-between items-center text-slate-800">
-    烹飪步驟 
-    <button v-if="isEditing" @click="addStep" class="text-emerald-500 text-sm hover:underline font-medium">+ 新增步驟</button>
-  </h2>
-
-  <div class="space-y-6">
-    <div v-for="(step, idx) in steps" :key="step.id" class="flex gap-4">
-      <div class="flex flex-col items-center gap-2 mt-1">
-        <div class="w-8 h-8 bg-slate-800 text-white rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow-md">
-          {{ idx + 1 }}
-        </div>
-        <div v-if="isEditing" class="cursor-grab text-slate-300 hover:text-slate-500 transition-colors">⋮⋮</div>
+  <div class="container">
+    <div class="step-editor">
+      <div class="section-header">
+        <h2 class="zh-h4-bold">烹飪步驟</h2>
       </div>
 
-      <div class="flex-1 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative hover:shadow-md transition-shadow">
-        <div class="flex flex-wrap items-center gap-2 mb-4">
-          <div @click.stop="openPop($event, step.id, 'timer')" 
-               class="bg-slate-50 px-3 py-1 rounded-full text-[10px] font-bold transition hover:bg-emerald-50"
-               :class="isEditing ? 'cursor-pointer' : ''">
-            ⏱ {{ step.time }} 分
-          </div>
+      <div class="step-list">
+        <div v-for="(step, idx) in steps" :key="step.id" class="step-item">
           
-          <div v-for="tid in step.tags" :key="tid" class="flex items-center gap-1 bg-blue-50 text-blue-500 px-2 py-1 rounded text-[10px] font-medium">
-            <span>{{ ingredients.find(i => i.id === tid)?.name || '未知食材' }}</span>
-            <button v-if="isEditing" @click.stop="toggleTag(step, tid)" class="text-blue-300 hover:text-blue-600 ml-1">✕</button>
+          <div class="step-sidebar">
+            <div v-if="isEditing" class="drag-handle">
+              <svg width="12" height="18" viewBox="0 0 12 18" fill="none"><circle cx="2" cy="2" r="2" fill="#CBD5E1"/><circle cx="2" cy="9" r="2" fill="#CBD5E1"/><circle cx="2" cy="16" r="2" fill="#CBD5E1"/><circle cx="10" cy="2" r="2" fill="#CBD5E1"/><circle cx="10" cy="9" r="2" fill="#CBD5E1"/><circle cx="10" cy="16" r="2" fill="#CBD5E1"/></svg>
+            </div>
+            <div class="step-number-badge p-p3">{{ idx + 1 }}</div>
           </div>
 
-          <button v-if="isEditing" @click.stop="openPop($event, step.id, 'ing')" 
-                  class="text-emerald-500 text-[10px] font-bold border border-emerald-200 px-2 py-1 rounded-full hover:bg-emerald-50 transition">
-            + 食材
-          </button>
+          <div class="step-card">
+            <div class="card-header-row">
+              <input 
+                v-if="isEditing" 
+                v-model="step.title" 
+                class="zh-h5 title-input" 
+                placeholder="請輸入該步驟標題..."
+              >
+              <div v-else class="zh-h5 title-text">{{ step.title || '步驟標題' }}</div>
+              
+              <button v-if="isEditing" @click="removeStep(step.id)" class="btn-remove p-p3">✕</button>
+            </div>
+
+            <hr class="card-divider">
+
+            <div class="card-body row">
+              <div class="col-4 col-md-12">
+                <div 
+                  class="step-image-uploader" 
+                  @click="uploadStepImg(step)"
+                  :style="{ backgroundImage: step.img ? `url(${step.img})` : '' }"
+                >
+                  <div v-if="!step.img" class="upload-placeholder">
+                    <span class="plus-icon">+</span>
+                    <span class="p-p3">新增圖片</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-8 col-md-12">
+                <div class="step-info-column">
+                  <div class="tag-action-row">
+                    <BaseTag 
+                      :text="step.time > 0 ? `${step.time} 分鐘` : '時間'" 
+                      variant="action" 
+                      :class="['btn-timer-tag', { 'is-active': step.time > 0 }]"
+                      @click.stop="openPop($event, step.id, 'timer')" 
+                    />
+                    
+                    <BaseTag 
+                      text="食材" 
+                      variant="action" 
+                      :class="['btn-ingredient-tag', { 'is-active': step.tags.length > 0 }]"
+                      @click.stop="openPop($event, step.id, 'ing')" 
+                    />
+                    
+                    <div v-for="tid in step.tags" :key="tid" class="selected-tag p-p3">
+                      {{ ingredients.find(i => i.id === tid)?.name }}
+                      <span v-if="isEditing" class="tag-del" @click.stop="toggleTag(step, tid)">✕</span>
+                    </div>
+                  </div>
+
+                  <textarea 
+                    v-if="isEditing" 
+                    v-model="step.text" 
+                    class="p-p3 desc-textarea" 
+                    placeholder="請輸入該步驟內容..."
+                  ></textarea>
+                  <div v-else class="p-p3 desc-display">{{ step.text || '暫無內容描述' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="flex flex-col md:flex-row gap-6">
-          <div @click="uploadStepImg(step)" 
-               class="w-28 h-28 bg-slate-50 rounded-2xl border-dashed border-2 flex items-center justify-center text-[10px] text-slate-400 bg-cover bg-center overflow-hidden shrink-0 border-slate-200 hover:border-emerald-300 transition-colors"
-               :class="isEditing ? 'cursor-pointer' : ''"
-               :style="{ backgroundImage: step.img ? `url(${step.img})` : '' }">
-            <span v-if="!step.img">上傳圖片</span>
-          </div>
-
-          <div class="flex-1 flex flex-col gap-2">
-            <input v-if="isEditing" v-model="step.title" type="text" 
-                   class="font-bold border-b border-slate-100 focus:border-emerald-500 outline-none pb-1 transition-colors" 
-                   placeholder="步驟標題">
-            <div v-else class="font-bold text-slate-800">{{ step.title || '未命名步驟' }}</div>
-            
-            <textarea v-if="isEditing" v-model="step.text" 
-                      class="w-full text-xs text-slate-500 bg-slate-50 rounded-xl p-3 h-20 outline-none focus:ring-1 focus:ring-emerald-500 resize-none" 
-                      placeholder="步驟描述..."></textarea>
-            <div v-else class="text-xs text-slate-500 leading-relaxed whitespace-pre-wrap">{{ step.text || '無詳細內容' }}</div>
-          </div>
-        </div>
-
-        <button v-if="isEditing" @click="removeStep(step.id)" 
-                class="absolute top-4 right-4 text-slate-300 hover:text-red-400 transition-colors px-2">✕</button>
+      <div v-if="isEditing" class="footer-actions">
+        <BaseBtn 
+          title="+ 新增步驟"
+          variant="outline" 
+          height="40" 
+          class="full-width-btn zh-h5" 
+          @click="addStep" 
+        />
       </div>
     </div>
   </div>
 
-  <div v-if="showIngPop" :style="popStyle" class="fixed z-[100] bg-white border border-slate-100 rounded-2xl p-4 w-64 shadow-2xl" @click.stop>
-    <div class="text-[10px] font-bold text-slate-400 mb-2 border-b border-slate-50 pb-1">點擊選擇食材</div>
-    <div class="flex flex-wrap gap-2">
-      <button v-for="i in ingredients" :key="i.id" 
-              @click="toggleTag(getActiveStep(), i.id)"
-              class="px-3 py-1 rounded-full text-xs border transition"
-              :class="getActiveStep()?.tags.includes(i.id) ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-slate-50 border-slate-100 hover:bg-emerald-50'">
-        {{ i.name || '?' }}
-      </button>
+  <div v-if="showIngPop" :style="popStyle" class="popover-box" @click.stop>
+    <div class="p-p3 popover-title">選擇食材</div>
+    <div class="popover-content">
+      <button v-for="i in ingredients" :key="i.id" @click="toggleTag(getActiveStep(), i.id)" class="p-p3 chip" :class="{ active: getActiveStep()?.tags.includes(i.id) }">{{ i.name }}</button>
     </div>
   </div>
 
-  <div v-if="showTimerPop" :style="popStyle" class="fixed z-[100] bg-white border border-slate-100 rounded-2xl p-5 w-56 shadow-2xl text-center" @click.stop>
-    <div class="text-xs font-bold text-slate-400 mb-3">設定步驟時間 (分)</div>
-    <input type="number" v-model="getActiveStep().time" 
-           class="text-3xl font-black text-emerald-600 w-full text-center outline-none bg-transparent">
-    <div class="grid grid-cols-2 gap-2 mt-4">
-      <button @click="getActiveStep().time += 5" class="bg-slate-50 py-2 rounded-lg text-xs font-bold hover:bg-slate-100 transition">+5</button>
-      <button @click="getActiveStep().time = Math.max(0, getActiveStep().time - 5)" class="bg-slate-50 py-2 rounded-lg text-xs font-bold hover:bg-slate-100 transition">-5</button>
+  <div v-if="showTimerPop" :style="popStyle" class="popover-box timer-box" @click.stop>
+    <div class="p-p3 popover-title">設定時間 (分)</div>
+    <div class="timer-ui">
+      <input type="number" v-model="getActiveStep().time" class="zh-h3">
+      <div class="timer-btns">
+        <button @click="getActiveStep().time += 5">+5</button>
+        <button @click="getActiveStep().time = Math.max(0, getActiveStep().time - 5)">-5</button>
+      </div>
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+// 這裡引用你的斷點設定
+$md: 810px;
+
+.step-editor {
+  margin: 10px auto;
+  width: 100%;
+
+  .section-header {
+    margin-bottom: 24px;
+    .header-line { border: 0; border-top: 1px solid #10B981; margin-top: 12px; opacity: 0.3; }
+  }
+
+  .step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin-bottom: 32px;
+  }
+
+  .step-item {
+    display: flex;
+    gap: 16px;
+    @media (max-width: $md) { gap: 8px; }
+
+    .step-sidebar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 14px;
+      gap: 12px;
+      width: 40px;
+      flex-shrink: 0;
+      .drag-handle { cursor: grab; display: flex; align-items: center; }
+      .step-number-badge {
+        width: 32px;
+        height: 32px;
+        background: $primary-color-100;
+        color: $primary-color-700;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .step-card {
+      flex: 1;
+      background: $neutral-color-white;
+      border: 1px solid $neutral-color-400;
+      border-radius: 10px;
+      padding: 24px;
+      @media (max-width: $md) { padding: 16px; }
+
+      .card-header-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        .title-input { flex: 1; border: none; outline: none; background: transparent; }
+        .btn-remove { background: none; border: none; color: $secondary-color-danger-700; cursor: pointer; }
+      }
+
+      .card-divider { border: 0; border-top: 1px solid $primary-color-700; margin: 16px 0; }
+
+      .card-body {
+        // 使用 row 之後會覆蓋 display: flex
+        .step-image-uploader {
+          width: 100%;
+          max-width: 130px;
+          aspect-ratio: 1 / 1;
+          background-color: $neutral-color-100;
+          background-size: cover;
+          background-position: center;
+          border-radius: 10px;
+          border: 1px dashed $neutral-color-400;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          margin-bottom: 0;
+          
+          @media (max-width: $md) {
+            max-width: 100%;
+            height: 180px;
+            margin-bottom: 16px;
+          }
+
+          .upload-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: $neutral-color-400;
+            .plus-icon { font-size: 24px; margin-bottom: 4px; }
+          }
+        }
+
+        .step-info-column {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+
+          .tag-action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+
+            :deep(.btn-timer-tag) {
+              background-color: $neutral-color-100 ; 
+              color: $neutral-color-800 ;           
+              border: 1px solid transparent ;
+              cursor: pointer;
+              transition: all 0.2s;
+            }
+
+            :deep(.btn-ingredient-tag) {
+              background-color: $neutral-color-white ; 
+              color: $primary-color-700 ;            
+              border: 1px solid $primary-color-400;
+              cursor: pointer;
+              transition: all 0.2s;
+            }
+
+            .selected-tag {
+              background: $primary-color-100;
+              padding: 4px 12px;
+              border-radius: 10px;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              .tag-del { color: $neutral-color-800; cursor: pointer; font-size: 14px; }
+            }
+          }
+
+          .desc-textarea, .desc-display {
+            width: 100%;
+            min-height: 80px;
+            border: none;
+            resize: none;
+            outline: none;
+            background: transparent;
+            line-height: 1.6;
+          }
+        }
+      }
+    }
+  }
+
+  .footer-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+    padding-left: 56px; 
+    width: 100%;
+    @media (max-width: $md) { padding-left: 0; }
+
+    :deep(.full-width-btn) {
+      width: 100%;
+      button { width: 100%; border-radius: 12px; }
+    }
+  }
+}
+
+.popover-box {
+  background: $neutral-color-white;
+  border: 1px solid $neutral-color-400;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+  z-index: 100;
+  min-width: 220px;
+
+  @media (max-width: $md) {
+    width: 90%;
+    max-width: 320px;
+  }
+
+  .popover-title { color: $primary-color-700; margin-bottom: 12px; border-bottom: 1px solid $neutral-color-400; padding-bottom: 6px; }
+  
+  .popover-content {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    .chip {
+      padding: 6px 12px; border-radius: 6px; border: 1px solid $neutral-color-white; background: $neutral-color-100; cursor: pointer;
+      &.active { background: $primary-color-700; color: $neutral-color-white; border-color: $primary-color-700; }
+    }
+  }
+
+  &.timer-box {
+    text-align: center;
+    .timer-ui {
+      input { width: 100px; text-align: center; border: none; border-bottom: 2px solid $primary-color-700; outline: none; margin-bottom: 16px; font-size: 24px; }
+      .timer-btns { display: flex; gap: 10px; button { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid $neutral-color-white; cursor: pointer; background: $neutral-color-100; } }
+    }
+  }
+}
+</style>

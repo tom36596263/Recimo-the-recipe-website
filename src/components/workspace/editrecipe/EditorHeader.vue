@@ -2,43 +2,29 @@
 import { computed } from 'vue';
 
 const props = defineProps({
-  modelValue: {
-    type: Object,
-    required: true
-  },
-  isEditing: {
-    type: Boolean,
-    default: false
-  }
+  modelValue: { type: Object, required: true },
+  isEditing: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(['update:modelValue']);
 
-// 內部更新方法，確保雙向綁定 (v-model)
 const updateField = (field, value) => {
   emit('update:modelValue', { ...props.modelValue, [field]: value });
 };
 
-// 處理難度星星點擊
 const setDifficulty = (val) => {
-  if (props.isEditing) {
-    updateField('difficulty', val);
-  }
+  if (props.isEditing) updateField('difficulty', val);
 };
 
-// 處理封面圖上傳
 const handleCoverUpload = (e) => {
   const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (f) => {
-      updateField('coverImg', f.target.result);
-    };
-    reader.readAsDataURL(file);
-  }
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => updateField('coverImg', evt.target.result);
+  reader.readAsDataURL(file);
 };
 
-// 計算總時間 (如果父層沒傳總時間，可以從 steps 算)
 const displayTime = computed(() => {
   if (props.modelValue.steps) {
     return props.modelValue.steps.reduce(
@@ -51,77 +37,65 @@ const displayTime = computed(() => {
 </script>
 
 <template>
-  <section
-    class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 mb-8 flex flex-col md:flex-row gap-8"
-  >
+  <section class="header-card">
+
+    <!-- 封面 -->
     <div
+      class="cover-container"
+      :style="{ backgroundImage: modelValue.coverImg ? `url(${modelValue.coverImg})` : '' }"
       @click="isEditing && $refs.fileInput.click()"
-      class="w-full md:w-64 h-52 bg-slate-50 rounded-2xl border-dashed border-2 flex flex-col items-center justify-center text-slate-400 cursor-pointer overflow-hidden bg-cover bg-center transition hover:bg-slate-100 relative"
-      :style="{ backgroundImage: `url(${modelValue.coverImg})` }"
     >
       <input
-        type="file"
         ref="fileInput"
-        class="hidden"
-        accept="image/*"
+        type="file"
+        class="hidden-input"
         @change="handleCoverUpload"
       />
 
-      <div v-if="isEditing && !modelValue.coverImg" class="text-center">
-        <span class="text-2xl block">+</span>
-        <span class="text-xs">上傳封面</span>
-      </div>
-
-      <div v-if="!isEditing && !modelValue.coverImg" class="text-slate-200">
-        <i class="fa-solid fa-image fa-3x"></i>
+      <div v-if="!modelValue.coverImg" class="placeholder">
+        <template v-if="isEditing">
+          <p class="p-p1">+</p>
+          <p class="p-p1">上傳封面</p>
+        </template>
+        <i v-else class="fa-solid fa-image fa-3x"></i>
       </div>
     </div>
 
-    <div class="flex-1 space-y-4">
-      <div v-if="isEditing">
+    <!-- 右側資訊 -->
+    <div class="info-container">
+
+      <!-- 標題 -->
+      <div class="title-area">
         <input
-          type="text"
-          :value="modelValue.title"
-          @input="updateField('title', $event.target.value)"
-          class="w-full text-3xl font-black border-none focus:ring-0 p-0 outline-none placeholder-slate-300"
+          v-if="isEditing"
+          v-model="modelValue.title"
+          class="title-input zh-h3-bold"
           placeholder="食譜名稱"
         />
-      </div>
-      <h1 v-else class="text-3xl font-black text-slate-800">
-        {{ modelValue.title || '未命名食譜' }}
-      </h1>
 
-      <div class="flex items-center gap-8 py-2 border-y border-slate-50">
-        <div>
-          <div
-            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"
-          >
-            總烹飪時間
-          </div>
-          <div class="flex items-center gap-1 font-bold text-emerald-600">
-            <span class="text-xl">{{ displayTime }}</span>
-            <span class="text-xs">分鐘</span>
+        <div v-else class="title-display zh-h3-bold">
+          {{ modelValue.title || '未命名食譜' }}
+        </div>
+      </div>
+
+      <!-- 統計 -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <p class="label p-p3">總烹飪時間</p>
+          <div class="value time">
+            <span class="num">{{ displayTime }}</span> 分鐘
           </div>
         </div>
 
-        <div>
-          <div
-            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"
-          >
-            難易度
-          </div>
-          <div class="flex gap-1 mt-1">
+        <div class="stat-item">
+          <p class="label p-p3">難易度</p>
+          <div class="stars">
             <span
               v-for="n in 5"
               :key="n"
+              class="star"
+              :class="{ active: n <= modelValue.difficulty }"
               @click="setDifficulty(n)"
-              class="text-xl transition-colors"
-              :class="[
-                n <= modelValue.difficulty
-                  ? 'text-amber-400'
-                  : 'text-slate-200',
-                isEditing ? 'cursor-pointer hover:scale-110' : ''
-              ]"
             >
               ★
             </span>
@@ -129,24 +103,135 @@ const displayTime = computed(() => {
         </div>
       </div>
 
-      <div v-if="isEditing">
+      <!-- 簡介 -->
+      <div class="desc-area">
         <textarea
-          :value="modelValue.description"
-          @input="updateField('description', $event.target.value)"
-          class="w-full text-slate-500 border-none focus:ring-0 p-0 resize-none h-20 text-sm bg-transparent"
-          placeholder="輸入食譜簡介，吸引大家來試做..."
+          v-if="isEditing"
+          v-model="modelValue.description"
+          class="desc-input p-p2"
+          placeholder="輸入食譜簡介..."
         ></textarea>
+
+        <p v-else class="desc-display p-p2">
+          {{ modelValue.description || '暫無簡介' }}
+        </p>
       </div>
-      <p v-else class="text-slate-500 text-sm leading-relaxed">
-        {{ modelValue.description || '這個作者很懶，還沒寫簡介...' }}
-      </p>
+
     </div>
   </section>
 </template>
 
-<style scoped>
-/* 可以在這裡微調樣式 */
-textarea {
-  line-height: 1.6;
+<style lang="scss">
+
+.header-card {
+  background: $neutral-color-white;
+  border-radius: 10px;
+  padding: 30px;
+  border: 1.5px solid $primary-color-700;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
+}
+
+.cover-container {
+  width: 100%;
+  height: 200px;
+  background: $neutral-color-100;
+  border: 2px dashed $neutral-color-400;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+
+  @media (min-width: 768px) {
+    width: 260px;
+    height: 210px;
+    flex-shrink: 0;
+  }
+
+  .hidden-input {
+    display: none;
+  }
+
+  .placeholder {
+    text-align: center;
+    color: $neutral-color-400;
+  }
+}
+
+.info-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.title-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+}
+
+.stats-bar {
+  display: flex;
+  gap: 40px;
+  padding: 15px 0;
+  border-top: 2px solid $neutral-color-100;
+  border-bottom: 2px solid $neutral-color-100;
+}
+
+.stat-item {
+  .label {
+    color: $neutral-color-400;
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  .value.time {
+    color: $primary-color-700;
+    
+
+    .num {
+      font-size: 22px;
+      font-weight: 600;
+
+    }
+  }
+
+  .stars .star {
+    font-size: 20px;
+    color: $neutral-color-400;
+    cursor: pointer;
+
+    &.active {
+      color: $secondary-color-warning-700;
+    }
+  }
+}
+
+.desc-area {
+  .desc-input,
+  .desc-display {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    line-height: 1.6;
+    font: inherit;
+  }
+
+  .desc-input {
+    height: 70px;
+    resize: none;
+  }
 }
 </style>

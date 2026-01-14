@@ -28,7 +28,10 @@ return Array.from({ length: 5 }, (_, i) => (i < score ? '★' : '☆'));
     </div>
     </div>
 
-    <div class="badge-favorite">♡ 加收藏</div>
+    <div class="badge-favorite">
+<!-- <i-material-symbols-heart /> -->
+
+        加收藏</div>
 </div>
 
 
@@ -62,7 +65,8 @@ return Array.from({ length: 5 }, (_, i) => (i < score ? '★' : '☆'));
     border-radius: 10px;
     overflow: hidden;
     border: 2px solid $neutral-color-400; // 這是你的框
-    height: 350px;
+    // height: 350px;
+    aspect-ratio: 16 / 9;
     width: 100%;
     margin-bottom: 20px;
 
@@ -70,6 +74,7 @@ return Array.from({ length: 5 }, (_, i) => (i < score ? '★' : '☆'));
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;// 確保裁切時是以中心點為主
     display: block;
     transition: transform 0.6s ease;
 }
@@ -82,17 +87,17 @@ return Array.from({ length: 5 }, (_, i) => (i < score ? '★' : '☆'));
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, #f0f7ff 0%, #e2eeff 100%);
+    background: $neutral-color-100;
 
 &::before {
     content: '';
     position: absolute;
     top: 15px; left: 15px; right: 15px; bottom: 15px;
-    border: 2px dashed #adc6e8;
+    // border: 2px dashed #adc6e8;
     border-radius: 12px;
 }
 
-.icon-image { color: #adc6e8; }
+.icon-image { color: $neutral-color-400; }
 }
 
 .badge-favorite {
@@ -129,6 +134,24 @@ p {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 20px; // 增加元素間的間距
+
+    // --- 手機版調整 (針對小螢幕) ---
+    @media screen and (max-width: 810px) {
+        flex-direction: column;    // 改為上下排列
+        align-items: flex-start;  // 讓時間與難易度靠左對齊
+        
+        .info-right {
+            width: 100%;          // 讓右側容器佔滿 100%
+            
+            // 強制讓 BaseBtn 組件佔滿整行
+            :deep(.base-btn),     // 如果 BaseBtn 有這個 class
+            button {
+                width: 100% !important; 
+                max-width: none !important; // 取消寬度限制
+            }
+        }
+    }
 }
 
 .stars-text {

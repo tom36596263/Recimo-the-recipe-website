@@ -113,7 +113,7 @@ const updateServings = (delta) => {
   border-radius: 10px;
   overflow: hidden;
   height: 48px;
-  width: 300px;
+  width: 100%;          
   margin: 0 auto;
 
   .control-btn {

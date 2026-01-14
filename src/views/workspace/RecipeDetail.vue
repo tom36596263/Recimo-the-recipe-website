@@ -7,7 +7,6 @@ import RecipeComments from '../../components/workspace/recipedetail/RecipeCommen
 import CookSnap from '../../components/workspace/recipedetail/CookSnap.vue';
 import RecipeIntro from '../../components/workspace/recipedetail/RecipeIntro.vue';
 
-
 const servings = ref(1);
 
 const updateServings = (delta) => {
@@ -18,7 +17,7 @@ if (servings.value + delta >= 1) {
 
 const recipeIntroData = {
 title: '雲朵般口感 - 經典日式舒芙蕾鬆餅',
-image: 'https://images.unsplash.com/photo-1598214813591-203900a9a56e?auto=format&fit=crop&w=1200&q=80',
+image: new URL('../../assets/images/recipe/main/recipe_souffle_main.jpg', import.meta.url).href,
 time: '30 分鐘',
 description: '不同於傳統美式鬆餅的紮實，它透過細緻打發蛋白創造出極致蓬鬆的層次，入口即化並散發清淡蛋香。這款甜點不僅具備視覺上的療癒動感，更是追求輕盈食感的下午茶首選。'
 };
@@ -27,32 +26,32 @@ const stepsData = [
 {
     title: "分離蛋黃與蛋白",
     content: "將兩顆雞蛋分離，蛋白放入冰過頭的攪拌盆（蛋白霜穩定的關鍵）。",
-    image: ""
+    image: new URL('../../assets/images/recipe/step/recipe_souffle_step_01.jpg', import.meta.url).href,
 },
 {
     title: "製作蛋黃糊",
     content: "蛋黃加入牛奶、香草精拌勻，再篩入低筋麵粉與泡打粉，攪拌至無顆粒狀。",
-    image: ""
+    image: new URL('../../assets/images/recipe/step/recipe_souffle_step_02.jpg', import.meta.url).href,
 },
 {
     title: "打發蛋白霜",
     content: "砂糖分三次加入蛋白，使用電動打蛋器打至「硬性發泡」。",
-    image: ""
+    image: new URL('../../assets/images/recipe/step/recipe_souffle_step_03.jpg', import.meta.url).href,
 },
 {
     title: "混合麵糊",
     content: "取 1/3 蛋白霜加入蛋黃糊拌勻，再倒回剩餘蛋白霜中，用「切拌法」輕柔混合，避免消泡。",
-    image: ""
+    image: new URL('../../assets/images/recipe/step/recipe_souffle_step_04.jpg', import.meta.url).href,
 },
 {
     title: "低溫煎烤",
     content: "平底鍋抹薄油，小火預熱。用冰淇淋勺挖取麵糊堆疊高度，加入一匙水，蓋鍋蓋悶煎 4 分鐘。",
-    image: ""
+    image: new URL('../../assets/images/recipe/step/recipe_souffle_step_05.jpg', import.meta.url).href,
 },
 {
     title: "翻面與盛盤",
     content: "底部呈金黃色後小心翻面，再悶煎 3 分鐘即可出爐。",
-    image: ""
+    image: new URL('../../assets/images/recipe/step/recipe_souffle_step_06.jpg', import.meta.url).href,
 },
 ];
 
@@ -60,7 +59,7 @@ const ingredientsData = [
 {
     INGREDIENT_NAME: '雞蛋',
     amount: 2,
-    unit_weight: 60, // 一顆蛋約 60g
+    unit_weight: 60,
     unit_name: '顆',
     calories_per_100g: 155,
     protein_per_100g: 13,
@@ -71,7 +70,7 @@ const ingredientsData = [
 {
     INGREDIENT_NAME: '低筋麵粉',
     amount: 35,
-    unit_weight: 1, // 單位已經是 g
+    unit_weight: 1,
     unit_name: 'g',
     calories_per_100g: 364,
     protein_per_100g: 8,
@@ -82,7 +81,7 @@ const ingredientsData = [
 {
     INGREDIENT_NAME: '全脂牛奶',
     amount: 20,
-    unit_weight: 1, // ml 與 g 近似 1:1
+    unit_weight: 1,
     unit_name: 'ml',
     calories_per_100g: 61,
     protein_per_100g: 3.2,
@@ -135,7 +134,7 @@ const commentList = ref([
     handle: "leo_h_bake",
     time: "2d ago",
     content: "質地非常完美！跟著步驟圖示觀察蛋白霜的尖角狀態真的很關鍵。口感輕盈像雲朵一樣，跟我之前在巴黎吃到的一模一樣。",
-    avatar: "https://i.pravatar.cc/150?u=leo", // 測試用頭像
+    avatar: "https://i.pravatar.cc/150?u=leo",
     likes: 55
 },
 {
@@ -155,106 +154,136 @@ const commentList = ref([
     likes: 21
 }
 ]);
-
 </script>
 
 <template>
 <div class="recipe-container-root">
     <main class="container"> 
-        <header class="flex justify-between items-center mb-6">
-            <nav class="text-gray-400">
-                Home / Recipe / <span class="text-gray-800 font-bold">Classic Souffle</span>
-            </nav>
-
-            <BaseBtn 
-                title="改編集+" 
-                variant="outline" 
-                @click="" 
-                height="30" 
-                class="w-auto" 
-            />
+        <header class="flex justify-end items-center mb-2 pt-2">
+            <router-link to="/workspace/modify-recipe">
+                <BaseBtn title="改編集+" variant="outline" height="30" class="w-auto" />
+            </router-link>
         </header>
 
         <div class="zh-h2">{{ recipeIntroData.title }}</div>
 
-
         <div class="row">
-            <div class="col-7 col-sm-12 space-y-12">
-                <section>
+            <div class="col-7 col-lg-12">
+                <section class="mb-10">
                     <RecipeIntro :info="recipeIntroData" />
-
-
-
                 </section>
 
-                
+                <div class="d-lg-none">
+                    <section class="mb-10">
+                        <NutritionCard :servings="servings" :ingredients="ingredientsData" @change-servings="handleServingsChange" />
+                    </section>
+                    <section class="mb-10">
+                        <RecipeIngredients :servings="servings" :list="ingredientsData" />
+                    </section>
+                </div>
 
-                <section>
+                <section class="mb-10 steps-section">
                     <RecipeSteps :steps="stepsData" />
                 </section>
             </div>
 
-            <div class="col-5 col-sm-12 space-y-12">
-                <div class="nutrition-card-wrapper">
-                    <NutritionCard 
-                        :servings="servings" 
-                        :ingredients="ingredientsData" 
-                        @change-servings="handleServingsChange" 
-                    />
+            <div class="col-5 col-lg-12">
+                <div class="d-none-lg">
+                    <section class="mb-10">
+                        <NutritionCard :servings="servings" :ingredients="ingredientsData" @change-servings="handleServingsChange" />
+                    </section>
+                    <section class="mb-10">
+                        <RecipeIngredients :servings="servings" :list="ingredientsData" />
+                    </section>
                 </div>
 
-                <div class="ingredients-wrapper">
-                    <RecipeIngredients :servings="servings" :list="ingredientsData" />
-                </div>
-
-                
-                <div>
+                <section class="mb-10">
                     <RecipeComments :list="commentList" />
-                </div>
+                </section>
+            </div>
 
-
+            <div class="col-12 cook-snap-full">
+                <section class="mb-10 content-wrapper">
+                    <CookSnap />
+                </section>
                 
             </div>
-            <div>
-                <CookSnap />
-            </div>
-            
-        </div>
+        </div> 
     </main>
 </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
+    .d-lg-none {
+        @media screen and (min-width: 1024px) {
+            display: none !important;
+        }
+    }
 
-    /* --- [第一部分：全域解鎖區] --- */
-    .workspace-layout {
-    height: auto !important;
-    overflow: visible !important;
-    .page-content {
+    .d-none-lg {
+        @media screen and (max-width: 1024px) {
+            display: none !important;
+        }
+    }
+
+    :global(.workspace-layout) {
         height: auto !important;
         overflow: visible !important;
     }
+    :global(.workspace-layout .page-content) {
+        height: auto !important;
+        overflow: visible !important;
     }
-    html, body {
-    overflow-y: auto !important;
-    height: auto !important;
+    :global(html, body) {
+        overflow-y: auto !important;
+        height: auto !important;
     }
-    /* --- [第二部分：頁面專屬樣式] --- */
+    
     header {
         display: flex;
-        justify-content: space-between
+        justify-content: flex-end; 
     }
 
     .recipe-container-root {
-    background-color: $neutral-color-white;
-    min-height: 100vh;
-    padding: 0px 0 100px 0;
+        background-color: $neutral-color-white;
+        min-height: 100vh;
+        /* 2. 將下方的 padding-bottom 保留，但頂部 padding 改為 0 */
+        padding: 0px 0 100px 0;
 
-    
+        @media screen and (max-width: 810px) {
+            /* 手機版原本是 40px，現在改成 10px 讓按鈕上去 */
+            padding-top: 10px !important;
+        }
 
-    .zh-h2 {
-        margin-bottom: 20px; 
+        @media screen and (min-width: 811px) {
+            /* 電腦版將原本的 0px 確保不被撐開 */
+            padding-top: 0px;
+        }
+
+        .cook-snap-full {
+            display: flex !important;       
+            justify-content: center;        
+            width: 100%;                    
+            margin-top: 40px;
+            background-color: $neutral-color-100;
+            padding-top: 40px;
+
+            .content-wrapper {
+                width: 100%;
+                max-width: 800px;   
+            }
+        }
+
+        .zh-h2 {
+            padding-top: 20px;
+            margin-bottom: 20px; 
+        }
+
+        .steps-section {
+            margin-top: 40px;
+            @media screen and (max-width: 810px) {
+                margin-top: 20px !important;
+            }
+        }
     }
-    
-}
 </style>

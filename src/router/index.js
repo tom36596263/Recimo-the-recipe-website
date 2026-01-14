@@ -164,6 +164,14 @@ const routes = [
         name: 'user-settings',
         component: () => import('@/views/workspace/SettingsView.vue'),
         meta: { layout: 'workspace', requiresAuth: true }
+      },
+      {
+        path: 'modify-recipe/:id', // :id 代表食譜的編號
+        name: 'modify-recipe',
+        component: () => import('@/views/workspace/ModifyRecipe.vue'),
+        meta: {
+          layout: 'workspace',
+          requiresAuth: true}
       }
     ]
   },
