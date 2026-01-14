@@ -25,12 +25,11 @@
 <style lang="scss" scoped>
     @import '@/assets/scss/layouts/default-layout';
     .default-layout{
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
         .site-header{
-            position: sticky;
+            position: fixed;
             top: 30px;
+            left: 0;
+            right: 0;
             z-index: 100;
         }
         .page-content{
