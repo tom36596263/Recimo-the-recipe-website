@@ -1,10 +1,7 @@
 <script setup>
     import Navbar from '@/components/site/Navbar.vue';
+    import Breadcrumb from '@/components/site/Breadcrumb.vue';
     import Footer from '@/components/site/Footer.vue';
-/**
- * 暫時移除 handleLoginClick 邏輯，
- * 等待未來串接登入燈箱與 Pinia。
- */
 </script>
 
 <template>
@@ -13,6 +10,11 @@
             <Navbar />             
         </header>
         <main class="page-content">
+            <div class="container">
+                <div class="row">
+                    <Breadcrumb />
+                </div>
+            </div>
             <router-view />            
         </main>
 

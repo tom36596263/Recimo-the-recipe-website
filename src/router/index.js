@@ -14,55 +14,67 @@ const routes = [
     path: '/',
     name: 'home',
     component: () => import('@/views/site/HomeView.vue'),
-    meta: { layout: 'default' }
+    meta: { layout: 'default', breadcrumb: null }
   },
   {
     path: '/search',
     name: 'site-search',
     component: () => import('@/views/site/SearchView.vue'),
-    meta: { layout: 'default' }
+    meta: { layout: 'default', title: '搜尋好料理', breadcrumb: '搜尋好料理'  }
   },
   {
     path: '/about',
     name: 'about',
     component: () => import('@/views/site/AboutView.vue'),
-    meta: { title: '關於Recimo', showInMenu: true, layout: 'default' }
+    meta: { layout: 'default', title: '關於Recimo', breadcrumb: '關於Recimo', showInMenu: true,  }
   },
   {
     path: '/recipes',
     name: 'recipes-overview',
     component: () => import('@/views/site/RecipeOverview.vue'),
-    meta: { title: '食譜總覽', showInMenu: true, layout: 'default' }
+    meta: { layout: 'default', title: '食譜總覽', breadcrumb: '食譜總覽', showInMenu: true,  }
   },
   {
     path: '/mall',
-    name: 'mall',
     component: () => import('@/views/site/MallView.vue'),
-    meta: { title: 'Recimo商城', showInMenu: true, layout: 'default' }
+    meta: { layout: 'default', title: 'Recimo商城', breadcrumb: 'Recimo商城', showInMenu: true }
   },
   {
-    path: '/mall/:id',
+    path: '/mall:id',
     name: 'product-detail',
     component: () => import('@/views/site/ProductDetail.vue'),
-    meta: { layout: 'default' }
+    meta: { layout: 'default', breadcrumb: '載入中...', showInMenu: true }
   },
+  // {
+  //   path: '/mall',
+  //   component: () => import('@/views/site/MallView.vue'),
+  //   meta: { layout: 'default', title: 'Recimo商城', breadcrumb: 'Recimo商城', showInMenu: true },
+  //   children: [
+  //     {
+  //       path: ':id',
+  //       name: 'product-detail',
+  //       component: () => import('@/views/site/ProductDetail.vue'),
+  //       meta: { breadcrumb: '載入中...' }
+  //     }
+  //   ]
+  // },
   {
     path: '/benefits',
     name: 'benefits',
     component: () => import('@/views/site/BenefitsView.vue'),
-    meta: { title: '會員權益', showInMenu: true, layout: 'default' }
+    meta: { layout: 'default', title: '會員權益', breadcrumb: '會員權益', showInMenu: true }
   },
   {
     path: '/cart',
     name: 'cart',
     component: () => import('@/views/site/CartView.vue'),
-    meta: { layout: 'default' }
+    meta: { layout: 'default', title: '我的購物車', breadcrumb: '我的購物車' }
   },
   {
     path: '/checkout',
     name: 'checkout',
     component: () => import('@/views/site/CheckoutView.vue'),
-    meta: { layout: 'default' }
+    meta: { layout: 'default', title: '結帳', breadcrumb: '結帳' }
   },
 
   // ==========================================

@@ -7,9 +7,12 @@ import { ref, onMounted } from 'vue';
 </script>
 
 <template>
-    <h1>官網的食譜總覽</h1>
-
-    <div class="container">
+    <section class="container">
+        <div class="row">
+            
+        </div>
+    </section>
+    <section class="container recipe-cards">
         <div class="row">
             <div class="col-4">
                 <RecipeCardLg />
@@ -21,13 +24,12 @@ import { ref, onMounted } from 'vue';
                 <RecipeCardLg />
             </div>
         </div>
-    </div>
+    </section>
     
 </template>
 
 <style lang="scss" scoped>
-
-//  lang="scss": 告訴 Vue 這裡要用 Scss 編譯
-//  scoped: 確保這裡寫的 CSS 只會影響目前這個頁面，不會「跑去污染」到其他頁面的樣式。
-
+.recipe-cards{
+    margin-top: 100px;
+}
 </style>

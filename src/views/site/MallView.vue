@@ -121,11 +121,6 @@ const columns = ref([
 </script>
 
 <template>
-  <!-- 麵包屑 -->
-  <div class="bread">
-    <a class="p-p1" href="HomeView.vue">首頁 </a>
-    <span> / Recimo商城</span>
-  </div>
 
   <!-- 標題 -->
   <div class="title">
