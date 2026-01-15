@@ -1,18 +1,58 @@
 <script setup>
+import { ref } from 'vue';
+// 模擬 API 拿到的資料 (Mock Data)
+const orders = ref([
+  {
+    id: '111018',
+    date: '114/11/03',
+    trackingNo: '1211031',
+    receiver: '王小花',
+    phone: '0952875365',
+    method: '宅配',
+    payment: '貨到付款',
+    status: 1, // 對應到 '訂單確認'
+    items: [
+      { name: '舒肥雞胸藜麥飯', qty: 1, price: 160 },
+      { name: '豆腐漢堡排佐野菇', qty: 1, price: 150 }
+    ]
+  },
+  {
+    id: '111019',
+    date: '114/11/04',
+    trackingNo: '1211032',
+    receiver: '李大明',
+    phone: '0912345678',
+    method: '超商取貨',
+    payment: '已付款',
+    status: 3, // 對應到 '送達'
+    items: [{ name: '鮮蝦義大利麵', qty: 2, price: 220 }]
+  }
+]);
 
-//  setup: 這是 Vue 3 的語法糖，讓你不用寫 export default {}，且能直接使用變數和函式，開發效率最高。
-// 所有的變數、函式、或是從 JSON 引入的資料都寫在script裡面。
-import { ref, onMounted } from 'vue';
-
+const onCancel = (orderId) => {
+  alert(`使用者點擊取消訂單: ${orderId}`);
+  // 這裡可以呼叫後端 API 執行取消邏輯
+};
 </script>
 
 <template>
-    <h1>訂單查詢</h1>
+  <div class="order-page">
+    <h2>我的訂單</h2>
+    <OrderCard
+      v-for="order in orders"
+      :key="order.id"
+      :order="order"
+      @cancel-order="onCancel"
+    />
+  </div>
 </template>
 
-<style lang="scss" scoped>
-
-//  lang="scss": 告訴 Vue 這裡要用 Scss 編譯
-//  scoped: 確保這裡寫的 CSS 只會影響目前這個頁面，不會「跑去污染」到其他頁面的樣式。
-
+<style>
+.order-page {
+  padding: 20px;
+  padding-bottom: 80px;
+  margin-bottom: 20px;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
+}
 </style>

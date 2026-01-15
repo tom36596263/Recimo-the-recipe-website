@@ -4,6 +4,31 @@ import card from '@/components/mall/ProductCard.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
+// --- Swiper 相關設定 (請用這段取代舊的) ---
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/free-mode'; // 記得加上這個樣式
+
+// 關鍵修正：把 Pagination 和 FreeMode 寫在同一行
+import { Pagination, FreeMode } from 'swiper/modules';
+
+// 註冊模組：也寫在一起
+const modules = [Pagination, FreeMode];
+// --- 新增：Swiper RWD 斷點設定 ---
+const swiperBreakpoints = {
+  // 當螢幕寬度 >= 0px (手機)
+  0: {
+    slidesPerView: 1.3,
+    spaceBetween: 15
+  },
+  // 當螢幕寬度 >= 768px (平板)
+  768: {
+    slidesPerView: 3, // 平板顯示 3 張完整，露出第 4 張一點點
+    spaceBetween: 20
+  }
+};
+
 // --- 資料與狀態 ---
 const baseURL = import.meta.env.BASE_URL;
 const productList = ref([]);
@@ -94,39 +119,28 @@ onMounted(() => {
   fetchData(); //當網頁畫面全部準備好（掛載完成）的那一瞬間，請幫我執行 fetchData 這個函式,fetchData 去倉庫搬貨，搬回來後更新了 productList.value。
 });
 
-// 模擬圖片資料 (您可以換成 API 取得的資料)
-// 這裡將圖片分成 4 欄 (columns)
+const getImg = (name) => {
+  return new URL(`../../assets/images/mall/${name}`, import.meta.url).href;
+};
+
+// 2. 修改 columns 資料，使用 getImg 包住檔名
 const columns = ref([
+  // 第一欄
   [
-    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80',
-    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80',
-    'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&q=80'
+    getImg('food1.png'), // 替換成你的圖片檔名
+    getImg('food2.png'),
+    getImg('food3.png')
   ],
-  [
-    'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&q=80',
-    'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&q=80',
-    'https://images.unsplash.com/photo-1467003909585-2f8a7270028d?w=400&q=80'
-  ],
-  [
-    'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&q=80',
-    'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80',
-    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80'
-  ],
-  [
-    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80',
-    'https://images.unsplash.com/photo-1493770348161-369560ae357d?w=400&q=80',
-    'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=400&q=80'
-  ]
+  // 第二欄
+  [getImg('food4.png'), getImg('food5.jpg'), getImg('food6.jpg')],
+  // 第三欄
+  [getImg('food7.jpg'), getImg('food8.jpg'), getImg('food9.png')],
+  // 第四欄
+  [getImg('food10.png'), getImg('food11.png'), getImg('food3.png')]
 ]);
 </script>
 
 <template>
-  <!-- 麵包屑 -->
-  <div class="bread">
-    <a class="p-p1" href="HomeView.vue">首頁 </a>
-    <span> / Recimo商城</span>
-  </div>
-
   <!-- 標題 -->
   <div class="title">
     <h1 class="zh-h1-bold">Recimo商城</h1>
@@ -139,7 +153,7 @@ const columns = ref([
         <h2 class="zh-h2">本月熱銷</h2>
       </div>
       <div class="container">
-        <div class="row mobile-scroll">
+        <div class="row desktop-view">
           <div
             v-for="item in randomProducts"
             :key="item.id"
@@ -149,6 +163,21 @@ const columns = ref([
             <card :item="item" />
           </div>
         </div>
+        <div class="mobile-view swiper-container-custom">
+          <swiper
+            :breakpoints="swiperBreakpoints"
+            :modules="modules"
+            class="mySwiper"
+          >
+            <swiper-slide
+              v-for="item in randomProducts"
+              :key="item.id"
+              @click="goToDetail(item.id)"
+            >
+              <card :item="item" />
+            </swiper-slide>
+          </swiper>
+        </div>
       </div>
     </div>
   </section>
@@ -157,24 +186,47 @@ const columns = ref([
     <h2 class="zh-h2">Recimo料理包</h2>
   </div>
   <!-- 標籤 -->
-  <div class="tag">
-    <BaseTag
-      v-for="item in tags"
-      :key="item.text"
-      :text="item.text"
-      :width="item.width"
-      :show-icon="false"
-      :variant="activeTag === item.text ? 'primary' : 'action'"
-      @click="selectTag(item.text)"
-    ></BaseTag>
+  <div class="tag-wrapper">
+    <div class="tag">
+      <BaseTag
+        v-for="item in tags"
+        :key="item.text"
+        :text="item.text"
+        :width="item.width"
+        :show-icon="false"
+        :variant="activeTag === item.text ? 'primary' : 'action'"
+        @click="selectTag(item.text)"
+      ></BaseTag>
+    </div>
+
+    <div class="tag-swiper">
+      <swiper
+        :slidesPerView="'auto'"
+        :spaceBetween="14"
+        :freeMode="true"
+        :modules="modules"
+        class="mySwiper"
+      >
+        <swiper-slide v-for="item in tags" :key="item.text" class="tag-slide">
+          <BaseTag
+            :text="item.text"
+            :width="item.width"
+            :show-icon="false"
+            :variant="activeTag === item.text ? 'primary' : 'action'"
+            @click="selectTag(item.text)"
+          ></BaseTag>
+        </swiper-slide>
+      </swiper>
+    </div>
   </div>
+
   <section>
     <!-- 商品 -->
     <div class="container">
-      <div class="row mobile-scroll">
+      <div class="row desktop-view">
         <div
           v-if="displayedProducts.length === 0"
-          class="col-12"
+          class="col-12 col-lg-6"
           style="text-align: center; padding: 40px"
         >
           目前沒有此分類的商品
@@ -182,11 +234,29 @@ const columns = ref([
         <div
           v-for="item in displayedProducts"
           :key="item.id"
-          class="col-3 col-md-12"
+          class="col-3 col-lg-6"
           @click="goToDetail(item.id)"
         >
           <card :item="item" />
         </div>
+      </div>
+      <div
+        class="mobile-view swiper-container-custom"
+        v-if="displayedProducts.length > 0"
+      >
+        <swiper
+          :breakpoints="swiperBreakpoints"
+          :modules="modules"
+          class="mySwiper"
+        >
+          <swiper-slide
+            v-for="item in displayedProducts"
+            :key="item.id"
+            @click="goToDetail(item.id)"
+          >
+            <card :item="item" />
+          </swiper-slide>
+        </swiper>
       </div>
     </div>
 
@@ -274,7 +344,7 @@ const columns = ref([
 .bread > span {
   color: $primary-color-400;
 }
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .bread {
     display: none;
   }
@@ -285,13 +355,24 @@ const columns = ref([
   display: flex;
   justify-content: center;
   margin-top: 48px;
+  @media (max-width: 1024px) {
+    margin-top: 60px;
+  }
 }
 
 //熱銷商品
 .hot-container {
-  background-color: blanchedalmond;
+  background-image: url(../../assets/images/mall/hotback.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center top;
   margin-top: 45px;
   padding-bottom: 120px;
+  @media (max-width: 768px) {
+    background-image: url(../../assets/images/mall/phonehotback.png);
+    background-size: cover;
+    background-position: center;
+  }
 }
 .hot-title {
   text-align: center;
@@ -313,21 +394,44 @@ const columns = ref([
   margin-bottom: 42px;
   margin-top: 51px;
 }
+// 手機版 Tag Swiper 特別設定
+.tag-slide {
+  // 關鍵！設定 width: auto，Swiper 才會依照內容寬度排列，不會一張佔滿畫面
+  width: auto;
+}
+.tag-swiper {
+  display: none; /* 平板跟桌機都不要看到它 */
+}
+// RWD 斷點設定 (維持跟您商品列表一樣的 1024px)
+@media (max-width: 768px) {
+  .tag {
+    display: none;
+  }
+  // 調整手機版 Tag Swiper 的間距
+  .tag-swiper {
+    display: block; /* 手機版打開 */
+    margin-top: 30px;
+    margin-bottom: 15px;
+    padding-left: 15px; // 左邊留白，滑動體驗較好
+  }
+}
+
 .container {
   display: flex;
   justify-content: space-evenly;
+  margin-bottom: 30px;
 }
 
 .row {
   display: flex;
-  justify-content: flex-start;
-  border: 1px solid red;
+  flex-wrap: wrap; // 必加：確保商品多時會換行，不會全部擠在同一排
+  justify-content: flex-start; // 靠左對齊
+  width: 100%; // 必加：不管裡面有幾個商品，這一排都要佔滿整個 container
 }
 
 .product-card {
   margin-bottom: 13px;
   cursor: pointer;
-  border: 1px solid blue;
 }
 
 //頁碼
@@ -425,7 +529,7 @@ const columns = ref([
   backdrop-filter: blur(8px); /* 毛玻璃特效 */
   padding: 40px 60px;
   text-align: center;
-  border-radius: 4px;
+  border-radius: $radius-base;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   max-width: 890px;
 }
@@ -444,6 +548,55 @@ const columns = ref([
   /* 隱藏後兩欄，只留兩欄 */
   .column:nth-child(n + 3) {
     display: none;
+  }
+}
+
+// .col-3 {
+//   width: 25%; // 25% 代表一排四個 (100 / 4)
+//   flex: 0 0 25%; // 確保不會被擠壓或放大
+//   box-sizing: border-box; // 確保 padding 不會把格子撐爆
+//   padding: 10px; // 給商品卡片一點間距
+// }
+
+// // 手機版 RWD 設定
+// @media (max-width: 768px) {
+//   .col-md-12 {
+//     width: 100%;
+//     flex: 0 0 100%;
+//   }
+// }
+// 桌機版狀態
+.desktop-view {
+  display: flex; // 恢復 flex 屬性
+  flex-wrap: wrap; // 雙重保險：一定要換行
+  width: 100%;
+}
+
+// 手機版狀態 (預設隱藏)
+.mobile-view {
+  display: none;
+}
+@media (max-width: 1024px) {
+  // 手機版隱藏桌機 Grid
+  .desktop-view {
+    display: none !important; // 強制隱藏
+  }
+  // 手機版顯示 Swiper
+  .mobile-view {
+    display: block;
+    width: 100%;
+    // padding-left: 15px; // 左側留白
+    overflow: hidden;
+  }
+
+  // 調整 Swiper 樣式
+  .swiper {
+    padding-bottom: 20px;
+    // padding-right: 40px; // 讓右邊露出下一張
+  }
+
+  .swiper-slide {
+    height: auto;
   }
 }
 </style>

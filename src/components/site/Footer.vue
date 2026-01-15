@@ -86,7 +86,7 @@
                 height: 50px;
                 padding: 0 10px;
                 &:hover{
-                    color: $primary-color-700;
+                    color: $accent-color-700;
                 }
             }
             .login-btn{

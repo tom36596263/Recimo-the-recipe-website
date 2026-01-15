@@ -1,17 +1,63 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Navigation, FreeMode } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/free-mode';
+import OrderCard from '../../components/mall/CheckCard.vue';
+import CheckCard from '../../components/mall/CheckCard.vue';
+
+// Swiper 模組
+const swiperModules = [Navigation, FreeMode];
+
+// 控制方向與滑動模式
+const direction = ref('horizontal');
+const freeMode = ref(true);
+const slidesPerView = ref('auto'); // 平板改 1
+
+const updateSwiperMode = () => {
+  const width = window.innerWidth;
+  if (width >= 1024) {
+    direction.value = 'vertical';
+    freeMode.value = false; // 桌機卷軸
+    slidesPerView.value = 'auto';
+  } else {
+    // 手機 & 平板都水平滑動
+    direction.value = 'horizontal';
+    freeMode.value = true;
+    slidesPerView.value = 'auto';
+  }
+};
+
+onMounted(() => {
+  updateSwiperMode();
+  window.addEventListener('resize', updateSwiperMode);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateSwiperMode);
+});
 
 const orderItems = ref([
   {
     id: 101, // 訂單項目的唯一 ID (隨便寫)
     productId: 1, // ⚠️ 重要：這裡必須對應你 products.json 裡面有的 ID
-    quantity: 2 // 數量
+    quantity: 3, // 數量
+    price: 480
   },
   {
     id: 102,
     productId: 2, // ⚠️ 這裡也要確認 json 裡有 ID 為 2 的商品
-    quantity: 1
+    quantity: 1,
+    price: 220
+  },
+  {
+    id: 103,
+    productId: 3, // ⚠️ 這裡也要確認 json 裡有 ID 為 2 的商品
+    quantity: 1,
+    price: 180
   }
 ]);
 
@@ -30,7 +76,7 @@ const form = ref({
   addname: '',
   addphone: '',
   addhome: '', // 非必填
-  addaddress: '',
+  addadress: '',
 
   // 信用卡
   cardnum1: '',
@@ -168,6 +214,24 @@ const handleDelete = () => {
     router.push('../workspace/OrderInquiry.vue');
   }
 };
+
+// 計算商品總金額 (小計)
+const subtotal = computed(() => {
+  return orderItems.value.reduce((total, item) => {
+    // 直接用 item 裡面的 price * quantity
+    return total + item.price * item.quantity;
+  }, 0);
+});
+
+// 計算運費 (小計 >= 1000 免運，否則 60)
+const shippingFee = computed(() => {
+  return subtotal.value >= 1000 ? 0 : 60;
+});
+
+// 計算總結帳金額 (小計 + 運費)
+const totalAmount = computed(() => {
+  return subtotal.value + shippingFee.value;
+});
 </script>
 
 <template>
@@ -278,7 +342,12 @@ const handleDelete = () => {
               </div>
             </div>
 
-            <div class="add-address" v-show="form.shippingType === 'new'">
+            <div
+              class="add-address"
+              v-show="
+                form.shippingType === 'new' || form.shippingType === 'same'
+              "
+            >
               <div class="field add-field">
                 <label class="p-p1">收貨人</label>
                 <input
@@ -440,13 +509,27 @@ const handleDelete = () => {
       <div class="row reverse-layout">
         <div class="col-12 col-md-10">
           <div class="product-container">
-            <div class="order-list">
-              <CheckoutItem
-                v-for="item in orderItems"
-                :key="item.id"
-                :product-id="item.productId"
-                :quantity="item.quantity"
-              />
+            <div class="order-list swiper-wrap">
+              <Swiper
+                class="order-swiper"
+                :modules="swiperModules"
+                :space-between="12"
+                :slides-per-view="slidesPerView"
+                :direction="direction"
+                :free-mode="freeMode"
+                navigation
+              >
+                <SwiperSlide
+                  v-for="item in orderItems"
+                  :key="item.id"
+                  class="order-slide"
+                >
+                  <CheckCard
+                    :product-id="item.productId"
+                    :quantity="item.quantity"
+                  />
+                </SwiperSlide>
+              </Swiper>
             </div>
           </div>
         </div>
@@ -454,11 +537,14 @@ const handleDelete = () => {
       <div class="total-sum">
         <div class="row-text">
           <p class="p-p1">運費</p>
-          <p class="p-p1">$60</p>
+          <p class="p-p1">
+            {{ shippingFee === 0 ? '免運' : `$${shippingFee}` }}
+          </p>
         </div>
+
         <div class="row-text">
           <p class="p-p1">總計</p>
-          <p class="p-p1">$500</p>
+          <p class="p-p1">${{ totalAmount }}</p>
         </div>
       </div>
     </div>
@@ -466,17 +552,14 @@ const handleDelete = () => {
 </template>
 
 <style lang="scss" scoped>
-// 樣式保持原樣
-// ... 這裡請貼上您原本的 CSS ...
-
-// 這裡只補上這段即可
 input[type='checkbox'] {
-  accent-color: $primary-color-700;
+  accent-color: $primary-color-700; // 控制勾選時的顏色
   width: 18px;
   height: 18px;
   cursor: pointer;
   margin-top: 13px;
   margin-right: 8px;
+  vertical-align: middle; // 建議加上這行，讓它跟旁邊的文字垂直置中對齊
 }
 
 // 麵包屑
@@ -503,16 +586,16 @@ input[type='checkbox'] {
   position: relative;
 }
 
-.title::after {
-  content: '';
-  width: 97%;
-  max-width: 550px;
-  height: 0.5px;
-  background-color: $neutral-color-800;
-  display: block;
-  bottom: -3px;
-  position: absolute;
-}
+// .title::after {
+//   content: '';
+//   width: 97%;
+//   max-width: 550px;
+//   height: 0.5px;
+//   background-color: $neutral-color-800;
+//   display: block;
+//   bottom: -3px;
+//   position: absolute;
+// }
 @media (max-width: 768px) {
   .title {
     margin-left: 23px;
@@ -553,7 +636,7 @@ input[type='checkbox'] {
 .field > input:focus {
   border: 1px solid $neutral-color-800;
 }
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .container {
     flex-wrap: wrap;
     flex-direction: column-reverse;
@@ -567,17 +650,17 @@ input[type='checkbox'] {
 }
 
 //宅配地址
-.deliver-title::before {
-  content: '';
-  width: 130%;
-  max-width: 600px;
-  height: 0.5px;
-  background-color: $neutral-color-800;
-  display: block;
-  position: absolute;
-  bottom: 50px;
-  left: -60px;
-}
+// .deliver-title::before {
+//   content: '';
+//   width: 130%;
+//   max-width: 600px;
+//   height: 0.5px;
+//   background-color: $neutral-color-800;
+//   display: block;
+//   position: absolute;
+//   bottom: 50px;
+//   left: -60px;
+// }
 
 .deliver-title {
   margin-bottom: 15px;
@@ -677,17 +760,17 @@ input[type='checkbox'] {
   margin-bottom: 42px;
 }
 
-.pay-title::before {
-  content: '';
-  width: 130%;
-  max-width: 600px;
-  height: 0.5px;
-  background-color: $neutral-color-800;
-  display: block;
-  position: absolute;
-  bottom: 40px;
-  left: -60px;
-}
+// .pay-title::before {
+//   content: '';
+//   width: 130%;
+//   max-width: 600px;
+//   height: 0.5px;
+//   background-color: $neutral-color-800;
+//   display: block;
+//   position: absolute;
+//   bottom: 40px;
+//   left: -60px;
+// }
 
 .pay-title {
   margin-bottom: 15px;
@@ -712,7 +795,7 @@ input[type='checkbox'] {
 
 @media (max-width: 768px) {
   .product-container {
-    flex-direction: row;
+    flex-direction: column;
     margin-top: 20px;
   }
   .card-wrap {
@@ -729,5 +812,47 @@ input[type='checkbox'] {
 .row-text {
   display: flex;
   gap: 20px;
+}
+
+/* Swiper 容器 */
+.swiper-wrap {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 桌機垂直卷軸 */
+@media (min-width: 1025px) {
+  .order-list {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+}
+
+/* 平板 & 手機水平滑動 */
+@media (max-width: 1024px) {
+  .order-list {
+    max-height: none; // 移除高度限制
+    overflow: hidden; // Swiper 自己控制滑動，不要scroll
+  }
+
+  .order-swiper {
+    flex-wrap: nowrap;
+  }
+
+  .order-slide {
+    width: auto !important; // 自動寬度
+    flex: 0 0 auto; // 卡片不縮放
+    display: flex;
+  }
+
+  .order-slide > * {
+    max-width: 420px;
+    width: 100%;
+  }
+
+  /* 確保 Swiper 滑動可以手指拖動 */
+  .swiper-wrapper {
+    display: flex;
+  }
 }
 </style>
