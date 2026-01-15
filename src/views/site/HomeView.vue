@@ -4,6 +4,7 @@
     import AboutIcons from '@/components/site/home/AboutSectionIcons.vue';
     import Service from '@/components/site/home/ServiceSection.vue';
     import HotRecipe from '@/components/site/home/HotRecipeSection.vue';
+    import FindRecipe from '@/components/site/home/FindRecipeSection.vue';
 </script>
 
 <template>
@@ -39,6 +40,12 @@
             </div>
         </section>
     </div>
+
+    <section class="find-recipe-section container">
+        <div class="row">
+            <FindRecipe />
+        </div>
+    </section>
     
     
 </template>
@@ -71,6 +78,12 @@
     .hot-recipe-bg{
         background-color: $neutral-color-100;
         padding:80px 0;
+    }
+    .find-recipe-section{
+        margin: 60px auto;
+        padding: 50px;
+        background-color: $primary-color-100;
+        border-radius: $radius-base;
     }
     @media screen and (max-width: 810px){
         .about-section-bg{

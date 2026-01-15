@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import card from '@/components/mall/ProductCard.vue';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 // --- Swiper 相關設定 (請用這段取代舊的) ---
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -36,6 +36,7 @@ const activeTag = ref('ALL'); // 目前選中的標籤
 const currentPage = ref(1); // 目前在第幾頁
 const pageSize = 8; // 一頁顯示幾筆 (4欄 x 2排 = 8筆)
 const router = useRouter();
+const route = useRoute();
 
 //進入商品詳情
 const goToDetail = (id) => {
@@ -141,128 +142,78 @@ const columns = ref([
 </script>
 
 <template>
-  <!-- 標題 -->
-  <div class="title">
-    <h1 class="zh-h1-bold">Recimo商城</h1>
-  </div>
+  <div v-if="!route.params.id" class="mall">
+    <!-- 標題 -->
+    <div class="title">
+      <h1 class="zh-h1-bold">Recimo商城</h1>
+    </div>
 
-  <!-- 本月熱銷 -->
-  <section>
-    <div class="hot-container">
-      <div class="hot-title">
-        <h2 class="zh-h2">本月熱銷</h2>
-      </div>
-      <div class="container">
-        <div class="row desktop-view">
-          <div
-            v-for="item in randomProducts"
-            :key="item.id"
-            class="col-4 col-md-12"
-            @click="goToDetail(item.id)"
-          >
-            <card :item="item" />
+    <!-- 本月熱銷 -->
+    <section>
+      <div class="hot-container">
+        <div class="hot-title">
+          <h2 class="zh-h2">本月熱銷</h2>
+        </div>
+        <div class="container">
+          <div class="row desktop-view">
+            <div v-for="item in randomProducts" :key="item.id" class="col-4 col-md-12" @click="goToDetail(item.id)">
+              <card :item="item" />
+            </div>
+          </div>
+          <div class="mobile-view swiper-container-custom">
+            <swiper :breakpoints="swiperBreakpoints" :modules="modules" class="mySwiper">
+              <swiper-slide v-for="item in randomProducts" :key="item.id" @click="goToDetail(item.id)">
+                <card :item="item" />
+              </swiper-slide>
+            </swiper>
           </div>
         </div>
-        <div class="mobile-view swiper-container-custom">
-          <swiper
-            :breakpoints="swiperBreakpoints"
-            :modules="modules"
-            class="mySwiper"
-          >
-            <swiper-slide
-              v-for="item in randomProducts"
-              :key="item.id"
-              @click="goToDetail(item.id)"
-            >
-              <card :item="item" />
-            </swiper-slide>
-          </swiper>
-        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <div class="product-title">
-    <h2 class="zh-h2">Recimo料理包</h2>
-  </div>
-  <!-- 標籤 -->
-  <div class="tag-wrapper">
-    <div class="tag">
-      <BaseTag
-        v-for="item in tags"
-        :key="item.text"
-        :text="item.text"
-        :width="item.width"
-        :show-icon="false"
-        :variant="activeTag === item.text ? 'primary' : 'action'"
-        @click="selectTag(item.text)"
-      ></BaseTag>
+    <div class="product-title">
+      <h2 class="zh-h2">Recimo料理包</h2>
     </div>
-
-    <div class="tag-swiper">
-      <swiper
-        :slidesPerView="'auto'"
-        :spaceBetween="14"
-        :freeMode="true"
-        :modules="modules"
-        class="mySwiper"
-      >
-        <swiper-slide v-for="item in tags" :key="item.text" class="tag-slide">
-          <BaseTag
-            :text="item.text"
-            :width="item.width"
-            :show-icon="false"
-            :variant="activeTag === item.text ? 'primary' : 'action'"
-            @click="selectTag(item.text)"
-          ></BaseTag>
-        </swiper-slide>
-      </swiper>
-    </div>
-  </div>
-
-  <section>
-    <!-- 商品 -->
-    <div class="container">
-      <div class="row desktop-view">
-        <div
-          v-if="displayedProducts.length === 0"
-          class="col-12 col-lg-6"
-          style="text-align: center; padding: 40px"
-        >
-          目前沒有此分類的商品
-        </div>
-        <div
-          v-for="item in displayedProducts"
-          :key="item.id"
-          class="col-3 col-lg-6"
-          @click="goToDetail(item.id)"
-        >
-          <card :item="item" />
-        </div>
+    <!-- 標籤 -->
+    <div class="tag-wrapper">
+      <div class="tag">
+        <BaseTag v-for="item in tags" :key="item.text" :text="item.text" :width="item.width" :show-icon="false"
+          :variant="activeTag === item.text ? 'primary' : 'action'" @click="selectTag(item.text)"></BaseTag>
       </div>
-      <div
-        class="mobile-view swiper-container-custom"
-        v-if="displayedProducts.length > 0"
-      >
-        <swiper
-          :breakpoints="swiperBreakpoints"
-          :modules="modules"
-          class="mySwiper"
-        >
-          <swiper-slide
-            v-for="item in displayedProducts"
-            :key="item.id"
-            @click="goToDetail(item.id)"
-          >
-            <card :item="item" />
+
+      <div class="tag-swiper">
+        <swiper :slidesPerView="'auto'" :spaceBetween="14" :freeMode="true" :modules="modules" class="mySwiper">
+          <swiper-slide v-for="item in tags" :key="item.text" class="tag-slide">
+            <BaseTag :text="item.text" :width="item.width" :show-icon="false"
+              :variant="activeTag === item.text ? 'primary' : 'action'" @click="selectTag(item.text)"></BaseTag>
           </swiper-slide>
         </swiper>
       </div>
     </div>
 
-    <!-- 頁碼 -->
-    <div class="pagination" v-if="totalPages > 1">
-      <!-- <a
+    <section>
+      <!-- 商品 -->
+      <div class="container">
+        <div class="row desktop-view">
+          <div v-if="displayedProducts.length === 0" class="col-12 col-lg-6" style="text-align: center; padding: 40px">
+            目前沒有此分類的商品
+          </div>
+          <div v-for="item in displayedProducts" :key="item.id" class="col-3 col-lg-6" @click="goToDetail(item.id)">
+            <card :item="item" />
+          </div>
+        </div>
+        <div class="mobile-view swiper-container-custom" v-if="displayedProducts.length > 0">
+          <swiper :breakpoints="swiperBreakpoints" :modules="modules" class="mySwiper">
+            <swiper-slide v-for="item in displayedProducts" :key="item.id" @click="goToDetail(item.id)">
+              <card :item="item" />
+            </swiper-slide>
+          </swiper>
+        </div>
+      </div>
+
+      <!-- 頁碼 -->
+      <div class="pagination" v-if="totalPages > 1">
+        <!-- <a
         href="#"
         class="page-link"
         @click.prevent="setPage(currentPage - 1)"
@@ -271,19 +222,13 @@ const columns = ref([
         &lt;
       </a> -->
 
-      <a
-        href="#"
-        class="page-link"
-        v-for="page in totalPages"
-        :key="page"
-        :class="{ active: currentPage === page }"
-        @click.prevent="setPage(page)"
-      >
-        {{ page }}
-      </a>
-      <!-- 如果這顆按鈕代表的數字 (page) 等於你目前所在的頁碼 (currentPage)。 -->
-      <!-- 加上 active 這個 class。這通常會讓按鈕變色（例如變成藍底白字），告訴使用者「你現在在這裡」。 -->
-      <!-- <a
+        <a href="#" class="page-link" v-for="page in totalPages" :key="page" :class="{ active: currentPage === page }"
+          @click.prevent="setPage(page)">
+          {{ page }}
+        </a>
+        <!-- 如果這顆按鈕代表的數字 (page) 等於你目前所在的頁碼 (currentPage)。 -->
+        <!-- 加上 active 這個 class。這通常會讓按鈕變色（例如變成藍底白字），告訴使用者「你現在在這裡」。 -->
+        <!-- <a
         href="#"
         class="page-link"
         @click.prevent="setPage(currentPage + 1)"
@@ -291,312 +236,341 @@ const columns = ref([
       >
         &gt;
       </a> -->
-    </div>
-  </section>
+      </div>
+    </section>
 
-  <!-- 輪播圖 -->
-  <div class="marquee-container">
-    <div class="grid-wrapper">
-      <div
-        v-for="(colImages, index) in columns"
-        :key="index"
-        class="column"
-        :class="index % 2 === 0 ? 'move-down' : 'move-up'"
-      >
-        <div class="track">
-          <div v-for="(img, i) in colImages" :key="'a-' + i" class="img-item">
-            <img :src="img" alt="food" />
-          </div>
-          <div v-for="(img, i) in colImages" :key="'b-' + i" class="img-item">
-            <img :src="img" alt="food" />
+    <!-- 輪播圖 -->
+    <div class="marquee-container">
+      <div class="grid-wrapper">
+        <div v-for="(colImages, index) in columns" :key="index" class="column"
+          :class="index % 2 === 0 ? 'move-down' : 'move-up'">
+          <div class="track">
+            <div v-for="(img, i) in colImages" :key="'a-' + i" class="img-item">
+              <img :src="img" alt="food" />
+            </div>
+            <div v-for="(img, i) in colImages" :key="'b-' + i" class="img-item">
+              <img :src="img" alt="food" />
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="overlay-content">
-      <div class="card">
-        <h2 class="zh-h2-bold">Get your Recimo ID</h2>
-        <p class="zh-h3">
-          您需要 Recimo ID 才能購買 Recimo 提供的商品。<br />
-          註冊完全免費。
-        </p>
-        <BaseBtn
-          title="會員登入"
-          href="/src/components/LoginLightbox.vue"
-          :width="102"
-        />
+      <div class="overlay-content">
+        <div class="card">
+          <h2 class="zh-h2-bold">Get your Recimo ID</h2>
+          <p class="zh-h3">
+            您需要 Recimo ID 才能購買 Recimo 提供的商品。<br />
+            註冊完全免費。
+          </p>
+          <BaseBtn title="會員登入" href="/src/components/LoginLightbox.vue" :width="102" />
+        </div>
       </div>
     </div>
   </div>
+  <router-view v-else></router-view>
 </template>
 
 <style lang="scss" scoped>
-// 麵包屑
-.bread {
-  margin-top: 17px;
-  margin-left: 40px;
-}
-.bread > a {
-  text-decoration: none;
-  color: $neutral-color-800;
-}
-.bread > span {
-  color: $primary-color-400;
-}
-@media (max-width: 1024px) {
+.mall {
+
+  // 麵包屑
   .bread {
-    display: none;
+    margin-top: 17px;
+    margin-left: 40px;
   }
-}
 
-//標題
-.title {
-  display: flex;
-  justify-content: center;
-  margin-top: 48px;
+  .bread>a {
+    text-decoration: none;
+    color: $neutral-color-800;
+  }
+
+  .bread>span {
+    color: $primary-color-400;
+  }
+
   @media (max-width: 1024px) {
-    margin-top: 60px;
+    .bread {
+      display: none;
+    }
   }
-}
 
-//熱銷商品
-.hot-container {
-  background-image: url(../../assets/images/mall/hotback.png);
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center top;
-  margin-top: 45px;
-  padding-bottom: 120px;
-  @media (max-width: 768px) {
-    background-image: url(../../assets/images/mall/phonehotback.png);
+  //標題
+  .title {
+    display: flex;
+    justify-content: center;
+    margin-top: 48px;
+
+    @media (max-width: 1024px) {
+      margin-top: 60px;
+    }
+  }
+
+  //熱銷商品
+  .hot-container {
+    background-image: url(../../assets/images/mall/hotback.png);
+    background-repeat: no-repeat;
     background-size: cover;
-    background-position: center;
+    background-position: center top;
+    margin-top: 45px;
+    padding-bottom: 120px;
+
+    @media (max-width: 768px) {
+      background-image: url(../../assets/images/mall/phonehotback.png);
+      background-size: cover;
+      background-position: center;
+    }
   }
-}
-.hot-title {
-  text-align: center;
-  padding-top: 67px;
-  margin-bottom: 57px;
-}
 
-//商品
-.product-title {
-  margin-top: 52px;
-  text-align: center;
-}
+  .hot-title {
+    text-align: center;
+    padding-top: 67px;
+    margin-bottom: 57px;
+  }
 
-.tag {
-  display: flex;
-  gap: 14px;
-  justify-content: end;
-  margin-right: 45px;
-  margin-bottom: 42px;
-  margin-top: 51px;
-}
-// 手機版 Tag Swiper 特別設定
-.tag-slide {
-  // 關鍵！設定 width: auto，Swiper 才會依照內容寬度排列，不會一張佔滿畫面
-  width: auto;
-}
-.tag-swiper {
-  display: none; /* 平板跟桌機都不要看到它 */
-}
-// RWD 斷點設定 (維持跟您商品列表一樣的 1024px)
-@media (max-width: 768px) {
+  //商品
+  .product-title {
+    margin-top: 52px;
+    text-align: center;
+  }
+
   .tag {
-    display: none;
+    display: flex;
+    gap: 14px;
+    justify-content: end;
+    margin-right: 45px;
+    margin-bottom: 42px;
+    margin-top: 51px;
   }
-  // 調整手機版 Tag Swiper 的間距
+
+  // 手機版 Tag Swiper 特別設定
+  .tag-slide {
+    // 關鍵！設定 width: auto，Swiper 才會依照內容寬度排列，不會一張佔滿畫面
+    width: auto;
+  }
+
   .tag-swiper {
-    display: block; /* 手機版打開 */
-    margin-top: 30px;
-    margin-bottom: 15px;
-    padding-left: 15px; // 左邊留白，滑動體驗較好
+    display: none;
+    /* 平板跟桌機都不要看到它 */
   }
-}
 
-.container {
-  display: flex;
-  justify-content: space-evenly;
-  margin-bottom: 30px;
-}
+  // RWD 斷點設定 (維持跟您商品列表一樣的 1024px)
+  @media (max-width: 768px) {
+    .tag {
+      display: none;
+    }
 
-.row {
-  display: flex;
-  flex-wrap: wrap; // 必加：確保商品多時會換行，不會全部擠在同一排
-  justify-content: flex-start; // 靠左對齊
-  width: 100%; // 必加：不管裡面有幾個商品，這一排都要佔滿整個 container
-}
+    // 調整手機版 Tag Swiper 的間距
+    .tag-swiper {
+      display: block;
+      /* 手機版打開 */
+      margin-top: 30px;
+      margin-bottom: 15px;
+      padding-left: 15px; // 左邊留白，滑動體驗較好
+    }
+  }
 
-.product-card {
-  margin-bottom: 13px;
-  cursor: pointer;
-}
+  .container {
+    display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 30px;
+  }
 
-//頁碼
-.pagination {
-  margin-bottom: 60px;
-}
+  .row {
+    display: flex;
+    flex-wrap: wrap; // 必加：確保商品多時會換行，不會全部擠在同一排
+    justify-content: flex-start; // 靠左對齊
+    width: 100%; // 必加：不管裡面有幾個商品，這一排都要佔滿整個 container
+  }
 
-//輪播圖
-.marquee-container {
-  position: relative;
-  width: 100%;
-  height: 600px;
-  overflow: hidden;
-  background: #f8f8f8;
-}
+  .product-card {
+    margin-bottom: 13px;
+    cursor: pointer;
+  }
 
-.grid-wrapper {
-  display: flex;
-  gap: 8px; /* 欄位間距 */
-  width: 120%; /* 稍微寬一點以避免邊緣空白，視情況調整 */
-  height: 100%;
-  margin-left: -10%; /* 置中修正 */
-  transform: rotate(0deg); /* 如果想要傾斜效果可以在這裡改角度 */
-}
+  //頁碼
+  .pagination {
+    margin-bottom: 60px;
+  }
 
-.column {
-  flex: 1;
-  position: relative;
-  height: 100%;
-  overflow: hidden; /* 隱藏欄位外的圖片 */
-}
+  //輪播圖
+  .marquee-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    overflow: hidden;
+    background: #f8f8f8;
+  }
 
-.img-item {
-  margin-bottom: 8px; /* 圖片垂直間距 */
-  overflow: hidden;
-  height: 280px; /* 固定高度，確保動畫計算準確 */
-}
+  .grid-wrapper {
+    display: flex;
+    gap: 8px;
+    /* 欄位間距 */
+    width: 120%;
+    /* 稍微寬一點以避免邊緣空白，視情況調整 */
+    height: 100%;
+    margin-left: -10%;
+    /* 置中修正 */
+    transform: rotate(0deg);
+    /* 如果想要傾斜效果可以在這裡改角度 */
+  }
 
-.img-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+  .column {
+    flex: 1;
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    /* 隱藏欄位外的圖片 */
+  }
 
-/* 4. 動畫核心 */
-/* 原理：Track 總高度是原本內容的 200% (因為複製了一份)。
+  .img-item {
+    margin-bottom: 8px;
+    /* 圖片垂直間距 */
+    overflow: hidden;
+    height: 280px;
+    /* 固定高度，確保動畫計算準確 */
+  }
+
+  .img-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* 4. 動畫核心 */
+  /* 原理：Track 總高度是原本內容的 200% (因為複製了一份)。
    從 0% 移動到 -50% (或相反)，視覺上會剛好接回起點，形成無限循環。
 */
 
-/* 往下移動的欄位 */
-.move-down .track {
-  animation: scroll-down 30s linear infinite;
-}
-
-/* 往上移動的欄位 */
-.move-up .track {
-  animation: scroll-up 30s linear infinite;
-}
-
-@keyframes scroll-up {
-  0% {
-    transform: translateY(0);
+  /* 往下移動的欄位 */
+  .move-down .track {
+    animation: scroll-down 30s linear infinite;
   }
-  100% {
-    transform: translateY(-50%);
+
+  /* 往上移動的欄位 */
+  .move-up .track {
+    animation: scroll-up 30s linear infinite;
   }
-}
 
-@keyframes scroll-down {
-  0% {
-    transform: translateY(-50%);
-  } /* 從中間開始往回播 */
-  100% {
-    transform: translateY(0);
+  @keyframes scroll-up {
+    0% {
+      transform: translateY(0);
+    }
+
+    100% {
+      transform: translateY(-50%);
+    }
   }
-}
 
-/* 5. 中間遮罩樣式 (仿照您的截圖) */
-.overlay-content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-  background: rgba(0, 0, 0, 0.2); /* 整體稍微變暗 */
-}
+  @keyframes scroll-down {
+    0% {
+      transform: translateY(-50%);
+    }
 
-.card {
-  background: rgba(255, 255, 255, 0.85); /* 半透明白底 */
-  backdrop-filter: blur(8px); /* 毛玻璃特效 */
-  padding: 40px 60px;
-  text-align: center;
-  border-radius: $radius-base;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  max-width: 890px;
-}
-.card > h2 {
-  margin-bottom: 10px;
-}
-.card > p {
-  margin-bottom: 9px;
-}
-/* 6. RWD 響應式：手機版變成兩欄 */
-@media (max-width: 768px) {
-  .grid-wrapper {
+    /* 從中間開始往回播 */
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  /* 5. 中間遮罩樣式 (仿照您的截圖) */
+  .overlay-content {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    margin-left: 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.2);
+    /* 整體稍微變暗 */
   }
-  /* 隱藏後兩欄，只留兩欄 */
-  .column:nth-child(n + 3) {
+
+  .card {
+    background: rgba(255, 255, 255, 0.85);
+    /* 半透明白底 */
+    backdrop-filter: blur(8px);
+    /* 毛玻璃特效 */
+    padding: 40px 60px;
+    text-align: center;
+    border-radius: $radius-base;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    max-width: 890px;
+  }
+
+  .card>h2 {
+    margin-bottom: 10px;
+  }
+
+  .card>p {
+    margin-bottom: 9px;
+  }
+
+  /* 6. RWD 響應式：手機版變成兩欄 */
+  @media (max-width: 768px) {
+    .grid-wrapper {
+      width: 100%;
+      margin-left: 0;
+    }
+
+    /* 隱藏後兩欄，只留兩欄 */
+    .column:nth-child(n + 3) {
+      display: none;
+    }
+  }
+
+  // .col-3 {
+  //   width: 25%; // 25% 代表一排四個 (100 / 4)
+  //   flex: 0 0 25%; // 確保不會被擠壓或放大
+  //   box-sizing: border-box; // 確保 padding 不會把格子撐爆
+  //   padding: 10px; // 給商品卡片一點間距
+  // }
+
+  // // 手機版 RWD 設定
+  // @media (max-width: 768px) {
+  //   .col-md-12 {
+  //     width: 100%;
+  //     flex: 0 0 100%;
+  //   }
+  // }
+  // 桌機版狀態
+  .desktop-view {
+    display: flex; // 恢復 flex 屬性
+    flex-wrap: wrap; // 雙重保險：一定要換行
+    width: 100%;
+  }
+
+  // 手機版狀態 (預設隱藏)
+  .mobile-view {
     display: none;
   }
-}
 
-// .col-3 {
-//   width: 25%; // 25% 代表一排四個 (100 / 4)
-//   flex: 0 0 25%; // 確保不會被擠壓或放大
-//   box-sizing: border-box; // 確保 padding 不會把格子撐爆
-//   padding: 10px; // 給商品卡片一點間距
-// }
+  @media (max-width: 1024px) {
 
-// // 手機版 RWD 設定
-// @media (max-width: 768px) {
-//   .col-md-12 {
-//     width: 100%;
-//     flex: 0 0 100%;
-//   }
-// }
-// 桌機版狀態
-.desktop-view {
-  display: flex; // 恢復 flex 屬性
-  flex-wrap: wrap; // 雙重保險：一定要換行
-  width: 100%;
-}
+    // 手機版隱藏桌機 Grid
+    .desktop-view {
+      display: none !important; // 強制隱藏
+    }
 
-// 手機版狀態 (預設隱藏)
-.mobile-view {
-  display: none;
-}
-@media (max-width: 1024px) {
-  // 手機版隱藏桌機 Grid
-  .desktop-view {
-    display: none !important; // 強制隱藏
-  }
-  // 手機版顯示 Swiper
-  .mobile-view {
-    display: block;
-    width: 100%;
-    // padding-left: 15px; // 左側留白
-    overflow: hidden;
-  }
+    // 手機版顯示 Swiper
+    .mobile-view {
+      display: block;
+      width: 100%;
+      // padding-left: 15px; // 左側留白
+      overflow: hidden;
+    }
 
-  // 調整 Swiper 樣式
-  .swiper {
-    padding-bottom: 20px;
-    // padding-right: 40px; // 讓右邊露出下一張
-  }
+    // 調整 Swiper 樣式
+    .swiper {
+      padding-bottom: 20px;
+      // padding-right: 40px; // 讓右邊露出下一張
+    }
 
-  .swiper-slide {
-    height: auto;
+    .swiper-slide {
+      height: auto;
+    }
   }
 }
 </style>

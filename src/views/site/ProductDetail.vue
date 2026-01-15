@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import ProductRmd from '@/components/mall/ProductRmd.vue';
 import axios from 'axios';
+import { useRouteName } from '@/composables/useRouteName'
 
 // ==========================================
 // vue上課教：以後部屬比較不會有問題
@@ -68,6 +69,7 @@ const route = useRoute();
 const productId = computed(() => route.params.id); // 將 ID 改為 computed，確保網址變了它也跟著變
 
 const productInfo = ref(null); // 儲存當前商品的所有資訊
+const { setDetailName } = useRouteName()
 
 const fetchData = async () => {
   try {
@@ -83,12 +85,12 @@ const fetchData = async () => {
       activeImage.value = firstImg;
       // 切換商品時，數量重置為 1
       count.value = 1;
+      setDetailName(productInfo.value.product_name)
     }
   } catch (error) {
     console.error("抓取失敗", error);
   }
 };
-import { watch } from 'vue';
 
 // 監聽 ID，當從推薦商品點擊進入不同 ID 時，重新抓資料
 watch(() => productId.value, () => {
@@ -98,7 +100,6 @@ watch(() => productId.value, () => {
 onMounted(() => {
   fetchData();
 });
-
 </script>
 
 <template>
@@ -106,19 +107,8 @@ onMounted(() => {
   <section v-if="productInfo" class="product-detail container">
     <div class="row">
 
-      <!-- ==========================================
-            商品圖
-      ========================================= -->
       <div class="col-7 col-lg-12">
-
         <div class="product-detail__gallery">
-          <nav class="breadcrumb">
-            <ul class="breadcrumb__list">
-              <li><router-link to="/" class="p-p1">首頁</router-link></li>
-              <li><router-link to="/mall" class="p-p1">Recimo商城</router-link></li>
-              <li class="active p-p1">{{ productInfo?.product_name }}</li>
-            </ul>
-          </nav>
           <div class="gallery__main">
             <img :src="mainImage" id="gallery-preview-img">
           </div>
@@ -437,39 +427,5 @@ td {
   }
 }
 
-// ==========================================
-// 麵包屑
-// ==========================================
-.breadcrumb {
-  padding-bottom: 10px;
 
-  .breadcrumb__list {
-    display: flex;
-    color: black;
-
-    .active {
-      color: $primary-color-800;
-    }
-
-    li {
-      display: flex;
-      align-items: center;
-
-      // 製作中間的分隔斜線
-      &:not(:last-child)::after {
-        content: "/";
-        margin: 0 10px;
-      }
-
-      a {
-        text-decoration: none;
-        color: inherit;
-
-        &:hover {
-          color: $accent-color-700;
-        }
-      }
-    }
-  }
-}
 </style>

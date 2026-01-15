@@ -8,12 +8,12 @@ import IconShoppingCart from 'virtual:icons/material-symbols/Shopping-Cart-outli
 import IconAssignment from 'virtual:icons/material-symbols/Assignment-outline'
 
 const pageicon = ref([
-    markRaw(IconForkSpoon),
-    markRaw(IconSkillet),
-    markRaw(IconHandMeal),
-    markRaw(IconInboxTextPerson),
-    markRaw(IconShoppingCart),
-    markRaw(IconAssignment)
+  markRaw(IconForkSpoon),
+  markRaw(IconSkillet),
+  markRaw(IconHandMeal),
+  markRaw(IconInboxTextPerson),
+  markRaw(IconShoppingCart),
+  markRaw(IconAssignment)
 ]);
 
 const routes = [
@@ -36,44 +36,44 @@ const routes = [
     path: '/search',
     name: 'site-search',
     component: () => import('@/views/site/SearchView.vue'),
-    meta: { layout: 'default', title: '搜尋好料理', breadcrumb: '搜尋好料理'  }
+    meta: { layout: 'default', title: '搜尋好料理', breadcrumb: '搜尋好料理' }
   },
   {
     path: '/about',
     name: 'about',
     component: () => import('@/views/site/AboutView.vue'),
-    meta: { layout: 'default', title: '關於Recimo', breadcrumb: '關於Recimo', showInMenu: true,  }
+    meta: { layout: 'default', title: '關於Recimo', breadcrumb: '關於Recimo', showInMenu: true, }
   },
   {
     path: '/recipes',
     name: 'recipes-overview',
     component: () => import('@/views/site/RecipeOverview.vue'),
-    meta: { layout: 'default', title: '食譜總覽', breadcrumb: '食譜總覽', showInMenu: true,  }
-  },
-  {
-    path: '/mall',
-    component: () => import('@/views/site/MallView.vue'),
-    meta: { layout: 'default', title: 'Recimo商城', breadcrumb: 'Recimo商城', showInMenu: true }
-  },
-  {
-    path: '/mall/:id',
-    name: 'product-detail',
-    component: () => import('@/views/site/ProductDetail.vue'),
-    meta: { layout: 'default', breadcrumb: '載入中...', showInMenu: true }
+    meta: { layout: 'default', title: '食譜總覽', breadcrumb: '食譜總覽', showInMenu: true, }
   },
   // {
   //   path: '/mall',
   //   component: () => import('@/views/site/MallView.vue'),
-  //   meta: { layout: 'default', title: 'Recimo商城', breadcrumb: 'Recimo商城', showInMenu: true },
-  //   children: [
-  //     {
-  //       path: ':id',
-  //       name: 'product-detail',
-  //       component: () => import('@/views/site/ProductDetail.vue'),
-  //       meta: { breadcrumb: '載入中...' }
-  //     }
-  //   ]
+  //   meta: { layout: 'default', title: 'Recimo商城', breadcrumb: 'Recimo商城', showInMenu: true }
   // },
+  // {
+  //   path: '/mall/:id',
+  //   name: 'product-detail',
+  //   component: () => import('@/views/site/ProductDetail.vue'),
+  //   meta: { layout: 'default', breadcrumb: '載入中...', showInMenu: true }
+  // },
+  {
+    path: '/mall',
+    component: () => import('@/views/site/MallView.vue'),
+    meta: { layout: 'default', title: 'Recimo商城', breadcrumb: 'Recimo商城', showInMenu: true },
+    children: [
+      {
+        path: ':id',
+        name: 'product-detail',
+        component: () => import('@/views/site/ProductDetail.vue'),
+        meta: { isDynamic: true, breadcrumb: '動態的名字' }
+      }
+    ]
+  },
   {
     path: '/benefits',
     name: 'benefits',
@@ -106,7 +106,7 @@ const routes = [
         component: () => import('@/views/workspace/MyRecipes.vue'),
         meta: {
           title: '我的食譜',
-          icon: markRaw(IconForkSpoon), 
+          icon: markRaw(IconForkSpoon),
           layout: 'workspace',
           requiresAuth: true
         }
