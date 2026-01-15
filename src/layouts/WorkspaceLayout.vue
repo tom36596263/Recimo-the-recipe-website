@@ -17,9 +17,7 @@
                     <div class="topbar-logo">
                         <router-link to="/"><img :src="LogoBlack" alt="Recimo Logo"></router-link>
                     </div>
-                    <div class="workspace-top-bar">
                         <WorkspaceTopBar v-if="!route.meta.hideTopBar" />
-                    </div>
                 </div>
             </header>
             <section class="container">
@@ -45,13 +43,11 @@
         display: flex;
         height: 100vh;
         overflow: hidden;
-        .workspace-top-bar {
-            width: 100%;
-            // padding: 20px; 
-            margin: 20px auto;
-            border-radius: $radius-base;
-            background-color: $primary-color-100;
-            display: flex;
+        
+        .page-content {
+            padding-bottom: 80px;
+            margin-bottom: 20px;
+            overflow-y: auto;
         }
     }
     .breadcrumb{
@@ -68,6 +64,7 @@
             }
         }
     }
+
     @media screen and (max-width: 810px){
         .topbar-logo{
             width: 100%;
