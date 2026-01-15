@@ -67,7 +67,6 @@ const productImage = computed(() => {
     text-decoration: none; // 去掉超連結底線
     color: inherit; // 繼承文字顏色，避免變成藍色
     width: 100%;
-    max-width: 315px;
     background-color: $neutral-color-white;
     border: 1px solid $primary-color-700;
     border-radius: 10px;
