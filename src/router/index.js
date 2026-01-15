@@ -56,7 +56,7 @@ const routes = [
     meta: { layout: 'default', title: 'Recimo商城', breadcrumb: 'Recimo商城', showInMenu: true }
   },
   {
-    path: '/mall:id',
+    path: '/mall/:id',
     name: 'product-detail',
     component: () => import('@/views/site/ProductDetail.vue'),
     meta: { layout: 'default', breadcrumb: '載入中...', showInMenu: true }
