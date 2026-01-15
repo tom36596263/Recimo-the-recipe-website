@@ -135,6 +135,7 @@ const handleSave = () => {
     max-width: 1000px;
     margin: 40px auto;
     padding: 0 20px;
+    
 
     .main-title {
         text-align: center;
@@ -143,7 +144,7 @@ const handleSave = () => {
     }
 
     .form-card {
-        border: 1px solid $primary-color-400;
+        border: 1px solid $neutral-color-700;
         border-radius: 12px;
         padding: 40px;
         background-color: $neutral-color-white;
