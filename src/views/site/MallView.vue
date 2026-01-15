@@ -157,7 +157,7 @@ const columns = ref([
           <div
             v-for="item in randomProducts"
             :key="item.id"
-            class="col-4 col-md-12"
+            class="col-3 col-md-12"
             @click="goToDetail(item.id)"
           >
             <card :item="item" />
@@ -368,6 +368,7 @@ const columns = ref([
   background-position: center top;
   margin-top: 45px;
   padding-bottom: 120px;
+
   @media (max-width: 768px) {
     background-image: url(../../assets/images/mall/phonehotback.png);
     background-size: cover;
@@ -570,6 +571,7 @@ const columns = ref([
   display: flex; // 恢復 flex 屬性
   flex-wrap: wrap; // 雙重保險：一定要換行
   width: 100%;
+  justify-content: center;
 }
 
 // 手機版狀態 (預設隱藏)

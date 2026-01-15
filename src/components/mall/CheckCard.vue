@@ -72,7 +72,7 @@ const getUnit = (name) => {
   width: 100%;
   box-sizing: border-box;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     flex-direction: column;
     align-items: flex-start;
     padding: 12px;
@@ -82,20 +82,21 @@ const getUnit = (name) => {
 
 .image-wrapper {
   width: 250px;
-  height: 150px;
   flex-shrink: 0;
   overflow: hidden;
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     width: 100%;
-    height: 200px; // 高度可以稍微拉高，或設為 auto
   }
 
   img {
     width: 100%;
-    height: 100%;
+    // height: 100%;
     border-radius: $radius-base;
-    object-position: center;
-    object-fit: contain;
+    // object-position: center;
+    object-fit: cover;
+    @media (max-width: 768px) {
+      width: 280px;
+    }
   }
 }
 
@@ -104,7 +105,7 @@ const getUnit = (name) => {
   flex-direction: column;
   justify-content: space-between;
   width: 100%;
-  max-width: 300px;
+  // max-width: 300px;
 
   @media (min-width: 769px) {
     height: auto;
