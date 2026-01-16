@@ -6,9 +6,9 @@ const isReportModalOpen = ref(false);
 
 // 1. 新增：用來存放準備被檢舉的留言資料
 const activeComment = ref({
-  content: '這是測試用的留言內容，之後會從列表傳進來',
-  userName: '測試員',
-  time: '1d ago'
+    content: '這這是測試用的留言內容的留言內容這這是測試用的留言內容的留言內容這這是測試用的留言內容的留言內容這這是測試用的留言內容的留言內容內容這這是測試用的留言內容的留言內容內容這這',
+    userName: '測試員',
+    time: '1d ago'
 });
 
 const onReportSubmit = (data) => {
@@ -22,13 +22,9 @@ const onReportSubmit = (data) => {
     <div class="parent-container">
         <h1>測試主頁面</h1>
         <button @click="isReportModalOpen = true" class="open-btn">
-        點我打開檢舉彈窗
+            點我打開檢舉彈窗
         </button>
 
-        <CommentReportModal 
-        v-model="isReportModalOpen" 
-        :comment-data="activeComment"
-        @submit="onReportSubmit" 
-        />
+        <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment" @submit="onReportSubmit" />
     </div>
 </template>

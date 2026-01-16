@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 
-// 接收父層傳來的顯示狀態與留言資料
+
 const props = defineProps({
     modelValue: Boolean,
     commentData: {
@@ -14,7 +14,7 @@ const props = defineProps({
     }
 });
 
-// 定義事件：更新狀態與送出資料
+
 const emit = defineEmits(['update:modelValue', 'submit']);
 
 const reasons = [
@@ -29,88 +29,71 @@ const reportNote = ref('');
 
 const handleClose = () => {
     emit('update:modelValue', false);
-    
-    };
 
-    const handleSubmit = () => {
+};
+
+const handleSubmit = () => {
     emit('submit', {
         reason: selectedReason.value,
         note: reportNote.value
     });
-        alert("已送出檢舉");
+    alert("已送出檢舉");
 };
 </script>
 
 <template>
     <Teleport to="body">
-    <div v-if="modelValue" class="black-mask" @click.self="handleClose">
-        <div class="modal-card">
-            <button class="close-x" @click="handleClose" aria-label="關閉">
-            ×
-            </button>
+        <div v-if="modelValue" class="black-mask" @click.self="handleClose">
+            <div class="modal-card">
+                <button class="close-x" @click="handleClose" aria-label="關閉">
+                    ×
+                </button>
 
-            <div class="modal-header">
-            <div class="modal-title zh-h3-bold ">檢舉這則留言</div>
-            <div class="green-divider"></div>
-            </div>
+                <div class="modal-header">
+                    <div class="modal-title zh-h4-bold ">檢舉這則留言</div>
+                    <div class="green-divider"></div>
+                </div>
 
-            <div class="report-content">
-            <div class="comment-box">
-                <p class="comment-text p-p2">{{ commentData.content }}</p>
-                <div class="user-meta p-p3">
-                    @{{ commentData.userName }} · {{ commentData.time }}
+                <div class="report-content">
+                    <div class="comment-box">
+                        <p class="comment-text p-p2">{{ commentData.content }}</p>
+                        <div class="user-meta p-p3">
+                            @{{ commentData.userName }} · {{ commentData.time }}
+                        </div>
+                    </div>
+
+                    <div class="input-section">
+                        <p class="section-title zh-h5-bold">請選擇檢舉原因：</p>
+                        <div class="radio-list">
+                            <label v-for="item in reasons" :key="item" class="radio-item">
+                                <input type="radio" :value="item" v-model="selectedReason" />
+                                <span class="radio-text p-p2">{{ item }}</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="input-section">
+                        <p class="section-title zh-h5-bold">補充說明（選填）：</p>
+                        <textarea v-model="reportNote" placeholder="請說明具體情況..." class="p-p3"></textarea>
+                    </div>
+
+                    <div class="btn-group">
+
+
+                        <BaseBtn title="取消" variant="outline" height="0" class="w-auto" @click="handleClose">
+                        </BaseBtn>
+
+                        <BaseBtn title="送出檢舉" @click="handleSubmit" class="w-auto" />
+
+
+                    </div>
                 </div>
             </div>
-
-            <div class="input-section">
-                <p class="section-title zh-h5-bold">請選擇檢舉原因：</p>
-                <div class="radio-list">
-                <label v-for="item in reasons" :key="item" class="radio-item">
-                    <input type="radio" :value="item" v-model="selectedReason" />
-                    <span class="radio-text p-p2">{{ item }}</span>
-                </label>
-                </div>
-            </div>
-
-            <div class="input-section">
-                <p class="section-title zh-h5-bold">補充說明（選填）：</p>
-                <textarea
-                v-model="reportNote"
-                placeholder="請說明具體情況..."
-                class="p-p3"
-                ></textarea>
-            </div>
-
-            <div class="btn-group">
-                
-
-                <BaseBtn
-                title="取消"
-                variant="outline"
-                height="0"
-                class="w-auto"
-                @click="handleClose">
-                </BaseBtn>
-                
-                <BaseBtn 
-                title="送出檢舉"
-                @click="handleSubmit" 
-                class="w-auto"
-                />
-
-                
-            </div>
-            </div>
-        </div>
         </div>
     </Teleport>
 </template>
 
-
-
 <style scoped lang="scss">
-$primary-green: #438b64;
-
 
 .black-mask {
     position: fixed;
@@ -120,18 +103,22 @@ $primary-green: #438b64;
     justify-content: center;
     align-items: center;
     z-index: 100;
+    padding: 20px;
 }
+
 .modal-card {
-    height: 630px;
+    display: flex;
+    flex-direction: column;
+    height: auto;
     background: $neutral-color-white;
-    width: 90%;
-    max-width: 440px;
+    width: 450px;
+    max-width: calc(100% - 40px);
     border-radius: 12px;
-    padding: 30px;
-    position: relative; 
+    padding: 24px 30px;
+    position: relative;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: hidden;
     text-align: left;
 
     .close-x {
@@ -146,23 +133,23 @@ $primary-green: #438b64;
         line-height: 1;
         padding: 5px;
         transition: color 0.2s;
+        z-index: 2;
+
         &:hover {
             color: $neutral-color-black;
         }
     }
 }
 
-
 .modal-header {
-    
-    margin-top: -30px;
-    margin-bottom: 20px;
+    flex-shrink: 0;
+    margin-bottom: 16px;
 
     .modal-title {
-    color: $primary-color-700;
-
-        margin: 0 0 12px 0;
+        color: $primary-color-700;
+        margin: 0 0 10px 0;
     }
+
     .green-divider {
         height: 1px;
         background: $primary-color-400;
@@ -170,74 +157,122 @@ $primary-green: #438b64;
     }
 }
 
+.report-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0;
+    width: 100%;
+    box-sizing: border-box;
+
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $neutral-color-100;
+        border-radius: 4px;
+    }
+}
 
 .comment-box {
     background: $neutral-color-100;
-    
     border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 20px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+
     .comment-text {
-        margin: 0;
+        flex: 1;
+        overflow-y: auto;
+        word-break: break-all;
+        white-space: pre-wrap;
+        background: transparent;
         line-height: 1.5;
         font-weight: 500;
+
+        &::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: $neutral-color-400;
+            border-radius: 4px;
+        }
     }
+
     .user-meta {
-        margin-top: 10px;
+        margin-top: 6px;
         color: $neutral-color-400;
         border-top: 1px solid $neutral-color-400;
-        padding-top: 8px;
+        padding-top: 6px;
+        flex-shrink: 0;
+    }
+}
+
+
+.btn-group {
+    margin: 0;
+    width: 100%;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 16px;
+
+
+    @media (max-width: 480px) {
+        gap: 15px;
+
+        :deep(.base-btn) {
+            flex: 1;
+        }
     }
 }
 
 .input-section {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+
     .section-title {
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 }
 
 .radio-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
+
     .radio-item {
         display: flex;
         align-items: center;
         gap: 10px;
         cursor: pointer;
+
         input {
-        accent-color: $primary-green;
-        width: 18px;
-        height: 18px;
-        }
-        .radio-text {
-        //   font-size: 15px;
-        color: #666;
+            accent-color: $primary-color-700;
+            width: 18px;
+            height: 18px;
         }
     }
 }
 
 textarea {
     width: 100%;
-    min-height: 100px;
+    /* 保持你設定的 80px */
+    min-height: 80px;
     border-radius: 10px;
     border: 1px solid $neutral-color-400;
-    padding: 12px;
-    //   font-size: 14px;
+    padding: 10px 12px;
     resize: none;
     box-sizing: border-box;
-    &:focus {
-        border-color: $primary-green;
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(67, 139, 100, 0.1);
-    }
-}
 
-.btn-group {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 10px;
+    &:focus {
+        border-color: $primary-color-700;
+        outline: none;
+    }
 }
 </style>

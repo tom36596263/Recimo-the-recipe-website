@@ -219,7 +219,7 @@ const recipeIntroData = {
             {{ recipeIntroData.title }}
             </div>
             <div class="icon-group">
-            <i-material-symbols-error-outline-rounded />
+            <i-material-symbols:edit-outline-rounded />
             <i-material-symbols-thumb-up-outline />
             <i-material-symbols-share-outline />
             </div>
