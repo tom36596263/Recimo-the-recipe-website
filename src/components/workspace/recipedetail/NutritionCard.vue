@@ -55,9 +55,9 @@ const updateServings = (delta) => {
     </div>
 
     <div class="total-calories-box">
-      <span class="fire-icon">🔥</span>
-      <span class="calories-value">{{ totalCalories }}</span>
-      <span class="unit">kcal</span>
+      <i-material-symbols-mode-heat-outline-rounded />
+      <span class="calories-value zh-h4">{{ totalCalories }}</span>
+      <span class="unit zh-h4">kcal</span>
     </div>
 
     <div class="nutrients-content">
@@ -86,12 +86,16 @@ const updateServings = (delta) => {
 @import '@/assets/scss/abstracts/_color.scss';
 
 .nutrition-card {
-  background-color: #f8f8f8;
+  background-color: $neutral-color-100;
   border-radius: 15px;
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+
+  .en-h3 {
+    letter-spacing: 3px;
+  }
 }
 
 /* 修正後的 CSS */
@@ -108,7 +112,7 @@ const updateServings = (delta) => {
 .servings-control {
   display: flex;
   align-items: center;
-  background-color: white;
+  background-color: $neutral-color-white;
   border: 1.5px solid $primary-color-700;
   border-radius: 10px;
   overflow: hidden;
@@ -120,8 +124,8 @@ const updateServings = (delta) => {
     width: 50px;
     height: 100%;
     // 這裡強制設定背景色，避免被預設樣式覆蓋
-    background-color: $primary-color-700 !important; 
-    color: white !important;
+    background-color: $primary-color-700 ; 
+    color: $neutral-color-white;
     font-size: 24px;
     border: none;
     cursor: pointer;
@@ -130,7 +134,7 @@ const updateServings = (delta) => {
     align-items: center;
 
     &:disabled {
-      background-color: #ccc !important;
+      background-color: $neutral-color-400;
       cursor: not-allowed;
     }
   }
@@ -144,9 +148,15 @@ const updateServings = (delta) => {
 .total-calories-box {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 8px;
-  .unit { font-size: 18px; color: #666; }
+  align-items: center; 
+  gap: 8px;           
+
+
+  :deep(svg) {
+    font-size: 22px; 
+    // color: $primary-color-700;
+    display: block;    
+  }
 }
 
 .nutrients-content {
@@ -156,10 +166,10 @@ const updateServings = (delta) => {
 
 .nutrient-item {
   flex: 1;
-  background-color: white;
+  background-color: $neutral-color-white;
   height: 90px;
   border-radius: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid $neutral-color-400;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -170,6 +180,6 @@ const updateServings = (delta) => {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  .tag { background-color: #e8f5e9; color: #4caf50; padding: 4px 12px; border-radius: 6px; font-size: 12px; }
+  .tag { background-color: $neutral-color-100; color: $primary-color-400; padding: 4px 12px; border-radius: 6px; font-size: 12px; }
 }
 </style>
