@@ -1,13 +1,16 @@
+@use "../abstracts/color";
+@use "../abstracts/mixins";
+
 // 一般表單 Input (維持原本設計)
 .form-input {
-  @include input-style();
+  @include mixins.input-style();
 
   &.is-error {
-    @include input-status($secondary-color-danger-700);
+    @include mixins.input-status(color.$secondary-color-danger-700);
   }
 
   &.is-success {
-    @include input-status($secondary-color-success-700);
+    @include mixins.input-status(color.$secondary-color-success-700);
   }
 }
 

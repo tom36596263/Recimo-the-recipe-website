@@ -1,3 +1,6 @@
+@use "../abstracts/color";
+@use "../abstracts/variables";
+
 
 .workspace-layout {
     display: flex;
@@ -6,8 +9,8 @@
 
     // // 側邊欄固定寬度
     .sidebar {
-        width: $sidebar-width;
-        background: $primary-color-100;
+        width: variables.$sidebar-width;
+        background: color.$primary-color-100;
         display: flex;
         flex-direction: column;
         padding: 24px;
@@ -15,7 +18,7 @@
         .logo {
             font-size: 1.5rem;
             font-weight: bold;
-            color: $primary-color-800;
+            color: color.$primary-color-800;
             margin-bottom: 2rem;
         }
     }
