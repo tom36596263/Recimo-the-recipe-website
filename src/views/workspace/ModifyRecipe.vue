@@ -51,6 +51,10 @@ const onPostReportSubmit = (data) => {
 
         <PostReportModal v-model="isPostModalOpen" :comment-data="activePost" @submit="onPostReportSubmit" />
     </div>
+    
+    <i-material-symbols:error-outline-rounded />
+    
+    
 </template>
 
 <style scoped>

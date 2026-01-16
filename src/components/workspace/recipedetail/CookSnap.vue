@@ -1,53 +1,74 @@
 <script setup>
 import { ref } from 'vue';
+// 1. 引入檢舉彈窗組件
+import PostReportModal from '@/components/workspace/recipedetail/modals/PostReportModal.vue';
 
 const props = defineProps({
-    list: {
-        type: Array,
-        required: true,
-        default: () => []
-    }
+  list: {
+    type: Array,
+    required: true,
+    default: () => []
+  }
 });
 
 // 建立 DOM 引用
 const fileInput = ref(null);
 const wallViewport = ref(null);
 
-// 觸發上傳按鈕
+// --- 彈窗控制邏輯 ---
+const isReportModalOpen = ref(false);
+const selectedPhotoData = ref({
+  content: '',
+  userName: '',
+  time: '',
+  image: ''
+});
+
+// 處理檢舉點擊
+const handleReport = (photo) => {
+  // 將點選的照片資料格式化，傳遞給彈窗
+  selectedPhotoData.value = {
+    content: photo.comment,      // 照片留言內容
+    userName: photo.userName || '匿名用戶', // 假設資料中有 userName
+    time: photo.time || '剛剛',   // 假設資料中有時間
+    image: photo.url            // 照片網址
+  };
+  // 開啟彈窗
+  isReportModalOpen.value = true;
+};
+
+const onReportSubmit = (reportResult) => {
+  console.log('收到檢舉提交資料:', reportResult);
+  // 這裡執行 API 提交邏輯
+  isReportModalOpen.value = false;
+};
+// ------------------
+
 const handleUploadClick = () => {
-    fileInput.value.click();
+  fileInput.value.click();
 };
 
-// 處理左右箭頭捲動
 const scrollWall = (direction) => {
-    if (wallViewport.value) {
-        // 捲動距離 = 一張圖寬(240px) + 間距(16px)
-        const scrollAmount = 256; 
-        wallViewport.value.scrollBy({
-            left: direction === 'next' ? scrollAmount : -scrollAmount,
-            behavior: 'smooth'
-        });
-    }
+  if (wallViewport.value) {
+    const scrollAmount = 256;
+    wallViewport.value.scrollBy({
+      left: direction === 'next' ? scrollAmount : -scrollAmount,
+      behavior: 'smooth'
+    });
+  }
 };
 
-// 處理檔案選取 (預留功能)
 const onFileSelected = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        console.log("已選取檔案:", file.name);
-    }
+  const file = event.target.files[0];
+  if (file) {
+    console.log("已選取檔案:", file.name);
+  }
 };
 </script>
 
 <template>
   <div class="recipe-result-container">
-    <input 
-        type="file" 
-        ref="fileInput" 
-        style="display: none" 
-        accept="image/*" 
-        @change="onFileSelected"
-    />
+    <input type="file" ref="fileInput" style="display: none" accept="image/*" @change="onFileSelected" />
 
     <div class="result-header">
       <div class="upload-trigger-area" @click="handleUploadClick">
@@ -77,6 +98,10 @@ const onFileSelected = (event) => {
           <img :src="photo.url" :alt="'User work ' + index">
           <div class="work-overlay">
             <p class="comment-text p-p2">{{ photo.comment }}</p>
+
+            <div class="report-icon-wrapper" @click.stop="handleReport(photo)">
+              <i-material-symbols:error-outline-rounded />
+            </div>
           </div>
         </div>
       </div>
@@ -85,12 +110,15 @@ const onFileSelected = (event) => {
         <i-material-symbols-arrow-forward-ios-rounded />
       </button>
     </div>
+
+    <PostReportModal v-model="isReportModalOpen" :commentData="selectedPhotoData" @submit="onReportSubmit" />
   </div>
 </template>
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
+// ... 你的樣式表保持不變 ...
 .recipe-result-container {
   padding: 40px 0;
 
@@ -113,23 +141,37 @@ const onFileSelected = (event) => {
       cursor: pointer;
       transition: all 0.3s ease;
 
-      &:hover { 
+      &:hover {
         background-color: $primary-color-100;
-        border-style: dashed; 
+        border-style: dashed;
       }
 
-      .plus-sign { color: $neutral-color-black; margin-bottom: -4px; }
-      .main-label { color: $neutral-color-black; margin-top: 4px; }
-      .sub-label { color: $neutral-color-400; transform: scale(0.8); }
+      .plus-sign {
+        color: $neutral-color-black;
+        margin-bottom: -4px;
+      }
+
+      .main-label {
+        color: $neutral-color-black;
+        margin-top: 4px;
+      }
+
+      .sub-label {
+        color: $neutral-color-400;
+        transform: scale(0.8);
+      }
     }
 
     .header-text-group {
-      .description { margin-top: 8px; color: $neutral-color-700; }
+      .description {
+        margin-top: 8px;
+        color: $neutral-color-700;
+      }
     }
   }
 
   .result-wall {
-    position: relative; // 重要：讓箭頭可以定位
+    position: relative;
     display: flex;
     align-items: center;
 
@@ -138,15 +180,16 @@ const onFileSelected = (event) => {
       gap: 16px;
       overflow-x: auto;
       padding: 10px 0;
-      scroll-behavior: smooth; // 平滑捲動
-      
-      // 隱藏捲軸
-      &::-webkit-scrollbar { display: none; }
+      scroll-behavior: smooth;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
 
-    // 箭頭按鈕樣式
     .nav-btn {
       position: absolute;
       top: 50%;
@@ -163,18 +206,24 @@ const onFileSelected = (event) => {
       cursor: pointer;
       z-index: 5;
       transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
       &:hover {
         background-color: $primary-color-700;
         color: $neutral-color-white;
       }
 
-      &.prev { left: -22px; }
-      &.next { right: -22px; }
+      &.prev {
+        left: -22px;
+      }
 
-      // Icon 大小
-      svg { font-size: 20px; }
+      &.next {
+        right: -22px;
+      }
+
+      svg {
+        font-size: 20px;
+      }
     }
 
     .work-item {
@@ -183,10 +232,10 @@ const onFileSelected = (event) => {
       position: relative;
       border-radius: 12px;
       overflow: hidden;
-      
-      img { 
-        width: 100%; 
-        height: 100%; 
+
+      img {
+        width: 100%;
+        height: 100%;
         object-fit: cover;
         transition: transform 0.5s ease;
       }
@@ -207,11 +256,35 @@ const onFileSelected = (event) => {
           text-align: center;
           line-height: 1.6;
         }
+
+        .report-icon-wrapper {
+          position: absolute;
+          bottom: 12px;
+          right: 12px;
+          color: rgba($neutral-color-white, 0.7);
+          cursor: pointer;
+          display: flex;
+          transition: all 0.2s ease;
+
+          &:hover {
+            color: $neutral-color-white;
+            transform: scale(1.1);
+          }
+
+          svg {
+            font-size: 20px;
+          }
+        }
       }
 
       &:hover {
-        img { transform: scale(1.1); }
-        .work-overlay { opacity: 1; }
+        img {
+          transform: scale(1.1);
+        }
+
+        .work-overlay {
+          opacity: 1;
+        }
       }
     }
   }
@@ -222,9 +295,14 @@ const onFileSelected = (event) => {
     flex-direction: column;
     text-align: center;
     gap: 20px;
-    .upload-card { width: 100%; }
+
+    .upload-card {
+      width: 100%;
+    }
   }
-  // 手機版隱藏箭頭，改用直接滑動
-  .nav-btn { display: none; }
+
+  .nav-btn {
+    display: none;
+  }
 }
 </style>

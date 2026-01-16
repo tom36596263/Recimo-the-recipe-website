@@ -9,7 +9,7 @@ const props = defineProps({
             content: '載入中...',
             userName: '未知用戶',
             time: '',
-            image: '' 
+            image: ''
         })
     }
 });
@@ -79,7 +79,8 @@ const handleSubmit = () => {
 
                     <div class="input-section">
                         <p class="section-title zh-h5-bold">補充說明（選填）：</p>
-                        <textarea v-model="reportNote" placeholder="請說明具體情況..." class="p-p3"></textarea>
+                        <textarea v-model="reportNote" placeholder="請說明具體情況..."
+                            class="p-p3 custom-scrollbar"></textarea>
                     </div>
 
                     <div class="btn-group">
@@ -93,7 +94,7 @@ const handleSubmit = () => {
 </template>
 
 <style scoped lang="scss">
-/* 保留你原本的所有基礎樣式... */
+@import '@/assets/scss/abstracts/_color.scss';
 
 .black-mask {
     position: fixed;
@@ -154,7 +155,7 @@ const handleSubmit = () => {
 
 .report-content {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: visible;
     width: 100%;
 }
 
@@ -220,7 +221,6 @@ const handleSubmit = () => {
     }
 }
 
-
 .input-section {
     margin-bottom: 16px;
 
@@ -256,10 +256,34 @@ textarea {
     padding: 10px 12px;
     resize: none;
     box-sizing: border-box;
+    /* 核心修改：強制折行與垂直捲軸 */
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    overflow-y: auto;
 
     &:focus {
         border-color: $primary-color-700;
         outline: none;
+    }
+
+    /* 美化捲軸樣式 */
+    &.custom-scrollbar {
+        &::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: $neutral-color-400;
+            border-radius: 4px;
+
+            &:hover {
+                background: $primary-color-400;
+            }
+        }
     }
 }
 
