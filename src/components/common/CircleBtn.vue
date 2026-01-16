@@ -79,6 +79,7 @@ const buttonClass = computed(() => {
         color: $primary-color-700;
         .icon-circle {
         background-color: $neutral-color-white;
+        opacity:.6;
         color: $primary-color-700;
         }
         &:hover {

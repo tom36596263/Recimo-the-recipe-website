@@ -1,3 +1,5 @@
+@use "../abstracts/color";
+
 .pagination {
   display: flex;
   align-items: center;
@@ -17,12 +19,12 @@
     height: 40px;
 
     // 2. 外觀樣式 (預設狀態)
-    border: 1px solid $primary-color-700; // 綠色邊框
+    border: 1px solid color.$primary-color-700; // 綠色邊框
     border-radius: 8px; // 圓角 (對應 $radius-base)
     background-color: transparent; // 背景透明
 
     // 3. 文字樣式
-    color: $primary-color-700; // 綠色文字
+    color: color.$primary-color-700; // 綠色文字
     // 註：如果你想要像圖二那樣文字稍微偏灰，可以改用下行：
     // color: $neutral-color-800;
 
@@ -33,27 +35,27 @@
 
     // --- Hover 狀態 (滑鼠移上去) ---
     &:hover {
-      background-color: $primary-color-100; // 變成淺綠色背景
-      color: $primary-color-800;
+      background-color: color.$primary-color-100; // 變成淺綠色背景
+      color: color.$primary-color-800;
     }
 
     // --- Active 狀態 (目前所在頁面：深綠色實心) ---
     &.active {
-      background-color: $primary-color-700; // 深綠背景
-      color: $neutral-color-white; // 白色文字
-      border-color: $primary-color-700; // 確保邊框顏色一致
+      background-color: color.$primary-color-700; // 深綠背景
+      color: color.$neutral-color-white; // 白色文字
+      border-color: color.$primary-color-700; // 確保邊框顏色一致
 
       // Active 狀態通常不需要 Hover 變色，維持原樣
       &:hover {
-        background-color: $primary-color-700;
+        background-color: color.$primary-color-700;
         cursor: default;
       }
     }
 
     // --- Disabled 狀態 (選用：例如不能按上一頁時) ---
     &.disabled {
-      border-color: $neutral-color-400;
-      color: $neutral-color-400;
+      border-color: color.$neutral-color-400;
+      color: color.$neutral-color-400;
       cursor: not-allowed;
       pointer-events: none; // 禁止點擊
 

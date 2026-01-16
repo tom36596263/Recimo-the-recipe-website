@@ -1,0 +1,79 @@
+<script setup>
+
+</script>
+<template>
+    <div class="pagination">
+        <a href="#" class="page-link">1</a>
+        <a href="#" class="page-link active">2</a>
+        <a href="#" class="page-link">3</a>
+        <a href="#" class="page-link">4</a>
+    </div>
+</template>
+<style lang="scss" scoped>
+    .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center; // 讓整排按鈕置中
+    gap: 12px; // 按鈕之間的間距 (可依需求調整 8px - 16px)
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+
+    // 每一個分頁按鈕 (如果是 <a class="page-link"> 或 <button class="page-link">)
+    .page-link {
+        // 1. 基礎結構 (Box Model)
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 40px; // 設定為正方形 (參考你之前的 $height-base)
+        height: 40px;
+
+        // 2. 外觀樣式 (預設狀態)
+        border: 1px solid $primary-color-700; // 綠色邊框
+        border-radius: 8px; // 圓角 (對應 $radius-base)
+        background-color: transparent; // 背景透明
+
+        // 3. 文字樣式
+        color: $primary-color-700; // 綠色文字
+        // 註：如果你想要像圖二那樣文字稍微偏灰，可以改用下行：
+        // color: $neutral-color-800;
+
+        font-size: 16px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease; // 平滑過渡效果
+
+        // --- Hover 狀態 (滑鼠移上去) ---
+        &:hover {
+            background-color: $primary-color-100; // 變成淺綠色背景
+            color: $primary-color-800;
+        }
+
+        // --- Active 狀態 (目前所在頁面：深綠色實心) ---
+        &.active {
+            background-color: $primary-color-700; // 深綠背景
+            color: $neutral-color-white; // 白色文字
+            border-color: $primary-color-700; // 確保邊框顏色一致
+
+            // Active 狀態通常不需要 Hover 變色，維持原樣
+            &:hover {
+                background-color: $primary-color-700;
+                cursor: default;
+            }
+        }
+
+        // --- Disabled 狀態 (選用：例如不能按上一頁時) ---
+        &.disabled {
+            border-color: $neutral-color-400;
+            color: $neutral-color-400;
+            cursor: not-allowed;
+            pointer-events: none; // 禁止點擊
+
+            &:hover {
+            background-color: transparent;
+            }
+        }
+    }
+}
+
+</style>

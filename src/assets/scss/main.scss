@@ -1,29 +1,30 @@
-//引入變數
-@import '/src/assets/scss/abstracts/variables';
-@import '/src/assets/scss/abstracts/font';
-@import '/src/assets/scss/abstracts/color';
+// 引入變數
+@use "sass:list";
+@use 'abstracts/variables';
+@use 'abstracts/font';
+@use 'abstracts/color';
 
-//函式庫
-@import '/src/assets/scss/abstracts/mixins';
+// 函式庫
+@use 'abstracts/mixins';
 
-//組件
-@import '/src/assets/scss/components-scss/input';
-@import '/src/assets/scss/components-scss/btn';
-@import '/src/assets/scss/components-scss/pagination';
-@import '/src/assets/scss/components-scss/modal';
+// 組件
+@use 'components-scss/input';
+@use 'components-scss/btn';
+@use 'components-scss/pagination';
+@use 'components-scss/modal';
 
-//版面配置
-@import '/src/assets/scss/layouts/grid';
-@import '/src/assets/scss/layouts/default-layout';
-@import '/src/assets/scss/layouts/workspace-layout';
-@import '/src/assets/scss/layouts/share-layout';
+// 版面配置
+@use 'layouts/grid';
+@use 'layouts/default-layout';
+@use 'layouts/workspace-layout';
+@use 'layouts/share-layout';
 
 // 此檔案用於存放全域css
 body {
   margin: 0;
   font-family: sans-serif;
-  background-color: $neutral-color-white;
-  color: $neutral-color-800;
+  background-color: color.$neutral-color-white;
+  color: color.$neutral-color-800;
   overflow-x: hidden;
 }
 
@@ -81,43 +82,67 @@ $heading-config-zh: (
   )
 );
 @each $name, $values in $heading-config-zh {
-  $min: nth($values, 1);
-  $max: nth($values, 2);
-  $weight: nth($values, 3);
+  $min: list.nth($values, 1);
+  $max: list.nth($values, 2);
+  $weight: list.nth($values, 3);
 
   .zh-#{$name} {
-    @include heading-zh($min, $max, $weight);
+    @include mixins.heading-zh($min, $max, $weight);
   }
 }
 
 // 英文標題迴圈
 $heading-config-en: (
-  'h1': (1.875rem, 1.875rem, 400),
-  'h1-bold': (1.875rem, 1.875rem, 700),
-  'h2': (1.5rem, 1.5rem, 400),
-  'h2-bold': ( 1.5rem, 1.5rem, 700 ),
-  'h3': ( 1rem, 1rem, 400 ),
-  'h3-bold': ( 1rem, 1rem, 700 )
+  'h1': (
+    1.875rem,
+    1.875rem,
+    400
+  ),
+  'h1-bold': (
+    1.875rem,
+    1.875rem,
+    700
+  ),
+  'h2': (
+    1.5rem,
+    1.5rem,
+    400
+  ),
+  'h2-bold': (
+    1.5rem,
+    1.5rem,
+    700
+  ),
+  'h3': (
+    1rem,
+    1rem,
+    400
+  ),
+  'h3-bold': (
+    1rem,
+    1rem,
+    700
+  )
 );
 @each $name, $values in $heading-config-en {
-  $min: nth($values, 1);
-  $max: nth($values, 2);
-  $weight: nth($values, 3);
+  $min: list.nth($values, 1);
+  $max: list.nth($values, 2);
+  $weight: list.nth($values, 3);
 
   .en-#{$name} {
-    @include heading-en($min, $max, $weight);
+    @include mixins.heading-en($min, $max, $weight);
   }
 }
 
 //內文
 .p-p1 {
-  @include text-style(1rem, $lh-body);
+  @include mixins.text-style(1rem, font.$lh-body);
 }
 
 .p-p2 {
-  @include text-style(0.875rem);
+  @include mixins.text-style(0.875rem);
 }
 
 .p-p3 {
-  @include text-style(0.75rem);
+  @include mixins.text-style(0.75rem);
 }

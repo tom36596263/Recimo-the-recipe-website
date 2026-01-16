@@ -1,8 +1,10 @@
+@use "../abstracts/color";
+
 .default-layout {
     flex-direction: column;
 }
 .site-footer {
-    background-color: $primary-color-100;
+    background-color: color.$primary-color-100;
     padding: 40px 0;
     text-align: center;
 }

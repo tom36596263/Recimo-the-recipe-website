@@ -2,7 +2,7 @@
     import CircleBtn from '@/components/common/CircleBtn.vue'
 </script>
 <template>
-    <div class="col-6 find-recipe-info">
+    <div class="col-6 col-md-12 find-recipe-info">
         <div class="find-recipe-title">
             <h3 class="zh-h3">用食材找到好料理</h3>
             <h2 class="zh-h2-bold">準備好給你的廚房一點新鮮感</h2>
@@ -15,7 +15,7 @@
         <CircleBtn title="尋找食譜" href="/recipes"/>
     </div>
 
-    <div class="col-6">
+    <div class="col-6 col-md-12">
         <div class="find-recipe-img">
             <img src="@/assets/images/site/meal-pic.png" alt="菜餚">
         </div>
@@ -62,6 +62,11 @@
             height: 50px;
             background-color: $neutral-color-100;
             
+        }
+    }
+    @media screen and (max-width: 810px){
+        .find-recipe-img{
+            margin-top: 40px;
         }
     }
 </style>
