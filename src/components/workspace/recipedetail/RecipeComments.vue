@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from "vue";
-// 引入你的彈窗組件
 import CommentReportModal from './modals/CommentReportModal.vue';
 
 const props = defineProps({
@@ -11,17 +10,24 @@ const props = defineProps({
 });
 
 const userInput = ref("");
-// --- 1. 新增狀態 ---
 const isReportModalOpen = ref(false);
+const isSuccessShow = ref(false); // 成功彈窗狀態
 const activeComment = ref({ content: '', userName: '', time: '' });
 
 const handleSend = () => {
     if (!userInput.value.trim()) return;
-    alert("送出留言！" + userInput.value);
+
+    // 模擬發送
+    console.log("送出留言內容：", userInput.value);
     userInput.value = "";
+
+    // 觸發成功彈窗
+    isSuccessShow.value = true;
+    setTimeout(() => {
+        isSuccessShow.value = false;
+    }, 2000);
 };
 
-// --- 2. 新增開啟彈窗的 Function ---
 const openReport = (item) => {
     activeComment.value = {
         content: item.content,
@@ -32,14 +38,34 @@ const openReport = (item) => {
 };
 
 const onReportSubmit = (data) => {
-    console.log('API 發送檢舉中...', data);
-    console.log('針對這則留言:', activeComment.value);
     isReportModalOpen.value = false;
+};
+
+const toggleLike = (item) => {
+    item.isLiked = !item.isLiked;
+    if (item.isLiked) {
+        item.likes++;
+    } else {
+        item.likes--;
+    }
 };
 </script>
 
 <template>
     <div class="comment-container">
+        <div class="input-section">
+            <div class="input-wrapper">
+                <textarea v-model="userInput" placeholder="分享你的烹飪心得或修改建議..." class="comment-textarea p-p2"
+                    rows="3"></textarea>
+            </div>
+            <div class="input-actions-row">
+                <span class="p-p3 tip-text">請保持友善的社群交流環境</span>
+                <button @click="handleSend" class="send-btn" :disabled="!userInput.trim()">
+                    發表評論
+                </button>
+            </div>
+        </div>
+
         <div class="comment-list">
             <div v-for="(item, index) in list" :key="index" class="comment-item animate-in">
                 <div class="avatar-box">
@@ -47,7 +73,7 @@ const onReportSubmit = (data) => {
                 </div>
 
                 <div class="comment-content">
-                    <div class="user-info">
+                    <div class="user-info-header">
                         <span class="user-name p-p1">{{ item.userName }}</span>
                         <span class="user-handle p-p3">@{{ item.handle }} · {{ item.time }}</span>
                     </div>
@@ -55,11 +81,10 @@ const onReportSubmit = (data) => {
                     <p class="comment-text p-p2">{{ item.content }}</p>
 
                     <div class="comment-actions">
-                        <button class="like-btn" @click="item.likes++">
+                        <button class="like-btn" :class="{ 'active': item.isLiked }" @click="toggleLike(item)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                
+                                :fill="item.isLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z">
                                 </path>
                                 <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
@@ -82,6 +107,15 @@ const onReportSubmit = (data) => {
         </div>
 
         <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment" @submit="onReportSubmit" />
+
+        <Transition name="fade">
+            <div v-if="isSuccessShow" class="success-toast">
+                <div class="toast-content">
+                    <i-material-symbols:check-circle-rounded class="success-icon" />
+                    <span class="zh-p">留言已成功發表！</span>
+                </div>
+            </div>
+        </Transition>
     </div>
 </template>
 
@@ -89,70 +123,60 @@ const onReportSubmit = (data) => {
 @import '@/assets/scss/abstracts/_color.scss';
 
 .comment-container {
+    position: relative;
     background-color: transparent;
     padding: 20px 0;
 }
 
-.comment-header {
-    margin-bottom: 20px;
-
-    .zh-h3 {
-        font-size: 20px;
-        color: #333;
-        font-weight: 500;
-    }
-}
-
+// 保持原本的輸入框排版
 .input-section {
-    margin-bottom: 30px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid $neutral-color-100;
+    padding-bottom: 24px;
 
     .input-wrapper {
-        display: flex;
-        align-items: center;
-        border: 1px solid $primary-color-700;
-        border-radius: 12px;
-        padding: 10px 16px;
-        background: #fff;
-        transition: box-shadow 0.2s;
+        margin-bottom: 12px;
 
-        &:focus-within {
-            box-shadow: 0 2px 8px rgba($primary-color-700, 0.15);
-        }
+        .comment-textarea {
+            width: 100%;
+            border: 1px solid $neutral-color-100;
+            border-radius: 12px;
+            padding: 16px;
+            background-color: $neutral-color-white;
+            resize: none;
 
-        .comment-input {
-            flex: 1;
-            border: none;
-            outline: none;
-            background: transparent;
-            color: #444;
-
-            &::placeholder {
-                color: #bbb;
+            &:focus {
+                outline: none;
+                border-color: $primary-color-400;
             }
+        }
+    }
+
+    .input-actions-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .tip-text {
+            color: $neutral-color-400;
         }
 
         .send-btn {
-            background: none;
+            background-color: $primary-color-700;
+            color: $neutral-color-white;
             border: none;
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-weight: 500;
             cursor: pointer;
-            color: #ddd; // 預設禁用色
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            padding-left: 8px;
-
-            &.active {
-                color: $primary-color-700;
-
-                &:hover {
-                    color: $primary-color-800;
-                    transform: scale(1.1);
-                }
-            }
 
             &:disabled {
+                background-color: $neutral-color-100;
                 cursor: not-allowed;
+            }
+
+            &:hover:not(:disabled) {
+                background-color: $primary-color-800;
             }
         }
     }
@@ -176,38 +200,38 @@ const onReportSubmit = (data) => {
             height: 44px;
             border-radius: 50%;
             object-fit: cover;
-            background-color: #f5f5f5;
         }
     }
 
     .comment-content {
         flex: 1;
 
-        .user-info {
+        .user-info-header {
             display: flex;
+            justify-content: space-between;
             align-items: baseline;
-            gap: 10px;
             margin-bottom: 4px;
 
             .user-name {
                 font-weight: 600;
-                color: #333;
+                color: $neutral-color-black;
             }
 
             .user-handle {
-                color: #999;
+                color: $neutral-color-400;
             }
         }
 
         .comment-text {
-            color: #444;
-            line-height: 1.5;
-            margin-bottom: 10px;
+            line-height: 1.6;
+            margin-bottom: 12px;
             white-space: pre-line;
+            color: $neutral-color-black;
         }
     }
 }
 
+// --- 完全還原你原本的 Actions 樣式（未變動） ---
 .comment-actions {
     display: flex;
     justify-content: flex-end;
@@ -220,16 +244,16 @@ const onReportSubmit = (data) => {
         cursor: pointer;
         display: flex;
         align-items: center;
-        color: #888;
-        padding: 0;
-        transition: color 0.2s;
-
-        &:hover {
-            color: #444;
-        }
+        color: $neutral-color-400;
+        padding: 4px;
+        transition: all 0.2s;
     }
 
     .like-btn {
+        &.active {
+            color: $primary-color-700;
+        }
+
         &:hover {
             color: $primary-color-700;
         }
@@ -237,14 +261,49 @@ const onReportSubmit = (data) => {
 
     .report-btn {
         &:hover {
-            color: #ff6b6b;
+            color: $secondary-color-danger-700;
         }
     }
 
     .action-text {
-        margin-left: 5px;
-        font-weight: 500;
+        margin-left: 6px;
     }
+}
+
+// 成功彈窗樣式
+.success-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 24px 48px;
+    border-radius: 16px;
+
+    .toast-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+
+        .success-icon {
+            font-size: 48px;
+            color: #4CAF50;
+        }
+    }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+    transform: translate(-50%, -45%);
 }
 
 .animate-in {

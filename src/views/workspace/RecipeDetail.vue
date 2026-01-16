@@ -177,7 +177,7 @@ const recipeIntroData = {
     },
     {
         url: '/img/social/32/5.jpg',
-        comment: '沒開玩笑，超級好吃!'
+        comment: '沒開玩笑，超級好吃'
     }
 ];
     </script>

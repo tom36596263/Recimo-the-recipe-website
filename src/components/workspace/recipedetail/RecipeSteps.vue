@@ -10,7 +10,14 @@ const props = defineProps({
 
 <template>
 <div class="step-container">
-  <div class="zh-h3">烹飪流程指南</div>
+  <!-- <div class="step-header-content"> -->
+    <div class="zh-h3">烹飪流程指南</div>
+
+  <!-- <div class="info-right">
+      <BaseBtn title="開始烹飪" class="cook-btn" />
+    </div> -->
+  <!-- </div> -->
+  
 
   <div 
     v-for="(step, index) in steps" 
@@ -53,6 +60,11 @@ const props = defineProps({
 <style lang="scss" scoped>
 @import "@/assets/scss/abstracts/_color.scss";
 
+// .step-header-content {
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+// }
 .zh-h3 {
   padding-top: 20px; // 稍微縮減頂部間距
   padding-bottom: 20px;
