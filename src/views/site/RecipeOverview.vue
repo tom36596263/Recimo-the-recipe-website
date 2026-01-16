@@ -1,68 +1,76 @@
 <script setup>
 import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
 import FilterSection from '@/components/site/RecipeOverview/FilterSection.vue'
-
+import PageBtn from '@/components/common/PageBtn.vue'
 import { ref, onMounted, computed } from 'vue';
 
 const allRecipe = ref([])
 const currentPage = ref(1)
 const pageSize = 6
 
+onMounted(async () => {
+    try {
+        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
+            fetch('/data/recipe/recipes.json').then(res => res.json()),
+            fetch('/data/recipe/recipe_tag.json').then(res => res.json()), 
+            fetch('/data/recipe/tags.json').then(res => res.json())
+        ]);
 
-const recipes = ref([
-    {
-        "recipe_name": "舒肥雞胸藜麥飯",
-        "image_url": "/img/mall/PROD-001_01.jpg",
-        "tags": ["低卡健身系列", "低溫舒肥", "超級食物"],
-        "nutritional_info": {
-            "calories": "250kcal",
-            "serving_size": "1",
-            "cooking_time": "3分鐘",
-        },
-        "author": {
-        "name": "健康廚房",
-        "likes": 850
-        }
-    },
-    {
-        "recipe_name": "香煎鮭魚糙米便當",
-        "image_url": "/img/mall/PROD-002_01.jpg",
-        "tags": ["低卡健身系列", "阿拉斯加鮭魚", "高纖"],
-        "nutritional_info": {
-            "calories": "580kcal",
-            "serving_size": "1",
-            "cooking_time": "5分鐘",
-        },
-        "author": {
-        "name": "山海味鮮",
-        "likes": 1200
-        }
-    },
-    {
-        "recipe_name": "蒜香毛豆嫩豬排",
-        "image_url": "/img/mall/PROD-003_01.jpg",
-        "tags": ["低卡健身系列", "台灣活菌豬", "職人調味"],
-        "nutritional_info": {
-            "calories": "318kcal",
-            "serving_size": "1",
-            "cooking_time": "4分鐘",
-        },
-        "author": {
-        "name": "職人調味",
-        "likes": 640
-        }
+        const tagMap = {};
+        resTags.forEach(tag => {
+            tagMap[tag.tag_id] = tag.tag_name;
+        });
+
+        allRecipe.value = resRecipes.map(recipe => {
+
+            const matchedTagIds = resRecipeTags
+                .filter(rt => rt.recipe_id === recipe.recipe_id)
+                .map(rt => rt.tag_id);
+
+            // 透過 tagMap 轉換成 tag_name 陣列
+            const recipeTagsNames = matchedTagIds.map(id => tagMap[id]).filter(Boolean);
+
+            return {
+                recipe_name: recipe.recipe_title,
+                image_url: recipe.recipe_image_url,
+                tags: recipeTagsNames,
+                nutritional_info: {
+                    calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
+                    serving_size: recipe.recipe_servings,
+                    cooking_time: `${recipe.recipe_total_time.split(':')[1]}分鐘` 
+                },
+                author: {
+                    name: 'Recimo',
+                    likes: recipe.recipe_like_count
+                }
+            };
+        });
+    } catch (error) {
+        console.error('載入資料失敗:', error);
     }
-]);
+});
 
+// 計算總頁數
+const totalPages = computed(() => {
+    return Math.ceil(allRecipe.value.length / pageSize);
+});
+
+// 根據當前頁碼計算應顯示的食譜
+const recipes = computed(() => {
+    const start = (currentPage.value - 1) * pageSize;
+    const end = start + pageSize;
+    return allRecipe.value.slice(start, end);
+});
+
+const handlePageChange = (page) => {
+    currentPage.value = page;
+};
 </script>
 
 <template>
     <section class="container filter-content">
         <div class="row">
-            
-                <FilterSection />
-            
-            
+            <FilterSection />
         </div>
     </section>
     <section class="container recipe-cards-section">
@@ -75,14 +83,8 @@ const recipes = ref([
 
     <section class="container">
         <div class="row">
-            <div class="pagination">
-                <a href="#" class="page-link">1</a>
-                <a href="#" class="page-link active">2</a>
-                <a href="#" class="page-link">3</a>
-                <a href="#" class="page-link">4</a>
-            </div>
+            <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
         </div>
-
     </section>
     
 </template>

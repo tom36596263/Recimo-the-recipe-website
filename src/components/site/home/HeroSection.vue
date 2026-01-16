@@ -63,7 +63,7 @@
     .hero-container{
         display: flex;
         align-items: center;
-        overflow: hidden;
+        // overflow: hidden;
         
         .hero-title{
             margin-bottom: 30px;
@@ -87,6 +87,7 @@
             transform: translate(-50%, -50%);
             position: absolute;
             transition: height 1s ease;
+            overflow: hidden;
         }
         .hero-img1{
             opacity: 1;

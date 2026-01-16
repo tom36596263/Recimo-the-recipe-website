@@ -60,7 +60,7 @@ const handleSelect = (filterId, option) => {
     <div class="col-3 col-lg-12">
         <div class="inspiration-kitchen-cta">
             <h3 class="zh-h3-bold">用食材找到好料理</h3>
-            <BaseBtn title="前往靈感廚房" height="50"/>
+            <BaseBtn title="前往靈感廚房" height="50" variant="outline"/>
         </div>
     </div>
     

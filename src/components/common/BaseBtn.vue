@@ -53,10 +53,9 @@ const buttonClasses = computed(() => {
 
 const handleClick = (event) => {
     if(props.disabled)return;
-    // 如果是內部連結且沒有 '#'
     if (props.href && props.href.startsWith('/')) {
-        event.preventDefault(); // 攔截原生跳轉
-        router.push(props.href); // 使用 router 跳轉
+        event.preventDefault();
+        router.push(props.href); 
     } else {
         emit('click', event);
     }
@@ -116,7 +115,7 @@ const buttonStyle = computed(() => {
 
   // Outline
     &.btn-outline {
-        background-color: $neutral-color-white;
+        background-color: transparent;
         border-color: $primary-color-700;
         color: $primary-color-700;
         &:hover:not(:disabled) {
