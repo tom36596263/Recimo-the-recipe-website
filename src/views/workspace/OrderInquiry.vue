@@ -26,6 +26,17 @@ const orders = ref([
     payment: '已付款',
     status: 3, // 對應到 '送達'
     items: [{ name: '鮮蝦義大利麵', qty: 2, price: 220 }]
+  },
+  {
+    id: '111019',
+    date: '114/11/04',
+    trackingNo: '1211032',
+    receiver: '李大明',
+    phone: '0912345678',
+    method: '超商取貨',
+    payment: '已付款',
+    status: 3, // 對應到 '送達'
+    items: [{ name: '鮮蝦義大利麵', qty: 2, price: 220 }]
   }
 ]);
 
@@ -48,11 +59,11 @@ const onCancel = (orderId) => {
 </template>
 
 <style>
-.order-page {
+/* .order-page {
   padding: 20px;
   padding-bottom: 80px;
   margin-bottom: 20px;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 200px);
   overflow-y: auto;
-}
+} */
 </style>

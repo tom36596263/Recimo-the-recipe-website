@@ -33,6 +33,7 @@ const mealSlots = ref([
   width: 7%;
   text-align: center;
   gap: 4px;
+  flex-shrink: 0;
 
   &__date,
   &__slot,
@@ -49,7 +50,7 @@ const mealSlots = ref([
   }
 
   &__slot {
-    height: 200px; // 只有它比較高
+    height: 200px;
   }
 }
 </style>
