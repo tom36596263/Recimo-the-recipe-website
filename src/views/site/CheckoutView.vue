@@ -1,31 +1,34 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-
-const orderItems = ref([
-  {
-    id: 101, // 訂單項目的唯一 ID (隨便寫)
-    productId: 1, // ⚠️ 重要：這裡必須對應你 products.json 裡面有的 ID
-    quantity: 3, // 數量
-    price: 480
-  },
-  {
-    id: 102,
-    productId: 2, // ⚠️ 這裡也要確認 json 裡有 ID 為 2 的商品
-    quantity: 1,
-    price: 220
-  },
-  {
-    id: 103,
-    productId: 3, // ⚠️ 這裡也要確認 json 裡有 ID 為 2 的商品
-    quantity: 1,
-    price: 180
-  }
-]);
+import axios from 'axios';
 
 const router = useRouter();
+const orderItems = ref([]);
+// import orderItems from '/public/data/mall/order_product.json';
+onMounted(async () => {
+  try {
+    // 3. 使用 fetch 請求位於 public 資料夾內的檔案
+    // 注意：在瀏覽器中，public 資料夾通常對應到根目錄 '/'
+    const response = await fetch('/data/mall/order_product.json');
 
-// 資料打包
+    // 4. 確保回應成功
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    // 5. 將 JSON 資料解析並存入變數
+    orderItems.value = await response.json();
+
+    // console.log('資料載入成功:', orderItems.value);
+
+  } catch (error) {
+    // console.error('資料載入失敗:', error);
+  }
+});
+
+
+// 資料打包送進後端
 const form = ref({
   // 訂購人
   name: '',
@@ -177,11 +180,23 @@ const handleDelete = () => {
   }
 };
 
+const backcart = () => {
+  router.push('./CartView.vue');
+}
+
 // 計算商品總金額 (小計)
 const subtotal = computed(() => {
+  // 檢查 orderItems.value 是否有值
+  if (!orderItems.value || orderItems.value.length === 0) {
+    return 0;
+  }
+
+  // 記得要加 .value 才能拿到陣列
   return orderItems.value.reduce((total, item) => {
-    // 直接用 item 裡面的 price * quantity
-    return total + item.price * item.quantity;
+    // 確保 price 和 quantity 是數字，避免 undefined 計算變成 NaN
+    const price = item.price || 0;
+    const qty = item.quantity || 0;
+    return total + (price * qty);
   }, 0);
 });
 
@@ -201,6 +216,7 @@ const totalAmount = computed(() => {
     <div class="title">
       <h2 class="zh-h2">結帳 Checkout</h2>
     </div>
+    <hr>
     <div class="row">
       <div class="col-6 col-lg-12">
         <div class="checkout-container">
@@ -211,71 +227,38 @@ const totalAmount = computed(() => {
             <div class="field-flex">
               <div class="field">
                 <label class="p-p1">姓名</label>
-                <input
-                  type="text"
-                  v-model="form.name"
-                  placeholder="請輸入姓名"
-                  class="form-input"
-                  :class="{ 'is-error': errors.name }"
-                  @blur="validateField('name')"
-                  @input="errors.name = ''"
-                />
+                <input type="text" v-model="form.name" placeholder="請輸入姓名" class="form-input"
+                  :class="{ 'is-error': errors.name }" @blur="validateField('name')" @input="errors.name = ''" />
               </div>
 
               <div class="field">
                 <label class="p-p1">手機</label>
-                <input
-                  type="tel"
-                  v-model="form.phone"
-                  placeholder="請輸入手機"
-                  maxlength="10"
-                  class="form-input"
-                  :class="{ 'is-error': errors.phone }"
-                  @blur="validateField('phone')"
-                  @input="errors.phone = ''"
-                />
+                <input type="tel" v-model="form.phone" placeholder="請輸入手機" maxlength="10" class="form-input"
+                  :class="{ 'is-error': errors.phone }" @blur="validateField('phone')" @input="errors.phone = ''" />
               </div>
             </div>
             <div class="field-flex">
               <div class="field">
                 <label class="p-p1">E-mail</label>
-                <input
-                  type="email"
-                  v-model="form.email"
-                  placeholder="請輸入Email"
-                  class="form-input"
-                  :class="{ 'is-error': errors.email }"
-                  @blur="validateField('email')"
-                  @input="errors.email = ''"
-                />
+                <input type="email" v-model="form.email" placeholder="請輸入Email" class="form-input"
+                  :class="{ 'is-error': errors.email }" @blur="validateField('email')" @input="errors.email = ''" />
               </div>
 
               <div class="field">
                 <label class="p-p1">家用電話</label>
-                <input
-                  type="tel"
-                  v-model="form.home"
-                  placeholder="請輸入電話 (選填)"
-                  class="form-input"
-                />
+                <input type="tel" v-model="form.home" placeholder="請輸入電話 (選填)" class="form-input" />
               </div>
             </div>
 
             <div class="field lg">
               <label class="p-p1">地址</label>
-              <input
-                type="text"
-                v-model="form.adress"
-                placeholder="請輸入地址"
-                class="form-input"
-                :class="{ 'is-error': errors.adress }"
-                @blur="validateField('adress')"
-                @input="errors.adress = ''"
-              />
+              <input type="text" v-model="form.adress" placeholder="請輸入地址" class="form-input"
+                :class="{ 'is-error': errors.adress }" @blur="validateField('adress')" @input="errors.adress = ''" />
             </div>
           </div>
 
           <div class="delivery">
+            <hr>
             <div class="deliver-title">
               <h5 class="zh-h5">宅配地址</h5>
             </div>
@@ -283,78 +266,43 @@ const totalAmount = computed(() => {
               <div class="deliver-other-text">
                 <div class="other-address-text">
                   <div class="add">
-                    <input
-                      type="checkbox"
-                      :checked="form.shippingType === 'new'"
-                      @click="form.shippingType = 'new'"
-                    />
+                    <input type="checkbox" :checked="form.shippingType === 'new'" @click="form.shippingType = 'new'" />
                     <p class="p-p1">新增宅配地址</p>
                   </div>
                   <div class="same">
-                    <input
-                      type="checkbox"
-                      :checked="form.shippingType === 'same'"
-                      @click="form.shippingType = 'same'"
-                    />
+                    <input type="checkbox" :checked="form.shippingType === 'same'"
+                      @click="form.shippingType = 'same'" />
                     <p class="p-p1">同訂購人</p>
                   </div>
                 </div>
 
-                <div
-                  class="add-address"
-                  v-show="
-                    form.shippingType === 'new' || form.shippingType === 'same'
-                  "
-                >
+                <div class="add-address" v-show="form.shippingType === 'new' || form.shippingType === 'same'
+                  ">
                   <div class="field-flex">
                     <div class="field add-field">
                       <label class="p-p1">收貨人</label>
-                      <input
-                        type="text"
-                        v-model="form.addname"
-                        placeholder="請輸入姓名"
-                        class="form-input"
-                        :class="{ 'is-error': errors.addname }"
-                        @blur="validateField('addname')"
-                        @input="errors.addname = ''"
-                      />
+                      <input type="text" v-model="form.addname" placeholder="請輸入姓名" class="form-input"
+                        :class="{ 'is-error': errors.addname }" @blur="validateField('addname')"
+                        @input="errors.addname = ''" />
                     </div>
                     <div class="field add-field">
                       <label class="p-p1">手機號碼</label>
-                      <input
-                        type="text"
-                        maxlength="10"
-                        v-model="form.addphone"
-                        placeholder="請輸入電話號碼"
-                        class="form-input"
-                        :class="{ 'is-error': errors.addphone }"
-                        @blur="validateField('addphone')"
-                        @input="errors.addphone = ''"
-                      />
+                      <input type="text" maxlength="10" v-model="form.addphone" placeholder="請輸入電話號碼" class="form-input"
+                        :class="{ 'is-error': errors.addphone }" @blur="validateField('addphone')"
+                        @input="errors.addphone = ''" />
                     </div>
                   </div>
                   <div class="field-flex">
                     <div class="field add-field">
                       <label class="p-p1">家用電話</label>
-                      <input
-                        type="text"
-                        v-model="form.addhome"
-                        placeholder="請輸入電話號碼 (選填)"
-                        class="form-input"
-                      />
+                      <input type="text" v-model="form.addhome" placeholder="請輸入電話號碼 (選填)" class="form-input" />
                     </div>
 
                     <div class="field add-field">
                       <label class="p-p1">寄件地址</label>
-                      <input
-                        type="text"
-                        v-model="form.addadress"
-                        placeholder="請輸入地址"
-                        class="form-input"
-                        :class="{ 'is-error': errors.addadress }"
-                        @blur="validateField('addadress')"
-                        @input="errors.addadress = ''"
-                      />
+                      <input type="text" v-model="form.addadress" placeholder="請輸入地址" class="form-input"
+                        :class="{ 'is-error': errors.addadress }" @blur="validateField('addadress')"
+                        @input="errors.addadress = ''" />
                     </div>
                   </div>
                 </div>
@@ -363,25 +311,18 @@ const totalAmount = computed(() => {
           </div>
 
           <div class="pay">
+            <hr>
             <div class="pay-title">
               <h5 class="zh-h5">付款方式</h5>
             </div>
             <div class="pay-flex">
               <div class="same">
-                <input
-                  type="checkbox"
-                  :checked="form.paymentMethod === 'card'"
-                  @click="form.paymentMethod = 'card'"
-                />
+                <input type="checkbox" :checked="form.paymentMethod === 'card'" @click="form.paymentMethod = 'card'" />
                 <p class="p-p1">信用卡付款</p>
               </div>
 
               <div class="same">
-                <input
-                  type="checkbox"
-                  :checked="form.paymentMethod === 'cod'"
-                  @click="form.paymentMethod = 'cod'"
-                />
+                <input type="checkbox" :checked="form.paymentMethod === 'cod'" @click="form.paymentMethod = 'cod'" />
                 <p class="p-p1">貨到付款</p>
               </div>
             </div>
@@ -389,76 +330,34 @@ const totalAmount = computed(() => {
               <div class="pay-field">
                 <label class="p-p1">卡號</label>
                 <div class="card-row">
-                  <input
-                    type="text"
-                    maxlength="4"
-                    v-model="form.cardnum1"
-                    placeholder="0000"
-                    class="form-input"
-                    :class="{ 'is-error': errors.cardnum1 }"
-                    @blur="validateField('cardnum1')"
-                    @input="errors.cardnum1 = ''"
-                  />
+                  <input type="text" maxlength="4" v-model="form.cardnum1" placeholder="0000" class="form-input"
+                    :class="{ 'is-error': errors.cardnum1 }" @blur="validateField('cardnum1')"
+                    @input="errors.cardnum1 = ''" />
                   <span class="separator">-</span>
-                  <input
-                    type="text"
-                    maxlength="4"
-                    v-model="form.cardnum2"
-                    placeholder="0000"
-                    class="form-input"
-                    :class="{ 'is-error': errors.cardnum2 }"
-                    @blur="validateField('cardnum2')"
-                    @input="errors.cardnum2 = ''"
-                  />
+                  <input type="text" maxlength="4" v-model="form.cardnum2" placeholder="0000" class="form-input"
+                    :class="{ 'is-error': errors.cardnum2 }" @blur="validateField('cardnum2')"
+                    @input="errors.cardnum2 = ''" />
                   <span class="separator">-</span>
-                  <input
-                    type="text"
-                    maxlength="4"
-                    v-model="form.cardnum3"
-                    placeholder="0000"
-                    class="form-input"
-                    :class="{ 'is-error': errors.cardnum3 }"
-                    @blur="validateField('cardnum3')"
-                    @input="errors.cardnum3 = ''"
-                  />
+                  <input type="text" maxlength="4" v-model="form.cardnum3" placeholder="0000" class="form-input"
+                    :class="{ 'is-error': errors.cardnum3 }" @blur="validateField('cardnum3')"
+                    @input="errors.cardnum3 = ''" />
                   <span class="separator">-</span>
-                  <input
-                    type="text"
-                    maxlength="4"
-                    v-model="form.cardnum4"
-                    placeholder="0000"
-                    class="form-input"
-                    :class="{ 'is-error': errors.cardnum4 }"
-                    @blur="validateField('cardnum4')"
-                    @input="errors.cardnum4 = ''"
-                  />
+                  <input type="text" maxlength="4" v-model="form.cardnum4" placeholder="0000" class="form-input"
+                    :class="{ 'is-error': errors.cardnum4 }" @blur="validateField('cardnum4')"
+                    @input="errors.cardnum4 = ''" />
                 </div>
               </div>
               <div class="field-flex">
                 <div class="field">
                   <label class="p-p1">有效期限</label>
-                  <input
-                    type="text"
-                    v-model="form.num"
-                    placeholder="MM/YY"
-                    class="form-input"
-                    :class="{ 'is-error': errors.num }"
-                    @blur="validateField('num')"
-                    @input="errors.num = ''"
-                  />
+                  <input type="text" v-model="form.num" placeholder="MM/YY" class="form-input"
+                    :class="{ 'is-error': errors.num }" @blur="validateField('num')" @input="errors.num = ''" />
                 </div>
                 <div class="field">
                   <label class="p-p1">安全碼</label>
-                  <input
-                    type="text"
-                    maxlength="3"
-                    v-model="form.savenum"
-                    placeholder="CVC"
-                    class="form-input"
-                    :class="{ 'is-error': errors.savenum }"
-                    @blur="validateField('savenum')"
-                    @input="errors.savenum = ''"
-                  />
+                  <input type="text" maxlength="3" v-model="form.savenum" placeholder="CVC" class="form-input"
+                    :class="{ 'is-error': errors.savenum }" @blur="validateField('savenum')"
+                    @input="errors.savenum = ''" />
                 </div>
               </div>
             </div>
@@ -472,25 +371,27 @@ const totalAmount = computed(() => {
       <div class="col-6 col-lg-12">
         <div class="card-container">
           <div class="order-list">
-            <CheckCard
-              v-for="item in orderItems"
-              :key="item.id"
-              :product-id="item.productId"
-              :quantity="item.quantity"
-            />
+            <CheckCard v-for="item in orderItems" :key="item.id" :product-id="item.productId"
+              :quantity="item.quantity" />
           </div>
         </div>
+        <hr>
         <div class="total-sum">
-          <div class="row-text">
-            <p class="p-p1">運費</p>
-            <p class="p-p1">
-              {{ shippingFee === 0 ? '免運' : `$${shippingFee}` }}
-            </p>
+          <div class="submit">
+            <BaseBtn title="返回購物車" @click="backcart" />
           </div>
+          <div class="sum-flex">
+            <div class="row-text">
+              <p class="p-p1">運費</p>
+              <p class="p-p1">
+                {{ shippingFee === 0 ? '免運' : `$${shippingFee}` }}
+              </p>
+            </div>
 
-          <div class="row-text">
-            <p class="p-p1">總計</p>
-            <p class="p-p1">${{ totalAmount }}</p>
+            <div class="row-text">
+              <p class="p-p1">總計</p>
+              <p class="p-p1">${{ totalAmount }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -511,7 +412,7 @@ input[type='checkbox'] {
 
 .title {
   margin-top: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 // .title::after {
@@ -530,15 +431,15 @@ input[type='checkbox'] {
 .checkout-container {
   display: flex;
   flex-direction: column;
-
-  gap: 40px;
+  gap: 20px;
   margin-left: 50px;
 }
 
 .purchaser-title {
-  margin-top: 43px;
+  margin-top: 20px;
   margin-bottom: 20px;
 }
+
 .field {
   display: flex;
   flex-direction: column;
@@ -547,44 +448,51 @@ input[type='checkbox'] {
   gap: 10px;
 }
 
-.field > input {
+.field>input {
   width: 313px;
   margin-bottom: 10px;
   background-color: $neutral-color-100;
 }
-.field > input:focus {
+
+.field>input:focus {
   border: 1px solid $neutral-color-800;
 }
+
 @media (max-width: 1024px) {
   .checkout-container {
     margin: 0;
   }
+
   .row {
     display: flex;
     flex-wrap: wrap;
     flex-direction: column-reverse;
   }
+
   .field-flex {
     width: 100%;
     display: flex;
     justify-content: space-between;
     gap: 20px;
   }
-  .field > input {
+
+  .field>input {
     width: 400px;
   }
 
-  .lg > input {
+  .lg>input {
     width: 100%;
   }
 }
+
 @media (max-width: 820px) {
   .field-flex {
     flex-direction: column;
     align-content: center;
     gap: 0;
   }
-  .field > input {
+
+  .field>input {
     width: 100%;
   }
 }
@@ -606,6 +514,7 @@ input[type='checkbox'] {
   margin-bottom: 15px;
   position: relative;
 }
+
 .deliver-text {
   display: flex;
   flex-direction: column;
@@ -641,7 +550,7 @@ input[type='checkbox'] {
   margin-left: 40px;
 }
 
-.choose > i {
+.choose>i {
   cursor: pointer;
   flex: 1;
 }
@@ -662,13 +571,15 @@ input[type='checkbox'] {
   margin-right: 30px;
 }
 
-.add-field > input {
+.add-field>input {
   background-color: $neutral-color-100;
 }
+
 @media (max-width: 1024px) {
   .choose {
     margin-left: -1px;
   }
+
   .deliver-text {
     align-items: stretch;
   }
@@ -679,16 +590,19 @@ input[type='checkbox'] {
   display: flex;
   gap: 50px;
 }
+
 .pay-field {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
   margin-bottom: 13px;
+
   .card-row {
     display: flex;
     align-items: center;
     gap: 8px;
+
     input {
       text-align: center;
     }
@@ -730,17 +644,27 @@ input[type='checkbox'] {
   .order-list {
     display: flex;
     gap: 15px;
-    overflow-x: auto; /* 可以滑 */
-    overflow-y: hidden; /* 只關掉垂直 */
-    -webkit-overflow-scrolling: touch; /* iOS 慣性 */
-    scrollbar-width: none; /* Firefox */
+    overflow-x: auto;
+    /* 可以滑 */
+    overflow-y: hidden;
+    /* 只關掉垂直 */
+    -webkit-overflow-scrolling: touch;
+    /* iOS 慣性 */
+    scrollbar-width: none;
+    /* Firefox */
   }
+
   .order-list ::-webkit-scrollbar {
     display: none;
   }
 }
 
 //總計
+.total-sum {
+  display: flex;
+  justify-content: space-around;
+}
+
 .row-text {
   display: flex;
   gap: 20px;
