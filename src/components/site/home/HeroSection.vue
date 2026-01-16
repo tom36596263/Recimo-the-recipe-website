@@ -63,6 +63,7 @@
     .hero-container{
         display: flex;
         align-items: center;
+        overflow: hidden;
         
         .hero-title{
             margin-bottom: 30px;
