@@ -75,14 +75,14 @@ const handleClick = (event) => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid $primary-color-700;
+  border: 1px solid $neutral-color-100;
   border-radius: $radius;
   height: $height;
   font-size: $font-size;
   width: $width;
   padding: 0 $padding-x;
-  background-color: $primary-color-700;
-  color: $neutral-color-white;
+  background-color: $neutral-color-100;
+  color: $neutral-color-black;
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
@@ -100,7 +100,7 @@ const handleClick = (event) => {
   // Hover 效果 (針對還沒被選取的時候)
   &:hover {
     background-color: $accent-color-400;
-    color: $neutral-color-white;
+    color: $neutral-color-800;
     border-color: $accent-color-400;
   }
 
@@ -117,9 +117,9 @@ const handleClick = (event) => {
 // ★ 新增：選取狀態 (Primary)
 // 它是疊加在 .tag-action 之上的，所以會繼承高度 32px
 .tag-primary {
-  background-color: $accent-color-700; // 選取後的深色背景
+  background-color: $primary-color-700; // 選取後的深色背景
   color: $neutral-color-white; // 白字
-  border: 1px solid $accent-color-700; // 邊框同色，確保高度不會變
+  border: 1px solid $primary-color-700; // 邊框同色，確保高度不會變
 
   // 選取狀態下，hover 維持原樣，不需要再變色
   &:hover {
