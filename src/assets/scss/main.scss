@@ -10,7 +10,6 @@
 @import '/src/assets/scss/components-scss/input';
 @import '/src/assets/scss/components-scss/btn';
 @import '/src/assets/scss/components-scss/pagination';
-@import '/src/assets/scss/components-scss/tag';
 @import '/src/assets/scss/components-scss/modal';
 
 //版面配置
@@ -25,58 +24,59 @@ body {
   font-family: sans-serif;
   background-color: $neutral-color-white;
   color: $neutral-color-800;
+  overflow-x: hidden;
 }
 
 //中文標題迴圈
 $heading-config-zh: (
   'h1': (
-    28px,
-    36px,
+    1.75rem,
+    3rem,
     400
   ),
   'h1-bold': (
-    28px,
-    36px,
+    1.75rem,
+    3rem,
     700
   ),
   'h2': (
-    24px,
-    28px,
+    1.5rem,
+    1.75rem,
     400
   ),
   'h2-bold': (
-    24px,
-    28px,
+    1.5rem,
+    1.75rem,
     700
   ),
   'h3': (
-    20px,
-    24px,
+    1.25rem,
+    1.5rem,
     400
   ),
   'h3-bold': (
-    20px,
-    24px,
+    1.25rem,
+    1.5rem,
     700
   ),
   'h4': (
-    18px,
-    20px,
+    1.125rem,
+    1.25rem,
     400
   ),
   'h4-bold': (
-    18px,
-    20px,
+    1.125rem,
+    1.25rem,
     700
   ),
   'h5': (
-    14px,
-    18px,
+    0.875rem,
+    1.125rem,
     400
   ),
   'h5-bold': (
-    14px,
-    18px,
+    0.875rem,
+    1.125rem,
     700
   )
 );
@@ -92,36 +92,12 @@ $heading-config-zh: (
 
 // 英文標題迴圈
 $heading-config-en: (
-  'h1': (
-    30px,
-    30px,
-    400
-  ),
-  'h1-bold': (
-    30px,
-    30px,
-    700
-  ),
-  'h2': (
-    24px,
-    24px,
-    400
-  ),
-  'h2-bold': (
-    24px,
-    24px,
-    700
-  ),
-  'h3': (
-    16px,
-    16px,
-    400
-  ),
-  'h3-bold': (
-    16px,
-    16px,
-    700
-  )
+  'h1': (1.875rem, 1.875rem, 400),
+  'h1-bold': (1.875rem, 1.875rem, 700),
+  'h2': (1.5rem, 1.5rem, 400),
+  'h2-bold': ( 1.5rem, 1.5rem, 700 ),
+  'h3': ( 1rem, 1rem, 400 ),
+  'h3-bold': ( 1rem, 1rem, 700 )
 );
 @each $name, $values in $heading-config-en {
   $min: nth($values, 1);
@@ -135,13 +111,13 @@ $heading-config-en: (
 
 //內文
 .p-p1 {
-  @include text-style(16px, $lh-body);
+  @include text-style(1rem, $lh-body);
 }
 
 .p-p2 {
-  @include text-style(14px);
+  @include text-style(0.875rem);
 }
 
 .p-p3 {
-  @include text-style(12px);
+  @include text-style(0.75rem);
 }
