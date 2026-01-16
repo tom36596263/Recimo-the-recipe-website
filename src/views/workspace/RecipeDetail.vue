@@ -11,67 +11,47 @@ const servings = ref(1);
 
 const recipeIntroData = {
     title: '雲朵般口感 - 經典日式舒芙蕾鬆餅',
-    image: new URL(
-        '../../assets/images/recipe/main/recipe_souffle_main.jpg',
-        import.meta.url
-    ).href,
+    
+    image: '/img/recipes/32/cover.png',
+
     time: '30 分鐘',
-    difficulty: 3, // 預設難易度
-    description:
-        '不同於傳統美式鬆餅的紮實，它透過細緻打發蛋白創造出極致蓬鬆的層次，入口即化並散發清淡蛋香。這款甜點不僅具備視覺上的療癒動感，更是追求輕盈食感的下午茶首選。'
-    };
+    difficulty: 3,
+    description: '不同於傳統美式鬆餅的紮實...'
+};
 
     const stepsData = [
     {
         title: '分離蛋黃與蛋白',
         content: '將兩顆雞蛋分離，蛋白放入冰過頭的攪拌盆（蛋白霜穩定的關鍵）。',
-        image: new URL(
-        '../../assets/images/recipe/step/recipe_souffle_step_01.jpg',
-        import.meta.url
-        ).href
+        image: '/img/recipes/32/steps/1.jpg'
     },
     {
         title: '製作蛋黃糊',
         content:
         '蛋黃加入牛奶、香草精拌勻，再篩入低筋麵粉與泡打粉，攪拌至無顆粒狀。',
-        image: new URL(
-        '../../assets/images/recipe/step/recipe_souffle_step_02.jpg',
-        import.meta.url
-        ).href
+        image: '/img/recipes/32/steps/2.jpg'
     },
     {
         title: '打發蛋白霜',
         content: '砂糖分三次加入蛋白，使用電動打蛋器打至「硬性發泡」。',
-        image: new URL(
-        '../../assets/images/recipe/step/recipe_souffle_step_03.jpg',
-        import.meta.url
-        ).href
+        image: '/img/recipes/32/steps/3.jpg'
     },
     {
         title: '混合麵糊',
         content:
         '取 1/3 蛋白霜加入蛋黃糊拌勻，再倒回剩餘蛋白霜中，用「切拌法」輕柔混合，避免消泡。',
-        image: new URL(
-        '../../assets/images/recipe/step/recipe_souffle_step_04.jpg',
-        import.meta.url
-        ).href
+        image: '/img/recipes/32/steps/4.jpg'
     },
     {
         title: '低溫煎烤',
         content:
         '平底鍋抹薄油，小火預熱。用冰淇淋勺挖取麵糊堆疊高度，加入一匙水，蓋鍋蓋悶煎 4 分鐘。',
-        image: new URL(
-        '../../assets/images/recipe/step/recipe_souffle_step_05.jpg',
-        import.meta.url
-        ).href
+        image: '/img/recipes/32/steps/5.jpg'
     },
     {
         title: '翻面與盛盤',
         content: '底部呈金黃色後小心翻面，再悶煎 3 分鐘即可出爐。',
-        image: new URL(
-        '../../assets/images/recipe/step/recipe_souffle_step_06.jpg',
-        import.meta.url
-        ).href
+        image: '/img/recipes/32/steps/6.jpg'
     }
     ]; 
 
@@ -179,24 +159,27 @@ const recipeIntroData = {
     ]);
 
     const SnapsData = [
-    { 
-        url: new URL('../../assets/images/recipe/snap/recipe_souffle_snap_01.jpg', import.meta.url).href, 
-        comment: '第一次做舒芙蕾就上手！口感真的很綿密。' 
+    {
+        url: '/img/social/32/1.jpg',
+        comment: '第一次做舒芙蕾就上手！口感真的很綿密。'
     },
-    { 
-        url: new URL('../../assets/images/recipe/snap/recipe_souffle_snap_02.jpg', import.meta.url).href, 
-        comment: '加了點蜂蜜後味道更提升了。' 
+    {
+        url: '/img/social/32/2.jpg',
+        comment: '加了點蜂蜜後味道更提升了。'
     },
-    { 
-        url: new URL('../../assets/images/recipe/snap/recipe_souffle_snap_03.jpg', import.meta.url).href, 
-        comment: '孩子們超愛，這是我的週末必備甜點。' 
+    {
+        url: '/img/social/32/3.jpg',
+        comment: '孩子們超愛，這是我的週末必備甜點。'
     },
-    { 
-        url: new URL('../../assets/images/recipe/snap/recipe_souffle_snap_04.jpg', import.meta.url).href, 
-        comment: '沒想到新手照著做也能做出這種療癒的晃動感。' 
+    {
+        url: '/img/social/32/4.jpg',
+        comment: '沒想到新手照著做也能做出這種療癒的晃動感。'
+    },
+    {
+        url: '/img/social/32/5.jpg',
+        comment: '沒開玩笑，超級好吃!'
     }
 ];
-
     </script>
 
     <template>
