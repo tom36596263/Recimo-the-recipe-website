@@ -10,22 +10,19 @@ const pageSize = 6
 
 onMounted(async () => {
     try {
-        // 1. 同時獲取三份資料
         const [resRecipes, resRecipeTags, resTags] = await Promise.all([
             fetch('/data/recipe/recipes.json').then(res => res.json()),
-            fetch('/data/recipe/recipe_tag.json').then(res => res.json()), // 請確保路徑正確
-            fetch('/data/recipe/tags.json').then(res => res.json())        // 請確保路徑正確
+            fetch('/data/recipe/recipe_tag.json').then(res => res.json()), 
+            fetch('/data/recipe/tags.json').then(res => res.json())
         ]);
 
-        // 2. 建立 tag 查找表 { tag_id: tag_name }
         const tagMap = {};
         resTags.forEach(tag => {
             tagMap[tag.tag_id] = tag.tag_name;
         });
 
-        // 3. 組合成 RecipeCardLg 所需的格式
         allRecipe.value = resRecipes.map(recipe => {
-            // 找出此食譜對應的所有 tag_id
+
             const matchedTagIds = resRecipeTags
                 .filter(rt => rt.recipe_id === recipe.recipe_id)
                 .map(rt => rt.tag_id);
@@ -36,11 +33,11 @@ onMounted(async () => {
             return {
                 recipe_name: recipe.recipe_title,
                 image_url: recipe.recipe_image_url,
-                tags: recipeTagsNames, // 成功填入標籤陣列
+                tags: recipeTagsNames,
                 nutritional_info: {
                     calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
                     serving_size: recipe.recipe_servings,
-                    cooking_time: `${recipe.recipe_total_time.split(':')[1]}分鐘` // 修正拼字錯誤 total_time
+                    cooking_time: `${recipe.recipe_total_time.split(':')[1]}分鐘` 
                 },
                 author: {
                     name: 'Recimo',
@@ -73,10 +70,7 @@ const handlePageChange = (page) => {
 <template>
     <section class="container filter-content">
         <div class="row">
-            
-                <FilterSection />
-            
-            
+            <FilterSection />
         </div>
     </section>
     <section class="container recipe-cards-section">
@@ -91,7 +85,6 @@ const handlePageChange = (page) => {
         <div class="row">
             <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
         </div>
-
     </section>
     
 </template>
