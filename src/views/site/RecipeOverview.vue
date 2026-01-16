@@ -8,29 +8,48 @@ const allRecipe = ref([])
 const currentPage = ref(1)
 const pageSize = 6
 
-// 從 JSON 加載食譜資料
 onMounted(async () => {
     try {
-        const response = await fetch('/data/recipe/recipes.json');
-        const recipesData = await response.json();
+        // 1. 同時獲取三份資料
+        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
+            fetch('/data/recipe/recipes.json').then(res => res.json()),
+            fetch('/data/recipe/recipe_tag.json').then(res => res.json()), // 請確保路徑正確
+            fetch('/data/recipe/tags.json').then(res => res.json())        // 請確保路徑正確
+        ]);
 
-        // 將 JSON 資料轉換為 RecipeCardLg 所需的格式
-        allRecipe.value = recipesData.map(recipe => ({
-            recipe_name: recipe.recipe_title,
-            image_url: recipe.recipe_image_url,
-            tags: [], // 稍後可以根據 recipe_tag.json 填充
-            nutritional_info: {
-                calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
-                serving_size: recipe.recipe_servings,
-                cooking_time: `${recipe.recipe_totle_time.split(':')[1]}分鐘`
-            },
-            author: {
-                name: 'Recimo',
-                likes: recipe.recipe_like_count
-            }
-        }));
+        // 2. 建立 tag 查找表 { tag_id: tag_name }
+        const tagMap = {};
+        resTags.forEach(tag => {
+            tagMap[tag.tag_id] = tag.tag_name;
+        });
+
+        // 3. 組合成 RecipeCardLg 所需的格式
+        allRecipe.value = resRecipes.map(recipe => {
+            // 找出此食譜對應的所有 tag_id
+            const matchedTagIds = resRecipeTags
+                .filter(rt => rt.recipe_id === recipe.recipe_id)
+                .map(rt => rt.tag_id);
+
+            // 透過 tagMap 轉換成 tag_name 陣列
+            const recipeTagsNames = matchedTagIds.map(id => tagMap[id]).filter(Boolean);
+
+            return {
+                recipe_name: recipe.recipe_title,
+                image_url: recipe.recipe_image_url,
+                tags: recipeTagsNames, // 成功填入標籤陣列
+                nutritional_info: {
+                    calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
+                    serving_size: recipe.recipe_servings,
+                    cooking_time: `${recipe.recipe_total_time.split(':')[1]}分鐘` // 修正拼字錯誤 total_time
+                },
+                author: {
+                    name: 'Recimo',
+                    likes: recipe.recipe_like_count
+                }
+            };
+        });
     } catch (error) {
-        console.error('載入食譜資料失敗:', error);
+        console.error('載入資料失敗:', error);
     }
 });
 
@@ -46,7 +65,6 @@ const recipes = computed(() => {
     return allRecipe.value.slice(start, end);
 });
 
-// 頁碼變更處理
 const handlePageChange = (page) => {
     currentPage.value = page;
 };
@@ -55,36 +73,40 @@ const handlePageChange = (page) => {
 <template>
     <section class="container filter-content">
         <div class="row">
-            <FilterSection />
+            
+                <FilterSection />
+            
+            
         </div>
     </section>
     <section class="container recipe-cards-section">
         <div class="row">
             <div v-for="item in recipes" :key="item.recipe_name" class="col-4 col-lg-12">
-                <RecipeCardLg :recipe="item" class="recipe-card" />
+                <RecipeCardLg :recipe="item" class="recipe-card"/>
             </div>
         </div>
     </section>
 
     <section class="container">
-        <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
-    </section>
+        <div class="row">
+            <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
+        </div>
 
+    </section>
+    
 </template>
 
 <style lang="scss" scoped>
-.filter-content {
-    margin-top: 40px;
-}
-
-.recipe-cards-section {
-    margin: 60px auto;
-}
-
-@media screen and (max-width: 1024px) {
-    .recipe-card {
-        margin-bottom: 20px;
-
+    .filter-content{
+        margin-top: 40px;
     }
-}
+    .recipe-cards-section{
+        margin: 60px auto;
+    }
+    @media screen and (max-width: 1024px){
+        .recipe-card{
+            margin-bottom: 20px;
+
+        }
+    }
 </style>
