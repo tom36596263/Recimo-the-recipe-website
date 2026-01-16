@@ -1,16 +1,44 @@
 <script setup>
+import { defineProps, defineEmits, computed } from 'vue'
 
+const props = defineProps({
+    currentPage: {
+        type: Number,
+        default: 1
+    },
+    totalPages: {
+        type: Number,
+        required: true
+    }
+});
+
+const emit = defineEmits(['update:page']);
+
+// 生成頁碼陣列
+const pageNumbers = computed(() => {
+    const pages = [];
+    for (let i = 1; i <= props.totalPages; i++) {
+        pages.push(i);
+    }
+    return pages;
+});
+
+const changePage = (page) => {
+    if (page >= 1 && page <= props.totalPages) {
+        emit('update:page', page);
+    }
+};
 </script>
 <template>
     <div class="pagination">
-        <a href="#" class="page-link">1</a>
-        <a href="#" class="page-link active">2</a>
-        <a href="#" class="page-link">3</a>
-        <a href="#" class="page-link">4</a>
+        <button v-for="page in pageNumbers" :key="page" @click="changePage(page)"
+            :class="['page-link', { active: page === currentPage }]">
+            {{ page }}
+        </button>
     </div>
 </template>
 <style lang="scss" scoped>
-    .pagination {
+.pagination {
     display: flex;
     align-items: center;
     justify-content: center; // 讓整排按鈕置中
@@ -70,10 +98,9 @@
             pointer-events: none; // 禁止點擊
 
             &:hover {
-            background-color: transparent;
+                background-color: transparent;
             }
         }
     }
 }
-
 </style>

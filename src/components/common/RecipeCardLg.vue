@@ -85,9 +85,11 @@
         overflow: hidden;
         background-color: $neutral-color-white;
         .card-header{
+            height: 250px;
+            overflow: hidden;
             img{
                 width: 100%;
-                object-fit: cover;
+                // object-fit: cover;
             }
         }
         .card-body{
