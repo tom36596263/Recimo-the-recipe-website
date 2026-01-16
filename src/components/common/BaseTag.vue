@@ -59,16 +59,8 @@ const handleClick = (event) => {
 </script>
 
 <template>
-  <div
-    class="base-tag"
-    :class="tagClass"
-    :style="customStyle"
-    @click="handleClick"
-  >
-    <i
-      v-if="variant === 'action' && showIcon"
-      class="fa-solid fa-plus plus-sign"
-    ></i>
+  <div class="base-tag" :class="tagClass" :style="customStyle" @click="handleClick">
+    <i v-if="variant === 'action' && showIcon" class="fa-solid fa-plus plus-sign"></i>
 
     <span class="tag-content">
       <template v-if="text">{{ text }}</template>
@@ -83,35 +75,33 @@ const handleClick = (event) => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid $primary-color-100;
+  border: 1px solid $neutral-color-100;
   border-radius: $radius;
   height: $height;
   font-size: $font-size;
   width: $width;
   padding: 0 $padding-x;
-  background-color: $primary-color-100;
-  color: $neutral-color-800;
+  background-color: $neutral-color-100;
+  color: $neutral-color-black;
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
 
 // 1. 大型互動標籤 (高度 32px)
 .tag-action {
-  @include tag-base(
-    $height: 32px,
+  @include tag-base($height: 32px,
     $font-size: 16px,
     $width: 100%,
-    $padding-x: 8px
-  );
+    $padding-x: 8px);
 
   cursor: pointer;
   user-select: none;
 
   // Hover 效果 (針對還沒被選取的時候)
   &:hover {
-    background-color: $primary-color-400;
-    color: $neutral-color-white;
-    border-color: $primary-color-400;
+    background-color: $accent-color-400;
+    color: $neutral-color-800;
+    border-color: $accent-color-400;
   }
 
   &:active {
@@ -127,26 +117,24 @@ const handleClick = (event) => {
 // ★ 新增：選取狀態 (Primary)
 // 它是疊加在 .tag-action 之上的，所以會繼承高度 32px
 .tag-primary {
-  background-color: $primary-color-400; // 選取後的深色背景
+  background-color: $primary-color-700; // 選取後的深色背景
   color: $neutral-color-white; // 白字
-  border: 1px solid $primary-color-400; // 邊框同色，確保高度不會變
+  border: 1px solid $primary-color-700; // 邊框同色，確保高度不會變
 
   // 選取狀態下，hover 維持原樣，不需要再變色
   &:hover {
-    background-color: $primary-color-400;
+    background-color: $accent-color-700;
     opacity: 0.9; // 稍微一點點變化提示即可
   }
 }
 
 // 2. 小型展示標籤 (高度 21px)
 .tag-label {
-  @include tag-base(
-    $height: 21px,
+  @include tag-base($height: 21px,
     $font-size: 14px,
     $width: auto,
     $padding-x: 8px,
-    $radius: 4px
-  );
+    $radius: 4px);
   cursor: default;
 }
 </style>
