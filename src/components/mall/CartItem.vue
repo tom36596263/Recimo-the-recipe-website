@@ -90,9 +90,9 @@ watch(
 <style lang="scss" scoped>
 .product-card {
   display: flex;
-  background: #fff;
-  border: 1px solid #c4d6c4;
-  border-radius: 8px;
+  background: $neutral-color-white;
+  border: 1px solid $primary-color-700;
+  border-radius: $radius-base;
   padding: 10px;
   margin-bottom: 16px;
   align-items: center;
@@ -113,7 +113,7 @@ watch(
   width: 250px;
   height: 150px;
   flex-shrink: 0;
-  border-radius: 10px;
+  border-radius: $radius-base;
   overflow: hidden;
 
   img {
@@ -146,17 +146,19 @@ watch(
   .quantity-control {
     display: flex;
     align-items: center;
-    background: #e8f3e8;
-    border-radius: 4px;
+    background: $primary-color-100;
+    border-radius: $radius-base;
     padding: 2px;
 
     button {
       background: none;
       border: none;
-      width: 40px; /* 修正原本 150px 太寬的問題 */
+      width: 40px;
+      /* 修正原本 150px 太寬的問題 */
       height: 40px;
       cursor: pointer;
       font-size: 16px;
+
       &:disabled {
         opacity: 0.3;
       }
@@ -168,6 +170,7 @@ watch(
       border: none;
       background: transparent;
       font-size: 16px;
+
       &::-webkit-inner-spin-button {
         -webkit-appearance: none;
       }
@@ -183,7 +186,8 @@ watch(
 
   .subtotal {
     font-weight: bold;
-    margin-left: auto; /* 讓小計靠右或是依你設計 */
+    margin-left: auto;
+    /* 讓小計靠右或是依你設計 */
   }
 }
 </style>
