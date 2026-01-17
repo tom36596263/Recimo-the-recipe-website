@@ -1,8 +1,8 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import LogoWhite from '@/assets/images/site/Recimo-logo-white.svg'
-import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
+import LogoWhite from '/img/site/Recimo-logo-white.svg'
+import LogoBlack from '/img/site/Recimo-logo-black.svg'
 import BaseBtn from '@/components/common/BaseBtn.vue'
 
 const router = useRouter();

@@ -5,6 +5,7 @@
     import IconLocalFireDepartment from '~icons/material-symbols/Local-Fire-Department-outline';
     import IconramenDining from '~icons/material-symbols/Ramen-Dining-outline';
     import IconAlarm from '~icons/material-symbols/Alarm-outline';
+    import LogoBlack from '/img/site/Recimo-logo-black.svg'
 
     const props = defineProps({
         recipe: {
@@ -65,14 +66,14 @@
         <footer>
             <div class="personal-info">
                 <div class="personal-img">
-                <img src="@/assets/images/site/Recimo-logo-black.svg" alt="">
+                <img :src="LogoBlack" alt="">
             </div>
                 <p class="p-p1">Recimo</p>
             </div>
             
             <div class="btn-group">
                 <BaseBtn title="加入收藏" variant="outline" height="30"/>
-                <BaseBtn title="開始烹飪" height="30"/>
+                <!-- <BaseBtn title="食譜詳情" height="30"/> -->
             </div>
             
         </footer>
