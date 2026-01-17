@@ -6,7 +6,7 @@
     "amount": 250.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "過篩備用"
+    "remark": "中粉過篩後備用，可確保麵糰口感更細緻"
   },
   {
     "recipe_ingredient_id": 2,
@@ -24,7 +24,7 @@
     "amount": 150.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": "常溫即可"
+    "remark": "常溫水即可，若冬天可使用微溫水幫助發酵"
   },
   {
     "recipe_ingredient_id": 4,
@@ -51,7 +51,7 @@
     "amount": 125.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "置於室溫軟化"
+    "remark": "置於室溫完全軟化，直到手指可輕鬆壓下的程度"
   },
   {
     "recipe_ingredient_id": 7,
@@ -87,7 +87,7 @@
     "amount": 100.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "洗淨瀝乾"
+    "remark": "徹底洗淨並吸乾水分，避免影響風味"
   },
   {
     "recipe_ingredient_id": 11,
@@ -96,7 +96,7 @@
     "amount": 60.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "切絲"
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 12,
@@ -132,7 +132,7 @@
     "amount": 15.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "裝飾用"
+    "remark": "裝飾用，建議出餐前再撒上以維持視覺美感"
   },
   {
     "recipe_ingredient_id": 16,
@@ -141,7 +141,7 @@
     "amount": 300.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "切塊"
+    "remark": "均勻切塊，大小一致可確保烹飪時受熱均勻"
   },
   {
     "recipe_ingredient_id": 17,
@@ -186,7 +186,7 @@
     "amount": 10.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "去皮切片"
+    "remark": "去皮切片，片狀厚度約 0.2 公分左右最佳"
   },
   {
     "recipe_ingredient_id": 22,
@@ -240,7 +240,7 @@
     "amount": 100.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "先充分浸泡軟化後再進行後續處理"
   },
   {
     "recipe_ingredient_id": 28,
@@ -249,7 +249,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "切末"
+    "remark": "切細末，可讓香味更容易融入醬汁"
   },
   {
     "recipe_ingredient_id": 29,
@@ -330,7 +330,7 @@
     "amount": 250.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "建議選用肉質結實的部位，燉煮後口感較佳"
   },
   {
     "recipe_ingredient_id": 38,
@@ -402,7 +402,7 @@
     "amount": 15.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "提味用"
+    "remark": "提味用，可依據個人口味調整最後灑上的份量"
   },
   {
     "recipe_ingredient_id": 46,
@@ -411,7 +411,7 @@
     "amount": 2.0,
     "unit_name": "個",
     "is_modified": false,
-    "remark": ""
+    "remark": "選用新鮮度高的食材，成品香氣會更足"
   },
   {
     "recipe_ingredient_id": 47,
@@ -492,7 +492,7 @@
     "amount": 1.0,
     "unit_name": "份",
     "is_modified": false,
-    "remark": ""
+    "remark": "一人份基準，烹調前請先撥鬆以利均勻受熱"
   },
   {
     "recipe_ingredient_id": 56,
@@ -564,7 +564,7 @@
     "amount": 5.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "少許即可"
+    "remark": "少許即可，主要用於提升顏色層次"
   },
   {
     "recipe_ingredient_id": 64,
@@ -573,7 +573,7 @@
     "amount": 200.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "選用當季新鮮品項，口感會更為鮮甜"
   },
   {
     "recipe_ingredient_id": 65,
@@ -600,7 +600,7 @@
     "amount": 1.0,
     "unit_name": "瓣",
     "is_modified": false,
-    "remark": "拍碎"
+    "remark": "稍微拍碎，讓爆香時蒜油精華能快速釋放"
   },
   {
     "recipe_ingredient_id": 68,
@@ -645,7 +645,7 @@
     "amount": 3.0,
     "unit_name": "顆",
     "is_modified": false,
-    "remark": ""
+    "remark": "使用常溫蛋，製作出的質地會更加穩定"
   },
   {
     "recipe_ingredient_id": 73,
@@ -726,7 +726,7 @@
     "amount": 10.0,
     "unit_name": "隻",
     "is_modified": false,
-    "remark": "去腸泥"
+    "remark": "去腸泥並保留尾部，不僅美觀且口感較乾淨"
   },
   {
     "recipe_ingredient_id": 82,
@@ -789,7 +789,7 @@
     "amount": 4.0,
     "unit_name": "角",
     "is_modified": false,
-    "remark": "食用前擠汁"
+    "remark": "上桌食用前再擠上新鮮汁液，可去腥提味"
   },
   {
     "recipe_ingredient_id": 89,
@@ -798,7 +798,7 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "切成長條狀，厚度約 1 公分最能保持彈性口感"
   },
   {
     "recipe_ingredient_id": 90,
@@ -870,7 +870,7 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "去除筋膜後切薄片，醃漬時會更入味"
   },
   {
     "recipe_ingredient_id": 98,
@@ -915,7 +915,7 @@
     "amount": 1.0,
     "unit_name": "角",
     "is_modified": false,
-    "remark": ""
+    "remark": "隨餐附上，可增加清爽度"
   },
   {
     "recipe_ingredient_id": 103,
@@ -924,7 +924,7 @@
     "amount": 2.0,
     "unit_name": "片",
     "is_modified": false,
-    "remark": ""
+    "remark": "確認魚片已完全退冰，並抹乾表面水分"
   },
   {
     "recipe_ingredient_id": 104,
@@ -987,7 +987,7 @@
     "amount": 1.0,
     "unit_name": "盒",
     "is_modified": false,
-    "remark": "切小塊"
+    "remark": "切成約 2 公分正方塊，下鍋時動作輕巧避免破碎"
   },
   {
     "recipe_ingredient_id": 111,
@@ -1059,7 +1059,7 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "選用脂肪分佈均勻的部位，快炒後口感更嫩滑"
   },
   {
     "recipe_ingredient_id": 119,
@@ -1113,7 +1113,7 @@
     "amount": 2.0,
     "unit_name": "角",
     "is_modified": false,
-    "remark": ""
+    "remark": "裝飾兼調味用"
   },
   {
     "recipe_ingredient_id": 125,
@@ -1122,7 +1122,7 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "預先處理乾淨，確保沒有殘留雜質"
   },
   {
     "recipe_ingredient_id": 126,
@@ -1149,7 +1149,7 @@
     "amount": 1.0,
     "unit_name": "碗",
     "is_modified": false,
-    "remark": "白飯或隔夜飯"
+    "remark": "推薦使用隔夜飯，水分較少，炒起來顆粒分明"
   },
   {
     "recipe_ingredient_id": 129,
@@ -1194,7 +1194,7 @@
     "amount": 200.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "撕成適合入口的小片狀，增加表面積吸收醬汁"
   },
   {
     "recipe_ingredient_id": 134,
@@ -1212,7 +1212,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "切長段"
+    "remark": "切成長段約 4-5 公分，烹煮後外觀較整齊"
   },
   {
     "recipe_ingredient_id": 136,
@@ -1257,7 +1257,7 @@
     "amount": 250.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "厚度建議適中，以免在燉煮過程中縮水過多"
   },
   {
     "recipe_ingredient_id": 141,
@@ -1266,7 +1266,7 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "切絲"
+    "remark": "切均勻細絲，可縮短熟化時間並增加層次"
   },
   {
     "recipe_ingredient_id": 142,
@@ -1329,7 +1329,7 @@
     "amount": 200.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "徹底清洗並去除泥沙，建議烹飪前保持低溫"
   },
   {
     "recipe_ingredient_id": 149,
@@ -1392,7 +1392,7 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "使用斷筋處理，可避免受熱後嚴重縮小"
   },
   {
     "recipe_ingredient_id": 156,
@@ -1473,6 +1473,6 @@
     "amount": 10.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "提升整體配色質感"
   }
 ]
