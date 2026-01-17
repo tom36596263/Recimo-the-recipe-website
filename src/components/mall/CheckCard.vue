@@ -1,53 +1,53 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import productsData from '../../../public/data/mall/products.json';
+import { computed } from 'vue';
 
+// 1. 接收父層傳來的資料
 const props = defineProps({
-  productId: {
-    type: Number,
-    required: true
+  productName: {
+    type: String,
+    default: ''
   },
   quantity: {
     type: Number,
-    default: 1
+    default: 0
+  },
+  price: {
+    type: Number,
+    default: 0
+  },
+  image: {
+    type: String,
+    default: ''
   }
 });
 
-// 結帳頁面通常不需要 emit 修改數量，所以刪除 emits
-
-const product = ref(null);
-
-onMounted(() => {
-  if (Array.isArray(productsData)) {
-    const found = productsData.find((p) => p.id === props.productId);
-    if (found) {
-      product.value = found;
-    }
-  }
-});
-
+// 2. 計算小計 (單價 * 數量)
+// 直接使用 props.price 和 props.quantity 計算
 const subtotal = computed(() => {
-  if (!product.value) return 0;
-  return Number(product.value.price) * props.quantity;
+  return props.price * props.quantity;
 });
 
-const getUnit = (name) => {
-  if (!name) return '個';
-  return name.includes('飯') ? '個' : '包';
-};
+
+const cleanImage = computed(() => {
+  if (props.image && props.image.startsWith('public/')) {
+    return props.image.replace('public/', '/');
+  }
+  return props.image;
+});
+
 </script>
 
 <template>
-  <div class="product-card" v-if="product">
+  <div class="product-card">
     <div class="image-wrapper">
-      <img :src="product.images[0]" :alt="product.product_name" />
+      <img :src="cleanImage" :alt="productName" />
     </div>
 
     <div class="content">
       <div class="info">
-        <p class="title p-p1">{{ product.product_name }}</p>
+        <p class="title p-p1">{{ productName }}</p>
         <p class="price-unit p-p1">
-          價格 : {{ product.price }}元/{{ getUnit(product.product_name) }}
+          價格 : {{ price }}元/包
         </p>
       </div>
 
@@ -84,6 +84,7 @@ const getUnit = (name) => {
   width: 250px;
   flex-shrink: 0;
   overflow: hidden;
+
   @media (max-width: 1024px) {
     width: 100%;
   }
@@ -94,6 +95,7 @@ const getUnit = (name) => {
     border-radius: $radius-base;
     // object-position: center;
     object-fit: cover;
+
     @media (max-width: 768px) {
       width: 280px;
     }
