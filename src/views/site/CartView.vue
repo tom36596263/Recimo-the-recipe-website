@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 //  setup: 這是 Vue 3 的語法糖，讓你不用寫 export default {}，且能直接使用變數和函式，開發效率最高。
 // 所有的變數、函式、或是從 JSON 引入的資料都寫在script裡面。
 import { ref, onMounted } from 'vue';
@@ -44,4 +44,45 @@ const handleRemoveItem = (prodId) => {
 <style lang="scss" scoped>
 //  lang="scss": 告訴 Vue 這裡要用 Scss 編譯
 //  scoped: 確保這裡寫的 CSS 只會影響目前這個頁面，不會「跑去污染」到其他頁面的樣式。
-</style>
+</style> -->
+
+<!-- ======================================== -->
+<script setup>
+import { defineProps, computed, defineEmits } from 'vue';
+import { useCartStore } from '@/stores/cartStore'
+import ProductRmd from '@/components/mall/ProductRmd.vue';
+import CartCard from '@/components/mall/CartCard.vue';
+import CartItem from '@/components/mall/CartItem.vue';
+
+const cartStore = useCartStore()
+
+// 計算總額
+const totalAmount = computed(() => {
+  // 注意：這裡是 item.count 而不是 item.qty
+  return cartStore.items.reduce((total, item) => {
+    return total + (item.product_price * (item.count || 0));
+  }, 0);
+});
+</script>
+
+<template>
+  <div class="cart-page">
+    <h2>購物車清單</h2>
+
+    <div class="container">
+      <div v-if="cartStore.items && cartStore.items.length > 0">
+        <CartCard v-for="item in cartStore.items" :key="item.product_id" :item="item" />
+      </div>
+
+      <div v-if="cartStore && cartStore.items && cartStore.items.length > 0">
+      </div>
+
+      <div v-else>
+        <p>購物車目前沒有商品</p>
+      </div>
+    </div>
+  </div>
+
+  <button @click="cartStore.clear()">清空</button>
+  <ProductRmd class="detail-recommend-section" />
+</template>

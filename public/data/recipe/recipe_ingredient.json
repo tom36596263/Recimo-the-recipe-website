@@ -5,7 +5,7 @@
     "ingredient_id": 390,
     "amount": 250.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false 
   },
   {
     "recipe_ingredient_id": 2,

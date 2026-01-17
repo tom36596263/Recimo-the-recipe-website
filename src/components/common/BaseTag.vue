@@ -82,7 +82,7 @@ const handleClick = (event) => {
   width: $width;
   padding: 0 $padding-x;
   background-color: $neutral-color-100;
-  color: $neutral-color-black;
+  color: $neutral-color-800;
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
@@ -99,8 +99,8 @@ const handleClick = (event) => {
 
   // Hover 效果 (針對還沒被選取的時候)
   &:hover {
-    background-color: $accent-color-400;
-    color: $neutral-color-800;
+    background-color: $accent-color-100;
+    color: $accent-color-700;
     border-color: $accent-color-400;
   }
 
@@ -123,7 +123,7 @@ const handleClick = (event) => {
 
   // 選取狀態下，hover 維持原樣，不需要再變色
   &:hover {
-    background-color: $accent-color-700;
+    background-color: $accent-color-100;
     opacity: 0.9; // 稍微一點點變化提示即可
   }
 }
