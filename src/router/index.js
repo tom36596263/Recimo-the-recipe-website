@@ -7,6 +7,12 @@ import IconInboxTextPerson from 'virtual:icons/material-symbols/Inbox-Text-Perso
 import IconShoppingCart from 'virtual:icons/material-symbols/Shopping-Cart-outline'
 import IconAssignment from 'virtual:icons/material-symbols/Assignment-outline'
 
+import AdminLayout from '@/views/admin/AdminLayout.vue'
+import AdminHome from '@/views/admin/AdminHome.vue'
+import AdminUsers from '@/views/admin/AdminUsers.vue'
+import AdminUserDetail from '@/views/admin/AdminUserDetail.vue'
+import AdminSettings from '@/views/admin/AdminSettings.vue'
+
 const pageicon = ref([
   markRaw(IconForkSpoon),
   markRaw(IconSkillet),
@@ -80,6 +86,33 @@ const routes = [
     name: 'benefits',
     component: () => import('@/views/site/BenefitsView.vue'),
     meta: { layout: 'default', title: '會員權益', breadcrumb: '會員權益', showInMenu: true }
+  },
+  {
+    path: '/admin',
+    component: AdminLayout, // ✅ 父層 Layout
+    children: [
+      {
+        path: '', // ✅ /admin
+        name: 'admin-home',
+        component: AdminHome
+      },
+      {
+        path: 'users', // ✅ /admin/users
+        name: 'admin-users',
+        component: AdminUsers
+      },
+      {
+        path: 'users/:id', // ✅ /admin/users/123
+        name: 'admin-user-detail',
+        component: AdminUserDetail,
+        props: true // ✅ 把 params 變成 props
+      },
+      {
+        path: 'settings', // ✅ /admin/settings
+        name: 'admin-settings',
+        component: AdminSettings
+      }
+    ]
   },
   {
     path: '/cart',
@@ -206,14 +239,14 @@ const routes = [
     ]
   },
   // 404 處理：若輸入不存在的網址導回首頁
-  {
-    path: '/:pathMatch(.*)*',
-    redirect: '/'
-  }
+  // {
+  //   path: '/:pathMatch(.*)*',
+  //   redirect: '/'
+  // }
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
   scrollBehavior(to, from, savedPosition) {
     return { top: 0 };
