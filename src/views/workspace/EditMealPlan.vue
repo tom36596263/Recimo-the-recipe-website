@@ -12,7 +12,7 @@ const planData = ref({
   planId: 1001,
   title: '2024春季增肌減脂計畫',
   startDate: '2024-03-01',
-  endDate: '2024-03-010'
+  endDate: '2024-03-10'
 });
 
 // 根據開始與結束日期，產生成一個Date物件的陣列
