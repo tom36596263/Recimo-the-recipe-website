@@ -29,7 +29,6 @@
     .hero-container{
         display: flex;
         align-items: center;
-        justify-content: center;
         width: 100%;
         height: 100vh;
         
@@ -49,18 +48,23 @@
         }
         .bg-layout{
             z-index: -1;
-            position: absolute; 
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            .hero-img1 {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: center;
+            }
         }
-        .hero-img1{
-            opacity: 1;
-            z-index: -3;
-            object-fit: cover;
-        }
-        .hero-img2{
-            opacity: 0;
-            height: 0;
-            z-index: -5;
-        }
-    }
         
+        
+    }
+        @media screen and (max-width: 810px) {
+            .hero-img1 {
+                object-position: 70% center; 
+            }
+        }
 </style>
