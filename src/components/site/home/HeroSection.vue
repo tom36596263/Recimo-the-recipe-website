@@ -63,10 +63,6 @@
         
     }
         @media screen and (max-width: 810px) {
-            .hero-container {
-                padding: 20px; 
-
-            }
             .hero-img1 {
                 object-position: 70% center; 
             }
