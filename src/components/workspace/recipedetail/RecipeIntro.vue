@@ -1,5 +1,7 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
+// 導入開發好的燈箱組件
+import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
 
 const props = defineProps({
     info: {
@@ -8,11 +10,20 @@ const props = defineProps({
     }
 });
 
+// 控制燈箱顯隱的狀態
+const showModal = ref(false);
+
 // 產生星星陣列
 const starArray = computed(() => {
     const score = props.info.difficulty ?? 3;
     return Array.from({ length: 5 }, (_, i) => (i < score ? '★' : '☆'));
 });
+
+// 處理燈箱確認提交後的邏輯
+const onModalSubmit = (data) => {
+    console.log('加入資料夾成功：', data);
+    // 這裡可以處理後續 API 動作
+};
 </script>
 
 <template>
@@ -29,7 +40,8 @@ const starArray = computed(() => {
                     </svg>
                 </div>
             </div>
-            <div class="badge-favorite">
+
+            <div class="badge-favorite" @click="showModal = true">
                 <i-material-symbols-favorite-outline-rounded />
                 <div class="favorite-text">加收藏</div>
             </div>
@@ -70,6 +82,8 @@ const starArray = computed(() => {
                 <p class="p-p1">{{ props.info.description }}</p>
             </div>
         </article>
+
+        <AddToFolderModal v-model="showModal" @submit="onModalSubmit" />
     </div>
 </template>
 
@@ -115,14 +129,16 @@ const starArray = computed(() => {
 .badge-favorite {
     color: $primary-color-700;
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 10px;
+    left: 10px;
     z-index: 10;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 5px;
     transition: all 0.3s ease;
+    padding: 6px 12px;
+    border-radius: 20px;
 
     &:hover {
         color: $accent-color-700;
@@ -180,24 +196,23 @@ const starArray = computed(() => {
         }
     }
 
-    // --- RWD 修正 ---
     @media screen and (max-width: 810px) {
         flex-direction: column;
-        align-items: center; // 整體置中
-        text-align: center; // 文字置中
+        align-items: center;
+        text-align: center;
         gap: 24px;
 
         .info-left {
             width: 100%;
-            justify-content: space-evenly; // 讓製作時間與難易度在同一列平均分佈
+            justify-content: space-evenly;
             gap: 0;
 
             .info-item {
-                align-items: center; // 標籤與數值在內部也置中
-                flex: 1; // 讓兩個項目平分寬度
+                align-items: center;
+                flex: 1;
 
                 .label-row {
-                    justify-content: center; // 標籤內的圖標文字置中
+                    justify-content: center;
                 }
             }
         }
@@ -213,7 +228,6 @@ const starArray = computed(() => {
     }
 }
 
-// --- 星星樣式 ---
 .stars-box {
     display: inline-flex;
     align-items: center;
@@ -226,7 +240,6 @@ const starArray = computed(() => {
     }
 }
 
-// --- 簡介區塊 ---
 .recipe-description {
     display: flex;
     align-items: center;

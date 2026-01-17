@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
-import CookSnapUploadModal from '@/components/workspace/recipedetail/modals/CookSnapUploadModal.vue';
+// 修改引用路徑，指向你準備要開發的新燈箱
+import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
 
 const isModalOpen = ref(false);
 
@@ -8,9 +9,9 @@ const openModal = () => {
     isModalOpen.value = true;
 };
 
-// 處理燈箱傳出的 submit 事件
+// 處理收藏功能傳出的資料
 const handleConfirm = (data) => {
-    console.log('接收到上傳資料：', data);
+    console.log('接收到收藏設定資料：', data);
     isModalOpen.value = false;
 };
 </script>
@@ -18,13 +19,14 @@ const handleConfirm = (data) => {
 <template>
     <div class="test-container">
         <h1>燈箱功能測試頁面</h1>
+        <p class="p-p3" style="color: #666;">目前測試對象：AddToFolderModal.vue</p>
         <hr>
 
         <button @click="openModal" class="test-btn">
-            開啟「分享料理成果」燈箱
+            開啟「加入收藏分類」燈箱
         </button>
 
-        <CookSnapUploadModal v-model="isModalOpen" @submit="handleConfirm" />
+        <AddToFolderModal v-model="isModalOpen" @submit="handleConfirm" />
     </div>
 </template>
 
@@ -43,6 +45,7 @@ const handleConfirm = (data) => {
 {
     padding: 12px 24px;
     background-color: #42b983;
+    /* 這是你目前的測試綠，之後可以改成 $primary-color-700 */
     color: white;
     border: none;
     border-radius: 8px;

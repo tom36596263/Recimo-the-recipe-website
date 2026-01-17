@@ -191,7 +191,7 @@ const openReport = (item, index) => {
             .user-name {
                 font-weight: 600;
                 margin-right: 6px;
-                color: $neutral-color-black;
+                color: $neutral-color-800;
             }
 
             .user-meta {
