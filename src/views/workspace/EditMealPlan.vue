@@ -12,7 +12,7 @@ const planData = ref({
   planId: 1001,
   title: '2024春季增肌減脂計畫',
   startDate: '2024-03-01',
-  endDate: '2024-03-05'
+  endDate: '2024-03-010'
 });
 
 // 根據開始與結束日期，產生成一個Date物件的陣列
@@ -60,11 +60,7 @@ const closePanel = () => {
         <ColumnTitle />
 
         <div class="meal-plan-container__columns" @wheel.prevent="onWheel">
-          <DayColumn
-            v-for="date in datelist"
-            :key="date.getTime()"
-            :current-date="date"
-          />
+          <DayColumn v-for="date in datelist" :key="date.getTime()" :current-date="date" />
         </div>
       </div>
     </div>
