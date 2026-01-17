@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
-import axios from 'axios';
+// import axios from 'axios';
+import { publicApi, base } from '@/utils/publicApi.js';
 import { defineStore } from 'pinia'
 import { useRouteName } from '@/composables/useRouteName'
 import { useCartStore } from '@/stores/cartStore'
@@ -9,15 +10,15 @@ import ProductRmd from '@/components/mall/ProductRmd.vue';
 // ==========================================
 // vue上課教：以後部屬比較不會有問題(資料放public的話)
 // ==========================================
-const baseURL = import.meta.env.BASE_URL
+// const baseurl = import.meta.env.BASE_URL
 
 // ==========================================
 // 點小圖秀大圖
 // ==========================================
 const productImages = [
-  `${baseURL}img/mall/PROD-001_01.jpg`,
-  `${baseURL}img/mall/PROD-001_02.jpg`,
-  `${baseURL}img/mall/PROD-001_03.jpg`
+  `${base}img/mall/PROD-001_01.jpg`,
+  `${base}img/mall/PROD-001_02.jpg`,
+  `${base}img/mall/PROD-001_03.jpg`
 ];
 
 // 預設顯示第一張
@@ -65,7 +66,8 @@ const { setDetailName } = useRouteName()
 
 const fetchData = async () => {
   try {
-    const response = await axios.get(`${baseURL}data/mall/products.json`);
+    // const response = await axios.get(`${base}data/mall/products.json`);
+    const response = await publicApi.get(`data/mall/products.json`);
 
     // 1. 修改這裡：將 p.id 改為 p.product_id
     // 並使用 String() 確保兩邊型別一致（字串對字串）
@@ -113,10 +115,18 @@ onMounted(() => {
 });
 
 // 新增一個處理路徑的 function
+// const getImageUrl = (url) => {
+//   if (!url) return '';
+//   const cleanPath = url.replace(/^public\//, '');
+//   // return `${base}${cleanPath}`;
+//   return `publicApi${cleanPath}`;
+// };
 const getImageUrl = (url) => {
   if (!url) return '';
+  // 假設 JSON 裡的路徑是 "public/img/prod.jpg"
   const cleanPath = url.replace(/^public\//, '');
-  return `${baseURL}${cleanPath}`;
+  // 修正：直接回傳相對路徑或加上基礎路徑
+  return `${base}${cleanPath}`;
 };
 
 // ==========================================
