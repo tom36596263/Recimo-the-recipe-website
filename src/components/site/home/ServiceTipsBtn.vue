@@ -49,7 +49,7 @@
     .tips-btn{
         display: flex;
         margin-bottom: 12px;
-        padding:50px;
+        padding:20px 50px;
         border-radius: $radius-base;
         transition: background-color .5s ease;
         position: relative;
@@ -57,6 +57,7 @@
             margin-left: 20px;
             .zh-h4{
                 color: $primary-color-700;
+                margin-bottom: 6px;
             }
         }
         .dot{
@@ -85,16 +86,15 @@
         }
     }
     @media screen and (max-width: 1024px){
-        // .tips-btn{
-        //     padding:24px 8px;
-        //     flex-direction: column;
-        //     align-items: center;
-        //     .circle-icon{
-        //         margin-bottom: 8px;
-        //     }
-        //     // .p-p1{
-        //     //     display: none;
-        //     // }
-        // }
+        .tips-btn{
+            flex-direction: column;
+            // justify-content: center;
+            align-items: center;
+            text-align: center;
+            
+        }
+        .circle-icon{
+            margin-bottom: 16px;
+        }
     }
 </style>
