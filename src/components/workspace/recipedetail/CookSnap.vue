@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import PostReportModal from '@/components/workspace/recipedetail/modals/PostReportModal.vue'
+// 1. 引入剛做好的上傳燈箱
+import CookSnapUploadModal from '@/components/workspace/recipedetail/modals/CookSnapUploadModal.vue'
 
 const props = defineProps({
   list: {
@@ -10,10 +12,9 @@ const props = defineProps({
   }
 })
 
-const fileInput = ref(null)
 const wallViewport = ref(null)
 
-// 檢舉彈窗
+// --- 檢舉彈窗狀態 ---
 const isReportModalOpen = ref(false)
 const selectedPhotoData = ref({
   content: '',
@@ -32,18 +33,18 @@ const handleReport = (photo) => {
   isReportModalOpen.value = true
 }
 
-const onReportSubmit = () => {
-  isReportModalOpen.value = false
-}
+// --- 上傳燈箱狀態 (新加入) ---
+const isUploadModalOpen = ref(false)
 
-// 上傳
 const handleUploadClick = () => {
-  fileInput.value.click()
+  // 直接開啟燈箱，不再觸發隱藏的 input
+  isUploadModalOpen.value = true
 }
 
-const onFileSelected = (event) => {
-  const file = event.target.files[0]
-  if (file) console.log('已選取檔案:', file.name)
+const onUploadSubmit = (data) => {
+  console.log('準備送往後端的資料:', data)
+  // 這裡之後可以串接 axios post
+  isUploadModalOpen.value = false
 }
 
 // 橫向捲動
@@ -56,8 +57,6 @@ const scrollWall = (direction) => {
 
 <template>
   <div class="recipe-result-container">
-    <input ref="fileInput" type="file" accept="image/*" hidden @change="onFileSelected" />
-
     <div class="result-header">
       <div class="upload-trigger-area" @click="handleUploadClick">
         <div class="upload-card">
@@ -77,32 +76,11 @@ const scrollWall = (direction) => {
     </div>
 
     <div class="result-wall">
-      <button v-if="list.length > 0" class="nav-btn prev" @click="scrollWall('prev')">
-        <i-material-symbols-arrow-back-ios-new-rounded />
-      </button>
-
-      <div class="wall-viewport" ref="wallViewport">
-        <div v-for="(photo, index) in list" :key="index" class="work-item">
-          <img :src="photo.url" :alt="'User work ' + index" />
-          <div class="work-overlay">
-            <p class="comment-text p-p2">{{ photo.comment }}</p>
-            <div class="report-icon-wrapper" @click.stop="handleReport(photo)">
-              <i-material-symbols:error-outline-rounded />
-            </div>
-          </div>
-        </div>
-
-        <div v-if="list.length === 0" class="empty-placeholder">
-          <p class="p-p2">目前還沒有作品分享，快來上傳您的第一張成品照吧！</p>
-        </div>
-      </div>
-
-      <button v-if="list.length > 0" class="nav-btn next" @click="scrollWall('next')">
-        <i-material-symbols-arrow-forward-ios-rounded />
-      </button>
     </div>
 
-    <PostReportModal v-model="isReportModalOpen" :commentData="selectedPhotoData" @submit="onReportSubmit" />
+    <CookSnapUploadModal v-model="isUploadModalOpen" @submit="onUploadSubmit" />
+
+    <PostReportModal v-model="isReportModalOpen" :commentData="selectedPhotoData" @submit="isReportModalOpen = false" />
   </div>
 </template>
 
