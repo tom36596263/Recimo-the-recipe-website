@@ -43,14 +43,14 @@ const computedIngredients = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/abstracts/_color.scss'; // 確保引用專案顏色變數
+@import '@/assets/scss/abstracts/_color.scss';
 
 .ingredients-container {
     width: 100%;
     margin-bottom: 2rem;
 
     .debug-msg {
-        color: #e74c3c;
+        color: $secondary-color-danger-700;
         text-align: center;
         padding: 10px;
         font-weight: bold;
@@ -59,24 +59,24 @@ const computedIngredients = computed(() => {
 
 .table-wrapper {
     margin-top: 20px;
-    border: 1px solid #ccc; // 對應圖片中的灰色細邊框
-    border-radius: 12px; // 對應圖片中的圓角
-    overflow: hidden; // 確保 header 顏色不會超出圓角
-    background-color: #fff;
+    border: 1px solid $neutral-color-400; 
+    border-radius: 10px; 
+    overflow: hidden;
+    background-color: $neutral-color-white;
 }
 
 .table-header {
     display: flex;
-    background-color: #4a9062; // 對應圖片中的森林綠色
+    background-color: $primary-color-700; 
     padding: 12px 20px;
 
     .cell {
-        color: #fff; // 白色文字
+        color: $neutral-color-white; 
         font-weight: 500;
         margin: 0;
         flex: 1;
 
-        // 根據圖片微調寬度比例：食材與份量較窄，備註較寬
+        
         &:nth-child(1) {
             flex: 1.2;
         }
@@ -92,7 +92,7 @@ const computedIngredients = computed(() => {
 }
 
 .table-body {
-    padding: 8px 0; // 上下留點空隙
+    padding: 8px 0; 
 
     .table-row {
         display: flex;
@@ -100,7 +100,7 @@ const computedIngredients = computed(() => {
         transition: background-color 0.2s;
 
         &:hover {
-            background-color: #f9f9f9;
+            background-color: $neutral-color-100;
         }
 
         .cell {
@@ -119,19 +119,19 @@ const computedIngredients = computed(() => {
 
             &.note {
                 flex: 2;
-                color: #333;
+                color: $neutral-color-black;
             }
 
             .p-p2 {
                 margin: 0;
                 line-height: 1.5;
-                font-size: 16px; // 調整至適合閱讀的大小
+                
             }
         }
     }
 }
 
-// 響應式微調：手機版縮小內距
+
 @media screen and (max-width: 576px) {
 
     .table-header,
