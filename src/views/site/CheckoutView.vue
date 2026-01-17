@@ -371,8 +371,10 @@ const totalAmount = computed(() => {
       <div class="col-6 col-lg-12">
         <div class="card-container">
           <div class="order-list">
-            <CheckCard v-for="item in orderItems" :key="item.id" :product-id="item.productId"
-              :quantity="item.quantity" />
+            <div class="order-list">
+              <CheckCard v-for="item in orderItems" :key="item.id" :product-name="item.product_name"
+                :quantity="item.quantity" :price="item.price" :image="item.images?.[0] || '/default.png'" />
+            </div>
           </div>
         </div>
         <hr>

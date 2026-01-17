@@ -2,19 +2,25 @@
   {
     "id": 101,
     "productId": 1,
+    "product_name": "舒肥雞胸藜麥飯",
     "quantity": 3,
-    "price": 480
+    "price": 480,
+    "images": ["public/img/mall/PROD-001_01.jpg"]
   },
   {
     "id": 102,
     "productId": 2,
+    "product_name": "香煎鮭魚糙米便當",
     "quantity": 1,
-    "price": 220
+    "price": 220,
+    "images": ["public/img/mall/PROD-002_01.jpg"]
   },
   {
     "id": 103,
     "productId": 3,
+    "product_name": "蒜香毛豆嫩豬排",
     "quantity": 1,
-    "price": 180
+    "price": 180,
+    "images": ["public/img/mall/PROD-003_01.jpg"]
   }
 ]
