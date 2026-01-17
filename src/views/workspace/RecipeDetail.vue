@@ -1,10 +1,9 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'; // 補上 onMounted
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-
-// 第一步驟：引用 json 檔案一定要 import 這行
 import { publicApi } from '@/utils/publicApi';
 
+// 引用元件
 import RecipeSteps from '../../components/workspace/recipedetail/RecipeSteps.vue';
 import NutritionCard from '../../components/workspace/recipedetail/NutritionCard.vue';
 import RecipeIngredients from '../../components/workspace/recipedetail/RecipeIngredients.vue';
@@ -37,7 +36,7 @@ const ingredientNameMap = {
     497: "溫水",
 };
 
-// 第二步驟：自訂 fetchData 函數
+// --- 2. 自訂 fetchData 函數 ---
 const fetchData = async () => {
     isLoading.value = true;
     const recipeId = Number(route.params.id) || 1;
@@ -46,8 +45,6 @@ const fetchData = async () => {
     localLikesOffset.value = 0;
 
     try {
-        // 使用 publicApi.get，路徑開頭不加斜線
-        // 因為是多個請求，維持 Promise.all 確保效能
         const [resR, resRecipeIng, resIngMaster, resS, resC, resG] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_ingredient.json'),
@@ -57,9 +54,9 @@ const fetchData = async () => {
             publicApi.get('data/social/gallery.json')
         ]);
 
-        // Axios 的資料是在 res.data 裡面
         rawRecipe.value = resR.data.find(r => Number(r.recipe_id) === recipeId) || null;
 
+        // 處理食材關聯資料
         const filteredLinks = resRecipeIng.data.filter(i => Number(i.recipe_id) === recipeId);
         rawIngredients.value = filteredLinks.map(link => {
             const masterInfo = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
@@ -70,7 +67,9 @@ const fetchData = async () => {
                 protein_per_100g: masterInfo?.protein_per_100g || 0,
                 fat_per_100g: masterInfo?.fat_per_100g || 0,
                 carbs_per_100g: masterInfo?.carbs_per_100g || 0,
-                default_unit: masterInfo?.unit_name || link.unit_name
+                default_unit: masterInfo?.unit_name || link.unit_name,
+                // 💡 修正處：將 JSON 的 remark 對應到 note 欄位
+                note: link.remark || ''
             };
         });
 
@@ -82,9 +81,7 @@ const fetchData = async () => {
         const galleryRaw = resG.data.data || resG.data;
         rawGallery.value = galleryRaw.filter(g => Number(g.RECIPE_ID) === recipeId);
 
-        if (rawRecipe.value) {
-            servings.value = 1;
-        }
+        if (rawRecipe.value) servings.value = 1;
 
     } catch (err) {
         console.error('讀取 JSON 失敗：', err);
@@ -93,17 +90,10 @@ const fetchData = async () => {
     }
 };
 
-// 第三步驟：確保在掛載生命週期呼叫
-onMounted(() => {
-    fetchData();
-});
+onMounted(() => { fetchData(); });
+watch(() => route.params.id, () => { fetchData(); });
 
-// 監聽路由 ID 變化（當使用者在不同食譜間切換時觸發）
-watch(() => route.params.id, () => {
-    fetchData();
-});
-
-// --- 3. 計算屬性與其餘邏輯 (維持不變) ---
+// --- 3. 計算屬性 ---
 const commentList = computed(() => {
     return rawComments.value.map(c => ({
         userName: c.USER_NAME,
@@ -154,10 +144,12 @@ const recipeIntroData = computed(() => {
     };
 });
 
+// 💡 整理要傳給子元件的格式
 const ingredientsData = computed(() => rawIngredients.value.map(item => ({
     INGREDIENT_NAME: item.ingredient_name,
     amount: item.amount,
     unit_name: item.unit_name || item.default_unit,
+    // 這裡維持 item.note，因為在 fetchData mapping 時已經把 remark 塞進去了
     note: item.note || '',
     calories_per_100g: item.calories_per_100g,
     protein_per_100g: item.protein_per_100g,

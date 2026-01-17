@@ -30,8 +30,8 @@ const getAvatarStyle = (name) => {
 const handleSend = () => {
     if (!userInput.value.trim()) return;
     userInput.value = "";
-    isSuccessShow.value = true;
-    setTimeout(() => { isSuccessShow.value = false; }, 2000);
+    // 改為普通 alert
+    alert("感謝你的分享！為了維護社群品質，你的留言正在進行審核，通過後將會立即顯示在食譜頁面上。");
 };
 
 const openReport = (item, index) => {
@@ -88,9 +88,6 @@ const openReport = (item, index) => {
         <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment"
             @update:modelValue="val => !val && (reportingIndex = null)" />
 
-        <Transition name="fade">
-            <div v-if="isSuccessShow" class="toast">留言已成功發表！</div>
-        </Transition>
     </div>
 </template>
 
