@@ -2,7 +2,7 @@
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import card from '@/components/mall/CheckCard.vue';
-import axios from 'axios';
+// import axios from 'axios';
 
 const router = useRouter();
 const orderItems = ref([]);

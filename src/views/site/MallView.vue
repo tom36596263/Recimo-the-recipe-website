@@ -64,7 +64,7 @@ const filteredProducts = computed(() => {
   }
   // 注意：這裡假設你的 JSON 資料裡有一個屬性叫做 category (或 tag)
   // 且內容跟上面的 text 完全一樣 (例如 "低卡健身系列")
-  return productList.value.filter((item) => item.category === activeTag.value);
+  return productList.value.filter((item) => item.product_category === activeTag.value);
 });
 
 // --- 核心邏輯步驟 2：計算總頁數 ---
