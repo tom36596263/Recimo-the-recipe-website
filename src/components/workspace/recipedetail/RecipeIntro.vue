@@ -161,7 +161,7 @@ const starArray = computed(() => {
             }
 
             .value {
-                color: $neutral-color-black;
+                color: $neutral-color-800;
                 font-weight: 600;
             }
         }

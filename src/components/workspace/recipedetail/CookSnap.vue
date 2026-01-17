@@ -1,7 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-// 1. 引入檢舉彈窗組件
-import PostReportModal from '@/components/workspace/recipedetail/modals/PostReportModal.vue';
+import { ref } from 'vue'
+import PostReportModal from '@/components/workspace/recipedetail/modals/PostReportModal.vue'
 
 const props = defineProps({
   list: {
@@ -9,67 +8,57 @@ const props = defineProps({
     required: true,
     default: () => []
   }
-});
+})
 
-// 建立 DOM 引用
-const fileInput = ref(null);
-const wallViewport = ref(null);
+const fileInput = ref(null)
+const wallViewport = ref(null)
 
-// --- 彈窗控制邏輯 ---
-const isReportModalOpen = ref(false);
+// 檢舉彈窗
+const isReportModalOpen = ref(false)
 const selectedPhotoData = ref({
   content: '',
   userName: '',
   time: '',
   image: ''
-});
+})
 
-// 處理檢舉點擊
 const handleReport = (photo) => {
-  // 將點選的照片資料格式化，傳遞給彈窗
   selectedPhotoData.value = {
-    content: photo.comment,      // 照片留言內容
-    userName: photo.userName || '匿名用戶', // 假設資料中有 userName
-    time: photo.time || '剛剛',   // 假設資料中有時間
-    image: photo.url            // 照片網址
-  };
-  // 開啟彈窗
-  isReportModalOpen.value = true;
-};
-
-const onReportSubmit = (reportResult) => {
-  console.log('收到檢舉提交資料:', reportResult);
-  // 這裡執行 API 提交邏輯
-  isReportModalOpen.value = false;
-};
-// ------------------
-
-const handleUploadClick = () => {
-  fileInput.value.click();
-};
-
-const scrollWall = (direction) => {
-  if (wallViewport.value) {
-    const scrollAmount = 256;
-    wallViewport.value.scrollBy({
-      left: direction === 'next' ? scrollAmount : -scrollAmount,
-      behavior: 'smooth'
-    });
+    content: photo.comment,
+    userName: photo.userName || '匿名用戶',
+    time: photo.time || '剛剛',
+    image: photo.url
   }
-};
+  isReportModalOpen.value = true
+}
+
+const onReportSubmit = () => {
+  isReportModalOpen.value = false
+}
+
+// 上傳
+const handleUploadClick = () => {
+  fileInput.value.click()
+}
 
 const onFileSelected = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    console.log("已選取檔案:", file.name);
-  }
-};
+  const file = event.target.files[0]
+  if (file) console.log('已選取檔案:', file.name)
+}
+
+// 橫向捲動
+const scrollWall = (direction) => {
+  if (!wallViewport.value) return
+  const offset = direction === 'next' ? 256 : -256
+  wallViewport.value.scrollBy({ left: offset, behavior: 'smooth' })
+}
 </script>
 
 <template>
   <div class="recipe-result-container">
-    <input type="file" ref="fileInput" style="display: none" accept="image/*" @change="onFileSelected" />
+    <input ref="fileInput" type="file" accept="image/*" hidden @change="onFileSelected" />
 
+    <!-- Header -->
     <div class="result-header">
       <div class="upload-trigger-area" @click="handleUploadClick">
         <div class="upload-card">
@@ -88,6 +77,7 @@ const onFileSelected = (event) => {
       </div>
     </div>
 
+    <!-- Result Wall -->
     <div class="result-wall">
       <button class="nav-btn prev" @click="scrollWall('prev')">
         <i-material-symbols-arrow-back-ios-new-rounded />
@@ -95,10 +85,9 @@ const onFileSelected = (event) => {
 
       <div class="wall-viewport" ref="wallViewport">
         <div v-for="(photo, index) in list" :key="index" class="work-item">
-          <img :src="photo.url" :alt="'User work ' + index">
+          <img :src="photo.url" :alt="'User work ' + index" />
           <div class="work-overlay">
             <p class="comment-text p-p2">{{ photo.comment }}</p>
-
             <div class="report-icon-wrapper" @click.stop="handleReport(photo)">
               <i-material-symbols:error-outline-rounded />
             </div>
@@ -118,25 +107,26 @@ const onFileSelected = (event) => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-// ... 你的樣式表保持不變 ...
 .recipe-result-container {
-  padding: 40px 0;
+  padding: 24px 0; // 🔽 原 40px
 
   .result-header {
+    max-width: 960px; // 🔹 視覺集中
+    margin: 0 auto 32px;
     display: flex;
     align-items: center;
-    gap: 40px;
-    margin-bottom: 48px;
+    gap: 32px;
 
     .upload-card {
       width: 180px;
-      height: 140px;
+      height: 120px; // 🔽 原 140px
       border: 1px solid $primary-color-700;
       border-radius: 10px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      gap: 4px;
       background-color: $neutral-color-white;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -147,25 +137,23 @@ const onFileSelected = (event) => {
       }
 
       .plus-sign {
-        color: $neutral-color-black;
-        margin-bottom: -4px;
-      }
-
-      .main-label {
-        color: $neutral-color-black;
-        margin-top: 4px;
+        margin-bottom: -6px;
       }
 
       .sub-label {
-        color: $neutral-color-400;
         transform: scale(0.8);
+        color: $neutral-color-400;
       }
     }
 
     .header-text-group {
       .description {
-        margin-top: 8px;
+        margin-top: 4px; // 🔽
         color: $neutral-color-700;
+
+        p {
+          margin-bottom: 2px; // 🔽 行距收緊
+        }
       }
     }
   }
@@ -179,15 +167,12 @@ const onFileSelected = (event) => {
       display: flex;
       gap: 16px;
       overflow-x: auto;
-      padding: 10px 0;
+      padding: 8px 0;
       scroll-behavior: smooth;
 
       &::-webkit-scrollbar {
         display: none;
       }
-
-      -ms-overflow-style: none;
-      scrollbar-width: none;
     }
 
     .nav-btn {
@@ -201,8 +186,8 @@ const onFileSelected = (event) => {
       background-color: $neutral-color-white;
       color: $primary-color-700;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       cursor: pointer;
       z-index: 5;
       transition: all 0.3s ease;
@@ -220,24 +205,20 @@ const onFileSelected = (event) => {
       &.next {
         right: -22px;
       }
-
-      svg {
-        font-size: 20px;
-      }
     }
 
     .work-item {
       flex: 0 0 240px;
       height: 150px;
-      position: relative;
       border-radius: 12px;
       overflow: hidden;
+      position: relative;
 
       img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.5s ease;
+        transition: transform 0.4s ease;
       }
 
       .work-overlay {
@@ -247,39 +228,33 @@ const onFileSelected = (event) => {
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: 16px;
         opacity: 0;
         transition: opacity 0.3s ease;
 
         .comment-text {
           color: $neutral-color-white;
           text-align: center;
-          line-height: 1.6;
+          line-height: 1.5;
         }
 
         .report-icon-wrapper {
           position: absolute;
-          bottom: 12px;
-          right: 12px;
-          color: rgba($neutral-color-white, 0.7);
+          bottom: 10px;
+          right: 10px;
           cursor: pointer;
-          display: flex;
-          transition: all 0.2s ease;
+          opacity: 0.8;
 
           &:hover {
-            color: $neutral-color-white;
+            opacity: 1;
             transform: scale(1.1);
-          }
-
-          svg {
-            font-size: 20px;
           }
         }
       }
 
       &:hover {
         img {
-          transform: scale(1.1);
+          transform: scale(1.08);
         }
 
         .work-overlay {
@@ -290,11 +265,11 @@ const onFileSelected = (event) => {
   }
 }
 
-@media screen and (max-width: 810px) {
+@media (max-width: 810px) {
   .result-header {
     flex-direction: column;
     text-align: center;
-    gap: 20px;
+    gap: 16px;
 
     .upload-card {
       width: 100%;

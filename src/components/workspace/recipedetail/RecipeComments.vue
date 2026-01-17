@@ -1,346 +1,280 @@
 <script setup>
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import CommentReportModal from './modals/CommentReportModal.vue';
 
 const props = defineProps({
-    list: {
-        type: Array,
-        default: () => []
-    }
+    list: { type: Array, default: () => [] }
 });
 
 const userInput = ref("");
 const isReportModalOpen = ref(false);
-const isSuccessShow = ref(false); // 成功彈窗狀態
+const isSuccessShow = ref(false);
 const activeComment = ref({ content: '', userName: '', time: '' });
+
+// --- 簡單的點讚邏輯 ---
+const localLikes = reactive({}); // 記錄格式如 { 0: true, 1: false }
+
+const toggleLike = (index) => {
+    localLikes[index] = !localLikes[index];
+};
+
+const getAvatarStyle = (name) => {
+    const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
+    const charCodeSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
+};
 
 const handleSend = () => {
     if (!userInput.value.trim()) return;
-
-    // 模擬發送
-    console.log("送出留言內容：", userInput.value);
     userInput.value = "";
-
-    // 觸發成功彈窗
     isSuccessShow.value = true;
-    setTimeout(() => {
-        isSuccessShow.value = false;
-    }, 2000);
+    setTimeout(() => { isSuccessShow.value = false; }, 2000);
 };
 
 const openReport = (item) => {
-    activeComment.value = {
-        content: item.content,
-        userName: item.userName,
-        time: item.time
-    };
+    activeComment.value = { ...item };
     isReportModalOpen.value = true;
-};
-
-const onReportSubmit = (data) => {
-    isReportModalOpen.value = false;
-};
-
-const toggleLike = (item) => {
-    item.isLiked = !item.isLiked;
-    if (item.isLiked) {
-        item.likes++;
-    } else {
-        item.likes--;
-    }
 };
 </script>
 
 <template>
-    <div class="comment-container">
-        <div class="input-section">
-            <div class="input-wrapper">
-                <textarea v-model="userInput" placeholder="分享你的烹飪心得或修改建議..." class="comment-textarea p-p2"
-                    rows="3"></textarea>
-            </div>
-            <div class="input-actions-row">
-                <span class="p-p3 tip-text">請保持友善的社群交流環境</span>
-                <button @click="handleSend" class="send-btn p-p2" :disabled="!userInput.trim()">
-                    發表評論
-                </button>
-            </div>
+    <div class="comment-section">
+        <h2 class="section-title zh-h3">美味悄悄話</h2>
+
+        <div class="input-container">
+            <input v-model="userInput" type="text" placeholder="分享你的想法..." class="styled-input"
+                @keyup.enter="handleSend" />
+            <button class="send-icon-btn" :class="{ 'active': userInput.trim() }" @click="handleSend">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                </svg>
+            </button>
         </div>
 
         <div class="comment-list">
-            <div v-for="(item, index) in list" :key="index" class="comment-item animate-in">
-                <div class="avatar-box">
-                    <img :src="item.avatar" class="avatar-img" alt="avatar" />
+            <div v-for="(item, index) in list" :key="index" class="comment-item">
+                <div class="user-avatar-text" :style="getAvatarStyle(item.userName)">
+                    {{ item.userName.charAt(0).toUpperCase() }}
                 </div>
 
-                <div class="comment-content">
-                    <div class="user-info-header">
-                        <div class="header-left">
-                            <span class="user-name zh-h4-bold">{{ item.userName }}</span>
-                            <span class="user-handle p-p3">@{{ item.handle }} · {{ item.time }}</span>
-                        </div>
+                <div class="comment-body">
+                    <div class="comment-header">
+                        <span class="user-name p-p1">{{ item.userName }}</span>
+                        <span class="user-meta p-p3">@{{ item.handle }} • {{ item.time }}</span>
                     </div>
+                    <p class="comment-text p-p2">{{ item.content }}</p>
 
-                    <p class="comment-text p-p1">{{ item.content }}</p>
-
-                    <div class="comment-actions">
-                        <button class="like-btn" :class="{ 'active': item.isLiked }" @click="toggleLike(item)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                :fill="item.isLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z">
-                                </path>
-                                <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
-                            </svg>
-                            <span class="action-text p-p3">{{ item.likes }}</span>
+                    <div class="comment-footer">
+                        <button class="action-btn like-btn" :class="{ 'active': localLikes[index] }"
+                            @click="toggleLike(index)">
+                            <i-material-symbols-thumb-up-outline class="action-icon" />
+                            <span class="count">{{ (item.likes || 0) + (localLikes[index] ? 1 : 0) }}</span>
                         </button>
 
-                        <button class="report-btn" title="檢舉此留言" @click="openReport(item)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="8" x2="12" y2="12"></line>
-                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                            </svg>
+                        <button class="action-btn report-btn" @click="openReport(item)">
+                            <i-material-symbols:error-outline-rounded class="action-icon" />
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment" @submit="onReportSubmit" />
+        <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment" />
 
         <Transition name="fade">
-            <div v-if="isSuccessShow" class="success-toast">
-                <div class="toast-content">
-                    <i-material-symbols:check-circle-rounded class="success-icon" />
-                    <span class="zh-h5-bold">留言已成功發表！</span>
-                </div>
-            </div>
+            <div v-if="isSuccessShow" class="toast">留言已成功發表！</div>
         </Transition>
     </div>
 </template>
 
+
+
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-.comment-container {
-    position: relative;
-    background-color: transparent;
-    padding: 24px 0;
+.comment-section {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    font-family: "PingFang TC", sans-serif;
 }
 
-// --- 輸入區樣式 ---
-.input-section {
-    margin-bottom: 48px;
-    border-bottom: 1px solid $neutral-color-100;
-    padding-bottom: 32px;
+.section-title {
+    margin-bottom: 16px;
+    color: $neutral-color-black;
+}
 
-    .input-wrapper {
-        margin-bottom: 16px;
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
 
-        .comment-textarea {
-            width: 100%;
-            border: 1px solid $neutral-color-100;
-            border-radius: 12px;
-            padding: 16px;
-            background-color: $neutral-color-white;
-            color: $neutral-color-black;
-            resize: none;
-            transition: border-color 0.3s;
+    .styled-input {
+        width: 100%;
+        padding: 10px 50px 10px 16px;
+        border: 1.5px solid $primary-color-700;
+        border-radius: 12px;
+        font-size: 15px;
+        outline: none;
+        transition: all 0.2s;
 
-            &::placeholder {
-                color: $neutral-color-400;
-            }
-
-            &:focus {
-                outline: none;
-                border-color: $primary-color-400;
-            }
-        }
-    }
-
-    .input-actions-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        .tip-text {
+        &::placeholder {
             color: $neutral-color-400;
         }
 
-        .send-btn {
-            background-color: $primary-color-700;
-            color: $neutral-color-white;
-            border: none;
-            padding: 10px 28px;
-            border-radius: 30px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s;
-
-            &:disabled {
-                background-color: $neutral-color-100;
-                color: $neutral-color-400;
-                cursor: not-allowed;
-            }
-
-            &:hover:not(:disabled) {
-                background-color: $primary-color-800;
-            }
-        }
-    }
-}
-
-// --- 留言列表樣式 ---
-.comment-list {
-    display: flex;
-    flex-direction: column;
-    gap: 40px; // 增加留言間的間距
-}
-
-.comment-item {
-    display: flex;
-    gap: 20px;
-
-    .avatar-box {
-        flex-shrink: 0;
-
-        .avatar-img {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid $neutral-color-100;
+        &:focus {
+            border-color: $primary-color-800;
+            box-shadow: 0 0 0 3px rgba(74, 131, 96, 0.1);
         }
     }
 
-    .comment-content {
-        flex: 1;
-
-        .user-info-header {
-            margin-bottom: 8px;
-
-            .header-left {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-
-                .user-name {
-                    color: $neutral-color-black;
-                }
-
-                .user-handle {
-                    color: $neutral-color-700;
-                }
-            }
-        }
-
-        .comment-text {
-            line-height: 1.8;
-            margin-bottom: 14px;
-            white-space: pre-line;
-            color: $neutral-color-800; // 使用 800 提升內文質感
-        }
-    }
-}
-
-// --- 操作按鈕區 ---
-.comment-actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 20px;
-
-    button {
+    .send-icon-btn {
+        position: absolute;
+        right: 15px;
         background: none;
         border: none;
+        padding: 5px;
         cursor: pointer;
+        color: $neutral-color-400;
         display: flex;
         align-items: center;
-        color: $neutral-color-black; // 預設使用黑色
-        padding: 6px;
-        transition: transform 0.2s, color 0.2s;
+        transition: color 0.2s;
 
-        &:active {
-            transform: scale(0.9);
-        }
-    }
-
-    .like-btn {
         &.active {
             color: $primary-color-700;
         }
 
-        &:hover {
-            color: $primary-color-700;
+        &:disabled {
+            cursor: not-allowed;
         }
-    }
-
-    .report-btn {
-        &:hover {
-            color: $secondary-color-danger-700;
-        }
-    }
-
-    .action-text {
-        margin-left: 6px;
-        font-weight: 500;
     }
 }
 
-// --- 成功彈窗 ---
-.success-toast {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10000;
-    background-color: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(4px);
-    color: $neutral-color-white;
-    padding: 32px 56px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+.comment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; 
+}
 
-    .toast-content {
+.comment-item {
+    display: flex;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $neutral-color-100;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    .user-avatar-text {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
         display: flex;
-        flex-direction: column;
         align-items: center;
-        gap: 12px;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+        flex-shrink: 0;
+        user-select: none;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
 
-        .success-icon {
-            font-size: 56px;
-            color: $secondary-color-success-700;
+    .comment-body {
+        flex: 1;
+
+        .comment-header {
+            margin-bottom: 2px;
+
+            .user-name {
+                font-weight: 600;
+                margin-right: 6px;
+                color: $neutral-color-black;
+            }
+
+            .user-meta {
+                color: $neutral-color-400;
+                font-size: 13px;
+            }
+        }
+
+        .comment-text {
+            line-height: 1.5;
+            color: $neutral-color-800;
+            margin-bottom: 4px;
+            white-space: pre-line;
+        }
+
+        .comment-image-wrapper {
+            margin: 8px 0;
+
+            .result-image {
+                max-width: 200px;
+                border-radius: 8px;
+                display: block;
+            }
+        }
+
+        .comment-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+
+            .action-btn {
+                background: none;
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                color: $neutral-color-700; 
+                padding: 4px;
+                transition: color 0.2s;
+
+                .action-icon {
+                    font-size: 18px;
+                }
+
+                .count {
+                    margin-left: 4px;
+                    font-size: 14px;
+                    font-weight: 500;
+                }
+
+                &.like-btn:hover,
+                &.like-btn.active {
+                    color: $primary-color-700;
+                }
+
+                &.report-btn:hover {
+                    color: $secondary-color-danger-700;
+                }
+            }
         }
     }
 }
 
-// 動畫與其餘過渡
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: $neutral-color-white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    z-index: 100;
+    font-size: 13px;
+}
+
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.3s, transform 0.3s;
+    transition: opacity 0.3s;
 }
 
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
-    transform: translate(-50%, -40%);
-}
-
-.animate-in {
-    animation: fadeIn 0.5s ease-out forwards;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 </style>
