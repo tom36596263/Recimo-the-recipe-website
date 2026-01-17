@@ -39,26 +39,26 @@ const handleCancel = () => {
       <div class="info-group">
         <div class="info-row p-p1">
           <span>訂購日期：{{ order.date }}</span>
-          <span>訂單編號：{{ order.id }}</span>
-          <span>物流編號：{{ order.trackingNo }}</span>
+          <div class="flex">
+            <span>訂單編號：{{ order.id }}</span>
+            <span>物流編號：{{ order.trackingNo }}</span>
+          </div>
         </div>
         <div class="info-row p-p1">
           <span>收件人：{{ order.receiver }}</span>
           <span>手機號碼：{{ order.phone }}</span>
-          <span>配送方式：{{ order.method }}</span>
-          <span>付款狀態：{{ order.payment }}</span>
+          <div class="flex">
+            <span>配送方式：{{ order.method }}</span>
+            <span>付款狀態：{{ order.payment }}</span>
+          </div>
         </div>
       </div>
       <BaseBtn title="取消訂單" variant="outline" @click="handleDelete" />
     </div>
 
     <div class="status-bar p-p1">
-      <div
-        v-for="(step, index) in statusSteps"
-        :key="index"
-        class="status-step"
-        :class="{ active: index <= order.status }"
-      >
+      <div v-for="(step, index) in statusSteps" :key="index" class="status-step"
+        :class="{ active: index <= order.status }">
         <div class="bar"></div>
         <span class="label">{{ step }}</span>
       </div>
@@ -87,16 +87,16 @@ const handleCancel = () => {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 /* 樣式與之前相同，針對卡片設計 */
 .order-card {
-  background-color: #fff;
-  border-radius: 8px;
+  background-color: $neutral-color-100;
+  border-radius: $radius-base;
   padding: 24px;
-  margin-bottom: 24px; /* 卡片與卡片之間的距離 */
+  margin-bottom: 24px;
+  /* 卡片與卡片之間的距離 */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   font-family: sans-serif;
-  color: #333;
 }
 
 .card-header {
@@ -104,22 +104,35 @@ const handleCancel = () => {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 20px;
+
+  @media (max-width: 530px) {
+    flex-direction: column;
+    align-items: flex-end;
+  }
 }
 
 .info-row {
   display: flex;
-  gap: 24px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: #333;
+  gap: 15px;
+  margin-bottom: 15px;
   flex-wrap: wrap;
+}
+
+.flex {
+  display: flex;
+  gap: 10px;
+
+  @media (max-width: 430px) {
+    flex-direction: column;
+  }
 }
 
 /* Status Bar */
 .status-bar {
   display: flex;
   justify-content: space-between;
-  margin: 30px 0;
+  margin: 20px 0;
+  gap: 8px;
 }
 
 .status-step {
@@ -133,22 +146,21 @@ const handleCancel = () => {
 .status-step .bar {
   width: 100%;
   height: 4px;
-  background-color: #ddd;
+  background-color: $primary-color-400;
   margin-bottom: 8px;
   border-radius: 2px;
 }
 
-.status-step + .status-step .bar {
+.status-step+.status-step .bar {
   margin-left: 4px;
 }
 
 .status-step.active {
   opacity: 1;
-  color: #2c3e50;
 }
 
 .status-step.active .bar {
-  background-color: #68b684;
+  background-color: $primary-color-700;
 }
 
 .status-step .label {
@@ -167,14 +179,9 @@ const handleCancel = () => {
   align-items: center;
 }
 
-.list-header {
-  color: #666;
-  border-bottom: 2px solid #68b684; /* 綠色底線 */
-  margin-bottom: 10px;
-}
 
 .product-item {
-  background-color: #fcfcfc;
+  background-color: $neutral-color-white;
   margin-bottom: 8px;
   border-radius: 4px;
 }
@@ -183,10 +190,12 @@ const handleCancel = () => {
   flex: 3;
   text-align: left;
 }
+
 .col-qty {
   flex: 1;
   text-align: center;
 }
+
 .col-price {
   flex: 1;
   text-align: right;

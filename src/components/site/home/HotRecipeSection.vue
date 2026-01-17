@@ -6,7 +6,7 @@ import { ref, onMounted } from 'vue';
 const recipes = ref([
     {
         "recipe_name": "舒肥雞胸藜麥飯",
-        "image_url": "public/img/mall/PROD-001_01.jpg",
+        "image_url": "/img/mall/PROD-001_01.jpg",
         "tags": ["低卡健身系列", "低溫舒肥", "超級食物"],
         "nutritional_info": {
             "calories": "250kcal",
@@ -20,7 +20,7 @@ const recipes = ref([
     },
     {
         "recipe_name": "香煎鮭魚糙米便當",
-        "image_url": "public/img/mall/PROD-002_01.jpg",
+        "image_url": "/img/mall/PROD-002_01.jpg",
         "tags": ["低卡健身系列", "阿拉斯加鮭魚", "高纖"],
         "nutritional_info": {
             "calories": "580kcal",
@@ -34,7 +34,7 @@ const recipes = ref([
     },
     {
         "recipe_name": "蒜香毛豆嫩豬排",
-        "image_url": "public/img/mall/PROD-003_01.jpg",
+        "image_url": "/img/mall/PROD-003_01.jpg",
         "tags": ["低卡健身系列", "台灣活菌豬", "職人調味"],
         "nutritional_info": {
             "calories": "318kcal",

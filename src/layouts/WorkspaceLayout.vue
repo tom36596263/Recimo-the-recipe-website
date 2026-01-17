@@ -1,6 +1,6 @@
 <script setup>
 import { useRoute } from 'vue-router';
-import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
+import LogoBlack from '/img/site/Recimo-logo-black.svg'
 import WorkspaceTopBar from '@/components/workspace/WorkspaceTopBar.vue';
 import WorkspaceSideBar from '@/components/workspace/WorkspaceSideBar.vue';
 

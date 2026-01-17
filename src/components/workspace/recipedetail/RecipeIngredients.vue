@@ -18,9 +18,11 @@ const computedIngredients = computed(() => {
         displayAmount: parseFloat((Number(item.amount) * props.servings).toFixed(1))
     }));
 });
+
 </script>
 
 <template>
+
     <section class="ingredients-container">
         <div class="table-wrapper">
             <div class="table-header">

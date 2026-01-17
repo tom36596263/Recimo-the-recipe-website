@@ -54,7 +54,7 @@ const props = defineProps({
 @import "@/assets/scss/abstracts/_color.scss";
 
 .zh-h3 {
-  padding-top: 40px; // 稍微縮減頂部間距
+  padding-top: 20px; // 稍微縮減頂部間距
   padding-bottom: 20px;
 }
 
@@ -82,7 +82,7 @@ const props = defineProps({
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 12px;
+    border-radius: 10px;
   }
 }
 
@@ -90,7 +90,7 @@ const props = defineProps({
 .placeholder-box {
   width: 100%;
   height: 100%;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 2px dashed $neutral-color-400; // 核心：虛線邊框
   background-color: $neutral-color-100;
   display: flex;
@@ -139,7 +139,6 @@ const props = defineProps({
     text-transform: uppercase;
   }
   .index {
-    font-size: 18px;
     font-weight: bold;
     line-height: 1.1;
   }

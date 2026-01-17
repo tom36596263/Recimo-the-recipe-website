@@ -32,7 +32,7 @@ const swiperBreakpoints = {
 // --- 資料與狀態 ---
 const baseURL = import.meta.env.BASE_URL;
 const productList = ref([]);
-const activeTag = ref('ALL'); // 目前選中的標籤
+const activeTag = ref('全部'); // 目前選中的標籤
 const currentPage = ref(1); // 目前在第幾頁
 const pageSize = 8; // 一頁顯示幾筆 (4欄 x 2排 = 8筆)
 const router = useRouter();
@@ -49,7 +49,7 @@ const goToDetail = (id) => {
 
 // --- 標籤設定 ---
 const tags = [
-  { text: 'ALL', width: '62px' },
+  { text: '全部', width: '62px' },
   { text: '低卡健身系列', width: '138px' },
   { text: '日韓風味系列', width: '138px' },
   { text: '歐美西式系列', width: '138px' },
@@ -59,7 +59,7 @@ const tags = [
 // --- 核心邏輯步驟 1：先過濾資料 (Filter) ---
 const filteredProducts = computed(() => {
   //經過篩選後的所有商品清單
-  if (activeTag.value === 'ALL') {
+  if (activeTag.value === '全部') {
     return productList.value;
   }
   // 注意：這裡假設你的 JSON 資料裡有一個屬性叫做 category (或 tag)
@@ -84,7 +84,7 @@ const displayedProducts = computed(() => {
 const randomProducts = computed(() => {
   if (productList.value.length === 0) return [];
   const shuffled = [...productList.value].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, 3);
+  return shuffled.slice(0, 4);
   //... 是「展開運算子 (Spread Operator)」。意思是把 productList 裡面的東西全部倒出來，放進一個新的 [] 裡面
   //sort(() => 0.5 - Math.random()) 是洗牌的概念
 });
@@ -156,7 +156,7 @@ const columns = ref([
         </div>
         <div class="container">
           <div class="row desktop-view">
-            <div v-for="item in randomProducts" :key="item.id" class="col-4 col-md-12" @click="goToDetail(item.id)">
+            <div v-for="item in randomProducts" :key="item.id" class="col-3 col-md-12" @click="goToDetail(item.id)">
               <card :item="item" />
             </div>
           </div>
@@ -213,29 +213,10 @@ const columns = ref([
 
       <!-- 頁碼 -->
       <div class="pagination" v-if="totalPages > 1">
-        <!-- <a
-        href="#"
-        class="page-link"
-        @click.prevent="setPage(currentPage - 1)"
-        :class="{ disabled: currentPage === 1 }"
-      >
-        &lt;
-      </a> -->
-
-        <a href="#" class="page-link" v-for="page in totalPages" :key="page" :class="{ active: currentPage === page }"
-          @click.prevent="setPage(page)">
+        <button v-for="page in totalPages" :key="page" class="page-link" :class="{ active: currentPage === page }"
+          @click="setPage(page)">
           {{ page }}
-        </a>
-        <!-- 如果這顆按鈕代表的數字 (page) 等於你目前所在的頁碼 (currentPage)。 -->
-        <!-- 加上 active 這個 class。這通常會讓按鈕變色（例如變成藍底白字），告訴使用者「你現在在這裡」。 -->
-        <!-- <a
-        href="#"
-        class="page-link"
-        @click.prevent="setPage(currentPage + 1)"
-        :class="{ disabled: currentPage === totalPages }"
-      >
-        &gt;
-      </a> -->
+        </button>
       </div>
     </section>
 
@@ -313,6 +294,7 @@ const columns = ref([
     background-position: center top;
     margin-top: 45px;
     padding-bottom: 120px;
+
 
     @media (max-width: 768px) {
       background-image: url(../../assets/images/mall/phonehotback.png);

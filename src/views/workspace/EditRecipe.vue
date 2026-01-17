@@ -1,25 +1,11 @@
 <script setup>
-import { ref, computed, provide, onMounted } from 'vue';
+import { ref, provide } from 'vue';
 import EditorHeader from '@/components/workspace/editrecipe/EditorHeader.vue';
 import IngredientEditor from '@/components/workspace/editrecipe/IngredientEditor.vue';
 import StepEditor from '@/components/workspace/editrecipe/StepEditor.vue';
 
 // 控制編輯狀態
 const isEditing = ref(true);
-
-// 載入環境 (Tailwind & FA)
-onMounted(() => {
-  if (!document.getElementById('tailwind-cdn')) {
-    const tw = document.createElement('script');
-    tw.src = 'https://cdn.tailwindcss.com';
-    document.head.appendChild(tw);
-  }
-  // 補上 FontAwesome 否則星星跟叉叉會消失
-  const fa = document.createElement('link');
-  fa.rel = 'stylesheet';
-  fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
-  document.head.appendChild(fa);
-});
 
 // 食譜資料
 const recipeForm = ref({
@@ -28,91 +14,145 @@ const recipeForm = ref({
   coverImg: null,
   difficulty: 3,
   ingredients: [{ id: 'i1', name: '雞蛋', amount: '2 顆', memo: '需分離' }],
-  steps: [{ id: 's1', title: '處理蛋白', text: '將蛋白打發至濕性發泡。', time: 5, tags: ['i1'], img: null }]
+  steps: [
+    {
+      id: 's1',
+      title: '處理蛋白',
+      text: '將蛋白打發至濕性發泡。',
+      time: 5,
+      tags: ['i1'],
+      img: null
+    }
+  ]
 });
 
-const totalTime = computed(() => {
-  return recipeForm.value.steps.reduce((sum, s) => sum + (parseInt(s.time) || 0), 0);
-});
+const handleSave = () => {
+  console.log('儲存食譜', recipeForm.value);
+};
 
 provide('isEditing', isEditing);
 </script>
 
 <template>
-  <div :class="['min-h-screen pb-20 font-sans bg-slate-50 text-slate-700', { 'is-editing': isEditing }]">
-    
-    <main class="max-w-[1200px] mx-auto p-10">
-      <header class="flex justify-between items-center mb-10">
-        <div class="px-3 py-1 rounded-full text-xs font-bold transition-colors"
-             :class="isEditing ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-200 text-slate-500'">
-          {{ isEditing ? '編輯模式' : '預覽模式' }}
-        </div>
-        <div class="flex gap-3">
-          <button v-if="!isEditing" @click="isEditing = true" 
-                  class="bg-blue-600 text-white px-8 py-2 rounded-full font-bold shadow-lg hover:bg-blue-700 transition">
-            進入編輯
-          </button>
-          <button v-else @click="isEditing = false" 
-                  class="bg-emerald-500 text-white px-8 py-2 rounded-full font-bold shadow-lg hover:bg-emerald-600 transition">
-            完成並儲存
-          </button>
-        </div>
-      </header>
+  <div :class="['recipe-editor-page', { 'is-editing': isEditing }]">
+    <main class="container">
+      
+      <div class="header-section mb-10">
+        <EditorHeader v-model="recipeForm" :is-editing="isEditing" />
+      </div>
 
-      <EditorHeader v-model="recipeForm" :is-editing="isEditing" />
+      <div class="edit-main-card">
+        <div class="row"> 
+          <aside class="col-4 col-md-12 ingredient-sidebar">
+            <IngredientEditor :ingredients="recipeForm.ingredients" :is-editing="isEditing" />
+          </aside>
 
-      <div class="grid grid-cols-12 gap-10">
-        <div class="col-span-12 lg:col-span-4">
-          <IngredientEditor :ingredients="recipeForm.ingredients" :is-editing="isEditing" />
-        </div>
-        <div class="col-span-12 lg:col-span-8">
-          <StepEditor :steps="recipeForm.steps" :ingredients="recipeForm.ingredients" :is-editing="isEditing" />
+          <section class="col-8 col-md-12 step-content">
+            <StepEditor :steps="recipeForm.steps" :ingredients="recipeForm.ingredients" :is-editing="isEditing" />
+          </section>
         </div>
       </div>
+
+      <footer class="editor-footer">
+        <div class="footer-center-group">
+          <BaseBtn 
+            title="完成編輯" 
+            :width="180"
+            @click="handleSave"
+            class="save-btn"
+          />
+    
+          <div class="publish-toggle">
+            <input type="checkbox" id="publish-check" />
+            <label for="publish-check" class="p-p3">公開發布</label>
+          </div>
+        </div>
+      </footer>
     </main>
   </div>
 </template>
 
-<style>
-/* --- [第一部分：全域解鎖區] --- */
-.workspace-layout {
-  height: auto !important;
-  overflow: visible !important;
-  .page-content {
-    height: auto !important;
-    overflow: visible !important;
+<style lang="scss" scoped>
+/* --- 頁面基礎 --- */
+.recipe-editor-page {
+  min-height: 100vh;
+  padding: 40px 0 80px;
+  background-color: $neutral-color-white;
+}
+
+/* --- 大框框與格線適配 --- */
+.edit-main-card {
+  background: $neutral-color-white;
+  border: 1.5px solid $primary-color-700;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 40px;
+
+  // 確保 row 內距在大框框裡表現正常
+  .row { margin: 0; }
+}
+
+.ingredient-sidebar {
+  padding: 30px;
+  border-right: 1.5px solid rgba($primary-color-700, 0.1);
+
+  // 當螢幕小於 810px (團隊 md 斷點)
+  @media screen and (max-width: 810px) {
+    border-right: none;
+    border-bottom: 1.5px solid rgba($primary-color-700, 0.1);
   }
 }
-html, body {
-  overflow-y: auto !important;
-  height: auto !important;
+
+.step-content {
+  padding: 30px;
 }
 
-/* --- [第二部分：頁面專屬樣式] --- */
+/* --- 底部按鈕 --- */
+.editor-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 
-.is-editing .edit-visible { display: flex !important; }
-.is-editing .edit-hidden { display: none !important; }
-.edit-visible { display: none; }
+  .footer-center-group {
+    display: flex;
+    align-items: center;
+    gap: 24px;
 
-.editable-input { 
-  border-bottom: 1px solid #e2e8f0; 
-  width: 100%; 
-  transition: border-color 0.2s; 
-  background: transparent; 
+    // 手機版按鈕上下排 (sm: 390px)
+    @media screen and (max-width: 390px) {
+      flex-direction: column;
+      gap: 16px;
+    }
+  }
+
+  .save-btn :deep(button) {
+    background-color: $primary-color-700;
+    border-radius: 12px;
+    height: 48px;
+  }
+
+  .publish-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    input {
+      width: 18px;
+      height: 18px;
+      accent-color: $primary-color-700;
+      cursor: pointer;
+    }
+  }
 }
-.editable-input:focus { border-color: #10b981; outline: none; }
 
-.popover { 
-  animation: fadeInScale 0.2s ease-out; 
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); 
-}
-@keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.95) translateY(-5px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-.star-active { color: #fbbf24; }
-.star-inactive { color: #e2e8f0; }
+.mb-10 { margin-bottom: 40px; }
 
-.step-item.dragging { opacity: 0.4; background: #f8fafc; border: 2px dashed #cbd5e1; }
-.drag-handle { cursor: grab; }
+/* 基礎全域修正 */
+:global(.workspace-layout), 
+:global(.workspace-layout .page-content),
+:global(html, body) {
+    height: auto !important;
+    overflow: visible !important;
+    overflow-y: auto !important;
+}
 </style>
