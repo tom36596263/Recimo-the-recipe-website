@@ -37,21 +37,11 @@ const updateServings = (delta) => {
     </header>
 
     <div class="servings-control">
-      <button 
-        type="button"
-        @click="updateServings(-1)" 
-        :disabled="servings <= 1" 
-        class="control-btn"
-      > − </button>
-      
+      <button type="button" @click="updateServings(-1)" :disabled="servings <= 1" class="control-btn"> − </button>
+
       <div class="servings-display p-p1">{{ servings }} 人份</div>
-      
-      <button 
-        type="button"
-        @click="updateServings(1)" 
-        :disabled="servings >= 20" 
-        class="control-btn"
-      > + </button>
+
+      <button type="button" @click="updateServings(1)" :disabled="servings >= 20" class="control-btn"> + </button>
     </div>
 
     <div class="total-calories-box">
@@ -74,11 +64,6 @@ const updateServings = (delta) => {
         <p class="label p-p2">碳水化合物</p>
       </div>
     </div>
-
-    <div class="tags-row" v-if="totalProtein > 10">
-      <span class="tag">豐富蛋白質</span>
-      <span class="tag">低脂肪含量</span>
-    </div>
   </div>
 </template>
 
@@ -98,14 +83,13 @@ const updateServings = (delta) => {
   }
 }
 
-/* 修正後的 CSS */
 .card-header {
-  display: flex;             
-  flex-direction: column;    
-  align-items: flex-start;   
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 
-  .zh-h3 { 
-    margin-bottom: 10px;      
+  .zh-h3 {
+    margin-bottom: 10px;
   }
 }
 
@@ -117,14 +101,13 @@ const updateServings = (delta) => {
   border-radius: 10px;
   overflow: hidden;
   height: 48px;
-  width: 100%;          
+  width: 100%;
   margin: 0 auto;
 
   .control-btn {
     width: 50px;
     height: 100%;
-    // 這裡強制設定背景色，避免被預設樣式覆蓋
-    background-color: $primary-color-700 ; 
+    background-color: $primary-color-700;
     color: $neutral-color-white;
     font-size: 24px;
     border: none;
@@ -132,30 +115,40 @@ const updateServings = (delta) => {
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: all 0.2s ease; // 平滑過渡動畫
+
+    &:hover:not(:disabled) {
+      background-color: $primary-color-400;
+      filter: brightness(1.1);
+    }
+
+    &:active:not(:disabled) {
+      background-color: $primary-color-800;
+    }
 
     &:disabled {
       background-color: $neutral-color-400;
       cursor: not-allowed;
+      opacity: 0.7;
     }
   }
 
   .servings-display {
     flex: 1;
     text-align: center;
+    user-select: none; // 防止連點時選取到文字
   }
 }
 
 .total-calories-box {
   display: flex;
   justify-content: center;
-  align-items: center; 
-  gap: 8px;           
-
+  align-items: center;
+  gap: 8px;
 
   :deep(svg) {
-    font-size: 22px; 
-    // color: $primary-color-700;
-    display: block;    
+    font-size: 22px;
+    display: block;
   }
 }
 
@@ -174,12 +167,5 @@ const updateServings = (delta) => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-.tags-row {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  .tag { background-color: $neutral-color-100; color: $primary-color-400; padding: 4px 12px; border-radius: 6px; font-size: 12px; }
 }
 </style>

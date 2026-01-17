@@ -52,7 +52,7 @@ const handleSubmit = () => {
                     <div class="green-divider"></div>
                 </div>
 
-                <div class="report-content">
+                <div class="report-content custom-scrollbar">
                     <div class="comment-box photo-mode">
                         <div class="photo-fixed">
                             <img :src="commentData.image || 'https://via.placeholder.com/150'" alt="成品照" />
@@ -110,22 +110,22 @@ const handleSubmit = () => {
 .modal-card {
     display: flex;
     flex-direction: column;
-    height: auto;
     background: $neutral-color-white;
     width: 450px;
     max-width: calc(100% - 40px);
+    max-height: 92vh;
     border-radius: 12px;
-    padding: 24px 30px;
+    padding: 20px 30px;
     position: relative;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    max-height: 90vh;
+    height: auto;
     overflow: hidden;
     text-align: left;
 
     .close-x {
         position: absolute;
-        top: 20px;
-        right: 20px;
+        top: 15px;
+        right: 15px;
         background: none;
         border: none;
         font-size: 26px;
@@ -139,11 +139,11 @@ const handleSubmit = () => {
 
 .modal-header {
     flex-shrink: 0;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 
     .modal-title {
         color: $primary-color-700;
-        margin: 0 0 10px 0;
+        margin: 0 0 8px 0;
     }
 
     .green-divider {
@@ -154,19 +154,31 @@ const handleSubmit = () => {
 }
 
 .report-content {
-    flex: 1;
-    overflow-y: visible;
+    overflow: visible;
     width: 100%;
+    flex: none;
+}
+
+
+@media (max-height: 700px) {
+    .modal-card {
+        max-height: 95vh;
+    }
+
+    .report-content {
+        overflow-y: auto;
+        flex: 1 1 auto;
+    }
 }
 
 .comment-box.photo-mode {
     background: $neutral-color-100;
     border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 16px;
-    height: 140px;
+    padding: 12px;
+    margin-bottom: 12px;
+    height: 130px;
     display: grid;
-    grid-template-columns: 120px 1fr;
+    grid-template-columns: 110px 1fr;
     grid-template-rows: 1fr auto;
     gap: 12px;
     flex-shrink: 0;
@@ -174,7 +186,7 @@ const handleSubmit = () => {
     .photo-fixed {
         grid-column: 1;
         grid-row: 1;
-        width: 120px;
+        width: 110px;
         height: 100%;
         background: $neutral-color-400;
         border-radius: 6px;
@@ -193,18 +205,10 @@ const handleSubmit = () => {
         overflow-y: auto;
         padding-right: 4px;
 
-        &::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-            background: $neutral-color-400;
-            border-radius: 4px;
-        }
-
         .comment-text {
             margin: 0;
-            line-height: 1.5;
+            font-size: 14px;
+            line-height: 1.4;
             word-break: break-all;
             white-space: pre-wrap;
             font-weight: 500;
@@ -215,24 +219,26 @@ const handleSubmit = () => {
         grid-column: 1 / 3;
         grid-row: 2;
         margin-top: 4px;
+        font-size: 12px;
         color: $neutral-color-400;
         border-top: 1px solid $neutral-color-400;
-        padding-top: 6px;
+        padding-top: 4px;
     }
 }
 
 .input-section {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 
     .section-title {
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
 }
 
 .radio-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
+
 
     .radio-item {
         display: flex;
@@ -242,56 +248,44 @@ const handleSubmit = () => {
 
         input {
             accent-color: $primary-color-700;
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
         }
     }
 }
 
 textarea {
     width: 100%;
-    min-height: 80px;
+    min-height: 70px;
     border-radius: 10px;
     border: 1px solid $neutral-color-400;
-    padding: 10px 12px;
+    padding: 8px 12px;
     resize: none;
     box-sizing: border-box;
-    /* 核心修改：強制折行與垂直捲軸 */
-    word-wrap: break-word;
-    white-space: pre-wrap;
     overflow-y: auto;
 
     &:focus {
         border-color: $primary-color-700;
         outline: none;
     }
-
-    /* 美化捲軸樣式 */
-    &.custom-scrollbar {
-        &::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        &::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        &::-webkit-scrollbar-thumb {
-            background: $neutral-color-400;
-            border-radius: 4px;
-
-            &:hover {
-                background: $primary-color-400;
-            }
-        }
-    }
 }
 
 .btn-group {
-    margin-top: 16px;
+    margin-top: 12px;
     display: flex;
     justify-content: center;
-    gap: 30px;
+    gap: 24px;
     height: 40px;
+}
+
+.custom-scrollbar {
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $neutral-color-400;
+        border-radius: 4px;
+    }
 }
 </style>
