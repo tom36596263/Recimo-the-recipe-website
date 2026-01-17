@@ -98,27 +98,26 @@ const openReport = (item, index) => {
 @import '@/assets/scss/abstracts/_color.scss';
 
 .comment-section {
-    max-width: 1400px; // 寬度拉大
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 16px 20px; // 高度拉小：減少上下 padding
+    padding: 24px 20px; // 稍微增加上下 padding（原16px）
     font-family: "PingFang TC", sans-serif;
 }
 
 .section-title {
-    margin-bottom: 20px; // 高度拉小：縮小標題間距
+    margin-bottom: 24px; // 稍微增加標題間距（原20px）
     color: $neutral-color-black;
 }
 
 .input-container {
-    margin-bottom: 40px;
     position: relative;
     display: flex;
     align-items: center;
-    margin-bottom: 16px; // 高度拉小：縮小輸入框下方間距
+    margin-bottom: 24px; // 增加輸入框下方間距（原16px）
 
     .styled-input {
         width: 100%;
-        padding: 8px 50px 8px 16px; // 高度拉小：縮小內距
+        padding: 12px 50px 12px 16px; // 增加內距增加高度感（原8px）
         border: 1.5px solid $primary-color-700;
         border-radius: 12px;
         font-size: 15px;
@@ -156,13 +155,13 @@ const openReport = (item, index) => {
 .comment-list {
     display: flex;
     flex-direction: column;
-    gap: 5px; // 高度拉小：縮小留言之間的距離
+    gap: 12px; // 增加留言之間的距離（原5px）
 }
 
 .comment-item {
     display: flex;
     gap: 12px;
-    padding-bottom: 8px; // 高度拉小：縮小底部線條間距
+    padding-bottom: 12px; // 增加底部間距（原8px）
     border-bottom: 1px solid $neutral-color-100;
 
     &:last-child {
@@ -170,8 +169,8 @@ const openReport = (item, index) => {
     }
 
     .user-avatar-text {
-        width: 36px; // 稍微縮小頭像配合高度縮減
-        height: 36px;
+        width: 40px; // 頭像稍微調大（原36px）
+        height: 40px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -187,7 +186,7 @@ const openReport = (item, index) => {
         flex: 1;
 
         .comment-header {
-            margin-bottom: 0px; // 高度拉小：緊湊頭部
+            margin-bottom: 4px; // 增加頭部間距（原0px）
 
             .user-name {
                 font-weight: 600;
@@ -202,9 +201,9 @@ const openReport = (item, index) => {
         }
 
         .comment-text {
-            line-height: 1.4; // 高度拉小：緊湊文字行高
+            line-height: 1.6; // 增加文字行高（原1.4）
             color: $neutral-color-800;
-            margin-bottom: 2px;
+            margin-bottom: 8px; // 增加文字與下方按鈕間距（原2px）
             white-space: pre-line;
             font-size: 14px;
         }
@@ -213,7 +212,7 @@ const openReport = (item, index) => {
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            gap: 8px;
+            gap: 16px; // 拉開 ICON 之間的距離（原8px）
 
             .action-btn {
                 background: none;
@@ -222,11 +221,11 @@ const openReport = (item, index) => {
                 display: flex;
                 align-items: center;
                 color: $neutral-color-700;
-                padding: 2px 4px; // 高度拉小：減少按鈕點擊區域厚度
+                padding: 4px; // 增加點擊範圍（原2px）
                 transition: all 0.2s ease;
 
                 .action-icon {
-                    font-size: 16px;
+                    font-size: 18px; // ICON 稍微放大（原16px）
                 }
 
                 .count {
