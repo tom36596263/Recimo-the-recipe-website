@@ -70,7 +70,8 @@ const routes = [
         path: ':id',
         name: 'product-detail',
         component: () => import('@/views/site/ProductDetail.vue'),
-        meta: { isDynamic: true, breadcrumb: '動態的名字' }
+        meta: { isDynamic: true, breadcrumb: '動態的名字' },
+        props: true,
       }
     ]
   },
@@ -199,7 +200,8 @@ const routes = [
         component: () => import('@/views/workspace/ModifyRecipe.vue'),
         meta: {
           layout: 'workspace',
-          requiresAuth: true}
+          requiresAuth: true
+        }
       }
     ]
   },
