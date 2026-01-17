@@ -75,10 +75,10 @@ const updateServings = (delta) => {
       </div>
     </div>
 
-    <div class="tags-row" v-if="totalProtein > 10">
+    <!-- <div class="tags-row" v-if="totalProtein > 10">
       <span class="tag">豐富蛋白質</span>
       <span class="tag">低脂肪含量</span>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -176,10 +176,10 @@ const updateServings = (delta) => {
   align-items: center;
 }
 
-.tags-row {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  .tag { background-color: $neutral-color-100; color: $primary-color-400; padding: 4px 12px; border-radius: 6px; font-size: 12px; }
-}
+// .tags-row {
+//   display: flex;
+//   justify-content: flex-end;
+//   gap: 8px;
+//   .tag { background-color: $neutral-color-100; color: $primary-color-400; padding: 4px 12px; border-radius: 6px; font-size: 12px; }
+// }
 </style>

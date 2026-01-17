@@ -17,7 +17,6 @@ const rawSteps = ref([]);
 const servings = ref(1);
 const isLoading = ref(true);
 
-// 備用食材名稱映射表
 const ingredientNameMap = {
     390: "高筋麵粉",
     496: "酵母粉",
@@ -30,14 +29,29 @@ const fetchData = async () => {
     const recipeId = Number(route.params.id) || 1;
 
     try {
-        const [resR, resI, resS] = await Promise.all([
+        const [resR, resRecipeIng, resIngMaster, resS] = await Promise.all([
             fetch('/data/recipe/recipes.json').then(r => r.json()),
+            fetch('/data/recipe/recipe_ingredient.json').then(r => r.json()),
             fetch('/data/recipe/ingredients.json').then(r => r.json()),
             fetch('/data/recipe/steps.json').then(r => r.json())
         ]);
 
         rawRecipe.value = resR.find(r => Number(r.recipe_id) === recipeId) || null;
-        rawIngredients.value = resI.filter(i => Number(i.recipe_id) === recipeId);
+
+        const filteredLinks = resRecipeIng.filter(i => Number(i.recipe_id) === recipeId);
+        rawIngredients.value = filteredLinks.map(link => {
+            const masterInfo = resIngMaster.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
+            return {
+                ...link,
+                ingredient_name: masterInfo?.ingredient_name || ingredientNameMap[link.ingredient_id] || `食材 ID: ${link.ingredient_id}`,
+                calories_per_100g: masterInfo?.kcal_per_100g || 0,
+                protein_per_100g: masterInfo?.protein_per_100g || 0,
+                fat_per_100g: masterInfo?.fat_per_100g || 0,
+                carbs_per_100g: masterInfo?.carbs_per_100g || 0,
+                default_unit: masterInfo?.unit_name || link.unit_name
+            };
+        });
+
         rawSteps.value = resS.filter(s => Number(s.recipe_id) === recipeId)
             .sort((a, b) => a.step_order - b.step_order);
 
@@ -53,7 +67,26 @@ const fetchData = async () => {
 
 watch(() => route.params.id, () => fetchData(), { immediate: true });
 
-// --- 3. 資料轉換邏輯 ---
+// --- 3. 功能邏輯 ---
+const handleShare = async () => {
+    const title = recipeIntroData.value?.title || '美味食譜';
+    const url = window.location.href;
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: title,
+                text: `我在 Recimo 看到一個很棒的食譜：${title}`,
+                url: url
+            });
+        } catch (err) {
+            console.log('分享取消');
+        }
+    } else {
+        await navigator.clipboard.writeText(url);
+        alert('連結已複製到剪貼簿！');
+    }
+};
 
 const formatTime = (timeStr) => {
     if (!timeStr) return '0 分鐘';
@@ -74,23 +107,20 @@ const recipeIntroData = computed(() => {
     };
 });
 
-// 食材表格資料
 const ingredientsData = computed(() => {
     return rawIngredients.value.map(item => ({
-        INGREDIENT_NAME: item.ingredient_name || ingredientNameMap[item.ingredient_id] || `食材 ID: ${item.ingredient_id}`,
+        INGREDIENT_NAME: item.ingredient_name,
         amount: item.amount,
-        unit_name: item.unit_name,
+        unit_name: item.unit_name || item.default_unit,
         note: item.note || '',
-        // 保留營養數值基礎
-        calories_per_100g: item.calories_per_100g || 0,
-        protein_per_100g: item.protein_per_100g || 0,
-        fat_per_100g: item.fat_per_100g || 0,
-        carbs_per_100g: item.carbs_per_100g || 0,
+        calories_per_100g: item.calories_per_100g,
+        protein_per_100g: item.protein_per_100g,
+        fat_per_100g: item.fat_per_100g,
+        carbs_per_100g: item.carbs_per_100g,
         unit_weight: 1
     }));
 });
 
-// 【核心修正】營養標籤資料：從食譜主表提取計算好的總值
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value) return [];
     return [{
@@ -104,36 +134,31 @@ const nutritionWrapper = computed(() => {
 });
 
 const stepsData = computed(() => {
-    return rawSteps.value.map(s => {
-        let processedImage = s.step_image_url || '';
-        if (processedImage.toLowerCase().endsWith('.jpg')) {
-            processedImage = processedImage.replace(/\.jpg$/i, '.png');
-        }
-        return {
-            title: s.step_title,
-            content: s.step_content,
-            image: processedImage
-        };
-    });
+    return rawSteps.value.map(s => ({
+        title: s.step_title,
+        content: s.step_content,
+        image: (s.step_image_url || '').replace(/\.jpg$/i, '.png')
+    }));
 });
 
 const handleServingsChange = (newVal) => {
     servings.value = newVal;
 };
 
-// 留言與 CookSnap 資料還原
+// 留言板資料 (3 筆)
 const commentList = ref([
-    { userName: 'Leo Harrison', handle: 'leo_h_bake', time: '2d ago', content: '質地非常完美！跟著步驟圖示觀察蛋白霜的尖角狀態真的很關鍵。口感輕盈像雲朵一樣。', avatar: 'https://i.pravatar.cc/150?u=leo', likes: 55 },
-    { userName: 'Marcus Miller', handle: 'mar_cooks', time: '1w ago', content: '排版非常人性化。當我手上沾滿麵粉時，這種文字在圖片上方的排版超有幫助。', avatar: 'https://i.pravatar.cc/150?u=marcus', likes: 42 },
-    { userName: 'Sophia Chen', handle: 'sophia_lab', time: '5h ago', content: '數據精確且具科學性。我非常喜歡你們提供的精確分量數據。', avatar: 'https://i.pravatar.cc/150?u=sophia', likes: 21 }
+    { userName: 'Leo Harrison', handle: 'leo_h_bake', time: '2d ago', content: '質地非常完美！蛋白霜真的很關鍵。', avatar: 'https://i.pravatar.cc/150?u=leo', likes: 55 },
+    { userName: 'Marcus Miller', handle: 'mar_cooks', time: '1w ago', content: '排版非常人性化，超有幫助。', avatar: 'https://i.pravatar.cc/150?u=marcus', likes: 42 },
+    { userName: 'Sophia Chen', handle: 'sophia_lab', time: '5h ago', content: '數據精確且具科學性。我非常喜歡你們提供的精確數據！', avatar: 'https://i.pravatar.cc/150?u=sophia', likes: 21 }
 ]);
 
+// 成品照資料 (5 筆)
 const SnapsData = [
     { url: '/img/social/32/1.jpg', comment: '第一次做就上手！口感真的很綿密。' },
     { url: '/img/social/32/2.jpg', comment: '加了點蜂蜜後味道更提升了。' },
     { url: '/img/social/32/3.jpg', comment: '孩子們超愛，這是我的週末必備甜點。' },
     { url: '/img/social/32/4.jpg', comment: '照著做也能做出這種療癒的晃動感。' },
-    { url: '/img/social/32/5.jpg', comment: '沒開玩笑，超級好吃!' }
+    { url: '/img/social/32/5.jpg', comment: '沒開玩笑，超級好吃！' }
 ];
 </script>
 
@@ -152,9 +177,9 @@ const SnapsData = [
                     {{ recipeIntroData.title }}
                 </div>
                 <div class="icon-group">
-                    <i-material-symbols:edit-outline-rounded />
-                    <i-material-symbols-thumb-up-outline />
-                    <i-material-symbols-share-outline />
+                    <i-material-symbols:edit-outline-rounded class="action-icon" />
+                    <i-material-symbols-thumb-up-outline class="action-icon" />
+                    <i-material-symbols-share-outline class="action-icon" @click="handleShare" />
                 </div>
             </div>
 
@@ -163,7 +188,6 @@ const SnapsData = [
                     <section class="mb-10">
                         <RecipeIntro :info="recipeIntroData" />
                     </section>
-
                     <div class="d-lg-none">
                         <section class="mb-10">
                             <NutritionCard :servings="servings" :ingredients="nutritionWrapper"
@@ -173,7 +197,6 @@ const SnapsData = [
                             <RecipeIngredients :servings="servings" :list="ingredientsData" />
                         </section>
                     </div>
-
                     <section class="mb-10 steps-section">
                         <RecipeSteps :steps="stepsData" />
                     </section>
@@ -259,6 +282,7 @@ const SnapsData = [
         .main-icon {
             font-size: 24px;
             flex-shrink: 0;
+            color: $primary-color-700;
         }
 
         @media screen and (max-width: 1024px) {
@@ -269,7 +293,7 @@ const SnapsData = [
     .icon-group {
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 20px !important; // 強制設定間距
         color: $primary-color-700;
 
         @media screen and (max-width: 1024px) {
@@ -278,28 +302,18 @@ const SnapsData = [
             margin-top: 10px;
         }
 
+        // 針對自定義 icon 元件設定
+        .action-icon,
         svg {
             font-size: 24px;
             cursor: pointer;
             transition: color 0.2s;
+            flex-shrink: 0;
 
             &:hover {
                 color: $primary-color-400;
             }
         }
-    }
-}
-
-// 響應式控制
-.d-lg-none {
-    @media screen and (min-width: 1024px) {
-        display: none !important;
-    }
-}
-
-.d-none-lg {
-    @media screen and (max-width: 1024px) {
-        display: none !important;
     }
 }
 
@@ -309,7 +323,7 @@ const SnapsData = [
     width: 100%;
     margin-top: 40px;
     background-color: $neutral-color-100;
-    padding-top: 40px;
+    padding: 40px 0;
 
     .content-wrapper {
         width: 100%;
@@ -325,7 +339,18 @@ const SnapsData = [
     }
 }
 
-// 捲軸修正
+.d-lg-none {
+    @media screen and (min-width: 1024px) {
+        display: none !important;
+    }
+}
+
+.d-none-lg {
+    @media screen and (max-width: 1024px) {
+        display: none !important;
+    }
+}
+
 :global(.workspace-layout),
 :global(.workspace-layout .page-content),
 :global(html, body) {

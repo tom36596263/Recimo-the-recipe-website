@@ -10,13 +10,10 @@ const props = defineProps({
 
 <template>
 <div class="step-container">
-  <!-- <div class="step-header-content"> -->
+
     <div class="zh-h3">烹飪流程指南</div>
 
-  <!-- <div class="info-right">
-      <BaseBtn title="開始烹飪" class="cook-btn" />
-    </div> -->
-  <!-- </div> -->
+
   
 
   <div 
@@ -60,13 +57,9 @@ const props = defineProps({
 <style lang="scss" scoped>
 @import "@/assets/scss/abstracts/_color.scss";
 
-// .step-header-content {
-//   display: flex;
-//   justify-content: space-between;
-//   align-items: center;
-// }
+
 .zh-h3 {
-  padding-top: 20px; // 稍微縮減頂部間距
+  padding-top: 20px; 
   padding-bottom: 20px;
 }
 
@@ -81,10 +74,10 @@ const props = defineProps({
   display: flex;
   gap: 20px;
   height: auto;
-  align-items: flex-start; // 讓內容對齊頂部
+  align-items: flex-start; 
 }
 
-/* 圖片與佔位框共同樣式 */
+
 .step-image {
   width: 140px;
   height: 140px;
@@ -98,12 +91,11 @@ const props = defineProps({
   }
 }
 
-/* 虛線佔位框 */
 .placeholder-box {
   width: 100%;
   height: 100%;
   border-radius: 10px;
-  border: 2px dashed $neutral-color-400; // 核心：虛線邊框
+  border: 2px dashed $neutral-color-400; 
   background-color: $neutral-color-100;
   display: flex;
   justify-content: center;
@@ -123,7 +115,7 @@ const props = defineProps({
   p {
     margin-top: 12px;
     line-height: 1.8;
-    margin-bottom: 0; // 移除底部預設間距縮減高度
+    margin-bottom: 0; 
   }
 }
 
