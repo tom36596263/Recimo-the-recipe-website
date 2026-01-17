@@ -2,6 +2,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import card from '@/components/mall/ProductCard.vue';
 import axios from 'axios';
+import { publicApi } from '@/utils/publicApi'; // ！！！務必加上這行引入 ！！！
 import { useRouter, useRoute } from 'vue-router';
 
 // --- Swiper 相關設定 (請用這段取代舊的) ---
@@ -91,8 +92,8 @@ const randomProducts = computed(() => {
 
 // --- 事件處理 ---
 const fetchData = () => {
-  axios
-    .get('/data/mall/products.json')
+  publicApi
+    .get('data/mall/products.json')
     .then((response) => {
       //.then是抓到資料後做函視裡面的動作,response：這是 Axios 幫你打包好的一個包裹。
       // console.log('抓到的資料：', response.data);

@@ -2,127 +2,141 @@
 import { computed } from 'vue';
 
 const props = defineProps({
-    servings: {
-        type: Number,
-        default: 1
-    },
-    list: {
-        type: Array,
-        default: () => []
-    }
+    servings: { type: Number, default: 1 },
+    list: { type: Array, default: () => [] }
 });
 
 const computedIngredients = computed(() => {
     return props.list.map(item => ({
         ...item,
-        displayAmount: parseFloat((Number(item.amount) * props.servings).toFixed(1))
+        displayAmount: parseFloat(((Number(item.amount) || 0) * props.servings).toFixed(1))
     }));
 });
-
 </script>
 
 <template>
-
     <section class="ingredients-container">
+        <p v-if="list.length === 0" class="debug-msg">偵錯：父組件傳入的食材陣列為空</p>
+
         <div class="table-wrapper">
             <div class="table-header">
-                <p class="cell p-p2">食材</p>
-                <p class="cell p-p2">份量</p>
-                <p class="cell p-p2">備註</p>
+                <p class="cell">食材</p>
+                <p class="cell">份量</p>
+                <p class="cell">備註</p>
             </div>
 
             <div class="table-body">
-
-                <div 
-                    v-for="(item, index) in computedIngredients" 
-                    :key="index"
-                    class="table-row"
-                >
+                <div v-for="(item, index) in computedIngredients" :key="index" class="table-row">
                     <div class="cell name">
                         <p class="p-p2">{{ item.INGREDIENT_NAME }}</p>
                     </div>
-
                     <div class="cell amount">
-                        <p class="p-p2">
-                            {{ item.displayAmount }} {{ item.unit_name }}
-                        </p>
+                        <p class="p-p2">{{ item.displayAmount }} {{ item.unit_name }}</p>
                     </div>
-
                     <div class="cell note">
-                        <p class="p-p2">{{ item.note || '' }}</p>
+                        <p class="p-p2">{{ item.note }}</p>
                     </div>
                 </div>
-
             </div>
         </div>
-
     </section>
 </template>
 
 <style lang="scss" scoped>
+@import '@/assets/scss/abstracts/_color.scss';
 
 .ingredients-container {
-    padding: 20px 0;
+    width: 100%;
+    margin-bottom: 2rem;
+
+    .debug-msg {
+        color: $secondary-color-danger-700;
+        text-align: center;
+        padding: 10px;
+        font-weight: bold;
+    }
 }
 
 .table-wrapper {
-    border: 1px solid $primary-color-700;
+    margin-top: 20px;
+    border: 1px solid $neutral-color-400; 
     border-radius: 10px; 
-    overflow: hidden;   
+    overflow: hidden;
     background-color: $neutral-color-white;
 }
 
 .table-header {
-    background-color: $primary-color-700;
-    display: grid;
-    grid-template-columns: 1.2fr 1fr 2fr; // 調整比例：食材/份量/備註
-    padding: 10px 0;
-    
-    .cell {
-        color: $neutral-color-white;
-        text-align: center;
+    display: flex;
+    background-color: $primary-color-700; 
+    padding: 12px 20px;
 
-        p.p-p2 {
-            margin: 0;
+    .cell {
+        color: $neutral-color-white; 
+        font-weight: 500;
+        margin: 0;
+        flex: 1;
+
+        
+        &:nth-child(1) {
+            flex: 1.2;
+        }
+
+        &:nth-child(2) {
+            flex: 1;
+        }
+
+        &:nth-child(3) {
+            flex: 2;
         }
     }
 }
 
 .table-body {
+    padding: 8px 0; 
+
     .table-row {
-        display: grid;
-        grid-template-columns: 1.2fr 1fr 2fr;
-        padding: 10px 0;
-        border-bottom: 0px; // 圖片中行與行之間沒有線
+        display: flex;
+        padding: 12px 20px;
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: $neutral-color-100;
+        }
 
         .cell {
+            flex: 1;
             display: flex;
             align-items: center;
 
             &.name {
-                padding-left: 30px; // 第一欄左側縮排
+                flex: 1.2;
+                font-weight: 500;
             }
 
             &.amount {
-                justify-content: flex-start; // 份量靠左對齊
+                flex: 1;
             }
 
+            &.note {
+                flex: 2;
+                color: $neutral-color-black;
+            }
+
+            .p-p2 {
+                margin: 0;
+                line-height: 1.5;
+                
+            }
         }
     }
 }
 
-.servings-hint {
-    margin-top: 12px;
-    font-size: 12px;
-    color: #888;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
 
-    .info-icon {
-        width: 14px;
-        height: 14px;
+@media screen and (max-width: 576px) {
+
+    .table-header,
+    .table-row {
+        padding: 10px 12px;
     }
 }
 </style>

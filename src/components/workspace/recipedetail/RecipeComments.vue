@@ -1,159 +1,152 @@
 <script setup>
-import { ref } from "vue";
-// 引入你的彈窗組件
+import { ref, reactive } from "vue";
 import CommentReportModal from './modals/CommentReportModal.vue';
 
 const props = defineProps({
-    list: {
-        type: Array,
-        default: () => []
-    }
+    list: { type: Array, default: () => [] }
 });
 
 const userInput = ref("");
-// --- 1. 新增狀態 ---
 const isReportModalOpen = ref(false);
+const isSuccessShow = ref(false);
 const activeComment = ref({ content: '', userName: '', time: '' });
+
+// --- 簡單的點讚邏輯 ---
+const localLikes = reactive({}); // 記錄格式如 { 0: true, 1: false }
+
+const toggleLike = (index) => {
+    localLikes[index] = !localLikes[index];
+};
+
+const getAvatarStyle = (name) => {
+    const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
+    const charCodeSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
+};
 
 const handleSend = () => {
     if (!userInput.value.trim()) return;
-    alert("送出留言！" + userInput.value);
     userInput.value = "";
+    isSuccessShow.value = true;
+    setTimeout(() => { isSuccessShow.value = false; }, 2000);
 };
 
-// --- 2. 新增開啟彈窗的 Function ---
 const openReport = (item) => {
-    activeComment.value = {
-        content: item.content,
-        userName: item.userName,
-        time: item.time
-    };
+    activeComment.value = { ...item };
     isReportModalOpen.value = true;
-};
-
-const onReportSubmit = (data) => {
-    console.log('API 發送檢舉中...', data);
-    console.log('針對這則留言:', activeComment.value);
-    isReportModalOpen.value = false;
 };
 </script>
 
 <template>
-    <div class="comment-container">
+    <div class="comment-section">
+        <h2 class="section-title zh-h3">美味悄悄話</h2>
+
+        <div class="input-container">
+            <input v-model="userInput" type="text" placeholder="分享你的想法..." class="styled-input"
+                @keyup.enter="handleSend" />
+            <button class="send-icon-btn" :class="{ 'active': userInput.trim() }" @click="handleSend">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                </svg>
+            </button>
+        </div>
+
         <div class="comment-list">
-            <div v-for="(item, index) in list" :key="index" class="comment-item animate-in">
-                <div class="avatar-box">
-                    <img :src="item.avatar" class="avatar-img" alt="avatar" />
+            <div v-for="(item, index) in list" :key="index" class="comment-item">
+                <div class="user-avatar-text" :style="getAvatarStyle(item.userName)">
+                    {{ item.userName.charAt(0).toUpperCase() }}
                 </div>
 
-                <div class="comment-content">
-                    <div class="user-info">
+                <div class="comment-body">
+                    <div class="comment-header">
                         <span class="user-name p-p1">{{ item.userName }}</span>
-                        <span class="user-handle p-p3">@{{ item.handle }} · {{ item.time }}</span>
+                        <span class="user-meta p-p3">@{{ item.handle }} • {{ item.time }}</span>
                     </div>
-
                     <p class="comment-text p-p2">{{ item.content }}</p>
 
-                    <div class="comment-actions">
-                        <button class="like-btn" @click="item.likes++">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                
-                                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z">
-                                </path>
-                                <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
-                            </svg>
-                            <span class="action-text p-p3">{{ item.likes }}</span>
+                    <div class="comment-footer">
+                        <button class="action-btn like-btn" :class="{ 'active': localLikes[index] }"
+                            @click="toggleLike(index)">
+                            <i-material-symbols-thumb-up-outline class="action-icon" />
+                            <span class="count">{{ (item.likes || 0) + (localLikes[index] ? 1 : 0) }}</span>
                         </button>
 
-                        <button class="report-btn" title="檢舉此留言" @click="openReport(item)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="8" x2="12" y2="12"></line>
-                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                            </svg>
+                        <button class="action-btn report-btn" @click="openReport(item)">
+                            <i-material-symbols:error-outline-rounded class="action-icon" />
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment" @submit="onReportSubmit" />
+        <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment" />
+
+        <Transition name="fade">
+            <div v-if="isSuccessShow" class="toast">留言已成功發表！</div>
+        </Transition>
     </div>
 </template>
+
+
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-.comment-container {
-    background-color: transparent;
-    padding: 20px 0;
+.comment-section {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    font-family: "PingFang TC", sans-serif;
 }
 
-.comment-header {
-    margin-bottom: 20px;
+.section-title {
+    margin-bottom: 16px;
+    color: $neutral-color-black;
+}
 
-    .zh-h3 {
-        font-size: 20px;
-        color: #333;
-        font-weight: 500;
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+
+    .styled-input {
+        width: 100%;
+        padding: 10px 50px 10px 16px;
+        border: 1.5px solid $primary-color-700;
+        border-radius: 12px;
+        font-size: 15px;
+        outline: none;
+        transition: all 0.2s;
+
+        &::placeholder {
+            color: $neutral-color-400;
+        }
+
+        &:focus {
+            border-color: $primary-color-800;
+            box-shadow: 0 0 0 3px rgba(74, 131, 96, 0.1);
+        }
     }
-}
 
-.input-section {
-    margin-bottom: 30px;
-
-    .input-wrapper {
+    .send-icon-btn {
+        position: absolute;
+        right: 15px;
+        background: none;
+        border: none;
+        padding: 5px;
+        cursor: pointer;
+        color: $neutral-color-400;
         display: flex;
         align-items: center;
-        border: 1px solid $primary-color-700;
-        border-radius: 12px;
-        padding: 10px 16px;
-        background: #fff;
-        transition: box-shadow 0.2s;
+        transition: color 0.2s;
 
-        &:focus-within {
-            box-shadow: 0 2px 8px rgba($primary-color-700, 0.15);
+        &.active {
+            color: $primary-color-700;
         }
 
-        .comment-input {
-            flex: 1;
-            border: none;
-            outline: none;
-            background: transparent;
-            color: #444;
-
-            &::placeholder {
-                color: #bbb;
-            }
-        }
-
-        .send-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #ddd; // 預設禁用色
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            padding-left: 8px;
-
-            &.active {
-                color: $primary-color-700;
-
-                &:hover {
-                    color: $primary-color-800;
-                    transform: scale(1.1);
-                }
-            }
-
-            &:disabled {
-                cursor: not-allowed;
-            }
+        &:disabled {
+            cursor: not-allowed;
         }
     }
 }
@@ -161,105 +154,127 @@ const onReportSubmit = (data) => {
 .comment-list {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 12px; 
 }
 
 .comment-item {
     display: flex;
-    gap: 16px;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $neutral-color-100;
 
-    .avatar-box {
-        flex-shrink: 0;
-
-        .avatar-img {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            object-fit: cover;
-            background-color: #f5f5f5;
-        }
+    &:last-child {
+        border-bottom: none;
     }
 
-    .comment-content {
+    .user-avatar-text {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+        flex-shrink: 0;
+        user-select: none;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .comment-body {
         flex: 1;
 
-        .user-info {
-            display: flex;
-            align-items: baseline;
-            gap: 10px;
-            margin-bottom: 4px;
+        .comment-header {
+            margin-bottom: 2px;
 
             .user-name {
                 font-weight: 600;
-                color: #333;
+                margin-right: 6px;
+                color: $neutral-color-black;
             }
 
-            .user-handle {
-                color: #999;
+            .user-meta {
+                color: $neutral-color-400;
+                font-size: 13px;
             }
         }
 
         .comment-text {
-            color: #444;
             line-height: 1.5;
-            margin-bottom: 10px;
+            color: $neutral-color-800;
+            margin-bottom: 4px;
             white-space: pre-line;
         }
+
+        .comment-image-wrapper {
+            margin: 8px 0;
+
+            .result-image {
+                max-width: 200px;
+                border-radius: 8px;
+                display: block;
+            }
+        }
+
+        .comment-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+
+            .action-btn {
+                background: none;
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                color: $neutral-color-700; 
+                padding: 4px;
+                transition: color 0.2s;
+
+                .action-icon {
+                    font-size: 18px;
+                }
+
+                .count {
+                    margin-left: 4px;
+                    font-size: 14px;
+                    font-weight: 500;
+                }
+
+                &.like-btn:hover,
+                &.like-btn.active {
+                    color: $primary-color-700;
+                }
+
+                &.report-btn:hover {
+                    color: $secondary-color-danger-700;
+                }
+            }
+        }
     }
 }
 
-.comment-actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 16px;
-
-    button {
-        background: none;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        color: #888;
-        padding: 0;
-        transition: color 0.2s;
-
-        &:hover {
-            color: #444;
-        }
-    }
-
-    .like-btn {
-        &:hover {
-            color: $primary-color-700;
-        }
-    }
-
-    .report-btn {
-        &:hover {
-            color: #ff6b6b;
-        }
-    }
-
-    .action-text {
-        margin-left: 5px;
-        font-weight: 500;
-    }
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: $neutral-color-white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    z-index: 100;
+    font-size: 13px;
 }
 
-.animate-in {
-    animation: fadeIn 0.4s ease-out forwards;
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 </style>
