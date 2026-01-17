@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import PostReportModal from '@/components/workspace/recipedetail/modals/PostReportModal.vue'
+// 導入上傳燈箱
+import CookSnapUploadModal from '@/components/workspace/recipedetail/modals/CookSnapUploadModal.vue'
 
 const props = defineProps({
   list: {
@@ -10,10 +12,9 @@ const props = defineProps({
   }
 })
 
-const fileInput = ref(null)
 const wallViewport = ref(null)
 
-// 檢舉彈窗
+// --- 檢舉彈窗邏輯 ---
 const isReportModalOpen = ref(false)
 const selectedPhotoData = ref({
   content: '',
@@ -36,14 +37,16 @@ const onReportSubmit = () => {
   isReportModalOpen.value = false
 }
 
-// 上傳
+// --- 上傳成品燈箱邏輯 ---
+const isUploadModalOpen = ref(false)
+
 const handleUploadClick = () => {
-  fileInput.value.click()
+  isUploadModalOpen.value = true
 }
 
-const onFileSelected = (event) => {
-  const file = event.target.files[0]
-  if (file) console.log('已選取檔案:', file.name)
+const onUploadSubmit = (data) => {
+  console.log('上傳成功:', data)
+  isUploadModalOpen.value = false
 }
 
 // 橫向捲動
@@ -56,8 +59,6 @@ const scrollWall = (direction) => {
 
 <template>
   <div class="recipe-result-container">
-    <input ref="fileInput" type="file" accept="image/*" hidden @change="onFileSelected" />
-
     <div class="result-header">
       <div class="upload-trigger-area" @click="handleUploadClick">
         <div class="upload-card">
@@ -103,6 +104,8 @@ const scrollWall = (direction) => {
     </div>
 
     <PostReportModal v-model="isReportModalOpen" :commentData="selectedPhotoData" @submit="onReportSubmit" />
+
+    <CookSnapUploadModal v-model="isUploadModalOpen" @submit="onUploadSubmit" />
   </div>
 </template>
 
@@ -149,16 +152,13 @@ const scrollWall = (direction) => {
     }
 
     .header-text-group {
-
       .zh-h5 {
         text-align: center;
       }
-      
+
       .description {
         width: 100%;
-        // background-color: red;
         margin-top: 25px;
-        // margin-left: 10%;
         line-height: 20px;
         color: $neutral-color-700;
 
