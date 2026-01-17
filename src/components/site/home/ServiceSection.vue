@@ -29,16 +29,16 @@
         <h2 class="zh-h2">Recimo核心服務</h2>
         <h2 class="en-h3">Recimo Service</h2>
     </div>
-    <div class="col-4 col-lg-3">
+    <div class="col-12 service-tips-btn">
         <ServiceTipsBtn
         :active-index="activeIndex"
         @target-slide="slideTo"
         />
     </div>
-    <div class="col-8 col-lg-9">
+    <div class="col-12">
         <swiper 
-        direction="vertical"
-        :slidesPerView="1"
+        direction="horizontal"
+        :slidesPerView="1.3"
         :spaceBetween="10"
         :mousewheel="{
             forceToAxis: true,
@@ -69,8 +69,13 @@
             margin-bottom: 10px;
         }
     }
+    .service-tips-btn{
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+    }
     .my-swiper{
-        height:570px;
+        height:500px;
         width: 100%;
     }
     .swiper-slide{

@@ -66,11 +66,9 @@
         <footer>
             <div class="personal-info">
                 <div class="personal-img">
-                    <img :src="LogoBlack" alt="">
-                </div>
+                <img :src="LogoBlack" alt="">
+            </div>
                 <p class="p-p1">Recimo</p>
-                <i-material-symbols-thumb-up-outline />
-                <span class="en-h3">{{recipe.recipe_like_count}}</span>
             </div>
             
             <div class="btn-group">

@@ -1,4 +1,6 @@
 <script setup>
+import { publicApi } from '@/utils/publicApi';
+
 import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
 import FilterSection from '@/components/site/RecipeOverview/FilterSection.vue'
 import PageBtn from '@/components/common/PageBtn.vue'
@@ -11,19 +13,23 @@ const pageSize = 6
 onMounted(async () => {
     try {
         const [resRecipes, resRecipeTags, resTags] = await Promise.all([
-            fetch('/data/recipe/recipes.json').then(res => res.json()),
-            fetch('/data/recipe/recipe_tag.json').then(res => res.json()), 
-            fetch('/data/recipe/tags.json').then(res => res.json())
+            publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/recipe/recipe_tag.json'), 
+            publicApi.get('data/recipe/tags.json')
         ]);
 
+        const recipeData = resRecipes.data;
+        const recipeTagsData = resRecipeTags.data;
+        const tagsData = resTags.data;
+
         const tagMap = {};
-        resTags.forEach(tag => {
+        tagsData.forEach(tag => {
             tagMap[tag.tag_id] = tag.tag_name;
         });
 
         allRecipe.value = resRecipes.map(recipe => {
 
-            const matchedTagIds = resRecipeTags
+            const matchedTagIds = recipeTagsData
                 .filter(rt => rt.recipe_id === recipe.recipe_id)
                 .map(rt => rt.tag_id);
 
@@ -81,9 +87,12 @@ const handlePageChange = (page) => {
         </div>
     </section>
 
-    <section class="container">
+    <section class="container page-btn">
         <div class="row">
-            <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
+            <div class="col-12">
+                <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
+            </div>
+            
         </div>
     </section>
     
@@ -94,7 +103,13 @@ const handlePageChange = (page) => {
         margin-top: 40px;
     }
     .recipe-cards-section{
-        margin: 60px auto;
+        margin: 60px auto 30px ;
+    }
+    .page-btn{
+        margin-bottom: 30px;
+    }
+    .recipe-card{
+        margin-bottom:20px;
     }
     @media screen and (max-width: 1024px){
         .recipe-card{
