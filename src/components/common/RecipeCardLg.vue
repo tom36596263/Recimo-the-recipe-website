@@ -70,12 +70,11 @@
                 </div>
                 <p class="p-p1">Recimo</p>
                 <i-material-symbols-thumb-up-outline />
-                <span class="en-h3">{{recipe.recipe_like_count}}</span>
+                <span class="en-h3">{{ recipe.author.likes }}</span>
             </div>
             
             <div class="btn-group">
                 <BaseBtn title="加入收藏" variant="outline" height="30"/>
-                <!-- <BaseBtn title="食譜詳情" height="30"/> -->
             </div>
             
         </footer>
@@ -88,19 +87,21 @@
         overflow: hidden;
         background-color: $neutral-color-white;
         .card-header{
-            height: 250px;
             overflow: hidden;
             img{
                 width: 100%;
+                height: 320px;
             }
         }
         .card-body{
             padding: 16px;
+            
             .title{
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 6px;
+                color: $primary-color-700;
             }
             .tag{
                 display: flex;
@@ -135,6 +136,12 @@
             .personal-info{
                 display: flex;
                 align-items: center;
+                .p-p1{
+                    margin-right: 6px;
+                }
+                .en-h3{
+                    margin-left: 6px;
+                }
             }
             .personal-img{
                 width: 24px;

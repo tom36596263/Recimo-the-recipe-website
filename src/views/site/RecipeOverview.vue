@@ -1,5 +1,7 @@
 <script setup>
-import { publicApi } from '@/utils/publicApi';
+import { publicApi } from '@/utils/publicApi'
+import { useRouter } from 'vue-router'
+const router = useRouter();
 
 import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
 import FilterSection from '@/components/site/RecipeOverview/FilterSection.vue'
@@ -27,7 +29,8 @@ onMounted(async () => {
             tagMap[tag.tag_id] = tag.tag_name;
         });
 
-        allRecipe.value = resRecipes.map(recipe => {
+        const base = import.meta.env.BASE_URL;
+        allRecipe.value = recipeData.map(recipe => {
 
             const matchedTagIds = recipeTagsData
                 .filter(rt => rt.recipe_id === recipe.recipe_id)
@@ -37,8 +40,11 @@ onMounted(async () => {
             const recipeTagsNames = matchedTagIds.map(id => tagMap[id]).filter(Boolean);
 
             return {
+                id: recipe.recipe_id,
                 recipe_name: recipe.recipe_title,
-                image_url: recipe.recipe_image_url,
+                image_url: recipe.recipe_image_url.startsWith('http') 
+                            ? recipe.recipe_image_url 
+                            : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
                 tags: recipeTagsNames,
                 nutritional_info: {
                     calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
@@ -55,7 +61,12 @@ onMounted(async () => {
         console.error('載入資料失敗:', error);
     }
 });
-
+const goToDetail = (id) => {
+    router.push({
+        name: 'workspace-recipe-detail',
+        params: { id:id }
+    })
+}
 // 計算總頁數
 const totalPages = computed(() => {
     return Math.ceil(allRecipe.value.length / pageSize);
@@ -81,9 +92,13 @@ const handlePageChange = (page) => {
     </section>
     <section class="container recipe-cards-section">
         <div class="row">
-            <div v-for="item in recipes" :key="item.recipe_name" class="col-4 col-lg-12">
+            <router-link 
+            v-for="item in recipes" 
+            :key="item.id" 
+            :to="{ name: 'workspace-recipe-detail', params: { id: item.id } }"
+            class="col-4 col-lg-12 recipe-cards">
                 <RecipeCardLg :recipe="item" class="recipe-card"/>
-            </div>
+            </router-link>
         </div>
     </section>
 
@@ -104,6 +119,11 @@ const handlePageChange = (page) => {
     }
     .recipe-cards-section{
         margin: 60px auto 30px ;
+    }
+    .recipe-cards{
+        text-decoration: none;
+        color: $neutral-color-800;
+        
     }
     .page-btn{
         margin-bottom: 30px;
