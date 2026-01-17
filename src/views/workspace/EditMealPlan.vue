@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import DayColumn from '@/components/workspace/mealplan/DayColumn.vue';
 import ColumnTitle from '@/components/workspace/mealplan/ColumnTitle.vue';
 import PlanPanel from '@/components/workspace/mealplan/PlanPanel.vue';
+import RecipePicker from '@/components/workspace/mealplan/RecipePicker.vue';
 
 // 控制面板顯示的狀態，預設關閉
 const showPanel = ref(false);
@@ -34,6 +35,17 @@ const onWheel = (e) => {
   container.scrollLeft += e.deltaY * 0.2;
 };
 
+// 進入recipepicker
+const selectedDate = ref(null); // 當前選中的日期，null 代表沒有選擇任一天，僅展示週計畫
+
+const handleDateSelect = (date) => {
+  selectedDate.value = date;
+};
+
+const closeDetail = () => {
+  selectedDate.value = null;
+};
+
 // 開啟面板
 const openPanel = () => {
   showPanel.value = true;
@@ -51,18 +63,24 @@ const closePanel = () => {
       <div class="btn-bar col-12">
         <div class="btn-bar__bread-crumbs"></div>
 
-        <div class="btn-bar__info-btn" @click="openPanel">
+        <div class="btn-bar__info-btn col-12" @click="openPanel">
           <i-material-symbols-info-i />
         </div>
       </div>
 
-      <div class="meal-plan-container col-12">
-        <ColumnTitle />
-
-        <div class="meal-plan-container__columns" @wheel.prevent="onWheel">
-          <DayColumn v-for="date in datelist" :key="date.getTime()" :current-date="date" />
+      <Transition name="fade-scale">
+        <div v-if="!selectedDate" class="meal-plan-container">
+          <ColumnTitle />
+          <div class="meal-plan-container__columns" @wheel.prevent="onWheel">
+            <DayColumn v-for="date in datelist" :key="date.getTime()" :current-date="date"
+              @click="handleDateSelect(date)" />
+          </div>
         </div>
-      </div>
+
+        <div v-else class="meal-detail-view">
+          <RecipePicker :date="selectedDate" @back="closeDetail" />
+        </div>
+      </Transition>
     </div>
 
     <Transition name="slide-fade">
@@ -147,5 +165,17 @@ const closePanel = () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+// daycolumn至recipepicker的動畫
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-scale-enter-from,
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
 }
 </style>
