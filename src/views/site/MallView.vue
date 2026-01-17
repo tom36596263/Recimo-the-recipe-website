@@ -3,6 +3,7 @@ import { ref, onMounted, computed, watch } from 'vue';
 import card from '@/components/mall/ProductCard.vue';
 import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
+import PageBtn from '@/components/common/PageBtn.vue'
 
 // --- Swiper 相關設定 (請用這段取代舊的) ---
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -102,7 +103,11 @@ const fetchData = () => {
       console.error('讀取 JSON 失敗', error);
     });
 };
-
+const handlePageChange = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
 const selectTag = (tagName) => {
   activeTag.value = tagName;
   currentPage.value = 1; // 切換標籤時，要切回第一頁，不然使用者會迷路
@@ -212,12 +217,13 @@ const columns = ref([
       </div>
 
       <!-- 頁碼 -->
-      <div class="pagination" v-if="totalPages > 1">
+      <!-- <div class="pagination" v-if="totalPages > 1">
         <button v-for="page in totalPages" :key="page" class="page-link" :class="{ active: currentPage === page }"
           @click="setPage(page)">
           {{ page }}
         </button>
-      </div>
+      </div> -->
+      <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
     </section>
 
     <!-- 輪播圖 -->
@@ -249,6 +255,8 @@ const columns = ref([
     </div>
   </div>
   <router-view v-else></router-view>
+
+  <Cook />
 </template>
 
 <style lang="scss" scoped>
