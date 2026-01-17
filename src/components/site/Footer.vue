@@ -3,6 +3,7 @@
     import { computed } from 'vue';
 
     import SearchBar from '@/components/common/SearchBar.vue'
+    import LogoBlack from '/img/site/Recimo-logo-black.svg'
 
     const router = useRouter();
 
@@ -22,7 +23,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="logo">
-                    <router-link to="/"><img src="@/assets/images/site/Recimo-logo-black.svg" alt=""></router-link>
+                    <router-link to="/"><img :src="LogoBlack" alt=""></router-link>
                 </div>
             </div>
             <div class="col-9 col-lg-12 link-group">

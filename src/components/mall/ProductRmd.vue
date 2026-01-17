@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import ProductCard from '@/components/mall/ProductCard.vue';
+
 // ==========================================
 // 引用swiper
 // ==========================================
@@ -23,7 +24,7 @@ const swiperBreakpoints = {
 };
 
 // ==========================================
-// vue上課教：以後部屬比較不會有問題
+// vue上課教：以後部屬比較不會有問題(資料放public的話)
 // ==========================================
 const baseURL = import.meta.env.BASE_URL
 
@@ -61,11 +62,6 @@ const randomProducts = computed(() => {
     return list.slice(0, 4);
 });
 
-const handleGlobalAdd = (product) => {
-    console.log("從父組件收到要加入購物車的資料：", product);
-    // 在這裡才去串 Pinia 或執行加入購物車邏輯
-};
-
 onMounted(() => {
     fetchData();
 });
@@ -76,8 +72,8 @@ onMounted(() => {
         <h2 class="zh-h2">推薦商品</h2>
         <div class="container">
             <div class="row">
-                <div v-for="product in randomProducts" :key="product.id" class="col-3  pc-grid">
-                    <ProductCard :item="product" @add-to-cart="handleGlobalAdd" />
+                <div v-for="product in randomProducts" :key="product.product_id" class="col-3  pc-grid">
+                    <ProductCard :item="product" />
                     <!--「把『當下的這份資料』塞進『卡片預留的插槽』裡。」item是在 ProductCard.vue 裡面透過 defineProps 定義的名字。它就像是卡片上的一個「專用收件口」。 product是在 ProductRmd.vue 裡面 v-for="product in randomProducts" 定義的那個變數。它代表「目前這一輪迴圈抓到的那一筆商品資料」。-->
                 </div>
                 <!-- ==========================================
@@ -85,8 +81,8 @@ onMounted(() => {
                 ========================================= -->
                 <div class="mobile-swiper">
                     <swiper :slides-per-view="1.2" :space-between="10" :breakpoints="swiperBreakpoints">
-                        <swiper-slide v-for="product in randomProducts" :key="product.id">
-                            <ProductCard :item="product" @add-to-cart="handleGlobalAdd" />
+                        <swiper-slide v-for="product in randomProducts" :key="product.product_id">
+                            <ProductCard :item="product" />
                         </swiper-slide>
                     </swiper>
                 </div>

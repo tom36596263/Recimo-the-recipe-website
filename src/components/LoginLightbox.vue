@@ -1,20 +1,155 @@
 <script setup>
-// setup: 這是 Vue 3 的語法糖，讓你不用寫 export default {}，且能直接使用變數和函式，開發效率最高。
-// 所有的變數、函式、或是從 JSON 引入的資料都寫在script裡面。
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+
+// ==========================================
+// input前端驗證
+// ==========================================
+import BaseInput from '@/components/login/BaseInput.vue'
+const name = ref('')
+const email = ref('')
+const password = ref('')
+const showPassword = ref(false)
+
+// 追蹤每個欄位是否被觸碰
+const touched = {
+  name: ref(false),
+  email: ref(false),
+  password: ref(false)
+}
+
+// 訊息內容
+const message = {
+  name: computed(() => {
+    // 如果還沒觸碰過，回傳空字串（不顯示提示）
+    if (!touched.name.value) return ''
+    // 觸碰過後，如果沒填才顯示必填提示
+    if (!name.value) return '* 此欄為必填'
+    return ''
+  }),
+  email: computed(() => {
+    if (!touched.email.value) return ''
+    if (!email.value) return '* 此欄為必填'
+    if (!/^\S+@\S+\.\S+$/.test(email.value)) return '* email 格式錯誤'
+    return ''
+  }),
+  password: computed(() => {
+    if (!touched.password.value) return ''
+    if (!password.value) return '* 此欄為必填'
+    return ''
+  })
+}
+
+// 驗證狀態
+const status = {
+  name: computed(() => {
+    if (!touched.name.value) return ''
+    if (!name.value) return 'error' // 觸碰過沒填
+    return name.value ? 'success' : 'error'
+  }),
+  email: computed(() => {
+    if (!touched.email.value) return ''
+    if (!email.value) return 'error' // 觸碰過沒填
+    if (!/^\S+@\S+\.\S+$/.test(email.value)) return 'error'
+    return 'success'
+  }),
+  password: computed(() => {
+    if (!touched.password.value) return ''
+    if (!password.value) return 'error' // 觸碰過沒填
+    return password.value ? 'success' : 'error'
+  })
+}
+// enter會進下一個input
+const emailRef = ref(null);
+const passwordRef = ref(null);
+const nameRef = ref(null);
+
+// 建立一個通用跳轉函式
+const focusNext = (nextRef) => {
+  console.log('嘗試跳轉，目標 Ref:', nextRef.value);
+
+  if (!nextRef || !nextRef.value) {
+    console.error('找不到目標 Ref 物件');
+    return;
+  }
+
+  // 1. 取得 DOM 根節點
+  // Vue 元件通常在 .value.$el，原生 HTML 元素則直接在 .value
+  const el = nextRef.value.$el || nextRef.value;
+
+  // 2. 尋找 input 標籤 (支援自定義元件內部的 input)
+  let inputElement = null;
+  if (el.tagName === 'INPUT') {
+    inputElement = el;
+  } else {
+    inputElement = el.querySelector('input');
+  }
+
+  if (inputElement) {
+    // 延遲一點點時間確保 DOM 狀態正確 (非必填，但可增加穩定性)
+    setTimeout(() => {
+      inputElement.focus();
+      console.log('Focus 成功！');
+    }, 10);
+  } else {
+    console.warn('目標組件中真的找不到 input 標籤');
+    // 如果是 captcha 抓不到 input，就嘗試直接執行登入
+    if (nextRef === captchaRef) {
+      handleLogin();
+    }
+  }
+};
+// ==========================================
+// 驗證碼
+// ==========================================
+
+import CaptchaInput from '@/components/login/CaptchaInput.vue'
+const loginForm = ref({
+  captchaInput: ''
+})
+const captchaVerified = ref(false)
+
+const onCaptchaVerified = (success) => {
+  captchaVerified.value = success
+  console.log('captchaVerified:', captchaVerified.value)
+}
+
+// ==========================================
+// 登入按鈕
+// ==========================================
+const handleLogin = () => {
+  // 標記所有欄位為已觸碰，觸發紅框提示
+  touched.email.value = true
+  touched.password.value = true
+
+  // 驗證邏輯：email、password、驗證碼都必須正確
+  if (
+    !email.value ||
+    !password.value ||
+    !/^\S+@\S+\.\S+$/.test(email.value) ||
+    !captchaVerified.value
+  ) {
+    alert('請填寫完整且正確的資料！')
+    return
+  }
+  alert('跳出登入成功或失敗彈窗！')
+}
 
 // ==========================================
 // 翻頁效果
 // ==========================================
-
-// 使用組長規範的 is 前綴命名布林值
 const isRegister = ref(false);
 const isVisible = ref(true);
 
 // 切換翻頁狀態的函式
 
-const handleToggleMode = () => {
-  isRegister.value = !isRegister.value;
+const goToRegister = () => {
+  isRegister.value = true;
+  console.log('切換到註冊頁', isRegister.value);
+};
+
+const goToLogin = () => {
+  isRegister.value = false;
+  console.log('切換到登入頁', isRegister.value);
 };
 
 // 關閉燈箱
@@ -22,112 +157,11 @@ const handleClose = () => {
   isVisible.value = false;
 };
 
-// ==========================================
-// 驗證碼
-// ==========================================
 
-// 定義綁定的變數，對應到 template 裡的 ref="canvasRef"
-const canvasRef = ref(null);
-const loginForm = ref({
-  captchaInput: '' // 用 v-model 綁定輸入框，不要用 getElementById
-});
-
-let currentCaptcha = '';
-
-// 產生亂數輔助函式
-function rand(min, max) {
-  return Math.floor(Math.random() * (max - min) + min);
-}
-
-// 產生驗證碼的主函式
-const generateCaptcha = () => {
-  // 關鍵：必須透過 .value 拿到 canvas 實體
-  const canvas = canvasRef.value;
-  if (!canvas) return; // 如果還沒畫好就跳過，防止報錯
-
-  const ctx = canvas.getContext('2d');
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
-  let code = '';
-
-  // 清空畫布
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#f2f2f2';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // 繪製文字
-  for (let i = 0; i < 4; i++) {
-    const char = chars.charAt(Math.floor(Math.random() * chars.length));
-    code += char;
-    ctx.font = 'bold 24px Arial';
-    ctx.fillStyle = `rgb(${rand(0, 150)}, ${rand(0, 150)}, ${rand(0, 150)})`;
-    const x = 10 + i * 25;
-    const y = 28;
-    const angle = (rand(-20, 20) * Math.PI) / 180;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(angle);
-    ctx.fillText(char, 0, 0);
-    ctx.restore();
-  }
-
-  // 干擾線
-  for (let i = 0; i < 5; i++) {
-    ctx.strokeStyle = `rgba(${rand(0, 255)}, ${rand(0, 255)}, ${rand(
-      0,
-      255
-    )}, 0.5)`;
-    ctx.beginPath();
-    ctx.moveTo(rand(0, canvas.width), rand(0, canvas.height));
-    ctx.lineTo(rand(0, canvas.width), rand(0, canvas.height));
-    ctx.stroke();
-  }
-
-  currentCaptcha = code.toLowerCase();
-};
-
-// 驗證按鈕的函式
-const handleVerify = () => {
-  const input = loginForm.value.captchaInput.toLowerCase();
-  if (input === currentCaptcha) {
-    alert('驗證成功！');
-  } else {
-    alert('驗證碼錯誤，請重試。');
-    generateCaptcha();
-    loginForm.value.captchaInput = ''; // 清空輸入框
-  }
-};
-
-// 生命週期：當畫面掛載完成後，才執行畫圖
-onMounted(() => {
-  generateCaptcha();
-});
-
-// ==========================================
-// 不要原生的input提示
-// ==========================================
-const emailInput = ref(null);
-
-onMounted(() => {
-  const el = emailInput.value;
-  if (!el) return;
-
-  // 1. 當驗證失敗時觸發
-  el.oninvalid = function (e) {
-    e.target.setCustomValidity(""); // 先清空舊的訊息
-    if (!e.target.validity.valid) {
-      // 在這裡輸入你想顯示的自訂文字
-      e.target.setCustomValidity("*必須包含「@」符號");
-    }
-  };
-
-  // 2. 當使用者正在輸入時，必須把錯誤清掉，否則表單會一直判定為無效而無法送出
-  el.oninput = function (e) {
-    e.target.setCustomValidity("");
-  };
-});
 </script>
 
 <template>
+
   <!-- 燈箱灰色遮罩.auth-modal 負責定位和 3D 環境，.auth-modal__overlay 負責顏色 -->
   <div class="auth-modal" v-if="isVisible">
     <div class="auth-modal__overlay" @click="handleClose"></div>
@@ -144,38 +178,29 @@ onMounted(() => {
         <div>
           <h1 class="zh-h3 auth-form__title">會員登入</h1>
           <div class="auth-form">
-            <form novalidate>
-              <label for="email">電子信箱</label>
-              <input ref="emailInput" type="email" class="form-input" placeholder="請輸入您的電子信箱" required />
-              <p class="input-message">請輸入正確的信箱格式</p>
-            </form>
-            <form>
-              <div>
-                <label for="password">密碼</label>
-                <a href="#">忘記密碼</a>
+            <BaseInput ref="emailRef" v-model="email" label="電子信箱" placeholder="請輸入您的電子信箱" :status="status.email.value"
+              :message="message.email" @blur="touched.email.value = true" @enter-press="focusNext(passwordRef)"
+              class="tight-gap" />
+            <BaseInput ref="passwordRef" v-model="password" label="密碼" placeholder="請輸入密碼"
+              :type="showPassword ? 'text' : 'password'" :status="status.password.value"
+              :message="message.password.value" @blur="touched.password.value = true"
+              @enter-press="focusNext(captchaRef)" class="tight-gap">
+              <template #label-right>
+                <a href="#" class="forgot-password-link">忘記密碼</a>
+              </template>
+              <template #suffix> <button type="button" @click="showPassword = !showPassword"> {{
+                showPassword ? '🙈' : '👁️' }} </button> </template>
+            </BaseInput>
+            <CaptchaInput ref="captchaRef" v-model="loginForm.captchaInput" @verified="onCaptchaVerified"
+              @enter-press="handleLogin" class="tight-gap" />
+            <div class="login-options">
+              <BaseBtn title=" 登入" variant="solid" @click="handleLogin" :width="244" :height="50" class="login-btn" />
+              <p class="auth-form__divider">更多登入方式</p>
+              <div class="social-login">
+                <a href="#"><img src="@/assets/images/login/google.svg" /></a>
+                <a href="#"><img src="@/assets/images/login/fb.svg" /></a>
+                <a href="#"><img src="@/assets/images/login/line.svg" /></a>
               </div>
-              <input type="password" class="form-input" placeholder="請輸入密碼" />
-            </form>
-            <form>
-              <div class="auth-form__group">
-                <label class="auth-form__label">驗證碼</label>
-                <div class="auth-form__captcha-row">
-                  <input type="text" class="form-input auth-form__input auth-form__input--captcha" placeholder="請輸入驗證碼"
-                    v-model="loginForm.captchaInput" />
-                  <canvas ref="canvasRef" width="120" height="40" class="auth-form__captcha-canvas"
-                    @click="generateCaptcha"></canvas>
-                  <button type="button" class="auth-form__refresh-btn" @click="generateCaptcha">
-                    換一張
-                  </button>
-                </div>
-              </div>
-            </form>
-            <BaseBtn title="登入" variant="solid" @click="handleLogin" :width="244" :height="50" />
-            <p>更多登入方式</p>
-            <div>
-              <a href="#"><img src="https://picsum.photos/40/40/?random=10" /></a>
-              <a href="#"><img src="https://picsum.photos/40/40/?random=10" /></a>
-              <a href="#"><img src="https://picsum.photos/40/40/?random=10" /></a>
             </div>
           </div>
         </div>
@@ -186,34 +211,33 @@ onMounted(() => {
         <!-- ==========================================
               會員註冊
         ========================================== -->
-        <div class="auth-form">
-          <button @click="handleClose">x</button>
-          <div>
-            <h1 class="auth-form__title">會員註冊</h1>
-            <div class="auth-form">
-              <form>
-                <label for="text">姓名</label>
-                <input type="text" class="form-input" placeholder="請輸入您的姓名" />
-              </form>
-              <form>
-                <label for="email">電子信箱</label>
-                <input type="email" class="form-input" placeholder="請輸入您的電子信箱" />
-              </form>
-              <form>
-                <label for="password">密碼</label>
-                <input type="password" class="form-input" placeholder="請輸入密碼" />
-              </form>
-              <form>
-                <div>
-                  <label for="password">確認密碼</label>
-                </div>
-                <input type="password" class="form-input" placeholder="請再輸入一次密碼" />
-              </form>
-              <BaseBtn title="註冊" variant="solid" @click="handleRegister" :width="244" :height="50" />
-            </div>
+        <button @click="handleClose">x</button>
+        <div>
+          <h1 class="zh-h3 auth-form__title">會員註冊</h1>
+          <div class="auth-form">
+            <BaseInput v-model="name" label="姓名" placeholder="請輸入姓名" :status="status.name.value"
+              :message="message.name.value" @blur="touched.name.value = true" class="tight-gap" />
+            <BaseInput ref="emailRef" v-model="email" label="電子信箱" placeholder="請輸入您的電子信箱" :status="status.email.value"
+              :message="message.email" @blur="touched.email.value = true" @enter-press="focusNext(passwordRef)"
+              class="tight-gap" />
+            <BaseInput ref="passwordRef" v-model="password" label="密碼" placeholder="請輸入密碼"
+              :type="showPassword ? 'text' : 'password'" :status="status.password.value"
+              :message="message.password.value" @blur="touched.password.value = true"
+              @enter-press="focusNext(captchaRef)" class="tight-gap">
+              <template #suffix> <button type="button" @click="showPassword = !showPassword"> {{
+                showPassword ? '🙈' : '👁️' }} </button> </template>
+            </BaseInput>
+            <form>
+              <div>
+                <label for="password">確認密碼</label>
+              </div>
+              <input type="password" class="form-input" placeholder="請再輸入一次密碼" />
+            </form>
+            <BaseBtn title="註冊" variant="solid" @click="handleRegister" :width="244" :height="50" />
           </div>
         </div>
       </div>
+
 
       <!-- 活動翻頁層 (.book__cover)：這是關鍵！它寬度只有書本的一半（50%），初始位置在右邊。 -->
       <div class="book__cover">
@@ -221,11 +245,11 @@ onMounted(() => {
           <!-- ==========================================
               前往會員註冊
           ========================================== -->
-          <div class="auth-hero__content">
-            <img src="https://picsum.photos/174/50/?random=10" />
-            <div>
-              <h3>還不是會員嗎？</h3>
-              <h4>快來一起加入Recimo吧~</h4>
+          <div class="registration-invite">
+            <img src="@/assets/images/site/Recimo-logo-black.svg" />
+            <div class="registration-invite__content">
+              <h3 class="zh-h2">還不是會員嗎？</h3>
+              <h4 class="zh-h3">快來一起加入Recimo吧~</h4>
               <BaseBtn title="前往註冊" variant="solid" @click="goToRegister" :width="244" :height="50" />
             </div>
           </div>
@@ -235,13 +259,12 @@ onMounted(() => {
           <!-- ==========================================
               前往會員登入
           ========================================== -->
-          <div class="auth-info">
-            <img src="https://picsum.photos/174/50/?random=10" />
-
-            <div>
+          <div class="login-invite">
+            <img src="@/assets/images/site/Recimo-logo-black.svg" />
+            <div class="login-invite__content">
               <h3>歡迎回來Recimo</h3>
               <h4>如果已經有會員就直接登入吧~</h4>
-              <BaseBtn title="前往註冊" variant="solid" @click="goToLogin" :width="244" :height="50" />
+              <BaseBtn title="前往登入" variant="solid" @click="goToLogin" :width="244" :height="50" />
             </div>
           </div>
         </div>
@@ -254,37 +277,167 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-//  lang="scss": 告訴 Vue 這裡要用 Scss 編譯
-//  scoped: 確保這裡寫的 CSS 只會影響目前這個頁面，不會「跑去污染」到其他頁面的樣式。
+.auth-form {
+  border: 1px solid red;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column; // 讓內容由上往下排
+  align-items: center; // **關鍵：讓所有子元素水平置中**
+  width: 100%; // 確保容器撐滿寬度
+}
 
-// ==========================================
+.login-btn {
+  margin: 20px 0;
+}
+
+// ========================================== 
 // input
 // ==========================================
-// @import '@/assets/scss/abstracts/_color.scss';
-// @import '@/assets/scss/components-scss/_input.scss';
+// 調整 label 與 input 的垂直距離
+.base-input-container.tight-gap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
+//標題
+.auth-form__title {
+  text-align: center;
+}
 
-// .form-input {
-//   // 直接呼叫設定的基礎樣式（裡面已經包含 transition 和 focus 邏輯了）
-//   @include input-style();
+.tight-gap {
+  margin: 10px 0;
+}
 
-//   // 2. 針對「驗證碼輸入框」微調寬度
-//   &--captcha {
-//     flex: 1;
-//   }
+// 忘記密碼
+:deep(.label-bar) {
+  display: flex;
+  justify-content: space-between; // 讓標籤跟連結分開在左右兩頭
+  align-items: center;
+  width: 100%;
+  margin-bottom: 4px; // 與 input 的距離
+}
 
-//   // 3. 處理 Focus 狀態 (如果你想讓燈箱的 Focus 顏色跟預設不同)
-//   &:focus {
-//     // 這裡會覆蓋 Mixin 裡的預設值，改成你想要的顏色
-//     border-color: $primary-color-800;
-//     box-shadow: 0 0 0 3px rgba($primary-color-800, 0.1);
-//   }
-// }
+.forgot-password-link {
+  font-size: 12px;
+  color: #4a7c59; // 配合你的主色調
+  text-decoration: none;
+  transition: color 0.3s;
 
-// // 4. 處理錯誤狀態 (這也是組長寫好的 mixin)
-// .form-input.is-error {
-//   @include input-status($secondary-color-danger-700);
-// }
+  &:hover {
+    color: $accent-color-700;
+    text-decoration: underline; // 移上去加下底線
+  }
+}
+
+// 更多登入方式
+.login-options {
+  width: 100%;
+  text-align: center;
+}
+
+.auth-form__divider {
+  display: flex; // 使用 Flexbox
+  align-items: center; // 垂直居中對齊文字與線條
+  width: 100%; // 確保容器寬度足夠
+  color: #888; // 文字顏色
+
+  // 線條的共同樣式
+  &::before,
+  &::after {
+    content: "";
+    flex: 1; // 讓線條自動填滿剩餘空間
+    height: 1px; // 線條高度
+    background-color: #ddd; // 線條顏色
+  }
+
+  // 文字與線條之間的間距
+  &::before {
+    margin-right: 15px;
+  }
+
+  &::after {
+    margin-left: 15px;
+  }
+}
+
+.social-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  a {
+    display: inline-block; // 確保 transform 在連結上生效
+    transition: transform 0.3s ease; // 設定動畫時間與曲線
+
+    &:hover {
+      // 放大 1.15 倍
+      transform: scale(1.15);
+
+      // 增加一點陰影，讓它看起來像浮起來
+      // filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    }
+
+    &:active {
+      // 點擊瞬間縮小回 0.95 倍，增加點擊回饋感
+      transform: scale(0.95);
+    }
+  }
+}
+
+.social-login img {
+
+  width: 40px;
+  margin: 20px;
+
+  // 放大 1.15 倍
+  transform: scale(1.15);
+
+  // 增加一點陰影，讓它看起來像浮起來
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+// ========================================== 
+// input旁邊有圖片的那頁
+// ==========================================
+.registration-invite {
+  background-image: url(@/assets/images/login/registration-invite-bg.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 15px;
+}
+
+.login-invite {
+  background-image: url(@/assets/images/login/login-invite-bg.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 15px;
+}
+
+.registration-invite__content,
+.login-invite__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  align-items: center;
+}
 
 // ========================================== 
 // 書
@@ -314,7 +467,7 @@ onMounted(() => {
 .book {
   position: relative;
   width: 900px;
-  height: 550px;
+  // height: 600px;
   display: flex;
   // 確保子元素能在 3D 空間中運動
   transform-style: preserve-3d;
@@ -350,12 +503,17 @@ onMounted(() => {
     transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     transform-style: preserve-3d;
     z-index: 5;
+  }
 
-    // 翻轉狀態：當父層有 .book--flipped 時，這一頁轉 180 度
-    .book--flipped & {
+  // 翻轉狀態：當父層有 .book--flipped 時，這一頁轉 180 度
+  &.book--flipped {
+
+    // 當 .book 同時擁有 .book--flipped 時，改變 cover 的狀態
+    .book__cover {
       transform: rotateY(-180deg);
     }
   }
+
 
   // 5. 翻頁的正反面
 

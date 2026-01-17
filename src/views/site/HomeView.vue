@@ -9,11 +9,14 @@
 
 <template>
     <!-- <h1>首頁</h1> -->
-    <header class="hero container">
-        <div class="row">
-            <Hero />
-        </div>
-    </header>
+    <div class="hero">
+        <header class="container">
+            <div class="row">
+                <Hero />
+            </div>
+        </header>
+    </div>
+    
     <section class="about-section-bg">
         <div class="about-section container">
             <div class="row">
@@ -52,13 +55,9 @@
 
 <style lang="scss" scoped>
     .hero{
-        width:100%;
         height: 100vh;
-        padding-top: 80px;
-        display: flex;
         flex-direction: column;
-        justify-content: center;
-        position: relative;
+        overflow: hidden;
     }
     .about-section-bg{
         background-color: $primary-color-700;
@@ -66,7 +65,6 @@
         padding:130px 0;
         position: relative;
         overflow: hidden;
-        
     }
     .about-feature-bg{
         background-color: $primary-color-100;
