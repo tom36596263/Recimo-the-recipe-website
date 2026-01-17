@@ -71,7 +71,7 @@ const handleSubmit = () => {
                             </label>
                         </div>
                     </div>
-                    
+
                     <div class="input-section">
                         <p class="section-title zh-h5-bold">補充說明（選填）：</p>
                         <textarea v-model="reportNote" placeholder="請說明具體情況..." class="p-p3"></textarea>
@@ -80,10 +80,10 @@ const handleSubmit = () => {
                     <div class="btn-group">
 
 
-                        <BaseBtn title="取消" variant="outline" height="0" class="w-auto" @click="handleClose">
+                        <BaseBtn title="取消" variant="outline" height="40" width="100%" @click="handleClose">
                         </BaseBtn>
 
-                        <BaseBtn title="送出檢舉" @click="handleSubmit" class="w-auto" />
+                        <BaseBtn title="送出檢舉" width="100%" height="40" @click="handleSubmit" />
 
 
                     </div>
@@ -94,7 +94,6 @@ const handleSubmit = () => {
 </template>
 
 <style scoped lang="scss">
-
 .black-mask {
     position: fixed;
     inset: 0;
@@ -215,20 +214,37 @@ const handleSubmit = () => {
 
 .btn-group {
     margin: 0;
+    background-color: transparent;
+    /* 已將紅色改掉，如需偵錯可改回 red */
     width: 100%;
     height: 40px;
     flex-shrink: 0;
     display: flex;
-    justify-content: center;
-    gap: 30px;
+    justify-content: space-between;
+    gap: 16px;
+    /* 稍微縮小間隙確保按鈕有足夠空間撐開 */
     margin-top: 16px;
 
+    :deep(.base-btn) {
+        flex: 1 !important;
+        /* 強制平分空間 */
+        max-width: none !important;
+        /* 破除內置最大寬度限制 */
+        width: 100% !important;
+        /* 強制撐滿 */
+
+        button,
+        a {
+            width: 100% !important;
+            /* 確保內部原生標籤也撐滿 */
+        }
+    }
 
     @media (max-width: 480px) {
-        gap: 15px;
+        gap: 12px;
 
         :deep(.base-btn) {
-            flex: 1;
+            flex: 1 !important;
         }
     }
 }
@@ -262,7 +278,6 @@ const handleSubmit = () => {
 
 textarea {
     width: 100%;
-    /* 保持你設定的 80px */
     min-height: 80px;
     border-radius: 10px;
     border: 1px solid $neutral-color-400;

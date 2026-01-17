@@ -273,7 +273,7 @@ textarea {
 .btn-group {
     margin-top: 12px;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     gap: 24px;
     height: 40px;
 }
