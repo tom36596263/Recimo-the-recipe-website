@@ -113,7 +113,7 @@ const starArray = computed(() => {
 }
 
 .badge-favorite {
-    color: $neutral-color-white;
+    color: $primary-color-700;
     position: absolute;
     top: 20px;
     left: 20px;
@@ -125,7 +125,7 @@ const starArray = computed(() => {
     transition: all 0.3s ease;
 
     &:hover {
-        color: $primary-color-700;
+        color: $accent-color-700;
         transform: scale(1.05);
     }
 }

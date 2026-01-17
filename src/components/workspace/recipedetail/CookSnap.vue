@@ -149,9 +149,16 @@ const scrollWall = (direction) => {
     }
 
     .header-text-group {
+
+      .zh-h5 {
+        text-align: center;
+      }
       
       .description {
-        margin-top: 30px;
+        width: 100%;
+        // background-color: red;
+        margin-top: 25px;
+        // margin-left: 10%;
         line-height: 20px;
         color: $neutral-color-700;
 
@@ -260,6 +267,7 @@ const scrollWall = (direction) => {
           right: 10px;
           cursor: pointer;
           opacity: 0.8;
+          color: $neutral-color-white;
 
           &:hover {
             opacity: 1;
