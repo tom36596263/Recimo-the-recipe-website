@@ -31,10 +31,7 @@ const subtotal = computed(() => {
   return Number(product.value.price) * props.quantity;
 });
 
-const getUnit = (name) => {
-  if (!name) return '個';
-  return name.includes('飯') ? '個' : '包';
-};
+
 </script>
 
 <template>
@@ -47,7 +44,7 @@ const getUnit = (name) => {
       <div class="info">
         <p class="title p-p1">{{ product.product_name }}</p>
         <p class="price-unit p-p1">
-          價格 : {{ product.price }}元/{{ getUnit(product.product_name) }}
+          價格 : {{ product.price }}元/包
         </p>
       </div>
 
@@ -84,6 +81,7 @@ const getUnit = (name) => {
   width: 250px;
   flex-shrink: 0;
   overflow: hidden;
+
   @media (max-width: 1024px) {
     width: 100%;
   }
@@ -94,6 +92,7 @@ const getUnit = (name) => {
     border-radius: $radius-base;
     // object-position: center;
     object-fit: cover;
+
     @media (max-width: 768px) {
       width: 280px;
     }
