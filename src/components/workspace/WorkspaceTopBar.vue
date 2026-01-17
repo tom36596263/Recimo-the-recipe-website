@@ -8,7 +8,7 @@ const route = useRoute();
     <div class="workspace-top-bar">
         <div class="col-6 col-md-12 personal-info">
             <div class="personal-img">
-                <img src="@/assets/images/site/Recimo-logo-black.svg" alt="">
+                <img src="/img/site/Recimo-logo-black.svg" alt="">
             </div>
             
             <div class="title">

@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseBtn from '@/components/common/BaseBtn.vue'
-import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
+import LogoBlack from '/img/site/Recimo-logo-black.svg'
 import IconList from 'virtual:icons/material-symbols/List'
 import IconAdd from 'virtual:icons/material-symbols/Add'
 
