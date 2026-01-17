@@ -278,7 +278,7 @@ const handleSubmit = () => {
 
 textarea {
     width: 100%;
-    min-height: 120px;
+    min-height: 110px;
     border-radius: 10px;
     border: 1px solid $primary-color-400;
     padding: 10px 12px;
