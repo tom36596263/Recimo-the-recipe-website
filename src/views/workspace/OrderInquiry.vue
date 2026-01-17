@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import card from '@/components/mall/OrderCard.vue';
 
 // 1. 宣告一個響應式變數，初始值為空陣列
 const ordersData = ref([]);
