@@ -1,4 +1,8 @@
 <script setup>
+import { publicApi } from '@/utils/publicApi'
+import { useRouter } from 'vue-router'
+const router = useRouter();
+
 import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
 import FilterSection from '@/components/site/RecipeOverview/FilterSection.vue'
 import PageBtn from '@/components/common/PageBtn.vue'
@@ -11,19 +15,24 @@ const pageSize = 6
 onMounted(async () => {
     try {
         const [resRecipes, resRecipeTags, resTags] = await Promise.all([
-            fetch('/data/recipe/recipes.json').then(res => res.json()),
-            fetch('/data/recipe/recipe_tag.json').then(res => res.json()), 
-            fetch('/data/recipe/tags.json').then(res => res.json())
+            publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/recipe/recipe_tag.json'), 
+            publicApi.get('data/recipe/tags.json')
         ]);
 
+        const recipeData = resRecipes.data;
+        const recipeTagsData = resRecipeTags.data;
+        const tagsData = resTags.data;
+
         const tagMap = {};
-        resTags.forEach(tag => {
+        tagsData.forEach(tag => {
             tagMap[tag.tag_id] = tag.tag_name;
         });
 
-        allRecipe.value = resRecipes.map(recipe => {
+        const base = import.meta.env.BASE_URL;
+        allRecipe.value = recipeData.map(recipe => {
 
-            const matchedTagIds = resRecipeTags
+            const matchedTagIds = recipeTagsData
                 .filter(rt => rt.recipe_id === recipe.recipe_id)
                 .map(rt => rt.tag_id);
 
@@ -31,8 +40,11 @@ onMounted(async () => {
             const recipeTagsNames = matchedTagIds.map(id => tagMap[id]).filter(Boolean);
 
             return {
+                id: recipe.recipe_id,
                 recipe_name: recipe.recipe_title,
-                image_url: recipe.recipe_image_url,
+                image_url: recipe.recipe_image_url.startsWith('http') 
+                            ? recipe.recipe_image_url 
+                            : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
                 tags: recipeTagsNames,
                 nutritional_info: {
                     calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
@@ -49,7 +61,12 @@ onMounted(async () => {
         console.error('載入資料失敗:', error);
     }
 });
-
+const goToDetail = (id) => {
+    router.push({
+        name: 'workspace-recipe-detail',
+        params: { id:id }
+    })
+}
 // 計算總頁數
 const totalPages = computed(() => {
     return Math.ceil(allRecipe.value.length / pageSize);
@@ -75,15 +92,22 @@ const handlePageChange = (page) => {
     </section>
     <section class="container recipe-cards-section">
         <div class="row">
-            <div v-for="item in recipes" :key="item.recipe_name" class="col-4 col-lg-12">
+            <router-link 
+            v-for="item in recipes" 
+            :key="item.id" 
+            :to="{ name: 'workspace-recipe-detail', params: { id: item.id } }"
+            class="col-4 col-lg-12 recipe-cards">
                 <RecipeCardLg :recipe="item" class="recipe-card"/>
-            </div>
+            </router-link>
         </div>
     </section>
 
-    <section class="container">
+    <section class="container page-btn">
         <div class="row">
-            <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
+            <div class="col-12">
+                <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
+            </div>
+            
         </div>
     </section>
     
@@ -94,7 +118,18 @@ const handlePageChange = (page) => {
         margin-top: 40px;
     }
     .recipe-cards-section{
-        margin: 60px auto;
+        margin: 60px auto 30px ;
+    }
+    .recipe-cards{
+        text-decoration: none;
+        color: $neutral-color-800;
+        
+    }
+    .page-btn{
+        margin-bottom: 30px;
+    }
+    .recipe-card{
+        margin-bottom:20px;
     }
     @media screen and (max-width: 1024px){
         .recipe-card{
