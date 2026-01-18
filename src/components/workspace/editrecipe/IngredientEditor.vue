@@ -37,7 +37,12 @@ const handleAddMultiple = (items) => {
                 unit: item.unit_name || '',
                 note: '',
                 fromDB: true,
-                isInvalid: false
+                isInvalid: false,
+                // --- 關鍵：將營養資料存入物件中 ---
+                kcal_per_100g: item.kcal_per_100g || 0,
+                protein_per_100g: item.protein_per_100g || 0,
+                fat_per_100g: item.fat_per_100g || 0,
+                carbs_per_100g: item.carbs_per_100g || 0
             });
         }
     });
