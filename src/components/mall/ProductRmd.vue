@@ -91,7 +91,8 @@ onMounted(() => {
     </section>
 </template>
 <style lang="scss" scoped>
-@import "@/assets/scss/layouts/_grid.scss";
+@use "sass:map";
+@use "@/assets/scss/layouts/_grid.scss" as *;
 
 .product-recommendations {
     background-image: url(@/assets/images/mall/Productrmd-bg.jpg);
@@ -114,7 +115,7 @@ onMounted(() => {
     display: none;
 }
 
-@media screen and (max-width: map-get($breakpoints, "lg")) {
+@media screen and (max-width: map.get($breakpoints, "lg")) {
     .product-recommendations {
         padding: 40px 20px;
     }
@@ -135,13 +136,13 @@ onMounted(() => {
     }
 }
 
-@media screen and (max-width: map-get($breakpoints, "md")) {
+@media screen and (max-width: map.get($breakpoints, "md")) {
     .product-recommendations {
         padding: 30px 15px;
     }
 }
 
-@media screen and (max-width: map-get($breakpoints, "sm")) {
+@media screen and (max-width: map.get($breakpoints, "sm")) {
     .product-recommendations {
         padding: 20px 0;
     }

@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import DefaultLayout from '@/layouts/DefaultLayout.vue'; // 官網版面
 import WorkspaceLayout from '@/layouts/WorkspaceLayout.vue'; // 工作區版面
+import GlobalModalManager from '@/GlobalModalManager.vue';
 
 const route = useRoute();
 
@@ -23,6 +24,7 @@ const layoutComponent = computed(() => {
   <component :is="layoutComponent">
     <router-view />
   </component>
+  <GlobalModalManager />
 </template>
 
 <style lang="scss">

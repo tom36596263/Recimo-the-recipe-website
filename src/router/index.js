@@ -7,12 +7,6 @@ import IconInboxTextPerson from 'virtual:icons/material-symbols/Inbox-Text-Perso
 import IconShoppingCart from 'virtual:icons/material-symbols/Shopping-Cart-outline'
 import IconAssignment from 'virtual:icons/material-symbols/Assignment-outline'
 
-import AdminLayout from '@/views/admin/AdminLayout.vue'
-import AdminHome from '@/views/admin/AdminHome.vue'
-import AdminUsers from '@/views/admin/AdminUsers.vue'
-import AdminUserDetail from '@/views/admin/AdminUserDetail.vue'
-import AdminSettings from '@/views/admin/AdminSettings.vue'
-
 const pageicon = ref([
   markRaw(IconForkSpoon),
   markRaw(IconSkillet),
@@ -27,10 +21,16 @@ const routes = [
   // 1. 前台官網 (使用 DefaultLayout)
   // ==========================================
   {
-    path: '/test-auth',
-    name: 'test-auth',
     // 隨便借用一個現有的 Layout 或直接載入組件
+    path: '/loginlightbox',
+    name: 'loginlightbox',
     component: () => import('@/components/LoginLightbox.vue')
+  },
+  {
+    // 登入教學
+    path: '/logintest',
+    name: 'Logintest',
+    component: () => import('@/views/site/login.vue'),
   },
   {
     path: '/',
@@ -86,33 +86,6 @@ const routes = [
     name: 'benefits',
     component: () => import('@/views/site/BenefitsView.vue'),
     meta: { layout: 'default', title: '會員權益', breadcrumb: '會員權益', showInMenu: true }
-  },
-  {
-    path: '/admin',
-    component: AdminLayout, // ✅ 父層 Layout
-    children: [
-      {
-        path: '', // ✅ /admin
-        name: 'admin-home',
-        component: AdminHome
-      },
-      {
-        path: 'users', // ✅ /admin/users
-        name: 'admin-users',
-        component: AdminUsers
-      },
-      {
-        path: 'users/:id', // ✅ /admin/users/123
-        name: 'admin-user-detail',
-        component: AdminUserDetail,
-        props: true // ✅ 把 params 變成 props
-      },
-      {
-        path: 'settings', // ✅ /admin/settings
-        name: 'admin-settings',
-        component: AdminSettings
-      }
-    ]
   },
   {
     path: '/cart',
@@ -181,14 +154,6 @@ const routes = [
           title: '食譜總覽',
           icon: markRaw(IconInboxTextPerson),
           layout: 'workspace',
-          requiresAuth: true
-        }
-      }, // 商城連結：直接給絕對路徑 /mall
-      {
-        path: '/mall',
-        meta: {
-          title: 'Recimo商城',
-          icon: markRaw(IconShoppingCart),
           requiresAuth: true
         }
       },

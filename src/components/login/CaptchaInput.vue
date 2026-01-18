@@ -85,14 +85,14 @@ onMounted(() => generateCaptcha())
 </template>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/abstracts/_mixins.scss";
-@import "@/assets/scss/components-scss/_input.scss";
+@use "@/assets/scss/abstracts/_mixins.scss" as *;
+@use "@/assets/scss/components-scss/_input.scss" as *;
 
 .base-input-container {
     margin: 10px 0;
 
     .form-input {
-        $border-color: $neutral-color-400; // 一開始黑框 
+        border: 1px solid $neutral-color-400; // 一開始黑框 
     }
 
     &.is-error {
