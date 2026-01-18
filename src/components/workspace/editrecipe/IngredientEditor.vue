@@ -123,7 +123,7 @@ const removeItem = (id) => {
 .ingredient-item {
     position: relative;
     background: $neutral-color-white;
-    border: 1px solid $neutral-color-100;
+    border: 0.5px solid $neutral-color-400;
     border-radius: 12px;
     padding: 12px 16px;
     transition: all 0.2s ease;

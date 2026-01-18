@@ -235,13 +235,13 @@ onUnmounted(() => {
 
 .step-card {
   flex: 1;
-  border-top: 1px solid $neutral-color-100;
+  border-top: 1px solid $neutral-color-400;
 
   .card-header {
     display: flex;
     align-items: center;
     padding: 12px 0;
-    border-bottom: 1px solid $neutral-color-100;
+    border-bottom: 1px solid $neutral-color-400;
     margin-bottom: 15px;
 
     .step-title-input {
@@ -486,7 +486,7 @@ onUnmounted(() => {
 
 .add-step-wrapper {
   margin-top: 30px;
-  border-top: 1px solid $neutral-color-100;
+  border-top: 1px solid $neutral-color-400;
   padding-top: 20px;
 
   .add-step-btn {
