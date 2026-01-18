@@ -1,11 +1,46 @@
 <script setup>
+import { ref } from 'vue';
+import IngredientSearchModal from './modals/IngredientSearchModal.vue';
+
 const props = defineProps({
     ingredients: { type: Array, required: true },
     isEditing: { type: Boolean, default: false }
 });
 
-const addItem = () => {
-    props.ingredients.push({ id: 'id' + Date.now(), name: '', amount: '', unit: '', note: '' });
+const showSearchModal = ref(false);
+
+const openSearchModal = () => {
+    showSearchModal.value = true;
+};
+
+const validateAmount = (item) => {
+    if (/[^\d.]/.test(item.amount)) {
+        item.isInvalid = true;
+        setTimeout(() => { item.isInvalid = false; }, 1500);
+    }
+    let val = item.amount.replace(/[^\d.]/g, "");
+    const dotCount = (val.match(/\./g) || []).length;
+    if (dotCount > 1) {
+        val = val.slice(0, val.lastIndexOf("."));
+    }
+    item.amount = val;
+};
+
+const handleAddMultiple = (items) => {
+    items.forEach(item => {
+        const isDuplicate = props.ingredients.some(ing => ing.name === item.ingredient_name);
+        if (!isDuplicate) {
+            props.ingredients.push({
+                id: 'id' + Date.now() + Math.floor(Math.random() * 1000),
+                name: item.ingredient_name,
+                amount: '',
+                unit: item.unit_name || '',
+                note: '',
+                fromDB: true,
+                isInvalid: false
+            });
+        }
+    });
 };
 
 const removeItem = (id) => {
@@ -25,38 +60,44 @@ const removeItem = (id) => {
                 <button v-if="isEditing" class="remove-btn" @click="removeItem(ing.id)">✕</button>
 
                 <div class="input-row main-row">
-                    <input v-model="ing.name" type="text" class="custom-input name-field p-p1"
-                        placeholder="食材名稱 (如: 雞蛋)" :readonly="!isEditing" />
+                    <input v-model="ing.name" type="text" class="custom-input name-field p-p1" placeholder="食材名稱"
+                        :readonly="!isEditing || ing.fromDB" />
                 </div>
 
                 <div class="input-row split-row">
                     <div class="amount-group p-p2">
-                        <input v-model="ing.amount" type="text" class="custom-input amount-field p-p2" placeholder="分量"
-                            :readonly="!isEditing" />
+                        <div class="amount-input-wrapper">
+                            <input v-model="ing.amount" type="text" inputmode="decimal"
+                                class="custom-input amount-field p-p2" :class="{ 'error-shake': ing.isInvalid }"
+                                placeholder="分量" :readonly="!isEditing" @input="validateAmount(ing)" />
+                            <span v-if="ing.isInvalid" class="number-hint">僅限數字</span>
+                        </div>
+
                         <div class="unit-box">
                             <span class="label">單位：</span>
                             <input v-model="ing.unit" type="text" class="custom-input unit-field p-p2" placeholder="顆"
-                                :readonly="!isEditing" />
+                                :readonly="!isEditing || ing.fromDB" />
                         </div>
                     </div>
                 </div>
 
                 <div class="input-row note-row">
-                    <input v-model="ing.note" type="text" class="custom-input note-field p-p3"
-                        placeholder="新增備註 (如: 需冷藏)..." :readonly="!isEditing" />
+                    <textarea v-model="ing.note" class="custom-input note-field p-p3" placeholder="新增備註 (限30字)..."
+                        :readonly="!isEditing" maxlength="30" rows="2"></textarea>
                 </div>
             </div>
         </div>
 
         <div v-if="isEditing" class="add-action-wrapper">
-            <button class="add-ingredient-btn p-p2" @click="addItem">+ 新增食材</button>
+            <button class="add-ingredient-btn p-p2" @click="openSearchModal">+ 新增食材</button>
         </div>
+
+        <IngredientSearchModal v-model="showSearchModal" :selectedList="ingredients"
+            @add-multiple="handleAddMultiple" />
     </section>
 </template>
 
 <style lang="scss" scoped>
-/* 僅保留佈局、邊框、間距與顏色變數 */
-
 .ingredient-editor-container {
     width: 100%;
     margin-bottom: 30px;
@@ -94,7 +135,7 @@ const removeItem = (id) => {
 
     &.is-view {
         border-color: transparent;
-        background: $primary-color-100; // 使用主色 100 做為背景
+        background: $primary-color-100;
         padding: 8px 12px;
     }
 
@@ -104,7 +145,7 @@ const removeItem = (id) => {
         right: 12px;
         background: none;
         border: none;
-        color: $secondary-color-danger-400; // 輔助色 danger
+        color: $secondary-color-danger-400;
         cursor: pointer;
         z-index: 2;
 
@@ -115,6 +156,7 @@ const removeItem = (id) => {
 }
 
 .input-row {
+    // background-color: #fff;
     border-bottom: 1px solid $neutral-color-100;
     padding: 6px 0;
     display: flex;
@@ -143,8 +185,19 @@ const removeItem = (id) => {
     }
 }
 
-.main-row .name-field {
-    color: $neutral-color-black;
+.note-row {
+    align-items: flex-start;
+    padding-top: 8px; // 稍微拉開與上方欄位的距離
+
+    .note-field {
+        color: $neutral-color-700 !important;
+        resize: none; // 鎖定縮放
+        height: 52px; // 固定高度 (約兩行文字 + padding)
+        line-height: 1.4; // 適中的行高
+        font-family: inherit;
+        overflow: hidden; // 隱藏捲軸（30字內不會超過）
+        word-break: break-all; // 避免長字撐破
+    }
 }
 
 .amount-group {
@@ -152,8 +205,26 @@ const removeItem = (id) => {
     align-items: center;
     width: 100%;
 
-    .amount-field {
+    .amount-input-wrapper {
         flex: 1;
+        position: relative;
+
+        .amount-field {
+            border-bottom: 1px solid transparent;
+
+            &:focus {
+                border-bottom-color: $primary-color-400;
+            }
+        }
+
+        .number-hint {
+            position: absolute;
+            left: 0;
+            bottom: -12px;
+            font-size: 10px;
+            color: $secondary-color-danger-400;
+            pointer-events: none;
+        }
     }
 
     .unit-box {
@@ -171,8 +242,25 @@ const removeItem = (id) => {
     }
 }
 
-.note-field {
-    color: $neutral-color-700 !important;
+.error-shake {
+    color: $secondary-color-danger-400 !important;
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-4px);
+    }
+
+    75% {
+        transform: translateX(4px);
+    }
 }
 
 .add-action-wrapper {
