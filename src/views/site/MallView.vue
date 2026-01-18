@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import card from '@/components/mall/ProductCard.vue';
 import axios from 'axios';
-import { publicApi } from '@/utils/publicApi'; // ！！！務必加上這行引入 ！！！
+import { publicApi } from '@/utils/publicApi';
 import { useRouter, useRoute } from 'vue-router';
 import PageBtn from '@/components/common/PageBtn.vue'
 
@@ -512,44 +512,28 @@ const columns = ref([
     }
   }
 
-  // .col-3 {
-  //   width: 25%; // 25% 代表一排四個 (100 / 4)
-  //   flex: 0 0 25%; // 確保不會被擠壓或放大
-  //   box-sizing: border-box; // 確保 padding 不會把格子撐爆
-  //   padding: 10px; // 給商品卡片一點間距
-  // }
-
-  // // 手機版 RWD 設定
-  // @media (max-width: 768px) {
-  //   .col-md-12 {
-  //     width: 100%;
-  //     flex: 0 0 100%;
-  //   }
-  // }
   // 桌機版狀態
   .desktop-view {
-    display: flex; // 恢復 flex 屬性
-    flex-wrap: wrap; // 雙重保險：一定要換行
+    display: flex;
+    flex-wrap: wrap;
     width: 100%;
   }
 
-  // 手機版狀態 (預設隱藏)
+
   .mobile-view {
     display: none;
   }
 
   @media (max-width: 1024px) {
 
-    // 手機版隱藏桌機 Grid
     .desktop-view {
-      display: none !important; // 強制隱藏
+      display: none
     }
 
-    // 手機版顯示 Swiper
+
     .mobile-view {
       display: block;
       width: 100%;
-      // padding-left: 15px; // 左側留白
       overflow: hidden;
     }
 

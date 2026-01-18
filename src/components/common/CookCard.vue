@@ -36,10 +36,10 @@ const handleAdd = () => {
     <article class="ingredient-card">
         <div class="info-section">
             <h3 class="title p-p1">{{ name }}</h3>
-            <p class="unit-label p-p1">每100g：</p>
+            <p class="unit-label p-p3">每100g：</p>
             <div class="nutrition-data">
-                <p class="p-p1">熱量：{{ calories }}kcal</p>
-                <p class="p-p1">脂肪：{{ fat }}g</p>
+                <p class="p-p3">熱量：{{ calories }}kcal</p>
+                <p class="p-p3">脂肪：{{ fat }}g</p>
             </div>
         </div>
 
@@ -61,10 +61,10 @@ const handleAdd = () => {
     padding: 12px;
     background-color: $neutral-color-white;
     border-radius: 12px;
-    position: relative; // 為了讓按鈕做絕對定位
-    max-width: 300px; // 可依需求調整寬度
-    font-family: sans-serif;
-    border: 1px solid red;
+    position: relative;
+    width: 270px;
+    height: 94px;
+    margin-bottom: 6px;
 }
 
 .info-section {
@@ -74,27 +74,16 @@ const handleAdd = () => {
     flex-direction: column;
     justify-content: center;
 
-    // .title {
-    //     font-size: 18px;
-    //     font-weight: 500;
-    //     color: $color-text-primary;
-    //     margin: 0 0 4px 0;
-    //     letter-spacing: 1px;
-    // }
-
-    .unit-label {
-        font-size: 12px;
-        // color: $color-text-secondary;
-        margin: 0 0 4px 0;
+    .title {
+        color: $primary-color-700;
     }
-
 }
 
 .image-wrapper {
-    width: 100px;
-    height: 80px;
+    width: 90px;
+    height: 70px;
     background-color: $neutral-color-400;
-    border-radius: 12px;
+    border-radius: $radius-base;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -114,8 +103,8 @@ const handleAdd = () => {
     position: absolute;
     bottom: 0px;
     right: 0px; // 根據設計圖，按鈕似乎浮在右下角
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     background-color: $primary-color-400;
     border: none;
     border-radius: 10px 0 10px 0;
