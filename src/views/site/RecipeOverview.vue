@@ -1,16 +1,28 @@
 <script setup>
+import { ref, onMounted, computed, watch } from 'vue';
 import { publicApi } from '@/utils/publicApi'
 import { useRouter } from 'vue-router'
-const router = useRouter();
 
 import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
 import FilterSection from '@/components/site/RecipeOverview/FilterSection.vue'
+import EmptyState from '@/components/site/RecipeOverview/NoResult.vue'
 import PageBtn from '@/components/common/PageBtn.vue'
-import { ref, onMounted, computed } from 'vue';
 
+const router = useRouter();
 const allRecipe = ref([])
 const currentPage = ref(1)
 const pageSize = 6
+
+const activeFilters = ref({
+    time: "全部",
+    difficulty: "全部",
+    mealPortions: "全部",
+    kcal: "全部"
+});
+
+watch(activeFilters, () => {
+    currentPage.value = 1;
+}, { deep: true });
 
 onMounted(async () => {
     try {
@@ -67,31 +79,64 @@ const goToDetail = (id) => {
         params: { id:id }
     })
 }
+
+const filteredRecipes = computed(() => {
+    return allRecipe.value.filter(recipe => {
+        const timeValue = parseInt(recipe.nutritional_info.cooking_time);
+        const timeMatch = activeFilters.value.time === "全部" || (
+            (activeFilters.value.time === "15分鐘內" && timeValue <= 5) ||
+            (activeFilters.value.time === "15-30分鐘" && timeValue > 15 && timeValue <= 30) ||
+            (activeFilters.value.time === "30-60分鐘" && timeValue > 30 && timeValue <= 60) ||
+            (activeFilters.value.time === "1小時以上" && timeValue > 60 && timeValue <= 180) ||
+            (activeFilters.value.time === "慢火長燉" && timeValue > 180)
+        );
+        
+        const portionMatch = activeFilters.value.mealPortions == "全部" ||(
+            (activeFilters.value.mealPortions === "1人獨享"  && recipe.nutritional_info.serving_size === 1) ||
+            (activeFilters.value.mealPortions === "2人世界"  && recipe.nutritional_info.serving_size === 2) ||
+            (activeFilters.value.mealPortions === "3-4人家庭"  && recipe.nutritional_info.serving_size >= 3 && recipe.nutritional_info.serving_size <= 4) ||
+            (activeFilters.value.mealPortions === "6人以上聚會"  && recipe.nutritional_info.serving_size >= 6)
+        );
+
+        const kcalValue = parseInt(recipe.nutritional_info.calories);
+        const kcalMatch = activeFilters.value.kcal === "全部" || (
+            (activeFilters.value.kcal === "100kcal(輕食)"  && kcalValue < 100) || 
+            (activeFilters.value.kcal === "150-300kcal(均衡)" && kcalValue > 150 && kcalValue <= 300) ||
+            (activeFilters.value.kcal === "300kcal以上(豐盛)"  && kcalValue > 300) 
+        );
+
+        return timeMatch && portionMatch && kcalMatch;
+    });
+});
+
 // 計算總頁數
 const totalPages = computed(() => {
-    return Math.ceil(allRecipe.value.length / pageSize);
+    return Math.ceil(filteredRecipes.value.length / pageSize);
 });
 
 // 根據當前頁碼計算應顯示的食譜
 const recipes = computed(() => {
     const start = (currentPage.value - 1) * pageSize;
-    const end = start + pageSize;
-    return allRecipe.value.slice(start, end);
+    return filteredRecipes.value.slice(start, start + pageSize);
 });
 
-const handlePageChange = (page) => {
-    currentPage.value = page;
+const handleEmptyAction = (action) => {
+    if (action === 'recipes') {
+        activeFilters.value = { time: "全部", difficulty: "全部", mealPortions: "全部", kcal: "全部" };
+    } else if (action === 'go-kitchen') {
+        router.push('/inspiration-kitchen');
+    }
 };
 </script>
 
 <template>
     <section class="container filter-content">
         <div class="row">
-            <FilterSection />
+            <FilterSection v-model="activeFilters" />
         </div>
     </section>
     <section class="container recipe-cards-section">
-        <div class="row">
+        <div v-if="recipes.length > 0" class="row">
             <router-link 
             v-for="item in recipes" 
             :key="item.id" 
@@ -100,6 +145,20 @@ const handlePageChange = (page) => {
                 <RecipeCardLg :recipe="item" class="recipe-card"/>
             </router-link>
         </div>
+        <div v-else class="row">
+            <div class="no-result col-12">
+                <EmptyState 
+                title="找不到符合條件的食譜"
+                description="推薦您前往「靈感廚房」用食材找食譜喔!"
+                :buttons="[
+                    { title: '查看所有食譜', variant: 'solid', emit: 'recipes' },
+                    { title: '前往靈感廚房', variant: 'outline', emit: 'go-kitchen' }
+                ]"
+                @button-click="handleEmptyAction"
+            />
+            </div>
+        </div>
+        
     </section>
 
     <section class="container page-btn">
@@ -118,7 +177,7 @@ const handlePageChange = (page) => {
         margin-top: 40px;
     }
     .recipe-cards-section{
-        margin: 60px auto 30px ;
+        margin: 60px auto 30px;
     }
     .recipe-cards{
         text-decoration: none;

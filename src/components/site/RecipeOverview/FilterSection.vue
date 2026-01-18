@@ -2,6 +2,10 @@
 import { ref, computed } from 'vue';
 import BaseTag from '@/components/common/BaseTag.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
+
+const props = defineProps({modelValue: Object});
+const emit = defineEmits(['update:modelValue']);
+
 const filters = ref([
     {
         "id": "time",
@@ -21,19 +25,13 @@ const filters = ref([
     {
         "id": "kcal",
         "label": "熱量估算",
-        "options": ["全部", "400kcal(輕食)", "400-700kcal(均衡)", "700kcal以上(豐盛)"]
+        "options": ["全部", "150kcal(輕食)", "150-300kcal(均衡)", "300kcal以上(豐盛)"]
     }
 ]);
-const activeFilters = ref({
-    time: "全部",
-    difficulty: "全部",
-    mealPortions: "全部",
-    kcal: "全部"
-});
 
 const handleSelect = (filterId, option) => {
-    console.log(option);
-    activeFilters.value[filterId] = option;
+    const newValue = { ...props.modelValue, [filterId]: option };
+    emit('update:modelValue', newValue);
 };
 </script>
 <template>
@@ -41,13 +39,13 @@ const handleSelect = (filterId, option) => {
         <div class="filter-content">
             <div v-for="item in filters" :key="item.id" class="filter-options">
                 <span>{{ item.label }}</span>
-                <div class="filter-options">
+                <div class="filter-tag">
                     <BaseTag 
                         v-for="opt in item.options" 
                         :key="opt" 
                         :text="opt" 
                         :show-icon="false"
-                        :variant="activeFilters[item.id] === opt ? 'primary' : 'action'" 
+                        :variant="props.modelValue[item.id] === opt ? 'primary' : 'action'" 
                         @click="handleSelect(item.id, opt)"
                     ></BaseTag>
                 </div>
@@ -87,6 +85,10 @@ const handleSelect = (filterId, option) => {
             }
             -ms-overflow-style: none;  /* IE and Edge */
             scrollbar-width: none;
+            .filter-tag{
+                display: flex;
+                gap: 10px;
+            }
         }
         .inspiration-kitchen-cta{
             background-color: $primary-color-100;
