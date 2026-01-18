@@ -47,7 +47,7 @@ const route = useRoute();
     overflow: hidden;
 
     .page-content {
-        padding-bottom: 80px;
+        // padding-bottom: 80px;
         margin-bottom: 20px;
         overflow-y: auto;
     }

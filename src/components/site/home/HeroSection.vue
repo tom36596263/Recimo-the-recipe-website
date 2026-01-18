@@ -1,6 +1,4 @@
 <script setup>
-    import { ref, onMounted, onUnmounted } from 'vue'
-    import heroImg1 from '@/assets/images/site/hero.png'
     import CircleBtn from '@/components/common/CircleBtn.vue'
 
 </script>
@@ -18,7 +16,7 @@
             <router-link to="/recipes"><CircleBtn title="尋找食譜" :type="isAltTheme ? 'white' : 'fedault'"/></router-link>
         </div>
         <div class="bg-layout">
-            <img :src="heroImg1" class="hero-img1"/>
+            <img :src="$parsePublicFile('img/site/hero.png')" alt="hero-bg" >
         </div>
     </div>
     
