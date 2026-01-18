@@ -1,4 +1,6 @@
 // 字體家族
+@use "sass:math";
+
 $font-family-en: "Karla", sans-serif;
 $font-family-zh: "Noto Sans TC", "Noto Sans", sans-serif;
 
@@ -19,16 +21,16 @@ $ls-heading-zh: 0.1em;
 $ls-body: 0.12em;
 
 @function get-fluid-val($min-rem, $max-rem) {
-  $min-px: $min-rem * 16 / 1rem;
-  $max-px: $max-rem * 16 / 1rem;
+  $min-px: math.div($min-rem * 16, 1rem);
+  $max-px: math.div($max-rem * 16, 1rem);
   $min-width: 375;
   $max-width: 1440;
   
-  $slope: ($max-px - $min-px) / ($max-width - $min-width);
+  $slope: math.div($max-px - $min-px, $max-width - $min-width);
   $y-intercept: -$min-width * $slope + $min-px;
   
   // 轉回 rem 單位以符合瀏覽器縮放需求
-  $y-intercept-rem: $y-intercept / 16 * 1rem;
+  $y-intercept-rem: math.div($y-intercept, 16) * 1rem;
   $slope-vw: $slope * 100vw;
   
   @return calc(#{$y-intercept-rem} + #{$slope-vw});

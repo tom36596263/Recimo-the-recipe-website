@@ -183,14 +183,6 @@ const routes = [
           layout: 'workspace',
           requiresAuth: true
         }
-      }, // 商城連結：直接給絕對路徑 /mall
-      {
-        path: '/mall',
-        meta: {
-          title: 'Recimo商城',
-          icon: markRaw(IconShoppingCart),
-          requiresAuth: true
-        }
       },
       {
         path: 'recipe-detail/:id',

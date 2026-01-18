@@ -34,7 +34,7 @@ const route = useRoute();
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/layouts/workspace-layout';
+@use '@/assets/scss/layouts/workspace-layout' as *;
 
 .topbar-logo img {
     display: none;
