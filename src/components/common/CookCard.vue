@@ -6,17 +6,17 @@ const props = defineProps({
     name: {
         type: String,
         required: true,
-        default: '玉米筍'
+        default: ''
     },
     calories: {
         type: [Number, String],
         required: true,
-        default: 105
+        default: ''
     },
     fat: {
         type: [Number, String],
         required: true,
-        default: 0.6
+        default: ''
     },
     imageSrc: {
         type: String,
@@ -65,6 +65,7 @@ const handleAdd = () => {
     width: 270px;
     height: 94px;
     margin-bottom: 6px;
+    cursor: pointer;
 }
 
 .info-section {

@@ -15,6 +15,8 @@ import 'swiper/css/free-mode'; // 記得加上這個樣式
 // 關鍵修正：把 Pagination 和 FreeMode 寫在同一行
 import { Pagination, FreeMode } from 'swiper/modules';
 
+
+
 // 註冊模組：也寫在一起
 const modules = [Pagination, FreeMode];
 // --- 新增：Swiper RWD 斷點設定 ---

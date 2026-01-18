@@ -2,31 +2,21 @@
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import card from '@/components/mall/CheckCard.vue';
-// import axios from 'axios';
+import axios from 'axios';
+import { publicApi } from '@/utils/publicApi';
 
 const router = useRouter();
 const orderItems = ref([]);
-// import orderItems from '/public/data/mall/order_product.json';
-onMounted(async () => {
-  try {
-    // 3. 使用 fetch 請求位於 public 資料夾內的檔案
-    // 注意：在瀏覽器中，public 資料夾通常對應到根目錄 '/'
-    const response = await fetch('/data/mall/order_product.json');
 
-    // 4. 確保回應成功
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    // 5. 將 JSON 資料解析並存入變數
-    orderItems.value = await response.json();
-
-    // console.log('資料載入成功:', orderItems.value);
-
-  } catch (error) {
-    // console.error('資料載入失敗:', error);
-  }
-});
+onMounted(() => {
+  publicApi.get('data/mall/order_product.json')
+    .then(res => {
+      orderItems.value = res.data;
+    })
+    .catch(err => {
+      console.error('讀取 JSON 失敗', err);
+    });
+})
 
 
 // 資料打包送進後端
