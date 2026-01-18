@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import PostReportModal from '@/components/workspace/recipedetail/modals/PostReportModal.vue'
+// 導入上傳燈箱
+import CookSnapUploadModal from '@/components/workspace/recipedetail/modals/CookSnapUploadModal.vue'
 
 const props = defineProps({
   list: {
@@ -10,10 +12,9 @@ const props = defineProps({
   }
 })
 
-const fileInput = ref(null)
 const wallViewport = ref(null)
 
-// 檢舉彈窗
+// --- 檢舉彈窗邏輯 ---
 const isReportModalOpen = ref(false)
 const selectedPhotoData = ref({
   content: '',
@@ -36,14 +37,16 @@ const onReportSubmit = () => {
   isReportModalOpen.value = false
 }
 
-// 上傳
+// --- 上傳成品燈箱邏輯 ---
+const isUploadModalOpen = ref(false)
+
 const handleUploadClick = () => {
-  fileInput.value.click()
+  isUploadModalOpen.value = true
 }
 
-const onFileSelected = (event) => {
-  const file = event.target.files[0]
-  if (file) console.log('已選取檔案:', file.name)
+const onUploadSubmit = (data) => {
+  console.log('上傳成功:', data)
+  isUploadModalOpen.value = false
 }
 
 // 橫向捲動
@@ -56,9 +59,6 @@ const scrollWall = (direction) => {
 
 <template>
   <div class="recipe-result-container">
-    <input ref="fileInput" type="file" accept="image/*" hidden @change="onFileSelected" />
-
-    <!-- Header -->
     <div class="result-header">
       <div class="upload-trigger-area" @click="handleUploadClick">
         <div class="upload-card">
@@ -71,15 +71,14 @@ const scrollWall = (direction) => {
       <div class="header-text-group">
         <h5 class="zh-h5">每一份手作的溫度，都值得被記錄與分享</h5>
         <div class="description">
-          <p class="p-p1">上傳您的作品照，與同樣熱愛烹飪的夥伴們交換那份成就感，</p>
-          <p class="p-p1">不用追求完美，這裡記錄的是屬於您廚房裡最真實的美味故事。</p>
+          <p class="p-p2">上傳您的作品照，與同樣熱愛烹飪的夥伴們交換那份成就感，</p>
+          <p class="p-p2">不用追求完美，這裡記錄的是屬於您廚房裡最真實的美味故事。</p>
         </div>
       </div>
     </div>
 
-    <!-- Result Wall -->
     <div class="result-wall">
-      <button class="nav-btn prev" @click="scrollWall('prev')">
+      <button v-if="list.length > 0" class="nav-btn prev" @click="scrollWall('prev')">
         <i-material-symbols-arrow-back-ios-new-rounded />
       </button>
 
@@ -93,14 +92,20 @@ const scrollWall = (direction) => {
             </div>
           </div>
         </div>
+
+        <div v-if="list.length === 0" class="empty-placeholder">
+          <p class="p-p2">目前還沒有作品分享，快來上傳您的第一張成品照吧！</p>
+        </div>
       </div>
 
-      <button class="nav-btn next" @click="scrollWall('next')">
+      <button v-if="list.length > 0" class="nav-btn next" @click="scrollWall('next')">
         <i-material-symbols-arrow-forward-ios-rounded />
       </button>
     </div>
 
     <PostReportModal v-model="isReportModalOpen" :commentData="selectedPhotoData" @submit="onReportSubmit" />
+
+    <CookSnapUploadModal v-model="isUploadModalOpen" @submit="onUploadSubmit" />
   </div>
 </template>
 
@@ -108,10 +113,10 @@ const scrollWall = (direction) => {
 @import '@/assets/scss/abstracts/_color.scss';
 
 .recipe-result-container {
-  padding: 24px 0; // 🔽 原 40px
+  padding: 24px 0;
 
   .result-header {
-    max-width: 960px; // 🔹 視覺集中
+    max-width: 960px;
     margin: 0 auto 32px;
     display: flex;
     align-items: center;
@@ -119,7 +124,7 @@ const scrollWall = (direction) => {
 
     .upload-card {
       width: 180px;
-      height: 120px; // 🔽 原 140px
+      height: 120px;
       border: 1px solid $primary-color-700;
       border-radius: 10px;
       display: flex;
@@ -147,12 +152,19 @@ const scrollWall = (direction) => {
     }
 
     .header-text-group {
+      .zh-h5 {
+        text-align: center;
+      }
+
       .description {
-        margin-top: 4px; // 🔽
+        width: 100%;
+        margin-top: 25px;
+        line-height: 20px;
         color: $neutral-color-700;
 
         p {
-          margin-bottom: 2px; // 🔽 行距收緊
+          margin-bottom: 2px;
+          line-height: 30px !important;
         }
       }
     }
@@ -169,9 +181,20 @@ const scrollWall = (direction) => {
       overflow-x: auto;
       padding: 8px 0;
       scroll-behavior: smooth;
+      width: 100%;
 
       &::-webkit-scrollbar {
         display: none;
+      }
+
+      .empty-placeholder {
+        width: 100%;
+        padding: 40px;
+        text-align: center;
+        background-color: $neutral-color-100;
+        border-radius: 12px;
+        color: $neutral-color-400;
+        border: 1px dashed $neutral-color-100;
       }
     }
 
@@ -244,6 +267,7 @@ const scrollWall = (direction) => {
           right: 10px;
           cursor: pointer;
           opacity: 0.8;
+          color: $neutral-color-white;
 
           &:hover {
             opacity: 1;
