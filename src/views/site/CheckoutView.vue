@@ -98,9 +98,9 @@ const validateField = (field) => {
       errors.value.phone = '手機格式錯誤';
   }
   if (field === 'email') {
-    if (!form.value.email) errors.value.email = '請輸入 Email';
+    if (!form.value.email) errors.value.email = '請輸入電子信箱';
     else if (!form.value.email.includes('@'))
-      errors.value.email = 'Email 格式錯誤';
+      errors.value.email = '電子信箱格式錯誤';
   }
   if (field === 'adress' && !form.value.adress)
     errors.value.adress = '請輸入地址';
@@ -128,6 +128,27 @@ const validateField = (field) => {
       errors.value.savenum = '必填';
   }
 };
+const formatExpiryDate = (e) => {
+  //取得當前輸入值，並只保留數字 (移除所有非數字字元)
+  let val = e.target.value.replace(/\D/g, '');
+
+  //限制最多只有 4 個數字 (MMYY)
+  if (val.length > 4) val = val.slice(0, 4);
+
+  //自動補斜線邏輯
+  //數字超過 2 碼 (例如輸入了 123 -> 變成 12/3)
+  if (val.length > 2) {
+    val = val.slice(0, 2) + '/' + val.slice(2);
+  }
+  //剛好輸入第 2 碼，且「不是」在按刪除鍵 (例如輸入 12 -> 變成 12/)
+  else if (val.length === 2 && e.inputType !== 'deleteContentBackward') {
+    val = val + '/';
+  }
+
+  //將處理好的值寫回 form
+  form.value.num = val;
+};
+
 
 // --- 送出按鈕 (檢查所有必填) ---
 const handleDelete = () => {
@@ -218,21 +239,23 @@ const totalAmount = computed(() => {
             <div class="field-flex">
               <div class="field">
                 <label class="p-p1">姓名</label>
-                <input type="text" v-model="form.name" placeholder="請輸入姓名" class="form-input"
+                <input type="text" v-model="form.name" class="form-input" :placeholder="errors.name ? '輸入有誤' : '請輸入姓名'"
                   :class="{ 'is-error': errors.name }" @blur="validateField('name')" @input="errors.name = ''" />
               </div>
 
               <div class="field">
                 <label class="p-p1">手機</label>
-                <input type="tel" v-model="form.phone" placeholder="請輸入手機" maxlength="10" class="form-input"
-                  :class="{ 'is-error': errors.phone }" @blur="validateField('phone')" @input="errors.phone = ''" />
+                <input type="tel" v-model="form.phone" maxlength="10" class="form-input"
+                  :placeholder="errors.phone ? '輸入有誤' : '請輸入手機'" :class="{ 'is-error': errors.phone }"
+                  @blur="validateField('phone')" @input="errors.phone = ''" />
               </div>
             </div>
             <div class="field-flex">
               <div class="field">
-                <label class="p-p1">E-mail</label>
-                <input type="email" v-model="form.email" placeholder="請輸入Email" class="form-input"
-                  :class="{ 'is-error': errors.email }" @blur="validateField('email')" @input="errors.email = ''" />
+                <label class="p-p1">電子信箱</label>
+                <input type="email" v-model="form.email" class="form-input"
+                  :placeholder="errors.email ? '輸入有誤' : '請輸入電子信箱'" :class="{ 'is-error': errors.email }"
+                  @blur="validateField('email')" @input="errors.email = ''" />
               </div>
 
               <div class="field">
@@ -243,8 +266,9 @@ const totalAmount = computed(() => {
 
             <div class="field lg">
               <label class="p-p1">地址</label>
-              <input type="text" v-model="form.adress" placeholder="請輸入地址" class="form-input"
-                :class="{ 'is-error': errors.adress }" @blur="validateField('adress')" @input="errors.adress = ''" />
+              <input type="text" v-model="form.adress" class="form-input"
+                :placeholder="errors.adress ? '輸入有誤' : '請輸入地址'" :class="{ 'is-error': errors.adress }"
+                @blur="validateField('adress')" @input="errors.adress = ''" />
             </div>
           </div>
 
@@ -272,15 +296,15 @@ const totalAmount = computed(() => {
                   <div class="field-flex">
                     <div class="field add-field">
                       <label class="p-p1">收貨人</label>
-                      <input type="text" v-model="form.addname" placeholder="請輸入姓名" class="form-input"
-                        :class="{ 'is-error': errors.addname }" @blur="validateField('addname')"
-                        @input="errors.addname = ''" />
+                      <input type="text" v-model="form.addname" class="form-input"
+                        :placeholder="errors.name ? '輸入有誤' : '請輸入姓名'" :class="{ 'is-error': errors.addname }"
+                        @blur="validateField('addname')" @input="errors.addname = ''" />
                     </div>
                     <div class="field add-field">
                       <label class="p-p1">手機號碼</label>
-                      <input type="text" maxlength="10" v-model="form.addphone" placeholder="請輸入電話號碼" class="form-input"
-                        :class="{ 'is-error': errors.addphone }" @blur="validateField('addphone')"
-                        @input="errors.addphone = ''" />
+                      <input type="text" maxlength="10" v-model="form.addphone" class="form-input"
+                        :placeholder="errors.phone ? '輸入有誤' : '請輸入手機'" :class="{ 'is-error': errors.addphone }"
+                        @blur="validateField('addphone')" @input="errors.addphone = ''" />
                     </div>
                   </div>
                   <div class="field-flex">
@@ -291,9 +315,9 @@ const totalAmount = computed(() => {
 
                     <div class="field add-field">
                       <label class="p-p1">寄件地址</label>
-                      <input type="text" v-model="form.addadress" placeholder="請輸入地址" class="form-input"
-                        :class="{ 'is-error': errors.addadress }" @blur="validateField('addadress')"
-                        @input="errors.addadress = ''" />
+                      <input type="text" v-model="form.addadress" class="form-input"
+                        :placeholder="errors.adress ? '輸入有誤' : '請輸入地址'" :class="{ 'is-error': errors.addadress }"
+                        @blur="validateField('addadress')" @input="errors.addadress = ''" />
                     </div>
                   </div>
                 </div>
@@ -321,75 +345,75 @@ const totalAmount = computed(() => {
               <div class="pay-field">
                 <label class="p-p1">卡號</label>
                 <div class="card-row">
-                  <input type="text" maxlength="4" v-model="form.cardnum1" placeholder="0000" class="form-input"
-                    :class="{ 'is-error': errors.cardnum1 }" @blur="validateField('cardnum1')"
-                    @input="errors.cardnum1 = ''" />
+                  <input type="text" maxlength="4" v-model="form.cardnum1" class="form-input"
+                    :placeholder="errors.cardnum1 ? '輸入有誤' : '0000'" :class="{ 'is-error': errors.cardnum1 }"
+                    @blur="validateField('cardnum1')" @input="errors.cardnum1 = ''" />
                   <span class="separator">-</span>
-                  <input type="text" maxlength="4" v-model="form.cardnum2" placeholder="0000" class="form-input"
-                    :class="{ 'is-error': errors.cardnum2 }" @blur="validateField('cardnum2')"
-                    @input="errors.cardnum2 = ''" />
+                  <input type="text" maxlength="4" v-model="form.cardnum2" class="form-input"
+                    :placeholder="errors.cardnum2 ? '輸入有誤' : '0000'" :class="{ 'is-error': errors.cardnum2 }"
+                    @blur="validateField('cardnum2')" @input="errors.cardnum2 = ''" />
                   <span class="separator">-</span>
-                  <input type="text" maxlength="4" v-model="form.cardnum3" placeholder="0000" class="form-input"
-                    :class="{ 'is-error': errors.cardnum3 }" @blur="validateField('cardnum3')"
-                    @input="errors.cardnum3 = ''" />
+                  <input type="text" maxlength="4" v-model="form.cardnum3" class="form-input"
+                    :placeholder="errors.cardnum3 ? '輸入有誤' : '0000'" :class="{ 'is-error': errors.cardnum3 }"
+                    @blur="validateField('cardnum3')" @input="errors.cardnum3 = ''" />
                   <span class="separator">-</span>
-                  <input type="text" maxlength="4" v-model="form.cardnum4" placeholder="0000" class="form-input"
-                    :class="{ 'is-error': errors.cardnum4 }" @blur="validateField('cardnum4')"
-                    @input="errors.cardnum4 = ''" />
+                  <input type="text" maxlength="4" v-model="form.cardnum4" class="form-input"
+                    :placeholder="errors.cardnum4 ? '輸入有誤' : '0000'" :class="{ 'is-error': errors.cardnum4 }"
+                    @blur="validateField('cardnum4')" @input="errors.cardnum4 = ''" />
                 </div>
               </div>
               <div class="field-flex">
                 <div class="field">
                   <label class="p-p1">有效期限</label>
-                  <input type="text" v-model="form.num" placeholder="MM/YY" class="form-input"
-                    :class="{ 'is-error': errors.num }" @blur="validateField('num')" @input="errors.num = ''" />
-                </div>
-                <div class="field">
-                  <label class="p-p1">安全碼</label>
-                  <input type="text" maxlength="3" v-model="form.savenum" placeholder="CVC" class="form-input"
-                    :class="{ 'is-error': errors.savenum }" @blur="validateField('savenum')"
-                    @input="errors.savenum = ''" />
+                  <input type="text" v-model="form.num" class="form-input" :placeholder="errors.num ? '輸入有誤' : 'MM/YY'"
+                    maxlength="5" :class="{ 'is-error': errors.num }" @blur="validateField('num')"
+                    @input="formatExpiryDate" </div>
+                  <div class="field">
+                    <label class="p-p1">安全碼</label>
+                    <input type="text" maxlength="3" v-model="form.savenum" class="form-input"
+                      :placeholder="errors.savenum ? '輸入有誤' : 'CVC'" :class="{ 'is-error': errors.savenum }"
+                      @blur="validateField('savenum')" @input="errors.savenum = ''" />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="submit">
-            <BaseBtn title="確定結帳" @click="handleDelete" />
+            <div class="submit">
+              <BaseBtn title="確定結帳" @click="handleDelete" />
+            </div>
           </div>
         </div>
-      </div>
-      <div class="col-6 col-lg-12">
-        <div class="card-container">
-          <div class="order-list">
+        <div class="col-6 col-lg-12">
+          <div class="card-container">
             <div class="order-list">
-              <CheckCard v-for="item in orderItems" :key="item.id" :product-name="item.product_name"
-                :quantity="item.quantity" :price="item.price" :image="item.images?.[0] || '/default.png'" />
+              <div class="order-list">
+                <CheckCard v-for="item in orderItems" :key="item.id" :product-name="item.product_name"
+                  :quantity="item.quantity" :price="item.price" :image="item.images?.[0] || '/default.png'" />
+              </div>
             </div>
           </div>
-        </div>
-        <hr>
-        <div class="total-sum">
-          <div class="submit">
-            <BaseBtn title="返回購物車" @click="backcart" />
-          </div>
-          <div class="sum-flex">
-            <div class="row-text">
-              <p class="p-p1">運費</p>
-              <p class="p-p1">
-                {{ shippingFee === 0 ? '免運' : `$${shippingFee}` }}
-              </p>
+          <hr>
+          <div class="total-sum">
+            <div class="submit">
+              <BaseBtn title="返回購物車" @click="backcart" />
             </div>
+            <div class="sum-flex">
+              <div class="row-text">
+                <p class="p-p1">運費</p>
+                <p class="p-p1">
+                  {{ shippingFee === 0 ? '免運' : `$${shippingFee}` }}
+                </p>
+              </div>
 
-            <div class="row-text">
-              <p class="p-p1">總計</p>
-              <p class="p-p1">${{ totalAmount }}</p>
+              <div class="row-text">
+                <p class="p-p1">總計</p>
+                <p class="p-p1">${{ totalAmount }}</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -451,10 +475,16 @@ input[type='checkbox'] {
   border: 1px solid $neutral-color-800;
 }
 
+.is-error::placeholder {
+  color: $secondary-color-danger-700;
+}
+
 @media (max-width: 1024px) {
   .checkout-container {
     margin: 0;
   }
+
+
 
   .row {
     display: flex;
