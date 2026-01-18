@@ -48,9 +48,9 @@
             z-index: -1;
             position: absolute;
             top: 0;
-            left: 0;
+            left: 0; 
             height: 100vh;
-            .hero-img1 {
+            img{
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
