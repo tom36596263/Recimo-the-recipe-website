@@ -27,12 +27,6 @@ const routes = [
     component: () => import('@/components/LoginLightbox.vue')
   },
   {
-    // 登入教學
-    path: '/logintest',
-    name: 'Logintest',
-    component: () => import('@/views/site/login.vue'),
-  },
-  {
     path: '/',
     name: 'home',
     component: () => import('@/views/site/HomeView.vue'),
