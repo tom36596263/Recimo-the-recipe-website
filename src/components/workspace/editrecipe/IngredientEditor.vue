@@ -1,22 +1,11 @@
 <script setup>
-
 const props = defineProps({
-    ingredients: {
-        type: Array,
-        required: true
-    },
-    isEditing: {
-        type: Boolean,
-        default: false
-    }
+    ingredients: { type: Array, required: true },
+    isEditing: { type: Boolean, default: false }
 });
 
 const addItem = () => {
-    props.ingredients.push({
-        id: 'id' + Date.now(),
-        name: '',
-        amount: ''
-    });
+    props.ingredients.push({ id: 'id' + Date.now(), name: '', amount: '', unit: '', note: '' });
 };
 
 const removeItem = (id) => {
@@ -26,147 +15,183 @@ const removeItem = (id) => {
 </script>
 
 <template>
-    <section class="ingredient-section">
-
-    <!-- 標題 -->
-    <header class="ingredient-header">
-        <h2 class="zh-h4-bold">食材列表</h2>
-
-    </header>
-
-    <!-- 食材清單 -->
-    <div class="ingredient-list">
-
-        <article
-            v-for="ing in ingredients"
-            :key="ing.id"
-            class="ingredient-card"
-        >
-            <!-- 編輯模式 -->
-            <template v-if="isEditing">
-            <input
-                v-model="ing.name"
-                type="text"
-                class="ingredient-name-input zh-h5"
-                placeholder="食材名稱"
-            />
-
-            <input
-                v-model="ing.amount"
-                type="text"
-                class="ingredient-amount-input p-p3"
-                placeholder="份量"
-            />
-
-            <button
-                class="remove-btn p-p3"
-                @click="removeItem(ing.id)"
-                aria-label="移除食材"
-            >
-                ✕
-            </button>
-            </template>
-
-            <!-- 顯示模式 -->
-            <template v-else>
-            <div class="ingredient-name zh-h5">
-                {{ ing.name || '(未命名)' }}
-            </div>
-            <div class="ingredient-amount p-p3">
-                {{ ing.amount }}
-            </div>
-            </template>
-        </article>
-
+    <section class="ingredient-editor-container">
+        <div class="section-header">
+            <h2 class="header-title zh-h4-bold">食材列表</h2>
         </div>
 
-    <BaseBtn 
-        title="+ 新增食材"
-        variant="outline" 
-        height="40" 
-        class="w-auto"
-        @click="addItem" 
-    />
+        <div class="ingredient-list">
+            <div v-for="ing in ingredients" :key="ing.id" class="ingredient-item" :class="{ 'is-view': !isEditing }">
+                <button v-if="isEditing" class="remove-btn" @click="removeItem(ing.id)">✕</button>
 
+                <div class="input-row main-row">
+                    <input v-model="ing.name" type="text" class="custom-input name-field p-p1"
+                        placeholder="食材名稱 (如: 雞蛋)" :readonly="!isEditing" />
+                </div>
 
+                <div class="input-row split-row">
+                    <div class="amount-group p-p2">
+                        <input v-model="ing.amount" type="text" class="custom-input amount-field p-p2" placeholder="分量"
+                            :readonly="!isEditing" />
+                        <div class="unit-box">
+                            <span class="label">單位：</span>
+                            <input v-model="ing.unit" type="text" class="custom-input unit-field p-p2" placeholder="顆"
+                                :readonly="!isEditing" />
+                        </div>
+                    </div>
+                </div>
 
+                <div class="input-row note-row">
+                    <input v-model="ing.note" type="text" class="custom-input note-field p-p3"
+                        placeholder="新增備註 (如: 需冷藏)..." :readonly="!isEditing" />
+                </div>
+            </div>
+        </div>
+
+        <div v-if="isEditing" class="add-action-wrapper">
+            <button class="add-ingredient-btn p-p2" @click="addItem">+ 新增食材</button>
+        </div>
     </section>
-    </template>
+</template>
 
-    
+<style lang="scss" scoped>
+/* 僅保留佈局、邊框、間距與顏色變數 */
 
-    <style lang="scss">
-
-        h2 {
-            height: 40px;
-            color: $primary-color-700;
-            border-bottom: 1.5px solid $primary-color-700;
-        }
-        
-
-    /* ========= 容器 ========= */
-
-    .ingredient-section {
-        margin: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    /* ========= 卡片 ========= */
-
-    .ingredient-card {
-
-
-        position: relative;
-        background: $neutral-color-white;
-        border-radius: 16px;
-
-        padding: 16px;
-        border: 1px solid $neutral-color-400;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-
-    .ingredient-list {
-        display: flex;
-        flex-direction: column;
-        gap: 20px; /* 2. 這裡加大：卡片與卡片之間的垂直距離 */
-    }  
-
-    /* ========= 輸入欄 ========= */
-
-    .ingredient-name-input,
-    .ingredient-amount-input {
-        width: 100%;
-        border: none;
-        border-bottom: 1px solid $neutral-color-100;
-        outline: none;
-        padding: 4px 0;
-
-        &:focus {
-            border-bottom-color: $primary-color-700;
-        }
+.ingredient-editor-container {
+    width: 100%;
+    margin-bottom: 30px;
 }
 
-/* ========= 移除按鈕 ========= */
+.section-header {
+    margin-bottom: 24px;
 
-.remove-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    color: $secondary-color-danger-400;
+    .header-title {
+        color: $primary-color-800;
+        padding-bottom: 12px;
+        border-bottom: 1.5px solid $primary-color-400;
+        margin: 0;
+    }
+}
+
+.ingredient-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ingredient-item {
+    position: relative;
+    background: $neutral-color-white;
+    border: 1px solid $neutral-color-100;
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: all 0.2s ease;
 
     &:hover {
-        color: $secondary-color-danger-700;
+        border-color: $primary-color-400;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    &.is-view {
+        border-color: transparent;
+        background: $primary-color-100; // 使用主色 100 做為背景
+        padding: 8px 12px;
+    }
+
+    .remove-btn {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        background: none;
+        border: none;
+        color: $secondary-color-danger-400; // 輔助色 danger
+        cursor: pointer;
+        z-index: 2;
+
+        &:hover {
+            color: $secondary-color-danger-700;
+        }
     }
 }
 
+.input-row {
+    border-bottom: 1px solid $neutral-color-100;
+    padding: 6px 0;
+    display: flex;
+    align-items: center;
 
+    &:last-child {
+        border-bottom: none;
+    }
+
+    .custom-input {
+        border: none;
+        outline: none;
+        background: transparent;
+        color: $neutral-color-800;
+        width: 100%;
+        padding: 4px 0;
+
+        &::placeholder {
+            color: $neutral-color-400;
+        }
+
+        &:read-only {
+            color: $neutral-color-black;
+            cursor: default;
+        }
+    }
+}
+
+.main-row .name-field {
+    color: $neutral-color-black;
+}
+
+.amount-group {
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    .amount-field {
+        flex: 1;
+    }
+
+    .unit-box {
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        color: $neutral-color-700;
+        margin-left: 12px;
+
+        .unit-field {
+            width: 50px;
+            text-align: left;
+            border-bottom: 1px dashed $neutral-color-100;
+        }
+    }
+}
+
+.note-field {
+    color: $neutral-color-700 !important;
+}
+
+.add-action-wrapper {
+    margin-top: 20px;
+
+    .add-ingredient-btn {
+        width: 100%;
+        height: 44px;
+        background: $neutral-color-white;
+        border: 1.5px solid $primary-color-400;
+        border-radius: 10px;
+        color: $primary-color-800;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+            background: $primary-color-100;
+            transform: translateY(-1px);
+        }
+    }
+}
 </style>
