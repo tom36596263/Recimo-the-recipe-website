@@ -95,7 +95,6 @@ const productImage = computed(() => {
 //     // 備用圖
 //     return `${baseURL}images/default-placeholder.png`;
 // });
-
 </script>
 <template>
     <router-link :to="`/mall/${item.product_id}`" class="product-card card-content">
@@ -117,7 +116,8 @@ const productImage = computed(() => {
     </router-link>
 </template>
 <style lang="scss" scoped>
-@import "@/assets/scss/layouts/_grid.scss";
+@use "sass:map";
+@use "@/assets/scss/layouts/_grid.scss" as *;
 
 .product-card {
     display: block; // 讓 a 標籤像 div 一樣撐開
@@ -137,7 +137,7 @@ const productImage = computed(() => {
     }
 }
 
-@media screen and (max-width: map-get($breakpoints, "lg")) {
+@media screen and (max-width: map.get($breakpoints, "lg")) {
     .product-card {
         &:hover {
             transform: none; // 強制取消位移

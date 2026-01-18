@@ -5,7 +5,8 @@
     "ingredient_id": 390,
     "amount": 250.0,
     "unit_name": "克",
-    "is_modified": false 
+    "is_modified": false,
+    "remark": "中粉過篩後備用，可確保麵糰口感更細緻"
   },
   {
     "recipe_ingredient_id": 2,
@@ -13,7 +14,8 @@
     "ingredient_id": 496,
     "amount": 3.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 3,
@@ -21,7 +23,8 @@
     "ingredient_id": 497,
     "amount": 150.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "常溫水即可，若冬天可使用微溫水幫助發酵"
   },
   {
     "recipe_ingredient_id": 4,
@@ -29,7 +32,8 @@
     "ingredient_id": 345,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 5,
@@ -37,7 +41,8 @@
     "ingredient_id": 416,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 6,
@@ -45,7 +50,8 @@
     "ingredient_id": 242,
     "amount": 125.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "置於室溫完全軟化，直到手指可輕鬆壓下的程度"
   },
   {
     "recipe_ingredient_id": 7,
@@ -53,7 +59,8 @@
     "ingredient_id": 367,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 8,
@@ -61,7 +68,8 @@
     "ingredient_id": 23,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 9,
@@ -69,7 +77,8 @@
     "ingredient_id": 345,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 10,
@@ -77,7 +86,8 @@
     "ingredient_id": 498,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "徹底洗淨並吸乾水分，避免影響風味"
   },
   {
     "recipe_ingredient_id": 11,
@@ -85,7 +95,8 @@
     "ingredient_id": 499,
     "amount": 60.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 12,
@@ -93,7 +104,8 @@
     "ingredient_id": 230,
     "amount": 2.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 13,
@@ -101,7 +113,8 @@
     "ingredient_id": 410,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 14,
@@ -109,7 +122,8 @@
     "ingredient_id": 392,
     "amount": 40.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 15,
@@ -117,7 +131,8 @@
     "ingredient_id": 405,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "裝飾用，建議出餐前再撒上以維持視覺美感"
   },
   {
     "recipe_ingredient_id": 16,
@@ -125,7 +140,8 @@
     "ingredient_id": 164,
     "amount": 300.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "均勻切塊，大小一致可確保烹飪時受熱均勻"
   },
   {
     "recipe_ingredient_id": 17,
@@ -133,7 +149,8 @@
     "ingredient_id": 500,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 18,
@@ -141,7 +158,8 @@
     "ingredient_id": 437,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 19,
@@ -149,7 +167,8 @@
     "ingredient_id": 449,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 20,
@@ -157,7 +176,8 @@
     "ingredient_id": 14,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 21,
@@ -165,7 +185,8 @@
     "ingredient_id": 9,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "去皮切片，片狀厚度約 0.2 公分左右最佳"
   },
   {
     "recipe_ingredient_id": 22,
@@ -173,7 +194,8 @@
     "ingredient_id": 2,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 23,
@@ -181,7 +203,8 @@
     "ingredient_id": 331,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 24,
@@ -189,7 +212,8 @@
     "ingredient_id": 340,
     "amount": 10.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 25,
@@ -197,7 +221,8 @@
     "ingredient_id": 410,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 26,
@@ -205,7 +230,8 @@
     "ingredient_id": 395,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 27,
@@ -213,7 +239,8 @@
     "ingredient_id": 278,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "先充分浸泡軟化後再進行後續處理"
   },
   {
     "recipe_ingredient_id": 28,
@@ -221,7 +248,8 @@
     "ingredient_id": 91,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切細末，可讓香味更容易融入醬汁"
   },
   {
     "recipe_ingredient_id": 29,
@@ -229,7 +257,8 @@
     "ingredient_id": 92,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 30,
@@ -237,7 +266,8 @@
     "ingredient_id": 239,
     "amount": 100.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 31,
@@ -245,7 +275,8 @@
     "ingredient_id": 501,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 32,
@@ -253,7 +284,8 @@
     "ingredient_id": 251,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 33,
@@ -261,7 +293,8 @@
     "ingredient_id": 2,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 34,
@@ -269,7 +302,8 @@
     "ingredient_id": 499,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 35,
@@ -277,7 +311,8 @@
     "ingredient_id": 419,
     "amount": 1.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 36,
@@ -285,7 +320,8 @@
     "ingredient_id": 416,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 37,
@@ -293,7 +329,8 @@
     "ingredient_id": 164,
     "amount": 250.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "建議選用肉質結實的部位，燉煮後口感較佳"
   },
   {
     "recipe_ingredient_id": 38,
@@ -301,7 +338,8 @@
     "ingredient_id": 354,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 39,
@@ -309,7 +347,8 @@
     "ingredient_id": 348,
     "amount": 400.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 40,
@@ -317,7 +356,8 @@
     "ingredient_id": 82,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 41,
@@ -325,7 +365,8 @@
     "ingredient_id": 335,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 42,
@@ -333,7 +374,8 @@
     "ingredient_id": 502,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 43,
@@ -341,7 +383,8 @@
     "ingredient_id": 34,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 44,
@@ -349,7 +392,8 @@
     "ingredient_id": 24,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 45,
@@ -357,7 +401,8 @@
     "ingredient_id": 345,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "提味用，可依據個人口味調整最後灑上的份量"
   },
   {
     "recipe_ingredient_id": 46,
@@ -365,7 +410,8 @@
     "ingredient_id": 305,
     "amount": 2.0,
     "unit_name": "個",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選用新鮮度高的食材，成品香氣會更足"
   },
   {
     "recipe_ingredient_id": 47,
@@ -373,7 +419,8 @@
     "ingredient_id": 230,
     "amount": 2.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 48,
@@ -381,7 +428,8 @@
     "ingredient_id": 191,
     "amount": 2.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 49,
@@ -389,7 +437,8 @@
     "ingredient_id": 231,
     "amount": 2.0,
     "unit_name": "個",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 50,
@@ -397,7 +446,8 @@
     "ingredient_id": 499,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 51,
@@ -405,7 +455,8 @@
     "ingredient_id": 503,
     "amount": 15.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 52,
@@ -413,7 +464,8 @@
     "ingredient_id": 504,
     "amount": 10.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 53,
@@ -421,7 +473,8 @@
     "ingredient_id": 422,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 54,
@@ -429,7 +482,8 @@
     "ingredient_id": 416,
     "amount": 1.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 55,
@@ -437,7 +491,8 @@
     "ingredient_id": 505,
     "amount": 1.0,
     "unit_name": "份",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "一人份基準，烹調前請先撥鬆以利均勻受熱"
   },
   {
     "recipe_ingredient_id": 56,
@@ -445,7 +500,8 @@
     "ingredient_id": 506,
     "amount": 400.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 57,
@@ -453,7 +509,8 @@
     "ingredient_id": 507,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 58,
@@ -461,7 +518,8 @@
     "ingredient_id": 194,
     "amount": 3.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 59,
@@ -469,7 +527,8 @@
     "ingredient_id": 232,
     "amount": 1.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 60,
@@ -477,7 +536,8 @@
     "ingredient_id": 97,
     "amount": 2.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 61,
@@ -485,7 +545,8 @@
     "ingredient_id": 94,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 62,
@@ -493,7 +554,8 @@
     "ingredient_id": 51,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 63,
@@ -501,7 +563,8 @@
     "ingredient_id": 16,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "少許即可，主要用於提升顏色層次"
   },
   {
     "recipe_ingredient_id": 64,
@@ -509,7 +572,8 @@
     "ingredient_id": 475,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選用當季新鮮品項，口感會更為鮮甜"
   },
   {
     "recipe_ingredient_id": 65,
@@ -517,7 +581,8 @@
     "ingredient_id": 508,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 66,
@@ -525,7 +590,8 @@
     "ingredient_id": 503,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 67,
@@ -533,7 +599,8 @@
     "ingredient_id": 1,
     "amount": 1.0,
     "unit_name": "瓣",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "稍微拍碎，讓爆香時蒜油精華能快速釋放"
   },
   {
     "recipe_ingredient_id": 68,
@@ -541,7 +608,8 @@
     "ingredient_id": 345,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 69,
@@ -549,7 +617,8 @@
     "ingredient_id": 426,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 70,
@@ -557,7 +626,8 @@
     "ingredient_id": 416,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 71,
@@ -565,7 +635,8 @@
     "ingredient_id": 497,
     "amount": 20.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 72,
@@ -573,7 +644,8 @@
     "ingredient_id": 3,
     "amount": 3.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "使用常溫蛋，製作出的質地會更加穩定"
   },
   {
     "recipe_ingredient_id": 73,
@@ -581,7 +653,8 @@
     "ingredient_id": 351,
     "amount": 500.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 74,
@@ -589,7 +662,8 @@
     "ingredient_id": 499,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 75,
@@ -597,7 +671,8 @@
     "ingredient_id": 341,
     "amount": 50.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 76,
@@ -605,7 +680,8 @@
     "ingredient_id": 300,
     "amount": 4.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 77,
@@ -613,7 +689,8 @@
     "ingredient_id": 509,
     "amount": 40.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 78,
@@ -621,7 +698,8 @@
     "ingredient_id": 22,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 79,
@@ -629,7 +707,8 @@
     "ingredient_id": 416,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 80,
@@ -637,7 +716,8 @@
     "ingredient_id": 419,
     "amount": 1.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 81,
@@ -645,7 +725,8 @@
     "ingredient_id": 210,
     "amount": 10.0,
     "unit_name": "隻",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "去腸泥並保留尾部，不僅美觀且口感較乾淨"
   },
   {
     "recipe_ingredient_id": 82,
@@ -653,7 +734,8 @@
     "ingredient_id": 2,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 83,
@@ -661,7 +743,8 @@
     "ingredient_id": 499,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 84,
@@ -669,7 +752,8 @@
     "ingredient_id": 503,
     "amount": 20.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 85,
@@ -677,7 +761,8 @@
     "ingredient_id": 21,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 86,
@@ -685,7 +770,8 @@
     "ingredient_id": 419,
     "amount": 1.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 87,
@@ -693,7 +779,8 @@
     "ingredient_id": 416,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 88,
@@ -701,7 +788,8 @@
     "ingredient_id": 136,
     "amount": 4.0,
     "unit_name": "角",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "上桌食用前再擠上新鮮汁液，可去腥提味"
   },
   {
     "recipe_ingredient_id": 89,
@@ -709,7 +797,8 @@
     "ingredient_id": 163,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成長條狀，厚度約 1 公分最能保持彈性口感"
   },
   {
     "recipe_ingredient_id": 90,
@@ -717,7 +806,8 @@
     "ingredient_id": 270,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 91,
@@ -725,7 +815,8 @@
     "ingredient_id": 263,
     "amount": 60.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 92,
@@ -733,7 +824,8 @@
     "ingredient_id": 43,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 93,
@@ -741,7 +833,8 @@
     "ingredient_id": 49,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 94,
@@ -749,7 +842,8 @@
     "ingredient_id": 345,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 95,
@@ -757,7 +851,8 @@
     "ingredient_id": 416,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 96,
@@ -765,7 +860,8 @@
     "ingredient_id": 419,
     "amount": 1.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 97,
@@ -773,7 +869,8 @@
     "ingredient_id": 201,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "去除筋膜後切薄片，醃漬時會更入味"
   },
   {
     "recipe_ingredient_id": 98,
@@ -781,7 +878,8 @@
     "ingredient_id": 264,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 99,
@@ -789,7 +887,8 @@
     "ingredient_id": 99,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 100,
@@ -797,7 +896,8 @@
     "ingredient_id": 57,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 101,
@@ -805,7 +905,8 @@
     "ingredient_id": 417,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 102,
@@ -813,7 +914,8 @@
     "ingredient_id": 136,
     "amount": 1.0,
     "unit_name": "角",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "隨餐附上，可增加清爽度"
   },
   {
     "recipe_ingredient_id": 103,
@@ -821,7 +923,8 @@
     "ingredient_id": 178,
     "amount": 2.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "確認魚片已完全退冰，並抹乾表面水分"
   },
   {
     "recipe_ingredient_id": 104,
@@ -829,7 +932,8 @@
     "ingredient_id": 100,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 105,
@@ -837,7 +941,8 @@
     "ingredient_id": 2,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 106,
@@ -845,7 +950,8 @@
     "ingredient_id": 331,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 107,
@@ -853,7 +959,8 @@
     "ingredient_id": 510,
     "amount": 15.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 108,
@@ -861,7 +968,8 @@
     "ingredient_id": 340,
     "amount": 10.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 109,
@@ -869,7 +977,8 @@
     "ingredient_id": 345,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 110,
@@ -877,7 +986,8 @@
     "ingredient_id": 256,
     "amount": 1.0,
     "unit_name": "盒",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成約 2 公分正方塊，下鍋時動作輕巧避免破碎"
   },
   {
     "recipe_ingredient_id": 111,
@@ -885,7 +995,8 @@
     "ingredient_id": 186,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 112,
@@ -893,7 +1004,8 @@
     "ingredient_id": 5,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 113,
@@ -901,7 +1013,8 @@
     "ingredient_id": 91,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 114,
@@ -909,7 +1022,8 @@
     "ingredient_id": 92,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 115,
@@ -917,7 +1031,8 @@
     "ingredient_id": 511,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 116,
@@ -925,7 +1040,8 @@
     "ingredient_id": 345,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 117,
@@ -933,7 +1049,8 @@
     "ingredient_id": 416,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 118,
@@ -941,7 +1058,8 @@
     "ingredient_id": 202,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選用脂肪分佈均勻的部位，快炒後口感更嫩滑"
   },
   {
     "recipe_ingredient_id": 119,
@@ -949,7 +1067,8 @@
     "ingredient_id": 4,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 120,
@@ -957,7 +1076,8 @@
     "ingredient_id": 48,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 121,
@@ -965,7 +1085,8 @@
     "ingredient_id": 341,
     "amount": 15.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 122,
@@ -973,7 +1094,8 @@
     "ingredient_id": 22,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 123,
@@ -981,7 +1103,8 @@
     "ingredient_id": 417,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 124,
@@ -989,7 +1112,8 @@
     "ingredient_id": 136,
     "amount": 2.0,
     "unit_name": "角",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "裝飾兼調味用"
   },
   {
     "recipe_ingredient_id": 125,
@@ -997,7 +1121,8 @@
     "ingredient_id": 170,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "預先處理乾淨，確保沒有殘留雜質"
   },
   {
     "recipe_ingredient_id": 126,
@@ -1005,7 +1130,8 @@
     "ingredient_id": 4,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 127,
@@ -1013,7 +1139,8 @@
     "ingredient_id": 230,
     "amount": 1.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 128,
@@ -1021,7 +1148,8 @@
     "ingredient_id": 272,
     "amount": 1.0,
     "unit_name": "碗",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "推薦使用隔夜飯，水分較少，炒起來顆粒分明"
   },
   {
     "recipe_ingredient_id": 129,
@@ -1029,7 +1157,8 @@
     "ingredient_id": 331,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 130,
@@ -1037,7 +1166,8 @@
     "ingredient_id": 410,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 131,
@@ -1045,7 +1175,8 @@
     "ingredient_id": 510,
     "amount": 20.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 132,
@@ -1053,7 +1184,8 @@
     "ingredient_id": 16,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 133,
@@ -1061,7 +1193,8 @@
     "ingredient_id": 512,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "撕成適合入口的小片狀，增加表面積吸收醬汁"
   },
   {
     "recipe_ingredient_id": 134,
@@ -1069,7 +1202,8 @@
     "ingredient_id": 491,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 135,
@@ -1077,7 +1211,8 @@
     "ingredient_id": 4,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成長段約 4-5 公分，烹煮後外觀較整齊"
   },
   {
     "recipe_ingredient_id": 136,
@@ -1085,7 +1220,8 @@
     "ingredient_id": 14,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 137,
@@ -1093,7 +1229,8 @@
     "ingredient_id": 360,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 138,
@@ -1101,7 +1238,8 @@
     "ingredient_id": 462,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 139,
@@ -1109,7 +1247,8 @@
     "ingredient_id": 345,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 140,
@@ -1117,7 +1256,8 @@
     "ingredient_id": 164,
     "amount": 250.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "厚度建議適中，以免在燉煮過程中縮水過多"
   },
   {
     "recipe_ingredient_id": 141,
@@ -1125,7 +1265,8 @@
     "ingredient_id": 56,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切均勻細絲，可縮短熟化時間並增加層次"
   },
   {
     "recipe_ingredient_id": 142,
@@ -1133,7 +1274,8 @@
     "ingredient_id": 57,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 143,
@@ -1141,7 +1283,8 @@
     "ingredient_id": 3,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 144,
@@ -1149,7 +1292,8 @@
     "ingredient_id": 513,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 145,
@@ -1157,7 +1301,8 @@
     "ingredient_id": 239,
     "amount": 20.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 146,
@@ -1165,7 +1310,8 @@
     "ingredient_id": 497,
     "amount": 400.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 147,
@@ -1173,7 +1319,8 @@
     "ingredient_id": 345,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 148,
@@ -1181,7 +1328,8 @@
     "ingredient_id": 514,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "徹底清洗並去除泥沙，建議烹飪前保持低溫"
   },
   {
     "recipe_ingredient_id": 149,
@@ -1189,7 +1337,8 @@
     "ingredient_id": 31,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 150,
@@ -1197,7 +1346,8 @@
     "ingredient_id": 2,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 151,
@@ -1205,7 +1355,8 @@
     "ingredient_id": 363,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 152,
@@ -1213,7 +1364,8 @@
     "ingredient_id": 510,
     "amount": 20.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 153,
@@ -1221,7 +1373,8 @@
     "ingredient_id": 340,
     "amount": 10.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 154,
@@ -1229,7 +1382,8 @@
     "ingredient_id": 345,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 155,
@@ -1237,7 +1391,8 @@
     "ingredient_id": 201,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "使用斷筋處理，可避免受熱後嚴重縮小"
   },
   {
     "recipe_ingredient_id": 156,
@@ -1245,7 +1400,8 @@
     "ingredient_id": 43,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 157,
@@ -1253,7 +1409,8 @@
     "ingredient_id": 331,
     "amount": 15.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 158,
@@ -1261,7 +1418,8 @@
     "ingredient_id": 510,
     "amount": 15.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 159,
@@ -1269,7 +1427,8 @@
     "ingredient_id": 410,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 160,
@@ -1277,7 +1436,8 @@
     "ingredient_id": 340,
     "amount": 10.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 161,
@@ -1285,7 +1445,8 @@
     "ingredient_id": 2,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 162,
@@ -1293,7 +1454,8 @@
     "ingredient_id": 462,
     "amount": 1.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 163,
@@ -1301,7 +1463,8 @@
     "ingredient_id": 16,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 164,
@@ -1309,6 +1472,7 @@
     "ingredient_id": 345,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "提升整體配色質感"
   }
 ]

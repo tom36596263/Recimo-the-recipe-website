@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
@@ -16,222 +16,264 @@ const setDifficulty = (val) => {
   if (props.isEditing) updateField('difficulty', val);
 };
 
+// ================================
+// 🔢 自動加總步驟時間 (確保轉為數字)
+// ================================
+const autoTotalTime = computed(() => {
+  if (!props.modelValue.steps) return 0;
+  return props.modelValue.steps.reduce((sum, step) => {
+    return sum + (Number(step.time) || 0);
+  }, 0);
+});
+
+// ================================
+// 👀 顯示用時間（唯讀狀態）
+// ================================
+const displayTime = computed(() => {
+  // 如果 totalTime 是字串且有內容，或者是大於 0 的數字，就用 totalTime
+  // 否則顯示自動加總
+  const manualTime = Number(props.modelValue.totalTime);
+  return manualTime > 0 ? manualTime : autoTotalTime.value;
+});
+
+// ================================
+// ⭐ 關鍵：深層監聽 modelValue 的變化
+// ================================
+watch(
+  () => props.modelValue.steps, // 盯著步驟陣列
+  (newSteps) => {
+    const newSum = newSteps?.reduce((sum, s) => sum + (Number(s.time) || 0), 0) || 0;
+
+    // 只有在「沒有手動輸入」或「totalTime 為 0/空」時才自動寫回
+    // 注意：你父層初始值給的是字串 '20'，這會被視為手動輸入
+    if (!props.modelValue.totalTime || props.modelValue.totalTime == 0) {
+      updateField('totalTime', newSum);
+    }
+  },
+  { deep: true } // 必須要 Deep 才能抓到步驟裡面的 time 變化
+);
+
+// ================================
+// 📷 上傳封面圖
+// ================================
 const handleCoverUpload = (e) => {
   const file = e.target.files[0];
   if (!file) return;
-
   const reader = new FileReader();
-  reader.onload = (evt) => updateField('coverImg', evt.target.result);
+  reader.onload = (evt) => {
+    updateField('coverImg', evt.target.result);
+  };
   reader.readAsDataURL(file);
 };
-
-const displayTime = computed(() => {
-  if (props.modelValue.steps) {
-    return props.modelValue.steps.reduce(
-      (sum, step) => sum + (parseInt(step.time) || 0),
-      0
-    );
-  }
-  return props.modelValue.totalTime || 0;
-});
 </script>
 
+
 <template>
-  <section class="header-card">
-
-    <!-- 封面 -->
-    <div
-      class="cover-container"
-      :style="{ backgroundImage: modelValue.coverImg ? `url(${modelValue.coverImg})` : '' }"
-      @click="isEditing && $refs.fileInput.click()"
-    >
-      <input
-        ref="fileInput"
-        type="file"
-        class="hidden-input"
-        @change="handleCoverUpload"
-      />
-
-      <div v-if="!modelValue.coverImg" class="placeholder">
-        <template v-if="isEditing">
-          <p class="p-p1">+</p>
-          <p class="p-p1">上傳封面</p>
-        </template>
-        <i v-else class="fa-solid fa-image fa-3x"></i>
+  <section class="recipe-card-container">
+    <div class="cover-section" :style="{ backgroundImage: modelValue.coverImg ? `url(${modelValue.coverImg})` : '' }"
+      @click="isEditing && $refs.fileInput.click()">
+      <input ref="fileInput" type="file" class="hidden-input" accept="image/*" @change="handleCoverUpload" />
+      <div v-if="!modelValue.coverImg" class="upload-placeholder">
+        <div class="placeholder-content">
+          <span class="plus-icon">+</span>
+          <p class="label p-p2">新增成品照</p>
+        </div>
       </div>
     </div>
 
-    <!-- 右側資訊 -->
-    <div class="info-container">
-
-      <!-- 標題 -->
-      <div class="title-area">
-        <input
-          v-if="isEditing"
-          v-model="modelValue.title"
-          class="title-input zh-h3-bold"
-          placeholder="食譜名稱"
-        />
-
-        <div v-else class="title-display zh-h3-bold">
-          {{ modelValue.title || '未命名食譜' }}
-        </div>
+    <div class="info-section">
+      <div class="row-title">
+        <input v-if="isEditing" :value="modelValue.title" @input="updateField('title', $event.target.value)"
+          class="title-input zh-h3" placeholder="請輸入標題..." />
+        <h2 v-else class="title-display zh-h2-bold">{{ modelValue.title || '未命名食譜' }}</h2>
       </div>
 
-      <!-- 統計 -->
-      <div class="stats-bar">
-        <div class="stat-item">
-          <p class="label p-p3">總烹飪時間</p>
-          <div class="value time">
-            <span class="num">{{ displayTime }}</span> 分鐘
-          </div>
+      <div class="row-meta p-p2">
+        <div class="meta-item">
+          <span class="label">製作時間：</span>
+          <template v-if="isEditing">
+            <input type="number" class="inline-input" :value="modelValue.totalTime"
+              @input="updateField('totalTime', $event.target.value)" :placeholder="autoTotalTime" />
+            <span class="unit">分鐘</span>
+            <small v-if="!modelValue.totalTime && autoTotalTime > 0" class="auto-hint">(已自動加總步驟時間)</small>
+          </template>
+          <span v-else class="value">{{ displayTime }} 分鐘</span>
         </div>
 
-        <div class="stat-item">
-          <p class="label p-p3">難易度</p>
-          <div class="stars">
-            <span
-              v-for="n in 5"
-              :key="n"
-              class="star"
-              :class="{ active: n <= modelValue.difficulty }"
-              @click="setDifficulty(n)"
-            >
-              ★
-            </span>
+        <div class="meta-item">
+          <span class="label">難易度：</span>
+          <div class="stars-group" :class="{ 'is-editing': isEditing }">
+            <span v-for="n in 5" :key="n" class="star" :class="{ active: n <= modelValue.difficulty }"
+              @click="setDifficulty(n)">
+              {{ n <= modelValue.difficulty ? '★' : '☆' }} </span>
           </div>
         </div>
       </div>
 
-      <!-- 簡介 -->
-      <div class="desc-area">
-        <textarea
-          v-if="isEditing"
-          v-model="modelValue.description"
-          class="desc-input p-p2"
-          placeholder="輸入食譜簡介..."
-        ></textarea>
+      <div class="row-description" :class="{ 'editing-border': isEditing }">
+        <textarea v-if="isEditing" :value="modelValue.description"
+          @input="updateField('description', $event.target.value)" class="desc-textarea p-p2" placeholder="請輸入說明..."
+          maxlength="200"></textarea>
+        <p v-else class="desc-display p-p2">{{ modelValue.description || '暫無簡介' }}</p>
 
-        <p v-else class="desc-display p-p2">
-          {{ modelValue.description || '暫無簡介' }}
-        </p>
+        <div v-if="isEditing" class="char-counter p-p3">{{ modelValue.description?.length || 0 }}/200</div>
       </div>
-
     </div>
   </section>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
+/* 僅保留佈局與顏色設定，文字大小已由 HTML Class 控制 */
 
-.header-card {
-  background: $neutral-color-white;
-  border-radius: 10px;
-  padding: 30px;
-  border: 1.5px solid $primary-color-700;
+.recipe-card-container {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  background: $neutral-color-white;
+  border: 1px solid $primary-color-400;
+  border-radius: 12px;
+  padding: 24px;
+  gap: 24px;
 
   @media (min-width: 768px) {
     flex-direction: row;
   }
 }
 
-.cover-container {
-  width: 100%;
-  height: 200px;
-  background: $neutral-color-100;
+.cover-section {
   border: 2px dashed $neutral-color-400;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  height: 220px;
+  background: $neutral-color-100;
+  border-radius: 8px;
   cursor: pointer;
   background-size: cover;
   background-position: center;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   @media (min-width: 768px) {
-    width: 260px;
-    height: 210px;
-    flex-shrink: 0;
+    width: 320px;
   }
 
   .hidden-input {
     display: none;
   }
 
-  .placeholder {
+  .upload-placeholder .placeholder-content {
     text-align: center;
-    color: $neutral-color-400;
+    color: $neutral-color-700;
+
+    .plus-icon {
+      font-size: 30px; // 保留圖示大小
+      display: block;
+    }
   }
 }
 
-.info-container {
+.info-section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-.title-input {
-  width: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  font: inherit;
+.row-title {
+  .title-input {
+    width: 100%;
+    border: none;
+    // color: $primary-color-800;
+    outline: none;
+    border-bottom: 1px solid $neutral-color-100;
+    background: transparent;
+  }
+
+  .title-display {
+    color: $primary-color-800;
+    margin: 0;
+  }
 }
 
-.stats-bar {
+.row-meta {
   display: flex;
-  gap: 40px;
-  padding: 15px 0;
-  border-top: 2px solid $neutral-color-100;
-  border-bottom: 2px solid $neutral-color-100;
-}
+  gap: 30px;
+  align-items: center;
+  color: $neutral-color-800;
 
-.stat-item {
-  .label {
-    color: $neutral-color-400;
-    margin-bottom: 5px;
-    display: block;
+  .inline-input {
+    border: none;
+    border-bottom: 1px solid $neutral-color-400;
+    width: 60px;
+    text-align: center;
+    outline: none;
+    color: $neutral-color-black;
+    background: transparent;
   }
 
-  .value.time {
+  .auto-hint {
     color: $primary-color-700;
-    
-
-    .num {
-      font-size: 22px;
-      font-weight: 600;
-
-    }
+    margin-left: 8px;
   }
 
-  .stars .star {
-    font-size: 20px;
-    color: $neutral-color-400;
-    cursor: pointer;
+  .stars-group {
+    display: flex;
+    gap: 4px;
 
-    &.active {
+    .star {
+      font-size: 20px;
+      color: $neutral-color-400;
+      transition: transform 0.2s;
+    }
+
+    &.is-editing .star {
+      cursor: pointer;
+
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+
+    .star.active {
       color: $secondary-color-warning-700;
     }
   }
 }
 
-.desc-area {
-  .desc-input,
-  .desc-display {
-    width: 100%;
-    border: none;
-    outline: none;
-    background: transparent;
-    line-height: 1.6;
-    font: inherit;
+.row-description {
+  position: relative;
+  min-height: 100px;
+  padding: 12px;
+  border: 1px solid transparent;
+  background: $neutral-color-100;
+  border-radius: 8px;
+
+  &.editing-border {
+    border: 1px dashed $primary-color-700;
+    background: $neutral-color-white;
   }
 
-  .desc-input {
+  .desc-textarea {
+    width: 100%;
     height: 70px;
+    border: none;
     resize: none;
+    outline: none;
+    background: transparent;
+    color: $neutral-color-800;
+  }
+
+  .desc-display {
+    color: $neutral-color-800;
+    margin: 0;
+    white-space: pre-wrap;
+  }
+
+  .char-counter {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    color: $neutral-color-400;
   }
 }
 </style>

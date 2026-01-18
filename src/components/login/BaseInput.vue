@@ -67,8 +67,8 @@ const emit = defineEmits(['blur', 'enter-press'])
 </template>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/abstracts/_mixins.scss";
-@import "@/assets/scss/components-scss/_input.scss";
+@use "@/assets/scss/abstracts/_mixins.scss" as *;
+@use "@/assets/scss/components-scss/_input.scss" as *;
 
 // ==========================================
 // 表單的input程式碼上下層級不同無法用mixins.scss預設

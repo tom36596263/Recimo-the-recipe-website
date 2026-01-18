@@ -1,6 +1,9 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { publicApi } from '@/utils/publicApi';
+
+// 引用元件
 import RecipeSteps from '../../components/workspace/recipedetail/RecipeSteps.vue';
 import NutritionCard from '../../components/workspace/recipedetail/NutritionCard.vue';
 import RecipeIngredients from '../../components/workspace/recipedetail/RecipeIngredients.vue';
@@ -15,9 +18,17 @@ const rawRecipe = ref(null);
 const rawIngredients = ref([]);
 const rawSteps = ref([]);
 const rawComments = ref([]);
-const rawGallery = ref([]); // 存儲成品照
+const rawGallery = ref([]);
 const servings = ref(1);
 const isLoading = ref(true);
+
+const isLiked = ref(false);
+const localLikesOffset = ref(0);
+
+const toggleRecipeLike = () => {
+    isLiked.value = !isLiked.value;
+    localLikesOffset.value = isLiked.value ? 1 : 0;
+};
 
 const ingredientNameMap = {
     390: "高筋麵粉",
@@ -25,26 +36,30 @@ const ingredientNameMap = {
     497: "溫水",
 };
 
-// --- 2. 資料獲取邏輯 ---
+// --- 2. 自訂 fetchData 函數 ---
 const fetchData = async () => {
     isLoading.value = true;
     const recipeId = Number(route.params.id) || 1;
 
+    isLiked.value = false;
+    localLikesOffset.value = 0;
+
     try {
         const [resR, resRecipeIng, resIngMaster, resS, resC, resG] = await Promise.all([
-            fetch('/data/recipe/recipes.json').then(r => r.json()),
-            fetch('/data/recipe/recipe_ingredient.json').then(r => r.json()),
-            fetch('/data/recipe/ingredients.json').then(r => r.json()),
-            fetch('/data/recipe/steps.json').then(r => r.json()),
-            fetch('/data/social/comments.json').then(r => r.json()),
-            fetch('/data/social/gallery.json').then(r => r.json())
+            publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/recipe/recipe_ingredient.json'),
+            publicApi.get('data/recipe/ingredients.json'),
+            publicApi.get('data/recipe/steps.json'),
+            publicApi.get('data/social/comments.json'),
+            publicApi.get('data/social/gallery.json')
         ]);
 
-        rawRecipe.value = resR.find(r => Number(r.recipe_id) === recipeId) || null;
+        rawRecipe.value = resR.data.find(r => Number(r.recipe_id) === recipeId) || null;
 
-        const filteredLinks = resRecipeIng.filter(i => Number(i.recipe_id) === recipeId);
+        // 處理食材關聯資料
+        const filteredLinks = resRecipeIng.data.filter(i => Number(i.recipe_id) === recipeId);
         rawIngredients.value = filteredLinks.map(link => {
-            const masterInfo = resIngMaster.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
+            const masterInfo = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
             return {
                 ...link,
                 ingredient_name: masterInfo?.ingredient_name || ingredientNameMap[link.ingredient_id] || `食材 ID: ${link.ingredient_id}`,
@@ -52,33 +67,33 @@ const fetchData = async () => {
                 protein_per_100g: masterInfo?.protein_per_100g || 0,
                 fat_per_100g: masterInfo?.fat_per_100g || 0,
                 carbs_per_100g: masterInfo?.carbs_per_100g || 0,
-                default_unit: masterInfo?.unit_name || link.unit_name
+                default_unit: masterInfo?.unit_name || link.unit_name,
+                // 💡 修正處：將 JSON 的 remark 對應到 note 欄位
+                note: link.remark || ''
             };
         });
 
-        rawSteps.value = resS.filter(s => Number(s.recipe_id) === recipeId)
+        rawSteps.value = resS.data.filter(s => Number(s.recipe_id) === recipeId)
             .sort((a, b) => a.step_order - b.step_order);
 
-        rawComments.value = resC.filter(c => Number(c.RECIPE_ID) === recipeId);
+        rawComments.value = resC.data.filter(c => Number(c.RECIPE_ID) === recipeId);
 
-        // 處理成品照片
-        const galleryData = resG.data || resG;
-        rawGallery.value = galleryData.filter(g => Number(g.RECIPE_ID) === recipeId);
+        const galleryRaw = resG.data.data || resG.data;
+        rawGallery.value = galleryRaw.filter(g => Number(g.RECIPE_ID) === recipeId);
 
-        if (rawRecipe.value) {
-            servings.value = rawRecipe.value.recipe_servings;
-        }
-    } catch (error) {
-        console.error("資料讀取失敗:", error);
+        if (rawRecipe.value) servings.value = 1;
+
+    } catch (err) {
+        console.error('讀取 JSON 失敗：', err);
     } finally {
         setTimeout(() => { isLoading.value = false; }, 100);
     }
 };
 
-watch(() => route.params.id, () => fetchData(), { immediate: true });
+onMounted(() => { fetchData(); });
+watch(() => route.params.id, () => { fetchData(); });
 
-// --- 3. 功能邏輯 ---
-
+// --- 3. 計算屬性 ---
 const commentList = computed(() => {
     return rawComments.value.map(c => ({
         userName: c.USER_NAME,
@@ -90,26 +105,20 @@ const commentList = computed(() => {
     }));
 });
 
-const snapsData = computed(() => {
-    return rawGallery.value.map(g => ({
-        url: g.GALLERY_URL,
-        comment: g.GALLERY_TEXT
-    }));
-});
+const baseRecipeLikes = ref(0);
+watch(rawRecipe, (newVal) => {
+    if (newVal) baseRecipeLikes.value = Math.floor(Math.random() * 200) + 50;
+}, { immediate: true });
+
+const displayRecipeLikes = computed(() => baseRecipeLikes.value + localLikesOffset.value);
+const snapsData = computed(() => rawGallery.value.map(g => ({ url: g.GALLERY_URL, comment: g.GALLERY_TEXT })));
 
 const handleShare = async () => {
     const title = recipeIntroData.value?.title || '美味食譜';
     const url = window.location.href;
     if (navigator.share) {
-        try {
-            await navigator.share({
-                title: title,
-                text: `我在 Recimo 看到一個很棒的食譜：${title}`,
-                url: url
-            });
-        } catch (err) {
-            console.log('分享取消');
-        }
+        try { await navigator.share({ title, text: `我在 Recimo 看到一個很棒的食譜：${title}`, url }); }
+        catch (err) { console.log('分享取消'); }
     } else {
         await navigator.clipboard.writeText(url);
         alert('連結已複製到剪貼簿！');
@@ -135,19 +144,19 @@ const recipeIntroData = computed(() => {
     };
 });
 
-const ingredientsData = computed(() => {
-    return rawIngredients.value.map(item => ({
-        INGREDIENT_NAME: item.ingredient_name,
-        amount: item.amount,
-        unit_name: item.unit_name || item.default_unit,
-        note: item.note || '',
-        calories_per_100g: item.calories_per_100g,
-        protein_per_100g: item.protein_per_100g,
-        fat_per_100g: item.fat_per_100g,
-        carbs_per_100g: item.carbs_per_100g,
-        unit_weight: 1
-    }));
-});
+// 💡 整理要傳給子元件的格式
+const ingredientsData = computed(() => rawIngredients.value.map(item => ({
+    INGREDIENT_NAME: item.ingredient_name,
+    amount: item.amount,
+    unit_name: item.unit_name || item.default_unit,
+    // 這裡維持 item.note，因為在 fetchData mapping 時已經把 remark 塞進去了
+    note: item.note || '',
+    calories_per_100g: item.calories_per_100g,
+    protein_per_100g: item.protein_per_100g,
+    fat_per_100g: item.fat_per_100g,
+    carbs_per_100g: item.carbs_per_100g,
+    unit_weight: 1
+})));
 
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value) return [];
@@ -161,17 +170,13 @@ const nutritionWrapper = computed(() => {
     }];
 });
 
-const stepsData = computed(() => {
-    return rawSteps.value.map(s => ({
-        title: s.step_title,
-        content: s.step_content,
-        image: (s.step_image_url || '').replace(/\.jpg$/i, '.png')
-    }));
-});
+const stepsData = computed(() => rawSteps.value.map(s => ({
+    title: s.step_title,
+    content: s.step_content,
+    image: (s.step_image_url || '').replace(/\.jpg$/i, '.png')
+})));
 
-const handleServingsChange = (newVal) => {
-    servings.value = newVal;
-};
+const handleServingsChange = (newVal) => { servings.value = newVal; };
 </script>
 
 <template>
@@ -190,7 +195,13 @@ const handleServingsChange = (newVal) => {
                 </div>
                 <div class="icon-group">
                     <i-material-symbols:edit-outline-rounded class="action-icon" />
-                    <i-material-symbols-thumb-up-outline class="action-icon" />
+
+                    <div class="action-item" :class="{ 'active': isLiked }" @click="toggleRecipeLike">
+                        <i-material-symbols-thumb-up-rounded v-if="isLiked" class="action-icon" />
+                        <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
+                        <span class="count-text">{{ displayRecipeLikes }}</span>
+                    </div>
+
                     <i-material-symbols-share-outline class="action-icon" @click="handleShare" />
                 </div>
             </div>
@@ -249,7 +260,6 @@ const handleServingsChange = (newVal) => {
 </template>
 
 <style lang="scss" scoped>
-/* 樣式保持不變 */
 @import '@/assets/scss/abstracts/_color.scss';
 
 .loading-state,
@@ -309,6 +319,32 @@ const handleServingsChange = (newVal) => {
         gap: 20px !important;
         color: $primary-color-700;
 
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+
+            &.active {
+                color: $primary-color-700;
+
+                .action-icon {
+                    fill: $primary-color-700;
+                }
+            }
+
+            &:hover {
+                color: $primary-color-400;
+            }
+        }
+
+        .count-text {
+            font-size: 16px;
+            font-weight: 500;
+            user-select: none;
+        }
+
         @media screen and (max-width: 1024px) {
             width: 100%;
             justify-content: flex-start;
@@ -318,13 +354,8 @@ const handleServingsChange = (newVal) => {
         .action-icon,
         svg {
             font-size: 24px;
-            cursor: pointer;
             transition: color 0.2s;
             flex-shrink: 0;
-
-            &:hover {
-                color: $primary-color-400;
-            }
         }
     }
 }
