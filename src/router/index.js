@@ -27,10 +27,16 @@ const routes = [
   // 1. 前台官網 (使用 DefaultLayout)
   // ==========================================
   {
-    path: '/test-auth',
-    name: 'test-auth',
     // 隨便借用一個現有的 Layout 或直接載入組件
+    path: '/loginlightbox',
+    name: 'loginlightbox',
     component: () => import('@/components/LoginLightbox.vue')
+  },
+  {
+    // 登入教學
+    path: '/logintest',
+    name: 'Logintest',
+    component: () => import('@/views/site/login.vue'),
   },
   {
     path: '/',

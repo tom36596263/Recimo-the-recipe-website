@@ -6,7 +6,9 @@ import { defineStore } from 'pinia'
 import { useRouteName } from '@/composables/useRouteName'
 import { useCartStore } from '@/stores/cartStore'
 import ProductRmd from '@/components/mall/ProductRmd.vue';
-
+// 門禁守衛
+import { useAuthGuard } from '@/composables/useAuthGuard';
+const { runWithAuth } = useAuthGuard();
 // ==========================================
 // vue上課教：以後部屬比較不會有問題(資料放public的話)
 // ==========================================
@@ -49,9 +51,12 @@ const addToCart = () => {
 };
 
 const buyNow = () => {
-  if (productInfo.value) {
-    console.log("直接購買商品", productInfo.value.product_name, "數量", count.value);
-  }
+  runWithAuth(() => {
+    // 「確定登入後」才執行
+    if (productInfo.value) {
+      console.log("直接購買商品", productInfo.value.product_name, "數量", count.value);
+    }
+  });
 };
 
 // ==========================================
