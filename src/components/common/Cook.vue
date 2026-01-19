@@ -183,6 +183,10 @@ const checkCollision = (x, y) => {
 const addToPot = (item) => {
     potIngredients.value.push(item);
     console.log('加入鍋子:', item.ingredient_name);
+    isDragOver.value = true;
+    setTimeout(() => {
+        isDragOver.value = false;
+    }, 200); // 0.2秒後蓋回去
 };
 
 
@@ -279,7 +283,8 @@ const startCooking = () => {
                             @touchend="handleTouchEnd">
 
                             <CookCard :name="item.ingredient_name" :calories="item.kcal_per_100g"
-                                :fat="item.fat_per_100g" :image-src="item.ingredient_image_url" />
+                                :fat="item.fat_per_100g" :image-src="item.ingredient_image_url"
+                                @add-ingredient="addToPot(item)" />
                         </div>
                     </div>
                 </div>

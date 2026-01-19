@@ -27,8 +27,8 @@ const props = defineProps({
 // 定義事件，當點擊 + 按鈕時通知父元件
 const emit = defineEmits(['add-to-cart']);
 
-const handleAdd = () => {
-    emit('add-to-cart', props.name);
+const handleAddClick = () => {
+    emit('add-ingredient'); // 發送訊號給父層
 };
 </script>
 
@@ -47,7 +47,7 @@ const handleAdd = () => {
             <img :src="imageSrc" :alt="name" class="product-img" />
         </div>
 
-        <button class="add-btn" @click="handleAdd" aria-label="加入食材">
+        <button class="add-btn" @click.stop="handleAddClick" aria-label="加入食材">
             <span class="plus-icon">+</span>
         </button>
     </article>
