@@ -16,13 +16,18 @@
             </div>
         </header>
     </div>
+
     
+        
     <section class="about-section-bg">
         <div class="about-section container">
             <div class="row">
                 <About />
             </div>
         </div>
+        <img :src="$parsePublicFile('img/remove-bg-ingredients/1.png')" alt="番茄" class="home-ingredient1">
+        <img :src="$parsePublicFile('img/remove-bg-ingredients/15.png')" alt="檸檬" class="home-ingredient15">
+        <img :src="$parsePublicFile('img/remove-bg-ingredients/20.png')" alt="花椰菜" class="home-ingredient20">
     </section>
     <section class="about-feature-bg">
         <div class="container">
@@ -58,6 +63,45 @@
         height: 100vh;
         flex-direction: column;
         overflow: hidden;
+    }
+    .home-ingredient1{
+        z-index: 20;
+        position: absolute;
+        top: 10vh;
+        right: 60vw;
+        width: 100px;
+        animation: floating 3s ease-in-out infinite;
+    }
+    .home-ingredient15{
+        z-index: 20;
+        position: absolute;
+        top: 70vh;
+        right: 5vw;
+        width: 140px;
+        animation: floating 4s ease-in-out infinite;
+        animation-delay: 1s;
+    }
+    .home-ingredient20{
+        z-index: 20;
+        position: absolute;
+        top: 70vh;
+        left: 5vw;
+        width: 180px;
+        animation: floating 4s ease-in-out infinite;
+        animation-delay: 0.5s;
+    }
+    
+    @keyframes floating {
+        0% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-20px);
+            // transform: rotate(10deg);
+        }
+        100% {
+            transform: translateY(0px);
+        }
     }
     .about-section-bg{
         background-color: $primary-color-700;

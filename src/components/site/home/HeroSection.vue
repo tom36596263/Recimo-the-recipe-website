@@ -29,6 +29,7 @@
         align-items: center;
         width: 100%;
         height: 100vh;
+        padding-top: 100px;
         
         .hero-title{
             margin-bottom: 30px;
@@ -57,7 +58,6 @@
                 object-position: center;
             }
         }
-        
         
     }
         @media screen and (max-width: 810px) {

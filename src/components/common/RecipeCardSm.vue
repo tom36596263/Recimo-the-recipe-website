@@ -3,7 +3,6 @@
 
     import BaseTag from '@/components/common/BaseTag.vue';
     import BaseBtn from '@/components/common/BaseBtn.vue';
-    import LogoBlack from '/img/site/Recimo-logo-black.svg'
     import LikeButton from '@/components/common/LikeButton.vue'
     const props = defineProps({
         recipe: {
@@ -45,7 +44,7 @@
         <footer>
             <div class="personal-info">
                 <div class="personal-img">
-                    <img :src="LogoBlack" alt="">
+                    <img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo" >
                 </div>
                 <p class="p-p1">Recimo</p>
                 <LikeButton 
