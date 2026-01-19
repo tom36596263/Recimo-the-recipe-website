@@ -83,8 +83,8 @@ const handleSubmit = () => {
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-submit" @click="handleSubmit">送出</button>
-                <button class="btn btn-cancel" @click="handleClose">取消</button>
+                <BaseBtn title="確定" @click="handleSubmit" />
+                <BaseBtn title="取消" variant="outline" @click="handleClose" />
             </div>
 
         </div>
@@ -92,11 +92,11 @@ const handleSubmit = () => {
 </template>
 
 <style lang="scss" scoped>
-/* 變數設定 (依照你的設計圖顏色) */
-$primary-green: #4F8A65;
-$danger-red: #FF4D4F;
-$border-color: #888;
-$bg-white: #ffffff;
+// /* 變數設定 (依照你的設計圖顏色) */
+// $primary-green: #4F8A65;
+// $danger-red: #FF4D4F;
+// $border-color: #888;
+// $bg-white: #ffffff;
 
 /* --- 遮罩層 (全螢幕背景) --- */
 .modal-mask {
@@ -120,11 +120,9 @@ $bg-white: #ffffff;
 .modal-container {
     width: 100%;
     max-width: 350px;
-    /* 左圖：手機版寬度較窄 */
-    background-color: $bg-white;
-    border-radius: 8px;
-    border: 1px solid $primary-green;
-    /* 外框線也是綠色 */
+    background-color: $neutral-color-100;
+    border-radius: $radius-base;
+    border: 1px solid $neutral-color-100;
     padding: 24px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
     transition: all 0.3s ease;
@@ -134,7 +132,7 @@ $bg-white: #ffffff;
 
 /* 標題 */
 .modal-title {
-    color: $primary-green;
+    color: $primary-color-700;
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 16px;
@@ -168,21 +166,20 @@ $bg-white: #ffffff;
     textarea {
         width: 100%;
         padding: 10px;
-        border: 1px solid #777;
-        /* 深一點的邊框 */
-        border-radius: 6px;
+        border: 1px solid $neutral-color-400;
+        border-radius: $radius-base;
         font-size: 1rem;
         outline: none;
 
         &:focus {
-            border-color: $primary-green;
+            border-color: $neutral-color-700;
         }
     }
 
     /* 自定義 Select 箭頭 (簡單版) */
     select {
         appearance: none;
-        background-color: white;
+        background-color: $neutral-color-white;
         background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
         background-repeat: no-repeat;
         background-position: right 10px center;
@@ -191,7 +188,7 @@ $bg-white: #ffffff;
 }
 
 .warning-text {
-    color: $danger-red;
+    color: $secondary-color-danger-700;
     font-size: 0.9rem;
     margin-top: 10px;
     margin-bottom: 24px;
@@ -201,60 +198,32 @@ $bg-white: #ffffff;
 .modal-footer {
     display: flex;
     gap: 15px;
-    /* 按鈕之間的間距 */
 }
 
 .btn {
-    padding: 10px 0;
-    border-radius: 6px;
-    font-size: 1rem;
     cursor: pointer;
-    border: 1px solid $primary-green;
-    transition: all 0.2s;
-
-    /* 左圖：手機版按鈕看起來是等寬的 (1:1) */
     flex: 1;
 }
 
-.btn-submit {
-    background-color: $primary-green;
-    color: white;
 
-    &:hover {
-        background-color: darken($primary-green, 10%);
-    }
-}
-
-.btn-cancel {
-    background-color: white;
-    color: $primary-green;
-
-    &:hover {
-        background-color: #f0fdf4;
-    }
-}
 
 /* --- 響應式：桌機版樣式 (右圖) --- */
 @media screen and (min-width: 768px) {
     .modal-container {
         max-width: 600px;
-        /* 右圖：寬度變寬 */
         padding: 32px;
     }
 
     /* 調整按鈕比例以符合右圖 */
     .modal-footer {
-        /* 右圖中，送出按鈕(綠)非常長，取消按鈕(白)比較短 */
-        /* 我們讓送出按鈕佔據更多空間，例如 2:1 或 3:1 */
 
         .btn-submit {
             flex: 3;
-            /* 佔據較大比例 */
+
         }
 
         .btn-cancel {
             flex: 1;
-            /* 佔據較小比例 */
         }
     }
 }

@@ -77,37 +77,37 @@ const handleConfirmCancel = (data) => {
       </div>
       <BaseBtn title="取消訂單" variant="outline" @click="onCancel" />
     </div>
-  </div>
 
-  <div class="status-bar p-p1">
-    <div v-for="(step, index) in statusSteps" :key="index" class="status-step"
-      :class="{ active: index <= order.status }">
-      <div class="bar"></div>
-      <span class="label">{{ step }}</span>
-    </div>
-  </div>
 
-  <div class="product-section">
-    <div class="list-header">
-      <span class="col-name p-p1">商品名</span>
-      <span class="col-qty p-p1">數量</span>
-      <span class="col-price p-p1">金額</span>
+    <div class="status-bar p-p1">
+      <div v-for="(step, index) in statusSteps" :key="index" class="status-step"
+        :class="{ active: index <= order.status }">
+        <div class="bar"></div>
+        <span class="label">{{ step }}</span>
+      </div>
     </div>
 
-    <ul class="product-list">
-      <li v-for="(item, idx) in order.items" :key="idx" class="product-item">
-        <span class="col-name p-p1">{{ item.name }}</span>
-        <span class="col-qty p-p1">{{ item.qty }}</span>
-        <span class="col-price p-p1">${{ item.price }}</span>
-      </li>
-    </ul>
-  </div>
+    <div class="product-section">
+      <div class="list-header">
+        <span class="col-name p-p1">商品名</span>
+        <span class="col-qty p-p1">數量</span>
+        <span class="col-price p-p1">金額</span>
+      </div>
 
-  <div class="card-footer">
-    <span class="summary-text p-p1">總數量：{{ totalQuantity }}</span>
-    <span class="summary-text p-p1">總金額：${{ totalAmount }}</span>
-  </div>
+      <ul class="product-list">
+        <li v-for="(item, idx) in order.items" :key="idx" class="product-item">
+          <span class="col-name p-p1">{{ item.name }}</span>
+          <span class="col-qty p-p1">{{ item.qty }}</span>
+          <span class="col-price p-p1">${{ item.price }}</span>
+        </li>
+      </ul>
+    </div>
 
+    <div class="card-footer">
+      <span class="summary-text p-p1">總數量：{{ totalQuantity }}</span>
+      <span class="summary-text p-p1">總金額：${{ totalAmount }}</span>
+    </div>
+  </div>
   <CanceModal :is-open="showCancelModal" @close="showCancelModal = false" @submit="handleConfirmCancel" />
 </template>
 
