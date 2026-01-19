@@ -1,0 +1,106 @@
+[
+  {
+    "item_id": 1,
+    "plan_id": 1,
+    "recipe_id": 11,
+    "planned_date": "2026-01-19 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 2,
+    "plan_id": 1,
+    "recipe_id": 8,
+    "planned_date": "2026-01-19 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 3,
+    "plan_id": 1,
+    "recipe_id": 4,
+    "planned_date": "2026-01-19 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 4,
+    "plan_id": 1,
+    "recipe_id": 9,
+    "planned_date": "2026-01-19 18:00:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 5,
+    "plan_id": 1,
+    "recipe_id": 6,
+    "planned_date": "2026-01-20 08:30:00",
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 6,
+    "plan_id": 1,
+    "recipe_id": 12,
+    "planned_date": "2026-01-20 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 7,
+    "plan_id": 1,
+    "recipe_id": 15,
+    "planned_date": "2026-01-20 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 8,
+    "plan_id": 1,
+    "recipe_id": 3,
+    "planned_date": "2026-01-20 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 9,
+    "plan_id": 1,
+    "recipe_id": 17,
+    "planned_date": "2026-01-20 18:00:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 10,
+    "plan_id": 1,
+    "recipe_id": 16,
+    "planned_date": "2026-01-21 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 11,
+    "plan_id": 1,
+    "recipe_id": 14,
+    "planned_date": "2026-01-21 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 12,
+    "plan_id": 1,
+    "recipe_id": 5,
+    "planned_date": "2026-01-21 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 13,
+    "plan_id": 1,
+    "recipe_id": 2,
+    "planned_date": "2026-01-21 18:00:00",
+    "meal_type": 2,
+    "sort_order": 2
+  }
+]
