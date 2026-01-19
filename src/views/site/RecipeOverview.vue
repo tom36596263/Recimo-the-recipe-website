@@ -228,7 +228,7 @@ const openKitchen = () => {
     <section class="container">
         <div class="row">
             <div class="col-12">
-                <RecipesCtaGroup />
+                <RecipesCtaGroup @open-kitchen="openKitchen" />
             </div>
         </div>
     </section>
