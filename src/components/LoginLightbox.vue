@@ -153,10 +153,12 @@ const goToLogin = () => {
 };
 
 // 關閉燈箱
-const handleClose = () => {
-  isVisible.value = false;
-};
 
+const emit = defineEmits(['close']);
+
+const handleClose = () => {
+  emit('close'); // 通知 GlobalModalManager 把 Pinia 的狀態關掉
+};
 
 </script>
 
@@ -174,7 +176,9 @@ const handleClose = () => {
         <!-- ==========================================
               會員登入
         ========================================== -->
-        <button @click="handleClose">x</button>
+        <button class="close-btn" @click="handleClose">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
         <div>
           <h1 class="zh-h3 auth-form__title">會員登入</h1>
           <div class="auth-form">
@@ -211,7 +215,9 @@ const handleClose = () => {
         <!-- ==========================================
               會員註冊
         ========================================== -->
-        <button @click="handleClose">x</button>
+        <button @click="handleClose">
+          <i :class="iconClass"></i>
+        </button>
         <div>
           <h1 class="zh-h3 auth-form__title">會員註冊</h1>
           <div class="auth-form">
@@ -246,7 +252,7 @@ const handleClose = () => {
               前往會員註冊
           ========================================== -->
           <div class="registration-invite">
-            <!-- <img src="public/img/site/Recimo-logo-R-black.svg" /> -->
+            <img src="/img/site/Recimo-logo-black.svg" />
             <div class="registration-invite__content">
               <h3 class="zh-h2">還不是會員嗎？</h3>
               <h4 class="zh-h3">快來一起加入Recimo吧~</h4>
@@ -260,7 +266,7 @@ const handleClose = () => {
               前往會員登入
           ========================================== -->
           <div class="login-invite">
-            <!-- <img src="public/img/site/Recimo-logo-R-black.svg" /> -->
+            <img src="/img/site/Recimo-logo-black.svg" />
             <div class="login-invite__content">
               <h3>歡迎回來Recimo</h3>
               <h4>如果已經有會員就直接登入吧~</h4>
@@ -278,7 +284,7 @@ const handleClose = () => {
 
 <style lang="scss" scoped>
 .auth-form {
-  border: 1px solid red;
+
   margin: 20px 0;
   display: flex;
   flex-direction: column; // 讓內容由上往下排

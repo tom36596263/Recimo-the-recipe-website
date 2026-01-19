@@ -6,7 +6,7 @@
     "step_title": "混合乾性食材",
     "step_total_time": "00:05:00",
     "step_content": "將高筋麵粉、酵母粉與鹽在攪拌盆中混合均勻。",
-    "step_image_url": "/img/recipes/1/steps/1.jpg",
+    "step_image_url": "/img/recipes/1/steps/1.png",
     "is_modified": false
   },
   {
@@ -16,7 +16,7 @@
     "step_title": "揉製麵糰",
     "step_total_time": "00:15:00",
     "step_content": "分次加入溫水與橄欖油，揉搓至麵糰表面光滑且不黏手。",
-    "step_image_url": "/img/recipes/1/steps/2.jpg",
+    "step_image_url": "/img/recipes/1/steps/2.png",
     "is_modified": false
   },
   {
@@ -26,7 +26,7 @@
     "step_title": "第一次發酵",
     "step_total_time": "01:00:00",
     "step_content": "蓋上濕布，放在溫暖處發酵 1 小時，直到麵糰變成兩倍大。",
-    "step_image_url": "/img/recipes/1/steps/3.jpg",
+    "step_image_url": "/img/recipes/1/steps/3.png",
     "is_modified": false
   },
   {
@@ -36,7 +36,7 @@
     "step_title": "麵糰整形與塗抹底醬",
     "step_total_time": "00:10:00",
     "step_content": "將發酵好的麵糰桿成圓餅狀，在表面均勻抹上一層番茄糊。",
-    "step_image_url": "/img/recipes/1/steps/4.jpg",
+    "step_image_url": "/img/recipes/1/steps/4.png",
     "is_modified": false
   },
   {
@@ -46,7 +46,7 @@
     "step_title": "鋪放配料",
     "step_total_time": "00:05:00",
     "step_content": "將新鮮莫札瑞拉起司切片或撕碎，均勻擺放在番茄糊上。",
-    "step_image_url": "/img/recipes/1/steps/5.jpg",
+    "step_image_url": "/img/recipes/1/steps/5.png",
     "is_modified": false
   },
   {
@@ -56,7 +56,7 @@
     "step_title": "烘烤",
     "step_total_time": "00:15:00",
     "step_content": "放入預熱至 230°C 的烤箱烘烤 12-15 分鐘，直到邊緣呈金黃色且起司融化。",
-    "step_image_url": "/img/recipes/1/steps/6.jpg",
+    "step_image_url": "/img/recipes/1/steps/6.png",
     "is_modified": false
   },
   {
@@ -66,7 +66,7 @@
     "step_title": "裝飾與出爐",
     "step_total_time": "00:02:00",
     "step_content": "出爐後放上新鮮羅勒葉，淋上少許特級初榨橄欖油即可享用。",
-    "step_image_url": "/img/recipes/1/steps/7.jpg",
+    "step_image_url": "/img/recipes/1/steps/7.png",
     "is_modified": false
   },
   {
@@ -76,7 +76,7 @@
     "step_title": "融化巧克力與奶油",
     "step_total_time": "00:10:00",
     "step_content": "將白巧克力與無鹽奶油放入碗中，隔水加熱至完全融化並拌勻，放涼備用。",
-    "step_image_url": "/img/recipes/2/steps/1.jpg",
+    "step_image_url": "/img/recipes/2/steps/1.png",
     "is_modified": false
   },
   {
@@ -86,7 +86,7 @@
     "step_title": "打發雞蛋與糖",
     "step_total_time": "00:08:00",
     "step_content": "將雞蛋與砂糖放入碗中，使用攪拌器打發至呈淡黃色且體積略微膨脹發泡。",
-    "step_image_url": "/img/recipes/2/steps/2.jpg",
+    "step_image_url": "/img/recipes/2/steps/2.png",
     "is_modified": false
   },
   {
@@ -96,7 +96,7 @@
     "step_title": "混合粉類",
     "step_total_time": "00:05:00",
     "step_content": "將低筋麵粉與抹茶粉過篩加入蛋糊中，以刮刀輕輕翻拌均勻。",
-    "step_image_url": "/img/recipes/2/steps/3.jpg",
+    "step_image_url": "/img/recipes/2/steps/3.png",
     "is_modified": false
   },
   {
@@ -106,7 +106,7 @@
     "step_title": "混合麵糊",
     "step_total_time": "00:03:00",
     "step_content": "將步驟1的巧克力奶油糊倒入抹茶蛋糊中，再次混合均勻成為蛋糕麵糊。",
-    "step_image_url": "/img/recipes/2/steps/4.jpg",
+    "step_image_url": "/img/recipes/2/steps/4.png",
     "is_modified": false
   },
   {
@@ -116,7 +116,7 @@
     "step_title": "入模準備",
     "step_total_time": "00:05:00",
     "step_content": "在模具內側塗抹少許奶油防沾，將麵糊平均倒入模具中約八分滿。",
-    "step_image_url": "/img/recipes/2/steps/5.jpg",
+    "step_image_url": "/img/recipes/2/steps/5.png",
     "is_modified": false
   },
   {
@@ -126,7 +126,7 @@
     "step_title": "烘烤",
     "step_total_time": "00:10:00",
     "step_content": "放入預熱 200°C 的烤箱烤 8-10 分鐘。觀察表面成型但輕按中心仍有柔軟感即可。",
-    "step_image_url": "/img/recipes/2/steps/6.jpg",
+    "step_image_url": "/img/recipes/2/steps/6.png",
     "is_modified": false
   },
   {
@@ -136,7 +136,7 @@
     "step_title": "出爐與脫模",
     "step_total_time": "00:05:00",
     "step_content": "出爐後稍放涼約 2-3 分鐘，小心脫模後擺盤即可享用。",
-    "step_image_url": "/img/recipes/2/steps/7.jpg",
+    "step_image_url": "/img/recipes/2/steps/7.png",
     "is_modified": false
   },
   {
@@ -146,7 +146,7 @@
     "step_title": "醃漬雞丁",
     "step_total_time": "00:20:00",
     "step_content": "雞肉丁中加入部分醬油、米酒與太白粉拌勻，醃漬約 20 分鐘使肉質入味且滑嫩。",
-    "step_image_url": "/img/recipes/3/steps/1.jpg",
+    "step_image_url": "/img/recipes/3/steps/1.png",
     "is_modified": false
   },
   {
@@ -156,7 +156,7 @@
     "step_title": "預熱與滑油",
     "step_total_time": "00:05:00",
     "step_content": "熱鍋下油，放入雞丁快速翻炒至表面變色（約八分熟）後立即撈起備用。",
-    "step_image_url": "/img/recipes/3/steps/2.jpg",
+    "step_image_url": "/img/recipes/3/steps/2.png",
     "is_modified": false
   },
   {
@@ -166,7 +166,7 @@
     "step_title": "爆香香料",
     "step_total_time": "00:03:00",
     "step_content": "原鍋留少許底油，放入乾辣椒段與花椒粒，小火煸炒至乾辣椒顏色轉深、散發麻辣香氣。",
-    "step_image_url": "/img/recipes/3/steps/3.jpg",
+    "step_image_url": "/img/recipes/3/steps/3.png",
     "is_modified": false
   },
   {
@@ -176,7 +176,7 @@
     "step_title": "入辛香料拌炒",
     "step_total_time": "00:02:00",
     "step_content": "加入薑片與蒜末爆香，與辣椒段、花椒粒混合均勻。",
-    "step_image_url": "/img/recipes/3/steps/4.jpg",
+    "step_image_url": "/img/recipes/3/steps/4.png",
     "is_modified": false
   },
   {
@@ -186,7 +186,7 @@
     "step_title": "回鍋與調味",
     "step_total_time": "00:03:00",
     "step_content": "將雞丁回鍋，加入剩餘醬油、砂糖與蔥段，大火快速翻炒均勻。",
-    "step_image_url": "/img/recipes/3/steps/5.jpg",
+    "step_image_url": "/img/recipes/3/steps/5.png",
     "is_modified": false
   },
   {
@@ -196,7 +196,7 @@
     "step_title": "勾芡與收汁",
     "step_total_time": "00:01:00",
     "step_content": "淋入少許芡汁（太白粉水），讓醬料均勻包裹在每一塊雞丁上。",
-    "step_image_url": "/img/recipes/3/steps/6.jpg",
+    "step_image_url": "/img/recipes/3/steps/6.png",
     "is_modified": false
   },
   {
@@ -206,7 +206,7 @@
     "step_title": "加入花生出爐",
     "step_total_time": "00:01:00",
     "step_content": "最後撒入去皮熟花生，迅速拌勻後即可出爐，以保持花生的酥脆口感。",
-    "step_image_url": "/img/recipes/3/steps/7.jpg",
+    "step_image_url": "/img/recipes/3/steps/7.png",
     "is_modified": false
   },
   {
@@ -216,7 +216,7 @@
     "step_title": "煮義大利麵",
     "step_total_time": "00:10:00",
     "step_content": "準備一鍋滾水並加入適量鹽巴，放入寬麵煮約 8-9 分鐘（比包裝建議少 1 分鐘），撈起並保留一碗煮麵水。",
-    "step_image_url": "/img/recipes/4/steps/1.jpg",
+    "step_image_url": "/img/recipes/4/steps/1.png",
     "is_modified": false
   },
   {
@@ -226,7 +226,7 @@
     "step_title": "爆香蒜末與奶油",
     "step_total_time": "00:02:00",
     "step_content": "平底鍋中放入無鹽奶油，加熱融化後放入蒜末，以中小火煸炒至香氣散發。",
-    "step_image_url": "/img/recipes/4/steps/2.jpg",
+    "step_image_url": "/img/recipes/4/steps/2.png",
     "is_modified": false
   },
   {
@@ -236,7 +236,7 @@
     "step_title": "拌炒野菇",
     "step_total_time": "00:05:00",
     "step_content": "放入鴻喜菇與香菇切片，轉大火將菇類水分炒乾，直至邊緣微焦呈金黃色。",
-    "step_image_url": "/img/recipes/4/steps/3.jpg",
+    "step_image_url": "/img/recipes/4/steps/3.png",
     "is_modified": false
   },
   {
@@ -246,7 +246,7 @@
     "step_title": "乳化醬汁",
     "step_total_time": "00:03:00",
     "step_content": "倒入鮮奶油與適量煮麵水，小火煮滾讓油脂與水分充分乳化。",
-    "step_image_url": "/img/recipes/4/steps/4.jpg",
+    "step_image_url": "/img/recipes/4/steps/4.png",
     "is_modified": false
   },
   {
@@ -256,7 +256,7 @@
     "step_title": "麵條合鍋",
     "step_total_time": "00:02:00",
     "step_content": "將煮好的寬麵放入鍋中，加入黑松露醬，均勻翻炒使麵條完整掛上醬汁。",
-    "step_image_url": "/img/recipes/4/steps/5.jpg",
+    "step_image_url": "/img/recipes/4/steps/5.png",
     "is_modified": false
   },
   {
@@ -266,7 +266,7 @@
     "step_title": "調味與收汁",
     "step_total_time": "00:02:00",
     "step_content": "加入帕瑪森起司粉攪拌至濃稠，撒上少許黑胡椒粉調味即可起鍋。",
-    "step_image_url": "/img/recipes/4/steps/6.jpg",
+    "step_image_url": "/img/recipes/4/steps/6.png",
     "is_modified": false
   },
   {
@@ -276,7 +276,7 @@
     "step_title": "備料",
     "step_total_time": "00:10:00",
     "step_content": "將雞腿肉切成一口大小，圓茄子去蒂頭後切成半月形塊狀備用。",
-    "step_image_url": "/img/recipes/5/steps/1.jpg",
+    "step_image_url": "/img/recipes/5/steps/1.png",
     "is_modified": false
   },
   {
@@ -286,7 +286,7 @@
     "step_title": "炒製咖哩底醬",
     "step_total_time": "00:05:00",
     "step_content": "鍋中放入少許橄欖油，以中小火將青咖哩醬炒至散發香氣且油脂微微滲出。",
-    "step_image_url": "/img/recipes/5/steps/2.jpg",
+    "step_image_url": "/img/recipes/5/steps/2.png",
     "is_modified": false
   },
   {
@@ -296,7 +296,7 @@
     "step_title": "加入椰奶",
     "step_total_time": "00:03:00",
     "step_content": "分兩至三次緩緩加入椰奶，每次加入皆需與咖哩醬完全拌勻，直到成濃稠亮澤的綠色醬汁。",
-    "step_image_url": "/img/recipes/5/steps/3.jpg",
+    "step_image_url": "/img/recipes/5/steps/3.png",
     "is_modified": false
   },
   {
@@ -306,7 +306,7 @@
     "step_title": "烹煮肉類與蔬菜",
     "step_total_time": "00:05:00",
     "step_content": "加入雞腿肉丁煮至轉白，隨後放入圓茄子塊與手撕的檸檬葉。",
-    "step_image_url": "/img/recipes/5/steps/4.jpg",
+    "step_image_url": "/img/recipes/5/steps/4.png",
     "is_modified": false
   },
   {
@@ -316,7 +316,7 @@
     "step_title": "燉煮與調味",
     "step_total_time": "00:15:00",
     "step_content": "轉小火燉煮約 15 分鐘直到茄子變軟熟透。加入魚露與椰糖拌勻，調整出鮮鹹帶微甜的風味。",
-    "step_image_url": "/img/recipes/5/steps/5.jpg",
+    "step_image_url": "/img/recipes/5/steps/5.png",
     "is_modified": false
   },
   {
@@ -326,7 +326,7 @@
     "step_title": "提香與完成",
     "step_total_time": "00:02:00",
     "step_content": "最後撒入新鮮泰式羅勒葉，稍微拌勻後即可熄火盛盤。",
-    "step_image_url": "/img/recipes/5/steps/6.jpg",
+    "step_image_url": "/img/recipes/5/steps/6.png",
     "is_modified": false
   },
   {
@@ -336,7 +336,7 @@
     "step_title": "調製荷蘭醬基底",
     "step_total_time": "00:05:00",
     "step_content": "取一鋼盆放入生蛋黃與檸檬汁，架在熱水鍋上方（不接觸水面），持續攪拌至蛋液發泡且變淺色。",
-    "step_image_url": "/img/recipes/6/steps/1.jpg",
+    "step_image_url": "/img/recipes/6/steps/1.png",
     "is_modified": false
   },
   {
@@ -346,7 +346,7 @@
     "step_title": "乳化荷蘭醬",
     "step_total_time": "00:05:00",
     "step_content": "慢慢分次加入融化的無鹽奶油，持續快速攪拌至液體呈濃稠滑順的醬汁狀，加鹽調味後保溫備用。",
-    "step_image_url": "/img/recipes/6/steps/2.jpg",
+    "step_image_url": "/img/recipes/6/steps/2.png",
     "is_modified": false
   },
   {
@@ -356,7 +356,7 @@
     "step_title": "準備煮蛋水",
     "step_total_time": "00:05:00",
     "step_content": "煮一鍋水至微滾狀態（冒小泡），加入白醋，白醋能幫助蛋白凝固。",
-    "step_image_url": "/img/recipes/6/steps/3.jpg",
+    "step_image_url": "/img/recipes/6/steps/3.png",
     "is_modified": false
   },
   {
@@ -366,7 +366,7 @@
     "step_title": "製作水波蛋",
     "step_total_time": "00:05:00",
     "step_content": "在水中攪拌出微弱渦流，將蛋打入碗中後滑入鍋心，小火煮約 3 分鐘，待蛋白凝固但蛋黃仍半熟，撈起瀝乾。",
-    "step_image_url": "/img/recipes/6/steps/4.jpg",
+    "step_image_url": "/img/recipes/6/steps/4.png",
     "is_modified": false
   },
   {
@@ -376,7 +376,7 @@
     "step_title": "烘烤馬芬與煎培根",
     "step_total_time": "00:05:00",
     "step_content": "將英式馬芬橫切並烤至酥脆金黃；同時將加拿大培根稍微煎香。",
-    "step_image_url": "/img/recipes/6/steps/5.jpg",
+    "step_image_url": "/img/recipes/6/steps/5.png",
     "is_modified": false
   },
   {
@@ -386,7 +386,7 @@
     "step_title": "組合與裝飾",
     "step_total_time": "00:02:00",
     "step_content": "依序放上馬芬、培根、水波蛋，淋上豐厚的荷蘭醬，最後撒上少許紅椒粉即可。",
-    "step_image_url": "/img/recipes/6/steps/6.jpg",
+    "step_image_url": "/img/recipes/6/steps/6.png",
     "is_modified": false
   },
   {
@@ -396,7 +396,7 @@
     "step_title": "加熱高湯",
     "step_total_time": "00:05:00",
     "step_content": "將豚骨高湯倒入鍋中，以中火加熱至微沸狀態，保持熱度備用。",
-    "step_image_url": "/img/recipes/7/steps/1.jpg",
+    "step_image_url": "/img/recipes/7/steps/1.png",
     "is_modified": false
   },
   {
@@ -406,7 +406,7 @@
     "step_title": "預熱湯碗與底醬",
     "step_total_time": "00:02:00",
     "step_content": "在拉麵碗中倒入拉麵味醂醬汁。若有溫碗習慣，可先用熱水沖碗後倒掉再放醬汁。",
-    "step_image_url": "/img/recipes/7/steps/2.jpg",
+    "step_image_url": "/img/recipes/7/steps/2.png",
     "is_modified": false
   },
   {
@@ -416,7 +416,7 @@
     "step_title": "烹煮麵條",
     "step_total_time": "00:03:00",
     "step_content": "準備另一鍋大滾水，散開拉麵麵條放入，依照喜好的軟硬度煮約 2-3 分鐘。",
-    "step_image_url": "/img/recipes/7/steps/3.jpg",
+    "step_image_url": "/img/recipes/7/steps/3.png",
     "is_modified": false
   },
   {
@@ -426,7 +426,7 @@
     "step_title": "沖湯與濾麵",
     "step_total_time": "00:01:00",
     "step_content": "將沸騰的高湯沖入裝有醬汁的碗中攪拌均勻。將煮好的麵條徹底瀝乾水分放入湯中。",
-    "step_image_url": "/img/recipes/7/steps/4.jpg",
+    "step_image_url": "/img/recipes/7/steps/4.png",
     "is_modified": false
   },
   {
@@ -436,7 +436,7 @@
     "step_title": "整理麵條與配料",
     "step_total_time": "00:02:00",
     "step_content": "用筷子將麵條挑順整齊，依序擺上日式叉燒肉片、木耳絲與筍片。",
-    "step_image_url": "/img/recipes/7/steps/5.jpg",
+    "step_image_url": "/img/recipes/7/steps/5.png",
     "is_modified": false
   },
   {
@@ -446,7 +446,7 @@
     "step_title": "最終裝飾",
     "step_total_time": "00:01:00",
     "step_content": "將溏心蛋對切擺放，撒上青蔥花，並在碗邊插上兩片海苔，即可趁熱享用。",
-    "step_image_url": "/img/recipes/7/steps/6.jpg",
+    "step_image_url": "/img/recipes/7/steps/6.png",
     "is_modified": false
   },
   {
@@ -456,7 +456,7 @@
     "step_title": "處理鷹嘴豆與大蒜",
     "step_total_time": "00:03:00",
     "step_content": "將煮熟的鷹嘴豆充分瀝乾水分，放入食物處理機中；大蒜去皮切半後一同放入。",
-    "step_image_url": "/img/recipes/8/steps/1.jpg",
+    "step_image_url": "/img/recipes/8/steps/1.png",
     "is_modified": false
   },
   {
@@ -466,7 +466,7 @@
     "step_title": "初步攪碎",
     "step_total_time": "00:02:00",
     "step_content": "先將鷹嘴豆與大蒜攪打成粗碎狀，這有助於後續混合更均勻。",
-    "step_image_url": "/img/recipes/8/steps/2.jpg",
+    "step_image_url": "/img/recipes/8/steps/2.png",
     "is_modified": false
   },
   {
@@ -476,7 +476,7 @@
     "step_title": "加入核心醬料",
     "step_total_time": "00:02:00",
     "step_content": "加入塔希尼芝麻醬、檸檬汁、孜然粉與鹽巴。",
-    "step_image_url": "/img/recipes/8/steps/3.jpg",
+    "step_image_url": "/img/recipes/8/steps/3.png",
     "is_modified": false
   },
   {
@@ -486,7 +486,7 @@
     "step_title": "乳化與調整稠度",
     "step_total_time": "00:05:00",
     "step_content": "啟動處理機，在攪打過程中慢慢淋入橄欖油與冰水。冰水能讓豆泥顏色更白皙且質地更蓬鬆。",
-    "step_image_url": "/img/recipes/8/steps/4.jpg",
+    "step_image_url": "/img/recipes/8/steps/4.png",
     "is_modified": false
   },
   {
@@ -496,7 +496,7 @@
     "step_title": "裝盛與裝飾",
     "step_total_time": "00:03:00",
     "step_content": "將打好的豆泥挖入盤中，用湯匙背面壓出螺旋狀凹槽，淋上額外的橄欖油，可隨喜好撒上紅椒粉或搭配口袋餅享用。",
-    "step_image_url": "/img/recipes/8/steps/5.jpg",
+    "step_image_url": "/img/recipes/8/steps/5.png",
     "is_modified": false
   },
   {

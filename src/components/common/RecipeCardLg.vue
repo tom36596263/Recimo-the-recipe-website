@@ -1,7 +1,11 @@
 <script setup>
     import { markRaw, computed } from 'vue';
+    import { useRouter } from 'vue-router';
+
     import BaseTag from '@/components/common/BaseTag.vue';
     import BaseBtn from '@/components/common/BaseBtn.vue';
+    import LikeButton from '@/components/common/LikeButton.vue'
+
     import IconLocalFireDepartment from '~icons/material-symbols/Local-Fire-Department-outline';
     import IconramenDining from '~icons/material-symbols/Ramen-Dining-outline';
     import IconAlarm from '~icons/material-symbols/Alarm-outline';
@@ -13,6 +17,15 @@
             required: true
         }
     });
+
+    const router = useRouter();
+
+    const goToDetail = () => {
+        router.push({ 
+            name: 'workspace-recipe-detail', 
+            params: { id: props.recipe.id } 
+        });
+    };
 
     const recipeInfo = computed(() => [
         {
@@ -34,6 +47,11 @@
             unit: '分鐘'
         }
     ]);
+
+    const handleLikeChange = (isLiked, item) => {
+        console.log(`用戶對 ${item.userName} 的留言點讚狀態：`, isLiked);
+        // 這裡可以呼叫 API 更新後端數據
+    };
 </script>
 <template>
     <div class="recipe-card-lg">
@@ -44,10 +62,10 @@
         <div class="card-body">
             <div class="title">
                 <h3 class="zh-h3">{{ recipe.recipe_name }}</h3>
-                <i-material-symbols-thumb-up-outline />
+                <i-material-symbols-Favorite-outline @click.prevent.stop />
             </div>
             <div class="tag">
-                <BaseTag v-for="tag in recipe.tags" :key="tag" :text="tag"/>
+                <BaseTag v-for="tag in recipe.tags" :key="tag" :text="tag" />
             </div>
             <div class="recipe-info">
                 <div 
@@ -65,16 +83,21 @@
         
         <footer>
             <div class="personal-info">
-                <div class="personal-img">
+                <div class="personal-img"> 
                     <img :src="LogoBlack" alt="">
                 </div>
                 <p class="p-p1">Recimo</p>
-                <i-material-symbols-thumb-up-outline />
-                <span class="en-h3">{{ recipe.author.likes }}</span>
+                <div @click.prevent.stopp>
+                    <LikeButton 
+                    :initial-likes="recipe.author.likes || 0" 
+                    @update:liked="(val) => handleLikeChange(val, item)"
+                    />
+                </div>
+                
             </div>
             
             <div class="btn-group">
-                <BaseBtn title="加入收藏" variant="outline" height="30"/>
+                <BaseBtn title="食譜詳情" variant="solid" height="30" @click="goToDetail" class="btn" />
             </div>
             
         </footer>
@@ -88,9 +111,18 @@
         background-color: $neutral-color-white;
         .card-header{
             overflow: hidden;
+            height: 320px;
+            width: 100%;
             img{
+                width:fit-content;
+                object-fit: cover;
+                display: block;
                 width: 100%;
-                height: 320px;
+                height: 100%;
+                transition: .3s ease;
+                &:hover{
+                    scale: 1.1;
+                }
             }
         }
         .card-body{
@@ -102,6 +134,10 @@
                 align-items: center;
                 margin-bottom: 6px;
                 color: $primary-color-700;
+            }
+            .icon-group{
+                display: flex;
+                gap: 12px;
             }
             .tag{
                 display: flex;
@@ -159,13 +195,18 @@
             }
         }
     }
-    @media screen and (max-width: 1200px){
+    @media screen and (max-width: 1300px){
         .recipe-card-lg{
             footer{
                 .btn{
                     width: 85px;
                 }
             }
+            // .btn-group{
+            //     .btn{
+            //         width: 100px;
+            //     }
+            // }
         }
     }
 </style>

@@ -11,8 +11,11 @@ const isReportModalOpen = ref(false);
 const isSuccessShow = ref(false);
 const activeComment = ref({ content: '', userName: '', time: '' });
 
+// --- 記錄目前哪一個 Index 的檢舉視窗是打開的 ---
+const reportingIndex = ref(null);
+
 // --- 簡單的點讚邏輯 ---
-const localLikes = reactive({}); // 記錄格式如 { 0: true, 1: false }
+const localLikes = reactive({});
 
 const toggleLike = (index) => {
     localLikes[index] = !localLikes[index];
@@ -27,12 +30,13 @@ const getAvatarStyle = (name) => {
 const handleSend = () => {
     if (!userInput.value.trim()) return;
     userInput.value = "";
-    isSuccessShow.value = true;
-    setTimeout(() => { isSuccessShow.value = false; }, 2000);
+    // 改為普通 alert
+    alert("感謝你的分享！為了維護社群品質，你的留言正在進行審核，通過後將會立即顯示在食譜頁面上。");
 };
 
-const openReport = (item) => {
+const openReport = (item, index) => {
     activeComment.value = { ...item };
+    reportingIndex.value = index;
     isReportModalOpen.value = true;
 };
 </script>
@@ -67,11 +71,13 @@ const openReport = (item) => {
                     <div class="comment-footer">
                         <button class="action-btn like-btn" :class="{ 'active': localLikes[index] }"
                             @click="toggleLike(index)">
-                            <i-material-symbols-thumb-up-outline class="action-icon" />
+                            <i-material-symbols-thumb-up-rounded v-if="localLikes[index]" class="action-icon" />
+                            <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
                             <span class="count">{{ (item.likes || 0) + (localLikes[index] ? 1 : 0) }}</span>
                         </button>
 
-                        <button class="action-btn report-btn" @click="openReport(item)">
+                        <button class="action-btn report-btn" :class="{ 'active': reportingIndex === index }"
+                            @click="openReport(item, index)">
                             <i-material-symbols:error-outline-rounded class="action-icon" />
                         </button>
                     </div>
@@ -79,28 +85,24 @@ const openReport = (item) => {
             </div>
         </div>
 
-        <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment" />
+        <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment"
+            @update:modelValue="val => !val && (reportingIndex = null)" />
 
-        <Transition name="fade">
-            <div v-if="isSuccessShow" class="toast">留言已成功發表！</div>
-        </Transition>
     </div>
 </template>
-
-
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
 .comment-section {
-    max-width: 800px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 32px 20px;
+    padding: 24px 20px; // 稍微增加上下 padding（原16px）
     font-family: "PingFang TC", sans-serif;
 }
 
 .section-title {
-    margin-bottom: 16px;
+    margin-bottom: 24px; // 稍微增加標題間距（原20px）
     color: $neutral-color-black;
 }
 
@@ -108,11 +110,11 @@ const openReport = (item) => {
     position: relative;
     display: flex;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 24px; // 增加輸入框下方間距（原16px）
 
     .styled-input {
         width: 100%;
-        padding: 10px 50px 10px 16px;
+        padding: 12px 50px 12px 16px; // 增加內距增加高度感（原8px）
         border: 1.5px solid $primary-color-700;
         border-radius: 12px;
         font-size: 15px;
@@ -144,23 +146,19 @@ const openReport = (item) => {
         &.active {
             color: $primary-color-700;
         }
-
-        &:disabled {
-            cursor: not-allowed;
-        }
     }
 }
 
 .comment-list {
     display: flex;
     flex-direction: column;
-    gap: 12px; 
+    gap: 12px; // 增加留言之間的距離（原5px）
 }
 
 .comment-item {
     display: flex;
     gap: 12px;
-    padding-bottom: 12px;
+    padding-bottom: 12px; // 增加底部間距（原8px）
     border-bottom: 1px solid $neutral-color-100;
 
     &:last-child {
@@ -168,14 +166,14 @@ const openReport = (item) => {
     }
 
     .user-avatar-text {
-        width: 40px;
+        width: 40px; // 頭像稍微調大（原36px）
         height: 40px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 600;
-        font-size: 16px;
+        font-size: 14px;
         flex-shrink: 0;
         user-select: none;
         border: 1px solid rgba(0, 0, 0, 0.05);
@@ -185,42 +183,33 @@ const openReport = (item) => {
         flex: 1;
 
         .comment-header {
-            margin-bottom: 2px;
+            margin-bottom: 4px; // 增加頭部間距（原0px）
 
             .user-name {
                 font-weight: 600;
                 margin-right: 6px;
-                color: $neutral-color-black;
+                color: $neutral-color-800;
             }
 
             .user-meta {
                 color: $neutral-color-400;
-                font-size: 13px;
+                font-size: 12px;
             }
         }
 
         .comment-text {
-            line-height: 1.5;
+            line-height: 1.6; // 增加文字行高（原1.4）
             color: $neutral-color-800;
-            margin-bottom: 4px;
+            margin-bottom: 8px; // 增加文字與下方按鈕間距（原2px）
             white-space: pre-line;
-        }
-
-        .comment-image-wrapper {
-            margin: 8px 0;
-
-            .result-image {
-                max-width: 200px;
-                border-radius: 8px;
-                display: block;
-            }
+            font-size: 14px;
         }
 
         .comment-footer {
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            gap: 8px;
+            gap: 16px; // 拉開 ICON 之間的距離（原8px）
 
             .action-btn {
                 background: none;
@@ -228,26 +217,30 @@ const openReport = (item) => {
                 cursor: pointer;
                 display: flex;
                 align-items: center;
-                color: $neutral-color-700; 
-                padding: 4px;
-                transition: color 0.2s;
+                color: $neutral-color-700;
+                padding: 4px; // 增加點擊範圍（原2px）
+                transition: all 0.2s ease;
 
                 .action-icon {
-                    font-size: 18px;
+                    font-size: 18px; // ICON 稍微放大（原16px）
                 }
 
                 .count {
                     margin-left: 4px;
-                    font-size: 14px;
-                    font-weight: 500;
+                    font-size: 13px;
                 }
 
                 &.like-btn:hover,
                 &.like-btn.active {
                     color: $primary-color-700;
+
+                    .action-icon {
+                        fill: currentColor;
+                    }
                 }
 
-                &.report-btn:hover {
+                &.report-btn:hover,
+                &.report-btn.active {
                     color: $secondary-color-danger-700;
                 }
             }
@@ -257,15 +250,15 @@ const openReport = (item) => {
 
 .toast {
     position: fixed;
-    bottom: 30px;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.8);
     color: $neutral-color-white;
-    padding: 10px 20px;
+    padding: 8px 16px;
     border-radius: 30px;
     z-index: 100;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .fade-enter-active,

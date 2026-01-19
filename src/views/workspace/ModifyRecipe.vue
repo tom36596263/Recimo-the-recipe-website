@@ -1,11 +1,12 @@
 <script setup>
 
+
 </script>
 
 <template>
-    <h1>test page</h1>
+    <h1>改編輯頁面</h1>
 </template>
 
-<style lang="scss" scoped>
+<style>
 
 </style>

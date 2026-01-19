@@ -6,7 +6,9 @@ import { defineStore } from 'pinia'
 import { useRouteName } from '@/composables/useRouteName'
 import { useCartStore } from '@/stores/cartStore'
 import ProductRmd from '@/components/mall/ProductRmd.vue';
-
+// 門禁守衛
+import { useAuthGuard } from '@/composables/useAuthGuard';
+const { runWithAuth } = useAuthGuard();
 // ==========================================
 // vue上課教：以後部屬比較不會有問題(資料放public的話)
 // ==========================================
@@ -49,9 +51,12 @@ const addToCart = () => {
 };
 
 const buyNow = () => {
-  if (productInfo.value) {
-    console.log("直接購買商品", productInfo.value.product_name, "數量", count.value);
-  }
+  runWithAuth(() => {
+    // 「確定登入後」才執行
+    if (productInfo.value) {
+      console.log("直接購買商品", productInfo.value.product_name, "數量", count.value);
+    }
+  });
 };
 
 // ==========================================
@@ -90,7 +95,7 @@ const fetchData = async () => {
       // 設定路由名稱（麵包屑或標題用）
       setDetailName(productInfo.value.product_name);
 
-      console.log("成功找到商品：", item.product_name);
+      // console.log("成功找到商品：", item.product_name);
     } else {
       console.warn("找不到該 ID 的商品資料，請確認 JSON 中的 product_id 值");
     }
@@ -277,7 +282,8 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/layouts/_grid.scss";
+@use "sass:map";
+@use "@/assets/scss/layouts/_grid.scss" as *;
 
 .product-detail-page {
   margin-top: 20px;
@@ -296,7 +302,7 @@ onUnmounted(() => {
   }
 
   // 在平板/手機版（堆疊狀態）時取消固定
-  @media screen and (max-width: map-get($breakpoints, "md")) {
+  @media screen and (max-width: map.get($breakpoints, "md")) {
     position: static;
   }
 }
@@ -312,7 +318,7 @@ onUnmounted(() => {
   overflow: hidden;
   border-radius: 10px;
 
-  @media screen and (max-width: map-get($breakpoints, "md")) {
+  @media screen and (max-width: map.get($breakpoints, "md")) {
     height: 430px; // 手機版回到原本設定的高度
     max-height: none;
   }
@@ -372,11 +378,11 @@ onUnmounted(() => {
   padding-left: 20px; // 增加與左側圖片的間距
 
   // 當螢幕變小時（變成上下堆疊），把間距拿掉，改為增加上方間距
-  @media screen and (max-width: map-get($breakpoints, "lg")) {
+  @media screen and (max-width: map.get($breakpoints, "lg")) {
     padding-left: 0;
   }
 
-  @media screen and (max-width: map-get($breakpoints, "md")) {
+  @media screen and (max-width: map.get($breakpoints, "md")) {
     margin-top: 30px;
   }
 }
@@ -488,7 +494,7 @@ td {
 .detail-recommend-section {
   margin-top: 100px;
 
-  @media screen and (max-width: map-get($breakpoints, "lg")) {
+  @media screen and (max-width: map.get($breakpoints, "lg")) {
     margin-top: 60px;
   }
 }

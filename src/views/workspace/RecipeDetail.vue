@@ -1,6 +1,10 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, computed, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { publicApi } from '@/utils/publicApi';
+import { useRecipeStore } from '@/stores/recipeEditor';
+
+// 引用元件 
 import RecipeSteps from '../../components/workspace/recipedetail/RecipeSteps.vue';
 import NutritionCard from '../../components/workspace/recipedetail/NutritionCard.vue';
 import RecipeIngredients from '../../components/workspace/recipedetail/RecipeIngredients.vue';
@@ -9,75 +13,165 @@ import CookSnap from '../../components/workspace/recipedetail/CookSnap.vue';
 import RecipeIntro from '../../components/workspace/recipedetail/RecipeIntro.vue';
 
 const route = useRoute();
+const router = useRouter();
+const recipeStore = useRecipeStore();
 
 // --- 1. 響應式資料狀態 ---
 const rawRecipe = ref(null);
 const rawIngredients = ref([]);
 const rawSteps = ref([]);
 const rawComments = ref([]);
-const rawGallery = ref([]); // 存儲成品照
+const rawGallery = ref([]);
 const servings = ref(1);
 const isLoading = ref(true);
 
-const ingredientNameMap = {
-    390: "高筋麵粉",
-    496: "酵母粉",
-    497: "溫水",
+const isLiked = ref(false);
+const localLikesOffset = ref(0);
+
+const isPreviewMode = computed(() => route.query.mode === 'preview');
+
+// --- 2. 功能函式 ---
+const toggleRecipeLike = () => {
+    if (isPreviewMode.value) return;
+    isLiked.value = !isLiked.value;
+    localLikesOffset.value = isLiked.value ? 1 : 0;
 };
 
-// --- 2. 資料獲取邏輯 ---
+const backToEdit = () => {
+    router.push('/workspace/edit-recipe');
+};
+
+// --- 3. fetchData 核心邏輯 ---
 const fetchData = async () => {
     isLoading.value = true;
-    const recipeId = Number(route.params.id) || 1;
+    rawRecipe.value = null;
+    rawIngredients.value = [];
+    rawSteps.value = [];
+
+    const recipeId = Number(route.params.id);
+
+    // ✨ 預覽模式攔截
+    if (isPreviewMode.value) {
+        const preview = recipeStore.previewData;
+        if (preview) {
+            rawRecipe.value = preview;
+            rawIngredients.value = preview.ingredients || [];
+            rawSteps.value = preview.steps || [];
+            rawComments.value = [];
+            rawGallery.value = [];
+            setTimeout(() => { isLoading.value = false; }, 300);
+            return;
+        } else {
+            router.replace('/workspace/edit-recipe');
+            return;
+        }
+    }
+
+    recipeStore.previewData = null;
 
     try {
         const [resR, resRecipeIng, resIngMaster, resS, resC, resG] = await Promise.all([
-            fetch('/data/recipe/recipes.json').then(r => r.json()),
-            fetch('/data/recipe/recipe_ingredient.json').then(r => r.json()),
-            fetch('/data/recipe/ingredients.json').then(r => r.json()),
-            fetch('/data/recipe/steps.json').then(r => r.json()),
-            fetch('/data/social/comments.json').then(r => r.json()),
-            fetch('/data/social/gallery.json').then(r => r.json())
+            publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/recipe/recipe_ingredient.json'),
+            publicApi.get('data/recipe/ingredients.json'),
+            publicApi.get('data/recipe/steps.json'),
+            publicApi.get('data/social/comments.json'),
+            publicApi.get('data/social/gallery.json')
         ]);
 
-        rawRecipe.value = resR.find(r => Number(r.recipe_id) === recipeId) || null;
+        const found = resR.data.find(r => Number(r.recipe_id) === recipeId);
+        if (!found) {
+            rawRecipe.value = null;
+            return;
+        }
+        rawRecipe.value = found;
 
-        const filteredLinks = resRecipeIng.filter(i => Number(i.recipe_id) === recipeId);
+        const filteredLinks = resRecipeIng.data.filter(i => Number(i.recipe_id) === recipeId);
         rawIngredients.value = filteredLinks.map(link => {
-            const masterInfo = resIngMaster.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
+            const masterInfo = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
             return {
                 ...link,
-                ingredient_name: masterInfo?.ingredient_name || ingredientNameMap[link.ingredient_id] || `食材 ID: ${link.ingredient_id}`,
+                ingredient_name: masterInfo?.ingredient_name || `食材 ID: ${link.ingredient_id}`,
                 calories_per_100g: masterInfo?.kcal_per_100g || 0,
                 protein_per_100g: masterInfo?.protein_per_100g || 0,
                 fat_per_100g: masterInfo?.fat_per_100g || 0,
                 carbs_per_100g: masterInfo?.carbs_per_100g || 0,
-                default_unit: masterInfo?.unit_name || link.unit_name
+                unit_name: link.unit_name || masterInfo?.unit_name || '份',
+                note: link.remark || ''
             };
         });
 
-        rawSteps.value = resS.filter(s => Number(s.recipe_id) === recipeId)
-            .sort((a, b) => a.step_order - b.step_order);
+        rawSteps.value = resS.data.filter(s => Number(s.recipe_id) === recipeId)
+            .sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
 
-        rawComments.value = resC.filter(c => Number(c.RECIPE_ID) === recipeId);
+        rawComments.value = resC.data.filter(c => Number(c.RECIPE_ID) === recipeId);
+        const galleryRaw = resG.data.data || resG.data;
+        rawGallery.value = galleryRaw.filter(g => Number(g.RECIPE_ID) === recipeId);
+        servings.value = 1;
 
-        // 處理成品照片
-        const galleryData = resG.data || resG;
-        rawGallery.value = galleryData.filter(g => Number(g.RECIPE_ID) === recipeId);
-
-        if (rawRecipe.value) {
-            servings.value = rawRecipe.value.recipe_servings;
-        }
-    } catch (error) {
-        console.error("資料讀取失敗:", error);
+    } catch (err) {
+        console.error('API 讀取失敗：', err);
     } finally {
         setTimeout(() => { isLoading.value = false; }, 100);
     }
 };
 
-watch(() => route.params.id, () => fetchData(), { immediate: true });
+onMounted(() => { fetchData(); });
 
-// --- 3. 功能邏輯 ---
+watch(() => [route.params.id, route.query.mode], () => {
+    fetchData();
+}, { deep: true });
+
+// --- 4. 計算屬性 (重點修正區) ---
+
+// 修正主圖與基本資訊
+const recipeIntroData = computed(() => {
+    if (!rawRecipe.value) return null;
+    return {
+        // 兼容 recipe_title (API) 或 title (編輯器)
+        title: rawRecipe.value.recipe_title || rawRecipe.value.title || '未命名食譜',
+        // ✨ 核心修正：主圖多欄位判斷
+        image: rawRecipe.value.recipe_image_url || rawRecipe.value.coverImg || rawRecipe.value.recipe_cover_image,
+        time: formatTime(rawRecipe.value.recipe_total_time),
+        difficulty: rawRecipe.value.recipe_difficulty || rawRecipe.value.difficulty || 1,
+        description: rawRecipe.value.recipe_descreption || rawRecipe.value.recipe_description || rawRecipe.value.description || '暫無簡介'
+    };
+});
+
+const stepsData = computed(() => {
+    if (!rawSteps.value || rawSteps.value.length === 0) return [];
+
+    const rId = rawRecipe.value?.recipe_id || route.params.id || '0';
+
+    return rawSteps.value.map((s, index) => {
+        let rawImg = s.step_image_url || s.image || s.img || '';
+        let finalImg = '';
+
+        // ✨ 修正點：確保 rawImg 是字串且不為空
+        if (rawImg && typeof rawImg === 'string' && rawImg.length > 0) {
+            if (rawImg.startsWith('data:') || rawImg.startsWith('http')) {
+                finalImg = rawImg;
+            } else {
+                // 移除開頭斜線並檢查是否已包含完整路徑
+                let cleanPath = rawImg.replace(/^\//, '');
+                if (cleanPath.includes('img/recipes/')) {
+                    finalImg = `/${cleanPath}`;
+                } else {
+                    finalImg = `/img/recipes/${rId}/steps/${cleanPath}`;
+                }
+            }
+        }
+
+        return {
+            id: s.step_id || s.id || `s-${index}`,
+            title: s.step_title || s.title || `步驟 ${index + 1}`,
+            content: s.step_content || s.content || s.text || '',
+            image: finalImg, // 確保這裡叫 image，子組件才吃得到
+            time: s.step_total_time || s.time || '',
+            tags: s.tags || []
+        };
+    });
+});
 
 const commentList = computed(() => {
     return rawComments.value.map(c => ({
@@ -90,26 +184,23 @@ const commentList = computed(() => {
     }));
 });
 
-const snapsData = computed(() => {
-    return rawGallery.value.map(g => ({
-        url: g.GALLERY_URL,
-        comment: g.GALLERY_TEXT
-    }));
-});
+const baseRecipeLikes = ref(0);
+watch(rawRecipe, (newVal) => {
+    if (newVal) {
+        baseRecipeLikes.value = isPreviewMode.value ? 0 : Math.floor(Math.random() * 200) + 50;
+    }
+}, { immediate: true });
+
+const displayRecipeLikes = computed(() => baseRecipeLikes.value + localLikesOffset.value);
+const snapsData = computed(() => rawGallery.value.map(g => ({ url: g.GALLERY_URL, comment: g.GALLERY_TEXT })));
 
 const handleShare = async () => {
+    if (isPreviewMode.value) return;
     const title = recipeIntroData.value?.title || '美味食譜';
     const url = window.location.href;
     if (navigator.share) {
-        try {
-            await navigator.share({
-                title: title,
-                text: `我在 Recimo 看到一個很棒的食譜：${title}`,
-                url: url
-            });
-        } catch (err) {
-            console.log('分享取消');
-        }
+        try { await navigator.share({ title, text: `我在 Recimo 看到一個很棒的食譜：${title}`, url }); }
+        catch (err) { console.log('分享取消'); }
     } else {
         await navigator.clipboard.writeText(url);
         alert('連結已複製到剪貼簿！');
@@ -119,35 +210,23 @@ const handleShare = async () => {
 const formatTime = (timeStr) => {
     if (!timeStr) return '0 分鐘';
     const parts = timeStr.split(':');
+    if (parts.length < 2) return `${timeStr} 分鐘`;
     const hours = parseInt(parts[0]);
     const minutes = parseInt(parts[1]);
     return hours > 0 ? `${hours} 小時 ${minutes} 分鐘` : `${minutes} 分鐘`;
 };
 
-const recipeIntroData = computed(() => {
-    if (!rawRecipe.value) return null;
-    return {
-        title: rawRecipe.value.recipe_title,
-        image: rawRecipe.value.recipe_image_url,
-        time: formatTime(rawRecipe.value.recipe_total_time),
-        difficulty: rawRecipe.value.recipe_difficulty,
-        description: rawRecipe.value.recipe_descreption
-    };
-});
-
-const ingredientsData = computed(() => {
-    return rawIngredients.value.map(item => ({
-        INGREDIENT_NAME: item.ingredient_name,
-        amount: item.amount,
-        unit_name: item.unit_name || item.default_unit,
-        note: item.note || '',
-        calories_per_100g: item.calories_per_100g,
-        protein_per_100g: item.protein_per_100g,
-        fat_per_100g: item.fat_per_100g,
-        carbs_per_100g: item.carbs_per_100g,
-        unit_weight: 1
-    }));
-});
+const ingredientsData = computed(() => rawIngredients.value.map(item => ({
+    INGREDIENT_NAME: item.ingredient_name,
+    amount: item.amount,
+    unit_name: item.unit_name,
+    note: item.note || '',
+    calories_per_100g: item.calories_per_100g || 0,
+    protein_per_100g: item.protein_per_100g || 0,
+    fat_per_100g: item.fat_per_100g || 0,
+    carbs_per_100g: item.carbs_per_100g || 0,
+    unit_weight: 1
+})));
 
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value) return [];
@@ -161,24 +240,21 @@ const nutritionWrapper = computed(() => {
     }];
 });
 
-const stepsData = computed(() => {
-    return rawSteps.value.map(s => ({
-        title: s.step_title,
-        content: s.step_content,
-        image: (s.step_image_url || '').replace(/\.jpg$/i, '.png')
-    }));
-});
-
-const handleServingsChange = (newVal) => {
-    servings.value = newVal;
-};
+const handleServingsChange = (newVal) => { servings.value = newVal; };
 </script>
 
 <template>
+    <div v-if="isPreviewMode" class="preview-sticky-bar">
+        <div class="container bar-content">
+            <span class="p-p2">✨ 正在預覽食譜草稿（尚未儲存）</span>
+            <button class="exit-preview-btn p-p3" @click="backToEdit">返回編輯</button>
+        </div>
+    </div>
+
     <div class="recipe-container-root" v-if="!isLoading && rawRecipe">
         <main class="container">
             <header class="page-header">
-                <router-link :to="`/workspace/modify-recipe/${rawRecipe.recipe_id}`">
+                <router-link v-if="!isPreviewMode" :to="`/workspace/modify-recipe/${rawRecipe.recipe_id}`">
                     <BaseBtn title="改編集+" variant="outline" height="30" class="w-auto" />
                 </router-link>
             </header>
@@ -188,18 +264,20 @@ const handleServingsChange = (newVal) => {
                     <i-material-symbols-restaurant-rounded class="main-icon" />
                     {{ recipeIntroData.title }}
                 </div>
-                <div class="icon-group">
-                    <i-material-symbols:edit-outline-rounded class="action-icon" />
-                    <i-material-symbols-thumb-up-outline class="action-icon" />
+                <div class="icon-group" :class="{ 'is-preview': isPreviewMode }">
+                    <div class="action-item" :class="{ 'active': isLiked }" @click="toggleRecipeLike">
+                        <i-material-symbols-thumb-up-rounded v-if="isLiked" class="action-icon" />
+                        <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
+                        <span class="count-text">{{ displayRecipeLikes }}</span>
+                    </div>
                     <i-material-symbols-share-outline class="action-icon" @click="handleShare" />
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-7 col-lg-12">
-                    <section class="mb-10">
-                        <RecipeIntro :info="recipeIntroData" />
-                    </section>
+                    <RecipeIntro :info="recipeIntroData" :is-preview="isPreviewMode" />
+
                     <div class="d-lg-none">
                         <section class="mb-10">
                             <NutritionCard :servings="servings" :ingredients="nutritionWrapper"
@@ -209,6 +287,7 @@ const handleServingsChange = (newVal) => {
                             <RecipeIngredients :servings="servings" :list="ingredientsData" />
                         </section>
                     </div>
+
                     <section class="mb-10 steps-section">
                         <RecipeSteps :steps="stepsData" />
                     </section>
@@ -224,12 +303,12 @@ const handleServingsChange = (newVal) => {
                             <RecipeIngredients :servings="servings" :list="ingredientsData" />
                         </section>
                     </div>
-                    <section class="mb-10">
+                    <section v-if="!isPreviewMode" class="mb-10">
                         <RecipeComments :list="commentList" />
                     </section>
                 </div>
 
-                <div class="col-12 cook-snap-full">
+                <div v-if="!isPreviewMode" class="col-12 cook-snap-full">
                     <section class="mb-10 content-wrapper">
                         <CookSnap :list="snapsData" />
                     </section>
@@ -241,7 +320,6 @@ const handleServingsChange = (newVal) => {
     <div v-else-if="isLoading" class="loading-state">
         <p>正在為您準備食譜資料...</p>
     </div>
-
     <div v-else class="error-state">
         <p>抱歉，找不到該食譜資料 (ID: {{ route.params.id }})。</p>
         <router-link to="/">返回首頁</router-link>
@@ -249,24 +327,48 @@ const handleServingsChange = (newVal) => {
 </template>
 
 <style lang="scss" scoped>
-/* 樣式保持不變 */
 @import '@/assets/scss/abstracts/_color.scss';
 
-.loading-state,
-.error-state {
-    text-align: center;
-    padding: 100px 0;
-    color: $primary-color-700;
+.preview-sticky-bar {
+    position: sticky;
+    top: 0;
+    z-index: 2000;
+    background-color: $primary-color-400;
+    color: white;
+    padding: 10px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    .bar-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        span {
+            color: $neutral-color-white;
+        }
+
+        .exit-preview-btn {
+            background-color: $neutral-color-white;
+            color: $primary-color-700;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+
+            &:hover {
+                background-color: $primary-color-100;
+                transform: translateY(-1px);
+            }
+        }
+    }
 }
 
 .recipe-container-root {
     background-color: $neutral-color-white;
     min-height: 100vh;
     padding: 0 0 100px 0;
-
-    @media screen and (max-width: 810px) {
-        padding-top: 10px !important;
-    }
 }
 
 .page-header {
@@ -279,8 +381,6 @@ const handleServingsChange = (newVal) => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
     padding: 20px 0;
     margin-bottom: 20px;
     border-bottom: 1px solid $neutral-color-100;
@@ -289,48 +389,61 @@ const handleServingsChange = (newVal) => {
         display: flex;
         align-items: center;
         gap: 12px;
-        color: $neutral-color-black;
-        margin: 0;
 
         .main-icon {
             font-size: 24px;
-            flex-shrink: 0;
             color: $neutral-color-black;
-        }
-
-        @media screen and (max-width: 1024px) {
-            width: 100%;
         }
     }
 
     .icon-group {
         display: flex;
         align-items: center;
-        gap: 20px !important;
+        gap: 20px;
         color: $primary-color-700;
 
-        @media screen and (max-width: 1024px) {
-            width: 100%;
-            justify-content: flex-start;
-            margin-top: 10px;
+        &.is-preview {
+            opacity: 0.6;
+
+            .action-item,
+            .action-icon {
+                cursor: not-allowed;
+                pointer-events: none;
+            }
         }
 
-        .action-icon,
-        svg {
-            font-size: 24px;
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             cursor: pointer;
-            transition: color 0.2s;
-            flex-shrink: 0;
+
+            &.active {
+                color: $primary-color-700;
+
+                .action-icon {
+                    fill: $primary-color-700;
+                }
+            }
 
             &:hover {
                 color: $primary-color-400;
             }
         }
+
+        .count-text {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .action-icon {
+            font-size: 24px;
+        }
     }
 }
 
 .cook-snap-full {
-    display: flex !important;
+    display: flex;
     justify-content: center;
     width: 100%;
     margin-top: 40px;
@@ -345,10 +458,13 @@ const handleServingsChange = (newVal) => {
 
 .steps-section {
     margin-top: 40px;
+}
 
-    @media screen and (max-width: 810px) {
-        margin-top: 20px !important;
-    }
+.loading-state,
+.error-state {
+    text-align: center;
+    padding: 100px 0;
+    color: $primary-color-700;
 }
 
 .d-lg-none {
@@ -361,13 +477,5 @@ const handleServingsChange = (newVal) => {
     @media screen and (max-width: 1024px) {
         display: none !important;
     }
-}
-
-:global(.workspace-layout),
-:global(.workspace-layout .page-content),
-:global(html, body) {
-    height: auto !important;
-    overflow: visible !important;
-    overflow-y: auto !important;
 }
 </style>

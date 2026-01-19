@@ -6,19 +6,64 @@ const activeStepId = ref(null);
 
 const showTimerPop = ref(false);
 const showIngPop = ref(false);
-const popStyle = ref({ top: '0px', left: '0px', position: 'absolute' });
+const popStyle = ref({ top: '0px', left: '0px', position: 'fixed' });
+
+// --- ✨ 圖片解析 ---
+const getStepImage = (step) => {
+  if (!step) return null;
+  const imgSource = step.image;
+  if (imgSource && typeof imgSource === 'string' && imgSource.trim().length > 0) {
+    if (imgSource.startsWith('data:') || imgSource.startsWith('http')) return imgSource;
+    let path = imgSource.trim();
+    if (!path.startsWith('/') && !path.startsWith('.')) path = `/${path}`;
+    return path;
+  }
+  return null;
+};
+
+const handleImgError = (e) => {
+  const img = e.target;
+  if (img.dataset.tried === 'true') {
+    img.src = 'https://placehold.co/150x120?text=No+Image';
+    return;
+  }
+  img.dataset.tried = 'true';
+  const currentSrc = img.src;
+  if (currentSrc.toLowerCase().endsWith('.png')) img.src = currentSrc.replace(/\.png$/i, '.jpg');
+  else if (currentSrc.toLowerCase().endsWith('.jpg')) img.src = currentSrc.replace(/\.jpg$/i, '.png');
+  else img.src = 'https://placehold.co/150x120?text=No+Image';
+};
+
+const toggleBodyScroll = (isLock) => {
+  if (isLock) {
+    const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = `${scrollBarWidth}px`;
+  } else {
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+  }
+};
 
 const addStep = () => {
-  props.steps.push({ id: 's' + Date.now(), title: '', text: '', time: 0, tags: [], img: null });
+  props.steps.push({
+    id: 's' + Date.now(),
+    title: '',
+    content: '',
+    image: null,
+    time: null,
+    tags: []
+  });
 };
 
 const removeStep = (id) => {
-  const index = props.steps.findIndex(s => s.id === id);
+  const index = props.steps.findIndex(s => (s.id || s.step_id) === id);
   if (index !== -1) props.steps.splice(index, 1);
 };
 
 const toggleTag = (step, ingId) => {
   if (!step) return;
+  if (!step.tags) step.tags = [];
   const index = step.tags.indexOf(ingId);
   if (index === -1) step.tags.push(ingId);
   else step.tags.splice(index, 1);
@@ -30,9 +75,13 @@ const uploadStepImg = (step) => {
   input.type = 'file';
   input.accept = 'image/*';
   input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
     const reader = new FileReader();
-    reader.onload = (f) => step.img = f.target.result;
-    reader.readAsDataURL(e.target.files[0]);
+    reader.onload = (f) => {
+      step.image = f.target.result;
+    };
+    reader.readAsDataURL(file);
   };
   input.click();
 };
@@ -40,353 +89,366 @@ const uploadStepImg = (step) => {
 const openPop = (e, stepId, type) => {
   if (!props.isEditing) return;
   activeStepId.value = stepId;
-  
   const rect = e.currentTarget.getBoundingClientRect();
-  
-  // RWD 彈窗定位邏輯：手機版固定在螢幕中央，桌面版跟隨按鈕
-  if (window.innerWidth <= 810) {
-    popStyle.value = { 
-      top: '50%', 
-      left: '50%', 
-      transform: 'translate(-50%, -50%)',
-      position: 'fixed' 
-    };
-  } else {
-    popStyle.value = { 
-      top: `${rect.bottom + window.scrollY + 8}px`, 
-      left: `${rect.left + window.scrollX}px`,
-      transform: 'none',
-      position: 'absolute' 
-    };
-  }
-  
-  if (type === 'timer') {
-    showTimerPop.value = !showTimerPop.value;
-    showIngPop.value = false;
-  } else {
-    showIngPop.value = !showIngPop.value;
-    showTimerPop.value = false;
-  }
+  popStyle.value = { top: `${rect.bottom + 8}px`, left: `${rect.left}px`, position: 'fixed', zIndex: 9999 };
+  if (type === 'timer') { showTimerPop.value = true; showIngPop.value = false; }
+  else { showIngPop.value = true; showTimerPop.value = false; }
+  toggleBodyScroll(true);
 };
 
 const closePops = () => {
   showTimerPop.value = false;
   showIngPop.value = false;
+  toggleBodyScroll(false);
 };
 
-const getActiveStep = () => props.steps.find(s => s.id === activeStepId.value);
+const getActiveStep = () => props.steps.find(s => (s.id || s.step_id) === activeStepId.value);
 
 onMounted(() => window.addEventListener('click', closePops));
-onUnmounted(() => window.removeEventListener('click', closePops));
+onUnmounted(() => {
+  window.removeEventListener('click', closePops);
+  toggleBodyScroll(false);
+});
 </script>
 
 <template>
-  <div class="container">
-    <div class="step-editor">
-      <div class="section-header">
-        <h2 class="zh-h4-bold">烹飪步驟</h2>
-      </div>
+  <div class="step-editor-container">
+    <div class="section-header">
+      <h2 class="header-title zh-h4-bold">烹飪步驟</h2>
+    </div>
 
-      <div class="step-list">
-        <div v-for="(step, idx) in steps" :key="step.id" class="step-item">
-          
-          <div class="step-sidebar">
-            <div v-if="isEditing" class="drag-handle">
-              <svg width="12" height="18" viewBox="0 0 12 18" fill="none"><circle cx="2" cy="2" r="2" fill="#CBD5E1"/><circle cx="2" cy="9" r="2" fill="#CBD5E1"/><circle cx="2" cy="16" r="2" fill="#CBD5E1"/><circle cx="10" cy="2" r="2" fill="#CBD5E1"/><circle cx="10" cy="9" r="2" fill="#CBD5E1"/><circle cx="10" cy="16" r="2" fill="#CBD5E1"/></svg>
-            </div>
-            <div class="step-number-badge p-p3">{{ idx + 1 }}</div>
+    <div class="step-list">
+      <div v-for="(step, idx) in steps" :key="step.id || idx" class="step-item-outer">
+        <div class="step-sidebar">
+          <div v-if="isEditing" class="drag-dots">⋮⋮</div>
+          <div class="step-number p-p2">{{ idx + 1 }}</div>
+        </div>
+
+        <div class="step-card">
+          <div class="card-header">
+            <input v-if="isEditing" v-model="step.title" class="step-title-input zh-h4" placeholder="步驟標題" />
+            <span v-else class="step-title-display zh-h4-bold">
+              {{ step.title || ('步驟 ' + (idx + 1)) }}
+            </span>
+            <button v-if="isEditing" class="delete-step" @click="removeStep(step.id)">✕</button>
           </div>
 
-          <div class="step-card">
-            <div class="card-header-row">
-              <input 
-                v-if="isEditing" 
-                v-model="step.title" 
-                class="zh-h5 title-input" 
-                placeholder="請輸入該步驟標題..."
-              >
-              <div v-else class="zh-h5 title-text">{{ step.title || '步驟標題' }}</div>
-              
-              <button v-if="isEditing" @click="removeStep(step.id)" class="btn-remove p-p3">✕</button>
+          <div class="card-content">
+            <div class="image-uploader-area">
+              <div class="image-box" @click="uploadStepImg(step)">
+                <img v-if="getStepImage(step)" :src="getStepImage(step)" class="step-img" @error="handleImgError" />
+                <div v-else class="image-placeholder">
+                  <span class="plus">+</span>
+                  <span class="text p-p3">新增圖片</span>
+                </div>
+                <div v-if="getStepImage(step) && isEditing" class="change-hint">
+                  <span>更換圖片</span>
+                </div>
+              </div>
             </div>
 
-            <hr class="card-divider">
+            <div class="step-info">
+              <div class="tag-row">
+                <BaseTag :text="step.time ? `${step.time} 分鐘` : '+ 時間'" variant="action" :show-icon="false" width="85px"
+                  @click.stop="openPop($event, step.id || idx, 'timer')" />
+                <BaseTag text="食材" variant="action" width="85px" @click.stop="openPop($event, step.id || idx, 'ing')" />
 
-            <div class="card-body row">
-              <div class="col-4 col-md-12">
-                <div 
-                  class="step-image-uploader" 
-                  @click="uploadStepImg(step)"
-                  :style="{ backgroundImage: step.img ? `url(${step.img})` : '' }"
-                >
-                  <div v-if="!step.img" class="upload-placeholder">
-                    <span class="plus-icon">+</span>
-                    <span class="p-p3">新增圖片</span>
-                  </div>
+                <div v-for="tid in (step.tags || [])" :key="tid" class="selected-ing-wrapper">
+                  <BaseTag variant="label" width="auto">
+                    <div class="ing-tag-content">
+                      <span class="ing-icon">🍳</span>
+                      <span class="ing-name p-p3">{{ingredients?.find(i => i.id === tid)?.name || '食材'}}</span>
+                      <span v-if="isEditing" class="tag-close-icon" @click.stop="toggleTag(step, tid)">✕</span>
+                    </div>
+                  </BaseTag>
                 </div>
               </div>
 
-              <div class="col-8 col-md-12">
-                <div class="step-info-column">
-                  <div class="tag-action-row">
-                    <BaseTag 
-                      :text="step.time > 0 ? `${step.time} 分鐘` : '時間'" 
-                      variant="action" 
-                      :class="['btn-timer-tag', { 'is-active': step.time > 0 }]"
-                      @click.stop="openPop($event, step.id, 'timer')" 
-                    />
-                    
-                    <BaseTag 
-                      text="食材" 
-                      variant="action" 
-                      :class="['btn-ingredient-tag', { 'is-active': step.tags.length > 0 }]"
-                      @click.stop="openPop($event, step.id, 'ing')" 
-                    />
-                    
-                    <div v-for="tid in step.tags" :key="tid" class="selected-tag p-p3">
-                      {{ ingredients.find(i => i.id === tid)?.name }}
-                      <span v-if="isEditing" class="tag-del" @click.stop="toggleTag(step, tid)">✕</span>
-                    </div>
-                  </div>
-
-                  <textarea 
-                    v-if="isEditing" 
-                    v-model="step.text" 
-                    class="p-p3 desc-textarea" 
-                    placeholder="請輸入該步驟內容..."
-                  ></textarea>
-                  <div v-else class="p-p3 desc-display">{{ step.text || '暫無內容描述' }}</div>
-                </div>
+              <textarea v-if="isEditing" v-model="step.content" class="step-textarea p-p2"
+                placeholder="詳細說明步驟內容..."></textarea>
+              <div v-else class="step-text-display p-p2">
+                {{ step.content || '無步驟說明' }}
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div v-if="isEditing" class="footer-actions">
-        <BaseBtn 
-          title="+ 新增步驟"
-          variant="outline" 
-          height="40" 
-          class="full-width-btn zh-h5" 
-          @click="addStep" 
-        />
-      </div>
+    <div v-if="isEditing" class="add-step-wrapper">
+      <button class="add-step-btn p-p2" @click="addStep">+ 新增步驟</button>
     </div>
   </div>
 
   <div v-if="showIngPop" :style="popStyle" class="popover-box" @click.stop>
-    <div class="p-p3 popover-title">選擇食材</div>
+    <div class="popover-title p-p2">選擇食材</div>
     <div class="popover-content">
-      <button v-for="i in ingredients" :key="i.id" @click="toggleTag(getActiveStep(), i.id)" class="p-p3 chip" :class="{ active: getActiveStep()?.tags.includes(i.id) }">{{ i.name }}</button>
+      <button v-for="i in ingredients" :key="i.id" @click="toggleTag(getActiveStep(), i.id)" class="chip p-p3"
+        :class="{ active: getActiveStep()?.tags?.includes(i.id) }">
+        {{ i.name }}
+      </button>
     </div>
   </div>
 
-  <div v-if="showTimerPop" :style="popStyle" class="popover-box timer-box" @click.stop>
-    <div class="p-p3 popover-title">設定時間 (分)</div>
-    <div class="timer-ui">
-      <input type="number" v-model="getActiveStep().time" class="zh-h3">
-      <div class="timer-btns">
-        <button @click="getActiveStep().time += 5">+5</button>
-        <button @click="getActiveStep().time = Math.max(0, getActiveStep().time - 5)">-5</button>
+  <div v-if="showTimerPop" :style="popStyle" class="popover-box" @click.stop>
+    <div class="popover-title p-p2">設定烹飪時間</div>
+    <div class="popover-content" style="display: flex; flex-direction: column; gap: 12px; padding: 10px 0;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <input type="number" v-model.number="getActiveStep().time"
+          style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; outline: none;" placeholder="輸入分鐘"
+          @keyup.enter="closePops" />
+        <span class="p-p3">分鐘</span>
       </div>
+      <button @click="closePops"
+        style="background: #3E8D60; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer;">確定</button>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-// 這裡引用你的斷點設定
-$md: 810px;
+@import '@/assets/scss/abstracts/_color.scss';
 
-.step-editor {
-  margin: 10px auto;
+.step-editor-container {
   width: 100%;
+  margin-bottom: 50px;
+}
 
-  .section-header {
-    margin-bottom: 24px;
-    .header-line { border: 0; border-top: 1px solid #10B981; margin-top: 12px; opacity: 0.3; }
+.section-header {
+  margin-bottom: 24px;
+
+  .header-title {
+    color: $primary-color-800;
+    border-bottom: 1.5px solid $primary-color-400;
+    padding-bottom: 12px;
+  }
+}
+
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.step-item-outer {
+  display: flex;
+  gap: 15px;
+}
+
+.image-box {
+  width: 150px;
+  height: 120px;
+  background: $neutral-color-100;
+  border: 1.5px dashed $neutral-color-400;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .step-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-  .step-list {
+  .image-placeholder {
     display: flex;
     flex-direction: column;
-    gap: 32px;
-    margin-bottom: 32px;
-  }
+    align-items: center;
+    color: $neutral-color-400;
 
-  .step-item {
-    display: flex;
-    gap: 16px;
-    @media (max-width: $md) { gap: 8px; }
-
-    .step-sidebar {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 14px;
-      gap: 12px;
-      width: 40px;
-      flex-shrink: 0;
-      .drag-handle { cursor: grab; display: flex; align-items: center; }
-      .step-number-badge {
-        width: 32px;
-        height: 32px;
-        background: $primary-color-100;
-        color: $primary-color-700;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-    }
-
-    .step-card {
-      flex: 1;
-      background: $neutral-color-white;
-      border: 1px solid $neutral-color-400;
-      border-radius: 10px;
-      padding: 24px;
-      @media (max-width: $md) { padding: 16px; }
-
-      .card-header-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        .title-input { flex: 1; border: none; outline: none; background: transparent; }
-        .btn-remove { background: none; border: none; color: $secondary-color-danger-700; cursor: pointer; }
-      }
-
-      .card-divider { border: 0; border-top: 1px solid $primary-color-700; margin: 16px 0; }
-
-      .card-body {
-        // 使用 row 之後會覆蓋 display: flex
-        .step-image-uploader {
-          width: 100%;
-          max-width: 130px;
-          aspect-ratio: 1 / 1;
-          background-color: $neutral-color-100;
-          background-size: cover;
-          background-position: center;
-          border-radius: 10px;
-          border: 1px dashed $neutral-color-400;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          margin-bottom: 0;
-          
-          @media (max-width: $md) {
-            max-width: 100%;
-            height: 180px;
-            margin-bottom: 16px;
-          }
-
-          .upload-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: $neutral-color-400;
-            .plus-icon { font-size: 24px; margin-bottom: 4px; }
-          }
-        }
-
-        .step-info-column {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-
-          .tag-action-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-
-            :deep(.btn-timer-tag) {
-              background-color: $neutral-color-100 ; 
-              color: $neutral-color-800 ;           
-              border: 1px solid transparent ;
-              cursor: pointer;
-              transition: all 0.2s;
-            }
-
-            :deep(.btn-ingredient-tag) {
-              background-color: $neutral-color-white ; 
-              color: $primary-color-700 ;            
-              border: 1px solid $primary-color-400;
-              cursor: pointer;
-              transition: all 0.2s;
-            }
-
-            .selected-tag {
-              background: $primary-color-100;
-              padding: 4px 12px;
-              border-radius: 10px;
-              display: flex;
-              align-items: center;
-              gap: 6px;
-              .tag-del { color: $neutral-color-800; cursor: pointer; font-size: 14px; }
-            }
-          }
-
-          .desc-textarea, .desc-display {
-            width: 100%;
-            min-height: 80px;
-            border: none;
-            resize: none;
-            outline: none;
-            background: transparent;
-            line-height: 1.6;
-          }
-        }
-      }
+    .plus {
+      font-size: 24px;
     }
   }
 
-  .footer-actions {
+  .change-hint {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    opacity: 0;
     display: flex;
+    align-items: center;
     justify-content: center;
-    margin-top: 24px;
-    padding-left: 56px; 
-    width: 100%;
-    @media (max-width: $md) { padding-left: 0; }
+    transition: opacity 0.2s;
+  }
 
-    :deep(.full-width-btn) {
-      width: 100%;
-      button { width: 100%; border-radius: 12px; }
+  &:hover .change-hint {
+    opacity: 1;
+  }
+}
+
+.step-card {
+  flex: 1;
+  border-top: 1px solid $neutral-color-400;
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid $neutral-color-400;
+    margin-bottom: 15px;
+
+    .step-title-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
     }
+
+    .delete-step {
+      color: $secondary-color-danger-400;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+  }
+
+  .card-content {
+    display: flex;
+    gap: 20px;
+  }
+}
+
+.step-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .step-textarea {
+    border: none;
+    outline: none;
+    resize: none;
+    min-height: 80px;
+    background: transparent;
+    width: 100%;
+  }
+
+  .step-text-display {
+    white-space: pre-wrap;
+    color: $neutral-color-800;
   }
 }
 
 .popover-box {
-  background: $neutral-color-white;
-  border: 1px solid $neutral-color-400;
+  background: white;
+  border: 1px solid $primary-color-400;
   border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-  z-index: 100;
-  min-width: 220px;
+  padding: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  width: 260px;
+  z-index: 9999;
 
-  @media (max-width: $md) {
-    width: 90%;
-    max-width: 320px;
-  }
+  .chip {
+    margin: 4px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    cursor: pointer;
 
-  .popover-title { color: $primary-color-700; margin-bottom: 12px; border-bottom: 1px solid $neutral-color-400; padding-bottom: 6px; }
-  
-  .popover-content {
-    display: flex; flex-wrap: wrap; gap: 8px;
-    .chip {
-      padding: 6px 12px; border-radius: 6px; border: 1px solid $neutral-color-white; background: $neutral-color-100; cursor: pointer;
-      &.active { background: $primary-color-700; color: $neutral-color-white; border-color: $primary-color-700; }
-    }
-  }
-
-  &.timer-box {
-    text-align: center;
-    .timer-ui {
-      input { width: 100px; text-align: center; border: none; border-bottom: 2px solid $primary-color-700; outline: none; margin-bottom: 16px; font-size: 24px; }
-      .timer-btns { display: flex; gap: 10px; button { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid $neutral-color-white; cursor: pointer; background: $neutral-color-100; } }
+    &.active {
+      background: $primary-color-800;
+      color: white;
+      border-color: $primary-color-800;
     }
   }
 }
+
+.add-step-wrapper {
+  margin-top: 30px;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+
+  .add-step-btn {
+    width: 100%;
+    height: 48px;
+    border: 1.5px solid $primary-color-400;
+    color: $primary-color-800;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+  }
+}
+
+.step-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30px;
+
+  .step-number {
+    width: 28px;
+    height: 28px;
+    background: $primary-color-100;
+    color: $primary-color-800;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+}
+
+// --- 補上食材標籤內部的樣式 ---
+
+.selected-ing-wrapper {
+  display: inline-flex;
+  align-items: center;
+
+  // 使用 :deep 強制修改 BaseTag 元件內部的樣式
+  :deep(.base-tag) {
+    height: 32px !important; 
+    min-height: 32px !important;
+    background-color: $primary-color-100!important; 
+    border-radius: 10px !important; 
+    border: none !important; 
+    padding: 0 8px !important; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.ing-tag-content {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 4px; // 圖示、文字、叉叉的間距
+  padding: 2px 4px;
+
+  .ing-icon {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+  }
+
+  .ing-name {
+    color: $neutral-color-800;
+    font-weight: 500;
+  }
+
+  .tag-close-icon {
+    margin-left: 2px;
+    font-size: 12px;
+    color: $neutral-color-400;
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $secondary-color-danger-400; // 滑鼠移上去變紅色
+    }
+  }
+}
+
+
 </style>

@@ -256,13 +256,43 @@ const handleSubmit = () => {
 
 textarea {
     width: 100%;
-    min-height: 70px;
+    min-height: 120px;
     border-radius: 10px;
-    border: 1px solid $neutral-color-400;
-    padding: 8px 12px;
+    border: 1px solid $primary-color-400;
+    padding: 10px 12px;
     resize: none;
     box-sizing: border-box;
+
+    /* 1. 確保斷行，禁止底部卷軸 */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: hidden;
     overflow-y: auto;
+
+    /* 2. 美化側邊卷軸 (Firefox) */
+    scrollbar-width: thin;
+    scrollbar-color: $primary-color-100 transparent;
+
+    /* 3. 美化側邊卷軸 (Chrome, Edge, Safari) */
+    &::-webkit-scrollbar {
+        width: 6px;
+        /* 卷軸寬度 */
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+        /* 軌道顏色 */
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: $primary-color-100;
+        /* 卷軸顏色 */
+        border-radius: 10px;
+
+        &:hover {
+            background-color: $primary-color-400;
+        }
+    }
 
     &:focus {
         border-color: $primary-color-700;
@@ -273,7 +303,7 @@ textarea {
 .btn-group {
     margin-top: 12px;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     gap: 24px;
     height: 40px;
 }

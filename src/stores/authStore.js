@@ -1,25 +1,108 @@
-// // src/stores/authStore.js
-// import { defineStore } from 'pinia';
+// // 這個 Store 負責管理登入狀態與控制「登入提醒燈箱」的開關。
+// import { ref, computed } from 'vue'
+// import { defineStore } from 'pinia'
 
-// export const useAuthStore = defineStore('auth', {
-//     state: () => ({
-//         isLoggedIn: localStorage.getItem('isLoggedIn') === 'true', // 從本地讀取登入狀態
-//         isLoginModalOpen: false // 控制登入燈箱的顯示/隱藏
-//     }),
-//     actions: {
-//         // 開啟登入燈箱
-//         openLoginModal() {
-//             this.isLoginModalOpen = true;
-//         },
-//         // 關閉登入燈箱
-//         closeLoginModal() {
-//             this.isLoginModalOpen = false;
-//         },
-//         // 登入成功
-//         login() {
-//             this.isLoggedIn = true;
-//             localStorage.setItem('isLoggedIn', 'true');
-//             this.closeLoginModal();
+// const USERS = [
+//     { account: 'demo', password: '1234', token: 'fake_token_demo' },
+//     { account: 'ingrid', password: '5678', token: 'fake_token_ingrid' },
+// ]
+
+// const localStorageKey = 'USER'
+// export const useUserStore = defineStore('user', () => {
+//     const errorMsg = ref('')
+//     const token = ref('')
+//     const isLogin = computed(() => token.value !== '')
+
+//     const loadStorage = () => {
+//         // 讀取localStorage
+//         const cache = localStorage.getItem(localStorageKey)
+//         if (cache) {
+//             token.value = cache
 //         }
 //     }
+
+//     const login = (accountValue, passwordValue) => {
+//         // 先判斷
+//         if (!accountValue || !passwordValue) {
+//             errorMsg.value = '請輸入帳號或密碼'
+//             return false
+//         }
+//         const result = USERS.find((user) => {
+//             return user.account === accountValue && user.password === passwordValue
+//         })
+//         if (!result) {
+//             errorMsg.value = '登入失敗'
+//             return false
+//         }
+//         // 成功登入
+//         token.value = result.token
+//         localStorage.setItem(localStorageKey, result.token) // 再寫入localStorage
+
+//         // 確保成功時 errorMsg 是空的（前面已經清過，這裡寫不寫都可以，但寫了更保險）
+//         errorMsg.value = ''
+//         return true // 回傳 true 代表登入順利
+//     }
+//     const logout = () => {
+//         token.value = ''
+//         localStorage.removeItem(localStorageKey)
+//     }
+
+//     loadStorage()
+//     return { errorMsg, token, isLogin, login, logout }
+// })
+
+// import { defineStore } from 'pinia';
+// import { ref } from 'vue';
+
+// export const useAuthStore = defineStore('auth', () => {
+//     // 登入狀態 (實際開發中建議從 Token 或 API 取得)
+//     const isLoggedIn = ref(false);
+
+//     // 控制「登入提示燈箱」的顯示
+//     const isLoginAlertOpen = ref(false);
+
+//     const openLoginAlert = () => {
+//         isLoginAlertOpen.value = true;
+//     };
+
+//     const closeLoginAlert = () => {
+//         isLoginAlertOpen.value = false;
+//     };
+
+//     return {
+//         isLoggedIn,
+//         isLoginAlertOpen,
+//         openLoginAlert,
+//         closeLoginAlert
+//     };
 // });
+
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+
+export const useAuthStore = defineStore('auth', () => {
+    // 登入狀態 (實際開發中建議從 Token 或 API 取得)
+    const isLoggedIn = ref(false);
+
+    // 控制「登入提示燈箱」的顯示
+    const isLoginAlertOpen = ref(false);
+    // 控制「真正的登入燈箱」
+    const isLoginLightboxOpen = ref(false);
+
+    const openLoginLightbox = () => {
+        isLoginAlertOpen.value = false; // 關閉提示
+        isLoginLightboxOpen.value = true; // 開啟登入表單
+    };
+
+    return {
+        isLoggedIn,
+        isLoginAlertOpen,
+        isLoginLightboxOpen,
+        openLoginLightbox,
+        openLoginAlert: () => isLoginAlertOpen.value = true,
+        closeAll: () => {
+            isLoginAlertOpen.value = false;
+            isLoginLightboxOpen.value = false;
+        }
+    };
+});
