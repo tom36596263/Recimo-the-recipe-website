@@ -116,7 +116,7 @@ const handleAdd = () => {
     transition: transform 0.1s, background-color 0.2s;
 
     &:hover {
-        background-color: darken($primary-color-400, 5%);
+        background-color: $accent-color-700;
     }
 
     &:active {
