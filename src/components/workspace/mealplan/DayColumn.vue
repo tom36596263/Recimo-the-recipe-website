@@ -133,6 +133,4 @@ const dinnerItems = computed(() => props.items.filter(item => item.meal_type ===
     .add-btn {
       color: $accent-color-700;
     }
-  }
-}
-</style>
+  }</style>
