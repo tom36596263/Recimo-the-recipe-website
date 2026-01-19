@@ -7,7 +7,7 @@
         <div class="bg-layout">
             <img :src="$parsePublicFile('img/site/recipe-overview-cta-group-bg.png')" alt="cta-bg" >
         </div>
-        <router-link to="/recipes"><CircleBtn title="靈感廚房" :type="isAltTheme ? 'white' : 'fedault'"/></router-link>
+        <router-link to="/recipes"><CircleBtn title="靈感廚房"/></router-link>
     </div>
     
 </template>

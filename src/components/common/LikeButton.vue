@@ -32,8 +32,9 @@
     >
         <i-material-symbols-thumb-up-outline v-if="!isLiked" class="action-icon" />
         <i-material-symbols-thumb-up v-else class="action-icon" />
+        <span class="count">{{ displayLike }}</span>
     </button>
-    <span class="count">{{ displayLike }}</span>
+    
 </template>
 <style lang="scss" scoped>
     .action-btn {

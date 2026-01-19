@@ -167,7 +167,7 @@ const navItems = computed(() => {
             color: $accent-color-700;
         }
 
-        &.router-link-active:not(.login-btn) {
+        &.router-link-active:not(.login-btn, .search-btn) {
             color: $accent-color-400;
 
             &:hover {

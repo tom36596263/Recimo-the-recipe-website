@@ -157,7 +157,7 @@ const handleEmptyAction = (action) => {
             v-for="item in recipes" 
             :key="item.id" 
             :to="{ name: 'workspace-recipe-detail', params: { id: item.id } }"
-            class="col-3 col-lg-6 col-sm-12 recipe-cards">
+            class="col-3 col-xl-4 col-sm-12 recipe-cards">
                 <RecipeCardSm :recipe="item" class="recipe-card"/>
         </div>
         </div>

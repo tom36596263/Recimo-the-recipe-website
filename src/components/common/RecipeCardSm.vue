@@ -4,7 +4,7 @@
     import BaseTag from '@/components/common/BaseTag.vue';
     import BaseBtn from '@/components/common/BaseBtn.vue';
     import LogoBlack from '/img/site/Recimo-logo-black.svg'
-
+    import LikeButton from '@/components/common/LikeButton.vue'
     const props = defineProps({
         recipe: {
             type: Object,
@@ -30,7 +30,7 @@
 
         <div class="card-body">
             <div class="title">
-                <h3 class="zh-h3">{{ recipe.recipe_name }}</h3>
+                <h4 class="zh-h4">{{ recipe.recipe_name }}</h4>
                 <div class="icon-group">
                     <i-material-symbols-Favorite-outline />
                 </div>
@@ -48,8 +48,10 @@
                     <img :src="LogoBlack" alt="">
                 </div>
                 <p class="p-p1">Recimo</p>
-                <i-material-symbols-thumb-up-outline />
-                <span class="en-h3">{{ recipe.author.likes }}</span>
+                <LikeButton 
+                :initial-likes="recipe.author.likes || 0" 
+                @update:liked="(val) => handleLikeChange(val, item)"
+                />
             </div>
             
             <div class="btn-group">
