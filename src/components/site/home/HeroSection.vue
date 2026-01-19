@@ -145,5 +145,8 @@ onMounted(() => {
             .hero-img1 {
                 object-position: 70% center; 
             }
+            .hero-container{
+                padding-top: 50px;
+            }
         }
 </style>
