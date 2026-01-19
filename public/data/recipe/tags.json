@@ -39,5 +39,13 @@
   { "tag_id": 38, "tag_name": "豬肉料理", "tag_type": "食材分類" },
   { "tag_id": 39, "tag_name": "丼飯", "tag_type": "料理種類" },
   { "tag_id": 40, "tag_name": "牛肉料理", "tag_type": "食材分類" },
-  { "tag_id": 41, "tag_name": "韓式料理", "tag_type": "異國風味" }
+  { "tag_id": 41, "tag_name": "韓式料理", "tag_type": "異國風味" },
+  { "tag_id": 42, "tag_name": "燉飯", "tag_type": "料理種類" },
+  { "tag_id": 43, "tag_name": "台式料理", "tag_type": "異國風味" },
+  { "tag_id": 44, "tag_name": "中式料理", "tag_type": "異國風味" },
+  { "tag_id": 45, "tag_name": "清蒸", "tag_type": "料理方式" },
+  { "tag_id": 46, "tag_name": "豆腐料理", "tag_type": "食材分類" },
+  { "tag_id": 47, "tag_name": "客家料理", "tag_type": "異國風味" },
+  { "tag_id": 48, "tag_name": "溫補料理", "tag_type": "餐點分類" },
+  { "tag_id": 49, "tag_name": "下午茶", "tag_type": "餐點分類" }
 ]
