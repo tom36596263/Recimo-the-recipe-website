@@ -8,29 +8,19 @@ const showTimerPop = ref(false);
 const showIngPop = ref(false);
 const popStyle = ref({ top: '0px', left: '0px', position: 'fixed' });
 
-// --- ✨ 圖片解析：確保路徑指向 public 根目錄 ---
-
+// --- ✨ 圖片解析 ---
 const getStepImage = (step) => {
   if (!step) return null;
-  // 此時 step.image 已經是父層處理好的完整路徑或 Base64
   const imgSource = step.image;
-
   if (imgSource && typeof imgSource === 'string' && imgSource.trim().length > 0) {
-    if (imgSource.startsWith('data:') || imgSource.startsWith('http')) {
-      return imgSource;
-    }
-
-    // 再次確保開頭有斜線 (Vite public 資料夾讀取必備)
+    if (imgSource.startsWith('data:') || imgSource.startsWith('http')) return imgSource;
     let path = imgSource.trim();
-    if (!path.startsWith('/') && !path.startsWith('.')) {
-      path = `/${path}`;
-    }
+    if (!path.startsWith('/') && !path.startsWith('.')) path = `/${path}`;
     return path;
   }
   return null;
 };
 
-// 圖片讀取失敗處理：嘗試修正副檔名
 const handleImgError = (e) => {
   const img = e.target;
   if (img.dataset.tried === 'true') {
@@ -39,14 +29,9 @@ const handleImgError = (e) => {
   }
   img.dataset.tried = 'true';
   const currentSrc = img.src;
-
-  if (currentSrc.toLowerCase().endsWith('.png')) {
-    img.src = currentSrc.replace(/\.png$/i, '.jpg');
-  } else if (currentSrc.toLowerCase().endsWith('.jpg')) {
-    img.src = currentSrc.replace(/\.jpg$/i, '.png');
-  } else {
-    img.src = 'https://placehold.co/150x120?text=No+Image';
-  }
+  if (currentSrc.toLowerCase().endsWith('.png')) img.src = currentSrc.replace(/\.png$/i, '.jpg');
+  else if (currentSrc.toLowerCase().endsWith('.jpg')) img.src = currentSrc.replace(/\.jpg$/i, '.png');
+  else img.src = 'https://placehold.co/150x120?text=No+Image';
 };
 
 const toggleBodyScroll = (isLock) => {
@@ -66,6 +51,7 @@ const addStep = () => {
     title: '',
     content: '',
     image: null,
+    time: null,
     tags: []
   });
 };
@@ -93,8 +79,7 @@ const uploadStepImg = (step) => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (f) => {
-      const base64String = f.target.result;
-      step.image = base64String;
+      step.image = f.target.result;
     };
     reader.readAsDataURL(file);
   };
@@ -152,12 +137,10 @@ onUnmounted(() => {
             <div class="image-uploader-area">
               <div class="image-box" @click="uploadStepImg(step)">
                 <img v-if="getStepImage(step)" :src="getStepImage(step)" class="step-img" @error="handleImgError" />
-
                 <div v-else class="image-placeholder">
                   <span class="plus">+</span>
                   <span class="text p-p3">新增圖片</span>
                 </div>
-
                 <div v-if="getStepImage(step) && isEditing" class="change-hint">
                   <span>更換圖片</span>
                 </div>
@@ -166,8 +149,8 @@ onUnmounted(() => {
 
             <div class="step-info">
               <div class="tag-row">
-                <BaseTag :text="(step.time) ? '+ ' + step.time : '+ 時間'" variant="action" :show-icon="false"
-                  width="85px" @click.stop="openPop($event, step.id || idx, 'timer')" />
+                <BaseTag :text="step.time ? `${step.time} 分鐘` : '+ 時間'" variant="action" :show-icon="false" width="85px"
+                  @click.stop="openPop($event, step.id || idx, 'timer')" />
                 <BaseTag text="食材" variant="action" width="85px" @click.stop="openPop($event, step.id || idx, 'ing')" />
 
                 <div v-for="tid in (step.tags || [])" :key="tid" class="selected-ing-wrapper">
@@ -206,9 +189,25 @@ onUnmounted(() => {
       </button>
     </div>
   </div>
+
+  <div v-if="showTimerPop" :style="popStyle" class="popover-box" @click.stop>
+    <div class="popover-title p-p2">設定烹飪時間</div>
+    <div class="popover-content" style="display: flex; flex-direction: column; gap: 12px; padding: 10px 0;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <input type="number" v-model.number="getActiveStep().time"
+          style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; outline: none;" placeholder="輸入分鐘"
+          @keyup.enter="closePops" />
+        <span class="p-p3">分鐘</span>
+      </div>
+      <button @click="closePops"
+        style="background: #3E8D60; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer;">確定</button>
+    </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
+@import '@/assets/scss/abstracts/_color.scss';
+
 .step-editor-container {
   width: 100%;
   margin-bottom: 50px;
@@ -233,17 +232,6 @@ onUnmounted(() => {
 .step-item-outer {
   display: flex;
   gap: 15px;
-}
-
-.image-uploader-area {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  .debug-label {
-    font-size: 10px;
-    color: red;
-  }
 }
 
 .image-box {
@@ -360,6 +348,7 @@ onUnmounted(() => {
   padding: 15px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   width: 260px;
+  z-index: 9999;
 
   .chip {
     margin: 4px;
@@ -410,4 +399,56 @@ onUnmounted(() => {
     font-weight: bold;
   }
 }
+
+// --- 補上食材標籤內部的樣式 ---
+
+.selected-ing-wrapper {
+  display: inline-flex;
+  align-items: center;
+
+  // 使用 :deep 強制修改 BaseTag 元件內部的樣式
+  :deep(.base-tag) {
+    height: 32px !important; 
+    min-height: 32px !important;
+    background-color: $primary-color-100!important; 
+    border-radius: 10px !important; 
+    border: none !important; 
+    padding: 0 8px !important; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.ing-tag-content {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 4px; // 圖示、文字、叉叉的間距
+  padding: 2px 4px;
+
+  .ing-icon {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+  }
+
+  .ing-name {
+    color: $neutral-color-800;
+    font-weight: 500;
+  }
+
+  .tag-close-icon {
+    margin-left: 2px;
+    font-size: 12px;
+    color: $neutral-color-400;
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $secondary-color-danger-400; // 滑鼠移上去變紅色
+    }
+  }
+}
+
+
 </style>
