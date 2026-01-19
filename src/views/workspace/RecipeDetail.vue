@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { publicApi } from '@/utils/publicApi';
 import { useRecipeStore } from '@/stores/recipeEditor';
@@ -41,6 +41,13 @@ const backToEdit = () => {
     router.push('/workspace/edit-recipe');
 };
 
+const toggleWorkspaceTopBar = (show) => {
+    const topBar = document.querySelector('.workspace-top-bar');
+    if (topBar) {
+        topBar.style.display = show ? '' : 'none';
+    }
+};
+
 // --- 3. fetchData 核心邏輯 ---
 const fetchData = async () => {
     isLoading.value = true;
@@ -50,7 +57,6 @@ const fetchData = async () => {
 
     const recipeId = Number(route.params.id);
 
-    // ✨ 預覽模式攔截
     if (isPreviewMode.value) {
         const preview = recipeStore.previewData;
         if (preview) {
@@ -116,21 +122,30 @@ const fetchData = async () => {
     }
 };
 
-onMounted(() => { fetchData(); });
+onMounted(() => {
+    fetchData();
+    if (isPreviewMode.value) {
+        toggleWorkspaceTopBar(false);
+    }
+});
+
+onUnmounted(() => {
+    toggleWorkspaceTopBar(true);
+});
+
+watch(() => isPreviewMode.value, (newVal) => {
+    toggleWorkspaceTopBar(!newVal);
+});
 
 watch(() => [route.params.id, route.query.mode], () => {
     fetchData();
 }, { deep: true });
 
-// --- 4. 計算屬性 (重點修正區) ---
-
-// 修正主圖與基本資訊
+// --- 4. 計算屬性 ---
 const recipeIntroData = computed(() => {
     if (!rawRecipe.value) return null;
     return {
-        // 兼容 recipe_title (API) 或 title (編輯器)
         title: rawRecipe.value.recipe_title || rawRecipe.value.title || '未命名食譜',
-        // ✨ 核心修正：主圖多欄位判斷
         image: rawRecipe.value.recipe_image_url || rawRecipe.value.coverImg || rawRecipe.value.recipe_cover_image,
         time: formatTime(rawRecipe.value.recipe_total_time),
         difficulty: rawRecipe.value.recipe_difficulty || rawRecipe.value.difficulty || 1,
@@ -140,19 +155,14 @@ const recipeIntroData = computed(() => {
 
 const stepsData = computed(() => {
     if (!rawSteps.value || rawSteps.value.length === 0) return [];
-
     const rId = rawRecipe.value?.recipe_id || route.params.id || '0';
-
     return rawSteps.value.map((s, index) => {
         let rawImg = s.step_image_url || s.image || s.img || '';
         let finalImg = '';
-
-        // ✨ 修正點：確保 rawImg 是字串且不為空
         if (rawImg && typeof rawImg === 'string' && rawImg.length > 0) {
             if (rawImg.startsWith('data:') || rawImg.startsWith('http')) {
                 finalImg = rawImg;
             } else {
-                // 移除開頭斜線並檢查是否已包含完整路徑
                 let cleanPath = rawImg.replace(/^\//, '');
                 if (cleanPath.includes('img/recipes/')) {
                     finalImg = `/${cleanPath}`;
@@ -161,12 +171,11 @@ const stepsData = computed(() => {
                 }
             }
         }
-
         return {
             id: s.step_id || s.id || `s-${index}`,
             title: s.step_title || s.title || `步驟 ${index + 1}`,
             content: s.step_content || s.content || s.text || '',
-            image: finalImg, // 確保這裡叫 image，子組件才吃得到
+            image: finalImg,
             time: s.step_total_time || s.time || '',
             tags: s.tags || []
         };
@@ -245,13 +254,19 @@ const handleServingsChange = (newVal) => { servings.value = newVal; };
 
 <template>
     <div v-if="isPreviewMode" class="preview-sticky-bar">
-        <div class="container bar-content">
-            <span class="p-p2">✨ 正在預覽食譜草稿（尚未儲存）</span>
-            <button class="exit-preview-btn p-p3" @click="backToEdit">返回編輯</button>
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="bar-content">
+                        <span class="p-p1">✨ 正在預覽食譜草稿（尚未儲存）</span>
+                        <button class="exit-preview-btn p-p2" @click="backToEdit">返回編輯</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="recipe-container-root" v-if="!isLoading && rawRecipe">
+    <div class="recipe-container-root" v-if="!isLoading && rawRecipe" :class="{ 'preview-padding': isPreviewMode }">
         <main class="container">
             <header class="page-header">
                 <router-link v-if="!isPreviewMode" :to="`/workspace/modify-recipe/${rawRecipe.recipe_id}`">
@@ -329,46 +344,75 @@ const handleServingsChange = (newVal) => { servings.value = newVal; };
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
+// 預覽 Bar 樣式修正
 .preview-sticky-bar {
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 2000;
-    background-color: $primary-color-400;
-    color: white;
-    padding: 10px 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    // 重點修正：避開 Sidebar
+    // 假設你的 Sidebar 是 260px，如果是別的數值請修改這裡
+    left: 260px;
+    width: calc(100% - 260px);
+    z-index: 9999;
+    padding-top: 20px;
+    pointer-events: none;
+
+    // 當螢幕變小，Sidebar 消失時（例如手機版），Bar 要變回 100% 寬度
+    @media screen and (max-width: 1024px) {
+        left: 0;
+        width: 100%;
+    }
+
+    .container {
+        // 寬度限制跟隨食譜內頁
+        max-width: 1000px; // 或者你定義的內容區寬度
+        margin: 0 auto;
+        padding: 0 15px;
+    }
 
     .bar-content {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        background-color: $primary-color-400;
+        color: $neutral-color-white;
+        padding: 14px 28px;
+        border-radius: 14px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        pointer-events: auto;
 
         span {
-            color: $neutral-color-white;
+            font-weight: 500;
+            letter-spacing: 0.5px;
         }
 
         .exit-preview-btn {
             background-color: $neutral-color-white;
             color: $primary-color-700;
             border: none;
-            padding: 6px 20px;
-            border-radius: 20px;
+            padding: 8px 22px;
+            border-radius: 50px;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s ease;
 
             &:hover {
                 background-color: $primary-color-100;
-                transform: translateY(-1px);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             }
         }
     }
 }
 
+// 基礎容器
 .recipe-container-root {
     background-color: $neutral-color-white;
     min-height: 100vh;
     padding: 0 0 100px 0;
+
+    &.preview-padding {
+        padding-top: 100px;
+    }
 }
 
 .page-header {

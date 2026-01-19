@@ -99,7 +99,7 @@ const handleSelect = (filterId, option) => {
 
 .inspiration-kitchen-cta {
     background-color: $primary-color-100;
-    padding: 40px;
+    padding: 40px 20px;
     height: 100%;
     display: flex;
     justify-content: center;
@@ -115,9 +115,9 @@ const handleSelect = (filterId, option) => {
 
     .ingredient1 {
         position: absolute;
-        bottom: 40px;
-        right: -50px;
-        width: 90px;
+        bottom: -50px;
+        right: 10px;
+        width: 80px;
         animation: floating 3s ease-in-out infinite;
     }
 
@@ -125,7 +125,7 @@ const handleSelect = (filterId, option) => {
         position: absolute;
         top: 40px;
         left: -30px;
-        width: 70px;
+        width: 60px;
         animation: floating 4s ease-in-out infinite;
         animation-delay: 0.5s;
     }

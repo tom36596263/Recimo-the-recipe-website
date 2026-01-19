@@ -9,7 +9,6 @@
     import IconLocalFireDepartment from '~icons/material-symbols/Local-Fire-Department-outline';
     import IconramenDining from '~icons/material-symbols/Ramen-Dining-outline';
     import IconAlarm from '~icons/material-symbols/Alarm-outline';
-    import LogoBlack from '/img/site/Recimo-logo-black.svg'
 
     const props = defineProps({
         recipe: {
@@ -83,8 +82,8 @@
         
         <footer>
             <div class="personal-info">
-                <div class="personal-img"> 
-                    <img :src="LogoBlack" alt="">
+                <div class="personal-img">
+                    <img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo" >
                 </div>
                 <p class="p-p1">Recimo</p>
                 <div @click.prevent.stopp>
