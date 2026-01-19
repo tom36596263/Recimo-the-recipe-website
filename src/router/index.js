@@ -135,10 +135,11 @@ const routes = [
         }
       },
       {
-        path: 'edit-plan',
+        path: 'edit-plan/:id',
         name: 'edit-meal-plan',
         component: () => import('@/views/workspace/EditMealPlan.vue'),
-        meta: { layout: 'workspace', requiresAuth: true, hideTopBar: true }
+        meta: { layout: 'workspace', requiresAuth: true, hideTopBar: true },
+        props: true
       },
       {
         path: 'recipes',
