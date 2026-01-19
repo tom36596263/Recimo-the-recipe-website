@@ -17,7 +17,7 @@ const setDifficulty = (val) => {
 };
 
 // ================================
-// 🔢 自動加總步驟時間 (確保轉為數字)
+// 🔢 自動加總步驟時間
 // ================================
 const autoTotalTime = computed(() => {
   if (!props.modelValue.steps) return 0;
@@ -27,30 +27,25 @@ const autoTotalTime = computed(() => {
 });
 
 // ================================
-// 👀 顯示用時間（唯讀狀態）
+// 👀 顯示用時間
 // ================================
 const displayTime = computed(() => {
-  // 如果 totalTime 是字串且有內容，或者是大於 0 的數字，就用 totalTime
-  // 否則顯示自動加總
   const manualTime = Number(props.modelValue.totalTime);
   return manualTime > 0 ? manualTime : autoTotalTime.value;
 });
 
 // ================================
-// ⭐ 關鍵：深層監聽 modelValue 的變化
+// ⭐ 監聽步驟時間變化並同步
 // ================================
 watch(
-  () => props.modelValue.steps, // 盯著步驟陣列
+  () => props.modelValue.steps,
   (newSteps) => {
     const newSum = newSteps?.reduce((sum, s) => sum + (Number(s.time) || 0), 0) || 0;
-
-    // 只有在「沒有手動輸入」或「totalTime 為 0/空」時才自動寫回
-    // 注意：你父層初始值給的是字串 '20'，這會被視為手動輸入
     if (!props.modelValue.totalTime || props.modelValue.totalTime == 0) {
       updateField('totalTime', newSum);
     }
   },
-  { deep: true } // 必須要 Deep 才能抓到步驟裡面的 time 變化
+  { deep: true }
 );
 
 // ================================
@@ -67,17 +62,22 @@ const handleCoverUpload = (e) => {
 };
 </script>
 
-
 <template>
   <section class="recipe-card-container">
-    <div class="cover-section" :style="{ backgroundImage: modelValue.coverImg ? `url(${modelValue.coverImg})` : '' }"
+    <div class="cover-section" :class="{ 'has-image': modelValue.coverImg }"
+      :style="{ backgroundImage: modelValue.coverImg ? `url(${modelValue.coverImg})` : '' }"
       @click="isEditing && $refs.fileInput.click()">
       <input ref="fileInput" type="file" class="hidden-input" accept="image/*" @change="handleCoverUpload" />
+
       <div v-if="!modelValue.coverImg" class="upload-placeholder">
         <div class="placeholder-content">
           <span class="plus-icon">+</span>
           <p class="label p-p2">新增成品照</p>
         </div>
+      </div>
+
+      <div v-if="modelValue.coverImg && isEditing" class="change-hint">
+        <span class="p-p2">更換成品照</span>
       </div>
     </div>
 
@@ -95,7 +95,7 @@ const handleCoverUpload = (e) => {
             <input type="number" class="inline-input" :value="modelValue.totalTime"
               @input="updateField('totalTime', $event.target.value)" :placeholder="autoTotalTime" />
             <span class="unit">分鐘</span>
-            <small v-if="!modelValue.totalTime && autoTotalTime > 0" class="auto-hint">(已自動加總步驟時間)</small>
+            <small v-if="!modelValue.totalTime && autoTotalTime > 0" class="auto-hint">(已自動加總)</small>
           </template>
           <span v-else class="value">{{ displayTime }} 分鐘</span>
         </div>
@@ -123,7 +123,7 @@ const handleCoverUpload = (e) => {
 </template>
 
 <style lang="scss" scoped>
-/* 僅保留佈局與顏色設定，文字大小已由 HTML Class 控制 */
+@import '@/assets/scss/abstracts/_color.scss';
 
 .recipe-card-container {
   display: flex;
@@ -140,6 +140,7 @@ const handleCoverUpload = (e) => {
 }
 
 .cover-section {
+  position: relative;
   border: 2px dashed $neutral-color-400;
   width: 100%;
   height: 220px;
@@ -152,6 +153,13 @@ const handleCoverUpload = (e) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.2s;
+
+  &.has-image {
+    border-style: solid; // 有圖片時虛線轉實線（或隱藏邊框）
+    // border-color: $primary-color-400;
+  }
 
   @media (min-width: 768px) {
     width: 320px;
@@ -161,12 +169,34 @@ const handleCoverUpload = (e) => {
     display: none;
   }
 
+  /* ✨ 更換提示遮罩：預設隱藏 */
+  .change-hint {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0; // 👈 預設看不見
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  /* ✨ 滑鼠移入時才顯現遮罩 */
+  &:hover {
+    border-color: $primary-color-700;
+
+    .change-hint {
+      opacity: 1; // 👈 Hover 時出現
+    }
+  }
+
   .upload-placeholder .placeholder-content {
     text-align: center;
     color: $neutral-color-700;
 
     .plus-icon {
-      font-size: 30px; // 保留圖示大小
+      font-size: 30px;
       display: block;
     }
   }
@@ -179,11 +209,11 @@ const handleCoverUpload = (e) => {
   gap: 16px;
 }
 
+/* ...其餘樣式維持不變... */
 .row-title {
   .title-input {
     width: 100%;
     border: none;
-    // color: $primary-color-800;
     outline: none;
     border-bottom: 1px solid $neutral-color-100;
     background: transparent;
@@ -207,7 +237,6 @@ const handleCoverUpload = (e) => {
     width: 60px;
     text-align: center;
     outline: none;
-    color: $neutral-color-black;
     background: transparent;
   }
 
@@ -244,7 +273,6 @@ const handleCoverUpload = (e) => {
   position: relative;
   min-height: 100px;
   padding: 12px;
-  border: 1px solid transparent;
   background: $neutral-color-100;
   border-radius: 8px;
 
@@ -260,13 +288,11 @@ const handleCoverUpload = (e) => {
     resize: none;
     outline: none;
     background: transparent;
-    color: $neutral-color-800;
   }
 
   .desc-display {
-    color: $neutral-color-800;
-    margin: 0;
     white-space: pre-wrap;
+    margin: 0;
   }
 
   .char-counter {

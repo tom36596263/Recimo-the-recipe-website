@@ -82,7 +82,7 @@ const uploadStepImg = (step) => {
     reader.onload = (f) => {
       step.image = f.target.result;
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(file); // ✨ 這裡已修復
   };
   input.click();
 };
@@ -138,7 +138,7 @@ onUnmounted(() => {
 
             <div class="card-content">
               <div class="image-uploader-area">
-                <div class="image-box" @click="uploadStepImg(step)">
+                <div class="image-box" :class="{ 'has-image': getStepImage(step) }" @click="uploadStepImg(step)">
                   <img v-if="getStepImage(step)" :src="getStepImage(step)" class="step-img" @error="handleImgError" />
                   <div v-else class="image-placeholder">
                     <span class="plus">+</span>
@@ -297,7 +297,6 @@ onUnmounted(() => {
       outline: none;
       background: transparent;
       min-width: 0;
-      // font-weight: bold;
     }
 
     .delete-step {
@@ -322,15 +321,11 @@ onUnmounted(() => {
 
 .image-uploader-area {
   flex-shrink: 0;
-
-  @media (max-width: 768px) {
-    width: 100%;
-  }
 }
 
 .image-box {
-  width: 150px;
-  height: 120px;
+  width: 150px; // ✨ 正方形固定寬度
+  height: 150px; // ✨ 正方形固定高度
   background: $neutral-color-100;
   border: 1.5px dashed $neutral-color-400;
   border-radius: 12px;
@@ -340,10 +335,11 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s;
 
-  @media (max-width: 768px) {
-    width: 100%;
-    height: 180px;
+  &.has-image {
+    border-style: solid; // ✨ 上傳後變實線
+    border-color: $primary-color-400;
   }
 
   .step-img {
@@ -375,8 +371,12 @@ onUnmounted(() => {
     transition: opacity 0.2s;
   }
 
-  &:hover .change-hint {
-    opacity: 1;
+  &:hover {
+    border-color: $primary-color-700;
+
+    .change-hint {
+      opacity: 1;
+    }
   }
 }
 
@@ -480,8 +480,7 @@ onUnmounted(() => {
     background-color: $primary-color-100 !important;
     border-radius: 10px !important;
     border: none !important;
-    padding: 0 10px !important; // 稍微增加左右內距更美觀
-    /* ✨ 限制最大寬度，避免單個標籤太長佔滿整行 */
+    padding: 0 10px !important;
     max-width: 160px;
   }
 }
@@ -490,16 +489,16 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
-  width: 100%; // 撐開容器以利省略號運作
+  width: 100%;
   overflow: hidden;
   line-height: 1;
 
   .ing-icon-img {
-    width: 16px; // 稍微放大一點點，視覺上跟文字更平衡
+    width: 16px;
     height: 16px;
     object-fit: contain;
-    flex-shrink: 0; // 絕對不允許縮小
-    margin-top: 1px; // 微調垂直位置
+    flex-shrink: 0;
+    margin-top: 1px;
   }
 
   .ing-name {
@@ -507,18 +506,14 @@ onUnmounted(() => {
     font-weight: 500;
     margin: 0;
     padding: 0;
-
-    /* ✨ 關鍵修改：防止折行並顯示省略號 */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
-    flex: 1; // 讓名字佔滿中間剩下的空間
-    display: block; // 改為 block 配合 flex 省略
-    font-size: 14px; // 視情況調整，確保文字清晰
+    flex: 1;
+    display: block;
+    font-size: 14px;
   }
 
-  /* 確保叉叉按鈕也不會因為文字長而被擠扁 */
   .tag-close-icon {
     flex-shrink: 0;
     margin-left: 2px;
@@ -531,6 +526,7 @@ onUnmounted(() => {
     }
   }
 }
+
 .ghost-step {
   opacity: 0.5;
   background: $primary-color-100 !important;
