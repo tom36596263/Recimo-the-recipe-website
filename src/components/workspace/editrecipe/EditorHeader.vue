@@ -84,7 +84,7 @@ const handleCoverUpload = (e) => {
     <div class="info-section">
       <div class="row-title">
         <input v-if="isEditing" :value="modelValue.title" @input="updateField('title', $event.target.value)"
-          class="title-input zh-h3" placeholder="請輸入標題..." />
+          class="title-input zh-h3" placeholder="請輸入標題..." maxlength="30" />
         <h2 v-else class="title-display zh-h2-bold">{{ modelValue.title || '未命名食譜' }}</h2>
       </div>
 
@@ -133,6 +133,7 @@ const handleCoverUpload = (e) => {
   border-radius: 12px;
   padding: 24px;
   gap: 24px;
+  min-width: 0; // ✨ 防破版
 
   @media (min-width: 768px) {
     flex-direction: row;
@@ -157,7 +158,7 @@ const handleCoverUpload = (e) => {
   transition: border-color 0.2s;
 
   &.has-image {
-    border-style: solid; // 有圖片時虛線轉實線（或隱藏邊框）
+    border-style: solid;
   }
 
   @media (min-width: 768px) {
@@ -168,7 +169,6 @@ const handleCoverUpload = (e) => {
     display: none;
   }
 
-  /* ✨ 更換提示遮罩：預設隱藏 */
   .change-hint {
     position: absolute;
     inset: 0;
@@ -177,16 +177,15 @@ const handleCoverUpload = (e) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0; // 👈 預設看不見
+    opacity: 0;
     transition: opacity 0.2s ease-in-out;
   }
 
-  /* ✨ 滑鼠移入時才顯現遮罩 */
   &:hover {
     border-color: $primary-color-700;
 
     .change-hint {
-      opacity: 1; // 👈 Hover 時出現
+      opacity: 1;
     }
   }
 
@@ -206,9 +205,9 @@ const handleCoverUpload = (e) => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0; // ✨ 防止子元素撐破 flex 容器
 }
 
-/* ...其餘樣式維持不變... */
 .row-title {
   .title-input {
     width: 100%;
@@ -221,11 +220,14 @@ const handleCoverUpload = (e) => {
   .title-display {
     color: $primary-color-800;
     margin: 0;
+    word-break: break-word; // ✨ 解決 aaaaaa 破版關鍵
+    overflow-wrap: break-word;
   }
 }
 
 .row-meta {
   display: flex;
+  flex-wrap: wrap; // ✨ 防止小螢幕擠壓破版
   gap: 30px;
   align-items: center;
   color: $neutral-color-800;
@@ -274,6 +276,7 @@ const handleCoverUpload = (e) => {
   padding: 12px;
   background: $neutral-color-100;
   border-radius: 8px;
+  min-width: 0; // ✨ 防破版
 
   &.editing-border {
     border: 1px dashed $primary-color-700;
@@ -292,6 +295,7 @@ const handleCoverUpload = (e) => {
   .desc-display {
     white-space: pre-wrap;
     margin: 0;
+    word-break: break-word; // ✨ 防破版
   }
 
   .char-counter {

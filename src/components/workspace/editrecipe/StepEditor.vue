@@ -129,7 +129,8 @@ onUnmounted(() => {
                 <div class="step-number p-p2">{{ idx + 1 }}</div>
               </div>
 
-              <input v-if="isEditing" v-model="step.title" class="step-title-input zh-h4" placeholder="步驟標題" />
+              <input v-if="isEditing" v-model="step.title" class="step-title-input zh-h4" placeholder="步驟標題"
+                maxlength="30" />
               <span v-else class="step-title-display zh-h4">
                 {{ step.title || ('步驟 ' + (idx + 1)) }}
               </span>
@@ -168,8 +169,11 @@ onUnmounted(() => {
                   </div>
                 </div>
 
-                <textarea v-if="isEditing" v-model="step.content" class="step-textarea p-p2"
-                  placeholder="詳細說明步驟內容..."></textarea>
+                <div v-if="isEditing" class="textarea-wrapper">
+                  <textarea v-model="step.content" class="step-textarea p-p2" placeholder="詳細說明步驟內容..."
+                    maxlength="100"></textarea>
+                  <span class="char-counter">{{ step.content?.length || 0 }}/100</span>
+                </div>
                 <div v-else class="step-text-display p-p2">
                   {{ step.content || '無步驟說明' }}
                 </div>
@@ -394,6 +398,20 @@ onUnmounted(() => {
     align-items: center;
   }
 
+  /* ✨ 字數統計外層容器 */
+  .textarea-wrapper {
+    position: relative;
+    width: 100%;
+
+    .char-counter {
+      position: absolute;
+      right: 0;
+      bottom: -15px;
+      font-size: 12px;
+      color: $neutral-color-400;
+    }
+  }
+
   .step-textarea {
     border: none;
     outline: none;
@@ -403,6 +421,7 @@ onUnmounted(() => {
     width: 100%;
     box-sizing: border-box;
     background: transparent;
+    overflow-wrap: break-word;
 
     &:focus {
       border: none;
@@ -413,7 +432,9 @@ onUnmounted(() => {
   .step-text-display {
     white-space: pre-wrap;
     color: $neutral-color-800;
-    word-break: break-all;
+    word-break: break-word; // 讓長單字斷行
+    overflow-wrap: break-word; // 確保內容不超出寬度
+    width: 100%; // 強制佔滿剩餘寬度
   }
 }
 
