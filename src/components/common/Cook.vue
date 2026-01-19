@@ -229,7 +229,7 @@ const startCooking = () => {
 
 <template>
     <div class="overlay" @click="emit('close')">
-        <div class="cook-container">
+        <div class="cook-container" @click.stop>
             <div class="row">
                 <div class="col-7">
                     <div class="title">
