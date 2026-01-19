@@ -83,7 +83,7 @@ const dinnerItems = computed(() => props.items.filter(item => item.meal_type ===
 
   &__slot {
     height: 22.2222222222vh;
-    <<<<<<< HEAD=======flex-direction: column;
+    flex-direction: column;
     justify-content: flex-start;
     align-items: center;
     padding: 8px 4px;
@@ -117,7 +117,6 @@ const dinnerItems = computed(() => props.items.filter(item => item.meal_type ===
       }
     }
 
-    >>>>>>>meal_plan
   }
 
   // 滑鼠懸停效果
