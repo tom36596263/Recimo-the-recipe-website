@@ -158,7 +158,6 @@ const handleCoverUpload = (e) => {
 
   &.has-image {
     border-style: solid; // 有圖片時虛線轉實線（或隱藏邊框）
-    // border-color: $primary-color-400;
   }
 
   @media (min-width: 768px) {

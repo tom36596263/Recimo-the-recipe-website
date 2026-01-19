@@ -104,7 +104,7 @@ provide('isEditing', isEditing);
       <footer class="editor-footer">
         <div class="footer-center-group">
 
-          <BaseBtn title="預覽食譜" variant="outline" :width="150" @click="handlePreview" class="preview-btn" />
+          <BaseBtn title="預覽食譜" variant="outline" :width="180" @click="handlePreview" class="preview-btn" />
 
           <BaseBtn :title="isPublished ? '確認發布' : '完成編輯'" :width="180" @click="handleSave" class="save-btn" />
 
@@ -155,7 +155,7 @@ $editor-border-style: 1px solid $primary-color-100;
 
   .footer-center-group {
     display: flex;
-    align-items: center;
+    align-items: center; // 確保整列內容（按鈕與勾選框）垂直置中
     gap: 24px;
   }
 
@@ -164,8 +164,9 @@ $editor-border-style: 1px solid $primary-color-100;
     align-items: center;
     gap: 8px;
     color: $neutral-color-700;
+    // 確保文字高度不影響排版
+    line-height: 1;
 
-    // ✨ 優化：讓勾選框點擊更順手
     input,
     label {
       cursor: pointer;
@@ -175,20 +176,26 @@ $editor-border-style: 1px solid $primary-color-100;
       width: 18px;
       height: 18px;
       accent-color: $primary-color-800;
+      margin: 0; // 移除預設邊距
     }
   }
 }
 
-// 在 style 區塊找到 .preview-btn
+// 修改按鈕樣式
+.preview-btn,
+.save-btn {
+  /* 1. 強制兩者高度一致 */
+  height: 48px !important;
+
+  /* 2. 確保內部文字垂直置中 */
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
 .preview-btn {
   border: 1px solid $primary-color-400 !important;
   color: $primary-color-400 !important;
-
-  // ✨ 新增高度設定
-  height: 41px !important;
-  display: flex !important; // 確保內容垂直居中
-  align-items: center;
-  justify-content: center;
 
   &:hover {
     background-color: $primary-color-100 !important;

@@ -376,23 +376,41 @@ const onReportSubmit = (data) => {
 .preview-sticky-bar {
     position: fixed;
     top: 0;
-    // 重點修正：避開 Sidebar
-    // 假設你的 Sidebar 是 260px，如果是別的數值請修改這裡
-    left: 260px;
+    // 預設避開 Sidebar (260px)
+    left: 230px;
     width: calc(100% - 260px);
     z-index: 9999;
     padding-top: 20px;
     pointer-events: none;
+    transition: all 0.3s ease; // 讓縮放平滑一點
 
-    // 當螢幕變小，Sidebar 消失時（例如手機版），Bar 要變回 100% 寬度
+    // ✨ 新增：針對平板 (768px ~ 1024px) 縮小 Bar 的內容，防止壓到列表
     @media screen and (max-width: 1024px) {
+        // 如果側邊欄還在，縮小左邊距避免碰撞
+        left: 240px;
+        width: calc(100% - 240px);
+
+        .bar-content {
+            padding: 10px 16px; // 縮小內距
+            transform: scale(0.9); // 整體輕微縮小
+            transform-origin: center top;
+        }
+    }
+
+    // 當螢幕更小，Sidebar 消失時
+    @media screen and (max-width: 768px) {
         left: 0;
         width: 100%;
+
+        .bar-content {
+            transform: scale(1);
+            width: 95%;
+            margin: 0 auto;
+        }
     }
 
     .container {
-        // 寬度限制跟隨食譜內頁
-        max-width: 1000px; // 或者你定義的內容區寬度
+        max-width: 1000px;
         margin: 0 auto;
         padding: 0 15px;
     }
@@ -405,12 +423,13 @@ const onReportSubmit = (data) => {
         color: $neutral-color-white;
         padding: 14px 28px;
         border-radius: 14px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        // box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         pointer-events: auto;
 
         span {
             font-weight: 500;
             letter-spacing: 0.5px;
+            white-space: nowrap; // 防止文字斷行擠壓高度
         }
 
         .exit-preview-btn {
@@ -422,6 +441,7 @@ const onReportSubmit = (data) => {
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            white-space: nowrap;
 
             &:hover {
                 background-color: $primary-color-100;
