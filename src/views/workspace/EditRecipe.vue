@@ -179,10 +179,16 @@ $editor-border-style: 1px solid $primary-color-100;
   }
 }
 
-// 預覽按鈕微調
+// 在 style 區塊找到 .preview-btn
 .preview-btn {
   border: 1px solid $primary-color-400 !important;
   color: $primary-color-400 !important;
+
+  // ✨ 新增高度設定
+  height: 41px !important;
+  display: flex !important; // 確保內容垂直居中
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     background-color: $primary-color-100 !important;
