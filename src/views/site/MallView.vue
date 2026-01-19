@@ -258,8 +258,6 @@ const columns = ref([
     </div>
   </div>
   <router-view v-else></router-view>
-
-  <Cook />
 </template>
 
 <style lang="scss" scoped>

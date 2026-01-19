@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import SearchBar from '@/components/common/SearchBar.vue';
+import BaseTag from '@/components/common/BaseTag.vue';
+import BaseBtn from '@/components/common/BaseBtn.vue';
 import CookCard from '@/components/common/CookCard.vue';
 import axios from 'axios';
 import { publicApi } from '@/utils/publicApi';
@@ -226,69 +228,71 @@ const startCooking = () => {
 </script>
 
 <template>
-    <!-- <div class="modal-overlay" @click.self="emit('close')"> -->
-    <div class="container">
-        <div class="row">
-            <div class="col-7">
-                <div class="title">
-                    <h3 class="zh-h3 title">靈感廚房</h3>
-                </div>
-                <div class="cook-wrap">
-                    <div class="cook-stage" ref="potZoneRef" :class="{ 'active-drop-zone': isDragOver }"
-                        @dragover="handleDragOver" @dragleave="handleDragLeave" @drop="handleDrop">
+    <div class="overlay" @click="emit('close')">
+        <div class="cook-container">
+            <div class="row">
+                <div class="col-7">
+                    <div class="title">
+                        <h3 class="zh-h3 title">靈感廚房</h3>
+                    </div>
+                    <div class="cook-wrap">
+                        <div class="cook-stage" ref="potZoneRef" :class="{ 'active-drop-zone': isDragOver }"
+                            @dragover="handleDragOver" @dragleave="handleDragLeave" @drop="handleDrop">
 
-                        <div v-if="potIngredients.length > 0" class="count-badge">
-                            {{ potIngredients.length }}
+                            <div v-if="potIngredients.length > 0" class="count-badge">
+                                {{ potIngredients.length }}
+                            </div>
+                            <div class="lid" :class="{ 'lid-open': isDragOver, 'lid-boiling': isCooking }">
+                                <img src="/src/assets/images/cook/lid.png" alt="">
+                            </div>
+                            <div class="pot" :class="{ 'shaking': isCooking }">
+                                <img src="/src/assets/images/cook/pot.png" alt="">
+                            </div>
+                            <div class="fire" :class="{ 'cooking-fire': isCooking }">
+                                <img src="/src//assets/images/cook/fire.png" alt="">
+                            </div>
                         </div>
-                        <div class="lid" :class="{ 'lid-open': isDragOver, 'lid-boiling': isCooking }">
-                            <img src="/src/assets/images/cook/lid.png" alt="">
-                        </div>
-                        <div class="pot" :class="{ 'shaking': isCooking }">
-                            <img src="/src/assets/images/cook/pot.png" alt="">
-                        </div>
-                        <div class="fire" :class="{ 'cooking-fire': isCooking }">
-                            <img src="/src//assets/images/cook/fire.png" alt="">
+                        <div class="btn">
+                            <BaseBtn :title="isCooking ? '烹飪中' : '開始烹飪'" @click="startCooking" :disabled="isCooking" />
+                            <!-- :disabled當這個條件成立時，讓按鈕失效（不能按） -->
                         </div>
                     </div>
-                    <div class="btn">
-                        <BaseBtn :title="isCooking ? '烹飪中' : '開始烹飪'" @click="startCooking" :disabled="isCooking" />
-                        <!-- :disabled當這個條件成立時，讓按鈕失效（不能按） -->
+                </div>
+
+
+                <div class="col-5 search-wrap">
+                    <div class="close" @click="emit('close')">
+                        <i class="fa-solid fa-xmark"></i>
                     </div>
-                </div>
-            </div>
+                    <div class="search">
+                        <SearchBar v-model="keyword" placeholder="搜尋食譜" style="width: 270px;" />
+                    </div>
+                    <div class="tag">
+                        <BaseTag v-for="item in tags" :key="item.text" :text="item.text" :width="item.width"
+                            :show-icon="false" :variant="activeTag === item.text ? 'primary' : 'action'"
+                            @click="selectTag(item.text)"></BaseTag>
+                    </div>
+                    <div class="card-container">
+                        <div v-for="item in filteredIngredients" :key="item.ingredient_id"
+                            class="draggable-card-wrapper" draggable="true" @dragstart="handleDragStart($event, item)"
+                            @touchstart="handleTouchStart($event, item)" @touchmove="handleTouchMove"
+                            @touchend="handleTouchEnd">
 
-
-            <div class="col-5 search-wrap">
-                <div class="close">
-                    <i class="fa-solid fa-xmark"></i>
-                </div>
-                <div class="search">
-                    <SearchBar v-model="keyword" placeholder="搜尋食譜" style="width: 270px;" />
-                </div>
-                <div class="tag">
-                    <BaseTag v-for="item in tags" :key="item.text" :text="item.text" :width="item.width"
-                        :show-icon="false" :variant="activeTag === item.text ? 'primary' : 'action'"
-                        @click="selectTag(item.text)"></BaseTag>
-                </div>
-                <div class="card-container">
-                    <div v-for="item in filteredIngredients" :key="item.ingredient_id" class="draggable-card-wrapper"
-                        draggable="true" @dragstart="handleDragStart($event, item)"
-                        @touchstart="handleTouchStart($event, item)" @touchmove="handleTouchMove"
-                        @touchend="handleTouchEnd">
-
-                        <CookCard :name="item.ingredient_name" :calories="item.kcal_per_100g" :fat="item.fat_per_100g"
-                            :image-src="item.ingredient_image_url" />
+                            <CookCard :name="item.ingredient_name" :calories="item.kcal_per_100g"
+                                :fat="item.fat_per_100g" :image-src="item.ingredient_image_url" />
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- </div> -->
+
+
 
 </template>
 
 <style lang="scss" scoped>
-.modal-overlay {
+.overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -300,14 +304,13 @@ const startCooking = () => {
     justify-content: center;
     align-items: center;
     // 防止背景捲動 (選用，視專案需求)
-    overflow: hidden;
     backdrop-filter: blur(4px);
+    z-index: 9999 !important;
 }
 
-.container {
+.cook-container {
     width: 790px;
     height: 487px;
-    border: 1px solid red;
     background-color: $neutral-color-white;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
