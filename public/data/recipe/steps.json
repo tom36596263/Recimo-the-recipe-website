@@ -1158,5 +1158,665 @@
     "step_content": "將鮭魚盛放在青花菜旁，撒上白芝麻與蔥絲點綴，增加香氣層次。",
     "step_image_url": "/img/recipes/20/steps/6.jpg",
     "is_modified": false
+  },
+  {
+    "step_id": 117,
+    "recipe_id": 21,
+    "step_order": 1,
+    "step_title": "炒香蔬菜底",
+    "step_total_time": "00:08:00",
+    "step_content": "熱鍋加入橄欖油，放入洋蔥丁、大蒜末與紅蘿蔔丁，以中小火翻炒至洋蔥變軟呈半透明狀。",
+    "step_image_url": "/img/recipes/21/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 118,
+    "recipe_id": 21,
+    "step_order": 2,
+    "step_title": "炒製絞肉",
+    "step_total_time": "00:05:00",
+    "step_content": "加入牛豬混合絞肉，用鏟子將肉切碎並炒至變色溢出油脂香氣。",
+    "step_image_url": "/img/recipes/21/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 119,
+    "recipe_id": 21,
+    "step_order": 3,
+    "step_title": "熬煮肉醬",
+    "step_total_time": "00:25:00",
+    "step_content": "加入番茄糊翻炒出香氣，隨後倒入罐裝碎番茄與義大利香料，加入少許水或煮麵水，小火燉煮約 25 分鐘至醬汁濃稠。",
+    "step_image_url": "/img/recipes/21/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 120,
+    "recipe_id": 21,
+    "step_order": 4,
+    "step_title": "烹煮麵條",
+    "step_total_time": "00:10:00",
+    "step_content": "準備一鍋滾水加入鹽巴，放入義大利直麵煮至八分熟（比包裝建議少 1-2 分鐘）。",
+    "step_image_url": "/img/recipes/21/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 121,
+    "recipe_id": 21,
+    "step_order": 5,
+    "step_title": "混合拌炒",
+    "step_total_time": "00:03:00",
+    "step_content": "將煮好的麵條撈起直接放入肉醬鍋中，加入少許煮麵水快速翻炒，讓麵條吸收醬汁。",
+    "step_image_url": "/img/recipes/21/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 122,
+    "recipe_id": 21,
+    "step_order": 6,
+    "step_title": "盛盤與裝飾",
+    "step_total_time": "00:01:00",
+    "step_content": "將麵條捲起盛入盤中，撒上大量的帕瑪森起司粉，即可趁熱享用。",
+    "step_image_url": "/img/recipes/21/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 123,
+    "recipe_id": 22,
+    "step_order": 1,
+    "step_title": "野菇煸炒",
+    "step_total_time": "00:08:00",
+    "step_content": "鍋中放入部分無鹽奶油，將鴻喜菇與香菇片放入，以中大火炒至水分收乾且表面焦香，撈起備用。",
+    "step_image_url": "/img/recipes/22/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 124,
+    "recipe_id": 22,
+    "step_order": 2,
+    "step_title": "炒香燉米",
+    "step_total_time": "00:05:00",
+    "step_content": "原鍋補入奶油與洋蔥末炒至透明，加入義大利燉米翻炒，使米粒均勻裹上油脂，直到邊緣呈現透明狀。",
+    "step_image_url": "/img/recipes/22/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 125,
+    "recipe_id": 22,
+    "step_order": 3,
+    "step_title": "白酒熗鍋與初步燉煮",
+    "step_total_time": "00:05:00",
+    "step_content": "倒入白葡萄酒，利用酒液刨開鍋底焦垢，持續攪拌直到酒氣蒸發且液體被米粒吸收。",
+    "step_image_url": "/img/recipes/22/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 126,
+    "recipe_id": 22,
+    "step_order": 4,
+    "step_title": "分次加入高湯",
+    "step_total_time": "00:20:00",
+    "step_content": "轉中小火，分次加入溫熱的雞高湯（每次約一杓），需不斷攪拌讓米粒釋放澱粉，待高湯被完全吸收後再加下一杓，持續約 18-20 分鐘。",
+    "step_image_url": "/img/recipes/22/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 127,
+    "recipe_id": 22,
+    "step_order": 5,
+    "step_title": "加入核心配料",
+    "step_total_time": "00:04:00",
+    "step_content": "當米粒達到外軟內 Q (Al dente) 的口感時，拌入先前炒好的野菇、鮮奶油與黑松露醬，攪拌均勻。",
+    "step_image_url": "/img/recipes/22/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 128,
+    "recipe_id": 22,
+    "step_order": 6,
+    "step_title": "熄火乳化 (Mantecatura)",
+    "step_total_time": "00:03:00",
+    "step_content": "熄火，加入剩下的奶油與帕瑪森起司粉，快速攪拌產生乳化效果，讓醬汁呈現絲滑黏稠狀後即可盛盤。",
+    "step_image_url": "/img/recipes/22/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 129,
+    "recipe_id": 23,
+    "step_order": 1,
+    "step_title": "清潔與醃漬",
+    "step_total_time": "01:05:00",
+    "step_content": "將雞翅洗淨並徹底用廚房紙巾擦乾表面水分。在大型密封袋或碗中放入雞翅、橄欖油及紐奧良醃料（紅椒粉、蒜粉、洋蔥粉、黑胡椒、鹽、砂糖），均勻揉捏使香料覆蓋全體，密封醃漬至少 1 小時（醃過夜效果更佳）。",
+    "step_image_url": "/img/recipes/23/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 130,
+    "recipe_id": 23,
+    "step_order": 2,
+    "step_title": "預熱烤箱",
+    "step_total_time": "00:05:00",
+    "step_content": "烤箱預熱至 200°C。在烤盤上放上烤網，這能讓雞翅在烘烤時熱氣流通，表皮更為酥脆。",
+    "step_image_url": "/img/recipes/23/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 131,
+    "recipe_id": 23,
+    "step_order": 3,
+    "step_title": "首次烘烤",
+    "step_total_time": "00:18:00",
+    "step_content": "將醃漬好的雞翅整齊排列在烤網上，放入烤箱烘烤約 15-20 分鐘，直到肉質熟透且表皮開始轉金黃色。",
+    "step_image_url": "/img/recipes/23/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 132,
+    "recipe_id": 23,
+    "step_order": 4,
+    "step_title": "調製與刷蜂蜜水",
+    "step_total_time": "00:02:00",
+    "step_content": "將蜂蜜與等比例的少量溫水混勻。取出雞翅，在表面均勻刷上一層薄薄的蜂蜜水。",
+    "step_image_url": "/img/recipes/23/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 133,
+    "recipe_id": 23,
+    "step_order": 5,
+    "step_title": "二次烘烤上色",
+    "step_total_time": "00:04:00",
+    "step_content": "將刷好醬的雞翅回爐再烤 3-5 分鐘。期間需密切觀察，直到表面呈現油亮誘人的焦糖棕色。",
+    "step_image_url": "/img/recipes/23/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 134,
+    "recipe_id": 23,
+    "step_order": 6,
+    "step_title": "盛盤與享用",
+    "step_total_time": "00:01:00",
+    "step_content": "出爐後稍微靜置 1-2 分鐘，讓肉汁回流，即可盛盤趁熱享用。",
+    "step_image_url": "/img/recipes/23/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 135,
+    "recipe_id": 24,
+    "step_order": 1,
+    "step_title": "煮麵與備料",
+    "step_total_time": "00:10:00",
+    "step_content": "準備一鍋滾水加入鹽巴，放入義大利細扁麵煮約 8 分鐘（比包裝建議時間少 2 分鐘），撈起並保留一碗煮麵水。",
+    "step_image_url": "/img/recipes/24/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 136,
+    "recipe_id": 24,
+    "step_order": 2,
+    "step_title": "煸香底味",
+    "step_total_time": "00:03:00",
+    "step_content": "平底鍋中放入特級初榨橄欖油，以低溫煸炒蒜片與乾辣椒絲，直到蒜片呈現微金黃色且香氣溢出。",
+    "step_image_url": "/img/recipes/24/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 137,
+    "recipe_id": 24,
+    "step_order": 3,
+    "step_title": "悶煮蛤蜊",
+    "step_total_time": "00:05:00",
+    "step_content": "轉大火放入新鮮蛤蜊，倒入白葡萄酒後立即蓋上鍋蓋，悶煮至蛤蜊全部彈開，隨即將蛤蜊暫時撈起以防過老。",
+    "step_image_url": "/img/recipes/24/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 138,
+    "recipe_id": 24,
+    "step_order": 4,
+    "step_title": "乳化拌炒",
+    "step_total_time": "00:03:00",
+    "step_content": "將煮好的麵條與少許煮麵水加入鍋中的蛤蜊原汁，轉大火快速拌炒，利用澱粉水讓油水混合乳化成濃稠醬汁。",
+    "step_image_url": "/img/recipes/24/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 139,
+    "recipe_id": 24,
+    "step_order": 5,
+    "step_title": "裝飾與收尾",
+    "step_total_time": "00:02:00",
+    "step_content": "將蛤蜊倒回鍋中拌勻，撒上新鮮巴西里碎，最後淋上一匙初榨橄欖油增加光澤與香氣，即可盛盤。",
+    "step_image_url": "/img/recipes/24/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 140,
+    "recipe_id": 25,
+    "step_order": 1,
+    "step_title": "調製蛋黃起司醬",
+    "step_total_time": "00:05:00",
+    "step_content": "在碗中放入 2 顆蛋黃、帕瑪森起司粉、鮮奶油與大量的現磨黑胡椒粒，攪拌均勻至略微濃稠的糊狀備用。",
+    "step_image_url": "/img/recipes/25/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 141,
+    "recipe_id": 25,
+    "step_order": 2,
+    "step_title": "烹煮麵條",
+    "step_total_time": "00:10:00",
+    "step_content": "準備一鍋滾水加入鹽巴，放入義大利直麵煮至彈牙 (Al dente)，撈起並保留一小碗煮麵水。",
+    "step_image_url": "/img/recipes/25/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 142,
+    "recipe_id": 25,
+    "step_order": 3,
+    "step_title": "煸炒培根",
+    "step_total_time": "00:05:00",
+    "step_content": "平底鍋不放油，放入培根條以中小火煸炒，直到培根邊緣呈現焦脆色澤且釋放出天然油脂。",
+    "step_image_url": "/img/recipes/25/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 143,
+    "recipe_id": 25,
+    "step_order": 4,
+    "step_title": "混合麵條與油脂",
+    "step_total_time": "00:02:00",
+    "step_content": "將煮好的麵條直接撈入培根鍋中快速翻炒，讓每根麵條均勻包裹上培根的油脂。",
+    "step_image_url": "/img/recipes/25/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 144,
+    "recipe_id": 25,
+    "step_order": 5,
+    "step_title": "離火乳化（關鍵步驟）",
+    "step_total_time": "00:03:00",
+    "step_content": "將平底鍋熄火並移開熱源。稍微降溫後倒入步驟 1 的蛋黃糊，快速持續攪拌，利用麵條與鍋具的餘溫使蛋液乳化成滑順醬汁，避免過熱變成炒蛋。",
+    "step_image_url": "/img/recipes/25/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 145,
+    "recipe_id": 25,
+    "step_order": 6,
+    "step_title": "調整稠度與盛盤",
+    "step_total_time": "00:02:00",
+    "step_content": "若醬汁太過濃稠，可加入少許煮麵水調整至理想狀態。盛盤後撒上額外的黑胡椒即可。",
+    "step_image_url": "/img/recipes/25/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 146,
+    "recipe_id": 26,
+    "step_order": 1,
+    "step_title": "低溫煸薑",
+    "step_total_time": "00:05:00",
+    "step_content": "鍋中倒入黑芝麻油，以小火慢慢煸炒老薑片，直到薑片邊緣呈現微捲曲的焦香狀態（注意火候不可太大，避免麻油發苦）。",
+    "step_image_url": "/img/recipes/26/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 147,
+    "recipe_id": 26,
+    "step_order": 2,
+    "step_title": "爆香與煎肉",
+    "step_total_time": "00:05:00",
+    "step_content": "放入整粒大蒜與紅辣椒段爆香，隨後轉大火，加入雞腿肉塊翻炒，直到肉表面呈現焦糖金黃色。",
+    "step_image_url": "/img/recipes/26/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 148,
+    "recipe_id": 26,
+    "step_order": 3,
+    "step_title": "燉煮入味",
+    "step_total_time": "00:10:00",
+    "step_content": "倒入醬油、米酒與砂糖。大火燒開煮出醬香後，轉小火蓋上鍋蓋悶煮約 10 分鐘，使肉質軟嫩且均勻上色。",
+    "step_image_url": "/img/recipes/26/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 149,
+    "recipe_id": 26,
+    "step_order": 4,
+    "step_title": "大火收汁",
+    "step_total_time": "00:05:00",
+    "step_content": "打開鍋蓋轉大火快速翻炒收汁，直到醬汁濃縮並呈現黏稠光澤，緊緊裹在雞塊上。",
+    "step_image_url": "/img/recipes/26/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 150,
+    "recipe_id": 26,
+    "step_order": 5,
+    "step_title": "九層塔提味",
+    "step_total_time": "00:01:00",
+    "step_content": "熄火。撒入大量的九層塔（泰式羅勒），利用鍋中的餘溫快速拌炒均勻，逼出強烈香氣後即可起鍋盛盤。",
+    "step_image_url": "/img/recipes/26/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 151,
+    "recipe_id": 27,
+    "step_order": 1,
+    "step_title": "汆燙去雜質",
+    "step_total_time": "00:10:00",
+    "step_content": "五花肉切成 3 公分見方的塊狀。冷水下鍋，加入少許薑片與米酒一起煮沸，燙出浮沫後撈起，用冷水沖洗乾淨並瀝乾備用。",
+    "step_image_url": "/img/recipes/27/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 152,
+    "recipe_id": 27,
+    "step_order": 2,
+    "step_title": "乾煸出油",
+    "step_total_time": "00:08:00",
+    "step_content": "熱鍋不放油，將肉塊下鍋以中火煸炒，直到五花肉本身的豬油釋出，且表面呈現微微金黃焦香。",
+    "step_image_url": "/img/recipes/27/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 153,
+    "recipe_id": 27,
+    "step_order": 3,
+    "step_title": "炒糖色與爆香",
+    "step_total_time": "00:05:00",
+    "step_content": "放入冰糖拌炒至融化並呈現琥珀色，讓肉塊均勻裹上糖色，隨後放入蔥段、薑片、大蒜粒翻炒出香氣。",
+    "step_image_url": "/img/recipes/27/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 154,
+    "recipe_id": 27,
+    "step_order": 4,
+    "step_title": "慢火燉煮",
+    "step_total_time": "00:50:00",
+    "step_content": "倒入醬油與米酒，加入淹過肉塊的水。大火燒開後轉小火，蓋上鍋蓋燉煮約 45-60 分鐘，直到肉質達到理想的軟糯程度。",
+    "step_image_url": "/img/recipes/27/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 155,
+    "recipe_id": 27,
+    "step_order": 5,
+    "step_title": "大火收汁",
+    "step_total_time": "00:05:00",
+    "step_content": "打開鍋蓋轉大火，將餘下的醬汁濃縮收乾，直到醬汁呈現黏稠狀且緊緊掛在紅燒肉上，色澤更趨油亮即可出爐。",
+    "step_image_url": "/img/recipes/27/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 156,
+    "recipe_id": 28,
+    "step_order": 1,
+    "step_title": "魚身處理與去腥",
+    "step_total_time": "00:05:00",
+    "step_content": "將鱸魚洗淨並徹底擦乾，在魚身兩側各斜劃 2-3 刀以便受熱均勻。在盤底鋪上少許蔥段與薑片，將魚放上後，表面再鋪上一層薑絲。",
+    "step_image_url": "/img/recipes/28/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 157,
+    "recipe_id": 28,
+    "step_order": 2,
+    "step_title": "大火清蒸",
+    "step_total_time": "00:10:00",
+    "step_content": "準備蒸鍋，水滾後放入魚盤，蓋上鍋蓋以大火蒸 8-10 分鐘。蒸好後關火悶 2 分鐘（可用筷子輕戳魚肉，若能輕易穿透即熟透）。",
+    "step_image_url": "/img/recipes/28/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 158,
+    "recipe_id": 28,
+    "step_order": 3,
+    "step_title": "瀝乾倒湯",
+    "step_total_time": "00:02:00",
+    "step_content": "取出魚盤，將盤中帶有腥味的魚湯倒掉，移除蒸過的薑絲與蔥段，重新鋪上新鮮的青蔥絲與辣椒絲。",
+    "step_image_url": "/img/recipes/28/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 159,
+    "recipe_id": 28,
+    "step_order": 4,
+    "step_title": "熱油潑淋（關鍵步驟）",
+    "step_total_time": "00:02:00",
+    "step_content": "小鍋中將橄欖油燒至微微冒煙，迅速將熱油淋在蔥絲與辣椒絲上，利用高溫激發辛香料的香氣。",
+    "step_image_url": "/img/recipes/28/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 160,
+    "recipe_id": 28,
+    "step_order": 5,
+    "step_title": "澆淋醬油",
+    "step_total_time": "00:01:00",
+    "step_content": "最後沿著魚盤邊緣澆上蒸魚醬油（不要直接淋在魚肉表面，以保持外觀與鮮甜），即可上桌。",
+    "step_image_url": "/img/recipes/28/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 161,
+    "recipe_id": 29,
+    "step_order": 1,
+    "step_title": "豆腐預處理",
+    "step_total_time": "00:08:00",
+    "step_content": "將板豆腐切成 2 公分的小方塊。準備一鍋水加入少許鹽煮沸，放入豆腐汆燙 2 分鐘。這能去除豆腥味並使豆腐結構更緊實，不易在後續燒煮時破碎。",
+    "step_image_url": "/img/recipes/29/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 162,
+    "recipe_id": 29,
+    "step_order": 2,
+    "step_title": "煸炒肉末與紅油",
+    "step_total_time": "00:05:00",
+    "step_content": "熱鍋不放油，先放入豬絞肉煸炒至乾香吐油，接著加入蒜末、薑泥與辣豆瓣醬，以中小火炒出紅油與豆香味。",
+    "step_image_url": "/img/recipes/29/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 163,
+    "recipe_id": 29,
+    "step_order": 3,
+    "step_title": "燒煮入味",
+    "step_total_time": "00:07:00",
+    "step_content": "倒入醬油、糖與清水煮沸，輕輕放入瀝乾的豆腐塊。轉小火慢燒，期間可用鏟背輕輕推動，讓豆腐吸收醬汁精華。",
+    "step_image_url": "/img/recipes/29/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 164,
+    "recipe_id": 29,
+    "step_order": 4,
+    "step_title": "勾芡收汁",
+    "step_total_time": "00:03:00",
+    "step_content": "將太白粉與水以 1:2 比例調勻。分三次緩緩淋入鍋中，邊淋邊推動，直到醬汁濃稠並緊緊裹住豆腐。",
+    "step_image_url": "/img/recipes/29/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 165,
+    "recipe_id": 29,
+    "step_order": 5,
+    "step_title": "完成與盛盤",
+    "step_total_time": "00:02:00",
+    "step_content": "盛盤後撒上大量蔥花，最後依照個人喜好撒上花椒粉，增加香氣層次。",
+    "step_image_url": "/img/recipes/29/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 166,
+    "recipe_id": 30,
+    "step_order": 1,
+    "step_title": "魷魚泡發與切絲",
+    "step_total_time": "00:15:00",
+    "step_content": "乾魷魚事先用溫鹽水泡發約 2-3 小時至軟化，洗淨後逆紋切成細長條狀備用。",
+    "step_image_url": "/img/recipes/30/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 167,
+    "recipe_id": 30,
+    "step_order": 2,
+    "step_title": "五花肉煸油",
+    "step_total_time": "00:08:00",
+    "step_content": "五花肉切成條狀。熱鍋放少許油，放入五花肉中火煸炒，直到逼出豬油且肉色金黃、邊緣微焦。",
+    "step_image_url": "/img/recipes/30/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 168,
+    "recipe_id": 30,
+    "step_order": 3,
+    "step_title": "煸炒豆乾",
+    "step_total_time": "00:05:00",
+    "step_content": "利用鍋中的豬油，放入豆乾絲一同煸炒，直到豆乾表面呈現微乾焦黃且帶有彈性。",
+    "step_image_url": "/img/recipes/30/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 169,
+    "recipe_id": 30,
+    "step_order": 4,
+    "step_title": "加入魷魚與爆香",
+    "step_total_time": "00:04:00",
+    "step_content": "放入魷魚條大火翻炒至散發乾貨特有的香氣，接著加入大蒜末與辣椒片爆香。",
+    "step_image_url": "/img/recipes/30/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 170,
+    "recipe_id": 30,
+    "step_order": 5,
+    "step_title": "蔬菜合炒",
+    "step_total_time": "00:03:00",
+    "step_content": "放入芹菜段與蔥段，保持大火快速翻炒，讓芹菜略微斷生並保持翠綠。",
+    "step_image_url": "/img/recipes/30/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 171,
+    "recipe_id": 30,
+    "step_order": 6,
+    "step_title": "調味收汁",
+    "step_total_time": "00:02:00",
+    "step_content": "沿鍋邊淋入醬油、米酒並撒上砂糖。持續大火快炒讓醬汁均勻包裹食材並收乾，直到鍋底無餘汁且香氣濃郁即可。",
+    "step_image_url": "/img/recipes/30/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 172,
+    "recipe_id": 31,
+    "step_order": 1,
+    "step_title": "低溫煸香薑片",
+    "step_total_time": "00:08:00",
+    "step_content": "冷鍋倒入黑芝麻油，放入切好的老薑薄片，以小火慢慢煸炒。直到薑片邊緣開始萎縮變皺且呈現微焦狀態（切記火不可大，避免麻油變苦）。",
+    "step_image_url": "/img/recipes/31/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 173,
+    "recipe_id": 31,
+    "step_order": 2,
+    "step_title": "拌炒雞腿肉",
+    "step_total_time": "00:05:00",
+    "step_content": "放入雞腿肉塊，轉中大火與薑片拌炒，直到雞肉表面轉白收縮，並微微呈現金黃油亮的色澤。",
+    "step_image_url": "/img/recipes/31/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 174,
+    "recipe_id": 31,
+    "step_order": 3,
+    "step_title": "加入藥膳與液體",
+    "step_total_time": "00:02:00",
+    "step_content": "倒入米酒與清水（比例可依喜好調整，此處採 1:1），隨後放入洗淨的紅棗與枸杞。",
+    "step_image_url": "/img/recipes/31/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 175,
+    "recipe_id": 31,
+    "step_order": 4,
+    "step_title": "燉煮融合",
+    "step_total_time": "00:20:00",
+    "step_content": "大火煮滾後，轉小火蓋上鍋蓋燉煮約 20 分鐘。若希望酒味淡一點，煮滾時可不蓋鍋蓋讓酒精揮發。",
+    "step_image_url": "/img/recipes/31/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 176,
+    "recipe_id": 31,
+    "step_order": 5,
+    "step_title": "最後調味",
+    "step_total_time": "00:01:00",
+    "step_content": "依個人口味加入極少許鹽巴提鮮（麻油雞通常不放過多鹽，以免搶味），拌勻後即可起鍋盛盤。",
+    "step_image_url": "/img/recipes/31/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 177,
+    "recipe_id": 32,
+    "step_order": 1,
+    "step_title": "分離蛋黃與蛋白",
+    "step_total_time": "00:03:00",
+    "step_content": "準備兩個無油無水的容器。將雞蛋小心分離，蛋白放入其中一盆並先放入冰箱冷藏（冰蛋白更容易打出細膩且穩定的蛋白霜），蛋黃則放入另一盆中。",
+    "step_image_url": "/img/recipes/32/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 178,
+    "recipe_id": 32,
+    "step_order": 2,
+    "step_title": "製作蛋黃糊",
+    "step_total_time": "00:07:00",
+    "step_content": "在蛋黃盆中加入全脂牛奶、香草精，用打蛋器攪拌均勻。篩入低筋麵粉與泡打粉，以「之」字形輕輕攪拌至無粉粒的滑順狀態，避免過度攪拌產生筋性。",
+    "step_image_url": "/img/recipes/32/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 179,
+    "recipe_id": 32,
+    "step_order": 3,
+    "step_title": "打發蛋白霜",
+    "step_total_time": "00:10:00",
+    "step_content": "將蛋白從冰箱取出。用電動打蛋器低速打出粗泡後，分三次加入細砂糖，逐漸轉高速打發。直到蛋白呈現結實有光澤感，拉起打蛋器有直立不彎曲的尖角（硬性發泡）。",
+    "step_image_url": "/img/recipes/32/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 180,
+    "recipe_id": 32,
+    "step_order": 4,
+    "step_title": "混合麵糊",
+    "step_total_time": "00:05:00",
+    "step_content": "取 1/3 的蛋白霜加入蛋黃糊中，用刮刀由底部向上翻拌均勻。再將混合好的麵糊倒回剩餘的蛋白霜中，以輕快柔和的翻拌手法（J字形）混合均勻，注意避免消泡。",
+    "step_image_url": "/img/recipes/32/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 181,
+    "recipe_id": 32,
+    "step_order": 5,
+    "step_title": "低溫煎烤與蒸氣",
+    "step_total_time": "00:08:00",
+    "step_content": "平底鍋抹上一層薄油並以微火預熱。用大湯勺挖取麵糊堆疊在鍋中。在鍋子空隙處加入一小匙水（約 10ml），立即蓋上鍋蓋，利用水蒸氣悶煎 4-5 分鐘。",
+    "step_image_url": "/img/recipes/32/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 182,
+    "recipe_id": 32,
+    "step_order": 6,
+    "step_title": "翻面與盛盤",
+    "step_total_time": "00:05:00",
+    "step_content": "打開鍋蓋，小心將鬆餅翻面（此時應已定型且底部呈金黃色）。再加入一小匙水，蓋上鍋蓋繼續悶煎 3-4 分鐘。出爐後可依喜好搭配鮮奶油、蜂蜜或水果。",
+    "step_image_url": "/img/recipes/32/steps/6.jpg",
+    "is_modified": false
   }
 ]

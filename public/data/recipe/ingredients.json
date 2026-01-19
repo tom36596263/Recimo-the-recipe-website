@@ -6680,5 +6680,31 @@
     "carbs_per_100g": 0.0,
     "unit_name": "克",
     "gram_conversion": 1.0
+  },
+  {
+    "ingredient_id": 515,
+    "ingredient_name": "義大利燉米",
+    "main_category": "grains-pasta-bakery",
+    "sub_category": "grains",
+    "ingredient_image_url": "/img/ingredients/grains-pasta-bakery/grains/arborio-rice.png",
+    "kcal_per_100g": 355.0,
+    "protein_per_100g": 7.0,
+    "fat_per_100g": 0.5,
+    "carbs_per_100g": 80.0,
+    "unit_name": "克",
+    "gram_conversion": 1.0
+  },
+  {
+    "ingredient_id": 516,
+    "ingredient_name": "黑芝麻油",
+    "main_category": "condiments-sauces-oils",
+    "sub_category": "oils",
+    "ingredient_image_url": "/img/ingredients/condiments-sauces-oils/oils/black-sesame-oil.png",
+    "kcal_per_100g": 884.0,
+    "protein_per_100g": 0.0,
+    "fat_per_100g": 100.0,
+    "carbs_per_100g": 0.0,
+    "unit_name": "克",
+    "gram_conversion": 1.0
   }
 ]
