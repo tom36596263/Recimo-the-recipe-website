@@ -33,6 +33,7 @@ const showCancelModal = ref(false);
 // 點擊「取消訂單」按鈕
 const onCancel = () => {
   // 開啟彈窗
+  if (props.order.status === -1) return;
   showCancelModal.value = true;
 };
 
@@ -50,7 +51,6 @@ const handleConfirmCancel = (data) => {
   showCancelModal.value = false;
   alert('訂單取消申請已送出');
 
-  // 重要：通知父層 (訂單列表) 更新畫面或是移除該筆訂單
   emit('cancel-order', props.order.id);
 };
 </script>
@@ -75,7 +75,8 @@ const handleConfirmCancel = (data) => {
           </div>
         </div>
       </div>
-      <BaseBtn title="取消訂單" variant="outline" @click="onCancel" />
+      <BaseBtn :title="order.status === -1 ? '訂單已取消' : '取消訂單'" :disabled="order.status === -1" variant="outline"
+        @click="onCancel" />
     </div>
 
 

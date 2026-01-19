@@ -23,7 +23,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="logo">
-                    <router-link to="/"><img :src="LogoBlack" alt=""></router-link>
+                    <router-link to="/"><img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo" ></router-link>
                 </div>
             </div>
             <div class="col-9 col-lg-12 link-group">

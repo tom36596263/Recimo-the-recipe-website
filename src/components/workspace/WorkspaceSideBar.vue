@@ -53,7 +53,7 @@ const closeMore = () => isMoreOpen.value = false;
                 <span class="tab-label p-p3">{{ item.title }}</span>
             </router-link>
 
-            <router-link class="tab-item add-btn">
+            <router-link to="edit-recipe" class="tab-item add-btn">
                 <IconAdd />
             </router-link>
             <div class="tab-item" @click="toggleMore" :class="{ 'active': isMoreOpen }">

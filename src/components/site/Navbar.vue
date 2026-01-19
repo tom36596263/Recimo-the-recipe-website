@@ -1,8 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import LogoWhite from '/img/site/Recimo-logo-white.svg'
-import LogoBlack from '/img/site/Recimo-logo-black.svg'
 import BaseBtn from '@/components/common/BaseBtn.vue'
 
 const router = useRouter();
@@ -58,7 +56,7 @@ const navItems = computed(() => {
                         <span></span>
                     </div>
                     <div class="logo">
-                        <router-link to="/"><img :src="LogoBlack" alt=""></router-link>
+                        <router-link to="/"><img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo" ></router-link>
                     </div>
                     <div class="link-group">
                         <router-link to="/search" class="search-btn p-p1">搜尋好料理</router-link>
@@ -79,7 +77,7 @@ const navItems = computed(() => {
                                 </router-link>
                             </div>
                             <div class="side-menu-only">
-                                <router-link to="/"><img :src="LogoWhite" alt="Recimo" /></router-link>
+                                <router-link to="/"><img :src="$parsePublicFile('img/site/Recimo-logo-white.svg')" alt="logo" ></router-link>
                                 <BaseBtn title="登出" height="30" />
                             </div>
                         </div>

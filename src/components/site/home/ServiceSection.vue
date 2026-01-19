@@ -38,7 +38,7 @@
     <div class="col-12">
         <swiper 
         direction="horizontal"
-        :slidesPerView="1.3"
+        :slidesPerView="1.4"
         :spaceBetween="10"
         :mousewheel="{
             forceToAxis: true,
@@ -93,7 +93,10 @@
             height:480px;
         }
     }
-    @media screen and (max-width: 1024px){
-        
+    @media screen and (max-width: 810px){
+        .my-swiper{
+            height:50vh;
+            width: 100%;
+        }
     }
 </style>
