@@ -58,7 +58,10 @@ const recipes = ref([
         <RecipeCardLg :recipe="item"/>
     </div>
     <div class="col-12 more-recipe-btn">
-        <CircleBtn title="看更多食譜" href="/recipes"/>
+        <router-link to="/recipes">
+            <CircleBtn title="看更多食譜" />
+        </router-link>
+        
     </div>
     
 </template>

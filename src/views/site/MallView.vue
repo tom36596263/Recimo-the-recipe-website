@@ -15,7 +15,16 @@ import 'swiper/css/free-mode'; // 記得加上這個樣式
 // 關鍵修正：把 Pagination 和 FreeMode 寫在同一行
 import { Pagination, FreeMode } from 'swiper/modules';
 
+//會員登入
+import { useAuthGuard } from '@/composables/useAuthGuard';
 
+const { runWithAuth } = useAuthGuard();
+const handleFollow = () => {
+  runWithAuth(() => {
+    // 這裡放「確定登入後」才要做的 API 動作
+    console.log("已登入，執行關注 API");
+  });
+};
 
 // 註冊模組：也寫在一起
 const modules = [Pagination, FreeMode];
@@ -219,13 +228,6 @@ const columns = ref([
         </div>
       </div>
 
-      <!-- 頁碼 -->
-      <!-- <div class="pagination" v-if="totalPages > 1">
-        <button v-for="page in totalPages" :key="page" class="page-link" :class="{ active: currentPage === page }"
-          @click="setPage(page)">
-          {{ page }}
-        </button>
-      </div> -->
       <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
     </section>
 
@@ -252,12 +254,14 @@ const columns = ref([
             您需要 Recimo ID 才能購買 Recimo 提供的商品。<br />
             註冊完全免費。
           </p>
-          <BaseBtn title="會員登入" href="/src/components/LoginLightbox.vue" :width="102" />
+          <BaseBtn title="會員登入" :width="102" @click="handleFollow" />
         </div>
       </div>
     </div>
   </div>
+
   <router-view v-else></router-view>
+  <!-- 如果網址有 ID（代表選了商品），就把商品詳情頁『嵌』在這個位置顯示；如果沒有 ID，就顯示原本的商城列表 -->
 </template>
 
 <style lang="scss" scoped>
@@ -428,11 +432,6 @@ const columns = ref([
     display: block;
   }
 
-  /* 4. 動畫核心 */
-  /* 原理：Track 總高度是原本內容的 200% (因為複製了一份)。
-   從 0% 移動到 -50% (或相反)，視覺上會剛好接回起點，形成無限循環。
-*/
-
   /* 往下移動的欄位 */
   .move-down .track {
     animation: scroll-down 30s linear infinite;
@@ -496,7 +495,7 @@ const columns = ref([
   }
 
   .card>p {
-    margin-bottom: 9px;
+    margin-bottom: 15px;
   }
 
   /* 6. RWD 響應式：手機版變成兩欄 */

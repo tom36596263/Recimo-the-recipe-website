@@ -5,6 +5,7 @@
     import Service from '@/components/site/home/ServiceSection.vue';
     import HotRecipe from '@/components/site/home/HotRecipeSection.vue';
     import FindRecipe from '@/components/site/home/FindRecipeSection.vue';
+    import LoadingPage from '@/components/LoadingPage.vue';
 </script>
 
 <template>
@@ -16,13 +17,18 @@
             </div>
         </header>
     </div>
+
     
+        
     <section class="about-section-bg">
         <div class="about-section container">
             <div class="row">
                 <About />
             </div>
         </div>
+        <img :src="$parsePublicFile('img/remove-bg-ingredients/1.png')" alt="番茄" class="home-ingredient1">
+        <img :src="$parsePublicFile('img/remove-bg-ingredients/15.png')" alt="檸檬" class="home-ingredient15">
+        <img :src="$parsePublicFile('img/remove-bg-ingredients/20.png')" alt="花椰菜" class="home-ingredient20">
     </section>
     <section class="about-feature-bg">
         <div class="container">
@@ -59,6 +65,45 @@
         flex-direction: column;
         overflow: hidden;
     }
+    .home-ingredient1{
+        z-index: 20;
+        position: absolute;
+        top: 10vh;
+        right: 60vw;
+        width: 100px;
+        animation: floating 3s ease-in-out infinite;
+    }
+    .home-ingredient15{
+        z-index: 20;
+        position: absolute;
+        top: 70vh;
+        right: 5vw;
+        width: 140px;
+        animation: floating 4s ease-in-out infinite;
+        animation-delay: 1s;
+    }
+    .home-ingredient20{
+        z-index: 20;
+        position: absolute;
+        top: 75vh;
+        left: 5vw;
+        width: 180px;
+        animation: floating 4s ease-in-out infinite;
+        animation-delay: 0.5s;
+    }
+    
+    @keyframes floating {
+        0% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-20px);
+            // transform: rotate(10deg);
+        }
+        100% {
+            transform: translateY(0px);
+        }
+    }
     .about-section-bg{
         background-color: $primary-color-700;
         width:100%;
@@ -89,6 +134,26 @@
             .title-wrapper{
                 margin-bottom: 30px;
             }
+        }
+        .home-ingredient1{
+            top: 25vh;
+            right: 75vw;
+            width: 90px;
+        }
+        .home-ingredient15{
+            top: 40vh;
+            right: 10vw;
+            width: 70px;
+            animation-delay: 1s;
+        }
+        .home-ingredient20{
+            top: 50vh;
+            left: 30vw;
+            width: 80px;
+            animation-delay: 0.5s;
+        }
+        .find-recipe-section{
+            padding: 40px 30px;
         }
     }
 </style>
