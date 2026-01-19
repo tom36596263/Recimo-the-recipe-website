@@ -21,9 +21,9 @@ const layoutComponent = computed(() => {
 </script>
 
 <template>
-  <component :is="layoutComponent">
-    <router-view />
-  </component>
+  <!-- <component :is="layoutComponent"> -->
+  <router-view />
+  <!-- </component> -->
   <GlobalModalManager />
 </template>
 

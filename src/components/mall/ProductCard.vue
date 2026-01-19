@@ -133,7 +133,7 @@ const productImage = computed(() => {
     &:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-
+        transition: transform 0.5s ease;
     }
 }
 
