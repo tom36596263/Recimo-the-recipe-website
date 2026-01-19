@@ -11,6 +11,7 @@ import RecipeIngredients from '../../components/workspace/recipedetail/RecipeIng
 import RecipeComments from '../../components/workspace/recipedetail/RecipeComments.vue';
 import CookSnap from '../../components/workspace/recipedetail/CookSnap.vue';
 import RecipeIntro from '../../components/workspace/recipedetail/RecipeIntro.vue';
+import RecipeReportModal from '@/components/workspace/recipedetail/modals/RecipeReportModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -250,6 +251,16 @@ const nutritionWrapper = computed(() => {
 });
 
 const handleServingsChange = (newVal) => { servings.value = newVal; };
+
+// --- 5. 檢舉食譜燈箱 ---
+const isReportModalOpen = ref(false);
+const onReportSubmit = (data) => {
+    console.log('收到檢舉內容:', data);
+    // 這裡通常會打 API 送出檢舉
+    isReportModalOpen.value = false; // 關閉燈箱
+};
+
+
 </script>
 
 <template>
@@ -284,8 +295,13 @@ const handleServingsChange = (newVal) => { servings.value = newVal; };
                         <i-material-symbols-thumb-up-rounded v-if="isLiked" class="action-icon" />
                         <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
                         <span class="count-text">{{ displayRecipeLikes }}</span>
+                        
                     </div>
                     <i-material-symbols-share-outline class="action-icon" @click="handleShare" />
+                    <i-material-symbols:edit class="action-icon"
+                        @click="router.push(`/workspace/edit-recipe/${rawRecipe.recipe_id}`)" />
+                    <i-material-symbols:error-outline-rounded class="action-icon report-btn"
+                        @click="isReportModalOpen = true" />
                 </div>
             </div>
 
@@ -339,6 +355,18 @@ const handleServingsChange = (newVal) => { servings.value = newVal; };
         <p>抱歉，找不到該食譜資料 (ID: {{ route.params.id }})。</p>
         <router-link to="/">返回首頁</router-link>
     </div>
+
+    <RecipeReportModal v-model="isReportModalOpen" :targetData="{
+        title: recipeIntroData?.title,
+
+        // 這裡就是關鍵！
+        // 把父元件的 .description 餵給 子元件需要的 content
+        content: recipeIntroData?.description,
+
+        userName: rawRecipe?.author_name || '未知作者',
+        image: recipeIntroData?.image
+    }" @submit="onReportSubmit" />
+
 </template>
 
 <style lang="scss" scoped>

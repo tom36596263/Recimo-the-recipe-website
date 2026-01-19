@@ -924,7 +924,7 @@
     "amount": 2.0,
     "unit_name": "片",
     "is_modified": false,
-    "remark": "確認魚片已完全退冰，並抹乾表面水分"
+    "remark": "確認已完全退冰，並抹乾表面水分"
   },
   {
     "recipe_ingredient_id": 104,
