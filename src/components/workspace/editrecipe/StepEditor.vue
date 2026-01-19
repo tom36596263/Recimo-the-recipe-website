@@ -160,7 +160,7 @@ onUnmounted(() => {
                   <div v-for="tid in (step.tags || [])" :key="tid" class="selected-ing-wrapper">
                     <BaseTag variant="label" width="auto">
                       <div class="ing-tag-content">
-                        <span class="ing-icon">🍳</span>
+                        <img src="@/assets/images/recipe/Vector.svg" class="ing-icon-img" alt="icon" />
                         <span class="ing-name p-p3">{{ingredients?.find(i => i.id === tid)?.name || '食材'}}</span>
                         <span v-if="isEditing" class="tag-close-icon" @click.stop="toggleTag(step, tid)">✕</span>
                       </div>
@@ -199,7 +199,7 @@ onUnmounted(() => {
     <div class="popover-title p-p2">設定烹飪時間</div>
     <div class="popover-content" style="display: flex; flex-direction: column; gap: 12px; padding: 10px 0;">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <input type="number" v-model.number="getActiveStep().time"
+        <input type="number" v-model.number="getActiveStep().time" step="1" min="0" max="1440"
           style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; outline: none;" placeholder="輸入分鐘"
           @keyup.enter="closePops" />
         <span class="p-p3">分鐘</span>
@@ -480,26 +480,57 @@ onUnmounted(() => {
     background-color: $primary-color-100 !important;
     border-radius: 10px !important;
     border: none !important;
-    padding: 0 8px !important;
-    max-width: 120px;
+    padding: 0 10px !important; // 稍微增加左右內距更美觀
+    /* ✨ 限制最大寬度，避免單個標籤太長佔滿整行 */
+    max-width: 160px;
   }
 }
 
 .ing-tag-content {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  width: 100%; // 撐開容器以利省略號運作
   overflow: hidden;
+  line-height: 1;
+
+  .ing-icon-img {
+    width: 16px; // 稍微放大一點點，視覺上跟文字更平衡
+    height: 16px;
+    object-fit: contain;
+    flex-shrink: 0; // 絕對不允許縮小
+    margin-top: 1px; // 微調垂直位置
+  }
 
   .ing-name {
     color: $neutral-color-800;
     font-weight: 500;
+    margin: 0;
+    padding: 0;
+
+    /* ✨ 關鍵修改：防止折行並顯示省略號 */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    flex: 1; // 讓名字佔滿中間剩下的空間
+    display: block; // 改為 block 配合 flex 省略
+    font-size: 14px; // 視情況調整，確保文字清晰
+  }
+
+  /* 確保叉叉按鈕也不會因為文字長而被擠扁 */
+  .tag-close-icon {
+    flex-shrink: 0;
+    margin-left: 2px;
+    cursor: pointer;
+    font-size: 12px;
+    color: $neutral-color-400;
+
+    &:hover {
+      color: $secondary-color-danger-400;
+    }
   }
 }
-
 .ghost-step {
   opacity: 0.5;
   background: $primary-color-100 !important;
