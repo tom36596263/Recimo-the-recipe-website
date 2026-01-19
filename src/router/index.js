@@ -120,6 +120,36 @@ const routes = [
         }
       },
       {
+        path: 'recent-recipes',
+        name: 'recent-recipes',
+        component: () => import('@/views/workspace/RecentRecipes.vue'),
+        meta: {
+          title: '最近觀看食譜',
+          layout: 'workspace',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'my-favorites',
+        name: 'my-favorites',
+        component: () => import('@/views/workspace/MyFavorites.vue'),
+        meta: {
+          title: '我的收藏',
+          layout: 'workspace',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'personal-recipes',
+        name: 'personal-recipes',
+        component: () => import('@/views/workspace/PersonalRecipes.vue'),
+        meta: {
+          title: '個人食譜',
+          layout: 'workspace',
+          requiresAuth: true
+        }
+      },
+      {
         path: 'lab',
         name: 'cooking-lab',
         component: () => import('@/views/workspace/CookingLab.vue'),
