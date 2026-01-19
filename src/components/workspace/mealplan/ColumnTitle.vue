@@ -19,10 +19,6 @@ const mealSlots = ref([
       <component :is="title.icon" v-if="title.icon" class="icon-style" />
       {{ title.name }}
     </div>
-
-    <div class="day-column__kcal">
-      <i-material-symbols-Local-Fire-Department-outline />
-    </div>
   </div>
 </template>
 
@@ -30,14 +26,14 @@ const mealSlots = ref([
 .day-column {
   display: flex;
   flex-direction: column;
-  width: 7%;
+  width: 50px;
   text-align: center;
   gap: 4px;
   flex-shrink: 0;
 
+
   &__date,
-  &__slot,
-  &__kcal {
+  &__slot {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -46,11 +42,15 @@ const mealSlots = ref([
     background-color: $neutral-color-100;
     border-radius: 10px;
     color: $primary-color-800;
-    height: 50px;
+    height: 5.5555555556vh;
   }
 
+  // &__date {
+  //   height: 5.5555555556vh;
+  // }
+
   &__slot {
-    height: 200px;
+    height: 22.2222222222vh;
   }
 }
 </style>
