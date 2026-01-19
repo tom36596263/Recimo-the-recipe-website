@@ -259,7 +259,8 @@ const productImage = computed(() => {
 
 <style lang="scss" scoped>
 // 引入你設定好的 Grid 變數
-@import "@/assets/scss/layouts/_grid.scss";
+@use "sass:map";
+@use "@/assets/scss/layouts/_grid.scss" as *;
 
 .product-card {
     display: flex;

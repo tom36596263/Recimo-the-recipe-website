@@ -68,7 +68,7 @@ const navItems = computed(() => {
                                 {{ item.title }}
                             </router-link>
                             <div class="nav-icon-link">
-                                <router-link to="/workspace" class="cart-btn" @click="closeMenu">
+                                <router-link to="/cart" class="cart-btn" @click="closeMenu">
                                     <span class="btn-text  p-p1">我的購物車</span>
                                     <i-material-symbols-Shopping-Cart-outline class="btn-icon" />
                                 </router-link>
@@ -167,7 +167,7 @@ const navItems = computed(() => {
             color: $accent-color-700;
         }
 
-        &.router-link-active:not(.login-btn) {
+        &.router-link-active:not(.login-btn, .search-btn) {
             color: $accent-color-400;
 
             &:hover {
