@@ -7,6 +7,11 @@ const props = defineProps({
     info: {
         type: Object,
         required: true
+    },
+    // 新增：接收預覽模式狀態
+    isPreview: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -41,7 +46,7 @@ const onModalSubmit = (data) => {
                 </div>
             </div>
 
-            <div class="badge-favorite" @click="showModal = true">
+            <div v-if="!props.isPreview" class="badge-favorite" @click="showModal = true">
                 <i-material-symbols-favorite-outline-rounded />
                 <div class="favorite-text">加收藏</div>
             </div>
@@ -73,7 +78,7 @@ const onModalSubmit = (data) => {
             </div>
 
             <div class="info-right">
-                <BaseBtn title="開始烹飪" class="cook-btn" />
+                <BaseBtn v-if="!props.isPreview" title="開始烹飪" class="cook-btn" />
             </div>
         </div>
 
@@ -83,9 +88,11 @@ const onModalSubmit = (data) => {
             </div>
         </article>
 
-        <AddToFolderModal v-model="showModal" @submit="onModalSubmit" />
+        <AddToFolderModal v-if="!props.isPreview" v-model="showModal" @submit="onModalSubmit" />
     </div>
 </template>
+
+
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';

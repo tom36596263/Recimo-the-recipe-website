@@ -6,33 +6,64 @@ const activeStepId = ref(null);
 
 const showTimerPop = ref(false);
 const showIngPop = ref(false);
-
 const popStyle = ref({ top: '0px', left: '0px', position: 'fixed' });
+
+// --- ✨ 圖片解析 ---
+const getStepImage = (step) => {
+  if (!step) return null;
+  const imgSource = step.image;
+  if (imgSource && typeof imgSource === 'string' && imgSource.trim().length > 0) {
+    if (imgSource.startsWith('data:') || imgSource.startsWith('http')) return imgSource;
+    let path = imgSource.trim();
+    if (!path.startsWith('/') && !path.startsWith('.')) path = `/${path}`;
+    return path;
+  }
+  return null;
+};
+
+const handleImgError = (e) => {
+  const img = e.target;
+  if (img.dataset.tried === 'true') {
+    img.src = 'https://placehold.co/150x120?text=No+Image';
+    return;
+  }
+  img.dataset.tried = 'true';
+  const currentSrc = img.src;
+  if (currentSrc.toLowerCase().endsWith('.png')) img.src = currentSrc.replace(/\.png$/i, '.jpg');
+  else if (currentSrc.toLowerCase().endsWith('.jpg')) img.src = currentSrc.replace(/\.jpg$/i, '.png');
+  else img.src = 'https://placehold.co/150x120?text=No+Image';
+};
 
 const toggleBodyScroll = (isLock) => {
   if (isLock) {
     const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = 'hidden';
     document.body.style.paddingRight = `${scrollBarWidth}px`;
-    document.body.style.touchAction = 'none';
   } else {
     document.body.style.overflow = '';
     document.body.style.paddingRight = '';
-    document.body.style.touchAction = '';
   }
 };
 
 const addStep = () => {
-  props.steps.push({ id: 's' + Date.now(), title: '', text: '', time: 0, tags: [], img: null });
+  props.steps.push({
+    id: 's' + Date.now(),
+    title: '',
+    content: '',
+    image: null,
+    time: null,
+    tags: []
+  });
 };
 
 const removeStep = (id) => {
-  const index = props.steps.findIndex(s => s.id === id);
+  const index = props.steps.findIndex(s => (s.id || s.step_id) === id);
   if (index !== -1) props.steps.splice(index, 1);
 };
 
 const toggleTag = (step, ingId) => {
   if (!step) return;
+  if (!step.tags) step.tags = [];
   const index = step.tags.indexOf(ingId);
   if (index === -1) step.tags.push(ingId);
   else step.tags.splice(index, 1);
@@ -41,11 +72,16 @@ const toggleTag = (step, ingId) => {
 const uploadStepImg = (step) => {
   if (!props.isEditing) return;
   const input = document.createElement('input');
-  input.type = 'file'; input.accept = 'image/*';
+  input.type = 'file';
+  input.accept = 'image/*';
   input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
     const reader = new FileReader();
-    reader.onload = (f) => step.img = f.target.result;
-    reader.readAsDataURL(e.target.files[0]);
+    reader.onload = (f) => {
+      step.image = f.target.result;
+    };
+    reader.readAsDataURL(file);
   };
   input.click();
 };
@@ -54,31 +90,19 @@ const openPop = (e, stepId, type) => {
   if (!props.isEditing) return;
   activeStepId.value = stepId;
   const rect = e.currentTarget.getBoundingClientRect();
-  popStyle.value = {
-    top: `${rect.bottom + 8}px`,
-    left: `${rect.left}px`,
-    position: 'fixed',
-    zIndex: 9999
-  };
-  if (type === 'timer') {
-    showTimerPop.value = true;
-    showIngPop.value = false;
-  } else {
-    showIngPop.value = true;
-    showTimerPop.value = false;
-  }
+  popStyle.value = { top: `${rect.bottom + 8}px`, left: `${rect.left}px`, position: 'fixed', zIndex: 9999 };
+  if (type === 'timer') { showTimerPop.value = true; showIngPop.value = false; }
+  else { showIngPop.value = true; showTimerPop.value = false; }
   toggleBodyScroll(true);
 };
 
 const closePops = () => {
-  if (showTimerPop.value || showIngPop.value) {
-    showTimerPop.value = false;
-    showIngPop.value = false;
-    toggleBodyScroll(false);
-  }
+  showTimerPop.value = false;
+  showIngPop.value = false;
+  toggleBodyScroll(false);
 };
 
-const getActiveStep = () => props.steps.find(s => s.id === activeStepId.value);
+const getActiveStep = () => props.steps.find(s => (s.id || s.step_id) === activeStepId.value);
 
 onMounted(() => window.addEventListener('click', closePops));
 onUnmounted(() => {
@@ -94,7 +118,7 @@ onUnmounted(() => {
     </div>
 
     <div class="step-list">
-      <div v-for="(step, idx) in steps" :key="step.id" class="step-item-outer">
+      <div v-for="(step, idx) in steps" :key="step.id || idx" class="step-item-outer">
         <div class="step-sidebar">
           <div v-if="isEditing" class="drag-dots">⋮⋮</div>
           <div class="step-number p-p2">{{ idx + 1 }}</div>
@@ -103,40 +127,48 @@ onUnmounted(() => {
         <div class="step-card">
           <div class="card-header">
             <input v-if="isEditing" v-model="step.title" class="step-title-input zh-h4" placeholder="步驟標題" />
-            <span v-else class="step-title-display zh-h4-bold">{{ step.title || '未命名步驟' }}</span>
+            <span v-else class="step-title-display zh-h4-bold">
+              {{ step.title || ('步驟 ' + (idx + 1)) }}
+            </span>
             <button v-if="isEditing" class="delete-step" @click="removeStep(step.id)">✕</button>
           </div>
 
           <div class="card-content">
-            <div class="image-uploader" @click="uploadStepImg(step)"
-              :style="{ backgroundImage: step.img ? `url(${step.img})` : '' }">
-              <div class="image-overlay">
-                <span class="plus">+</span>
-                <span class="text p-p3">{{ step.img ? '更換圖片' : '新增圖片' }}</span>
+            <div class="image-uploader-area">
+              <div class="image-box" @click="uploadStepImg(step)">
+                <img v-if="getStepImage(step)" :src="getStepImage(step)" class="step-img" @error="handleImgError" />
+                <div v-else class="image-placeholder">
+                  <span class="plus">+</span>
+                  <span class="text p-p3">新增圖片</span>
+                </div>
+                <div v-if="getStepImage(step) && isEditing" class="change-hint">
+                  <span>更換圖片</span>
+                </div>
               </div>
             </div>
 
             <div class="step-info">
               <div class="tag-row">
-                <BaseTag :text="step.time > 0 ? '+ ' + step.time + ':00' : '+ 時間'" variant="action" :show-icon="false"
-                  width="85px" @click.stop="openPop($event, step.id, 'timer')" />
+                <BaseTag :text="step.time ? `${step.time} 分鐘` : '+ 時間'" variant="action" :show-icon="false" width="85px"
+                  @click.stop="openPop($event, step.id || idx, 'timer')" />
+                <BaseTag text="食材" variant="action" width="85px" @click.stop="openPop($event, step.id || idx, 'ing')" />
 
-                <BaseTag text="食材" variant="action" width="85px" @click.stop="openPop($event, step.id, 'ing')" />
-
-                <div v-for="tid in step.tags" :key="tid" class="selected-ing-wrapper">
+                <div v-for="tid in (step.tags || [])" :key="tid" class="selected-ing-wrapper">
                   <BaseTag variant="label" width="auto">
                     <div class="ing-tag-content">
                       <span class="ing-icon">🍳</span>
-                      <span class="ing-name p-p3">{{ingredients.find(i => i.id === tid)?.name || '未知'}}</span>
+                      <span class="ing-name p-p3">{{ingredients?.find(i => i.id === tid)?.name || '食材'}}</span>
                       <span v-if="isEditing" class="tag-close-icon" @click.stop="toggleTag(step, tid)">✕</span>
                     </div>
                   </BaseTag>
                 </div>
               </div>
 
-              <textarea v-if="isEditing" v-model="step.text" class="step-textarea p-p2"
+              <textarea v-if="isEditing" v-model="step.content" class="step-textarea p-p2"
                 placeholder="詳細說明步驟內容..."></textarea>
-              <div v-else class="step-text-display p-p2">{{ step.text || '點擊編輯新增說明' }}</div>
+              <div v-else class="step-text-display p-p2">
+                {{ step.content || '無步驟說明' }}
+              </div>
             </div>
           </div>
         </div>
@@ -152,37 +184,30 @@ onUnmounted(() => {
     <div class="popover-title p-p2">選擇食材</div>
     <div class="popover-content">
       <button v-for="i in ingredients" :key="i.id" @click="toggleTag(getActiveStep(), i.id)" class="chip p-p3"
-        :class="{ active: getActiveStep()?.tags.includes(i.id) }">{{ i.name }}</button>
+        :class="{ active: getActiveStep()?.tags?.includes(i.id) }">
+        {{ i.name }}
+      </button>
     </div>
   </div>
 
-  <div v-if="showTimerPop" :style="popStyle" class="popover-box timer-box" @click.stop>
-    <div class="popover-title p-p2">設定製作時間</div>
-    <div class="timer-ui">
-      <div class="input-wrapper">
-        <input type="number" v-model.number="getActiveStep().time" class="timer-input">
-        <span class="unit zh-h4-bold">分鐘</span>
+  <div v-if="showTimerPop" :style="popStyle" class="popover-box" @click.stop>
+    <div class="popover-title p-p2">設定烹飪時間</div>
+    <div class="popover-content" style="display: flex; flex-direction: column; gap: 12px; padding: 10px 0;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <input type="number" v-model.number="getActiveStep().time"
+          style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; outline: none;" placeholder="輸入分鐘"
+          @keyup.enter="closePops" />
+        <span class="p-p3">分鐘</span>
       </div>
-      <div class="timer-control-grid">
-        <div class="control-column">
-          <button class="circle-btn minus p-p3"
-            @click="getActiveStep().time = Math.max(0, getActiveStep().time - 10)">-10</button>
-          <button class="circle-btn minus p-p3"
-            @click="getActiveStep().time = Math.max(0, getActiveStep().time - 5)">-5</button>
-        </div>
-        <div class="divider"></div>
-        <div class="control-column">
-          <button class="circle-btn plus p-p3" @click="getActiveStep().time += 5">+5</button>
-          <button class="circle-btn plus p-p3" @click="getActiveStep().time += 10">+10</button>
-        </div>
-      </div>
-      <button class="reset-link p-p3" @click="getActiveStep().time = 0">重設為 0</button>
+      <button @click="closePops"
+        style="background: #3E8D60; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer;">確定</button>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-/* 樣式部分保持不變，核心重點在上述 Template 的 BaseTag 傳參 */
+@import '@/assets/scss/abstracts/_color.scss';
+
 .step-editor-container {
   width: 100%;
   margin-bottom: 50px;
@@ -207,41 +232,64 @@ onUnmounted(() => {
 .step-item-outer {
   display: flex;
   gap: 15px;
+}
 
-  .step-sidebar {
+.image-box {
+  width: 150px;
+  height: 120px;
+  background: $neutral-color-100;
+  border: 1.5px dashed $neutral-color-400;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .step-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-placeholder {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 30px;
+    color: $neutral-color-400;
 
-    .drag-dots {
-      color: $neutral-color-400;
-      cursor: grab;
+    .plus {
+      font-size: 24px;
     }
+  }
 
-    .step-number {
-      width: 28px;
-      height: 28px;
-      background: $primary-color-100;
-      color: $primary-color-800;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-    }
+  .change-hint {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+  }
+
+  &:hover .change-hint {
+    opacity: 1;
   }
 }
 
 .step-card {
   flex: 1;
-  border-top: 1px solid $neutral-color-100;
+  border-top: 1px solid $neutral-color-400;
 
   .card-header {
     display: flex;
     align-items: center;
     padding: 12px 0;
-    border-bottom: 1px solid $neutral-color-100;
+    border-bottom: 1px solid $neutral-color-400;
     margin-bottom: 15px;
 
     .step-title-input {
@@ -249,7 +297,6 @@ onUnmounted(() => {
       border: none;
       outline: none;
       background: transparent;
-      color: $neutral-color-black;
     }
 
     .delete-step {
@@ -257,228 +304,62 @@ onUnmounted(() => {
       background: none;
       border: none;
       cursor: pointer;
-
-      &:hover {
-        color: $secondary-color-danger-700;
-      }
     }
   }
 
   .card-content {
     display: flex;
     gap: 20px;
+  }
+}
 
-    .image-uploader {
-      width: 150px;
-      height: 120px;
-      background: $neutral-color-100;
-      border: 1.5px dashed $neutral-color-400;
-      border-radius: 12px;
-      position: relative;
-      background-size: cover;
-      background-position: center;
+.step-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
-      .image-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba($neutral-color-white, 0.4);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: $neutral-color-700;
-      }
-    }
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
 
-    .step-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+  .step-textarea {
+    border: none;
+    outline: none;
+    resize: none;
+    min-height: 80px;
+    background: transparent;
+    width: 100%;
+  }
 
-      .tag-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        align-items: center;
-      }
-
-      .selected-ing-wrapper {
-        transform: scale(0.9);
-          transform-origin: left center;
-      
-          :deep(.base-tag) {
-            background-color: $primary-color-100;
-            height: 35px;
-            border-radius: 10px;
-          }
-      } 
-
-      .ing-tag-content {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 0 4px;
-
-        .ing-icon {
-          font-size: 14px;
-        }
-
-        .ing-name {
-          color: $neutral-color-800;
-          font-size: 16px;
-        }
-
-        .tag-close-icon {
-          color: $neutral-color-800;
-          font-size: 14px;
-          cursor: pointer;
-          margin-left: 4px;
-          line-height: 1;
-
-          &:hover {
-            color: $secondary-color-danger-700;
-          }
-        }
-      }
-
-      .step-textarea {
-        border: none;
-        outline: none;
-        resize: none;
-        min-height: 80px;
-        background: transparent;
-        color: $neutral-color-800;
-      }
-
-      .step-text-display {
-        color: $neutral-color-800;
-        white-space: pre-wrap;
-      }
-    }
+  .step-text-display {
+    white-space: pre-wrap;
+    color: $neutral-color-800;
   }
 }
 
 .popover-box {
-  background: $neutral-color-white;
+  background: white;
   border: 1px solid $primary-color-400;
   border-radius: 12px;
   padding: 15px;
-  box-shadow: 0 8px 20px rgba($neutral-color-black, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   width: 260px;
   z-index: 9999;
-
-  .popover-title {
-    color: $primary-color-800;
-    font-weight: bold;
-    margin-bottom: 12px;
-    border-bottom: 1px solid $neutral-color-100;
-    padding-bottom: 6px;
-  }
-
-  &.timer-box {
-    text-align: center;
-
-    .input-wrapper {
-      display: flex;
-      align-items: baseline;
-      justify-content: center;
-      gap: 6px;
-      margin: 10px 0 20px;
-
-      .timer-input {
-        width: 70px;
-        font-size: 32px;
-        font-weight: bold;
-        border: none;
-        border-bottom: 3px solid $primary-color-800;
-        text-align: center;
-        outline: none;
-        color: $primary-color-800;
-        background: transparent;
-      }
-
-      .unit {
-        color: $neutral-color-800;
-      }
-    }
-
-    .timer-control-grid {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-
-      .control-column {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .divider {
-        width: 1px;
-        height: 60px;
-        background: $neutral-color-100;
-      }
-
-      .circle-btn {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        border: 1px solid $neutral-color-100;
-        background: $neutral-color-white;
-        cursor: pointer;
-        transition: all 0.2s;
-
-        &.plus {
-          background: $primary-color-100;
-          color: $primary-color-800;
-          border-color: $primary-color-400;
-
-          &:hover {
-            background: $primary-color-800;
-            color: $neutral-color-white;
-          }
-        }
-
-        &.minus {
-          color: $neutral-color-800;
-
-          &:hover {
-            background: $secondary-color-danger-200;
-            color: $secondary-color-danger-700;
-            border-color: $secondary-color-danger-400;
-          }
-        }
-      }
-    }
-
-    .reset-link {
-      margin-top: 15px;
-      background: none;
-      border: none;
-      color: $neutral-color-400;
-      text-decoration: underline;
-      cursor: pointer;
-
-      &:hover {
-        color: $neutral-color-800;
-      }
-    }
-  }
 
   .chip {
     margin: 4px;
     padding: 6px 12px;
     border-radius: 20px;
-    border: 1px solid $neutral-color-100;
-    background: $neutral-color-white;
+    border: 1px solid #ddd;
     cursor: pointer;
-    color: $neutral-color-800;
 
     &.active {
       background: $primary-color-800;
-      color: $neutral-color-white;
+      color: white;
       border-color: $primary-color-800;
     }
   }
@@ -486,7 +367,7 @@ onUnmounted(() => {
 
 .add-step-wrapper {
   margin-top: 30px;
-  border-top: 1px solid $neutral-color-100;
+  border-top: 1px solid #eee;
   padding-top: 20px;
 
   .add-step-btn {
@@ -495,13 +376,79 @@ onUnmounted(() => {
     border: 1.5px solid $primary-color-400;
     color: $primary-color-800;
     border-radius: 10px;
-    background: $neutral-color-white;
-    // font-weight: bold;
+    background: white;
     cursor: pointer;
+  }
+}
+
+.step-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30px;
+
+  .step-number {
+    width: 28px;
+    height: 28px;
+    background: $primary-color-100;
+    color: $primary-color-800;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+}
+
+// --- 補上食材標籤內部的樣式 ---
+
+.selected-ing-wrapper {
+  display: inline-flex;
+  align-items: center;
+
+  // 使用 :deep 強制修改 BaseTag 元件內部的樣式
+  :deep(.base-tag) {
+    height: 32px !important; 
+    min-height: 32px !important;
+    background-color: $primary-color-100!important; 
+    border-radius: 10px !important; 
+    border: none !important; 
+    padding: 0 8px !important; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.ing-tag-content {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 4px; // 圖示、文字、叉叉的間距
+  padding: 2px 4px;
+
+  .ing-icon {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+  }
+
+  .ing-name {
+    color: $neutral-color-800;
+    font-weight: 500;
+  }
+
+  .tag-close-icon {
+    margin-left: 2px;
+    font-size: 12px;
+    color: $neutral-color-400;
+    cursor: pointer;
+    transition: color 0.2s;
 
     &:hover {
-      background: $primary-color-100;
+      color: $secondary-color-danger-400; // 滑鼠移上去變紅色
     }
   }
 }
+
+
 </style>
