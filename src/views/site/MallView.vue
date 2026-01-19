@@ -2,8 +2,9 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import card from '@/components/mall/ProductCard.vue';
 import axios from 'axios';
-import { publicApi } from '@/utils/publicApi'; // ！！！務必加上這行引入 ！！！
+import { publicApi } from '@/utils/publicApi';
 import { useRouter, useRoute } from 'vue-router';
+import PageBtn from '@/components/common/PageBtn.vue'
 
 // --- Swiper 相關設定 (請用這段取代舊的) ---
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -13,6 +14,8 @@ import 'swiper/css/free-mode'; // 記得加上這個樣式
 
 // 關鍵修正：把 Pagination 和 FreeMode 寫在同一行
 import { Pagination, FreeMode } from 'swiper/modules';
+
+
 
 // 註冊模組：也寫在一起
 const modules = [Pagination, FreeMode];
@@ -65,7 +68,7 @@ const filteredProducts = computed(() => {
   }
   // 注意：這裡假設你的 JSON 資料裡有一個屬性叫做 category (或 tag)
   // 且內容跟上面的 text 完全一樣 (例如 "低卡健身系列")
-  return productList.value.filter((item) => item.category === activeTag.value);
+  return productList.value.filter((item) => item.product_category === activeTag.value);
 });
 
 // --- 核心邏輯步驟 2：計算總頁數 ---
@@ -103,7 +106,11 @@ const fetchData = () => {
       console.error('讀取 JSON 失敗', error);
     });
 };
-
+const handlePageChange = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
 const selectTag = (tagName) => {
   activeTag.value = tagName;
   currentPage.value = 1; // 切換標籤時，要切回第一頁，不然使用者會迷路
@@ -213,12 +220,13 @@ const columns = ref([
       </div>
 
       <!-- 頁碼 -->
-      <div class="pagination" v-if="totalPages > 1">
+      <!-- <div class="pagination" v-if="totalPages > 1">
         <button v-for="page in totalPages" :key="page" class="page-link" :class="{ active: currentPage === page }"
           @click="setPage(page)">
           {{ page }}
         </button>
-      </div>
+      </div> -->
+      <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
     </section>
 
     <!-- 輪播圖 -->
@@ -504,44 +512,28 @@ const columns = ref([
     }
   }
 
-  // .col-3 {
-  //   width: 25%; // 25% 代表一排四個 (100 / 4)
-  //   flex: 0 0 25%; // 確保不會被擠壓或放大
-  //   box-sizing: border-box; // 確保 padding 不會把格子撐爆
-  //   padding: 10px; // 給商品卡片一點間距
-  // }
-
-  // // 手機版 RWD 設定
-  // @media (max-width: 768px) {
-  //   .col-md-12 {
-  //     width: 100%;
-  //     flex: 0 0 100%;
-  //   }
-  // }
   // 桌機版狀態
   .desktop-view {
-    display: flex; // 恢復 flex 屬性
-    flex-wrap: wrap; // 雙重保險：一定要換行
+    display: flex;
+    flex-wrap: wrap;
     width: 100%;
   }
 
-  // 手機版狀態 (預設隱藏)
+
   .mobile-view {
     display: none;
   }
 
   @media (max-width: 1024px) {
 
-    // 手機版隱藏桌機 Grid
     .desktop-view {
-      display: none !important; // 強制隱藏
+      display: none
     }
 
-    // 手機版顯示 Swiper
+
     .mobile-view {
       display: block;
       width: 100%;
-      // padding-left: 15px; // 左側留白
       overflow: hidden;
     }
 

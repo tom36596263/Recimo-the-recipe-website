@@ -1,60 +1,81 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { publicApi } from '@/utils/publicApi';
 import DayColumn from '@/components/workspace/mealplan/DayColumn.vue';
 import ColumnTitle from '@/components/workspace/mealplan/ColumnTitle.vue';
 import PlanPanel from '@/components/workspace/mealplan/PlanPanel.vue';
 import RecipePicker from '@/components/workspace/mealplan/RecipePicker.vue';
 
-// 控制面板顯示的狀態，預設關閉
-const showPanel = ref(false);
+// --- 資料狀態 ---
+const planData = ref({});        // 存放計畫基本資訊
+const mealPlanItems = ref([]);   // 存放所有配餐明細
+const allRecipes = ref([]);      // 存放食譜資料庫
 
-// 假資料
-const planData = ref({
-  planId: 1001,
-  title: '2024春季增肌減脂計畫',
-  startDate: '2024-03-01',
-  endDate: '2024-03-10'
-});
+// --- UI 控制 ---
+const showPanel = ref(false);    // 控制右側 PlanPanel 開關
+const selectedDate = ref(null);  // 控制是否進入單日編輯模式 (null 為週視圖)
 
-// 根據開始與結束日期，產生成一個Date物件的陣列
-const datelist = computed(function () {
-  const start = new Date(planData.value.startDate);
-  const end = new Date(planData.value.endDate);
+// --- API 請求 ---
+const fetchData = async () => {
+  try {
+    const [planRes, itemsRes, recipesRes] = await Promise.all([
+      publicApi.get('data/plan/meal_plans.json'),
+      publicApi.get('data/plan/meal_plan_items.json'),
+      publicApi.get('data/recipe/recipes.json')
+    ]);
+
+    // 取得計畫 ID: 1 的資料
+    planData.value = planRes.data.find(p => p.plan_id === 1) || {};
+    // 取得計畫 ID: 1 的所有配餐項目
+    mealPlanItems.value = itemsRes.data.filter(item => item.plan_id === 1);
+    allRecipes.value = recipesRes.data;
+  } catch (err) {
+    console.error('資料讀取失敗：', err.message);
+  }
+};
+
+// --- 計算屬性：產生日誌日期陣列 ---
+const datelist = computed(() => {
+  if (!planData.value.start_date) return []; // 避免 API 未回傳時報錯
+  const start = new Date(planData.value.start_date);
+  const end = new Date(planData.value.end_date);
   const list = [];
-
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     list.push(new Date(d));
   }
-
   return list;
 });
 
-// 橫向滾動
-const onWheel = (e) => {
-  const container = e.currentTarget;
-  container.scrollLeft += e.deltaY * 0.2;
+// --- 邏輯處理：根據日期獲取該日詳細資料 ---
+const getItemsByDate = (date) => {
+  const dateStr = date.toISOString().split('T')[0]; // 取得 YYYY-MM-DD
+  return mealPlanItems.value
+    .filter(item => item.planned_date.includes(dateStr))
+    .map(item => {
+      const recipeDetail = allRecipes.value.find(r => r.recipe_id === item.recipe_id);
+      return { ...item, detail: recipeDetail }; // 注入食譜詳情
+    });
 };
 
-// 進入recipepicker
-const selectedDate = ref(null); // 當前選中的日期，null 代表沒有選擇任一天，僅展示週計畫
-
-const handleDateSelect = (date) => {
-  selectedDate.value = date;
+// --- 事件處理 ---
+const handleAddRecipe = (payload) => {
+  mealPlanItems.value.push({
+    item_id: Date.now(),
+    plan_id: planData.value.plan_id,
+    recipe_id: payload.recipe_id,
+    planned_date: payload.date,
+    meal_type: payload.meal_type,
+    sort_order: 1
+  });
 };
 
-const closeDetail = () => {
-  selectedDate.value = null;
-};
+const handleDateSelect = (date) => { selectedDate.value = date; };
+const closeDetail = () => { selectedDate.value = null; };
+const openPanel = () => { showPanel.value = true; };
+const closePanel = () => { showPanel.value = false; };
+const onWheel = (e) => { e.currentTarget.scrollLeft += e.deltaY * 0.2; };
 
-// 開啟面板
-const openPanel = () => {
-  showPanel.value = true;
-};
-
-// 關閉面板 ，給子元件呼叫用
-const closePanel = () => {
-  showPanel.value = false;
-};
+onMounted(fetchData);
 </script>
 
 <template>
@@ -62,29 +83,30 @@ const closePanel = () => {
     <div class="row">
       <div class="btn-bar col-12">
         <div class="btn-bar__bread-crumbs"></div>
-
-        <div class="btn-bar__info-btn col-12" @click="openPanel">
+        <div class="btn-bar__info-btn" @click="openPanel">
           <i-material-symbols-info-i />
         </div>
       </div>
 
-      <Transition name="fade-scale">
-        <div v-if="!selectedDate" class="meal-plan-container">
+      <Transition name="fade-scale" mode="out-in">
+        <div v-if="!selectedDate" key="week" class="meal-plan-container col-12">
           <ColumnTitle />
           <div class="meal-plan-container__columns" @wheel.prevent="onWheel">
-            <DayColumn v-for="date in datelist" :key="date.getTime()" :current-date="date"
+            <DayColumn v-for="date in datelist" :key="date.getTime()" :current-date="date" :items="getItemsByDate(date)"
               @click="handleDateSelect(date)" />
           </div>
         </div>
 
-        <div v-else class="meal-detail-view">
-          <RecipePicker :date="selectedDate" @back="closeDetail" />
+        <div v-else key="picker" class="meal-detail-view col-12">
+          <RecipePicker :date="selectedDate" :current-items="getItemsByDate(selectedDate)" :all-recipes="allRecipes"
+            @back="closeDetail" @add="handleAddRecipe" />
         </div>
       </Transition>
     </div>
 
     <Transition name="slide-fade">
-      <PlanPanel v-if="showPanel" :plan-data="planData" @close="closePanel" />
+      <PlanPanel v-if="showPanel" :plan-data="planData" :meal-plan-items="mealPlanItems" :all-recipes="allRecipes"
+        @close="closePanel" />
     </Transition>
 
     <Transition name="fade">
@@ -94,10 +116,16 @@ const closePanel = () => {
 </template>
 
 <style lang="scss" scoped>
+.container {
+  overflow: hidden;
+  padding-bottom: 20px;
+}
+
 .btn-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
 
   &__info-btn {
     display: flex;
@@ -107,6 +135,7 @@ const closePanel = () => {
     height: 40px;
     border-radius: 50%;
     background-color: $primary-color-100;
+    color: $primary-color-800;
     cursor: pointer;
 
     &:hover {
@@ -120,13 +149,19 @@ const closePanel = () => {
 .meal-plan-container {
   display: flex;
   gap: 10px;
+  min-width: 0;
 
   &__columns {
     flex-grow: 1;
     display: flex;
     flex-wrap: nowrap;
-    gap: 10px;
+    gap: 12px;
     overflow-x: auto;
+    padding-bottom: 10px;
+
+    :deep(.day-column) {
+      flex-shrink: 0;
+    }
 
     &::-webkit-scrollbar {
       display: none;
@@ -144,10 +179,10 @@ const closePanel = () => {
   z-index: 998;
 }
 
-// 面板滑入滑出
+/* 動畫設定 */
 .slide-fade-enter-active,
 .slide-fade-leave-active {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 .slide-fade-enter-from,
@@ -156,7 +191,6 @@ const closePanel = () => {
   opacity: 0;
 }
 
-// 遮罩淡入淡出
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -167,7 +201,6 @@ const closePanel = () => {
   opacity: 0;
 }
 
-// daycolumn至recipepicker的動畫
 .fade-scale-enter-active,
 .fade-scale-leave-active {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -176,6 +209,20 @@ const closePanel = () => {
 .fade-scale-enter-from,
 .fade-scale-leave-to {
   opacity: 0;
-  transform: scale(0.95);
+  transform: scale(0.98);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.meal-detail-view {
+  animation: fadeIn 0.4s ease;
 }
 </style>
