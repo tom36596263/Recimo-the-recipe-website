@@ -15,6 +15,8 @@ const router = useRouter();
 const allRecipe = ref([])
 const currentPage = ref(1)
 const pageSize = 6
+//新增
+const searchIngredientIds = ref([]);
 
 const activeFilters = ref({
     time: "全部",
@@ -27,21 +29,29 @@ watch(activeFilters, () => {
     currentPage.value = 1;
 }, { deep: true });
 
+//新增
+watch(searchIngredientIds, () => {
+    currentPage.value = 1;
+});
+
 const handlePageChange = (page) => {
     currentPage.value = page;
 };
 
 onMounted(async () => {
     try {
-        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
+        const [resRecipes, resRecipeTags, resTags, resRecipeIngredients] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_tag.json'),
-            publicApi.get('data/recipe/tags.json')
+            publicApi.get('data/recipe/tags.json'),
+            publicApi.get('data/recipe/recipe_ingredient.json')
         ]);
 
         const recipeData = resRecipes.data;
         const recipeTagsData = resRecipeTags.data;
         const tagsData = resTags.data;
+        //新增
+        const recipeIngredientsData = resRecipeIngredients.data;
 
         const tagMap = {};
         tagsData.forEach(tag => {
@@ -58,6 +68,12 @@ onMounted(async () => {
             // 透過 tagMap 轉換成 tag_name 陣列
             const recipeTagsNames = matchedTagIds.map(id => tagMap[id]).filter(Boolean);
 
+
+            //新增
+            const matchedIngredients = recipeIngredientsData
+                .filter(ri => ri.recipe_id === recipe.recipe_id)
+                .map(ri => ri.ingredient_id);
+
             return {
                 id: recipe.recipe_id,
                 recipe_name: recipe.recipe_title,
@@ -66,6 +82,7 @@ onMounted(async () => {
                     ? recipe.recipe_image_url
                     : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
                 tags: recipeTagsNames,
+                ingredient_ids: matchedIngredients,
                 nutritional_info: {
                     calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
                     serving_size: recipe.recipe_servings,
@@ -124,7 +141,16 @@ const filteredRecipes = computed(() => {
             (activeFilters.value.kcal === "300kcal以上(豐盛)" && kcalValue > 300)
         );
 
-        return timeMatch && difficultyMatch && portionMatch && kcalMatch;
+        //新增
+        let ingredientMatch = true;
+        if (searchIngredientIds.value.length > 0) {
+            // 使用 Array.prototype.some()：只要有一個符合就回傳 true
+            ingredientMatch = searchIngredientIds.value.some(searchId =>
+                recipe.ingredient_ids.includes(searchId)
+            );
+        }
+
+        return timeMatch && difficultyMatch && portionMatch && kcalMatch && ingredientMatch;
     });
 });
 
@@ -142,6 +168,7 @@ const recipes = computed(() => {
 const handleEmptyAction = (action) => {
     if (action === 'recipes') {
         activeFilters.value = { time: "全部", difficulty: "全部", mealPortions: "全部", kcal: "全部" };
+        searchIngredientIds.value = [];
     } else if (action === 'go-kitchen') {
         // router.push('/inspiration-kitchen');
         openKitchen(); // 改成呼叫開燈箱函式
@@ -151,11 +178,15 @@ const handleEmptyAction = (action) => {
 //靈感廚房燈箱
 const showCook = ref(false);
 const handleCookFinish = (ingredients) => {
-    console.log('收到食材，可以進行搜尋或是跳轉：', ingredients);
+    if (ingredients && ingredients.length > 0) {
+        searchIngredientIds.value = ingredients.map(item => item.ingredient_id);
+    } else {
+        searchIngredientIds.value = [];
+    }
     showCook.value = false;
 };
 const openKitchen = () => {
-    console.log("🔥 父層收到訊號了！準備打開燈箱..."); // 加入這行
+    console.log("父層收到訊號了！準備打開燈箱..."); // 加入這行
     showCook.value = true;
 }
 
