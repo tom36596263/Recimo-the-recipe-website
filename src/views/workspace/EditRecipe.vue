@@ -12,6 +12,9 @@ const isEditing = ref(true);
 const router = useRouter();
 const recipeStore = useRecipeStore();
 
+// ✨ 新增：綁定「公開發布」Checkbox 的狀態
+const isPublished = ref(false);
+
 // --- 1. 食譜表單資料 (這是初始值) ---
 const recipeForm = ref({
   title: '',
@@ -25,13 +28,10 @@ const recipeForm = ref({
 
 // --- 2. 生命週期：還原資料 ---
 onMounted(() => {
-  // 檢查 Store 裡是否有「原始編輯格式」的暫存資料
-  // 假設你的 store 裡有一個 rawEditorData 用來存放未轉化前的原始資料
   if (recipeStore.rawEditorData) {
     console.log('偵測到暫存草稿，正在還原...', recipeStore.rawEditorData);
     recipeForm.value = { ...recipeStore.rawEditorData };
   } else {
-    // 如果沒有暫存，才給予初始預設值（例如這份經典鬆餅）
     recipeForm.value = {
       title: '經典日式舒芙蕾鬆餅',
       description: '日式舒芙蕾鬆餅以其驚人的空氣感與雲朵般的綿密口感聞名。',
@@ -47,12 +47,7 @@ onMounted(() => {
 // --- 3. 核心邏輯：預覽功能 ---
 const handlePreview = () => {
   console.log('正在儲存草稿並產生預覽...', recipeForm.value);
-
-  // ✨ 重點：在跳轉前，先把當前的原始資料存進 Store
-  // 你需要在 store 增加一個 action 處理這個：recipeStore.saveRawDoc(recipeForm.value)
   recipeStore.rawEditorData = { ...recipeForm.value };
-
-  // 執行原本的轉接邏輯（轉成詳情頁格式）
   recipeStore.setPreviewFromEditor(recipeForm.value);
 
   router.push({
@@ -61,12 +56,26 @@ const handlePreview = () => {
   });
 };
 
-// --- 核心邏輯：儲存/發布 ---
+// --- 4. 核心邏輯：儲存/發布 ---
 const handleSave = () => {
-  console.log('正式儲存食譜資料', recipeForm.value);
-  // 儲存成功後可以清空暫存，避免下次進來還是舊資料
-  recipeStore.rawEditorData = null;
-  alert('食譜已暫存（模擬）');
+  // ✨ 改動：點擊「完成編輯」後根據勾選狀態彈出不同的確認視窗
+  const actionText = isPublished.value ? '公開發布' : '儲存編輯';
+  const confirmMessage = isPublished.value
+    ? `確定要公開發布《${recipeForm.value.title || '這份食譜'}》嗎？`
+    : '確定要儲存目前的編輯內容嗎？';
+
+  if (window.confirm(confirmMessage)) {
+    console.log(`執行操作: ${actionText}`, recipeForm.value);
+
+    // 成功提示
+    alert(isPublished.value ? '🎉 食譜已成功發布！' : '💾 食譜已成功暫存！');
+
+    // 儲存成功後清空暫存
+    recipeStore.rawEditorData = null;
+
+    // 模擬跳轉回個人工作區
+    router.push('/workspace');
+  }
 };
 
 provide('isEditing', isEditing);
@@ -97,10 +106,10 @@ provide('isEditing', isEditing);
 
           <BaseBtn title="預覽食譜" variant="outline" :width="150" @click="handlePreview" class="preview-btn" />
 
-          <BaseBtn title="完成編輯" :width="180" @click="handleSave" class="save-btn" />
+          <BaseBtn :title="isPublished ? '確認發布' : '完成編輯'" :width="180" @click="handleSave" class="save-btn" />
 
           <div class="publish-toggle">
-            <input type="checkbox" id="publish-check" />
+            <input type="checkbox" id="publish-check" v-model="isPublished" />
             <label for="publish-check" class="p-p2">公開發布</label>
           </div>
         </div>
@@ -156,6 +165,12 @@ $editor-border-style: 1px solid $primary-color-100;
     gap: 8px;
     color: $neutral-color-700;
 
+    // ✨ 優化：讓勾選框點擊更順手
+    input,
+    label {
+      cursor: pointer;
+    }
+
     input {
       width: 18px;
       height: 18px;
@@ -173,4 +188,5 @@ $editor-border-style: 1px solid $primary-color-100;
     background-color: $primary-color-100 !important;
   }
 }
+
 </style>

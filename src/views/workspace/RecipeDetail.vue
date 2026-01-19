@@ -276,9 +276,7 @@ const handleServingsChange = (newVal) => { servings.value = newVal; };
 
             <div class="row">
                 <div class="col-7 col-lg-12">
-                    <section class="mb-10">
-                        <RecipeIntro :info="recipeIntroData" />
-                    </section>
+                    <RecipeIntro :info="recipeIntroData" :is-preview="isPreviewMode" />
 
                     <div class="d-lg-none">
                         <section class="mb-10">
