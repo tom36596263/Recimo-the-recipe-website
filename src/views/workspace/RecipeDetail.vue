@@ -372,47 +372,27 @@ const onReportSubmit = (data) => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-// 預覽 Bar 樣式修正
 .preview-sticky-bar {
     position: fixed;
     top: 0;
-    // 預設避開 Sidebar (260px)
-    left: 230px;
-    width: calc(100% - 260px);
+    // ✨ 核心修正：預設改為全寬，再透過內部 container 限制寬度
+    left: 0;
+    width: 100%;
     z-index: 9999;
-    padding-top: 20px;
+    padding-top: 12px; // 🔹 縮減上方留白 (原為 20px)
     pointer-events: none;
-    transition: all 0.3s ease; // 讓縮放平滑一點
+    transition: all 0.3s ease;
 
-    // ✨ 新增：針對平板 (768px ~ 1024px) 縮小 Bar 的內容，防止壓到列表
-    @media screen and (max-width: 1024px) {
-        // 如果側邊欄還在，縮小左邊距避免碰撞
-        left: 240px;
-        width: calc(100% - 240px);
-
-        .bar-content {
-            padding: 10px 16px; // 縮小內距
-            transform: scale(0.9); // 整體輕微縮小
-            transform-origin: center top;
-        }
-    }
-
-    // 當螢幕更小，Sidebar 消失時
-    @media screen and (max-width: 768px) {
-        left: 0;
-        width: 100%;
-
-        .bar-content {
-            transform: scale(1);
-            width: 95%;
-            margin: 0 auto;
-        }
+    // ✨ 修正 Sidebar 存在時的偏移 (這部分保留給電腦版)
+    @media screen and (min-width: 1025px) {
+        left: 260px;
+        width: calc(100% - 260px);
     }
 
     .container {
         max-width: 1000px;
         margin: 0 auto;
-        padding: 0 15px;
+        padding: 0 12px; // 🔹 稍微縮減左右 padding
     }
 
     .bar-content {
@@ -421,45 +401,51 @@ const onReportSubmit = (data) => {
         align-items: center;
         background-color: $primary-color-400;
         color: $neutral-color-white;
-        padding: 14px 28px;
-        border-radius: 14px;
-        // box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        padding: 10px 20px; // 🔹 縮減內距 (原為 14px 28px)
+        border-radius: 12px;
         pointer-events: auto;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
         span {
             font-weight: 500;
-            letter-spacing: 0.5px;
-            white-space: nowrap; // 防止文字斷行擠壓高度
+            font-size: 14px; // 🔹 手機版字體稍微縮小一點點更精緻
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; // 防止文字太長
         }
 
         .exit-preview-btn {
+            flex-shrink: 0; // 🔹 確保按鈕不會被壓扁
             background-color: $neutral-color-white;
             color: $primary-color-700;
             border: none;
-            padding: 8px 22px;
+            padding: 6px 16px; // 🔹 縮小按鈕尺寸
             border-radius: 50px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             white-space: nowrap;
+            margin-left: 8px;
 
             &:hover {
                 background-color: $primary-color-100;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             }
         }
     }
 }
-
-// 基礎容器
 .recipe-container-root {
     background-color: $neutral-color-white;
     min-height: 100vh;
     padding: 0 0 100px 0;
 
     &.preview-padding {
-        padding-top: 100px;
+        // ✨ 電腦版維持較大間距
+        padding-top: 90px;
+
+        // ✨ 手機版縮小間距，解決留白過大問題
+        @media screen and (max-width: 768px) {
+            padding-top: 0px;
+        }
     }
 }
 
