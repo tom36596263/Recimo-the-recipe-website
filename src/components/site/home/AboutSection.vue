@@ -15,7 +15,9 @@
         <h3 class="zh-h3 title">關於我們</h3>
         <p class="p-p1 detail">我們深信，食譜不應是死板的教科書，而是隨靈感與季節演進的動態紀錄。在 Recimo，我們鼓勵你發揮創意打破規則。</p>
         <p class="p-p1 detail">這是一個極度自由的平台，讓你在烹飪時能隨手記下多加的一匙香料、烹飪後的體悟，或是為心愛的人所做的微調。拿起你的數位筆尖，讓我們一起 ，打造專屬於你的美味百科。</p>
-        <CircleBtn title="了解更多" type="white" href="/about" class="more-btn"/>
+        <router-link to="/about">
+            <CircleBtn title="了解更多" type="white" class="more-btn"/>
+        </router-link>
     </div>
 
     <div class="bg-decoration-text">
