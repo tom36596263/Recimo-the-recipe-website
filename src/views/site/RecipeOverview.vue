@@ -154,13 +154,13 @@ const handleEmptyAction = (action) => {
     </section>
     <section class="container recipe-cards-section">
         <div v-if="recipes.length > 0" class="row">
-            <div 
+            <router-link 
             v-for="item in recipes" 
             :key="item.id" 
             :to="{ name: 'workspace-recipe-detail', params: { id: item.id } }"
-            class="col-4 col-lg-6 col-sm-12 recipe-cards">
+            class="col-4 col-md-12 recipe-cards">
                 <RecipeCardLg :recipe="item" class="recipe-card"/>
-        </div>
+            </router-link>
         </div>
         <div v-else class="row">
             <div class="no-result col-12">

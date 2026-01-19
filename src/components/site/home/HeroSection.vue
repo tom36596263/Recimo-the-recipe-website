@@ -13,7 +13,7 @@
             <p class="p-p1 hero-text">這裡沒有標準答案，只有你對美食的熱情<br>
                 隨手記下每一次烹飪的小發現，看見每一天自己的成長<br>
                 把煮飯變成最療癒的創作</p>
-            <router-link to="/recipes"><CircleBtn title="尋找食譜" :type="isAltTheme ? 'white' : 'fedault'"/></router-link>
+            <router-link to="/recipes"><CircleBtn title="尋找食譜" /></router-link>
         </div>
         <div class="bg-layout">
             <img :src="$parsePublicFile('img/site/hero.png')" alt="hero-bg" >

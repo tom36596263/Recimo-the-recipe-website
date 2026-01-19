@@ -62,10 +62,10 @@
         <div class="card-body">
             <div class="title">
                 <h3 class="zh-h3">{{ recipe.recipe_name }}</h3>
-                <i-material-symbols-Favorite-outline />
+                <i-material-symbols-Favorite-outline @click.prevent.stop />
             </div>
             <div class="tag">
-                <BaseTag v-for="tag in recipe.tags" :key="tag" :text="tag"/>
+                <BaseTag v-for="tag in recipe.tags" :key="tag" :text="tag" />
             </div>
             <div class="recipe-info">
                 <div 
@@ -83,14 +83,17 @@
         
         <footer>
             <div class="personal-info">
-                <div class="personal-img">
+                <div class="personal-img"> 
                     <img :src="LogoBlack" alt="">
                 </div>
                 <p class="p-p1">Recimo</p>
-                <LikeButton 
-                :initial-likes="recipe.author.likes || 0" 
-                @update:liked="(val) => handleLikeChange(val, item)"
-                />
+                <div @click.prevent.stopp>
+                    <LikeButton 
+                    :initial-likes="recipe.author.likes || 0" 
+                    @update:liked="(val) => handleLikeChange(val, item)"
+                    />
+                </div>
+                
             </div>
             
             <div class="btn-group">
