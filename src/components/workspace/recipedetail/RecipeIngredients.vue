@@ -67,7 +67,7 @@ $flex-note: 1.8;
 
 .table-wrapper {
     margin-top: 20px;
-    border: 1px solid $neutral-color-400;
+    border: 1px solid $primary-color-700;
     border-radius: 10px;
     overflow: hidden;
     background-color: $neutral-color-white;
