@@ -1,150 +1,183 @@
 <script setup>
+import { useRouter } from 'vue-router';
+import BaseTag from '@/components/common/BaseTag.vue';
+import BaseBtn from '@/components/common/BaseBtn.vue';
+import LikeButton from '@/components/common/LikeButton.vue';
+import LogoBlack from '/img/site/Recimo-logo-black.svg';
+
 /**
  * PlanRecipeCard.vue
- * 目的：在 RecipePicker 的搜尋清單中呈現完整的食譜資訊。
- * 串接：接收來自 RecipePicker 的 recipe 物件，點擊時將該物件傳回父層。
+ * 目的：在 RecipePicker 的搜尋清單中呈現與 RecipeCardSm 風格一致的食譜資訊。
  */
 const props = defineProps({
-    // 接收單一食譜的完整物件 (對應 recipes.json 的資料結構)
     recipe: {
         type: Object,
         required: true
     }
 });
 
-// 定義點擊事件，讓 RecipePicker 接收後執行新增逻辑
 const emit = defineEmits(['click']);
+
+// 點擊卡片或按鈕時觸發新增邏輯
+const handleAdd = () => {
+    emit('click', props.recipe);
+};
+
+// 處理按讚（目前僅為 UI 展示）
+const handleLikeChange = (val, recipe) => {
+    console.log(`${recipe.recipe_title} Liked: ${val}`);
+};
 </script>
 
 <template>
-    <div class="plan-recipe-card" @click="emit('click', recipe)">
+    <div class="recipe-card-lg" @click="handleAdd">
+        <header class="card-header">
+            <img :src="recipe.recipe_image_url" :alt="recipe.recipe_title">
+        </header>
 
-        <div class="plan-recipe-card__image-box">
-            <img :src="recipe.recipe_image_url" :alt="recipe.recipe_title" class="recipe-img" />
+        <div class="card-body">
+            <div class="title">
+                <h4 class="zh-h4">{{ recipe.recipe_title }}</h4>
+                <div class="icon-group">
+                    <i-material-symbols-Favorite-outline />
+                </div>
+            </div>
 
-            <div class="difficulty-tag">
-                難易度：
-                <i-material-symbols-star />
-                {{ recipe.recipe_difficulty }}
+            <div class="tag">
+                <BaseTag :text="`${recipe.recipe_kcal_per_100g} kcal`" />
+                <BaseTag :text="`${recipe.recipe_protein_per_100g}P`" />
+                <BaseTag :text="`難度：${recipe.recipe_difficulty}`" />
             </div>
         </div>
 
-        <div class="plan-recipe-card__content">
-
-            <div class="nutrition-tags">
-                <span class="tag tag--kcal">{{ recipe.recipe_kcal_per_100g }} kcal</span>
-                <span class="tag tag--pro">{{ recipe.recipe_protein_per_100g }}P</span>
+        <footer>
+            <div class="personal-info">
+                <div class="personal-img">
+                    <img :src="LogoBlack" alt="Recimo Logo">
+                </div>
+                <p class="p-p1">Recimo</p>
+                <LikeButton :initial-likes="recipe.recipe_likes || 0"
+                    @update:liked="(val) => handleLikeChange(val, recipe)" />
             </div>
 
-            <h4 class="recipe-title">{{ recipe.recipe_title }}</h4>
-
-            <p class="recipe-desc">{{ recipe.recipe_descreption }}</p>
-        </div>
+            <div class="btn-group">
+                <BaseBtn title="加入計畫" variant="solid" height="30" @click.stop="handleAdd" class="btn" />
+            </div>
+        </footer>
     </div>
 </template>
 
 <style lang="scss" scoped>
-.plan-recipe-card {
-    display: flex;
-    flex-direction: column;
+// 完全複用 RecipeCardSm.vue 的樣式邏輯
+.recipe-card-lg {
+    border: 1px solid $neutral-color-400;
+    border-radius: $radius-base;
+    overflow: hidden;
     background-color: $neutral-color-white;
-    border: 1px solid $neutral-color-100;
-    border-radius: 12px;
-    overflow: hidden; // 確保圖片圓角生效
     cursor: pointer;
-    transition: all 0.3s ease; // 平滑的動畫過渡
-    height: 100%;
+    transition: .3s ease;
 
-    // --- 互動效果：滑鼠懸停時上浮並產生陰影 ---
     &:hover {
-        transform: translateY(-5px);
         box-shadow: 0 8px 16px rgba($neutral-color-black, 0.08);
         border-color: $primary-color-400;
-
-        .recipe-title {
-            color: $primary-color-700; // 標題顏色同步變化
-        }
     }
 
-    // --- 1. 圖片區域樣式 ---
-    &__image-box {
-        position: relative;
+    .card-header {
+        overflow: hidden;
+        height: 220px;
         width: 100%;
-        height: 140px;
-        background-color: $neutral-color-100;
 
-        .recipe-img {
+        img {
+            object-fit: cover;
+            display: block;
             width: 100%;
             height: 100%;
-            object-fit: cover; // 核心：裁切圖片以填滿容器而不變形
-        }
+            transition: .3s ease;
 
-        .difficulty-tag {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            background-color: rgba($neutral-color-black, 0.6);
-            color: $neutral-color-white;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            backdrop-filter: blur(2px); // 背景模糊，增加質感
+            &:hover {
+                scale: 1.1; // 圖片縮放效果
+            }
         }
     }
 
-    // --- 2. 內容文字區域樣式 ---
-    &__content {
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        flex-grow: 1;
+    .card-body {
+        padding: 16px;
 
-        .nutrition-tags {
+        .title {
             display: flex;
-            gap: 6px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            color: $primary-color-700;
 
-            .tag {
-                font-size: 0.7rem;
-                font-weight: bold;
-                padding: 2px 8px;
-                border-radius: 4px;
-
-                &--kcal {
-                    background-color: $primary-color-100;
-                    color: $primary-color-800;
-                }
-
-                &--pro {
-                    background-color: $accent-color-100;
-                    color: $accent-color-800;
-                }
+            h4 {
+                // 處理標題過長
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin: 0;
             }
         }
 
-        .recipe-title {
-            font-size: 1rem;
-            font-weight: bold;
-            color: $neutral-color-black;
-            margin: 0;
-            transition: color 0.2s;
+        .icon-group {
+            display: flex;
+            gap: 12px;
+            color: $neutral-color-700;
         }
 
-        .recipe-desc {
-            font-size: 0.8rem;
-            color: $neutral-color-700;
-            line-height: 1.4;
-            margin: 0;
+        .tag {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap; // 避免標籤過多破版
+        }
+    }
 
-            /* --- 多行文字截斷邏輯 --- */
-            display: -webkit-box;
-            -webkit-line-clamp: 2; // 限制最多兩行
-            -webkit-box-orient: vertical;
+    footer {
+        padding: 0 16px 16px 16px;
+        justify-content: space-between;
+        display: flex;
+        align-items: center;
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .personal-info {
+            display: flex;
+            align-items: center;
+
+            .p-p1 {
+                margin-right: 6px;
+                color: $neutral-color-800;
+            }
+        }
+
+        .personal-img {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            border-radius: $radius-pill;
+            border: 1px solid $neutral-color-700;
             overflow: hidden;
-            text-overflow: ellipsis;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            img {
+                width: 16px; // 配合 Recimo logo 大小
+            }
+        }
+    }
+}
+
+// 響應式調整，確保小螢幕下按鈕不跑版
+@media screen and (max-width: 1300px) {
+    .recipe-card-lg {
+        footer {
+            .btn {
+                width: 85px;
+            }
         }
     }
 }

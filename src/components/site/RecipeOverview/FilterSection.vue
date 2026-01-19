@@ -37,6 +37,24 @@ const handleSelect = (filterId, option) => {
     emit('update:modelValue', newValue);
 };
 
+//取消訂單
+const onCancel = (orderId) => {
+    // 1. 在原始資料中找到這筆訂單的索引
+    const targetIndex = ordersData.value.findIndex(item => item.id === orderId);
+
+    // 2. 確保有找到訂單
+    if (targetIndex !== -1) {
+        // 【方法一：模擬真實情境】將狀態改為 -1 (已取消)
+        // 這樣它會從目前的標籤 (如:已確認) 消失，並出現在 "已取消訂單" 標籤中
+        ordersData.value[targetIndex].status = -1;
+
+        // 【方法二：完全刪除】如果你希望它直接從資料庫消失 (不留紀錄)
+        // ordersData.value.splice(targetIndex, 1);
+
+        console.log(`訂單 ${orderId} 已取消`);
+    }
+};
+
 
 </script>
 <template>

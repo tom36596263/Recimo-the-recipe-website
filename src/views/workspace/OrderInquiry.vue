@@ -103,7 +103,11 @@ const openCalender = () => {
 
 // 取消訂單 (模擬前端刪除)
 const onCancel = (orderId) => {
-
+  //在 ordersData 中找到這筆訂單的索引位置
+  const targetIndex = ordersData.value.findIndex(order => order.id === orderId);
+  if (targetIndex !== -1) {
+    ordersData.value[targetIndex].status = -1;
+  }
 }
 </script>
 
@@ -130,7 +134,6 @@ const onCancel = (orderId) => {
           <div v-if="paginatedOrders.length === 0" class="no-data">
             目前沒有符合條件的訂單
           </div>
-
           <OrderCard v-else v-for="order in paginatedOrders" :key="order.id" :order="order" @cancel-order="onCancel" />
         </div>
       </div>
