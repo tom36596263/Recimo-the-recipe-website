@@ -122,7 +122,8 @@ $editor-border-style: 1px solid $primary-color-100;
 
 .recipe-main-content {
   width: 100%;
-  border: $editor-border-style;
+  margin-top: 20px;
+  border: 1px solid $primary-color-400;
   border-radius: 12px;
   background: $neutral-color-white;
   box-sizing: border-box;
