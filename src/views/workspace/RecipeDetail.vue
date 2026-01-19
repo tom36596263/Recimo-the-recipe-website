@@ -12,6 +12,7 @@ import RecipeComments from '../../components/workspace/recipedetail/RecipeCommen
 import CookSnap from '../../components/workspace/recipedetail/CookSnap.vue';
 import RecipeIntro from '../../components/workspace/recipedetail/RecipeIntro.vue';
 import RecipeReportModal from '@/components/workspace/recipedetail/modals/RecipeReportModal.vue';
+import RelatedRecipes from '@/components/workspace/recipedetail/RelatedRecipes.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -367,6 +368,10 @@ const onReportSubmit = (data) => {
         image: recipeIntroData?.image
     }" @submit="onReportSubmit" />
 
+    <div v-if="!isPreviewMode" class="col-12">
+        <RelatedRecipes :currentId="route.params.id" />
+    </div>
+
 </template>
 
 <style lang="scss" scoped>
@@ -463,6 +468,14 @@ const onReportSubmit = (data) => {
     margin-bottom: 20px;
     border-bottom: 1px solid $neutral-color-100;
 
+    // ✨ 新增：手機版 RWD 調整
+    @media screen and (max-width: 768px) {
+        flex-direction: column; // 讓標題與 icon 組垂直排列
+        align-items: flex-start; // 靠左對齊
+        gap: 16px; // 標題與 icon 之間的間距
+        padding: 15px 0;
+    }
+
     .zh-h2 {
         display: flex;
         align-items: center;
@@ -479,6 +492,13 @@ const onReportSubmit = (data) => {
         align-items: center;
         gap: 20px;
         color: $primary-color-700;
+
+        // ✨ 新增：手機版時稍微縮小間距，避免在超小螢幕塞不下
+        @media screen and (max-width: 768px) {
+            gap: 16px;
+            width: 100%; // 滿版讓它好控制
+            justify-content: flex-start; // 確保 icon 組靠左對齊
+        }
 
         &.is-preview {
             opacity: 0.6;
