@@ -24,10 +24,19 @@ const props = defineProps({
     <div class="step-group">
       
       <div class="step-image">
-          <img v-if="step.image" :src="step.image" @error="(e) => console.log('圖片載入失敗，路徑為:', step.image)" alt="烹飪步驟圖" />
-          <div v-else class="placeholder-box">
+        <img 
+          v-if="step.image && step.image !== ''"
+          :src="step.image" 
+          alt="烹飪步驟圖" 
+        />
+        <div v-else class="placeholder-box">
+          <div class="icon-image">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+            </svg>
           </div>
         </div>
+      </div>
 
       <div class="step-content">
         <div class="step-title-group">

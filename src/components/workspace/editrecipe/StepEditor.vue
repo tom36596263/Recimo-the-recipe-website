@@ -211,6 +211,7 @@ onUnmounted(() => {
 .step-editor-container {
   width: 100%;
   margin-bottom: 50px;
+  box-sizing: border-box;
 }
 
 .section-header {
@@ -232,6 +233,79 @@ onUnmounted(() => {
 .step-item-outer {
   display: flex;
   gap: 15px;
+  width: 100%;
+
+  @media (max-width: 600px) {
+    gap: 8px;
+  }
+}
+
+.step-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30px;
+  flex-shrink: 0;
+
+  .step-number {
+    width: 28px;
+    height: 28px;
+    background: $primary-color-100;
+    color: $primary-color-800;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+}
+
+.step-card {
+  flex: 1;
+  border-top: 1px solid $neutral-color-400;
+  min-width: 0; // 防止 flex 子元素溢出
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid $neutral-color-400;
+    margin-bottom: 15px;
+
+    .step-title-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      min-width: 0; // 防止 input 撐開容器
+    }
+
+    .delete-step {
+      color: $secondary-color-danger-400;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+  }
+
+  .card-content {
+    display: flex;
+    gap: 20px;
+
+    @media (max-width: 768px) {
+      flex-direction: column; // 圖片與內容改為上下排列
+      gap: 12px;
+    }
+  }
+}
+
+.image-uploader-area {
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 }
 
 .image-box {
@@ -246,6 +320,11 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    width: 100%; // 手機版圖片撐滿寬度
+    height: 180px;
+  }
 
   .step-img {
     width: 100%;
@@ -281,66 +360,45 @@ onUnmounted(() => {
   }
 }
 
-.step-card {
-  flex: 1;
-  border-top: 1px solid $neutral-color-400;
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid $neutral-color-400;
-    margin-bottom: 15px;
-
-    .step-title-input {
-      flex: 1;
-      border: none;
-      outline: none;
-      background: transparent;
-    }
-
-    .delete-step {
-      color: $secondary-color-danger-400;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-  }
-
-  .card-content {
-    display: flex;
-    gap: 20px;
-  }
-}
-
 .step-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-width: 0;
 
   .tag-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px;
     align-items: center;
   }
 
-  .step-textarea {
-    border: none;
-    outline: none;
-    resize: none;
-    min-height: 80px;
-    background: transparent;
-    width: 100%;
-  }
+    .step-textarea {
+      border: none; 
+      outline: none;
+      resize: none; 
+      min-height: 80px;
+  
+      padding: 8px 0; 
+      width: 100%;
+      box-sizing: border-box;
+      background: transparent; 
+  
+      &:focus {
+        border: none; 
+        outline: none; 
+      }
+    }
 
   .step-text-display {
     white-space: pre-wrap;
     color: $neutral-color-800;
+    word-break: break-all;
   }
 }
 
+// 修正 Popover 在手機版可能超出螢幕的問題
 .popover-box {
   background: white;
   border: 1px solid $primary-color-400;
@@ -349,6 +407,7 @@ onUnmounted(() => {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   width: 260px;
   z-index: 9999;
+  max-width: calc(100vw - 40px); // 防止寬度超過螢幕
 
   .chip {
     margin: 4px;
@@ -356,6 +415,7 @@ onUnmounted(() => {
     border-radius: 20px;
     border: 1px solid #ddd;
     cursor: pointer;
+    background: white;
 
     &.active {
       background: $primary-color-800;
@@ -378,77 +438,49 @@ onUnmounted(() => {
     border-radius: 10px;
     background: white;
     cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    // --- 新增 Hover 效果 (與食材按鈕一致) ---
+      &:hover {
+        background: $primary-color-100;
+        transform: translateY(-1px);
+      }
+    
+      &:active {
+        background: $primary-color-400; // 點擊時顏色稍微加深
+        transform: translateY(0);
+      }
   }
 }
 
-.step-sidebar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 30px;
-
-  .step-number {
-    width: 28px;
-    height: 28px;
-    background: $primary-color-100;
-    color: $primary-color-800;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-  }
-}
-
-// --- 補上食材標籤內部的樣式 ---
-
+// 食材標籤內部
 .selected-ing-wrapper {
   display: inline-flex;
   align-items: center;
 
-  // 使用 :deep 強制修改 BaseTag 元件內部的樣式
   :deep(.base-tag) {
-    height: 32px !important; 
+    height: 32px !important;
     min-height: 32px !important;
-    background-color: $primary-color-100!important; 
-    border-radius: 10px !important; 
-    border: none !important; 
-    padding: 0 8px !important; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background-color: $primary-color-100 !important;
+    border-radius: 10px !important;
+    border: none !important;
+    padding: 0 8px !important;
+    max-width: 120px; // 防止標籤太長
   }
 }
+
 .ing-tag-content {
-  height: 30px;
   display: flex;
   align-items: center;
-  gap: 4px; // 圖示、文字、叉叉的間距
-  padding: 2px 4px;
-
-  .ing-icon {
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-  }
+  gap: 4px;
+  overflow: hidden;
 
   .ing-name {
     color: $neutral-color-800;
     font-weight: 500;
-  }
-
-  .tag-close-icon {
-    margin-left: 2px;
-    font-size: 12px;
-    color: $neutral-color-400;
-    cursor: pointer;
-    transition: color 0.2s;
-
-    &:hover {
-      color: $secondary-color-danger-400; // 滑鼠移上去變紅色
-    }
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
-
-
 </style>
