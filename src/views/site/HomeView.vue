@@ -84,7 +84,7 @@
     .home-ingredient20{
         z-index: 20;
         position: absolute;
-        top: 70vh;
+        top: 75vh;
         left: 5vw;
         width: 180px;
         animation: floating 4s ease-in-out infinite;
@@ -133,6 +133,23 @@
             .title-wrapper{
                 margin-bottom: 30px;
             }
+        }
+        .home-ingredient1{
+            top: 25vh;
+            right: 75vw;
+            width: 90px;
+        }
+        .home-ingredient15{
+            top: 40vh;
+            right: 10vw;
+            width: 70px;
+            animation-delay: 1s;
+        }
+        .home-ingredient20{
+            top: 50vh;
+            left: 30vw;
+            width: 80px;
+            animation-delay: 0.5s;
         }
     }
 </style>

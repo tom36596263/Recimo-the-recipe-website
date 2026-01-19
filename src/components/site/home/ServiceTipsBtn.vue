@@ -91,10 +91,23 @@
             // justify-content: center;
             align-items: center;
             text-align: center;
-            
+            .tips-text{
+                margin-left: 0;
+            }
         }
         .circle-icon{
             margin-bottom: 16px;
+        }
+    }
+    @media screen and (max-width: 810px){
+        .tips-btn{
+            display: flex;
+            flex-grow: 1;
+            .tips-text{
+                .p-p1{
+                    display: none;
+                }
+            }
         }
     }
 </style>
