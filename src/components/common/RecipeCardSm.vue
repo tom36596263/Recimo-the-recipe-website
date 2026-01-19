@@ -142,11 +142,6 @@
                     width: 85px;
                 }
             }
-            // .btn-group{
-            //     .btn{
-            //         width: 100px;
-            //     }
-            // }
         }
     }
 </style>

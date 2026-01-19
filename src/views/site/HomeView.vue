@@ -5,6 +5,7 @@
     import Service from '@/components/site/home/ServiceSection.vue';
     import HotRecipe from '@/components/site/home/HotRecipeSection.vue';
     import FindRecipe from '@/components/site/home/FindRecipeSection.vue';
+    import LoadingPage from '@/components/LoadingPage.vue';
 </script>
 
 <template>
@@ -150,6 +151,9 @@
             left: 30vw;
             width: 80px;
             animation-delay: 0.5s;
+        }
+        .find-recipe-section{
+            padding: 40px 30px;
         }
     }
 </style>

@@ -39,6 +39,7 @@
         </CircleIcon>
         <div class="tips-text">
             <h4 class="zh-h4" v-html="item.title"></h4>
+            <h5 class="zh-h5" v-html="item.title"></h5>
             <p class="p-p1" v-html="item.text"></p>
         </div>
         <div class="dot"></div>
@@ -58,6 +59,9 @@
             .zh-h4{
                 color: $primary-color-700;
                 margin-bottom: 6px;
+            }
+            .zh-h5{
+                display: none;
             }
         }
         .dot{
@@ -88,11 +92,14 @@
     @media screen and (max-width: 1024px){
         .tips-btn{
             flex-direction: column;
-            // justify-content: center;
             align-items: center;
             text-align: center;
             .tips-text{
                 margin-left: 0;
+            }
+            .dot{
+                right: 10px;
+                top: 10px;
             }
         }
         .circle-icon{
@@ -103,11 +110,23 @@
         .tips-btn{
             display: flex;
             flex-grow: 1;
+            padding:18px 12px;
             .tips-text{
                 .p-p1{
                     display: none;
                 }
+                .zh-h4{
+                    display: none;
+                }
+                .zh-h5{
+                    display: block;
+                    color: $primary-color-700;
+                }
+            }
+            .circle-icon{
+                margin-bottom: 10px;
             }
         }
+
     }
 </style>
