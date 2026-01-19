@@ -12,7 +12,10 @@
             <p class="p-p1">讓我們為你推薦料理的無限可能</p>
             <p class="p-p1">找出今天的美味食譜，煮出美味菜餚</p>
         </div>
-        <CircleBtn title="尋找食譜" href="/recipes"/>
+        <router-link to="/search">
+            <CircleBtn title="搜尋好料理" />
+        </router-link>
+        
     </div>
 
     <div class="col-6 col-md-12">
