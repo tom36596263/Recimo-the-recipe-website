@@ -183,6 +183,10 @@ const checkCollision = (x, y) => {
 const addToPot = (item) => {
     potIngredients.value.push(item);
     console.log('加入鍋子:', item.ingredient_name);
+    isDragOver.value = true;
+    setTimeout(() => {
+        isDragOver.value = false;
+    }, 200); // 0.2秒後蓋回去
 };
 
 
@@ -194,36 +198,53 @@ const handleDelete = () => {
 // 新增：烹飪狀態
 const isCooking = ref(false);
 const emit = defineEmits(['cook-finish', 'close']);//送資料
-// 修改：開始烹飪邏輯
+// 新增火焰爆炸狀態變數
+const isExploding = ref(false);
+//開始烹飪邏輯
 const startCooking = () => {
-    if (potIngredients.value.length === 0) {
+    const count = potIngredients.value.length;
+
+    //沒食材
+    if (count === 0) {
         alert('鍋子裡沒有食材喔！');
         return;
     }
 
-    // 1. 設定為烹飪中，啟動動畫
+    // 啟動烹飪動畫狀態
     isCooking.value = true;
-    // console.log('開始烹飪，火焰加熱中...');
 
-    // 2. 設定計時器，3秒 (3000毫秒) 後結束
-    setTimeout(() => {
-        // 停止動畫
-        isCooking.value = false;
+    //判斷食材數量
+    if (count > 5) {
+        //失敗：食材太多
+        isExploding.value = true; // 開啟大火狀態
+        console.log('食材太多！火力全開！');
 
-        // 不自己算結果，而是把「鍋子裡的食材」丟給外面 (父層)
-        emit('cook-finish', potIngredients.value);
+        setTimeout(() => {
+            // 3秒後重置
+            isCooking.value = false;
+            isExploding.value = false; // 關閉大火
+            potIngredients.value = []; // 清空鍋子 (回到最一開始狀態)
 
-        // 可選：順便通知父層關閉彈窗
-        emit('close');
+            alert('歐不！食材太多導致燒焦了，鍋子已清空！');
+        }, 2000);
 
-        // 執行原本完成後的邏輯
-        // console.log('烹飪完成！食材:', potIngredients.value);
-        alert(`烹飪完成！使用了 ${potIngredients.value.length} 個食材，好香啊！`);
+    } else {
+        //成功：食材正常 (<=5)
+        setTimeout(() => {
+            isCooking.value = false;
 
-        // (選擇性) 煮完後清空鍋子？
-        potIngredients.value = [];
-    }, 3000);
+            // 成功才送出資料
+            emit('cook-finish', potIngredients.value);
+            emit('close');
+
+            alert(`烹飪完成！使用了 ${count} 個食材，好香啊！`);
+            // 成功的鍋子清空由父層決定，或者這裡也可以清空
+            potIngredients.value = [];
+        }, 2000);
+    }
 };
+
+
 
 </script>
 
@@ -248,7 +269,8 @@ const startCooking = () => {
                             <div class="pot" :class="{ 'shaking': isCooking }">
                                 <img src="/src/assets/images/cook/pot.png" alt="">
                             </div>
-                            <div class="fire" :class="{ 'cooking-fire': isCooking }">
+                            <div class="fire"
+                                :class="{ 'cooking-fire': isCooking && !isExploding, 'big-fire': isExploding }">
                                 <img src="/src//assets/images/cook/fire.png" alt="">
                             </div>
                         </div>
@@ -279,7 +301,8 @@ const startCooking = () => {
                             @touchend="handleTouchEnd">
 
                             <CookCard :name="item.ingredient_name" :calories="item.kcal_per_100g"
-                                :fat="item.fat_per_100g" :image-src="item.ingredient_image_url" />
+                                :fat="item.fat_per_100g" :image-src="item.ingredient_image_url"
+                                @add-ingredient="addToPot(item)" />
                         </div>
                     </div>
                 </div>
@@ -365,16 +388,6 @@ const startCooking = () => {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-// .draggable-card-wrapper {
-//     cursor: grab;
-//     //防止在觸控拖曳時，觸發瀏覽器的捲動或上一頁下一頁手勢
-//     touch-action: none;
-//     user-select: none;
-
-//     &:active {
-//         cursor: grabbing;
-//     }
-// }
 
 .lid {
     position: absolute;
@@ -467,6 +480,13 @@ const startCooking = () => {
         // infinite: 無限循環
         // ease-in-out: 速度曲線
     }
+
+    &.big-fire {
+        animation: explosion 0.4s infinite linear;
+        width: 300px;
+        left: 0px;
+        z-index: 20;
+    }
 }
 
 @keyframes flicker {
@@ -484,6 +504,31 @@ const startCooking = () => {
     100% {
         transform: scale(1) translateY(0);
         filter: brightness(100%);
+    }
+}
+
+@keyframes explosion {
+    0% {
+        transform: scale(1.1) translateY(0);
+        filter: brightness(150%) hue-rotate(-10deg);
+    }
+
+    25% {
+        transform: scale(1.3) translateY(-5px) rotate(2deg);
+    }
+
+    50% {
+        transform: scale(1.5) translateY(-10px);
+        filter: brightness(200%) drop-shadow(0 0 20px rgba(255, 50, 0, 0.9));
+    }
+
+    75% {
+        transform: scale(1.3) translateY(-5px) rotate(-2deg);
+    }
+
+    100% {
+        transform: scale(1.1) translateY(0);
+        filter: brightness(150%) hue-rotate(-10deg);
     }
 }
 
