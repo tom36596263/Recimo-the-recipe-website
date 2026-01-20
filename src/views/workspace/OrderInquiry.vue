@@ -9,8 +9,11 @@ const currentPage = ref(1);
 const pageSize = 2; // 設定每頁顯示幾筆
 
 // 日期與標籤狀態
-const selectedDate = ref(''); // 綁定日期輸入框
+const today = new Date()
+const selectedDate = ref(`${today.getFullYear()}-${String((today.getMonth() + 1)).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`); // 綁定日期輸入框
 const activeTag = ref('全部訂單');
+// const selectedDate = ref(''); // 綁定日期輸入框
+// const activeTag = ref('全部訂單');
 
 // 1. 讀取資料
 onMounted(() => {
@@ -122,7 +125,7 @@ const onCancel = (orderId) => {
                 <i class="fa-regular fa-calendar-days"></i> 訂購時間
               </label>
               <input type="date" id="mydate" ref="dateInput" v-model="selectedDate">
-              <button v-if="selectedDate" @click="selectedDate = ''" class="clear-date-btn">×</button>
+              <button v-if="selectedDate" @click="selectedDate = ''" class="clear-date-btn">x</button>
             </div>
 
             <div class="tag">
@@ -199,5 +202,10 @@ input[type=date] {
 
 .fa-calendar-days {
   cursor: pointer;
+}
+
+.mydate {
+  display: flex;
+  align-items: center;
 }
 </style>
