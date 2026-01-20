@@ -228,9 +228,6 @@ onMounted(async () => {
                     -webkit-appearance: none;
                     margin: 0;
                 }
-
-                /* 隱藏 Firefox 的數字調節箭頭 */
-                -moz-appearance: textfield;
             }
         }
     }
@@ -281,7 +278,7 @@ onMounted(async () => {
                 justify-content: flex-start;
                 overflow-y: auto;
                 scrollbar-width: none;
-                height: 200px;
+                height: auto;
 
                 &::-webkit-scrollbar {
                     display: none;
