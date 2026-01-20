@@ -8,14 +8,15 @@ const router = useRouter();
 const route = useRoute();
 
 /* =====================================================
-   狀態定義
+    狀態定義
 ===================================================== */
 
 // 原始 / 當前編輯中的食譜資料
 const originalRecipe = ref({
     id: null,
     title: '',
-    coverImg: ''
+    coverImg: '',
+    description: '' // 確保包含描述欄位
 });
 
 // 改編卡片（目前用假資料）
@@ -34,7 +35,7 @@ const variantItems = ref(
 const mode = ref('create');
 
 /* =====================================================
-   核心初始化邏輯（唯一入口）
+    核心初始化邏輯（唯一入口）
 ===================================================== */
 
 watch(
@@ -62,7 +63,7 @@ watch(
 );
 
 /* =====================================================
-   資料處理方法
+    資料處理方法
 ===================================================== */
 
 // 抓取食譜資料
@@ -78,47 +79,53 @@ async function loadRecipeById(recipeId, options = {}) {
             return;
         }
 
+        // --- 圖片路徑邏輯優化 ---
+        let finalImg = found.recipe_image_url || '';
+
+        // 如果不是 http 開頭，且還沒包含完整的路由路徑，才進行拼接
+        if (finalImg && !finalImg.startsWith('http') && !finalImg.startsWith('/img/recipes/')) {
+            finalImg = `/img/recipes/${found.recipe_id}/${finalImg}`;
+        }
+
         originalRecipe.value = {
-            // ⭐ 改編時清掉 id，避免覆寫原食譜
             id: options.adapt ? null : found.recipe_id,
             title: options.adapt
                 ? `${found.recipe_title}（改編）`
                 : found.recipe_title,
-            coverImg: found.recipe_image_url.startsWith('http')
-                ? found.recipe_image_url
-                : `/img/recipes/${found.recipe_id}/${found.recipe_image_url}`
+            description: found.recipe_description || found.recipe_descreption || '',
+            coverImg: finalImg
         };
     } catch (err) {
         console.error('抓取食譜失敗', err);
         initEmptyRecipe();
     }
 }
-
 // 初始化空白食譜
 function initEmptyRecipe() {
     originalRecipe.value = {
         id: null,
         title: '新食譜',
-        coverImg: ''
+        coverImg: '',
+        description: ''
     };
 }
 
 /* =====================================================
-   UI 行為
+    UI 行為
 ===================================================== */
 
 // 點擊「創建食譜」（改編）
 function handleCreateNew() {
-    if (!route.params.id) return;
+    const sourceId = route.params.id || route.query.editId;
+    if (!sourceId) return;
 
     router.push({
         name: 'edit-recipe',
         query: {
-            editId: route.params.id,
+            editId: sourceId,
             action: 'adapt'
         }
     });
-
 }
 
 // 返回原食譜詳情
@@ -143,15 +150,14 @@ function goBack() {
             <div class="row align-center">
                 <div class="col-7 col-md-12">
                     <div class="main-image-container">
-                        <img :src="originalRecipe.coverImg" class="hero-img" alt="Original Recipe" />
+                        <img :src="originalRecipe.coverImg" class="hero-img" :alt="originalRecipe.title" />
                     </div>
                 </div>
                 <div class="col-5 col-md-12">
                     <div class="info-content">
-                        <h1 class="zh-h2 mb-16">{{ originalRecipe.title }}（改編版）</h1>
-                        <p class="p-p2 color-700 mb-24">
-                            這是一系列基於經典日式舒芙蕾鬆餅進行的各種實驗與改編。
-                            無論是低脂、高蛋白，或是各種口味嘗試，都能在這裡找到靈感。
+                        <h1 class="zh-h2 mb-16">{{ originalRecipe.title }}</h1>
+                        <p class="p-p1 color-p1 mb-24">
+                            {{ originalRecipe.description }}
                         </p>
                         <div class="stat-tag p-p3">共有 {{ variantItems.length }} 個改編版本</div>
                     </div>
@@ -216,8 +222,10 @@ function goBack() {
         }
     }
 
-    .color-700 {
+    // 🔹 改為 color-p1 並保留行距設定
+    .color-p1 {
         color: $neutral-color-700;
+        line-height: 2; // 設定為 2 比較適中，3 可能會太寬，您可以視情況調整
     }
 
     .mb-16 {
@@ -234,7 +242,6 @@ function goBack() {
         color: $primary-color-800;
         padding: 6px 16px;
         border-radius: 20px;
-        // 這裡不需要額外設字體大小，已套用 p-p3 class
     }
 
     .decorative-line {
