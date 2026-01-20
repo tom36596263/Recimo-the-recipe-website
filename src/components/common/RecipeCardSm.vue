@@ -29,14 +29,11 @@
 
         <div class="card-body">
             <div class="title">
-                <h4 class="zh-h4">{{ recipe.recipe_name }}</h4>
+                <h5 class="zh-h5">{{ recipe.recipe_name }}</h5>
                 <div class="icon-group">
                     <i-material-symbols-Favorite-outline />
                 </div>
                 
-            </div>
-            <div class="tag">
-                <BaseTag v-for="tag in recipe.tags" :key="tag" :text="tag"/>
             </div>
             
         </div>
@@ -53,10 +50,6 @@
                 />
             </div>
             
-            <div class="btn-group">
-                <BaseBtn title="食譜詳情" variant="solid" height="30" @click="goToDetail" class="btn" />
-            </div>
-            
         </footer>
     </div>
 </template>
@@ -68,7 +61,7 @@
         background-color: $neutral-color-white;
         .card-header{
             overflow: hidden;
-            height: 220px;
+            height: 150px;
             width: 100%;
             img{
                 width:fit-content;
@@ -83,7 +76,7 @@
             }
         }
         .card-body{
-            padding: 16px;
+            padding: 16px 16px 4px 16px;
             
             .title{
                 display: flex;
@@ -99,6 +92,7 @@
             .tag{
                 display: flex;
                 gap: 6px;
+                flex-wrap: wrap;
             }
         }
         footer{
