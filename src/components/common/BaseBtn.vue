@@ -8,7 +8,7 @@ const props = defineProps({
         type: String,
         default: '預設文字'
     },
-  // 樣式：'solid' (實心) 或 'outline' (描邊)
+    // 樣式：'solid' (實心) 或 'outline' (描邊)
     variant: {
         type: String,
         default: 'solid',
@@ -52,10 +52,10 @@ const buttonClasses = computed(() => {
 });
 
 const handleClick = (event) => {
-    if(props.disabled)return;
+    if (props.disabled) return;
     if (props.href && props.href.startsWith('/')) {
         event.preventDefault();
-        router.push(props.href); 
+        router.push(props.href);
     } else {
         emit('click', event);
     }
@@ -63,29 +63,23 @@ const handleClick = (event) => {
 const buttonStyle = computed(() => {
     const w = typeof props.width === 'number' ? `${props.width}px` : props.width;
     return {
-        '--btn-width' : w
+        '--btn-width': w
     };
 });
 </script>
 
 <template>
-    <component 
-        :is="href && href !== '#' ? 'a' : 'button'"
-        :href="href && href !== '#' ? href : undefined"
-        :type="!href || href === '#' ? type : undefined"
-        :class="buttonClasses"
-        :style="buttonStyle" 
-        :disabled="disabled"
-        @click="handleClick"
-    >
-        {{ title }}
+    <component :is="href && href !== '#' ? 'a' : 'button'" :href="href && href !== '#' ? href : undefined"
+        :type="!href || href === '#' ? type : undefined" :class="buttonClasses" :style="buttonStyle"
+        :disabled="disabled" @click="handleClick">
+        <slot>{{ title }}</slot>
     </component>
 </template>
 
 <style lang="scss" scoped>
 // 這裡貼上你提供的 SCSS 程式碼
 .btn {
-    display: inline-flex; 
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     width: var(--btn-width);
@@ -97,36 +91,50 @@ const buttonStyle = computed(() => {
     text-decoration: none;
     transition: all 0.3s ease;
 
-  // Sizes
-    &.h-30 { height: 30px; font-size: 14px; }
-    &.h-40 { height: 40px; font-size: 16px; }
-    &.h-50 { height: 50px; font-size: 20px; }
+    // Sizes
+    &.h-30 {
+        height: 30px;
+        font-size: 14px;
+    }
 
-  // Solid
+    &.h-40 {
+        height: 40px;
+        font-size: 16px;
+    }
+
+    &.h-50 {
+        height: 50px;
+        font-size: 20px;
+    }
+
+    // Solid
     &.btn-solid {
         background-color: $primary-color-700;
         color: $neutral-color-white;
         border-color: $primary-color-700;
+
         &:hover:not(:disabled) {
-        background-color: $accent-color-700;
-        border-color: $accent-color-700;
+            background-color: $accent-color-700;
+            border-color: $accent-color-700;
         }
     }
 
-  // Outline
+    // Outline
     &.btn-outline {
         background-color: transparent;
         border-color: $primary-color-700;
         color: $primary-color-700;
+
         &:hover:not(:disabled) {
-        border-color: $accent-color-700;
-        color: $accent-color-700;
-        background-color: $accent-color-100;
+            border-color: $accent-color-700;
+            color: $accent-color-700;
+            background-color: $accent-color-100;
         }
     }
 
-  // Disabled (整合進入原本的邏輯)
-    &:disabled, &.btn-disabled {
+    // Disabled (整合進入原本的邏輯)
+    &:disabled,
+    &.btn-disabled {
         cursor: not-allowed;
         &.btn-outline, &.btn-solid {
         border-color: $neutral-color-400;
