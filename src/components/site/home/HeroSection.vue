@@ -60,6 +60,7 @@ onMounted(() => {
         <div class="bg-layout">
             <img :src="$parsePublicFile('img/site/hero.png')" alt="hero-bg" >
         </div>
+        <p class="hint-text p-p1"><span class="dot"></span>SCROLL</p>
     </div>
     
     
@@ -76,7 +77,7 @@ onMounted(() => {
         width: 100%;
         height: 100vh;
         padding-top: 100px;
-        
+        // position: relative;
         .hero-title{
             margin-bottom: 30px;
             display: flex;
@@ -119,6 +120,12 @@ onMounted(() => {
                 opacity: 1;
             }
         }
+        .hint-text{
+            position: absolute;
+            top: 90vh;
+            left: 50vw;
+            animation: pulse 2s infinite;
+        }
         .bg-layout{
             z-index: -1;
             position: absolute;
@@ -135,15 +142,28 @@ onMounted(() => {
         .circle-btn{
             opacity: 0;
             transition: opacity 1s ease-in-out 1s; // 延遲更久
+            
             &.fade-in {
                 opacity: 1;
         }
         }
         
     }
-        @media screen and (max-width: 810px) {
-            .hero-img1 {
-                object-position: 70% center; 
-            }
+    // animation: pulse 2s infinite;
+    @keyframes pulse {
+        0%, 100% { 
+            opacity: 0.6; 
         }
+        50% { 
+            opacity: 1;
+        }
+    }
+    @media screen and (max-width: 810px) {
+        .hero-img1 {
+            object-position: 70% center; 
+        }
+        .hero-container{
+            padding-top: 50px;
+        }
+    }
 </style>

@@ -11,6 +11,8 @@ import RecipeIngredients from '../../components/workspace/recipedetail/RecipeIng
 import RecipeComments from '../../components/workspace/recipedetail/RecipeComments.vue';
 import CookSnap from '../../components/workspace/recipedetail/CookSnap.vue';
 import RecipeIntro from '../../components/workspace/recipedetail/RecipeIntro.vue';
+import RecipeReportModal from '@/components/workspace/recipedetail/modals/RecipeReportModal.vue';
+import RelatedRecipes from '@/components/workspace/recipedetail/RelatedRecipes.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -250,6 +252,16 @@ const nutritionWrapper = computed(() => {
 });
 
 const handleServingsChange = (newVal) => { servings.value = newVal; };
+
+// --- 5. 檢舉食譜燈箱 ---
+const isReportModalOpen = ref(false);
+const onReportSubmit = (data) => {
+    console.log('收到檢舉內容:', data);
+    // 這裡通常會打 API 送出檢舉
+    isReportModalOpen.value = false; // 關閉燈箱
+};
+
+
 </script>
 
 <template>
@@ -284,8 +296,13 @@ const handleServingsChange = (newVal) => { servings.value = newVal; };
                         <i-material-symbols-thumb-up-rounded v-if="isLiked" class="action-icon" />
                         <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
                         <span class="count-text">{{ displayRecipeLikes }}</span>
+                        
                     </div>
                     <i-material-symbols-share-outline class="action-icon" @click="handleShare" />
+                    <i-material-symbols:edit class="action-icon"
+                        @click="router.push(`/workspace/edit-recipe/${rawRecipe.recipe_id}`)" />
+                    <i-material-symbols:error-outline-rounded class="action-icon report-btn"
+                        @click="isReportModalOpen = true" />
                 </div>
             </div>
 
@@ -339,34 +356,48 @@ const handleServingsChange = (newVal) => { servings.value = newVal; };
         <p>抱歉，找不到該食譜資料 (ID: {{ route.params.id }})。</p>
         <router-link to="/">返回首頁</router-link>
     </div>
+
+    <RecipeReportModal v-model="isReportModalOpen" :targetData="{
+        title: recipeIntroData?.title,
+
+        // 這裡就是關鍵！
+        // 把父元件的 .description 餵給 子元件需要的 content
+        content: recipeIntroData?.description,
+
+        userName: rawRecipe?.author_name || '未知作者',
+        image: recipeIntroData?.image
+    }" @submit="onReportSubmit" />
+
+    <div v-if="!isPreviewMode" class="col-12">
+        <RelatedRecipes :currentId="route.params.id" />
+    </div>
+
 </template>
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-// 預覽 Bar 樣式修正
 .preview-sticky-bar {
     position: fixed;
     top: 0;
-    // 重點修正：避開 Sidebar
-    // 假設你的 Sidebar 是 260px，如果是別的數值請修改這裡
-    left: 260px;
-    width: calc(100% - 260px);
+    // ✨ 核心修正：預設改為全寬，再透過內部 container 限制寬度
+    left: 0;
+    width: 100%;
     z-index: 9999;
-    padding-top: 20px;
+    padding-top: 12px; // 🔹 縮減上方留白 (原為 20px)
     pointer-events: none;
+    transition: all 0.3s ease;
 
-    // 當螢幕變小，Sidebar 消失時（例如手機版），Bar 要變回 100% 寬度
-    @media screen and (max-width: 1024px) {
-        left: 0;
-        width: 100%;
+    // ✨ 修正 Sidebar 存在時的偏移 (這部分保留給電腦版)
+    @media screen and (min-width: 1025px) {
+        left: 260px;
+        width: calc(100% - 260px);
     }
 
     .container {
-        // 寬度限制跟隨食譜內頁
-        max-width: 1000px; // 或者你定義的內容區寬度
+        max-width: 1000px;
         margin: 0 auto;
-        padding: 0 15px;
+        padding: 0 12px; // 🔹 稍微縮減左右 padding
     }
 
     .bar-content {
@@ -375,43 +406,51 @@ const handleServingsChange = (newVal) => { servings.value = newVal; };
         align-items: center;
         background-color: $primary-color-400;
         color: $neutral-color-white;
-        padding: 14px 28px;
-        border-radius: 14px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        padding: 10px 20px; // 🔹 縮減內距 (原為 14px 28px)
+        border-radius: 12px;
         pointer-events: auto;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
         span {
             font-weight: 500;
-            letter-spacing: 0.5px;
+            font-size: 14px; // 🔹 手機版字體稍微縮小一點點更精緻
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; // 防止文字太長
         }
 
         .exit-preview-btn {
+            flex-shrink: 0; // 🔹 確保按鈕不會被壓扁
             background-color: $neutral-color-white;
             color: $primary-color-700;
             border: none;
-            padding: 8px 22px;
+            padding: 6px 16px; // 🔹 縮小按鈕尺寸
             border-radius: 50px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            white-space: nowrap;
+            margin-left: 8px;
 
             &:hover {
                 background-color: $primary-color-100;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             }
         }
     }
 }
-
-// 基礎容器
 .recipe-container-root {
     background-color: $neutral-color-white;
     min-height: 100vh;
     padding: 0 0 100px 0;
 
     &.preview-padding {
-        padding-top: 100px;
+        // ✨ 電腦版維持較大間距
+        padding-top: 90px;
+
+        // ✨ 手機版縮小間距，解決留白過大問題
+        @media screen and (max-width: 768px) {
+            padding-top: 0px;
+        }
     }
 }
 
@@ -429,6 +468,14 @@ const handleServingsChange = (newVal) => { servings.value = newVal; };
     margin-bottom: 20px;
     border-bottom: 1px solid $neutral-color-100;
 
+    // ✨ 新增：手機版 RWD 調整
+    @media screen and (max-width: 768px) {
+        flex-direction: column; // 讓標題與 icon 組垂直排列
+        align-items: flex-start; // 靠左對齊
+        gap: 16px; // 標題與 icon 之間的間距
+        padding: 15px 0;
+    }
+
     .zh-h2 {
         display: flex;
         align-items: center;
@@ -445,6 +492,13 @@ const handleServingsChange = (newVal) => { servings.value = newVal; };
         align-items: center;
         gap: 20px;
         color: $primary-color-700;
+
+        // ✨ 新增：手機版時稍微縮小間距，避免在超小螢幕塞不下
+        @media screen and (max-width: 768px) {
+            gap: 16px;
+            width: 100%; // 滿版讓它好控制
+            justify-content: flex-start; // 確保 icon 組靠左對齊
+        }
 
         &.is-preview {
             opacity: 0.6;

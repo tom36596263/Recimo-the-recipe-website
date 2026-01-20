@@ -1,10 +1,28 @@
 <script setup>
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import LogoBlack from '/img/site/Recimo-logo-black.svg'
 import WorkspaceTopBar from '@/components/workspace/WorkspaceTopBar.vue';
 import WorkspaceSideBar from '@/components/workspace/WorkspaceSideBar.vue';
 
 const route = useRoute();
+
+// 計算麵包屑
+const breadcrumbs = computed(() => {
+    const crumbs = [{ name: '首頁', path: '/' }];
+    
+    // 我的食譜的子頁面
+    const myRecipesSubPages = ['recent-recipes', 'my-favorites', 'personal-recipes'];
+    
+    if (myRecipesSubPages.includes(route.name)) {
+        crumbs.push({ name: '我的食譜', path: '/workspace/my-recipes' });
+        crumbs.push({ name: route.meta.title, path: null });
+    } else {
+        crumbs.push({ name: route.meta.title, path: null });
+    }
+    
+    return crumbs;
+});
 </script>
 
 <template>
@@ -23,7 +41,11 @@ const route = useRoute();
             <section class="container">
                 <div class="row">
                     <div class="breadcrumb p2">
-                        <router-link to="/">首頁</router-link> / <span class="title-active">{{ route.meta.title }}</span>
+                        <template v-for="(crumb, index) in breadcrumbs" :key="index">
+                            <router-link v-if="crumb.path" :to="crumb.path">{{ crumb.name }}</router-link>
+                            <span v-else class="title-active">{{ crumb.name }}</span>
+                            <span v-if="index < breadcrumbs.length - 1"> / </span>
+                        </template>
                     </div>
                 </div>
             </section>

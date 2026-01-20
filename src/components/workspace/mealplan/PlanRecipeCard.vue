@@ -23,10 +23,7 @@ const handleAdd = () => {
     emit('click', props.recipe);
 };
 
-// 處理按讚（目前僅為 UI 展示）
-const handleLikeChange = (val, recipe) => {
-    console.log(`${recipe.recipe_title} Liked: ${val}`);
-};
+
 </script>
 
 <template>
@@ -38,12 +35,10 @@ const handleLikeChange = (val, recipe) => {
         <div class="card-body">
             <div class="title">
                 <h4 class="zh-h4">{{ recipe.recipe_title }}</h4>
-                <div class="icon-group">
-                    <i-material-symbols-Favorite-outline />
-                </div>
+
             </div>
 
-            <div class="tag">
+            <div class="tag-group">
                 <BaseTag :text="`${recipe.recipe_kcal_per_100g} kcal`" />
                 <BaseTag :text="`${recipe.recipe_protein_per_100g}P`" />
                 <BaseTag :text="`難度：${recipe.recipe_difficulty}`" />
@@ -51,14 +46,7 @@ const handleLikeChange = (val, recipe) => {
         </div>
 
         <footer>
-            <div class="personal-info">
-                <div class="personal-img">
-                    <img :src="LogoBlack" alt="Recimo Logo">
-                </div>
-                <p class="p-p1">Recimo</p>
-                <LikeButton :initial-likes="recipe.recipe_likes || 0"
-                    @update:liked="(val) => handleLikeChange(val, recipe)" />
-            </div>
+
 
             <div class="btn-group">
                 <BaseBtn title="加入計畫" variant="solid" height="30" @click.stop="handleAdd" class="btn" />
@@ -68,7 +56,6 @@ const handleLikeChange = (val, recipe) => {
 </template>
 
 <style lang="scss" scoped>
-// 完全複用 RecipeCardSm.vue 的樣式邏輯
 .recipe-card-lg {
     border: 1px solid $neutral-color-400;
     border-radius: $radius-base;
@@ -111,7 +98,6 @@ const handleLikeChange = (val, recipe) => {
             color: $primary-color-700;
 
             h4 {
-                // 處理標題過長
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -125,10 +111,10 @@ const handleLikeChange = (val, recipe) => {
             color: $neutral-color-700;
         }
 
-        .tag {
+        .tag-group {
             display: flex;
             gap: 6px;
-            flex-wrap: wrap; // 避免標籤過多破版
+            flex-wrap: wrap;
         }
     }
 

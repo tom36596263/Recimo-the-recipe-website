@@ -1,27 +1,45 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import BaseBtn from '@/components/common/BaseBtn.vue'
 import LogoBlack from '/img/site/Recimo-logo-black.svg'
 import IconList from 'virtual:icons/material-symbols/List'
 import IconAdd from 'virtual:icons/material-symbols/Add'
 
 const router = useRouter();
+const route = useRoute();
 const isMoreOpen = ref(false);
 
-// 自動篩選出 workspace 下有標題的路由
+// 自動篩選出 workspace 下有標題和圖標的路由
 const menuItems = computed(() => {
     const workspaceRoot = router.options.routes.find(r => r.path === '/workspace');
     if (!workspaceRoot || !workspaceRoot.children) return [];
 
     return workspaceRoot.children
-        .filter(child => child.meta && child.meta.title)
+        .filter(child => child.meta && child.meta.title && child.meta.icon)
         .map(child => ({
             path: child.path.startsWith('/') ? child.path : `/workspace/${child.path}`,
             title: child.meta.title,
             icon: child.meta.icon
         }));
 });
+
+// 檢查路由是否激活（包含子路由）
+const isActive = (itemPath) => {
+    const currentPath = route.path;
+    const normalizedItemPath = itemPath.replace(/\/$/, '');
+    
+    // 我的食譜的子頁面
+    const myRecipesSubPages = ['/workspace/recent-recipes', '/workspace/my-favorites', '/workspace/personal-recipes'];
+    
+    // 如果當前在子頁面，且 itemPath 是我的食譜，則激活
+    if (normalizedItemPath === '/workspace/my-recipes' && myRecipesSubPages.includes(currentPath)) {
+        return true;
+    }
+    
+    // 完全匹配
+    return currentPath === normalizedItemPath;
+};
 
 const mobileFixedItems = computed(() => menuItems.value.slice(0, 3));
 const mobileMoreItems = computed(() => menuItems.value.slice(3));
@@ -36,7 +54,13 @@ const closeMore = () => isMoreOpen.value = false;
             <router-link to="/"><img :src="LogoBlack" alt="Recimo Logo"></router-link>
         </div>
         <div class="workspace-nav">
-            <router-link v-for="item in menuItems" :key="item.path" :to="item.path" class="side-nav-item">
+            <router-link 
+                v-for="item in menuItems" 
+                :key="item.path" 
+                :to="item.path" 
+                class="side-nav-item"
+                :class="{ 'router-link-active': isActive(item.path) }"
+            >
                 <div class="nav-content">
                     <component :is="item.icon" class="nav-icon" />
                     <span class="label">{{ item.title }}</span>
@@ -48,7 +72,13 @@ const closeMore = () => isMoreOpen.value = false;
 
     <nav class="mobile-tabbar">
         <div class="btn-group">
-            <router-link v-for="item in mobileFixedItems" :key="item.path" :to="item.path" class="tab-item">
+            <router-link 
+                v-for="item in mobileFixedItems" 
+                :key="item.path" 
+                :to="item.path" 
+                class="tab-item"
+                :class="{ 'router-link-active': isActive(item.path) }"
+            >
                 <component :is="item.icon" class="tab-icon" />
                 <span class="tab-label p-p3">{{ item.title }}</span>
             </router-link>

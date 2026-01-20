@@ -64,7 +64,18 @@ const buttonClass = computed(() => {
         transition: color 0.3s ease;
 
         i {
-        transition: transform 0.3s ease;
+        // transition: transform 0.3s ease;
+        animation: pulse 2s infinite;
+        }
+    }
+    @keyframes pulse {
+        0%, 100% { 
+            opacity: 0.6; 
+            transform: translateX(0);
+        }
+        50% { 
+            opacity: 1; 
+            transform: translateX(10px);
         }
     }
 

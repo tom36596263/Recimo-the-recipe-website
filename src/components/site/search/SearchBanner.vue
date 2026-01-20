@@ -1,9 +1,34 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue'
+import { publicApi } from '@/utils/publicApi'
 import SearchBar from '@/components/common/SearchBar.vue'
-import BaseTag from '@/components/common/BaseTag.vue';
+import BaseTag from '@/components/common/BaseTag.vue'
 
-const hotTags = ref(['雞胸肉', '創意吐司', '輕食早餐', '荷包蛋', '地瓜']);
+
+const props = defineProps(['modelValue'])
+const emit = defineEmits(['update:modelValue'])
+
+const hotTags = ref([])
+
+const fetchRandomTags = async () => {
+    try{
+        const res = await publicApi.get('data/recipe/tags.json');
+        const allTags = res.data;
+
+        hotTags.value = [...allTags]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 5)
+            .map(tag => tag.tag_name);
+    }catch(err){
+        console.error("無法載入隨機標籤:", err);
+    }
+}
+onMounted(() => {
+    fetchRandomTags();
+});
+const handleTagClick = (tagName) => {
+    emit('update:modelValue', tagName);
+}
 
 </script>
 
@@ -20,12 +45,17 @@ const hotTags = ref(['雞胸肉', '創意吐司', '輕食早餐', '荷包蛋', '
                 <h2 class="zh-h2">快速搜尋好料理</h2>
             </div>
             <div class="search-container">
-                <SearchBar placeholder="尋找靈感食譜..." />
+                <SearchBar
+                :modelValue="modelValue"
+                @update:modelValue="val => emit('update:modelValue', val)"
+                placeholder="輸入關鍵字尋找好料理..." 
+                maxWidth="100%"/>
             </div>
             <div class="tags-group">
                 <BaseTag v-for="tag in hotTags"
                 :key="tag"
                 :text="tag"
+                @click="handleTagClick(tag)"
                 height="30"
                 variant="outline"
                 class="tag-item"/>
@@ -73,12 +103,31 @@ const hotTags = ref(['雞胸肉', '創意吐司', '輕食早餐', '荷包蛋', '
             .tags-group{
                 display: flex;
                 gap: 10px;
+                flex-wrap: wrap;
+                .tag-item{
+                    word-wrap: nowrap;
+                }
             }
             .search-container{
-                width: 450px;
+                width: 50%;
                 margin-bottom: 20px;
             }
         }
+        
+    }
+    @media screen and (max-width: 810px){
+        .search-banner{
+            .content-overlay{
+                .search-container{
+                    width: 100%;
+                    margin-bottom: 20px;
+                }
+                .tags-group{
+                    gap:4px;
+                }
+            }
+        }
+        
         
     }
 </style>

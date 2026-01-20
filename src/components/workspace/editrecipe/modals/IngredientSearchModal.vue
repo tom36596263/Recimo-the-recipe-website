@@ -159,7 +159,6 @@ const handleConfirm = () => {
 </template>
 
 <style scoped lang="scss">
-/* 基礎樣式維持原樣 */
 .black-mask {
     position: fixed;
     inset: 0;
@@ -317,14 +316,12 @@ const handleConfirm = () => {
                 color: $primary-color-700;
             }
 
-            /* 剛點選但還沒確認新增的樣式 (綠色) */
             &.in-temp {
                 background: $primary-color-700;
                 color: $neutral-color-white;
                 border: none;
             }
 
-            /* 已經在父層清單中的樣式 (灰色且禁用) */
             &.in-parent {
                 background: $neutral-color-100;
                 color: $neutral-color-400;
@@ -340,7 +337,6 @@ const handleConfirm = () => {
     margin-top: 20px;
 
     .cook-btn {
-        /* 您原始的確認新增按鈕樣式 */
         padding: 8px 40px;
         border-radius: 30px;
         cursor: pointer;
@@ -352,5 +348,84 @@ const handleConfirm = () => {
     text-align: center;
     padding: 40px;
     color: $neutral-color-400;
+}
+
+/* =========================
+   RWD - Mobile only
+   ========================= */
+@media (max-width: 480px) {
+    .modal-card {
+        width: 100%;
+        max-width: calc(100% - 24px);
+        padding: 20px 16px;
+        border-radius: 12px;
+    }
+
+    .modal-header {
+        margin-bottom: 16px;
+
+        .modal-title {
+            font-size: 18px;
+        }
+    }
+
+    .search-bar.search-sm {
+        padding: 6px 16px;
+        margin-bottom: 16px;
+
+        .search-input {
+            font-size: 14px;
+        }
+    }
+
+    .category-tabs {
+        gap: 6px;
+        margin-bottom: 16px;
+
+        .tab-btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+    }
+
+    .list-container {
+        max-height: 200px;
+    }
+
+    .list-container .list-item {
+        padding: 10px 12px;
+
+        .item-info {
+            flex: 1;
+            min-width: 0;
+
+            .item-name {
+                display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .item-sub {
+                display: none;
+            }
+        }
+
+        .add-btn {
+            min-width: 72px;
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+    }
+
+    .more-box {
+        margin-top: 16px;
+
+        .cook-btn {
+            width: 100%;
+            padding: 10px 0;
+        }
+    }
 }
 </style>
