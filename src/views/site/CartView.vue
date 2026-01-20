@@ -1,88 +1,157 @@
-<!-- <script setup>
-//  setup: 這是 Vue 3 的語法糖，讓你不用寫 export default {}，且能直接使用變數和函式，開發效率最高。
-// 所有的變數、函式、或是從 JSON 引入的資料都寫在script裡面。
-import { ref, onMounted } from 'vue';
-// 假設這是購物車目前的狀態 (通常來自 Pinia Store)
-const cartItems = ref([
-  { id: 'c1', productId: 1, quantity: 1 },
-  { id: 'c2', productId: 15, quantity: 2 }
-]);
+<script setup>
+import { ref, defineProps, computed, defineEmits, onMounted, onUnmounted } from 'vue';
+import { useCartStore } from '@/stores/cartStore'
+import ProductRmd from '@/components/mall/ProductRmd.vue';
+import CartCard from '@/components/mall/CartCard.vue';
+// 門禁守衛
+import { useAuthGuard } from '@/composables/useAuthGuard';
+const { runWithAuth } = useAuthGuard();
+const cartStore = useCartStore()
 
-const handleUpdateQty = ({ id, quantity }) => {
-  // 注意：這裡邏輯要確認子元件傳回來的 id 是 productId 還是 cart item id
-  const item = cartItems.value.find((i) => i.productId === id);
-  if (item) item.quantity = quantity;
+// 計算總額
+const totalAmount = computed(() => {
+  return cartStore.items.reduce((total, item) => {
+    return total + (item.product_price * (item.count || 0));
+  }, 0);
+});
+
+// 前往結帳
+const handleGoToCheckout = () => {
+  runWithAuth(() => {
+    // 只有在登入驗證通過後，才會執行這裡
+    router.push('/checkout');
+  });
 };
 
-const handleRemoveItem = (prodId) => {
-  cartItems.value = cartItems.value.filter((i) => i.productId !== prodId);
+// ==========================================
+// nav淡出結帳預覽往上滑一點 nav出現回復
+// ==========================================
+const isScrollingDown = ref(false);
+let lastScrollY = window.scrollY;
+
+// 偵測往下滑或往上滑
+const handleScroll = () => {
+  const currentY = window.scrollY;
+  isScrollingDown.value = currentY > lastScrollY;
+  lastScrollY = currentY;
 };
+onMounted(() => {
+  // 監聽滾動
+  window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+  // 清除監聽，避免 memory leak
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <template>
-  <div class="cart-page">
-    <h2>我的購物車</h2>
-    <div class="container">
-      <div class="row">
-        <div class="col-12">
-          <div class="cart-list">
-            <CartItem
-              v-for="item in cartItems"
-              :key="item.id"
-              :product-id="item.productId"
-              :quantity="item.quantity"
-              @update:quantity="handleUpdateQty"
-              @remove="handleRemoveItem"
-            />
+  <div class="container cart-page">
+    <h2 class="zh-h2">購物車 Cart</h2>
+    <hr class="divider">
+
+    <div v-if="cartStore.items.length > 0" class="row">
+      <div class="col-7 col-lg-12">
+        <div class="cart-list">
+          <CartCard v-for="item in cartStore.items" :key="item.product_id || item.id" :item="item" />
+        </div>
+        <router-link to="/mall">
+          <BaseBtn title="前往Recimo商城" variant="outline" :width="210" />
+        </router-link>
+      </div>
+
+      <div class="col-5 col-lg-12">
+        <div class="summary-box" :class="{ 'is-nav-hidden': isScrollingDown }">
+          <div class="summary-line">
+            <span class="p-p1">小計：</span>
+            <span class="amount p-p1">${{ cartStore.totalAmount }}</span>
           </div>
+          <p class="shipping-note p-p1">運費 60 元，滿 1000 元免運</p>
+          <BaseBtn title="前往結帳" width="100%" @click="handleGoToCheckout" />
         </div>
       </div>
+    </div>
+
+    <div v-else class="empty-state">
+      <p>購物車目前沒有商品</p>
+      <router-link to="/mall">
+        <BaseBtn title="前往Recimo商城" variant="outline" :width="210" />
+      </router-link>
+    </div>
+
+    <div class="recommend">
+      <ProductRmd />
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-//  lang="scss": 告訴 Vue 這裡要用 Scss 編譯
-//  scoped: 確保這裡寫的 CSS 只會影響目前這個頁面，不會「跑去污染」到其他頁面的樣式。
-</style> -->
+.cart-page {
+  padding-top: 30px;
 
-<!-- ======================================== -->
-<script setup>
-import { defineProps, computed, defineEmits } from 'vue';
-import { useCartStore } from '@/stores/cartStore'
-import ProductRmd from '@/components/mall/ProductRmd.vue';
-import CartCard from '@/components/mall/CartCard.vue';
-import CartItem from '@/components/mall/CartItem.vue';
+  .divider {
+    border: 0;
+    border: 1px solid #B2B2B2;
+    margin: 20px 0 40px;
+  }
+}
 
-const cartStore = useCartStore()
+// 結帳預覽區塊
+.summary-box {
+  background-color: $neutral-color-100;
+  padding: 40px 30px;
+  border-radius: 4px;
+  text-align: right;
+  position: sticky;
+  top: 100px;
+  transition: top 0.3s ease;
 
-// 計算總額
-const totalAmount = computed(() => {
-  // 注意：這裡是 item.count 而不是 item.qty
-  return cartStore.items.reduce((total, item) => {
-    return total + (item.product_price * (item.count || 0));
-  }, 0);
-});
-</script>
+  &.is-nav-hidden {
+    top: 35px; // nav 隱藏時，大圖往上
+  }
 
-<template>
-  <div class="cart-page">
-    <h2>購物車清單</h2>
+  @media (max-width: 1024px) {
+    position: static;
+  }
 
-    <div class="container">
-      <div v-if="cartStore.items && cartStore.items.length > 0">
-        <CartCard v-for="item in cartStore.items" :key="item.product_id" :item="item" />
-      </div>
+  .summary-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 10px;
 
-      <div v-if="cartStore && cartStore.items && cartStore.items.length > 0">
-      </div>
+    .amount {
+      font-size: 1.3rem;
+    }
+  }
 
-      <div v-else>
-        <p>購物車目前沒有商品</p>
-      </div>
-    </div>
-  </div>
+  .shipping-note {
+    margin-bottom: 30px;
+  }
+}
 
-  <button @click="cartStore.clear()">清空</button>
-  <ProductRmd class="detail-recommend-section" />
-</template>
+// 空狀態與回商城按鈕
+.empty-state {
+  text-align: center;
+  padding: 80px 0;
+
+  p {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+  }
+}
+
+.recommend {
+  margin-top: 30px;
+}
+
+// 響應式微調 (小於 1024px 時結帳欄往下掉)
+@media screen and (max-width: 1024px) {
+  .summary-box {
+    margin-top: 30px;
+  }
+}
+</style>
