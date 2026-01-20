@@ -1,13 +1,17 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import BaseTag from '@/components/common/BaseTag.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
+import { useRouter, useRoute } from 'vue-router';
 
 const props = defineProps({ modelValue: Object });
 const emit = defineEmits([
     'update:modelValue',
     'open-kitchen'
 ]);
+
+const router = useRouter();
+const route = useRoute();
 
 const filters = ref([
     {
@@ -37,24 +41,33 @@ const handleSelect = (filterId, option) => {
     emit('update:modelValue', newValue);
 };
 
-//取消訂單
-const onCancel = (orderId) => {
-    // 1. 在原始資料中找到這筆訂單的索引
-    const targetIndex = ordersData.value.findIndex(item => item.id === orderId);
+// 在關於Recimo裡開起靈感小廚房
+const checkRoute = () => {
+    if (route.query.action === 'open-kitchen') {
+        emit('open-kitchen')
+    }
+}
 
-    // 2. 確保有找到訂單
-    if (targetIndex !== -1) {
-        // 【方法一：模擬真實情境】將狀態改為 -1 (已取消)
-        // 這樣它會從目前的標籤 (如:已確認) 消失，並出現在 "已取消訂單" 標籤中
-        ordersData.value[targetIndex].status = -1;
+onMounted(() => {
+    checkRoute()
+})
 
-        // 【方法二：完全刪除】如果你希望它直接從資料庫消失 (不留紀錄)
-        // ordersData.value.splice(targetIndex, 1);
-
-        console.log(`訂單 ${orderId} 已取消`);
+// 關閉靈感小廚房時，清除 Router Query 的函式
+const clearQuery = () => {
+    // 檢查目前是否有 query，避免重複執行
+    if (Object.keys(route.query).length > 0) {
+        router.replace({
+            path: route.path, // 保持在目前的頁面路徑
+            query: {}         // 將 query 設為空物件，清空參數
+        });
     }
 };
 
+const handleCloseModal = () => {
+    // 1. 執行原本關閉燈箱的邏輯 (例如 isShow.value = false)
+    // 2. 呼叫清空 URL
+    clearQuery();
+};
 
 </script>
 <template>
@@ -80,7 +93,7 @@ const onCancel = (orderId) => {
             <img :src="$parsePublicFile('img/remove-bg-ingredients/15.png')" alt="檸檬" class="ingredient15">
         </div>
     </div>
-
+    <InspirationKitchenModal v-if="isShow" @close="handleCloseModal" />
 </template>
 <style lang="scss" scoped>
 .filter-content {
