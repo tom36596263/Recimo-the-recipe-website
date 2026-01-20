@@ -130,8 +130,8 @@ const buttonStyle = computed(() => {
         cursor: not-allowed;
         &.btn-outline, &.btn-solid {
         border-color: $neutral-color-400;
-        color: $neutral-color-100;
-        background-color: $neutral-color-400;
+        color: $neutral-color-400;
+        // background-color: $neutral-color-400;
         }
     }
 }

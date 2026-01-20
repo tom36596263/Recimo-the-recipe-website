@@ -576,6 +576,6 @@ const startCooking = () => {
     width: 100%;
     flex: 1;
     overflow-y: auto;
-    padding-bottom: 20px;
+    padding: 20px;
 }
 </style>

@@ -8,6 +8,7 @@ import EmptyState from '@/components/site/RecipeOverview/NoResult.vue'
 import PageBtn from '@/components/common/PageBtn.vue'
 
 const recipes = ref([]);
+const products = ref([]);
 const recipeTags = ref([]);
 const tags = ref([]);
 const searchQuery = ref('');
@@ -17,12 +18,14 @@ const pageSize = 5;
 
 onMounted(async () => {
     try{
-        const [resRecipes, resRecipeTags, resTags ] = await Promise.all([
+        const [resRecipes,resProducts, resRecipeTags, resTags ] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/mall/products.json'),
             publicApi.get('data/recipe/recipe_tag.json'),
             publicApi.get('data/recipe/tags.json')
         ]);
         recipes.value = resRecipes.data;
+        products.value = resProducts.data;
         recipeTags.value = resRecipeTags.data;
         tags.value = resTags.data;
 
@@ -30,6 +33,11 @@ onMounted(async () => {
         console.error("載入失敗", err);
     }
 });
+
+const getProductForRecipe = (recipe) => {
+    if(!recipe.linked_product_id) return null;
+    return products.value.find(p => p.product_id === recipe.linked_product_id);
+}
 
 const getRecipeTags = (recipeId) => {
     const targetTagIds = recipeTags.value
@@ -49,10 +57,13 @@ const filteredRecipes = computed(() => {
 
     return recipes.value.filter(recipe => {
         const titleMatch = recipe.recipe_title.toLowerCase().includes(query);
+
+        const product = getProductForRecipe(recipe);
+        const productMatch = product? product.product_name.toLowerCase().includes(query):false;
         const tagMatch = recipeTags.value.some(rt => 
             rt.recipe_id === recipe.recipe_id && matchTagIds.includes(rt.tag_id)
         );
-        return titleMatch || tagMatch;
+        return titleMatch || productMatch || tagMatch;
     });
 });
 
@@ -95,7 +106,8 @@ watch(searchQuery, () => {
                 <SearchResultCard 
                 v-for="item in paginateRecipes" 
                 :key="item.recipe_id"
-                :recipe="item" 
+                :recipe="item"
+                :product="getProductForRecipe(item)" 
                 :recipeTags="getRecipeTags(item.recipe_id)" />
             </div>
         </div>

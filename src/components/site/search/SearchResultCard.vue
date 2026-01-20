@@ -80,14 +80,14 @@ const goToProductDetail = () => {
             </div>
             <div class="btn-group">
                 <BaseBtn 
-                    v-if="recipe"
                     title="食譜詳情" 
-                    variant="outline" 
+                    :variant="recipe ? 'solid' : 'outline'"
+                    :disabled="!recipe"
                     @click="goToRecipeDetail" />
                 <BaseBtn 
-                    v-if="product"
                     title="料理包詳情" 
-                    variant="outline"
+                    :variant="product ? 'solid' : 'outline'"
+                    :disabled="!product"
                     @click="goToProductDetail"/>
             </div>
         </div>
