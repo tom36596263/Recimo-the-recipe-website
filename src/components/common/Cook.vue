@@ -336,18 +336,21 @@ const startCooking = () => {
     height: 487px;
     background-color: $neutral-color-white;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border-radius: $radius-base;
+    overflow: hidden;
+    .cook-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
 }
 
 .row {
     height: 100%;
 }
 
-.cook-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-}
+
 
 .title {
     margin-left: 20px;
@@ -576,6 +579,6 @@ const startCooking = () => {
     width: 100%;
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 0 20px 20px 20px;
 }
 </style>

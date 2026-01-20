@@ -60,7 +60,6 @@ onMounted(() => {
         <div class="bg-layout">
             <img :src="$parsePublicFile('img/site/hero.png')" alt="hero-bg" >
         </div>
-        <p class="hint-text p-p1"><span class="dot"></span>SCROLL</p>
     </div>
     
     
@@ -119,12 +118,6 @@ onMounted(() => {
             &.fade-in {
                 opacity: 1;
             }
-        }
-        .hint-text{
-            position: absolute;
-            top: 90vh;
-            left: 50vw;
-            animation: pulse 2s infinite;
         }
         .bg-layout{
             z-index: -1;

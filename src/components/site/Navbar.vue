@@ -130,7 +130,7 @@ const navItems = computed(() => {
             border-radius: 50px;
             position: absolute;
             left: -160px;
-
+            animation: searchPulse 2.4s ease-in-out infinite;
             &:hover {
                 background-color: $accent-color-800;
                 color: $accent-color-100;
@@ -271,8 +271,22 @@ const navItems = computed(() => {
     }
 
 }
-
+@keyframes searchPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 180, 0, 0.6);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(255, 180, 0, 0);
+        transform: scale(1.03);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 180, 0, 0);
+        transform: scale(1);
+    }
+}
 @media screen and (max-width: 810px) {
+
     .site-nav {
         .link-group {
             .search-btn {

@@ -54,6 +54,12 @@
         border-radius: $radius-base;
         transition: background-color .5s ease;
         position: relative;
+        transition: all 0.3s ease;
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba($neutral-color-black, 0.08);
+            border-color: $primary-color-400;
+        }
         .tips-text{
             margin-left: 20px;
             .zh-h4{
@@ -77,6 +83,8 @@
         }
         &:hover, &.is-active{
             background-color: $primary-color-100;
+            border: 1px solid $primary-color-400;
+            box-shadow: 0 10px 20px rgba($neutral-color-black, 0.08);
             cursor: pointer;
             .dot{
                 opacity: 1;

@@ -62,7 +62,12 @@ const goToDetail = () => {
     overflow: hidden;
     background-color: $neutral-color-white;
     cursor: pointer;
-
+    transition: all 0.3s ease;
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba($neutral-color-black, 0.08);
+        border-color: $primary-color-400;
+    }
     .card-header {
         overflow: hidden;
         height: 150px;

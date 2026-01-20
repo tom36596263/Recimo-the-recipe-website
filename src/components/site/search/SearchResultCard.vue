@@ -67,14 +67,13 @@ const goToProductDetail = () => {
                     <BaseTag 
                         v-if="product?.product_category"
                         :text="product.product_category"
-                        variant="accent"
                         class="tag-item"
                     />
                     <BaseTag 
-                    v-for="tag in recipeTags"
-                    :key="tag.tag_id"
-                    :text="tag.tag_name"
-                    class="tag-item"/>
+                        v-for="tag in recipeTags"
+                        :key="tag.tag_id"
+                        :text="tag.tag_name"
+                        class="tag-item"/>
                 </div>
                 <p class="p-p2">{{ recipe.recipe_descreption }}</p>
             </div>

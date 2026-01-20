@@ -15,6 +15,7 @@ const searchQuery = ref('');
 
 const currentPage = ref(1); 
 const pageSize = 5;
+const isLoading = ref(true);
 
 onMounted(async () => {
     try{
@@ -31,6 +32,8 @@ onMounted(async () => {
 
     }catch(err){
         console.error("載入失敗", err);
+    }finally {
+        isLoading.value = false;
     }
 });
 
@@ -46,6 +49,7 @@ const getRecipeTags = (recipeId) => {
     return tags.value.filter(t => targetTagIds.includes(t.tag_id));
 };
 
+//篩選
 const filteredRecipes = computed(() => {
     const query = searchQuery.value.trim().toLowerCase();
     if(!query) return recipes.value;
@@ -60,13 +64,32 @@ const filteredRecipes = computed(() => {
 
         const product = getProductForRecipe(recipe);
         const productMatch = product? product.product_name.toLowerCase().includes(query):false;
+        const productCategoryMatch = product? product.product_category.toLowerCase().includes(query):false;
         const tagMatch = recipeTags.value.some(rt => 
             rt.recipe_id === recipe.recipe_id && matchTagIds.includes(rt.tag_id)
         );
-        return titleMatch || productMatch || tagMatch;
+        return titleMatch || productMatch || productCategoryMatch || tagMatch;
     });
 });
+//計算食譜、料理包總數
+const displayCounts = computed(() => {
+    const query = searchQuery.value.trim().toLowerCase();
+    if(!query){
+        return{
+            recipes: recipes.value.length,
+            products: products.value.length
+        };
+    }
+    const currentResults = filteredRecipes.value;
+    const recipeCount = currentResults.length;
+    const productCount = currentResults.filter(recipe => recipe.linked_product_id !== null).length;
+    return{
+        recipes: recipeCount,
+        products: productCount
+    }
+})
 
+//計算頁數
 const totalPages = computed(() => {
     return Math.ceil(filteredRecipes.value.length/pageSize);
 });
@@ -98,9 +121,15 @@ watch(searchQuery, () => {
     </div>
     <div class="container">
         <div v-if="filteredRecipes.length > 0" class="row">
-            <div class="col-12">
-                <h3 class="zh-h3" v-if="searchQuery">「{{searchQuery}}」搜尋結果({{ filteredRecipes.length }})</h3>
-                <h3 class="zh-h3" v-else>所有食譜({{ filteredRecipes.length }})</h3>
+            <div class="col-12 result-title">
+                <h3 class="zh-h3" v-if="searchQuery">「{{searchQuery}}」搜尋結果</h3>
+                <h3 class="zh-h3" v-else>所有好料理</h3>
+                <div class="count-badge-group p-p2">
+                    <span>{{ displayCounts.recipes }}筆食譜</span>
+                    <span> | </span>
+                    <span>{{ displayCounts.products }}筆料理包</span>
+                </div>
+
             </div>
             <div class="col-12" v-if="!isLoading">
                 <SearchResultCard 
@@ -137,5 +166,10 @@ watch(searchQuery, () => {
 <style lang="scss" scoped>
     .page-btn{
         margin: 30px auto;
+    }
+    .result-title{
+        display: flex;
+        align-items: end;
+        gap: 12px;
     }
 </style>
