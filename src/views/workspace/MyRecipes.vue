@@ -339,9 +339,6 @@ onMounted(() => {
 
 .section-title {
     margin-bottom: 0;
-    color: $neutral-color-800;
-    font-size: 24px;
-    font-weight: 600;
 }
 
 .count-badge {
