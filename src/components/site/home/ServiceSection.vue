@@ -38,7 +38,14 @@
     <div class="col-12">
         <swiper 
         direction="horizontal"
-        :slidesPerView="1.4"
+        :breakpoints="{
+            '0': {
+                slidesPerView: 1
+            },
+            '811': {
+                slidesPerView: 1.4
+            }
+        }"
         :spaceBetween="10"
         :mousewheel="{
             forceToAxis: true,

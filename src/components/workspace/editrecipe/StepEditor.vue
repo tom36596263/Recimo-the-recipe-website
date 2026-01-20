@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import draggable from 'vuedraggable';
 
 const props = defineProps(['steps', 'ingredients', 'isEditing']);
 const activeStepId = ref(null);
@@ -81,7 +82,7 @@ const uploadStepImg = (step) => {
     reader.onload = (f) => {
       step.image = f.target.result;
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(file); // ✨ 這裡已修復
   };
   input.click();
 };
@@ -117,63 +118,71 @@ onUnmounted(() => {
       <h2 class="header-title zh-h4-bold">烹飪步驟</h2>
     </div>
 
-    <div class="step-list">
-      <div v-for="(step, idx) in steps" :key="step.id || idx" class="step-item-outer">
-        <div class="step-sidebar">
-          <div v-if="isEditing" class="drag-dots">⋮⋮</div>
-          <div class="step-number p-p2">{{ idx + 1 }}</div>
-        </div>
+    <draggable :list="steps" class="step-list" handle=".drag-dots" item-key="id" :disabled="!isEditing"
+      ghost-class="ghost-step" animation="300">
+      <template #item="{ element: step, index: idx }">
+        <div class="step-item-outer">
+          <div class="step-card">
+            <div class="card-header">
+              <div class="step-sidebar-inline">
+                <div v-if="isEditing" class="drag-dots">⋮⋮</div>
+                <div class="step-number p-p2">{{ idx + 1 }}</div>
+              </div>
 
-        <div class="step-card">
-          <div class="card-header">
-            <input v-if="isEditing" v-model="step.title" class="step-title-input zh-h4" placeholder="步驟標題" />
-            <span v-else class="step-title-display zh-h4-bold">
-              {{ step.title || ('步驟 ' + (idx + 1)) }}
-            </span>
-            <button v-if="isEditing" class="delete-step" @click="removeStep(step.id)">✕</button>
-          </div>
+              <input v-if="isEditing" v-model="step.title" class="step-title-input zh-h4" placeholder="步驟標題"
+                maxlength="30" />
+              <span v-else class="step-title-display zh-h4">
+                {{ step.title || ('步驟 ' + (idx + 1)) }}
+              </span>
+              <button v-if="isEditing" class="delete-step" @click="removeStep(step.id)">✕</button>
+            </div>
 
-          <div class="card-content">
-            <div class="image-uploader-area">
-              <div class="image-box" @click="uploadStepImg(step)">
-                <img v-if="getStepImage(step)" :src="getStepImage(step)" class="step-img" @error="handleImgError" />
-                <div v-else class="image-placeholder">
-                  <span class="plus">+</span>
-                  <span class="text p-p3">新增圖片</span>
+            <div class="card-content">
+              <div class="image-uploader-area">
+                <div class="image-box" :class="{ 'has-image': getStepImage(step) }" @click="uploadStepImg(step)">
+                  <img v-if="getStepImage(step)" :src="getStepImage(step)" class="step-img" @error="handleImgError" />
+                  <div v-else class="image-placeholder">
+                    <span class="plus">+</span>
+                    <span class="text p-p3">新增圖片</span>
+                  </div>
+                  <div v-if="getStepImage(step) && isEditing" class="change-hint">
+                    <span>更換圖片</span>
+                  </div>
                 </div>
-                <div v-if="getStepImage(step) && isEditing" class="change-hint">
-                  <span>更換圖片</span>
+              </div>
+
+              <div class="step-info">
+                <div class="tag-row">
+                  <BaseTag :text="step.time ? `${step.time} 分鐘` : '+ 時間'" variant="action" :show-icon="false"
+                    width="85px" @click.stop="openPop($event, step.id || idx, 'timer')" />
+                  <BaseTag text="食材" variant="action" width="85px"
+                    @click.stop="openPop($event, step.id || idx, 'ing')" />
+
+                  <div v-for="tid in (step.tags || [])" :key="tid" class="selected-ing-wrapper">
+                    <BaseTag variant="label" width="auto">
+                      <div class="ing-tag-content">
+                        <img src="@/assets/images/recipe/Vector.svg" class="ing-icon-img" alt="icon" />
+                        <span class="ing-name p-p3">{{ingredients?.find(i => i.id === tid)?.name || '食材'}}</span>
+                        <span v-if="isEditing" class="tag-close-icon" @click.stop="toggleTag(step, tid)">✕</span>
+                      </div>
+                    </BaseTag>
+                  </div>
+                </div>
+
+                <div v-if="isEditing" class="textarea-wrapper">
+                  <textarea v-model="step.content" class="step-textarea p-p2" placeholder="詳細說明步驟內容..."
+                    maxlength="100"></textarea>
+                  <span class="char-counter">{{ step.content?.length || 0 }}/100</span>
+                </div>
+                <div v-else class="step-text-display p-p2">
+                  {{ step.content || '無步驟說明' }}
                 </div>
               </div>
             </div>
-
-            <div class="step-info">
-              <div class="tag-row">
-                <BaseTag :text="step.time ? `${step.time} 分鐘` : '+ 時間'" variant="action" :show-icon="false" width="85px"
-                  @click.stop="openPop($event, step.id || idx, 'timer')" />
-                <BaseTag text="食材" variant="action" width="85px" @click.stop="openPop($event, step.id || idx, 'ing')" />
-
-                <div v-for="tid in (step.tags || [])" :key="tid" class="selected-ing-wrapper">
-                  <BaseTag variant="label" width="auto">
-                    <div class="ing-tag-content">
-                      <span class="ing-icon">🍳</span>
-                      <span class="ing-name p-p3">{{ingredients?.find(i => i.id === tid)?.name || '食材'}}</span>
-                      <span v-if="isEditing" class="tag-close-icon" @click.stop="toggleTag(step, tid)">✕</span>
-                    </div>
-                  </BaseTag>
-                </div>
-              </div>
-
-              <textarea v-if="isEditing" v-model="step.content" class="step-textarea p-p2"
-                placeholder="詳細說明步驟內容..."></textarea>
-              <div v-else class="step-text-display p-p2">
-                {{ step.content || '無步驟說明' }}
-              </div>
-            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </draggable>
 
     <div v-if="isEditing" class="add-step-wrapper">
       <button class="add-step-btn p-p2" @click="addStep">+ 新增步驟</button>
@@ -194,7 +203,7 @@ onUnmounted(() => {
     <div class="popover-title p-p2">設定烹飪時間</div>
     <div class="popover-content" style="display: flex; flex-direction: column; gap: 12px; padding: 10px 0;">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <input type="number" v-model.number="getActiveStep().time"
+        <input type="number" v-model.number="getActiveStep().time" step="1" min="0" max="1440"
           style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; outline: none;" placeholder="輸入分鐘"
           @keyup.enter="closePops" />
         <span class="p-p3">分鐘</span>
@@ -211,6 +220,7 @@ onUnmounted(() => {
 .step-editor-container {
   width: 100%;
   margin-bottom: 50px;
+  box-sizing: border-box;
 }
 
 .section-header {
@@ -231,12 +241,95 @@ onUnmounted(() => {
 
 .step-item-outer {
   display: flex;
-  gap: 15px;
+  width: 100%;
+}
+
+.step-card {
+  flex: 1;
+  border-top: 1px solid $neutral-color-400;
+  min-width: 0;
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid $neutral-color-400;
+    margin-bottom: 15px;
+    gap: 12px;
+
+    .step-sidebar-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+
+      .drag-dots {
+        cursor: grab;
+        color: $neutral-color-400;
+        font-size: 20px;
+        letter-spacing: 2px;
+        user-select: none;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+
+        &:hover {
+          color: $primary-color-700;
+        }
+
+        &:active {
+          cursor: grabbing;
+        }
+      }
+
+      .step-number {
+        width: 28px;
+        height: 28px;
+        background: $primary-color-100;
+        color: $primary-color-800;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+      }
+    }
+
+    .step-title-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      min-width: 0;
+    }
+
+    .delete-step {
+      color: $secondary-color-danger-400;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+  }
+
+  .card-content {
+    display: flex;
+    gap: 20px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+}
+
+.image-uploader-area {
+  flex-shrink: 0;
 }
 
 .image-box {
-  width: 150px;
-  height: 120px;
+  width: 150px; // ✨ 正方形固定寬度
+  height: 150px; // ✨ 正方形固定高度
   background: $neutral-color-100;
   border: 1.5px dashed $neutral-color-400;
   border-radius: 12px;
@@ -246,6 +339,12 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s;
+
+  &.has-image {
+    border-style: solid; // ✨ 上傳後變實線
+    border-color: $primary-color-400;
+  }
 
   .step-img {
     width: 100%;
@@ -276,40 +375,12 @@ onUnmounted(() => {
     transition: opacity 0.2s;
   }
 
-  &:hover .change-hint {
-    opacity: 1;
-  }
-}
+  &:hover {
+    border-color: $primary-color-700;
 
-.step-card {
-  flex: 1;
-  border-top: 1px solid $neutral-color-400;
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid $neutral-color-400;
-    margin-bottom: 15px;
-
-    .step-title-input {
-      flex: 1;
-      border: none;
-      outline: none;
-      background: transparent;
+    .change-hint {
+      opacity: 1;
     }
-
-    .delete-step {
-      color: $secondary-color-danger-400;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-  }
-
-  .card-content {
-    display: flex;
-    gap: 20px;
   }
 }
 
@@ -318,12 +389,27 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-width: 0;
 
   .tag-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px;
     align-items: center;
+  }
+
+  /* ✨ 字數統計外層容器 */
+  .textarea-wrapper {
+    position: relative;
+    width: 100%;
+
+    .char-counter {
+      position: absolute;
+      right: 0;
+      bottom: -15px;
+      font-size: 12px;
+      color: $neutral-color-400;
+    }
   }
 
   .step-textarea {
@@ -331,13 +417,24 @@ onUnmounted(() => {
     outline: none;
     resize: none;
     min-height: 80px;
-    background: transparent;
+    padding: 8px 0;
     width: 100%;
+    box-sizing: border-box;
+    background: transparent;
+    overflow-wrap: break-word;
+
+    &:focus {
+      border: none;
+      outline: none;
+    }
   }
 
   .step-text-display {
     white-space: pre-wrap;
     color: $neutral-color-800;
+    word-break: break-word; // 讓長單字斷行
+    overflow-wrap: break-word; // 確保內容不超出寬度
+    width: 100%; // 強制佔滿剩餘寬度
   }
 }
 
@@ -349,6 +446,7 @@ onUnmounted(() => {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   width: 260px;
   z-index: 9999;
+  max-width: calc(100vw - 40px);
 
   .chip {
     margin: 4px;
@@ -356,6 +454,7 @@ onUnmounted(() => {
     border-radius: 20px;
     border: 1px solid #ddd;
     cursor: pointer;
+    background: white;
 
     &.active {
       background: $primary-color-800;
@@ -378,77 +477,81 @@ onUnmounted(() => {
     border-radius: 10px;
     background: white;
     cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      background: $primary-color-100;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      background: $primary-color-400;
+      transform: translateY(0);
+    }
   }
 }
-
-.step-sidebar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 30px;
-
-  .step-number {
-    width: 28px;
-    height: 28px;
-    background: $primary-color-100;
-    color: $primary-color-800;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-  }
-}
-
-// --- 補上食材標籤內部的樣式 ---
 
 .selected-ing-wrapper {
   display: inline-flex;
   align-items: center;
 
-  // 使用 :deep 強制修改 BaseTag 元件內部的樣式
   :deep(.base-tag) {
-    height: 32px !important; 
+    height: 32px !important;
     min-height: 32px !important;
-    background-color: $primary-color-100!important; 
-    border-radius: 10px !important; 
-    border: none !important; 
-    padding: 0 8px !important; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background-color: $primary-color-100 !important;
+    border-radius: 10px !important;
+    border: none !important;
+    padding: 0 10px !important;
+    max-width: 160px;
   }
 }
+
 .ing-tag-content {
-  height: 30px;
   display: flex;
   align-items: center;
-  gap: 4px; // 圖示、文字、叉叉的間距
-  padding: 2px 4px;
+  gap: 6px;
+  width: 100%;
+  overflow: hidden;
+  line-height: 1;
 
-  .ing-icon {
-    font-size: 16px;
-    display: flex;
-    align-items: center;
+  .ing-icon-img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    flex-shrink: 0;
+    margin-top: 1px;
   }
 
   .ing-name {
     color: $neutral-color-800;
     font-weight: 500;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    display: block;
+    font-size: 14px;
   }
 
   .tag-close-icon {
+    flex-shrink: 0;
     margin-left: 2px;
+    cursor: pointer;
     font-size: 12px;
     color: $neutral-color-400;
-    cursor: pointer;
-    transition: color 0.2s;
 
     &:hover {
-      color: $secondary-color-danger-400; // 滑鼠移上去變紅色
+      color: $secondary-color-danger-400;
     }
   }
 }
 
-
+.ghost-step {
+  opacity: 0.5;
+  background: $primary-color-100 !important;
+  border: 2px dashed $primary-color-400 !important;
+  border-radius: 12px;
+}
 </style>

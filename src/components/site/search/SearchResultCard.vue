@@ -1,67 +1,136 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { computed } from 'vue';
 import BaseTag from '@/components/common/BaseTag.vue';
+import BaseBtn from '@/components/common/BaseBtn.vue';
 
-const hotTags = ref(['義式料理', '披薩']);
+const props = defineProps({
+    recipe: {
+        type: Object,
+        required: true
+    },
+    recipeTags:{
+        type: Array,
+        default: () => []
+    }
+});
+
+const recipeImagePath = computed(() => {
+    return `img/recipes/${props.recipe.recipe_id}/cover.png`;
+})
 </script>
 
 <template>
     <div class="search-card">
+        
+        <div class="recipe-img">
+            <img :src="$parsePublicFile(recipeImagePath)" alt="recipe.recipe_title" />
+        </div>
         <div class="recipe-info">
-            <div class="recipe-img">
-                <img :src="$parsePublicFile('img/recipes/1/cover.png')" alt="" />
-            </div>
             <div class="title">
-                <h4 class="zh-h4">經典瑪格麗特披薩</h4>
+                <h4 class="zh-h3">{{recipe.recipe_title}}</h4>
                 <div class="tags-group">
-                    <BaseTag v-for="tag in hotTags"
-                    :key="tag"
-                    :text="tag"
+                    <BaseTag 
+                    v-for="tag in recipeTags"
+                    :key="tag.tag_id"
+                    :text="tag.tag_name"
                     class="tag-item"/>
                 </div>
+                <p class="p-p2">{{ recipe.recipe_descreption }}</p>
+            </div>
+            <div class="btn-group">
+                <BaseBtn title="食譜詳情" variant="solid"/>
+                <BaseBtn title="料理包詳情" variant="outline"/>
             </div>
         </div>
         
-        <div class="btn-group">
-            <BaseBtn title="食譜詳情" variant="solid"/>
-            <BaseBtn title="料理包詳情" variant="outline"/>
-        </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
-    .search-card{
+    .search-card {
         display: flex;
-        align-items: center; 
-        background-color: $neutral-color-100;
-        justify-content: space-between;
-        padding: 16px 50px 16px 16px;
-        margin: 20px 0;
-        .recipe-info{
-            height:160px;
+        
+        padding: 20px 0;
+        border-bottom: 1px solid $neutral-color-400;
+        width: 100%;
+
+        .recipe-img {
+            height: 160px;
+            min-width: 200px;
+            border-radius: $radius-base;
+            overflow: hidden;
+            margin-right: 20px;
             
-            display: flex;
-            align-items: center;
-            .recipe-img{
+            img {
+                width: 100%;
                 height: 100%;
-                width: 200px;
-                border-radius: $radius-base;
-                overflow: hidden;
-                margin-right: 20px;
-                img{
-                    height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        .recipe-info {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+
+            
+            .title {
+                margin-right: 30px;
+                .tags-group {
+                    display: flex;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                    margin: 8px 0;
                 }
             }
-            .title{
+            .btn-group{
                 display: flex;
                 flex-direction: column;
-                gap: 16px;
+                gap:10px;
             }
-            
-        }
-        .btn-group{
-            display: flex;
-            gap: 10px;
         }
     }
+@media screen and (max-width: 810px){
+
+}
+
+@media screen and (max-width: 810px) {
+    .search-card {
+        flex-direction: column;
+        align-items: stretch;
+        border-bottom: none;
+        margin-bottom: 30px;
+
+        .recipe-img {
+            width: 100%;
+            height: 200px;
+            margin-right: 0;
+            margin-bottom: 16px;
+        }
+
+        .recipe-info {
+            flex-direction: column;
+            .title {
+                margin-right: 0;
+                
+                .zh-h3 {
+                    font-size: 1.25rem;
+                }
+                
+                .p-p2 {
+                    display: none;
+                }
+            }
+
+            .btn-group {
+                display: flex;
+                gap: 10px;
+                margin-top: 16px;
+                flex-direction: row;
+            }
+        }
+    }
+}
 </style>
