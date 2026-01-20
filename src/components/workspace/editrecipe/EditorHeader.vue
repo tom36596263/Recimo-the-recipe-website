@@ -5,7 +5,7 @@ import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard
 const props = defineProps({
   modelValue: { type: Object, required: true },
   isEditing: { type: Boolean, default: false },
-  isAdaptMode: { type: Boolean, default: false } // 由父層傳入 true/false
+  isAdaptMode: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -18,27 +18,16 @@ const setDifficulty = (val) => {
   if (props.isEditing) updateField('difficulty', val);
 };
 
-// ================================
-// 🔢 自動加總步驟時間
-// ================================
 const autoTotalTime = computed(() => {
   if (!props.modelValue.steps) return 0;
-  return props.modelValue.steps.reduce((sum, step) => {
-    return sum + (Number(step.time) || 0);
-  }, 0);
+  return props.modelValue.steps.reduce((sum, step) => sum + (Number(step.time) || 0), 0);
 });
 
-// ================================
-// 👀 顯示用時間
-// ================================
 const displayTime = computed(() => {
   const manualTime = Number(props.modelValue.totalTime);
   return manualTime > 0 ? manualTime : autoTotalTime.value;
 });
 
-// ================================
-// ⭐ 監聽步驟時間變化
-// ================================
 watch(
   () => props.modelValue.steps,
   (newSteps) => {
@@ -50,20 +39,14 @@ watch(
   { deep: true }
 );
 
-// ================================
-// 📷 上傳封面圖
-// ================================
 const handleCoverUpload = (e) => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (evt) => {
-    updateField('coverImg', evt.target.result);
-  };
+  reader.onload = (evt) => updateField('coverImg', evt.target.result);
   reader.readAsDataURL(file);
 };
 
-// ✨ 確保小卡連動改編輸入內容
 const adaptRecipeData = computed(() => {
   return {
     ...props.modelValue,
@@ -78,7 +61,7 @@ const adaptRecipeData = computed(() => {
     <input ref="fileInput" type="file" class="hidden-input" accept="image/*" @change="handleCoverUpload" />
 
     <template v-if="isAdaptMode">
-      <div class="adapt-card-wrapper" @click="isEditing && $refs.fileInput.click()">
+      <div class="adapt-card-wrapper readonly-overlay">
         <AdaptRecipeCard :recipe="adaptRecipeData" />
       </div>
     </template>
@@ -132,7 +115,6 @@ const adaptRecipeData = computed(() => {
             <input type="number" class="inline-input" :value="modelValue.totalTime"
               @input="updateField('totalTime', $event.target.value)" :placeholder="autoTotalTime" />
             <span class="unit">分鐘</span>
-            <small v-if="!modelValue.totalTime && autoTotalTime > 0" class="auto-hint">(已自動加總)</small>
           </template>
           <span v-else class="value">{{ displayTime }} 分鐘</span>
         </div>
@@ -152,7 +134,6 @@ const adaptRecipeData = computed(() => {
           @input="updateField('description', $event.target.value)" class="desc-textarea p-p2" placeholder="請輸入說明..."
           maxlength="200"></textarea>
         <p v-else class="desc-display p-p2">{{ modelValue.description || '暫無簡介' }}</p>
-        <div v-if="isEditing" class="char-counter p-p3">{{ modelValue.description?.length || 0 }}/200</div>
       </div>
     </div>
   </section>
@@ -161,13 +142,11 @@ const adaptRecipeData = computed(() => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-/* 保留原有樣式，僅微調 row-adapt-inputs */
-
 .title-with-tag {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 4px; // 稍微拉開與下方區塊距離
+  margin-bottom: 4px;
 
   .adapt-tag {
     background: $primary-color-100;
@@ -183,14 +162,13 @@ const adaptRecipeData = computed(() => {
   display: none;
 }
 
-// ✨ 優化改編區域排版
 .row-adapt-inputs {
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  padding: 16px; // 增加內距讓輸入框不貼邊
-  background-color: $neutral-color-100; // 淡淡的底色區隔
+  padding: 16px;
+  background-color: $neutral-color-100;
   border-radius: 12px;
   border: 1px solid $neutral-color-100;
 
@@ -199,7 +177,7 @@ const adaptRecipeData = computed(() => {
 
     .form-input {
       width: 100%;
-      border-color: $neutral-color-400; // 讓邊框淡一點，視覺更輕盈
+      border-color: $neutral-color-400;
     }
   }
 }
@@ -226,12 +204,18 @@ const adaptRecipeData = computed(() => {
   position: relative;
   flex-shrink: 0;
   width: 100%;
-  cursor: pointer;
   border-radius: 8px;
   overflow: hidden;
 
   @media (min-width: 768px) {
     width: 320px;
+  }
+
+  // ✨ 玻璃罩樣式
+  &.readonly-overlay {
+    pointer-events: none; // 禁止所有滑鼠事件 (無法打字、無法點擊)
+    user-select: none; // 禁止選取文字
+    cursor: default;
   }
 }
 
@@ -258,10 +242,10 @@ const adaptRecipeData = computed(() => {
   border-radius: 8px;
   background-size: cover;
   background-position: center;
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 
   &.has-image {
     border-style: solid;
@@ -280,31 +264,26 @@ const adaptRecipeData = computed(() => {
   min-width: 0;
 }
 
-.row-title {
-  .title-input {
-    width: 100%;
-    border: none;
-    outline: none;
-    border-bottom: 1px solid $neutral-color-100;
-    background: transparent;
-  }
+.row-title .title-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid $neutral-color-100;
+  background: transparent;
+}
 
-  .title-display {
-    color: $primary-color-800;
-    margin: 0;
-  }
+.row-title .title-display {
+  color: $primary-color-800;
+  margin: 0;
 }
 
 .row-meta {
   display: flex;
-    gap: 30px;
-    align-items: center;
-    color: $neutral-color-800;
-    padding: 0 16px; // ✨ 增加跟輸入區塊一樣的左右 padding
-    margin-top: 4px; // 調整與上方灰色區塊的距離
-  
-    // 或者簡單一點，直接讓這排資訊稍微往右推一點點
-    // padding-left: 20px;
+  gap: 30px;
+  align-items: center;
+  color: $neutral-color-800;
+  padding: 0 16px;
+  margin-top: 4px;
 
   .inline-input {
     border: none;
@@ -345,7 +324,6 @@ const adaptRecipeData = computed(() => {
     background: $neutral-color-white;
   }
 
-  /* 改編模式時拉長 */
   &.is-adapt {
     min-height: 140px;
 
