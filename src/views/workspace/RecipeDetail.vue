@@ -39,8 +39,22 @@ const toggleRecipeLike = () => {
     localLikesOffset.value = isLiked.value ? 1 : 0;
 };
 
+// 返回編輯（或點擊編輯圖示時使用）
+const handleGoToEdit = () => {
+    if (isPreviewMode.value) {
+        // 預覽模式：直接返回編輯器，編輯器會從 Store 抓回 rawEditorData
+        router.push('/workspace/edit-recipe');
+    } else {
+        // 正式查看模式：帶上 editId 讓編輯器去 API 抓資料
+        router.push({
+            path: '/workspace/edit-recipe',
+            query: { editId: rawRecipe.value?.recipe_id }
+        });
+    }
+};
+
 const backToEdit = () => {
-    router.push('/workspace/edit-recipe');
+    handleGoToEdit();
 };
 
 const toggleWorkspaceTopBar = (show) => {
@@ -75,6 +89,7 @@ const fetchData = async () => {
         }
     }
 
+    // 非預覽模式才清空 Store
     recipeStore.previewData = null;
 
     try {
@@ -257,10 +272,8 @@ const handleServingsChange = (newVal) => { servings.value = newVal; };
 const isReportModalOpen = ref(false);
 const onReportSubmit = (data) => {
     console.log('收到檢舉內容:', data);
-    // 這裡通常會打 API 送出檢舉
-    isReportModalOpen.value = false; // 關閉燈箱
+    isReportModalOpen.value = false;
 };
-
 
 </script>
 
@@ -296,12 +309,12 @@ const onReportSubmit = (data) => {
                         <i-material-symbols-thumb-up-rounded v-if="isLiked" class="action-icon" />
                         <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
                         <span class="count-text">{{ displayRecipeLikes }}</span>
-                        
                     </div>
                     <i-material-symbols-share-outline class="action-icon" @click="handleShare" />
-                    <i-material-symbols:edit class="action-icon"
-                        @click="router.push(`/workspace/edit-recipe/${rawRecipe.recipe_id}`)" />
-                    <i-material-symbols:error-outline-rounded class="action-icon report-btn"
+
+                    <i-material-symbols-edit class="action-icon" @click="handleGoToEdit" />
+
+                    <i-material-symbols-error-outline-rounded class="action-icon report-btn"
                         @click="isReportModalOpen = true" />
                 </div>
             </div>
@@ -359,11 +372,7 @@ const onReportSubmit = (data) => {
 
     <RecipeReportModal v-model="isReportModalOpen" :targetData="{
         title: recipeIntroData?.title,
-
-        // 這裡就是關鍵！
-        // 把父元件的 .description 餵給 子元件需要的 content
         content: recipeIntroData?.description,
-
         userName: rawRecipe?.author_name || '未知作者',
         image: recipeIntroData?.image
     }" @submit="onReportSubmit" />
@@ -371,8 +380,9 @@ const onReportSubmit = (data) => {
     <div v-if="!isPreviewMode" class="col-12">
         <RelatedRecipes :currentId="route.params.id" />
     </div>
-
 </template>
+
+
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
