@@ -1,12 +1,18 @@
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router'
+
 import BaseTag from '@/components/common/BaseTag.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
 
 const props = defineProps({
     recipe: {
         type: Object,
-        required: true
+        default: null
+    },
+    product: {
+        type: Object,
+        default: null
     },
     recipeTags:{
         type: Array,
@@ -14,9 +20,38 @@ const props = defineProps({
     }
 });
 
+const router = useRouter();
+
 const recipeImagePath = computed(() => {
+    if(props.product && props.product.product_image){
+        const cover = props.product.product_image.find(img => img.is_cover);
+        return cover ? cover.image_url : props.product.product_image[0].image_url;
+    }
     return `img/recipes/${props.recipe.recipe_id}/cover.png`;
+});
+
+const displayTitle = computed(() => {
+    return props.product?.product_name || props.recipe?.recipe_title;
+});
+
+const displayDescription = computed(() => {
+    return props.product?.product_description || props.recipe?.recipe_descreption || '';
 })
+
+const goToRecipeDetail = () => {
+    if(!props.recipe) return;
+    router.push({
+        name: 'workspace-recipe-detail',
+        params: { id: props.recipe.recipe_id }
+    })
+}
+const goToProductDetail = () => {
+    if(!props.product) return;
+    router.push({
+        name: 'product-detail',
+        params: { id: props.product.product_id }
+    })
+}
 </script>
 
 <template>
@@ -30,6 +65,12 @@ const recipeImagePath = computed(() => {
                 <h4 class="zh-h3">{{recipe.recipe_title}}</h4>
                 <div class="tags-group">
                     <BaseTag 
+                        v-if="product?.product_category"
+                        :text="product.product_category"
+                        variant="accent"
+                        class="tag-item"
+                    />
+                    <BaseTag 
                     v-for="tag in recipeTags"
                     :key="tag.tag_id"
                     :text="tag.tag_name"
@@ -38,8 +79,16 @@ const recipeImagePath = computed(() => {
                 <p class="p-p2">{{ recipe.recipe_descreption }}</p>
             </div>
             <div class="btn-group">
-                <BaseBtn title="食譜詳情" variant="solid"/>
-                <BaseBtn title="料理包詳情" variant="outline"/>
+                <BaseBtn 
+                    v-if="recipe"
+                    title="食譜詳情" 
+                    variant="outline" 
+                    @click="goToRecipeDetail" />
+                <BaseBtn 
+                    v-if="product"
+                    title="料理包詳情" 
+                    variant="outline"
+                    @click="goToProductDetail"/>
             </div>
         </div>
         

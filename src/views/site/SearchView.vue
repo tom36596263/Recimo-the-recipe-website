@@ -12,7 +12,7 @@ const recipeTags = ref([]);
 const tags = ref([]);
 const searchQuery = ref('');
 
-const currentPage = ref(1);
+const currentPage = ref(1); 
 const pageSize = 5;
 
 onMounted(async () => {
