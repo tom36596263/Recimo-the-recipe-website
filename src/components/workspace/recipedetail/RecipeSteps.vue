@@ -82,12 +82,21 @@ const props = defineProps({
   width: 140px;
   height: 140px;
   flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 10px;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: 10px;
+    transition: transform 0.3s ease;
+    display: block;
+
+    &:hover {
+        transform: scale(1.15);
+        cursor: zoom-in; 
+      }
   }
 }
 
