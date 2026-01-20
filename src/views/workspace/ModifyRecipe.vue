@@ -10,54 +10,32 @@ const route = useRoute();
 /* =====================================================
     狀態定義
 ===================================================== */
-
-// 原始 / 當前編輯中的食譜資料
 const originalRecipe = ref({
     id: null,
     title: '',
     coverImg: '',
-    description: '' // 確保包含描述欄位
+    description: ''
 });
 
-// 改編卡片（目前用假資料）
-const variantItems = ref(
-    Array.from({ length: 7 }, (_, i) => ({
-        id: i + 1,
-        title: '極致減糖實驗',
-        adapt_title: '糖 -15g / 增加甜菊糖',
-        author: 'Recimo',
-        likes: 128,
-        coverImg: 'https://picsum.photos/400/300'
-    }))
-);
+// 這裡改為從 API 動態獲取
+const variantItems = ref([]);
 
-// 當前頁面模式：edit | adapt | create
 const mode = ref('create');
 
 /* =====================================================
-    核心初始化邏輯（唯一入口）
+    核心初始化邏輯
 ===================================================== */
-
 watch(
     () => [route.params.id, route.query.action, route.query.editId],
     async ([id, action, editId]) => {
-        // ① 編輯既有食譜
-        if (id) {
-            mode.value = 'edit';
-            await loadRecipeById(id);
-            return;
+        const targetId = id || editId;
+        if (targetId) {
+            mode.value = id ? 'edit' : 'adapt';
+            await loadRecipeData(targetId);
+        } else {
+            mode.value = 'create';
+            initEmptyRecipe();
         }
-
-        // ② 改編建立
-        if (action === 'adapt' && editId) {
-            mode.value = 'adapt';
-            await loadRecipeById(editId, { adapt: true });
-            return;
-        }
-
-        // ③ 全新建立
-        mode.value = 'create';
-        initEmptyRecipe();
     },
     { immediate: true }
 );
@@ -66,41 +44,59 @@ watch(
     資料處理方法
 ===================================================== */
 
-// 抓取食譜資料
-async function loadRecipeById(recipeId, options = {}) {
+async function loadRecipeData(recipeId) {
     try {
-        const res = await publicApi.get('data/recipe/recipes.json');
-        const found = res.data.find(
-            r => Number(r.recipe_id) === Number(recipeId)
-        );
+        // 同時抓取食譜主表、改編表
+        const [resRecipes, resAdaptations] = await Promise.all([
+            publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/recipe/recipe_adaptations.json')
+        ]);
 
-        if (!found) {
-            initEmptyRecipe();
-            return;
+        const allRecipes = resRecipes.data;
+        const allAdaptations = resAdaptations.data;
+
+        // 1. 處理原食譜資訊
+        const found = allRecipes.find(r => Number(r.recipe_id) === Number(recipeId));
+        if (found) {
+            let finalImg = found.recipe_image_url || '';
+            if (finalImg && !finalImg.startsWith('http') && !finalImg.startsWith('/img/recipes/')) {
+                finalImg = `/img/recipes/${found.recipe_id}/${finalImg}`;
+            }
+
+            originalRecipe.value = {
+                id: found.recipe_id,
+                title: found.recipe_title,
+                description: found.recipe_description || found.recipe_descreption || '',
+                coverImg: finalImg
+            };
+
+            // 2. 處理該食譜下方的「改編小卡」
+            // 找出所有 parent_recipe_id 等於目前這則食譜的改編項目
+            const filteredAdaptations = allAdaptations.filter(
+                a => Number(a.parent_recipe_id) === Number(recipeId)
+            );
+
+            variantItems.value = filteredAdaptations.map(adapt => {
+                // 找出改編食譜的原生資料 (為了拿作者、按讚數等)
+                const childInfo = allRecipes.find(r => Number(r.recipe_id) === Number(adapt.child_recipe_id));
+
+                return {
+                    id: adapt.child_recipe_id,
+                    title: childInfo?.recipe_title || '未知食譜',
+                    adapt_title: adapt.adaptation_title, // 使用 json 裡的 "洋蔥濃湯風牛丼"
+                    author: childInfo?.author_name || 'Recimo User',
+                    likes: childInfo?.likes_count || 0,
+                    // 優先使用改編專用圖，若無則用該食譜首圖
+                    coverImg: adapt.adaptation_image_url || childInfo?.recipe_image_url || 'https://picsum.photos/400/300'
+                };
+            });
         }
-
-        // --- 圖片路徑邏輯優化 ---
-        let finalImg = found.recipe_image_url || '';
-
-        // 如果不是 http 開頭，且還沒包含完整的路由路徑，才進行拼接
-        if (finalImg && !finalImg.startsWith('http') && !finalImg.startsWith('/img/recipes/')) {
-            finalImg = `/img/recipes/${found.recipe_id}/${finalImg}`;
-        }
-
-        originalRecipe.value = {
-            id: options.adapt ? null : found.recipe_id,
-            title: options.adapt
-                ? `${found.recipe_title}（改編）`
-                : found.recipe_title,
-            description: found.recipe_description || found.recipe_descreption || '',
-            coverImg: finalImg
-        };
     } catch (err) {
-        console.error('抓取食譜失敗', err);
+        console.error('抓取資料失敗', err);
         initEmptyRecipe();
     }
 }
-// 初始化空白食譜
+
 function initEmptyRecipe() {
     originalRecipe.value = {
         id: null,
@@ -108,15 +104,14 @@ function initEmptyRecipe() {
         coverImg: '',
         description: ''
     };
+    variantItems.value = [];
 }
 
 /* =====================================================
     UI 行為
 ===================================================== */
-
-// 點擊「創建食譜」（改編）
 function handleCreateNew() {
-    const sourceId = route.params.id || route.query.editId;
+    const sourceId = originalRecipe.value.id;
     if (!sourceId) return;
 
     router.push({
@@ -128,11 +123,9 @@ function handleCreateNew() {
     });
 }
 
-// 返回原食譜詳情
 function goBack() {
-    const backId = route.params.id || route.query.editId;
+    const backId = originalRecipe.value.id;
     if (!backId) return;
-
     router.push(`/workspace/recipe-detail/${backId}`);
 }
 </script>
