@@ -32,32 +32,27 @@ const recipeForm = ref({
   adapt_description: ''
 });
 
-// --- 輔助函式：將 HH:mm:ss 轉為 分鐘數 ---
-const parseToMinutes = (timeStr) => {
-  if (!timeStr || typeof timeStr !== 'string') return 0;
-  if (!timeStr.includes(':')) return parseInt(timeStr, 10) || 0;
-  const parts = timeStr.split(':');
-  const h = parseInt(parts[0], 10) || 0;
-  const m = parseInt(parts[1], 10) || 0;
-  return (h * 60) + m;
-};
-
 // --- 2. 核心邏輯 ---
 onMounted(async () => {
+  // 1. ✨ 關鍵修正：必須同時檢查 query.editId (這是從「創建食譜」按鈕傳過來的)
   const rawId = route.query.editId || route.params.id;
   const editIdFromUrl = rawId ? Number(rawId) : null;
   const isAdapt = route.query.action === 'adapt';
 
+  // 同步模式狀態
   isAdaptModeActive.value = isAdapt;
 
+  // 如果 Store 已經有快取資料，則優先使用（預覽返回時使用）
   if (recipeStore.rawEditorData) {
     recipeForm.value = { ...recipeStore.rawEditorData };
     recipeStore.rawEditorData = null;
     return;
   }
 
+  // 2. ✨ 如果有 ID，開始抓取遠端 JSON 資料
   if (editIdFromUrl) {
     try {
+      // 確保 API 同步抓取所有必要資料
       const [resR, resRecipeIng, resIngMaster, resS, resStepIng] = await Promise.all([
         publicApi.get('data/recipe/recipes.json'),
         publicApi.get('data/recipe/recipe_ingredient.json'),
@@ -71,7 +66,8 @@ onMounted(async () => {
 
       if (found) {
         if (isAdapt) {
-          recipeForm.value.recipe_id = null;
+          // --- 改編模式邏輯 ---
+          recipeForm.value.recipe_id = null; // 重要：新食譜不給 ID
           recipeForm.value.parent_recipe_id = recipeId;
           recipeForm.value.original_title = found.recipe_title;
           recipeForm.value.adapt_title = `${found.recipe_title} (改編版)`;
@@ -79,6 +75,7 @@ onMounted(async () => {
           recipeForm.value.description = found.recipe_description || found.recipe_descreption || '';
           recipeForm.value.coverImg = found.recipe_image_url;
         } else {
+          // --- 一般編輯模式邏輯 ---
           recipeForm.value.recipe_id = recipeId;
           recipeForm.value.title = found.recipe_title;
           recipeForm.value.description = found.recipe_description || found.recipe_descreption || '';
@@ -86,14 +83,19 @@ onMounted(async () => {
         }
 
         recipeForm.value.difficulty = found.recipe_difficulty || 1;
-        // 修正：確保總時間能正確轉換為分鐘或維持字串
-        recipeForm.value.totalTime = found.recipe_total_time || '00:30';
 
+        // --- ✨ 時間解析修正 (總時間) ---
+        const totalTimeStr = found.recipe_total_time || '00:30';
+        const tParts = totalTimeStr.split(':');
+        recipeForm.value.totalTime = (parseInt(tParts[0], 10) * 60) + (parseInt(tParts[1], 10) || 0);
+
+        // 圖片路徑轉換
         const rawCover = recipeForm.value.coverImg || '';
         if (rawCover && !rawCover.startsWith('http') && !rawCover.startsWith('/') && !rawCover.startsWith('data:')) {
           recipeForm.value.coverImg = `/img/recipes/${recipeId}/${rawCover}`;
         }
 
+        // --- 處理食材 (Ingredients) ---
         const links = resRecipeIng.data.filter(i => Number(i.recipe_id) === recipeId);
         recipeForm.value.ingredients = links.map(link => {
           const master = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
@@ -107,24 +109,32 @@ onMounted(async () => {
           };
         });
 
+        // --- 處理步驟 (Steps) ---
         const stepsData = resS.data.filter(s => Number(s.recipe_id) === recipeId).sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
         recipeForm.value.steps = stepsData.map((s, index) => {
           let rawImg = s.step_image_url || s.image || '';
           let finalImg = (rawImg && !rawImg.startsWith('http') && !rawImg.startsWith('data:') && !rawImg.startsWith('/'))
             ? `/img/recipes/${recipeId}/steps/${rawImg}`
             : rawImg;
+
+          // --- ✨ 時間解析修正 (步驟時間) ---
+          const stepTimeStr = s.step_total_time || '00:00:00';
+          const sParts = stepTimeStr.split(':');
+          const stepMinutes = (parseInt(sParts[0], 10) * 60) + (parseInt(sParts[1], 10) || 0);
+
           return {
             id: isAdapt ? null : (s.step_id || `s-${recipeId}-${index}`),
             title: s.step_title || '',
             content: s.step_content || '',
             image: finalImg,
-            // ✨ 關鍵修正：解析 HH:mm:ss 為純分鐘數給編輯器
-            time: parseToMinutes(s.step_total_time),
+            time: stepMinutes,
             tags: resStepIng.data.filter(si => Number(si.step_id) === Number(s.step_id)).map(si => si.ingredient_id)
           };
         });
 
-        console.log('✅ 資料加載成功');
+        console.log('✅ 資料加載成功，目前模式：', isAdapt ? '改編' : '一般編輯');
+      } else {
+        console.warn('❌ 找不到該 ID 的食譜資料');
       }
     } catch (err) {
       console.error("❌ 載入食譜失敗:", err);
@@ -175,7 +185,8 @@ provide('isEditing', isEditing);
   <div :class="['recipe-editor-page', { 'is-editing': isEditing }]">
     <main class="editor-main-layout container">
       <div class="header-section">
-        <EditorHeader v-model="recipeForm" :is-editing="isEditing" :is-adapt-mode="isAdaptModeActive" />
+        <EditorHeader v-model="recipeForm" :is-editing="isEditing"
+          :is-adapt-mode="!!(route.params.id || route.query.editId)" />
       </div>
 
       <div class="recipe-main-content">
@@ -204,7 +215,6 @@ provide('isEditing', isEditing);
 </template>
 
 <style lang="scss" scoped>
-/* 樣式保持不變... */
 @import '@/assets/scss/abstracts/_color.scss';
 
 .recipe-editor-page {
