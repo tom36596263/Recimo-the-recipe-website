@@ -318,7 +318,7 @@ onMounted(() => {
     justify-content: center;
 
     .section-icon {
-        font-size: 28px;
+        font-size: 24px;
         color: $primary-color-700;
     }
 
@@ -337,12 +337,12 @@ onMounted(() => {
     gap: 4px;
 }
 
-.section-title {
-    margin-bottom: 0;
-    color: $neutral-color-800;
-    font-size: 24px;
-    font-weight: 600;
-}
+// .section-title {
+//     margin-bottom: 0;
+//     color: $neutral-color-800;
+//     font-size: 24px;
+//     font-weight: 600;
+// }
 
 .count-badge {
     font-size: 14px;
