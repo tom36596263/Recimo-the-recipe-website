@@ -87,7 +87,7 @@ onMounted(async () => {
                     <i-material-symbols-arrow-back-ios-new />
                     返回週計畫
                 </button>
-                <h2 class="date-title">{{ displayDate }} 編輯中</h2>
+                <h2 class="date-title">{{ displayDate }}</h2>
             </div>
 
             <div class="header-right">
@@ -96,7 +96,7 @@ onMounted(async () => {
                         目前總熱量：<span class="value">{{ currentTotalKcal }}</span> kcal
                     </div>
                     <div class="kcal-item target">
-                        目標熱量：<input type="number" placeholder="點擊設定" class="kcal-input" /> kcal
+                        目標熱量：<input type="number" class="kcal-input p-p1" /> kcal
                     </div>
                 </div>
             </div>
@@ -156,7 +156,7 @@ onMounted(async () => {
     gap: 16px;
     animation: fadeIn 0.3s ease;
 
-    /* --- 頂部標題列 --- */
+    /* 頂部標題列 */
     &__header {
         flex-shrink: 0; // 防止標題列被壓縮
         display: flex;
@@ -215,14 +215,12 @@ onMounted(async () => {
 
             .kcal-input {
                 border: none;
-                border-bottom: 1px solid $neutral-color-400;
-                width: 70px;
+                width: 50px;
                 text-align: center;
                 outline: none;
                 color: $primary-color-800;
                 font-weight: bold;
                 background: transparent;
-                font-size: 1.1rem;
 
                 /* 隱藏 Chrome, Safari, Edge 的數字調節箭頭 */
                 &::-webkit-outer-spin-button,
@@ -230,9 +228,6 @@ onMounted(async () => {
                     -webkit-appearance: none;
                     margin: 0;
                 }
-
-                /* 隱藏 Firefox 的數字調節箭頭 */
-                -moz-appearance: textfield;
             }
         }
     }
@@ -279,13 +274,11 @@ onMounted(async () => {
                 border: 1px dashed $neutral-color-400;
                 border-radius: 8px;
                 display: flex;
-                /* 改為頂部對齊，解決內容過多時標題被裁切無法看全的問題 */
                 align-items: flex-start;
                 justify-content: flex-start;
                 overflow-y: auto;
-
-                /* 隱藏捲動軸但保留滑動功能 */
                 scrollbar-width: none;
+                height: auto;
 
                 &::-webkit-scrollbar {
                     display: none;
@@ -391,7 +384,7 @@ onMounted(async () => {
             }
         }
 
-        /* 食譜清單捲動容器 */
+        // /* 食譜清單捲動容器 */
         .recipe-scroll-area {
             flex: 1;
             overflow-y: auto;

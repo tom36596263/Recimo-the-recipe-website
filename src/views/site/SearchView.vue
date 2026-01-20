@@ -8,28 +8,39 @@ import EmptyState from '@/components/site/RecipeOverview/NoResult.vue'
 import PageBtn from '@/components/common/PageBtn.vue'
 
 const recipes = ref([]);
+const products = ref([]);
 const recipeTags = ref([]);
 const tags = ref([]);
 const searchQuery = ref('');
 
-const currentPage = ref(1);
+const currentPage = ref(1); 
 const pageSize = 5;
+const isLoading = ref(true);
 
 onMounted(async () => {
     try{
-        const [resRecipes, resRecipeTags, resTags ] = await Promise.all([
+        const [resRecipes,resProducts, resRecipeTags, resTags ] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/mall/products.json'),
             publicApi.get('data/recipe/recipe_tag.json'),
             publicApi.get('data/recipe/tags.json')
         ]);
         recipes.value = resRecipes.data;
+        products.value = resProducts.data;
         recipeTags.value = resRecipeTags.data;
         tags.value = resTags.data;
 
     }catch(err){
         console.error("載入失敗", err);
+    }finally {
+        isLoading.value = false;
     }
 });
+
+const getProductForRecipe = (recipe) => {
+    if(!recipe.linked_product_id) return null;
+    return products.value.find(p => p.product_id === recipe.linked_product_id);
+}
 
 const getRecipeTags = (recipeId) => {
     const targetTagIds = recipeTags.value
@@ -38,6 +49,7 @@ const getRecipeTags = (recipeId) => {
     return tags.value.filter(t => targetTagIds.includes(t.tag_id));
 };
 
+//篩選
 const filteredRecipes = computed(() => {
     const query = searchQuery.value.trim().toLowerCase();
     if(!query) return recipes.value;
@@ -49,13 +61,35 @@ const filteredRecipes = computed(() => {
 
     return recipes.value.filter(recipe => {
         const titleMatch = recipe.recipe_title.toLowerCase().includes(query);
+
+        const product = getProductForRecipe(recipe);
+        const productMatch = product? product.product_name.toLowerCase().includes(query):false;
+        const productCategoryMatch = product? product.product_category.toLowerCase().includes(query):false;
         const tagMatch = recipeTags.value.some(rt => 
             rt.recipe_id === recipe.recipe_id && matchTagIds.includes(rt.tag_id)
         );
-        return titleMatch || tagMatch;
+        return titleMatch || productMatch || productCategoryMatch || tagMatch;
     });
 });
+//計算食譜、料理包總數
+const displayCounts = computed(() => {
+    const query = searchQuery.value.trim().toLowerCase();
+    if(!query){
+        return{
+            recipes: recipes.value.length,
+            products: products.value.length
+        };
+    }
+    const currentResults = filteredRecipes.value;
+    const recipeCount = currentResults.length;
+    const productCount = currentResults.filter(recipe => recipe.linked_product_id !== null).length;
+    return{
+        recipes: recipeCount,
+        products: productCount
+    }
+})
 
+//計算頁數
 const totalPages = computed(() => {
     return Math.ceil(filteredRecipes.value.length/pageSize);
 });
@@ -87,15 +121,22 @@ watch(searchQuery, () => {
     </div>
     <div class="container">
         <div v-if="filteredRecipes.length > 0" class="row">
-            <div class="col-12">
-                <h3 class="zh-h3" v-if="searchQuery">「{{searchQuery}}」搜尋結果({{ filteredRecipes.length }})</h3>
-                <h3 class="zh-h3" v-else>所有食譜({{ filteredRecipes.length }})</h3>
+            <div class="col-12 result-title">
+                <h3 class="zh-h3" v-if="searchQuery">「{{searchQuery}}」搜尋結果</h3>
+                <h3 class="zh-h3" v-else>所有好料理</h3>
+                <div class="count-badge-group p-p2">
+                    <span>{{ displayCounts.recipes }}筆食譜</span>
+                    <span> | </span>
+                    <span>{{ displayCounts.products }}筆料理包</span>
+                </div>
+
             </div>
             <div class="col-12" v-if="!isLoading">
                 <SearchResultCard 
                 v-for="item in paginateRecipes" 
                 :key="item.recipe_id"
-                :recipe="item" 
+                :recipe="item"
+                :product="getProductForRecipe(item)" 
                 :recipeTags="getRecipeTags(item.recipe_id)" />
             </div>
         </div>
@@ -125,5 +166,10 @@ watch(searchQuery, () => {
 <style lang="scss" scoped>
     .page-btn{
         margin: 30px auto;
+    }
+    .result-title{
+        display: flex;
+        align-items: end;
+        gap: 12px;
     }
 </style>
