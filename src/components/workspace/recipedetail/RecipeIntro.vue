@@ -260,6 +260,9 @@ const onModalSubmit = (data) => {
         padding: 20px;
         line-height: 2.1;
         color: $neutral-color-800;
+        inline-size: 100%; 
+        overflow-wrap: break-word; 
+        white-space: pre-wrap; 
     }
 }
 </style>
