@@ -7,7 +7,7 @@ import ProductCard from '@/components/mall/ProductCard.vue';
 // ==========================================
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
-// 根據原本 SCSS 的斷點數值來設定
+
 const swiperBreakpoints = {
     390: {
         slidesPerView: 1.5,

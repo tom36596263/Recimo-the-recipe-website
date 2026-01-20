@@ -1,49 +1,168 @@
 <script setup>
 import { ref, provide, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useRecipeStore } from '@/stores/recipeEditor';
+import { publicApi } from '@/utils/publicApi';
 
 import EditorHeader from '@/components/workspace/editrecipe/EditorHeader.vue';
 import IngredientEditor from '@/components/workspace/editrecipe/IngredientEditor.vue';
 import StepEditor from '@/components/workspace/editrecipe/StepEditor.vue';
 
-const isEditing = ref(true);
 const router = useRouter();
+const route = useRoute();
 const recipeStore = useRecipeStore();
-const isPublished = ref(false);
 
-// --- 1. 食譜表單資料 (初始化為空) ---
+const isEditing = ref(true);
+const isPublished = ref(false);
+const isAdaptModeActive = ref(false);
+
+// --- 1. 食譜表單資料 ---
 const recipeForm = ref({
+  recipe_id: null,
+  parent_recipe_id: null,
   title: '',
   description: '',
   coverImg: null,
   difficulty: 1,
   totalTime: '00:00',
   ingredients: [],
-  steps: []
+  steps: [],
+  original_title: '',
+  adapt_title: '',
+  adapt_description: ''
 });
 
-// --- 2. 生命週期 ---
-onMounted(() => {
+// --- 2. 核心邏輯 ---
+onMounted(async () => {
+  // 1. ✨ 關鍵修正：必須同時檢查 query.editId (這是從「創建食譜」按鈕傳過來的)
+  const rawId = route.query.editId || route.params.id;
+  const editIdFromUrl = rawId ? Number(rawId) : null;
+  const isAdapt = route.query.action === 'adapt';
+
+  // 同步模式狀態
+  isAdaptModeActive.value = isAdapt;
+
+  // 如果 Store 已經有快取資料，則優先使用（預覽返回時使用）
   if (recipeStore.rawEditorData) {
     recipeForm.value = { ...recipeStore.rawEditorData };
+    recipeStore.rawEditorData = null;
+    return;
+  }
+
+  // 2. ✨ 如果有 ID，開始抓取遠端 JSON 資料
+  if (editIdFromUrl) {
+    try {
+      // 確保 API 同步抓取所有必要資料
+      const [resR, resRecipeIng, resIngMaster, resS, resStepIng] = await Promise.all([
+        publicApi.get('data/recipe/recipes.json'),
+        publicApi.get('data/recipe/recipe_ingredient.json'),
+        publicApi.get('data/recipe/ingredients.json'),
+        publicApi.get('data/recipe/steps.json'),
+        publicApi.get('data/recipe/step_ingredients.json')
+      ]);
+
+      const recipeId = editIdFromUrl;
+      const found = resR.data.find(r => Number(r.recipe_id) === recipeId);
+
+      if (found) {
+        if (isAdapt) {
+          // --- 改編模式邏輯 ---
+          recipeForm.value.recipe_id = null; // 重要：新食譜不給 ID
+          recipeForm.value.parent_recipe_id = recipeId;
+          recipeForm.value.original_title = found.recipe_title;
+          recipeForm.value.adapt_title = `${found.recipe_title} (改編版)`;
+          recipeForm.value.title = recipeForm.value.adapt_title;
+          recipeForm.value.description = found.recipe_description || found.recipe_descreption || '';
+          recipeForm.value.coverImg = found.recipe_image_url;
+        } else {
+          // --- 一般編輯模式邏輯 ---
+          recipeForm.value.recipe_id = recipeId;
+          recipeForm.value.title = found.recipe_title;
+          recipeForm.value.description = found.recipe_description || found.recipe_descreption || '';
+          recipeForm.value.coverImg = found.recipe_image_url;
+        }
+
+        recipeForm.value.difficulty = found.recipe_difficulty || 1;
+        recipeForm.value.totalTime = found.recipe_total_time || '00:30';
+
+        // 圖片路徑轉換
+        const rawCover = recipeForm.value.coverImg || '';
+        if (rawCover && !rawCover.startsWith('http') && !rawCover.startsWith('/') && !rawCover.startsWith('data:')) {
+          recipeForm.value.coverImg = `/img/recipes/${recipeId}/${rawCover}`;
+        }
+
+        // --- 處理食材 (Ingredients) ---
+        const links = resRecipeIng.data.filter(i => Number(i.recipe_id) === recipeId);
+        recipeForm.value.ingredients = links.map(link => {
+          const master = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
+          return {
+            id: link.ingredient_id,
+            name: master?.ingredient_name || '',
+            amount: link.amount,
+            unit: link.unit_name || master?.unit_name || '份',
+            note: link.remark || '',
+            kcal_per_100g: master?.kcal_per_100g || 0
+          };
+        });
+
+        // --- 處理步驟 (Steps) ---
+        const stepsData = resS.data.filter(s => Number(s.recipe_id) === recipeId).sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
+        recipeForm.value.steps = stepsData.map((s, index) => {
+          let rawImg = s.step_image_url || s.image || '';
+          let finalImg = (rawImg && !rawImg.startsWith('http') && !rawImg.startsWith('data:') && !rawImg.startsWith('/'))
+            ? `/img/recipes/${recipeId}/steps/${rawImg}`
+            : rawImg;
+          return {
+            id: isAdapt ? null : (s.step_id || `s-${recipeId}-${index}`),
+            title: s.step_title || '',
+            content: s.step_content || '',
+            image: finalImg,
+            time: parseInt(s.step_total_time) || 0,
+            tags: resStepIng.data.filter(si => Number(si.step_id) === Number(s.step_id)).map(si => si.ingredient_id)
+          };
+        });
+
+        console.log('✅ 資料加載成功，目前模式：', isAdapt ? '改編' : '一般編輯');
+      } else {
+        console.warn('❌ 找不到該 ID 的食譜資料');
+      }
+    } catch (err) {
+      console.error("❌ 載入食譜失敗:", err);
+    }
   }
 });
 
+// --- 3. 預覽與儲存 ---
 const handlePreview = () => {
+  const previewForm = JSON.parse(JSON.stringify(recipeForm.value));
+
+  if (recipeForm.value.coverImg instanceof File) {
+    previewForm.coverImg = URL.createObjectURL(recipeForm.value.coverImg);
+  }
+
+  recipeForm.value.steps.forEach((step, index) => {
+    if (step.image instanceof File) {
+      previewForm.steps[index].image = URL.createObjectURL(step.image);
+    }
+  });
+
   recipeStore.rawEditorData = { ...recipeForm.value };
-  recipeStore.setPreviewFromEditor(recipeForm.value);
-  router.push({ path: '/workspace/recipe-detail/0', query: { mode: 'preview' } });
+  recipeStore.setPreviewFromEditor(previewForm);
+
+  const currentId = route.query.editId || route.params.id || 0;
+
+  router.push({
+    path: `/workspace/recipe-detail/${currentId}`,
+    query: {
+      mode: 'preview',
+      editId: currentId
+    }
+  });
 };
 
 const handleSave = () => {
-  const actionText = isPublished.value ? '公開發布' : '儲存編輯';
-  const confirmMessage = isPublished.value
-    ? `確定要公開發布《${recipeForm.value.title || '這份食譜'}》嗎？`
-    : '確定要儲存目前的編輯內容嗎？';
-
-  if (window.confirm(confirmMessage)) {
-    alert(isPublished.value ? '🎉 食譜已成功發布！' : '💾 食譜已成功暫存！');
+  if (window.confirm('確定要儲存目前的編輯內容嗎？')) {
+    alert('💾 食譜已成功儲存！');
     recipeStore.rawEditorData = null;
     router.push('/workspace');
   }
@@ -56,7 +175,8 @@ provide('isEditing', isEditing);
   <div :class="['recipe-editor-page', { 'is-editing': isEditing }]">
     <main class="editor-main-layout container">
       <div class="header-section">
-        <EditorHeader v-model="recipeForm" :is-editing="isEditing" />
+        <EditorHeader v-model="recipeForm" :is-editing="isEditing"
+          :is-adapt-mode="!!(route.params.id || route.query.editId)" />
       </div>
 
       <div class="recipe-main-content">
@@ -73,9 +193,7 @@ provide('isEditing', isEditing);
       <footer class="editor-footer">
         <div class="footer-center-group">
           <BaseBtn title="預覽" variant="outline" :width="100" @click="handlePreview" class="preview-btn" />
-
           <BaseBtn :title="isPublished ? '確認發布' : '完成編輯'" :width="200" @click="handleSave" class="save-btn" />
-
           <div class="publish-toggle">
             <input type="checkbox" id="publish-check" v-model="isPublished" />
             <label for="publish-check" class="p-p2">公開發布</label>
@@ -125,7 +243,7 @@ provide('isEditing', isEditing);
     justify-content: center;
     gap: 20px;
     width: 100%;
-    max-width: 600px; // 限制群組寬度讓它看起來更像在中心
+    max-width: 600px;
 
     @media screen and (max-width: 1024px) {
       gap: 12px;
@@ -162,7 +280,6 @@ provide('isEditing', isEditing);
   border-radius: 8px !important;
 }
 
-// 預覽按鈕：固定較小寬度
 .preview-btn {
   width: 100px !important;
   min-width: 100px !important;
@@ -174,7 +291,6 @@ provide('isEditing', isEditing);
   }
 }
 
-// 發布按鈕：視覺重點
 .save-btn {
   width: 200px !important;
 }

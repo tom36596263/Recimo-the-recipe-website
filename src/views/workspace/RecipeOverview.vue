@@ -139,8 +139,6 @@ const recipes = computed(() => {
 const handleEmptyAction = (action) => {
     if (action === 'recipes') {
         activeFilters.value = { time: "全部", difficulty: "全部", mealPortions: "全部", kcal: "全部" };
-    } else if (action === 'go-kitchen') {
-        router.push('/inspiration-kitchen');
     }
 };
 </script>
@@ -167,8 +165,8 @@ const handleEmptyAction = (action) => {
                 title="找不到符合條件的食譜"
                 description="推薦您前往「靈感廚房」用食材找食譜喔!"
                 :buttons="[
-                    { title: '查看所有食譜', variant: 'solid', emit: 'recipes' },
-                    { title: '前往靈感廚房', variant: 'outline', emit: 'go-kitchen' }
+                    { title: '查看所有食譜', variant: 'outline', emit: 'recipes' },
+                    // { title: '前往靈感廚房', variant: 'outline', emit: 'go-kitchen' }
                 ]"
                 @button-click="handleEmptyAction"
             />
