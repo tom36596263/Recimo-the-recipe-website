@@ -44,14 +44,6 @@ const handleAdd = () => {
                 <BaseTag :text="`難度：${recipe.recipe_difficulty}`" />
             </div>
         </div>
-
-        <footer>
-
-
-            <div class="btn-group">
-                <BaseBtn title="加入計畫" variant="solid" height="30" @click.stop="handleAdd" class="btn" />
-            </div>
-        </footer>
     </div>
 </template>
 
@@ -63,11 +55,6 @@ const handleAdd = () => {
     background-color: $neutral-color-white;
     cursor: pointer;
     transition: .3s ease;
-
-    &:hover {
-        box-shadow: 0 8px 16px rgba($neutral-color-black, 0.08);
-        border-color: $primary-color-400;
-    }
 
     .card-header {
         overflow: hidden;
@@ -117,47 +104,9 @@ const handleAdd = () => {
             flex-wrap: wrap;
         }
     }
-
-    footer {
-        padding: 0 16px 16px 16px;
-        justify-content: space-between;
-        display: flex;
-        align-items: center;
-
-        .btn-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .personal-info {
-            display: flex;
-            align-items: center;
-
-            .p-p1 {
-                margin-right: 6px;
-                color: $neutral-color-800;
-            }
-        }
-
-        .personal-img {
-            width: 24px;
-            height: 24px;
-            margin-right: 8px;
-            border-radius: $radius-pill;
-            border: 1px solid $neutral-color-700;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            img {
-                width: 16px; // 配合 Recimo logo 大小
-            }
-        }
-    }
 }
 
-// 響應式調整，確保小螢幕下按鈕不跑版
+// RWD，確保小螢幕下按鈕不跑版
 @media screen and (max-width: 1300px) {
     .recipe-card-lg {
         footer {
