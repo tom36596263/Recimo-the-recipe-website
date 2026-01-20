@@ -7,36 +7,48 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'apply']);
 
-// 1. 資料狀態
 const userData = ref({
-    gender: 'female',
-    age: 25,
-    height: 170,
-    weight: 65,
+    gender: 'female', // 性別可以留一個預設，因為這必選其一
+    age: null,
+    height: null,
+    weight: null,
     activity: '1.2',
     goal: '0'
 });
 
 const calculatedResult = ref(null);
+const isSubmitted = ref(false); // 用於驗證狀態顯示
 
 const handleClose = () => {
     emit('update:modelValue', false);
 };
 
-// 2. 計算邏輯
 const handleCalculate = () => {
+    isSubmitted.value = true;
     const { gender, age, height, weight, activity, goal } = userData.value;
+
+    // 必填檢查
+    if (!age || !height || !weight) {
+        // 可以在這裡加入一個簡單的 toast 提示
+        return;
+    }
+
+    // 數值合理性
+    if (age < 1 || age > 110 || height < 50 || weight < 10) {
+        alert("請輸入合理的身體數據");
+        return;
+    }
+
+    // 執行 BMR 計算
     let bmr = (gender === 'male')
-        ? (10 * weight + 6.25 * height - 5 * age + 5)
-        : (10 * weight + 6.25 * height - 5 * age - 161);
+        ? (10 * Number(weight) + 6.25 * Number(height) - 5 * Number(age) + 5)
+        : (10 * Number(weight) + 6.25 * Number(height) - 5 * Number(age) - 161);
 
+    //計算總消耗量 (TDEE) 與 目標調整
     const total = (bmr * Number(activity)) + Number(goal);
-    calculatedResult.value = Math.round(total);
-};
 
-const handleApply = () => {
-    emit('apply', calculatedResult.value);
-    handleClose();
+    // 確保熱量不會低於基礎生存需求
+    calculatedResult.value = Math.max(1000, Math.round(total));
 };
 </script>
 
@@ -59,24 +71,34 @@ const handleApply = () => {
 
                     <div class="calculator-fields">
                         <div class="row">
-                            <div class="field-item">
+                            <div class="field-item gender-field">
                                 <span class="label">性別：</span>
-                                <div class="radio-group">
-                                    <label><input type="radio" v-model="userData.gender" value="female"> 女</label>
-                                    <label><input type="radio" v-model="userData.gender" value="male"> 男</label>
+                                <div class="radio-list horizontal">
+                                    <label class="radio-item">
+                                        <input type="radio" v-model="userData.gender" value="female"> 女
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" v-model="userData.gender" value="male"> 男
+                                    </label>
                                 </div>
                             </div>
                             <div class="field-item">
                                 <span class="label">年齡：</span>
-                                <input type="number" v-model="userData.age" class="round-input">
+                                <input type="number" v-model="userData.age" class="form-input p-p1"
+                                    :class="(isSubmitted && !userData.age) ? 'is-error' : 'is-success'"
+                                    placeholder="年齡" />
                             </div>
                             <div class="field-item">
                                 <span class="label">身高：</span>
-                                <input type="number" v-model="userData.height" class="round-input">
+                                <input type="number" v-model="userData.height" class="form-input p-p1"
+                                    :class="(isSubmitted && !userData.height) ? 'is-error' : 'is-success'"
+                                    placeholder="CM" />
                             </div>
                             <div class="field-item">
                                 <span class="label">體重：</span>
-                                <input type="number" v-model="userData.weight" class="round-input">
+                                <input type="number" v-model="userData.weight" class="form-input p-p1"
+                                    :class="(isSubmitted && !userData.weight) ? 'is-error' : 'is-success'"
+                                    placeholder="KG" />
                             </div>
                         </div>
 
@@ -115,8 +137,7 @@ const handleApply = () => {
                     <div class="result-content">
                         <p class="res-label">建議熱量：</p>
                         <h2 class="res-value">{{ calculatedResult }} <span class="unit">kcal</span></h2>
-
-                        <BaseBtn title="採用建議" width="50%" height="40" @click="handleApply" />
+                        <BaseBtn title="採用建議" width="40%" height="40" @click="handleApply" />
                     </div>
                 </div>
             </div>
@@ -138,8 +159,8 @@ const handleApply = () => {
 
 .modal-card {
     background: #fff;
-    width: auto;
-    max-width: 600px;
+    width: 95%;
+    max-width: 650px;
     height: auto;
     border-radius: 30px;
     position: relative;
@@ -174,6 +195,10 @@ const handleApply = () => {
     .modal-title {
         color: $primary-color-700;
         margin-bottom: 10px;
+        font-size: clamp(18px, 4.5vw, 24px);
+        line-height: 1.4;
+        white-space: normal;
+        word-break: break-all;
     }
 
     .green-divider {
@@ -187,13 +212,17 @@ const handleApply = () => {
     color: $neutral-color-800;
     margin-bottom: 30px;
     line-height: 1.7;
+    font-size: clamp(13px, 3.2vw, 16px);
+    white-space: normal;
+    word-break: break-all;
 }
 
 .calculator-fields {
     .row {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 20px;
+        flex-wrap: nowrap;
     }
 
     .mt-15 {
@@ -208,6 +237,7 @@ const handleApply = () => {
         display: flex;
         align-items: center;
         gap: 8px;
+        flex-shrink: 0;
 
         .label {
             font-size: 14px;
@@ -215,31 +245,54 @@ const handleApply = () => {
             font-weight: 500;
             white-space: nowrap;
         }
-    }
 
-    .radio-group {
-        display: flex;
-        gap: 12px;
-
-        label {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            font-size: 14px;
+        .form-input {
+            width: 70px;
         }
     }
 
-    .round-input {
-        width: 75px;
+    .radio-list {
+        display: flex;
+        gap: 12px;
+
+        &.horizontal {
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 14px;
+
+            input {
+                accent-color: $primary-color-700;
+                width: 18px;
+                height: 18px;
+            }
+        }
+    }
+
+    .form-input {
         height: 38px;
-        border-radius: 15px;
+        border-radius: 12px;
         border: 1px solid $neutral-color-400;
         text-align: center;
         outline: none;
+        transition: border-color 0.2s;
 
-        &:focus {
-            border-color: $primary-color-700;
+        &.is-success {
+            border-color: $neutral-color-400;
+
+            &:focus {
+                border-color: $primary-color-700;
+            }
+        }
+
+        &.is-error {
+            border-color: $secondary-color-danger-400;
         }
     }
 
@@ -265,11 +318,9 @@ const handleApply = () => {
         border-radius: 15px;
         border: 1px solid $neutral-color-400;
         padding: 0 30px 0 15px;
-        outline: none;
-        appearance: none;
         background: #fff;
-        cursor: pointer;
         font-size: 14px;
+        appearance: none;
 
         &:focus {
             border-color: $primary-color-700;
@@ -289,21 +340,18 @@ const handleApply = () => {
     height: 240px;
     position: relative;
     flex-shrink: 0;
-    margin-bottom: -1px;
 }
 
 .result-content {
-    position: relative;
-    z-index: 5;
-    width: 100%;
-    height: 105%;
+    width: 110%;
+    margin-left: -5%;
+    height: 110%;
     background-image: url('@/assets/images/recipe/cam.jpg');
     background-size: cover;
     background-position: center;
     border-radius: 0 0 30px 30px;
     background-blend-mode: multiply;
     background-color: rgba(0, 0, 0, 0.45);
-
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -313,7 +361,6 @@ const handleApply = () => {
     .res-label {
         font-size: 18px;
         margin-bottom: 8px;
-        font-weight: 300;
     }
 
     .res-value {
@@ -324,63 +371,69 @@ const handleApply = () => {
         .unit {
             font-size: 22px;
             margin-left: 8px;
-            font-weight: 400;
         }
     }
 }
 
 /* =========================
-   RWD - Mobile Only
-   不影響 desktop
+   RWD - Mobile
    ========================= */
-@media (max-width: 480px) {
+@media (max-width: 580px) {
     .modal-card {
-        width: calc(100% - 24px);
-        max-width: none;
-        border-radius: 20px;
+        width: 92%;
+        border-radius: 24px;
     }
 
     .form-container {
-        padding: 28px 20px 24px;
-    }
-
-    .advice-text {
-        font-size: 14px;
-        margin-bottom: 22px;
+        padding: 35px 25px 25px;
     }
 
     .calculator-fields {
         .row {
             flex-direction: column;
-            align-items: stretch;
-            gap: 12px;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
         .field-item {
             width: 100%;
-            justify-content: space-between;
+            /* 改為靠左排列，標籤與輸入框分站兩側 */
+            justify-content: flex-start;
+            flex-shrink: 1;
+
+            /* 輸入框佔滿剩餘空間 */
+            .form-input {
+                flex: 1;
+                width: auto !important;
+                text-align: left;
+                padding-left: 15px;
+            }
+
+            /* 性別靠左，與標籤保持間距 */
+            &.gender-field {
+                justify-content: flex-start;
+                gap: 15px;
+                padding: 5px 0;
+            }
         }
 
-        .round-input {
-            width: 100%;
-            text-align: left;
-            padding-left: 14px;
+        /* 下拉選單佔滿剩餘空間 */
+        .select-wrapper {
+            flex: 1;
+            width: auto;
         }
 
-        .radio-group {
-            justify-content: flex-end;
-        }
     }
 
     .result-section {
-        height: 200px;
+        height: 220px;
     }
 
     .result-content {
-        border-radius: 0 0 20px 20px;
+        border-radius: 0 0 24px 24px;
 
         .res-value {
-            font-size: 44px;
+            font-size: 48px;
         }
     }
 }
