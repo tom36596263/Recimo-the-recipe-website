@@ -1,122 +1,122 @@
 [
   {
     "id": 1,
-    "url": "/img/remove-bg-ingredients/1.png",
+    "url": "img/remove-bg-ingredients/1.png",
     "recipe_name": "經典瑪格麗特披薩",
-    "recipe_image_url": "/img/recipes/1/cover.png"
+    "recipe_image_url": "img/recipes/1/cover.png"
   },
   {
     "id": 2,
-    "url": "/img/remove-bg-ingredients/2.png",
+    "url": "img/remove-bg-ingredients/2.png",
     "recipe_name": "抹茶熔岩蛋糕",
-    "recipe_image_url": "/img/recipes/2/cover.png"
+    "recipe_image_url": "img/recipes/2/cover.png"
   },
   {
     "id": 3,
-    "url": "/img/remove-bg-ingredients/3.png",
+    "url": "img/remove-bg-ingredients/3.png",
     "recipe_name": "四川宮保雞丁",
-    "recipe_image_url": "/img/recipes/3/cover.png"
+    "recipe_image_url": "img/recipes/3/cover.png"
   },
   {
     "id": 4,
-    "url": "/img/remove-bg-ingredients/4.png",
+    "url": "img/remove-bg-ingredients/4.png",
     "recipe_name": "奶油松露野菇寬麵",
-    "recipe_image_url": "/img/recipes/4/cover.png"
+    "recipe_image_url": "img/recipes/4/cover.png"
   },
-  {
+  { 
     "id": 5,
-    "url": "/img/remove-bg-ingredients/5.png",
+    "url": "img/remove-bg-ingredients/5.png",
     "recipe_name": "泰式青咖哩雞",
-    "recipe_image_url": "/img/recipes/5/cover.png"
+    "recipe_image_url": "img/recipes/5/cover.png"
   },
   {
     "id": 6,
-    "url": "/img/remove-bg-ingredients/6.png",
+    "url": "img/remove-bg-ingredients/6.png",
     "recipe_name": "經典班尼迪克蛋",
-    "recipe_image_url": "/img/recipes/6/cover.png"
+    "recipe_image_url": "img/recipes/6/cover.png"
   },
   {
     "id": 7,
-    "url": "/img/remove-bg-ingredients/7.png",
+    "url": "img/remove-bg-ingredients/7.png",
     "recipe_name": "濃厚豚骨叉燒拉麵",
-    "recipe_image_url": "/img/recipes/7/cover.png"
+    "recipe_image_url": "img/recipes/7/cover.png"
   },
   {
     "id": 8,
-    "url": "/img/remove-bg-ingredients/8.png",
+    "url": "img/remove-bg-ingredients/8.png",
     "recipe_name": "經典自製鷹嘴豆泥",
-    "recipe_image_url": "/img/recipes/8/cover.png"
+    "recipe_image_url": "img/recipes/8/cover.png"
   },
   {
     "id": 9,
-    "url": "/img/remove-bg-ingredients/9.png",
+    "url": "img/remove-bg-ingredients/9.png",
     "recipe_name": "法式洋蔥濃湯",
-    "recipe_image_url": "/img/recipes/9/cover.png"
+    "recipe_image_url": "img/recipes/9/cover.png"
   },
   {
     "id": 10,
-    "url": "/img/remove-bg-ingredients/10.png",
+    "url": "img/remove-bg-ingredients/10.png",
     "recipe_name": "蒜香檸檬烤大蝦",
-    "recipe_image_url": "/img/recipes/10/cover.png"
+    "recipe_image_url": "img/recipes/10/cover.png"
   },
   {
     "id": 11,
-    "url": "/img/remove-bg-ingredients/11.png",
+    "url": "img/remove-bg-ingredients/11.png",
     "recipe_name": "舒肥雞胸藜麥飯",
-    "recipe_image_url": "/img/recipes/11/cover.png"
+    "recipe_image_url": "img/recipes/11/cover.png"
   },
   {
     "id": 12,
-    "url": "/img/remove-bg-ingredients/12.png",
+    "url": "img/remove-bg-ingredients/12.png",
     "recipe_name": "香煎鮭魚糙米便當",
-    "recipe_image_url": "/img/recipes/12/cover.png"
+    "recipe_image_url": "img/recipes/12/cover.png"
   },
   {
     "id": 13,
-    "url": "/img/remove-bg-ingredients/13.png",
+    "url": "img/remove-bg-ingredients/13.png",
     "recipe_name": "蒜香毛豆嫩豬排",
-    "recipe_image_url": "/img/recipes/13/cover.png"
+    "recipe_image_url": "img/recipes/13/cover.png"
   },
   {
     "id": 14,
-    "url": "/img/remove-bg-ingredients/14.png",
+    "url": "img/remove-bg-ingredients/14.png",
     "recipe_name": "豆腐漢堡排佐野菇",
-    "recipe_image_url": "/img/recipes/14/cover.png"
+    "recipe_image_url": "img/recipes/14/cover.png"
   },
   {
     "id": 15,
-    "url": "/img/remove-bg-ingredients/15.png",
+    "url": "img/remove-bg-ingredients/15.png",
     "recipe_name": "檸檬紙包魚片",
-    "recipe_image_url": "/img/recipes/15/cover.png"
+    "recipe_image_url": "img/recipes/15/cover.png"
   },
   {
     "id": 16,
-    "url": "/img/remove-bg-ingredients/16.png",
+    "url": "img/remove-bg-ingredients/16.png",
     "recipe_name": "日式壽喜燒牛丼",
-    "recipe_image_url": "/img/recipes/16/cover.png"
+    "recipe_image_url": "img/recipes/16/cover.png"
   },
   {
     "id": 17,
-    "url": "/img/remove-bg-ingredients/17.png",
+    "url": "img/remove-bg-ingredients/17.png",
     "recipe_name": "韓式泡菜炒豬肉",
-    "recipe_image_url": "/img/recipes/17/cover.png"
+    "recipe_image_url": "img/recipes/17/cover.png"
   },
   {
     "id": 18,
-    "url": "/img/remove-bg-ingredients/18.png",
+    "url": "img/remove-bg-ingredients/18.png",
     "recipe_name": "北海道咖哩雞",
-    "recipe_image_url": "/img/recipes/18/cover.png"
+    "recipe_image_url": "img/recipes/18/cover.png"
   },
   {
     "id": 19,
-    "url": "/img/remove-bg-ingredients/19.png",
+    "url": "img/remove-bg-ingredients/19.png",
     "recipe_name": "味增薑汁燒肉",
-    "recipe_image_url": "/img/recipes/19/cover.png"
+    "recipe_image_url": "img/recipes/19/cover.png"
   },
   {
     "id": 20,
-    "url": "/img/remove-bg-ingredients/20.png",
+    "url": "img/remove-bg-ingredients/20.png",
     "recipe_name": "照燒鮭魚排",
-    "recipe_image_url": "/img/recipes/20/cover.png"
+    "recipe_image_url": "img/recipes/20/cover.png"
   }
 ]

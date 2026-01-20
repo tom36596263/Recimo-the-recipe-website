@@ -28,7 +28,7 @@ const getRecipeTags = (recipeId) => {
 // 初始化數據
 onMounted(() => {
     // 最近觀看：取前3筆
-    recentRecipes.value = recipesData.slice(0, 3).map(recipe => ({
+    recentRecipes.value = recipesData.slice(0, 4).map(recipe => ({
         id: recipe.recipe_id,
         recipe_name: recipe.recipe_title,
         image_url: recipe.recipe_image_url,
@@ -40,7 +40,7 @@ onMounted(() => {
     }));
 
     // 我的收藏：取第4-6筆
-    favoriteRecipes.value = recipesData.slice(3, 6).map(recipe => ({
+    favoriteRecipes.value = recipesData.slice(4, 8).map(recipe => ({
         id: recipe.recipe_id,
         recipe_name: recipe.recipe_title,
         image_url: recipe.recipe_image_url,
@@ -52,7 +52,7 @@ onMounted(() => {
     }));
 
     // 個人食譜：取第7-9筆
-    personalRecipes.value = recipesData.slice(6, 9).map(recipe => ({
+    personalRecipes.value = recipesData.slice(8, 12).map(recipe => ({
         id: recipe.recipe_id,
         recipe_name: recipe.recipe_title,
         image_url: recipe.recipe_image_url,
@@ -85,7 +85,7 @@ const goToPersonalRecipes = () => {
             <div class="container">
                 <div class="row">
                     <div class="col-12 section-header">
-                        <h3 class="zh-h3 section-title">最近觀看食譜</h3>
+                        <h4 class="zh-h4 section-title">最近觀看食譜</h4>
                         <button class="view-more-btn" @click="goToRecentRecipes">
                             查看更多
                             <i class="fa-solid fa-chevron-right"></i>
@@ -93,7 +93,7 @@ const goToPersonalRecipes = () => {
                     </div>
                 </div>
                 <div class="row">
-                    <div v-for="recipe in recentRecipes" :key="recipe.id" class="col-4 col-lg-6 col-md-12">
+                    <div v-for="recipe in recentRecipes" :key="recipe.id" class="col-3 col-lg-6 col-md-12">
                         <RecipeCardSm :recipe="recipe" />
                     </div>
                 </div>
@@ -105,7 +105,7 @@ const goToPersonalRecipes = () => {
             <div class="container">
                 <div class="row">
                     <div class="col-12 section-header">
-                        <h3 class="zh-h3 section-title">我的收藏</h3>
+                        <h4 class="zh-h4 section-title">我的收藏</h4>
                         <button class="view-more-btn" @click="goToMyFavorites">
                             查看更多
                             <i class="fa-solid fa-chevron-right"></i>
@@ -113,7 +113,7 @@ const goToPersonalRecipes = () => {
                     </div>
                 </div>
                 <div class="row">
-                    <div v-for="recipe in favoriteRecipes" :key="recipe.id" class="col-4 col-lg-6 col-md-12">
+                    <div v-for="recipe in favoriteRecipes" :key="recipe.id" class="col-3 col-lg-6 col-md-12">
                         <RecipeCardSm :recipe="recipe" />
                     </div>
                 </div>
@@ -125,7 +125,7 @@ const goToPersonalRecipes = () => {
             <div class="container">
                 <div class="row">
                     <div class="col-12 section-header">
-                        <h3 class="zh-h3 section-title">個人食譜</h3>
+                        <h4 class="zh-h4 section-title">個人食譜</h4>
                         <button class="view-more-btn" @click="goToPersonalRecipes">
                             查看更多
                             <i class="fa-solid fa-chevron-right"></i>
@@ -133,7 +133,7 @@ const goToPersonalRecipes = () => {
                     </div>
                 </div>
                 <div class="row">
-                    <div v-for="recipe in personalRecipes" :key="recipe.id" class="col-4 col-lg-6 col-md-12">
+                    <div v-for="recipe in personalRecipes" :key="recipe.id" class="col-3 col-lg-6 col-md-12">
                         <RecipeCardSm :recipe="recipe" />
                     </div>
                 </div>
@@ -144,11 +144,11 @@ const goToPersonalRecipes = () => {
 
 <style lang="scss" scoped>
 .my-recipes-page {
-    padding: 40px 0;
+    padding: 20px 0 40px;
 }
 
 .recipe-section {
-    margin-bottom: 60px;
+    margin-bottom: 30px;
 
     &:last-child {
         margin-bottom: 0;
