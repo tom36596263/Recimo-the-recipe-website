@@ -172,7 +172,8 @@ provide('isEditing', isEditing);
   <div :class="['recipe-editor-page', { 'is-editing': isEditing }]">
     <main class="editor-main-layout container">
       <div class="header-section">
-        <EditorHeader v-model="recipeForm" :is-editing="isEditing" />
+        <EditorHeader v-model="recipeForm" :is-editing="isEditing"
+          :is-adapt-mode="!!(route.params.id || route.query.editId)" />
       </div>
 
       <div class="recipe-main-content">

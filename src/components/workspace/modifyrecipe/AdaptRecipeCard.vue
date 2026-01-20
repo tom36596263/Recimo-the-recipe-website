@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router';
 import LikeButton from '@/components/common/LikeButton.vue'
 
+// 接收來自父組件的食譜資料
 const props = defineProps({
     recipe: {
         type: Object,
@@ -11,43 +12,64 @@ const props = defineProps({
 
 const router = useRouter();
 
+// 跳轉詳情頁邏輯
 const goToDetail = () => {
     router.push({
         name: 'workspace-recipe-detail',
-        params: { id: props.recipe.id }
+        params: { id: props.recipe.id || props.recipe.recipe_id }
     });
 };
 
+// 處理按讚變更
+const handleLikeChange = (val, recipe) => {
+    console.log('讚數更新:', val);
+};
 </script>
+
 <template>
     <div class="recipe-card-sm" @click="goToDetail">
-        <header class="card-header">
-            <img :src="recipe.image_url" alt="recipe.recipe_name">
-        </header>
-        <div class="card-body">
-            <div class="title">
-                <h5 class="zh-h5">{{ recipe.recipe_name }}</h5>
-                <div class="icon-group">
-                    <i-material-symbols-Favorite-outline @click.prevent.stop />
-                </div>
+        <header class="card-header" :style="{
+            backgroundImage: recipe.coverImg ? `url(${recipe.coverImg})` : '',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+        }">
+            <div class="change-hint-overlay">
+                <span class="p-p2">+ 更換成品照</span>
             </div>
-        </div>
-        <footer>
-            <div class="personal-info">
-                <div class="personal-img">
-                    <img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo">
-                </div>
-                <p class="p-p1">Recimo</p>
-                <div @click.prevent.stop>
-                    <LikeButton :initial-likes="recipe.author.likes || 0"
-                        @update:liked="(val) => handleLikeChange(val, item)" />
-                </div>
+        </header>
+
+        <div class="card-body">
+            <div class="input-group title-input">
+                <input type="text" v-model="recipe.title" placeholder="請輸入更改版本標題..." @click.stop>
             </div>
 
+            <div class="input-group content-input">
+                <i-material-symbols-arrow-right-alt-rounded class="arrow-icon" />
+                <input type="text" v-model="recipe.description" placeholder="請輸入關鍵更改內容..." @click.stop>
+            </div>
+        </div>
+
+        <footer>
+            <div class="personal-info">
+                <div class="personal-img" :style="{
+                    backgroundImage: recipe.author?.author_image ? `url(${recipe.author.author_image})` : '',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                }">
+                </div>
+                <p class="p-p1">{{ recipe.author?.author_name || 'Recimo' }}</p>
+                <div @click.prevent.stop>
+                    <LikeButton :initial-likes="recipe.author?.likes || recipe.likes || 0"
+                        @update:liked="(val) => handleLikeChange(val, recipe)" />
+                </div>
+            </div>
         </footer>
     </div>
 </template>
+
 <style lang="scss" scoped>
+@import '@/assets/scss/abstracts/_color.scss';
+
 .recipe-card-sm {
     border: 1px solid $neutral-color-400;
     border-radius: $radius-base;
@@ -56,44 +78,72 @@ const goToDetail = () => {
     cursor: pointer;
 
     .card-header {
+        position: relative; // ✨ 必加：讓遮罩可以定位
         overflow: hidden;
         height: 150px;
         width: 100%;
+        background-color: $neutral-color-100;
 
-        img {
-            width: fit-content;
-            object-fit: cover;
-            display: block;
-            width: 100%;
-            height: 100%;
-            transition: .3s ease;
-
-            &:hover {
-                scale: 1.1;
+        // ✨ 2. 當滑鼠移入圖片區塊時顯示遮罩
+        &:hover {
+            .change-hint-overlay {
+                opacity: 1;
             }
         }
     }
 
+    // ✨ 3. 遮罩樣式
+    .change-hint-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        pointer-events: none; // 讓點擊可以穿透到 header
+    }
+
     .card-body {
-        padding: 16px 16px 4px 16px;
+        padding: 12px 16px;
 
-        .title {
+        .input-group {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
-            color: $primary-color-700;
+            margin-bottom: 8px;
+
+            input {
+                width: 100%;
+                border: none;
+                outline: none;
+                background: transparent;
+                font-size: 14px;
+                color: $neutral-color-700;
+                padding: 4px 0;
+
+                &::placeholder {
+                    color: $neutral-color-400;
+                }
+
+                &:focus {
+                    border-bottom: 1px solid $primary-color-400;
+                }
+            }
         }
 
-        .icon-group {
-            display: flex;
-            gap: 12px;
+        .title-input input {
+            font-weight: 500;
+            font-size: 16px;
         }
 
-        .tag {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
+        .content-input {
+            .arrow-icon {
+                font-size: 20px;
+                margin-right: 4px;
+                color: $neutral-color-800;
+            }
         }
     }
 
@@ -102,21 +152,12 @@ const goToDetail = () => {
         justify-content: space-between;
         display: flex;
 
-        .btn-group {
-            display: flex;
-            gap: 8px;
-        }
-
         .personal-info {
             display: flex;
             align-items: center;
 
             .p-p1 {
                 margin-right: 6px;
-            }
-
-            .en-h3 {
-                margin-left: 6px;
             }
         }
 
@@ -129,11 +170,7 @@ const goToDetail = () => {
             overflow: hidden;
             display: flex;
             justify-content: center;
-
-            img {
-                width: 20px;
-
-            }
+            background-color: $neutral-color-100;
         }
     }
 }
