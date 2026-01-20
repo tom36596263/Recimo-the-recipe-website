@@ -226,13 +226,22 @@ const handleShare = async () => {
     }
 };
 
-const formatTime = (timeStr) => {
-    if (!timeStr) return '0 分鐘';
-    const parts = timeStr.split(':');
-    if (parts.length < 2) return `${timeStr} 分鐘`;
-    const hours = parseInt(parts[0]);
-    const minutes = parseInt(parts[1]);
-    return hours > 0 ? `${hours} 小時 ${minutes} 分鐘` : `${minutes} 分鐘`;
+const formatTime = (timeVal) => {
+    if (!timeVal || timeVal === '00:00' || timeVal === 0) return '0 分鐘';
+
+    const timeStr = String(timeVal);
+
+    // 如果是 Pinia 傳來的 "HH:mm" 格式
+    if (timeStr.includes(':')) {
+        const parts = timeStr.split(':');
+        const hh = parseInt(parts[0], 10) || 0;
+        const mm = parseInt(parts[1], 10) || 0;
+        if (hh === 0) return `${mm} 分鐘`;
+        return `${hh} 小時 ${mm} 分鐘`;
+    }
+
+    // 如果是原本 JSON 的純分鐘數字 (例如 30)
+    return `${timeStr} 分鐘`;
 };
 
 const ingredientsData = computed(() => rawIngredients.value.map(item => ({
