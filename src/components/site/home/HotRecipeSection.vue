@@ -1,52 +1,70 @@
 <script setup>
     import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
     import CircleBtn from '@/components/common/CircleBtn.vue'
-import { ref, onMounted } from 'vue';
+    import { ref, onMounted } from 'vue';
+    import { publicApi } from '@/utils/publicApi'
 
-const recipes = ref([
-    {
-        "recipe_name": "舒肥雞胸藜麥飯",
-        "image_url": "/img/mall/PROD-001_01.jpg",
-        "tags": ["低卡健身系列", "低溫舒肥", "超級食物"],
-        "nutritional_info": {
-            "calories": "250kcal",
-            "serving_size": "1",
-            "cooking_time": "3分鐘",
-        },
-        "author": {
-        "name": "健康廚房",
-        "likes": 850
-        }
-    },
-    {
-        "recipe_name": "香煎鮭魚糙米便當",
-        "image_url": "/img/mall/PROD-002_01.jpg",
-        "tags": ["低卡健身系列", "阿拉斯加鮭魚", "高纖"],
-        "nutritional_info": {
-            "calories": "580kcal",
-            "serving_size": "1",
-            "cooking_time": "5分鐘",
-        },
-        "author": {
-        "name": "山海味鮮",
-        "likes": 1200
-        }
-    },
-    {
-        "recipe_name": "蒜香毛豆嫩豬排",
-        "image_url": "/img/mall/PROD-003_01.jpg",
-        "tags": ["低卡健身系列", "台灣活菌豬", "職人調味"],
-        "nutritional_info": {
-            "calories": "318kcal",
-            "serving_size": "1",
-            "cooking_time": "4分鐘",
-        },
-        "author": {
-        "name": "職人調味",
-        "likes": 640
-        }
+    const recipes = ref([])
+
+onMounted(async () => {
+    try {
+        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
+            publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/recipe/recipe_tag.json'),
+            publicApi.get('data/recipe/tags.json')
+        ]);
+
+        const recipeData = resRecipes.data;
+        const recipeTagsData = resRecipeTags.data;
+        const tagsData = resTags.data;
+
+        const tagMap = {};
+        tagsData.forEach(tag => {
+            tagMap[tag.tag_id] = tag.tag_name;
+        });
+
+        const randomRecipes = [...recipeData]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3);
+
+        const base = import.meta.env.BASE_URL;
+        recipes.value = randomRecipes.map(recipe => {
+
+            const matchedTagIds = recipeTagsData
+                .filter(rt => rt.recipe_id === recipe.recipe_id)
+                .map(rt => rt.tag_id);
+
+            // 透過 tagMap 轉換成 tag_name 陣列
+            const recipeTagsNames = matchedTagIds.map(id => tagMap[id]).filter(Boolean);
+            const timeParts = recipe.recipe_total_time.split(':');
+            const hours = parseInt(timeParts[0]);
+            const minutes = parseInt(timeParts[1]);
+            const displayTime = hours > 0 ? `${hours * 60 + minutes}分鐘` : `${minutes}分鐘`;
+
+            return {
+                id: recipe.recipe_id,
+                recipe_name: recipe.recipe_title,
+                difficulty: recipe.recipe_difficulty,
+                image_url: recipe.recipe_image_url.startsWith('http')
+                    ? recipe.recipe_image_url
+                    : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
+                tags: recipeTagsNames,
+                nutritional_info: {
+                    calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
+                    serving_size: recipe.recipe_servings,
+                    cooking_time: displayTime
+                },
+                author: {
+                    name: 'Recimo',
+                    likes: recipe.recipe_like_count
+                }
+            };
+        });
+    } catch (error) {
+        console.error('載入資料失敗:', error);
     }
-]);
+});
+
 </script>
 <template>
     
@@ -54,9 +72,13 @@ const recipes = ref([
         <h2 class="zh-h2">熱門食譜推薦</h2>
         <h2 class="en-h3">Hot Recipe</h2>
     </div>
-    <div v-for="item in recipes" :key="item.recipe_name" class="col-4 col-lg-12">
-        <RecipeCardLg :recipe="item"/>
-    </div>
+    <router-link 
+    v-for="item in recipes" 
+    :key="item.id"
+    :to="{ name: 'workspace-recipe-detail', params: { id: item.id } }" 
+    class="col-4 col-md-12 recipe-cards">
+        <RecipeCardLg :recipe="item" class="recipe-card" />
+    </router-link> 
     <div class="col-12 more-recipe-btn">
         <router-link to="/recipes">
             <CircleBtn title="看更多食譜" />
@@ -74,9 +96,19 @@ const recipes = ref([
             margin-bottom: 10px;
         }
     }
+    .recipe-cards{
+        text-decoration: none;
+        color: $neutral-color-800;
+        margin-bottom: 20px;
+    }
     .more-recipe-btn{
         display: flex;
         justify-content: center;
         margin-top: 30px;
+    }
+    @media screen and (max-width: 810px){
+        .hotrecipe-card{
+            margin-bottom: 20px;
+        }
     }
 </style>

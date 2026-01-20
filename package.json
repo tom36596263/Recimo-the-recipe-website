@@ -13,11 +13,13 @@
     "@fontsource/noto-sans-tc": "^5.2.8",
     "@fortawesome/fontawesome-free": "^7.1.0",
     "axios": "^1.13.2",
+    "chart.js": "^4.5.1",
     "datatables.net-dt": "^2.3.6",
     "datatables.net-vue3": "^3.0.4",
     "pinia": "^3.0.4",
     "swiper": "^12.0.3",
     "vue": "^3.5.24",
+    "vue-chartjs": "^5.3.3",
     "vue-router": "^4.6.4",
     "vuedraggable": "^4.1.0"
   },

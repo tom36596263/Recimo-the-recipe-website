@@ -12,6 +12,12 @@
     const activeIndex = ref(0);
     const swiperInstance = ref(null);
 
+    const services = [
+        { title: '我的筆記', fileName: 'home-service-section-1-note.png' },
+        { title: '備餐計畫', fileName: 'home-service-section-2-plan.png' },
+        { title: '食譜步驟', fileName: 'home-service-section-3-step.png' },
+    ];
+
     const setSwiperRef = (swiper) => {
         swiperInstance.value = swiper;
     };
@@ -57,10 +63,14 @@
         @slideChange="onSlideChange"
         @swiper="setSwiperRef"
         >
-        <swiper-slide v-for="n in 3" :key="n">
-            <div class="card-mockup">
-                <h3 style="color: #333">Slide {{ n }}</h3>
-                <div class="img"></div>
+        <swiper-slide v-for="(item, index) in services" :key="index">
+            
+            <div class="img-container">
+                <img 
+                    :src="$parsePublicFile(`img/site/${item.fileName}`)" 
+                    :alt="item.title" 
+                    class="service-img" 
+                />
             </div>
         </swiper-slide>
     </swiper>
@@ -84,17 +94,27 @@
     .my-swiper{
         height:500px;
         width: 100%;
-    }
-    .swiper-slide{
-        transition: transform 0.6s cubic-bezier(.25, 1, 0, 1);
-        border: 1px solid #333;
-        padding: 20px;
-        border-radius: $radius-base;
-        &.swiper-slide-next{
-            opacity: .5;
-            transform: scale(0.9);
+        overflow: hidden;
+        .img-container{
+            width: 100%;
+            height: 100%;
+            .service-img{
+                width: 100%;
+                object-fit: cover;
+            }
+        }
+        .swiper-slide{
+            transition: transform 0.6s cubic-bezier(.25, 1, 0, 1);
+            border: 1px solid $neutral-color-400;
+            border-radius: $radius-base;
+            overflow: hidden;
+            &.swiper-slide-next{
+                opacity: .5;
+                transform: scale(0.9);
+            }
         }
     }
+    
     @media screen and (max-width: 1200px){
         .my-swiper{
             height:480px;

@@ -2,13 +2,16 @@
 import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
 // import axios from 'axios';
 import { publicApi, base } from '@/utils/publicApi.js';
-import { defineStore } from 'pinia'
-import { useRouteName } from '@/composables/useRouteName'
-import { useCartStore } from '@/stores/cartStore'
+import { defineStore } from 'pinia';
+import { useRouteName } from '@/composables/useRouteName';
+import { useCartStore } from '@/stores/cartStore';
 import ProductRmd from '@/components/mall/ProductRmd.vue';
 // 門禁守衛
 import { useAuthGuard } from '@/composables/useAuthGuard';
 const { runWithAuth } = useAuthGuard();
+
+import { useRouter } from 'vue-router';
+const router = useRouter();
 // ==========================================
 // vue上課教：以後部屬比較不會有問題(資料放public的話)
 // ==========================================
@@ -44,17 +47,30 @@ const count = ref(1); // 預設數量是 1
 
 const cartStore = useCartStore()
 const addToCart = () => {
-  // 詳情頁的資料在 productInfo 裡
   if (productInfo.value) {
-    console.log("把商品", productInfo.value.product_name, "數量", count.value, "加入購物車");
+    // console.log("把商品", productInfo.value.product_name, "數量", count.value, "加入購物車");
+    // 呼叫 Store 的 add 方法
+
+    const cartItem = {
+      ...productInfo.value,
+      count: count.value // 傳入畫面上選擇的數量
+    };
+
+    cartStore.add(productInfo.value, count.value);
+
+    alert(`「${count.value}件${productInfo.value.product_name}」已加入購物車~`);
   }
 };
 
 const buyNow = () => {
   runWithAuth(() => {
-    // 「確定登入後」才執行
     if (productInfo.value) {
-      console.log("直接購買商品", productInfo.value.product_name, "數量", count.value);
+      // 呼叫 Store 的 add，把當前選擇的數量 count.value 傳進去
+      cartStore.add(productInfo.value, count.value);
+
+      // 直接跳轉到結帳頁面
+      router.push('/checkout');
+      console.log("準備跳轉至結帳畫面");
     }
   });
 };

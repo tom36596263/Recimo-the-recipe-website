@@ -1,6 +1,29 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, markRaw } from 'vue';
 import StepCard from '@/components/site/about/StepCard.vue';
+
+// 引入 Swiper
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+
+// icon
+import IconSkillet from '~icons/material-symbols/Skillet-outline';
+import IconHandMeal from '~icons/material-symbols/Hand-Meal-outline';
+import IconFavorite from '~icons/material-symbols/Favorite-outline';
+import IconAnalytics from '~icons/material-symbols/analytics';
+import IconAlarm from '~icons/material-symbols/alarm-outline';
+import IconNoteStack from '~icons/material-symbols/Note-Stack-outline';
+import IconStickyNote from '~icons/material-symbols/sticky-note-2-outline';
+import IconFire from '~icons/material-symbols/local-fire-department-rounded';
+import IconTableCart from '~icons/material-symbols/table-chart-view';
+import IconChef from '~icons/material-symbols/chef-hat-outline';
+import IconAddReaction from '~icons/material-symbols/add-reaction-outline';
+import IconCart from '~icons/material-symbols/Shopping-Cart-outline';
+
+// 在組件中定義 modules 方便 template 使用
+const swiperModules = [Pagination, Autoplay];
 
 const activeIndex = ref(0);
 
@@ -11,10 +34,14 @@ const headerList = [
         color: '$primary-color-800',
         bg: '$neutral-color-white',
         // 下方介紹區內容
+        images: [
+            '/img/about/introduce-01.jpg',
+            '/img/about/introduce-02.jpg'
+        ],
         mainDescription: '利用系統化工具深度管理您的廚房生活，讓每一次的烹飪決策都變得更高效、更智慧，從容享受下廚樂趣。',
         features: [
-            { icon: 'fa-utensils', title: '互動式食譜推薦', desc: '當不知道要做什麼料理時，透過趣味的小遊戲互動，系統將從茫茫食譜海中為您篩選出最符合當下心情與需求的驚喜方案。' },
-            { icon: 'fa-calendar-days', title: '週曆飲食規劃', desc: '利用週曆介面規劃早、中、晚三餐，系統自動加總每日熱量，協助您的健康管理。' }
+            { icon: markRaw(IconSkillet), title: '互動式食譜推薦', desc: '當不知道要做什麼料理時，透過趣味的小遊戲互動，系統將從茫茫食譜海中為您篩選出最符合當下心情與需求的驚喜方案。' },
+            { icon: markRaw(IconHandMeal), title: '週曆飲食規劃', desc: '利用週曆介面規劃早、中、晚三餐，系統自動加總每日熱量，協助您的健康管理。' }
         ],
         // 步驟介紹區內容 
         subSections: [
@@ -31,7 +58,7 @@ const headerList = [
                     { id: 6, content: '也可以點選食譜卡片上的「開始烹飪」立即烹飪' }
                 ],
                 btnTitle: '前往靈感廚房',
-                link: '/search'
+                link: '/recipes?action=open-kitchen'
             },
             {
                 id: 'plan',
@@ -56,12 +83,18 @@ const headerList = [
         color: '$neutral-color-black',
         bg: '$primary-color-100',
         // 下方介紹區內容
+        images: [
+            '/img/about/introduce-03.jpg',
+            '/img/about/introduce-04.jpg',
+            '/img/about/introduce-05.jpg',
+            '/img/about/introduce-06.jpg'
+        ],
         mainDescription: '告別照本宣科，Recimo打造專注的實作空間，結合Recipe + Memo設計，讓您即時紀錄火候與靈感，封存每一場實踐。',
         features: [
-            { icon: 'fa-utensils', title: '雲端私房收藏庫', desc: '一鍵收藏喜愛的各種風味，隨時隨地都能開啟，且支援自定義資料夾功能，可以根據習慣建立專屬分類，讓食譜井然有序。' },
-            { icon: 'fa-calendar-days', title: '智慧份量與營養分析', desc: '系統將根據您的用餐人數自動縮放食材比例，免去繁瑣計算並確保風味如一；同時即時估算配方熱量與營養成分，協助您輕鬆實踐科學化的飲食生活。' },
-            { icon: 'fa-utensils', title: '沉浸式烹飪', desc: '專屬食譜步驟頁面配備「智慧計時器」，確保每道工序精準無誤。' },
-            { icon: 'fa-calendar-days', title: '自訂食譜筆記', desc: '打破固定食譜的框架，在烹飪步驟中可以即時加入筆記，紀錄火候微調、食材替換或遇到的疑難雜症等，完整保留最真實的實作筆記。' }
+            { icon: markRaw(IconFavorite), title: '雲端私房收藏庫', desc: '一鍵收藏喜愛的各種風味，隨時隨地都能開啟，且支援自定義資料夾功能，可以根據習慣建立專屬分類，讓食譜井然有序。' },
+            { icon: markRaw(IconAnalytics), title: '智慧份量與營養分析', desc: '系統將根據您的用餐人數縮放食材比例，免去繁瑣計算並確保風味如一；同時即時估算配方熱量與營養成分，協助您輕鬆實踐科學化的飲食生活。' },
+            { icon: markRaw(IconAlarm), title: '沉浸式烹飪', desc: '專屬食譜步驟頁面配備「智慧計時器」，確保每道工序精準無誤。' },
+            { icon: markRaw(IconNoteStack), title: '自訂食譜筆記', desc: '打破固定食譜的框架，在烹飪步驟中可以即時加入筆記，紀錄火候微調、食材替換或遇到的疑難雜症等，完整保留最真實的實作筆記。' }
         ],
         // 步驟介紹區內容 
         subSections: [
@@ -103,12 +136,19 @@ const headerList = [
         color: '$neutral-color-black',
         bg: '$primary-color-100',
         // 下方介紹區內容
+        images: [
+            '/img/about/introduce-07.jpg',
+            '/img/about/introduce-08.jpg',
+            '/img/about/introduce-09.jpg',
+            '/img/about/introduce-10.jpg',
+            '/img/about/introduce-11.jpg'
+        ],
         mainDescription: '專屬的廚藝數據庫，透過精密且直觀的圖表分析，深度剖析您的烹飪習慣與飲食偏好，讓每一次下廚都成為進步的基石。',
         features: [
-            { icon: 'fa-utensils', title: '多媒體烹飪日誌', desc: '在烹飪結束後加入心得，並上傳成品照，建立最完整的美味紀錄與評分。' },
-            { icon: 'fa-calendar-days', title: '烹飪節奏與靈魂伴侶食材分析', desc: '系統自動統計您每週、每月的食譜使用數量與廚房活躍度及自動分析您最常使用的 Top 5 食材，找出您的個人口味 DNA。' },
-            { icon: 'fa-utensils', title: '廚藝成長指標', desc: '紀錄每一道菜的製作次數與滿意度評分，見證廚藝的點滴進步。' },
-            { icon: 'fa-calendar-days', title: '食譜進化論', desc: '打將現有的官方食譜作為基礎，每一次的微調都是靈感的延伸，透過改編集見證美味的進化過程。' }
+            { icon: markRaw(IconStickyNote), title: '多媒體烹飪日誌', desc: '在烹飪結束後加入心得，並上傳成品照，建立最完整的美味紀錄與評分。' },
+            { icon: markRaw(IconFire), title: '烹飪節奏與靈魂伴侶食材分析', desc: '系統自動統計您每週、每月的食譜使用數量與廚房活躍度及自動分析您最常使用的 Top 5 食材，找出您的個人口味 DNA。' },
+            { icon: markRaw(IconTableCart), title: '廚藝成長指標', desc: '紀錄每一道菜的製作次數與滿意度評分，見證廚藝的點滴進步。' },
+            { icon: markRaw(IconChef), title: '食譜進化論', desc: '打將現有的官方食譜作為基礎，每一次的微調都是靈感的延伸，透過改編集見證美味的進化過程。' }
         ],
         // 步驟介紹區內容 
         subSections: [
@@ -150,10 +190,14 @@ const headerList = [
         color: '$neutral-color-black',
         bg: '$primary-color-100',
         // 下方介紹區內容
+        images: [
+            '/img/about/introduce-12.jpg',
+            '/img/about/introduce-13.jpg'
+        ],
         mainDescription: '從個人私廚筆記到具備影響力的社群分享，Recimo 協助您將烹飪靈感轉化為實質價值，串起從食譜到餐桌的最後一哩路。',
         features: [
-            { icon: 'fa-utensils', title: '個人與社群發布食譜', desc: '自由定義食譜權限，無論是個人私房秘笈或社群公開分享，讓您的美味靈感與世界產生連結。' },
-            { icon: 'fa-calendar-days', title: '官方食譜即食版採購', desc: '讓食譜不再只是文字。一鍵下單即可將心儀配方轉化為新鮮食材組直送到家，實踐從螢幕到餐桌的無縫體驗。' }
+            { icon: markRaw(IconAddReaction), title: '個人與社群發布食譜', desc: '自由定義食譜權限，無論是個人私房秘笈或社群公開分享，讓您的美味靈感與世界產生連結。' },
+            { icon: markRaw(IconCart), title: '官方食譜即食版採購', desc: '讓食譜不再只是文字。一鍵下單即可將心儀配方轉化為新鮮食材組直送到家，實踐從螢幕到餐桌的無縫體驗。' }
         ],
         // 步驟介紹區內容 
         subSections: [
@@ -194,8 +238,50 @@ const headerList = [
 const setActive = (index) => {
     activeIndex.value = index;
 };
+
+// ==========================================
+// 隨機食材圖裝飾
+// ==========================================
+// 1. 先定義原始資料與響應式變數 (放在最外層)
+const foods = [
+    'banana.png', 'cheese.png', 'chili.png', 'egg.png', 'garlic.png',
+    'oil.png', 'orange.png', 'salt.png', 'scallion.png', 'strawberry.png'
+];
+const shuffledFoods = ref([]);
+
+// 2. 定義洗牌演算法
+const shuffleArray = (array) => {
+    const newArr = [...array];
+    for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+    }
+    return newArr;
+};
+
+// 3. 定義供 Template 呼叫的函式 (這個就是你在 HTML 裡用的那個名字)
+const getUniqueFoodImg = (index) => {
+    if (shuffledFoods.value.length === 0) return '';
+    // 使用餘數運算確保如果 index 超過陣列長度也能循環取圖
+    const foodName = shuffledFoods.value[index % shuffledFoods.value.length];
+    return `/img/about/${foodName}`;
+};
+
+// 4. 生命週期鉤子
+onMounted(() => {
+    // 這裡會將 foods 洗牌後存入 shuffledFoods
+    shuffledFoods.value = shuffleArray(foods);
+
+    // 檢查路由 (如果有定義 checkRoute 函式的話)
+    if (typeof checkRoute === 'function') {
+        checkRoute();
+    }
+});
 </script>
 <template>
+    <!-- ==========================================
+            banner
+    ========================================= -->
     <div class="hero-container container">
         <div class="row">
             <div class="hero-banner col-12">
@@ -203,67 +289,104 @@ const setActive = (index) => {
             </div>
         </div>
     </div>
+    <!-- ==========================================
+            功能介紹-頁籤切換
+    ========================================= -->
     <section class="features-section">
-        <div class="container">
-            <div class="row classification">
-                <div class="col-3" v-for="(item, index) in headerList" :key="item.title" @click="setActive(index)"
-                    style="cursor: pointer;">
-                    <div class="category-card" :class="{ 'active': activeIndex === index }">
-                        <div class="zh-h3 card-head"
-                            :style="{ backgroundColor: activeIndex === index ? item.color : '' }">
-                            {{ item.title }}
-                        </div>
-                        <div class="zh-h4 card-body">
-                            <p v-for="desc in item.contents" :key="desc">{{ desc }}</p>
+        <div>
+            <div class="container">
+                <div class="row classification">
+                    <div class="col-3" v-for="(item, index) in headerList" :key="item.title" @click="setActive(index)"
+                        style="cursor: pointer;">
+                        <div class="category-card" :class="{ 'active': activeIndex === index }">
+                            <div class="zh-h3 card-head"
+                                :style="{ backgroundColor: activeIndex === index ? item.color : '' }">
+                                {{ item.title }}
+                            </div>
+                            <div class="zh-h4 card-body">
+                                <p v-for="desc in item.contents" :key="desc">{{ desc }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row main-content" v-if="headerList[activeIndex]">
-                <div class="col-12 col-lg-6">
-                    <div class="image-preview-box" :style="{ backgroundColor: headerList[activeIndex].bg }">
-                        <img :src="`https://picsum.photos/300/200/?random=${activeIndex}`" alt="功能預覽">
-                        <div class="pagination-dots">
-                            <span v-for="n in 8" :key="n" :class="{ active: n === 1 }"></span>
+            <div class="introduce-wrap container">
+                <!-- ==========================================
+                        功能介紹-輪播圖
+                ========================================= -->
+                <div class="row main-content" v-if="headerList[activeIndex]">
+                    <div class="col-6 col-md-12">
+                        <div class="image-preview-box" :style="{ backgroundColor: headerList[activeIndex].bg }">
+                            <swiper :modules="[Pagination, Autoplay]" :slides-per-view="1"
+                                :pagination="{ clickable: true }" :autoplay="{ delay: 3000 }" :key="activeIndex"
+                                class="about-swiper">
+                                <swiper-slide v-for="(imgSrc, imgIndex) in headerList[activeIndex].images"
+                                    :key="imgIndex">
+                                    <img :src="imgSrc" alt="功能預覽">
+                                </swiper-slide>
+                            </swiper>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-12 col-lg-6">
-                    <div class="info-wrapper">
-                        <h2 class="zh-h3 section-title">{{ headerList[activeIndex].title }}</h2>
-                        <hr class="title-line" />
-                        <p class="section-desc">{{ headerList[activeIndex].mainDescription }}</p>
-
-                        <ul class="feature-list">
-                            <li class="feature-item" v-for="feat in headerList[activeIndex].features" :key="feat.title">
-                                <div class="icon-circle"><i :class="['fa-solid', feat.icon]"></i></div>
-                                <div class="text">
-                                    <h3>{{ feat.title }}</h3>
-                                    <p>{{ feat.desc }}</p>
-                                    <div class="hover-detail">詳細說明的文字 hover 再顯示</div>
-                                </div>
-                            </li>
-                        </ul>
+                    <!-- ==========================================
+                        功能介紹-內容
+                ========================================= -->
+                    <div class="introduce-wrap-content col-6 col-md-12">
+                        <div>
+                            <h2 class="zh-h3 section-title">{{ headerList[activeIndex].title }}</h2>
+                            <hr class="title-line" />
+                            <p class="p-p1 section-desc">{{ headerList[activeIndex].mainDescription }}</p>
+                            <ul class="feature-list">
+                                <li class="feature-item" v-for="feat in headerList[activeIndex].features"
+                                    :key="feat.title">
+                                    <div class="icon-circle"><template v-if="typeof feat.icon === 'string'">
+                                            <i :class="['fa-solid', feat.icon]"></i>
+                                        </template>
+                                        <template v-else>
+                                            <component :is="feat.icon" style="font-size: 1.5rem;" />
+                                        </template>
+                                    </div>
+                                    <div class="text">
+                                        <h3 class="zh-h4">{{ feat.title }}</h3>
+                                        <p class="p-p2 hover-desc">{{ feat.desc }}</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
+    <!-- ==========================================
+            功能使用步驟
+    ========================================= -->
     <section class="introduce" v-if="headerList[activeIndex]?.subSections?.length">
         <div class="container">
-            <div v-for="sub in headerList[activeIndex].subSections" :key="sub.id" class="sub-section-block">
-                <h3 class="zh-h3 title">{{ sub.title }}</h3>
-                <p class="p-p1 content">{{ sub.description }}</p>
-                <div class="row">
-                    <div v-for="step in sub.steps" :key="step.id" class="col-2">
+            <div v-for="(sub, index) in headerList[activeIndex].subSections" :key="sub.id" class="sub-section-block">
+                <img :src="getUniqueFoodImg(index)" class="random-food-icon" :style="{
+                    top: sub.foodPos?.top,
+                    right: sub.foodPos?.right,
+                    left: sub.foodPos?.left,
+                    transform: `rotate(${sub.foodPos?.rotate || '0deg'})`
+                }" alt="food img">
+
+                <div class="row stepcontainer">
+                    <h3 class="zh-h3 title">{{ sub.title }}</h3>
+                    <p class="p-p1 content col-6 col-lg-12">{{ sub.description }}</p>
+                </div>
+
+                <div class="stepcard row">
+                    <div v-for="step in sub.steps" :key="step.id" class="col-2 col-lg-4 col-md-6">
                         <StepCard :number="step.id" :content="step.content" />
                     </div>
                 </div>
+
                 <div class="btn-align-right">
-                    <CircleBtn :title="sub.btnTitle" type="white" :href="sub.link" />
+                    <router-link :to="sub.link">
+                        <CircleBtn :title="sub.btnTitle" type="white" :href="sub.link" />
+                    </router-link>
                 </div>
             </div>
         </div>
@@ -281,11 +404,13 @@ const setActive = (index) => {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 60vh;
+    height: 415px;
     margin-top: 40px;
     margin-bottom: 40px;
 
     @media screen and (max-width: 1024px) {
+        // 如果圖片主體在右邊，就把位置往右靠，避免右側被裁切
+        background-position: left center;
         margin-bottom: 20px;
     }
 
@@ -300,7 +425,7 @@ h1 {
 }
 
 // ==========================================
-// 功能介紹
+// 功能介紹-頁籤切換
 // ==========================================
 .category-card {
     cursor: pointer;
@@ -323,12 +448,17 @@ h1 {
         background-color: $neutral-color-white;
         color: $neutral-color-black;
 
+        // 當螢幕小於或等於 810px 時隱藏文字區塊
+        @media screen and (max-width: 810px) {
+            display: none;
+        }
+
     }
 
     // 選中時的樣式
     &.active {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         transition: transform 0.5s ease;
 
         .card-head {
@@ -339,17 +469,175 @@ h1 {
 }
 
 // ==========================================
-// 功能使用介紹
+// 功能介紹-輪播圖
+// ==========================================
+.introduce-wrap {
+    margin-top: 40px;
+    margin-bottom: 40px;
+
+    .main-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.image-preview-box img {
+    width: 100%;
+    border: 1px solid $primary-color-700;
+    border-radius: 10px;
+}
+
+/* 修改分頁點顏色 */
+:deep(.swiper-pagination-bullet) {
+    background: $primary-color-400; // 未選中時的顏色
+    opacity: 0.5;
+}
+
+:deep(.swiper-pagination-bullet-active) {
+    background: $primary-color-700; // 選中時的顏色
+    opacity: 1;
+}
+
+// ==========================================
+// 功能介紹-內容
+// ==========================================
+.introduce-wrap-content {
+    padding-left: 50px;
+
+    @media screen and (max-width: 1320px) {
+        padding-left: 10px;
+    }
+
+    @media screen and (max-width: 810px) {
+        padding-left: 0;
+        margin-top: 20px;
+    }
+}
+
+.section-title {
+    color: $primary-color-700;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.title-line {
+    color: $primary-color-700;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.section-desc {
+    margin-bottom: 20px;
+}
+
+.feature-list {
+    .feature-item {
+        display: flex;
+        align-items: center; // 圖標與文字永遠保持垂直置中
+        margin-bottom: 25px;
+        cursor: pointer;
+        min-height: 80px; // 給予一個最小高度，確保展開時不會劇烈推擠
+        transition: background-color 0.3s;
+
+        .icon-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 1.5px solid $primary-color-700;
+            color: $primary-color-700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .text {
+
+            h3 {
+                // margin-bottom: 5px;
+                color: $primary-color-700;
+                transition: margin 0.3s ease;
+            }
+
+            p {
+                // 預設隱藏狀態
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                transition: all 0.4s ease-in-out;
+                margin: 0;
+            }
+        }
+
+        // 當滑鼠 Hover 項目時
+        &:hover {
+            .icon-circle {
+                background-color: $primary-color-700;
+                color: $neutral-color-white;
+            }
+
+            .text h3 {
+                margin-bottom: 5px; // 展開時再推開間距
+            }
+
+            .text p {
+                max-height: 100px; // 設定一個足夠大的高度讓它展開
+                opacity: 1;
+                margin-top: 5px;
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 810px) {
+    .feature-list .feature-item {
+        // 移除指標手指樣式
+        cursor: default;
+
+        // 強制展開內容，不允許隱藏
+        .text p {
+            max-height: none !important;
+            opacity: 1 !important;
+            margin-top: 8px !important;
+            visibility: visible !important;
+        }
+
+        // 確保 hover 時不會產生變化
+        &:hover {
+            transform: none !important;
+
+            .icon-circle {
+                // 維持原本的邊框色，不變實心色
+                background-color: transparent !important;
+                color: $primary-color-700 !important;
+            }
+
+            .text h3 {
+                margin-bottom: 0 !important;
+            }
+        }
+    }
+}
+
+// ==========================================
+// 功能使用步驟
 // ==========================================
 .introduce {
     background-color: $primary-color-800;
     padding: 50px 0;
 }
 
-// 針對底下的第一個直接子層 div
-.introduce .container {
+.stepcontainer {
+    flex-direction: column;
+}
+
+//針對底下的第一個直接子層 
+div .introduce .container {
     &>div:first-child {
-        margin-bottom: 80px;
+        margin-bottom: 100px;
     }
 }
 
@@ -363,6 +651,8 @@ h1 {
     text-align: center;
     margin-bottom: 20px;
     color: $neutral-color-white;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .introduce .row {
@@ -371,5 +661,66 @@ h1 {
 
 .btn-align-right {
     text-align: right;
+}
+
+.stepcard.row {
+    @media screen and (max-width: 810px) {
+        :deep(.col-md-6) {
+            width: 50% !important;
+            flex: 0 0 50%; // 確保 flex 屬性同步
+        }
+    }
+}
+
+// ==========================================
+// 隨機食材圖裝飾
+// ==========================================
+// 定義上下飄浮動畫
+@keyframes floating {
+    0% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-15px) rotate(5deg); // 向上移動 15px 並稍微旋轉
+    }
+
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+}
+
+.sub-section-block {
+    position: relative;
+
+    // 預設所有圖的位置
+    .random-food-icon {
+        position: absolute;
+        top: -100px;
+        right: 20px;
+        width: 150px;
+        height: auto;
+        z-index: 10;
+        pointer-events: none; // 讓滑鼠穿透這個元素
+        animation: floating 3s ease-in-out infinite;
+
+        @media screen and (max-width: 890px) {
+            top: -90px;
+            right: 5px;
+            width: 120px;
+        }
+    }
+
+    // 針對第二個區塊的圖
+    &:nth-child(2) .random-food-icon {
+        top: -100px;
+        left: 20px;
+        animation-duration: 2.5s;
+        transform: rotate(-15deg);
+
+        @media screen and (max-width: 890px) {
+            left: 0;
+        }
+    }
 }
 </style>
