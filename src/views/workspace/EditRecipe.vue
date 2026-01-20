@@ -33,6 +33,7 @@ onMounted(async () => {
 
   // 情境 A：從預覽模式點擊「返回編輯」
   if (recipeStore.rawEditorData) {
+    recipeForm.value.recipe_id = found.recipe_id;
     recipeForm.value = { ...recipeStore.rawEditorData };
     recipeStore.rawEditorData = null;
     

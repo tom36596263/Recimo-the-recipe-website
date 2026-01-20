@@ -1,6 +1,11 @@
 <script setup>
 import { computed, watch } from 'vue';
 import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard.vue';
+// 1. ✨ 修正：必須匯入 useRoute
+import { useRouter, useRoute } from 'vue-router';
+
+const router = useRouter();
+const route = useRoute(); // 2. ✨ 修正：定義 route
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
@@ -10,6 +15,25 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
+const goToOriginal = () => {
+  // 1. 抓取 ID (優先從資料抓，沒有就從網址抓)
+  const targetId =
+    props.modelValue.recipe_id ||
+    props.modelValue.id ||
+    route.query.editId ||
+    route.params.id;
+
+  if (targetId) {
+    // ✨ 修正：改為正確的工作區路徑
+    console.log("✅ 準備跳轉至正確路徑:", `/workspace/recipe-detail/${targetId}`);
+    router.push(`/workspace/recipe-detail/${targetId}`);
+  } else {
+    console.error("❌ 找不到 ID");
+    alert("系統找不到原始食譜編號");
+  }
+};
+
+// ...其餘 updateField, setDifficulty, computed 等維持不變
 const updateField = (field, value) => {
   emit('update:modelValue', { ...props.modelValue, [field]: value });
 };
@@ -61,8 +85,12 @@ const adaptRecipeData = computed(() => {
     <input ref="fileInput" type="file" class="hidden-input" accept="image/*" @change="handleCoverUpload" />
 
     <template v-if="isAdaptMode">
-      <div class="adapt-card-wrapper readonly-overlay">
-        <AdaptRecipeCard :recipe="adaptRecipeData" />
+      <div class="adapt-card-section">
+        <div class="adapt-card-wrapper readonly-overlay">
+          <AdaptRecipeCard :recipe="adaptRecipeData" />
+        </div>
+        <BaseBtn title="查看原始食譜詳情" variant="outline" :width="320" @click="goToOriginal"
+          class="back-original-btn d-none-mobile" />
       </div>
     </template>
 
@@ -135,6 +163,9 @@ const adaptRecipeData = computed(() => {
           maxlength="200"></textarea>
         <p v-else class="desc-display p-p2">{{ modelValue.description || '暫無簡介' }}</p>
       </div>
+
+      <BaseBtn v-if="isAdaptMode" title="查看原始食譜詳情" variant="outline" :width="100" @click="goToOriginal"
+        class="back-original-btn d-only-mobile" />
     </div>
   </section>
 </template>
@@ -142,6 +173,60 @@ const adaptRecipeData = computed(() => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
+.adapt-card-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+
+  @media (min-width: 768px) {
+    width: 320px;
+  }
+}
+
+.back-original-btn {
+  &.d-only-mobile {
+    display: none;
+
+    @media (max-width: 767px) {
+      display: flex;
+      width: 100% !important;
+      margin-top: 24px;
+    }
+  }
+
+  &.d-none-mobile {
+    margin-top: 60px;
+
+    @media (max-width: 767px) {
+      display: none;
+    }
+  }
+}
+
+.recipe-card-container {
+  display: flex;
+  flex-direction: column;
+  background: $neutral-color-white;
+  border: 1px solid $primary-color-400;
+  border-radius: 12px;
+  padding: 24px;
+  gap: 24px;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
+}
+
+.info-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* 基礎樣式保持不變 */
 .title-with-tag {
   display: flex;
   align-items: center;
@@ -207,29 +292,10 @@ const adaptRecipeData = computed(() => {
   border-radius: 8px;
   overflow: hidden;
 
-  @media (min-width: 768px) {
-    width: 320px;
-  }
-
-  // ✨ 玻璃罩樣式
   &.readonly-overlay {
-    pointer-events: none; // 禁止所有滑鼠事件 (無法打字、無法點擊)
-    user-select: none; // 禁止選取文字
+    pointer-events: none;
+    user-select: none;
     cursor: default;
-  }
-}
-
-.recipe-card-container {
-  display: flex;
-  flex-direction: column;
-  background: $neutral-color-white;
-  border: 1px solid $primary-color-400;
-  border-radius: 12px;
-  padding: 24px;
-  gap: 24px;
-
-  @media (min-width: 768px) {
-    flex-direction: row;
   }
 }
 
@@ -254,14 +320,6 @@ const adaptRecipeData = computed(() => {
   @media (min-width: 768px) {
     width: 320px;
   }
-}
-
-.info-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
 }
 
 .row-title .title-input {

@@ -39,24 +39,12 @@ const toggleRecipeLike = () => {
     localLikesOffset.value = isLiked.value ? 1 : 0;
 };
 
-// --- 2. 功能函式 ---
 const handleGoToEdit = () => {
-    // ✨ 獲取當前食譜的 ID (從 API 拿到的或是網址上的)
     const currentId = rawRecipe.value?.recipe_id || route.params.id;
-
-    if (isPreviewMode.value) {
-        // 預覽模式：返回編輯器，並【務必】帶上 editId
-        router.push({
-            path: '/workspace/edit-recipe',
-            query: { editId: currentId } // ✨ 補上這行，編輯器才抓得到 ID
-        });
-    } else {
-        // 正式查看模式
-        router.push({
-            path: '/workspace/edit-recipe',
-            query: { editId: currentId }
-        });
-    }
+    router.push({
+        path: '/workspace/edit-recipe',
+        query: { editId: currentId }
+    });
 };
 
 const backToEdit = () => {
@@ -95,7 +83,6 @@ const fetchData = async () => {
         }
     }
 
-    // 非預覽模式才清空 Store
     recipeStore.previewData = null;
 
     try {
@@ -280,7 +267,6 @@ const onReportSubmit = (data) => {
     console.log('收到檢舉內容:', data);
     isReportModalOpen.value = false;
 };
-
 </script>
 
 <template>
@@ -316,19 +302,24 @@ const onReportSubmit = (data) => {
                         <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
                         <span class="count-text">{{ displayRecipeLikes }}</span>
                     </div>
-                    <i-material-symbols-share-outline class="action-icon" @click="handleShare" />
 
-                    <i-material-symbols-edit class="action-icon" @click="handleGoToEdit" />
+                    <div class="action-item" @click="handleShare">
+                        <i-material-symbols-share-outline class="action-icon" />
+                    </div>
 
-                    <i-material-symbols-error-outline-rounded class="action-icon report-btn"
-                        @click="isReportModalOpen = true" />
+                    <div class="action-item" @click="handleGoToEdit">
+                        <i-material-symbols-edit class="action-icon" />
+                    </div>
+
+                    <div class="action-item" @click="isReportModalOpen = true">
+                        <i-material-symbols-error-outline-rounded class="action-icon report-btn" />
+                    </div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-7 col-lg-12">
                     <RecipeIntro :info="recipeIntroData" :is-preview="isPreviewMode" />
-
                     <div class="d-lg-none">
                         <section class="mb-10">
                             <NutritionCard :servings="servings" :ingredients="nutritionWrapper"
@@ -338,7 +329,6 @@ const onReportSubmit = (data) => {
                             <RecipeIngredients :servings="servings" :list="ingredientsData" />
                         </section>
                     </div>
-
                     <section class="mb-10 steps-section">
                         <RecipeSteps :steps="stepsData" />
                     </section>
@@ -388,23 +378,19 @@ const onReportSubmit = (data) => {
     </div>
 </template>
 
-
-
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
 .preview-sticky-bar {
     position: fixed;
     top: 0;
-    // ✨ 核心修正：預設改為全寬，再透過內部 container 限制寬度
     left: 0;
     width: 100%;
     z-index: 9999;
-    padding-top: 12px; // 🔹 縮減上方留白 (原為 20px)
+    padding-top: 12px;
     pointer-events: none;
     transition: all 0.3s ease;
 
-    // ✨ 修正 Sidebar 存在時的偏移 (這部分保留給電腦版)
     @media screen and (min-width: 1025px) {
         left: 260px;
         width: calc(100% - 260px);
@@ -413,7 +399,7 @@ const onReportSubmit = (data) => {
     .container {
         max-width: 1000px;
         margin: 0 auto;
-        padding: 0 12px; // 🔹 稍微縮減左右 padding
+        padding: 0 12px;
     }
 
     .bar-content {
@@ -422,30 +408,29 @@ const onReportSubmit = (data) => {
         align-items: center;
         background-color: $primary-color-400;
         color: $neutral-color-white;
-        padding: 10px 20px; // 🔹 縮減內距 (原為 14px 28px)
+        padding: 10px 20px;
         border-radius: 12px;
         pointer-events: auto;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
         span {
             font-weight: 500;
-            font-size: 14px; // 🔹 手機版字體稍微縮小一點點更精緻
+            font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis; // 防止文字太長
+            text-overflow: ellipsis;
         }
 
         .exit-preview-btn {
-            flex-shrink: 0; // 🔹 確保按鈕不會被壓扁
+            flex-shrink: 0;
             background-color: $neutral-color-white;
             color: $primary-color-700;
             border: none;
-            padding: 6px 16px; // 🔹 縮小按鈕尺寸
+            padding: 6px 16px;
             border-radius: 50px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            white-space: nowrap;
             margin-left: 8px;
 
             &:hover {
@@ -454,16 +439,15 @@ const onReportSubmit = (data) => {
         }
     }
 }
+
 .recipe-container-root {
     background-color: $neutral-color-white;
     min-height: 100vh;
     padding: 0 0 100px 0;
 
     &.preview-padding {
-        // ✨ 電腦版維持較大間距
         padding-top: 90px;
 
-        // ✨ 手機版縮小間距，解決留白過大問題
         @media screen and (max-width: 768px) {
             padding-top: 0px;
         }
@@ -484,11 +468,10 @@ const onReportSubmit = (data) => {
     margin-bottom: 20px;
     border-bottom: 1px solid $neutral-color-100;
 
-    // ✨ 新增：手機版 RWD 調整
     @media screen and (max-width: 768px) {
-        flex-direction: column; // 讓標題與 icon 組垂直排列
-        align-items: flex-start; // 靠左對齊
-        gap: 16px; // 標題與 icon 之間的間距
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
         padding: 15px 0;
     }
 
@@ -509,18 +492,16 @@ const onReportSubmit = (data) => {
         gap: 20px;
         color: $primary-color-700;
 
-        // ✨ 新增：手機版時稍微縮小間距，避免在超小螢幕塞不下
         @media screen and (max-width: 768px) {
             gap: 16px;
-            width: 100%; // 滿版讓它好控制
-            justify-content: flex-start; // 確保 icon 組靠左對齊
+            width: 100%;
+            justify-content: flex-start;
         }
 
         &.is-preview {
             opacity: 0.6;
 
-            .action-item,
-            .action-icon {
+            .action-item {
                 cursor: not-allowed;
                 pointer-events: none;
             }
@@ -531,6 +512,7 @@ const onReportSubmit = (data) => {
             align-items: center;
             gap: 6px;
             cursor: pointer;
+            transition: color 0.2s ease;
 
             &.active {
                 color: $primary-color-700;
@@ -543,6 +525,8 @@ const onReportSubmit = (data) => {
             &:hover {
                 color: $primary-color-400;
             }
+
+            // ✨ 統一 hover 變色
         }
 
         .count-text {
