@@ -317,6 +317,57 @@ const adaptRecipeData = computed(() => {
     border-style: solid;
   }
 
+  // ✨ 修正：確保加號與文字完全置中且不偏移
+  .upload-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+
+    .placeholder-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: $neutral-color-400;
+
+      .plus-icon {
+        font-size: 48px;
+        line-height: 1;
+        margin-bottom: 4px;
+        display: block;
+      }
+
+      .label {
+        margin: 0;
+      }
+    }
+  }
+
+  .change-hint {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s;
+    border-radius: 6px;
+
+    span {
+      font-weight: 500;
+    }
+  }
+
+  &:hover .change-hint {
+    opacity: 1;
+  }
+
   @media (min-width: 768px) {
     width: 320px;
   }
