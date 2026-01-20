@@ -59,9 +59,11 @@ const navItems = computed(() => {
                         <router-link to="/"><img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo" ></router-link>
                     </div>
                     <div class="link-group">
-                        <router-link to="/search" class="search-btn p-p1">搜尋好料理</router-link>
+                        
 
                         <div class="page-link" :class="{ 'mobile-active': isMenuOpen }">
+                            <router-link to="/search" class="search-btn p-p1" :class="{ 'mobile-active': isMenuOpen }" >搜尋好料理</router-link>
+
                             <router-link v-for="item in navItems" :key="item.path" :to="item.path" class="p-p1">
                                 {{ item.title }}
                             </router-link>
@@ -116,6 +118,7 @@ const navItems = computed(() => {
         display: flex;
         gap: 24px;
         height: 50px;
+        position: relative;
 
         .search-btn {
             background-color: $accent-color-700;
@@ -125,7 +128,9 @@ const navItems = computed(() => {
             display: flex;
             padding: 0 30px;
             border-radius: 50px;
-
+            position: absolute;
+            left: -160px;
+            animation: searchPulse 2.4s ease-in-out infinite;
             &:hover {
                 background-color: $accent-color-800;
                 color: $accent-color-100;
@@ -203,7 +208,6 @@ const navItems = computed(() => {
         height: 45px;
         border-radius: 50%;
         background-color: rgba(255, 255, 255, 0.6);
-        // position: relative;
         z-index: 10;
         display: none;
         transition: .3s ease;
@@ -267,10 +271,29 @@ const navItems = computed(() => {
     }
 
 }
-
+@keyframes searchPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 180, 0, 0.6);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(255, 180, 0, 0);
+        transform: scale(1.03);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 180, 0, 0);
+        transform: scale(1);
+    }
+}
 @media screen and (max-width: 810px) {
+
     .site-nav {
         .link-group {
+            .search-btn {
+                position: static;
+                margin-bottom: 20px;
+                width: 150px;
+            }
             .page-link {
                 position: fixed;
                 top: 0;
@@ -381,8 +404,6 @@ const navItems = computed(() => {
             width: 45px;
             z-index: 20;
         }
-
-
         .cart-btn,
         .login-btn {
             color: $neutral-color-800;
@@ -417,7 +438,6 @@ const navItems = computed(() => {
             visibility: visible;
         }
     }
-
     .nav-box {
         display: none;
     }

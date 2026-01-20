@@ -12,13 +12,17 @@ const hotTags = ref([])
 
 const fetchRandomTags = async () => {
     try{
-        const res = await publicApi.get('data/recipe/tags.json');
-        const allTags = res.data;
+        const [resTags, resProducts] = await Promise.all([
+            publicApi.get('data/recipe/tags.json'),
+            publicApi.get('data/mall/products.json')
+        ]);
+        const recipeTagNames = resTags.data.map(tag => tag.tag_name);
+        const productCategories = [...new Set(resProducts.data.map(p => p.product_category))];
+        const allHotTags = [...recipeTagNames, ...productCategories];
 
-        hotTags.value = [...allTags]
+        hotTags.value = allHotTags
             .sort(() => Math.random() - 0.5)
-            .slice(0, 5)
-            .map(tag => tag.tag_name);
+            .slice(0, 5);
     }catch(err){
         console.error("無法載入隨機標籤:", err);
     }
