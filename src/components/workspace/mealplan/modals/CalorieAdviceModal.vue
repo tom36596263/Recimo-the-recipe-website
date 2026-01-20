@@ -158,7 +158,7 @@ const handleCalculate = () => {
 }
 
 .modal-card {
-    background: #fff;
+    background: $neutral-color-white;
     width: 95%;
     max-width: 650px;
     height: auto;
@@ -181,6 +181,11 @@ const handleCalculate = () => {
     color: $neutral-color-400;
     cursor: pointer;
     z-index: 10;
+    transition: color 0.2s ease;
+
+    &:hover {
+            color: $neutral-color-black;
+        }
 }
 
 /* --- 表單內容區 --- */
@@ -318,7 +323,7 @@ const handleCalculate = () => {
         border-radius: 15px;
         border: 1px solid $neutral-color-400;
         padding: 0 30px 0 15px;
-        background: #fff;
+        background: $neutral-color-white;
         font-size: 14px;
         appearance: none;
 
@@ -356,7 +361,7 @@ const handleCalculate = () => {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    color: #fff;
+    color: $neutral-color-white;
 
     .res-label {
         font-size: 18px;
