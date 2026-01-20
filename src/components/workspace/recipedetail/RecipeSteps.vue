@@ -115,7 +115,11 @@ const props = defineProps({
   p {
     margin-top: 12px;
     line-height: 1.8;
-    margin-bottom: 0; 
+    margin-bottom: 0;
+
+    white-space: pre-wrap; 
+    word-break: break-all; 
+    overflow-wrap: break-word; 
   }
 }
 
