@@ -28,41 +28,39 @@ const recipeForm = ref({
 
 // --- 2. 核心邏輯：掛載時載入資料 ---
 onMounted(async () => {
-  // 情境 A：從預覽模式點擊「返回編輯」
   if (recipeStore.rawEditorData) {
     recipeForm.value = { ...recipeStore.rawEditorData };
     recipeStore.rawEditorData = null;
     return;
   }
 
-  // 情境 B：載入正式食譜資料 (從編輯按鈕過來)
   const editId = route.query.editId || route.params.id;
   if (editId) {
     try {
-      const [resR, resRecipeIng, resIngMaster, resS] = await Promise.all([
+      // ✨ 1. 多抓取 step_ingredients.json
+      const [resR, resRecipeIng, resIngMaster, resS, resStepIng] = await Promise.all([
         publicApi.get('data/recipe/recipes.json'),
         publicApi.get('data/recipe/recipe_ingredient.json'),
         publicApi.get('data/recipe/ingredients.json'),
-        publicApi.get('data/recipe/steps.json')
+        publicApi.get('data/recipe/steps.json'),
+        publicApi.get('data/recipe/step_ingredients.json') // ✨ 這裡請確認你的路徑與檔名
       ]);
 
       const recipeId = Number(editId);
       const found = resR.data.find(r => Number(r.recipe_id) === recipeId);
 
       if (found) {
-        // 1. 基本資訊
         recipeForm.value.title = found.recipe_title;
         recipeForm.value.description = found.recipe_description || found.recipe_descreption;
         recipeForm.value.difficulty = found.recipe_difficulty || 1;
         recipeForm.value.totalTime = found.recipe_total_time || '00:30';
 
-        // 封面圖片路徑補完
         const rawCover = found.recipe_image_url || '';
         recipeForm.value.coverImg = (rawCover && !rawCover.startsWith('http') && !rawCover.startsWith('/'))
           ? `/img/recipes/${recipeId}/${rawCover}`
           : rawCover;
 
-        // 2. 填入食材
+        // 2. 處理食譜總食材
         const links = resRecipeIng.data.filter(i => Number(i.recipe_id) === recipeId);
         recipeForm.value.ingredients = links.map(link => {
           const master = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
@@ -71,7 +69,6 @@ onMounted(async () => {
             name: master?.ingredient_name || '',
             amount: link.amount,
             unit: link.unit_name || master?.unit_name || '份',
-            // 以下為計算營養成分需要的欄位 (由 Store 加總)
             kcal_per_100g: master?.kcal_per_100g || 0,
             protein_per_100g: master?.protein_per_100g || 0,
             fat_per_100g: master?.fat_per_100g || 0,
@@ -79,12 +76,12 @@ onMounted(async () => {
           };
         });
 
-        // 3. 填入步驟 (包含圖片與時間轉換)
+        // 3. 處理步驟 (包含抓取對應的步驟食材)
         const stepsData = resS.data.filter(s => Number(s.recipe_id) === recipeId)
           .sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
 
         recipeForm.value.steps = stepsData.map((s, index) => {
-          // 圖片路徑邏輯
+          // 圖片路徑
           let rawImg = s.step_image_url || s.image || '';
           let finalImg = '';
           if (rawImg) {
@@ -95,36 +92,39 @@ onMounted(async () => {
             }
           }
 
-          // 時間轉換邏輯: "00:05:00" -> 5 (分鐘)
+          // 時間轉換
           let minuteValue = 0;
-          const rawTime = s.step_total_time || s.time || '';
+          const rawTime = s.step_total_time || '';
           if (rawTime && typeof rawTime === 'string' && rawTime.includes(':')) {
             const parts = rawTime.split(':');
-            const h = parseInt(parts[0]) || 0;
-            const m = parseInt(parts[1]) || 0;
-            minuteValue = (h * 60) + m;
+            minuteValue = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
           } else {
             minuteValue = parseInt(rawTime) || 0;
           }
 
+          // ✨✨ 核心邏輯：從 resStepIng 找出屬於這個步驟的食材 ID
+          // 匹配條件是 step_id 要一樣
+          const stepTags = resStepIng.data
+            .filter(si => Number(si.step_id) === Number(s.step_id))
+            .map(si => si.ingredient_id);
+
           return {
-            id: s.step_id || `s-${recipeId}-${index}`, // 確保 Draggable 渲染有穩定 Key
+            id: s.step_id || `s-${recipeId}-${index}`,
             title: s.step_title || '',
             content: s.step_content || '',
-            image: finalImg,   // ✨ 對應 StepEditor 的 getStepImage(step)
-            time: minuteValue, // ✨ 對應 StepEditor 的 step.time (分鐘數字)
-            tags: s.tags || []
+            image: finalImg,
+            time: minuteValue,
+            tags: stepTags // ✨ 這裡就會帶入 [23, ...] 這樣的陣列
           };
         });
 
-        console.log('✅ 編輯資料載入成功：圖片與時間已正確解析');
+        console.log('✅ 步驟食材關聯載入成功');
       }
     } catch (err) {
       console.error("載入編輯資料失敗", err);
     }
   }
 });
-
 // --- 3. 預覽與儲存 ---
 const handlePreview = () => {
   // 深拷貝一份表單進行預覽轉換
