@@ -35,7 +35,7 @@ const handleAddClick = () => {
 <template>
     <article class="ingredient-card">
         <div class="info-section">
-            <h3 class="title p-p1">{{ name }}</h3>
+            <h3 class="title p-p2">{{ name }}</h3>
             <p class="unit-label p-p3">每100g：</p>
             <div class="nutrition-data">
                 <p class="p-p3">熱量：{{ calories }}kcal</p>
