@@ -76,7 +76,7 @@
     .home-ingredient15{
         z-index: 20;
         position: absolute;
-        top: 70vh;
+        top: 60%;
         right: 5vw;
         width: 140px;
         animation: floating 4s ease-in-out infinite;
@@ -85,8 +85,8 @@
     .home-ingredient20{
         z-index: 20;
         position: absolute;
-        top: 75vh;
-        left: 5vw;
+        top: 70%;
+        left: 10vw;
         width: 180px;
         animation: floating 4s ease-in-out infinite;
         animation-delay: 0.5s;
@@ -98,7 +98,6 @@
         }
         50% {
             transform: translateY(-20px);
-            // transform: rotate(10deg);
         }
         100% {
             transform: translateY(0px);
@@ -135,22 +134,10 @@
                 margin-bottom: 30px;
             }
         }
-        .home-ingredient1{
-            top: 25vh;
-            right: 75vw;
-            width: 90px;
-        }
-        .home-ingredient15{
-            top: 40vh;
-            right: 10vw;
-            width: 70px;
-            animation-delay: 1s;
-        }
+        .home-ingredient1, 
+        .home-ingredient15,
         .home-ingredient20{
-            top: 50vh;
-            left: 30vw;
-            width: 80px;
-            animation-delay: 0.5s;
+            display: none;
         }
         .find-recipe-section{
             padding: 40px 30px;

@@ -1,9 +1,7 @@
 <script setup>
     import { useRouter } from 'vue-router';
-
-    import BaseTag from '@/components/common/BaseTag.vue';
-    import BaseBtn from '@/components/common/BaseBtn.vue';
     import LikeButton from '@/components/common/LikeButton.vue'
+    
     const props = defineProps({
         recipe: {
             type: Object,
@@ -13,7 +11,7 @@
 
     const router = useRouter();
 
-    const goToDetail = () => {
+    const goToDetail = () => { 
         router.push({ 
             name: 'workspace-recipe-detail', 
             params: { id: props.recipe.id } 
@@ -22,43 +20,44 @@
 
 </script>
 <template>
-    <div class="recipe-card-lg">
+    <div 
+    class="recipe-card-sm"  
+    @click="goToDetail">
         <header class="card-header">
             <img :src="recipe.image_url" alt="recipe.recipe_name">
         </header>
-
         <div class="card-body">
             <div class="title">
                 <h5 class="zh-h5">{{ recipe.recipe_name }}</h5>
                 <div class="icon-group">
-                    <i-material-symbols-Favorite-outline />
+                    <i-material-symbols-Favorite-outline @click.prevent.stop/>
                 </div>
-                
             </div>
-            
         </div>
-        
         <footer>
             <div class="personal-info">
                 <div class="personal-img">
                     <img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo" >
                 </div>
                 <p class="p-p1">Recimo</p>
-                <LikeButton 
-                :initial-likes="recipe.author.likes || 0" 
-                @update:liked="(val) => handleLikeChange(val, item)"
-                />
+                <div @click.prevent.stop>
+                    <LikeButton 
+                    :initial-likes="recipe.author.likes || 0" 
+                    @update:liked="(val) => handleLikeChange(val, item)"
+                    />
+                </div>
             </div>
             
         </footer>
     </div>
 </template>
 <style lang="scss" scoped>
-    .recipe-card-lg{
+    .recipe-card-sm{
         border: 1px solid $neutral-color-400;
         border-radius: $radius-base;
         overflow: hidden;
         background-color: $neutral-color-white;
+        cursor: pointer;
         .card-header{
             overflow: hidden;
             height: 150px;
