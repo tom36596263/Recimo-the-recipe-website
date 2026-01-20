@@ -28,25 +28,36 @@ const recipeForm = ref({
 
 // --- 2. 核心邏輯：掛載時載入資料 ---
 onMounted(async () => {
+  // 先獲取當前 ID (可能是 params 或 query)
+  const editIdFromUrl = route.query.editId || route.params.id;
+
+  // 情境 A：從預覽模式點擊「返回編輯」
   if (recipeStore.rawEditorData) {
     recipeForm.value = { ...recipeStore.rawEditorData };
     recipeStore.rawEditorData = null;
+    
+    // ✨ 修正：如果返回時 URL 沒有 ID，則補上，確保重新整理不會失效
+    if (editIdFromUrl && !route.query.editId) {
+      router.replace({ 
+        query: { ...route.query, editId: editIdFromUrl } 
+      });
+    }
     return;
   }
 
-  const editId = route.query.editId || route.params.id;
-  if (editId) {
+  // 情境 B：載入正式食譜資料 (從編輯按鈕過來)
+  if (editIdFromUrl) {
     try {
-      // ✨ 1. 多抓取 step_ingredients.json
+      // 包含步驟食材關聯的多檔抓取
       const [resR, resRecipeIng, resIngMaster, resS, resStepIng] = await Promise.all([
         publicApi.get('data/recipe/recipes.json'),
         publicApi.get('data/recipe/recipe_ingredient.json'),
         publicApi.get('data/recipe/ingredients.json'),
         publicApi.get('data/recipe/steps.json'),
-        publicApi.get('data/recipe/step_ingredients.json') // ✨ 這裡請確認你的路徑與檔名
+        publicApi.get('data/recipe/step_ingredients.json')
       ]);
 
-      const recipeId = Number(editId);
+      const recipeId = Number(editIdFromUrl);
       const found = resR.data.find(r => Number(r.recipe_id) === recipeId);
 
       if (found) {
@@ -69,6 +80,7 @@ onMounted(async () => {
             name: master?.ingredient_name || '',
             amount: link.amount,
             unit: link.unit_name || master?.unit_name || '份',
+            note: link.remark || '',
             kcal_per_100g: master?.kcal_per_100g || 0,
             protein_per_100g: master?.protein_per_100g || 0,
             fat_per_100g: master?.fat_per_100g || 0,
@@ -81,18 +93,11 @@ onMounted(async () => {
           .sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
 
         recipeForm.value.steps = stepsData.map((s, index) => {
-          // 圖片路徑
           let rawImg = s.step_image_url || s.image || '';
-          let finalImg = '';
-          if (rawImg) {
-            if (rawImg.startsWith('http') || rawImg.startsWith('data:') || rawImg.startsWith('/')) {
-              finalImg = rawImg;
-            } else {
-              finalImg = `/img/recipes/${recipeId}/steps/${rawImg}`;
-            }
-          }
+          let finalImg = (rawImg && !rawImg.startsWith('http') && !rawImg.startsWith('data:') && !rawImg.startsWith('/'))
+            ? `/img/recipes/${recipeId}/steps/${rawImg}`
+            : rawImg;
 
-          // 時間轉換
           let minuteValue = 0;
           const rawTime = s.step_total_time || '';
           if (rawTime && typeof rawTime === 'string' && rawTime.includes(':')) {
@@ -102,8 +107,6 @@ onMounted(async () => {
             minuteValue = parseInt(rawTime) || 0;
           }
 
-          // ✨✨ 核心邏輯：從 resStepIng 找出屬於這個步驟的食材 ID
-          // 匹配條件是 step_id 要一樣
           const stepTags = resStepIng.data
             .filter(si => Number(si.step_id) === Number(s.step_id))
             .map(si => si.ingredient_id);
@@ -114,41 +117,43 @@ onMounted(async () => {
             content: s.step_content || '',
             image: finalImg,
             time: minuteValue,
-            tags: stepTags // ✨ 這裡就會帶入 [23, ...] 這樣的陣列
+            tags: stepTags
           };
         });
-
-        console.log('✅ 步驟食材關聯載入成功');
+        console.log('✅ 編輯資料載入成功 (含步驟食材)');
       }
     } catch (err) {
       console.error("載入編輯資料失敗", err);
     }
   }
 });
+
 // --- 3. 預覽與儲存 ---
 const handlePreview = () => {
-  // 深拷貝一份表單進行預覽轉換
   const previewForm = JSON.parse(JSON.stringify(recipeForm.value));
 
-  // 處理封面圖：如果目前是 File 物件則轉為網址
   if (recipeForm.value.coverImg instanceof File) {
     previewForm.coverImg = URL.createObjectURL(recipeForm.value.coverImg);
   }
 
-  // 處理步驟圖：如果是 File 則轉為網址
   recipeForm.value.steps.forEach((step, index) => {
     if (step.image instanceof File) {
       previewForm.steps[index].image = URL.createObjectURL(step.image);
     }
   });
 
-  // 存入 Store：rawEditorData 存原始含 File 的物件；setPreviewFromEditor 轉成詳情頁規格
   recipeStore.rawEditorData = { ...recipeForm.value };
   recipeStore.setPreviewFromEditor(previewForm);
 
+  // ✨ 修正：獲取當前正確的 ID
+  const currentId = route.query.editId || route.params.id || 0;
+
   router.push({
-    path: `/workspace/recipe-detail/${route.query.editId || 0}`,
-    query: { mode: 'preview' }
+    path: `/workspace/recipe-detail/${currentId}`,
+    query: { 
+      mode: 'preview',
+      editId: currentId // ✨ 傳遞 editId 以供詳情頁返回時使用
+    }
   });
 };
 
@@ -184,9 +189,7 @@ provide('isEditing', isEditing);
       <footer class="editor-footer">
         <div class="footer-center-group">
           <BaseBtn title="預覽" variant="outline" :width="100" @click="handlePreview" class="preview-btn" />
-
           <BaseBtn :title="isPublished ? '確認發布' : '完成編輯'" :width="200" @click="handleSave" class="save-btn" />
-
           <div class="publish-toggle">
             <input type="checkbox" id="publish-check" v-model="isPublished" />
             <label for="publish-check" class="p-p2">公開發布</label>
@@ -196,6 +199,7 @@ provide('isEditing', isEditing);
     </main>
   </div>
 </template>
+
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';

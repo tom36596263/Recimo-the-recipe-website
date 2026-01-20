@@ -39,16 +39,22 @@ const toggleRecipeLike = () => {
     localLikesOffset.value = isLiked.value ? 1 : 0;
 };
 
-// 返回編輯（或點擊編輯圖示時使用）
+// --- 2. 功能函式 ---
 const handleGoToEdit = () => {
+    // ✨ 獲取當前食譜的 ID (從 API 拿到的或是網址上的)
+    const currentId = rawRecipe.value?.recipe_id || route.params.id;
+
     if (isPreviewMode.value) {
-        // 預覽模式：直接返回編輯器，編輯器會從 Store 抓回 rawEditorData
-        router.push('/workspace/edit-recipe');
-    } else {
-        // 正式查看模式：帶上 editId 讓編輯器去 API 抓資料
+        // 預覽模式：返回編輯器，並【務必】帶上 editId
         router.push({
             path: '/workspace/edit-recipe',
-            query: { editId: rawRecipe.value?.recipe_id }
+            query: { editId: currentId } // ✨ 補上這行，編輯器才抓得到 ID
+        });
+    } else {
+        // 正式查看模式
+        router.push({
+            path: '/workspace/edit-recipe',
+            query: { editId: currentId }
         });
     }
 };
