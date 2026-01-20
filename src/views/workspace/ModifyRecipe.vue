@@ -1,35 +1,135 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { publicApi } from '@/utils/publicApi';
 import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard.vue';
 
 const router = useRouter();
+const route = useRoute();
 
-// 模擬原始食譜基礎資料
+/* =====================================================
+   狀態定義
+===================================================== */
+
+// 原始 / 當前編輯中的食譜資料
 const originalRecipe = ref({
-    id: 32,
-    title: '經典日式舒芙蕾鬆餅',
-    coverImg: 'https://picsum.photos/1200/600'
+    id: null,
+    title: '',
+    coverImg: ''
 });
 
-// 模擬 7 張改編卡片
-const variantItems = ref(new Array(7).fill({
-    id: 99,
-    title: '極致減糖實驗',
-    adapt_title: '糖 -15g / 增加甜菊糖',
-    author: 'Recimo',
-    likes: 128,
-    coverImg: 'https://picsum.photos/400/300'
-}));
+// 改編卡片（目前用假資料）
+const variantItems = ref(
+    Array.from({ length: 7 }, (_, i) => ({
+        id: i + 1,
+        title: '極致減糖實驗',
+        adapt_title: '糖 -15g / 增加甜菊糖',
+        author: 'Recimo',
+        likes: 128,
+        coverImg: 'https://picsum.photos/400/300'
+    }))
+);
 
-const handleCreateNew = () => {
-    router.push(`/workspace/modify-recipe/${originalRecipe.value.id}`);
-};
+// 當前頁面模式：edit | adapt | create
+const mode = ref('create');
 
-const goBack = () => {
-    router.back();
-};
+/* =====================================================
+   核心初始化邏輯（唯一入口）
+===================================================== */
+
+watch(
+    () => [route.params.id, route.query.action, route.query.editId],
+    async ([id, action, editId]) => {
+        // ① 編輯既有食譜
+        if (id) {
+            mode.value = 'edit';
+            await loadRecipeById(id);
+            return;
+        }
+
+        // ② 改編建立
+        if (action === 'adapt' && editId) {
+            mode.value = 'adapt';
+            await loadRecipeById(editId, { adapt: true });
+            return;
+        }
+
+        // ③ 全新建立
+        mode.value = 'create';
+        initEmptyRecipe();
+    },
+    { immediate: true }
+);
+
+/* =====================================================
+   資料處理方法
+===================================================== */
+
+// 抓取食譜資料
+async function loadRecipeById(recipeId, options = {}) {
+    try {
+        const res = await publicApi.get('data/recipe/recipes.json');
+        const found = res.data.find(
+            r => Number(r.recipe_id) === Number(recipeId)
+        );
+
+        if (!found) {
+            initEmptyRecipe();
+            return;
+        }
+
+        originalRecipe.value = {
+            // ⭐ 改編時清掉 id，避免覆寫原食譜
+            id: options.adapt ? null : found.recipe_id,
+            title: options.adapt
+                ? `${found.recipe_title}（改編）`
+                : found.recipe_title,
+            coverImg: found.recipe_image_url.startsWith('http')
+                ? found.recipe_image_url
+                : `/img/recipes/${found.recipe_id}/${found.recipe_image_url}`
+        };
+    } catch (err) {
+        console.error('抓取食譜失敗', err);
+        initEmptyRecipe();
+    }
+}
+
+// 初始化空白食譜
+function initEmptyRecipe() {
+    originalRecipe.value = {
+        id: null,
+        title: '新食譜',
+        coverImg: ''
+    };
+}
+
+/* =====================================================
+   UI 行為
+===================================================== */
+
+// 點擊「創建食譜」（改編）
+function handleCreateNew() {
+    if (!route.params.id) return;
+
+    router.push({
+        name: 'edit-recipe',
+        query: {
+            editId: route.params.id,
+            action: 'adapt'
+        }
+    });
+
+}
+
+// 返回原食譜詳情
+function goBack() {
+    const backId = route.params.id || route.query.editId;
+    if (!backId) return;
+
+    router.push(`/workspace/recipe-detail/${backId}`);
+}
 </script>
+
 
 <template>
     <div class="variants-gallery container">
@@ -138,7 +238,7 @@ const goBack = () => {
     }
 
     .decorative-line {
-        height: 4px;
+        height: 10px;
         background-color: $primary-color-100;
         border-radius: 4px;
     }

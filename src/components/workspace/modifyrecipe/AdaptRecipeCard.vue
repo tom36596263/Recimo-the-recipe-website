@@ -27,7 +27,7 @@ const handleLikeChange = (val, recipe) => {
 </script>
 
 <template>
-    <div class="recipe-card-sm" @click="goToDetail">
+    <div v-if="recipe" class="recipe-card-sm" @click="goToDetail">
         <header class="card-header" :style="{
             backgroundImage: recipe.coverImg ? `url(${recipe.coverImg})` : '',
             backgroundSize: 'cover',
@@ -40,26 +40,34 @@ const handleLikeChange = (val, recipe) => {
 
         <div class="card-body">
             <div class="input-group title-input">
-                <input type="text" v-model="recipe.title" placeholder="請輸入更改版本標題..." @click.stop>
+                <input type="text" :value="recipe.title || ''" placeholder="請輸入更改版本標題..." @click.stop>
             </div>
 
             <div class="input-group content-input">
                 <i-material-symbols-arrow-right-alt-rounded class="arrow-icon" />
-                <input type="text" v-model="recipe.description" placeholder="請輸入關鍵更改內容..." @click.stop>
+                <input type="text" :value="recipe.description || recipe.adapt_title || ''" placeholder="請輸入關鍵更改內容..."
+                    @click.stop>
             </div>
         </div>
 
         <footer>
             <div class="personal-info">
                 <div class="personal-img" :style="{
-                    backgroundImage: recipe.author?.author_image ? `url(${recipe.author.author_image})` : '',
+                    backgroundImage: (recipe.author && typeof recipe.author === 'object' && recipe.author.author_image)
+                        ? `url(${recipe.author.author_image})`
+                        : '',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }">
                 </div>
-                <p class="p-p1">{{ recipe.author?.author_name || 'Recimo' }}</p>
+
+                <p class="p-p1">
+                    {{ (recipe.author && typeof recipe.author === 'object') ? recipe.author.author_name : (recipe.author
+                    || 'Recimo') }}
+                </p>
+
                 <div @click.prevent.stop>
-                    <LikeButton :initial-likes="recipe.author?.likes || recipe.likes || 0"
+                    <LikeButton :initial-likes="recipe.likes || 0"
                         @update:liked="(val) => handleLikeChange(val, recipe)" />
                 </div>
             </div>

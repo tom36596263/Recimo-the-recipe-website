@@ -225,7 +225,7 @@ const routes = [
         meta: { layout: 'workspace', requiresAuth: true }
       },
       {
-        path: 'modify-recipe/:id', // :id 代表食譜的編號
+        path: 'modify-recipe/:id?', // :id 代表食譜的編號
         name: 'modify-recipe',
         component: () => import('@/views/workspace/ModifyRecipe.vue'),
         meta: {
