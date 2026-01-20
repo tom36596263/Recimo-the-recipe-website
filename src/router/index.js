@@ -175,7 +175,7 @@ const routes = [
         path: 'edit-plan/:id',
         name: 'edit-meal-plan',
         component: () => import('@/views/workspace/EditMealPlan.vue'),
-        meta: { layout: 'workspace', requiresAuth: true, hideTopBar: true },
+        meta: { layout: 'workspace', requiresAuth: true },
         props: true
       },
       {
@@ -225,7 +225,7 @@ const routes = [
         meta: { layout: 'workspace', requiresAuth: true }
       },
       {
-        path: 'modify-recipe/:id', // :id 代表食譜的編號
+        path: 'modify-recipe/:id?', // :id 代表食譜的編號
         name: 'modify-recipe',
         component: () => import('@/views/workspace/ModifyRecipe.vue'),
         meta: {

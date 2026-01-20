@@ -26,11 +26,12 @@ defineProps({
 @use "@/assets/scss/layouts/_grid.scss" as *;
 
 .step-card {
-    height: 205px;
+    min-height: 240px;
     border: 1px solid $primary-color-800;
     background-color: $primary-color-100;
     border-radius: 10px;
-    padding: 20px 25px;
+    padding: 20px 20px;
+    margin-bottom: 10px;
 
     display: flex;
     flex-direction: column;
@@ -45,9 +46,17 @@ defineProps({
 
 @media screen and (max-width: map.get($breakpoints, "lg")) {
     .step-card {
+        min-height: 190px;
+
         &:hover {
             transform: none; // 強制取消位移
         }
+    }
+}
+
+@media screen and (max-width: map.get($breakpoints, "md")) {
+    .step-card {
+        min-height: 220px;
     }
 }
 
@@ -60,6 +69,6 @@ defineProps({
     height: 50px;
     border-radius: 10px;
     color: $primary-color-700;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 </style>
