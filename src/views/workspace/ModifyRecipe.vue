@@ -7,136 +7,85 @@ import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard
 const router = useRouter();
 const route = useRoute();
 
-/* =====================================================
-    狀態定義
-===================================================== */
-
-// 原始 / 當前編輯中的食譜資料
-const originalRecipe = ref({
-    id: null,
-    title: '',
-    coverImg: '',
-    description: '' // 確保包含描述欄位
-});
-
-// 改編卡片（目前用假資料）
-const variantItems = ref(
-    Array.from({ length: 7 }, (_, i) => ({
-        id: i + 1,
-        title: '極致減糖實驗',
-        adapt_title: '糖 -15g / 增加甜菊糖',
-        author: 'Recimo',
-        likes: 128,
-        coverImg: 'https://picsum.photos/400/300'
-    }))
-);
-
-// 當前頁面模式：edit | adapt | create
-const mode = ref('create');
-
-/* =====================================================
-    核心初始化邏輯（唯一入口）
-===================================================== */
+const originalRecipe = ref({ id: null, title: '', coverImg: '', description: '' });
+const variantItems = ref([]);
 
 watch(
-    () => [route.params.id, route.query.action, route.query.editId],
-    async ([id, action, editId]) => {
-        // ① 編輯既有食譜
-        if (id) {
-            mode.value = 'edit';
-            await loadRecipeById(id);
-            return;
+    () => [route.params.id, route.query.editId],
+    async ([id, editId]) => {
+        const targetId = id || editId;
+        if (targetId) {
+            await loadRecipeData(targetId);
+        } else {
+            initEmptyRecipe();
         }
-
-        // ② 改編建立
-        if (action === 'adapt' && editId) {
-            mode.value = 'adapt';
-            await loadRecipeById(editId, { adapt: true });
-            return;
-        }
-
-        // ③ 全新建立
-        mode.value = 'create';
-        initEmptyRecipe();
     },
     { immediate: true }
 );
 
-/* =====================================================
-    資料處理方法
-===================================================== */
-
-// 抓取食譜資料
-async function loadRecipeById(recipeId, options = {}) {
+async function loadRecipeData(recipeId) {
     try {
-        const res = await publicApi.get('data/recipe/recipes.json');
-        const found = res.data.find(
-            r => Number(r.recipe_id) === Number(recipeId)
-        );
+        const [resRecipes, resAdaptations] = await Promise.all([
+            publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/recipe/recipe_adaptations.json')
+        ]);
 
-        if (!found) {
-            initEmptyRecipe();
-            return;
+        const allRecipes = resRecipes.data;
+        const allAdaptations = resAdaptations.data;
+
+        const found = allRecipes.find(r => Number(r.recipe_id) === Number(recipeId));
+        if (found) {
+            let finalImg = found.recipe_image_url || '';
+            if (finalImg && !finalImg.startsWith('http') && !finalImg.startsWith('/img/recipes/')) {
+                finalImg = `/img/recipes/${found.recipe_id}/${finalImg}`;
+            }
+
+            originalRecipe.value = {
+                id: found.recipe_id,
+                title: found.recipe_title,
+                description: found.recipe_description || found.recipe_descreption || '',
+                coverImg: finalImg
+            };
+
+            const filteredAdaptations = allAdaptations.filter(
+                a => Number(a.parent_recipe_id) === Number(recipeId)
+            );
+
+            variantItems.value = filteredAdaptations.map(adapt => {
+                const childInfo = allRecipes.find(r => Number(r.recipe_id) === Number(adapt.child_recipe_id));
+                return {
+                    id: adapt.child_recipe_id,
+                    title: childInfo?.recipe_title || '未知食譜',
+                    adapt_title: adapt.adaptation_title,
+                    author: childInfo?.author_name || 'Recimo User',
+                    likes: childInfo?.likes_count || 0,
+                    coverImg: adapt.adaptation_image_url || childInfo?.recipe_image_url || ''
+                };
+            });
         }
-
-        // --- 圖片路徑邏輯優化 ---
-        let finalImg = found.recipe_image_url || '';
-
-        // 如果不是 http 開頭，且還沒包含完整的路由路徑，才進行拼接
-        if (finalImg && !finalImg.startsWith('http') && !finalImg.startsWith('/img/recipes/')) {
-            finalImg = `/img/recipes/${found.recipe_id}/${finalImg}`;
-        }
-
-        originalRecipe.value = {
-            id: options.adapt ? null : found.recipe_id,
-            title: options.adapt
-                ? `${found.recipe_title}（改編）`
-                : found.recipe_title,
-            description: found.recipe_description || found.recipe_descreption || '',
-            coverImg: finalImg
-        };
     } catch (err) {
-        console.error('抓取食譜失敗', err);
-        initEmptyRecipe();
+        console.error('資料載入失敗', err);
     }
 }
-// 初始化空白食譜
+
 function initEmptyRecipe() {
-    originalRecipe.value = {
-        id: null,
-        title: '新食譜',
-        coverImg: '',
-        description: ''
-    };
+    originalRecipe.value = { id: null, title: '新食譜', coverImg: '', description: '' };
+    variantItems.value = [];
 }
 
-/* =====================================================
-    UI 行為
-===================================================== */
-
-// 點擊「創建食譜」（改編）
 function handleCreateNew() {
-    const sourceId = route.params.id || route.query.editId;
-    if (!sourceId) return;
-
+    if (!originalRecipe.value.id) return;
     router.push({
         name: 'edit-recipe',
-        query: {
-            editId: sourceId,
-            action: 'adapt'
-        }
+        query: { editId: originalRecipe.value.id, action: 'adapt' }
     });
 }
 
-// 返回原食譜詳情
 function goBack() {
-    const backId = route.params.id || route.query.editId;
-    if (!backId) return;
-
-    router.push(`/workspace/recipe-detail/${backId}`);
+    if (!originalRecipe.value.id) return;
+    router.push(`/workspace/recipe-detail/${originalRecipe.value.id}`);
 }
 </script>
-
 
 <template>
     <div class="variants-gallery container">
@@ -150,15 +99,13 @@ function goBack() {
             <div class="row align-center">
                 <div class="col-7 col-md-12">
                     <div class="main-image-container">
-                        <img :src="originalRecipe.coverImg" class="hero-img" :alt="originalRecipe.title" />
+                        <img :src="originalRecipe.coverImg" class="hero-img" />
                     </div>
                 </div>
                 <div class="col-5 col-md-12">
                     <div class="info-content">
                         <h1 class="zh-h2 mb-16">{{ originalRecipe.title }}</h1>
-                        <p class="p-p1 color-p1 mb-24">
-                            {{ originalRecipe.description }}
-                        </p>
+                        <p class="p-p1 color-p1 mb-24">{{ originalRecipe.description }}</p>
                         <div class="stat-tag p-p3">共有 {{ variantItems.length }} 個改編版本</div>
                     </div>
                 </div>
@@ -167,7 +114,7 @@ function goBack() {
         </section>
 
         <div class="row align-stretch">
-            <div class="col-3 col-lg-4 col-md-6 col-sm-12 mb-24">
+            <div class="col-3 col-lg-4 col-md-6 mb-24">
                 <div class="add-card-placeholder full-height" @click="handleCreateNew">
                     <div class="add-content">
                         <span class="plus-icon">+</span>
@@ -177,8 +124,8 @@ function goBack() {
                 </div>
             </div>
 
-            <div v-for="(item, index) in variantItems" :key="index" class="col-3 col-lg-4 col-md-6 col-sm-12 mb-24">
-                <AdaptRecipeCard :recipe="item" class="full-height" />
+            <div v-for="(item, index) in variantItems" :key="index" class="col-3 col-lg-4 col-md-6 mb-24">
+                <AdaptRecipeCard :recipe="item" class="full-height demo-readonly-card" />
             </div>
         </div>
     </div>
@@ -187,7 +134,58 @@ function goBack() {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-// 頁面基礎間距
+// ✨ Demo 專用唯讀強化樣式
+.demo-readonly-card {
+    cursor: default;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        z-index: 10;
+    }
+
+    :deep(.change-hint-overlay) {
+        display: none !important;
+    }
+
+    :deep(input) {
+        pointer-events: none;
+
+        &:focus {
+            border-bottom: none !important;
+        }
+    }
+}
+
+// ✨ 針對你的格線斷點進行手機版優化 (810px 以下)
+@media screen and (max-width: 810px) {
+    .add-card-placeholder {
+        padding: 24px 10px;
+
+        .plus-icon {
+            font-size: 32px !important;
+        }
+
+        .zh-h4 {
+            font-size: 16px !important;
+        }
+    }
+
+    // 縮小小卡內部組件，避免在 2 欄佈局下過長
+    :deep(.recipe-card-sm) {
+        .card-header {
+            height: 120px !important;
+        }
+
+        .card-body {
+            padding: 12px !important;
+        }
+    }
+}
+
+/* 原有基礎樣式 */
 .variants-gallery {
     padding: 20px 0 60px;
 }
@@ -196,7 +194,6 @@ function goBack() {
     text-align: right;
 }
 
-// Hero 區樣式優化
 .original-recipe-hero {
     .main-image-container {
         width: 100%;
@@ -204,7 +201,6 @@ function goBack() {
         border-radius: 16px;
         overflow: hidden;
         background-color: $neutral-color-100;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
         .hero-img {
             width: 100%;
@@ -215,25 +211,19 @@ function goBack() {
 
     .info-content {
         padding-left: 32px;
+    }
 
-        @media (max-width: 810px) {
+    // 你的斷點 md 為 810px
+    @media screen and (max-width: 810px) {
+        .info-content {
             padding-left: 0;
             margin-top: 24px;
         }
     }
 
-    // 🔹 改為 color-p1 並保留行距設定
     .color-p1 {
         color: $neutral-color-700;
-        line-height: 2; // 設定為 2 比較適中，3 可能會太寬，您可以視情況調整
-    }
-
-    .mb-16 {
-        margin-bottom: 16px;
-    }
-
-    .mb-24 {
-        margin-bottom: 24px;
+        line-height: 2;
     }
 
     .stat-tag {
@@ -248,10 +238,10 @@ function goBack() {
         height: 10px;
         background-color: $primary-color-100;
         border-radius: 4px;
+        margin-top: 40px;
     }
 }
 
-// 網格佈局工具
 .row.align-stretch {
     display: flex;
     flex-wrap: wrap;
@@ -266,15 +256,10 @@ function goBack() {
     margin-bottom: 40px;
 }
 
-.mt-40 {
-    margin-top: 40px;
-}
-
 .full-height {
     height: 100%;
 }
 
-// 創建按鈕卡片
 .add-card-placeholder {
     display: flex;
     flex-direction: column;
@@ -282,10 +267,15 @@ function goBack() {
     justify-content: center;
     border: 2px dashed $primary-color-400;
     border-radius: 12px;
-    background-color: $neutral-color-white;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.3s ease;
     padding: 40px 20px;
+
+    &:hover {
+        background-color: $primary-color-100;
+        transform: translateY(-8px);
+        border-style: solid;
+    }
 
     .add-content {
         text-align: center;
@@ -293,24 +283,63 @@ function goBack() {
 
         .plus-icon {
             font-size: 56px;
-            line-height: 1;
-            margin-bottom: 12px;
             display: block;
         }
 
         .uppercase {
             color: $neutral-color-400;
+            font-size: 12px;
             margin-top: 8px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+        }
+    }
+}
+
+// ✨ 針對你的格線斷點進行手機版優化 (810px 以下)
+@media screen and (max-width: 810px) {
+    .add-card-placeholder {
+        padding: 24px 10px;
+
+        .plus-icon {
+            font-size: 32px !important;
+        }
+
+        .zh-h4 {
+            font-size: 16px !important;
         }
     }
 
-    &:hover {
-        background-color: $primary-color-100;
-        border-color: $primary-color-700;
-        transform: translateY(-8px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    // 縮小小卡內部組件，避免在 2 欄佈局下過長
+    :deep(.recipe-card-sm),
+    :deep(.demo-readonly-card) {
+        width: 100%;
+        margin: 0 auto;
+
+        .card-header {
+            height: 120px !important;
+        }
+
+        .card-body {
+            padding: 12px !important;
+        }
+    }
+
+    // **主要改這裡：兩欄佈局**
+    .row.align-stretch>div {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+        padding-left: 8px;
+        padding-right: 8px;
+        box-sizing: border-box;
+    }
+
+    // 原食譜 Hero 區塊改為上下排列
+    .original-recipe-hero .row.align-center {
+        flex-direction: column;
+    }
+
+    .original-recipe-hero .info-content {
+        padding-left: 0;
+        margin-top: 16px;
     }
 }
 </style>
