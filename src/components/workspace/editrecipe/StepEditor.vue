@@ -328,8 +328,8 @@ onUnmounted(() => {
 }
 
 .image-box {
-  width: 150px; // ✨ 正方形固定寬度
-  height: 150px; // ✨ 正方形固定高度
+  width: 150px; 
+  height: 150px; 
   background: $neutral-color-100;
   border: 1.5px dashed $neutral-color-400;
   border-radius: 12px;
@@ -367,7 +367,7 @@ onUnmounted(() => {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.3);
-    color: white;
+    color: $neutral-color-white;
     opacity: 0;
     display: flex;
     align-items: center;
@@ -432,14 +432,14 @@ onUnmounted(() => {
   .step-text-display {
     white-space: pre-wrap;
     color: $neutral-color-800;
-    word-break: break-word; // 讓長單字斷行
-    overflow-wrap: break-word; // 確保內容不超出寬度
-    width: 100%; // 強制佔滿剩餘寬度
+    word-break: break-word; // 避免斷行
+    overflow-wrap: break-word; 
+    width: 100%; // 佔滿剩餘寬度
   }
 }
 
 .popover-box {
-  background: white;
+  background: $neutral-color-white;
   border: 1px solid $primary-color-400;
   border-radius: 12px;
   padding: 15px;
@@ -452,13 +452,13 @@ onUnmounted(() => {
     margin: 4px;
     padding: 6px 12px;
     border-radius: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid $neutral-color-100;
     cursor: pointer;
-    background: white;
+    background: $neutral-color-white;
 
     &.active {
       background: $primary-color-800;
-      color: white;
+      color: $neutral-color-white;
       border-color: $primary-color-800;
     }
   }
@@ -466,7 +466,7 @@ onUnmounted(() => {
 
 .add-step-wrapper {
   margin-top: 30px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid $neutral-color-100;
   padding-top: 20px;
 
   .add-step-btn {
@@ -475,7 +475,7 @@ onUnmounted(() => {
     border: 1.5px solid $primary-color-400;
     color: $primary-color-800;
     border-radius: 10px;
-    background: white;
+    background: $neutral-color-white;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
 
