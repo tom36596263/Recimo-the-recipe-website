@@ -53,7 +53,7 @@ const emit = defineEmits(['blur', 'enter-press'])
 
         <div class="input-field-wrapper">
             <input v-model="model" :type="type" :class="inputClasses" :placeholder="placeholder" @blur="emit('blur')"
-                @keyup.enter.stop="$emit('enter-press')" />
+                @keyup.enter="$emit('enter-press')" />
 
             <div class="suffix-icon">
                 <slot name="suffix"></slot>

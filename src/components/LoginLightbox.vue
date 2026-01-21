@@ -1,70 +1,109 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
+const authStore = useAuthStore();
 
 // ==========================================
 // input前端驗證
 // ==========================================
 import BaseInput from '@/components/login/BaseInput.vue'
-const name = ref('')
-const email = ref('')
-const password = ref('')
-const showPassword = ref(false)
+
+// icon
+import IconEyeOpen from '~icons/material-symbols/visibility-outline-rounded';
+import IconEyeClose from '~icons/material-symbols/visibility-off-outline-rounded';
+
+// ==========================================
+// 1. 登入用的資料
+// ==========================================
+const loginData = ref({
+  email: '',
+  password: ''
+});
+const USER = {
+  email: 'admin@test.com',
+  password: '123456'
+};
+// ==========================================
+// 2. 註冊用的資料
+// ==========================================
+const registerData = ref({
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: ''
+});
+
+// const showPassword = ref(false);
 
 // 追蹤每個欄位是否被觸碰
-const touched = {
-  name: ref(false),
-  email: ref(false),
-  password: ref(false)
-}
+const touched = ref({
+  login: { email: false, password: false },
+  register: { name: false, email: false, password: false, confirmPassword: false }
+});
 
 // 訊息內容
-const message = {
-  name: computed(() => {
-    // 如果還沒觸碰過，回傳空字串（不顯示提示）
-    if (!touched.name.value) return ''
-    // 觸碰過後，如果沒填才顯示必填提示
-    if (!name.value) return '* 此欄為必填'
-    return ''
-  }),
-  email: computed(() => {
-    if (!touched.email.value) return ''
-    if (!email.value) return '* 此欄為必填'
-    if (!/^\S+@\S+\.\S+$/.test(email.value)) return '* email 格式錯誤'
-    return ''
-  }),
-  password: computed(() => {
-    if (!touched.password.value) return ''
-    if (!password.value) return '* 此欄為必填'
-    return ''
-  })
-}
+// --- 登入驗證邏輯 ---
+const loginMessage = computed(() => {
+  const t = touched.value.login;
+  const d = loginData.value;
+  return {
+    email: t.email && !d.email ? '* 此欄為必填' : (t.email && !/^\S+@\S+\.\S+$/.test(d.email) ? '* email 格式錯誤' : ''),
+    password: t.password && !d.password ? '* 此欄為必填' : ''
+  };
+});
+
+const loginStatus = computed(() => ({
+  email: touched.value.login.email ? (loginMessage.value.email ? 'error' : 'success') : '',
+  password: touched.value.login.password ? (loginMessage.value.password ? 'error' : 'success') : ''
+}));
+
+// --- 註冊驗證邏輯 ---
+const registerMessage = computed(() => {
+  const t = touched.value.register;
+  const d = registerData.value;
+  const msg = { name: '', email: '', password: '', confirmPassword: '' };
+
+  if (t.name && !d.name) msg.name = '* 此欄為必填';
+  if (t.email) {
+    if (!d.email) msg.email = '* 此欄為必填';
+    else if (!/^\S+@\S+\.\S+$/.test(d.email)) msg.email = '* email 格式錯誤';
+  }
+  if (t.password && !d.password) msg.password = '* 此欄為必填';
+  if (t.confirmPassword) {
+    if (!d.confirmPassword) msg.confirmPassword = '* 此欄為必填';
+    else if (d.confirmPassword !== d.password) msg.confirmPassword = '* 兩次密碼不一致';
+  }
+  return msg;
+});
+
+// 眼睛連動與不連動
+const showLoginPassword = ref(false);
+const showRegisterPassword = ref(false);
 
 // 驗證狀態
-const status = {
-  name: computed(() => {
-    if (!touched.name.value) return ''
-    if (!name.value) return 'error' // 觸碰過沒填
-    return name.value ? 'success' : 'error'
-  }),
-  email: computed(() => {
-    if (!touched.email.value) return ''
-    if (!email.value) return 'error' // 觸碰過沒填
-    if (!/^\S+@\S+\.\S+$/.test(email.value)) return 'error'
-    return 'success'
-  }),
-  password: computed(() => {
-    if (!touched.password.value) return ''
-    if (!password.value) return 'error' // 觸碰過沒填
-    return password.value ? 'success' : 'error'
-  })
-}
+const registerStatus = computed(() => {
+  const msg = registerMessage.value;
+  const t = touched.value.register;
+  return {
+    name: t.name ? (msg.name ? 'error' : 'success') : '',
+    email: t.email ? (msg.email ? 'error' : 'success') : '',
+    password: t.password ? (msg.password ? 'error' : 'success') : '',
+    confirmPassword: t.confirmPassword ? (msg.confirmPassword ? 'error' : 'success') : ''
+  };
+});
+
 // enter會進下一個input
-const emailRef = ref(null);
-const passwordRef = ref(null);
-const nameRef = ref(null);
+const loginEmailRef = ref(null);
+const loginPasswordRef = ref(null);
+const captchaRef = ref(null);
+
+const regNameRef = ref(null);
+const regEmailRef = ref(null);
+const regPasswordRef = ref(null);
+const regConfirmPasswordRef = ref(null);
 
 // 建立一個通用跳轉函式
-const focusNext = (nextRef) => {
+const focusInput = (nextRef) => {
   console.log('嘗試跳轉，目標 Ref:', nextRef.value);
 
   if (!nextRef || !nextRef.value) {
@@ -116,24 +155,28 @@ const onCaptchaVerified = (success) => {
 // ==========================================
 // 登入按鈕
 // ==========================================
+// Login 按鈕邏輯
 const handleLogin = () => {
-  // 標記所有欄位為已觸碰，觸發紅框提示
-  touched.email.value = true
-  touched.password.value = true
-
-  // 驗證邏輯：email、password、驗證碼都必須正確
-  if (
-    !email.value ||
-    !password.value ||
-    !/^\S+@\S+\.\S+$/.test(email.value) ||
-    !captchaVerified.value
-  ) {
-    alert('請填寫完整且正確的資料！')
-    return
+  // 1. 基本前端驗證 (email, password, captcha)
+  if (loginMessage.value.email || loginMessage.value.password || !captchaVerified.value) {
+    alert('請填寫完整！');
+    return;
   }
-  alert('跳出登入成功或失敗彈窗！')
-}
 
+  // 2. 假帳密比對邏輯
+  const { email, password } = loginData.value;
+  if (email === 'admin@test.com' && password === '123456') {
+
+    // --- 關鍵步驟 ---
+    authStore.login(); // 這裡會把 isLoggedIn 設為 true，並觸發續傳動作
+    // ----------------
+
+    alert('登入成功！');
+    handleClose(); // 關閉燈箱
+  } else {
+    alert('帳號或密碼錯誤 (admin@test.com / 123456)');
+  }
+};
 // ==========================================
 // 翻頁效果
 // ==========================================
@@ -157,8 +200,10 @@ const goToLogin = () => {
 const emit = defineEmits(['close']);
 
 const handleClose = () => {
+  console.log('Close button clicked'); // 如果沒印出來，代表按鈕沒點到
   emit('close'); // 通知 GlobalModalManager 把 Pinia 的狀態關掉
 };
+
 
 </script>
 
@@ -167,33 +212,36 @@ const handleClose = () => {
   <!-- 燈箱灰色遮罩.auth-modal 負責定位和 3D 環境，.auth-modal__overlay 負責顏色 -->
   <div class="auth-modal" v-if="isVisible">
     <div class="auth-modal__overlay" @click="handleClose"></div>
-
     <!-- :class="{ 'book--flipped': isRegister }"：這是 Vue 的動態語法。當 isRegister 變成 true 時，這本書會被加上一個 book--flipped 的標籤。 -->
     <!-- 連動動畫：在 CSS 裡，我們寫了 .book--flipped & { transform: rotateY(-180deg); }。意思是只要標籤一出現，內部的封面頁就會執行「向左翻 180 度」的動作。 -->
     <div class="book" :class="{ 'book--flipped': isRegister }">
       <!-- 左底層 (.book__base--left)：固定在左邊，永遠不動。 -->
       <div class="book__base book__base--left">
         <!-- ==========================================
-              會員登入
-        ========================================== -->
+                    會員登入
+              ========================================== -->
         <button class="close-btn" @click="handleClose">
           <i class="fa-solid fa-xmark"></i>
         </button>
         <div>
           <h1 class="zh-h3 auth-form__title">會員登入</h1>
           <div class="auth-form">
-            <BaseInput ref="emailRef" v-model="email" label="電子信箱" placeholder="請輸入您的電子信箱" :status="status.email.value"
-              :message="message.email" @blur="touched.email.value = true" @enter-press="focusNext(passwordRef)"
-              class="tight-gap" />
-            <BaseInput ref="passwordRef" v-model="password" label="密碼" placeholder="請輸入密碼"
-              :type="showPassword ? 'text' : 'password'" :status="status.password.value"
-              :message="message.password.value" @blur="touched.password.value = true"
-              @enter-press="focusNext(captchaRef)" class="tight-gap">
-              <template #label-right>
-                <a href="#" class="forgot-password-link">忘記密碼</a>
+            <BaseInput ref="loginEmailRef" v-model="loginData.email" label="電子信箱" placeholder="請輸入電子信箱"
+              :status="loginStatus.email" :message="loginMessage.email" @blur="touched.login.email = true"
+              @enter-press="focusInput(loginPasswordRef)" class="tight-gap" />
+            <BaseInput ref="loginPasswordRef" v-model="loginData.password" label="密碼" placeholder="請輸入密碼"
+              :type="showLoginPassword ? 'text' : 'password'" :status="loginStatus.password"
+              :message="loginMessage.password" @blur="touched.login.password = true"
+              @enter-press="focusInput(captchaRef)" class="tight-gap">
+              <!-- <template #label-right>
+                      <a href="#" class="forgot-password-link">忘記密碼</a>
+                    </template> -->
+              <template #suffix>
+                <button type="button" @click="showLoginPassword = !showLoginPassword" class="icon-btn">
+                  <IconEyeClose v-if="showLoginPassword" />
+                  <IconEyeOpen v-else />
+                </button>
               </template>
-              <template #suffix> <button type="button" @click="showPassword = !showPassword"> {{
-                showPassword ? '🙈' : '👁️' }} </button> </template>
             </BaseInput>
             <CaptchaInput ref="captchaRef" v-model="loginForm.captchaInput" @verified="onCaptchaVerified"
               @enter-press="handleLogin" class="tight-gap" />
@@ -209,48 +257,46 @@ const handleClose = () => {
           </div>
         </div>
       </div>
-
       <!-- 右底層 (.book__base--right)：固定在右邊，永遠不動。 -->
       <div class="book__base book__base--right">
         <!-- ==========================================
-              會員註冊
-        ========================================== -->
-        <button @click="handleClose">
-          <i :class="iconClass"></i>
-        </button>
+                    會員註冊
+              ========================================== -->
         <div>
           <h1 class="zh-h3 auth-form__title">會員註冊</h1>
           <div class="auth-form">
-            <BaseInput v-model="name" label="姓名" placeholder="請輸入姓名" :status="status.name.value"
-              :message="message.name.value" @blur="touched.name.value = true" class="tight-gap" />
-            <BaseInput ref="emailRef" v-model="email" label="電子信箱" placeholder="請輸入您的電子信箱" :status="status.email.value"
-              :message="message.email" @blur="touched.email.value = true" @enter-press="focusNext(passwordRef)"
-              class="tight-gap" />
-            <BaseInput ref="passwordRef" v-model="password" label="密碼" placeholder="請輸入密碼"
-              :type="showPassword ? 'text' : 'password'" :status="status.password.value"
-              :message="message.password.value" @blur="touched.password.value = true"
-              @enter-press="focusNext(captchaRef)" class="tight-gap">
-              <template #suffix> <button type="button" @click="showPassword = !showPassword"> {{
-                showPassword ? '🙈' : '👁️' }} </button> </template>
+            <BaseInput ref="regNameRef" v-model="registerData.name" label="姓名" placeholder="請輸入姓名"
+              :status="registerStatus.name" :message="registerMessage.name" @blur="touched.register.name = true"
+              @enter-press="focusInput(regEmailRef)" class="tight-gap" />
+            <BaseInput ref="regEmailRef" v-model="registerData.email" label="電子信箱" placeholder="請輸入電子信箱"
+              :status="registerStatus.email" :message="registerMessage.email" @blur="touched.register.email = true"
+              @enter-press="focusInput(regPasswordRef)" class="tight-gap" />
+            <BaseInput ref="regPasswordRef" v-model="registerData.password" label="密碼" placeholder="請輸入密碼"
+              :type="showRegisterPassword ? 'text' : 'password'" :status="registerStatus.password"
+              :message="registerMessage.password" @blur="touched.register.password = true"
+              @enter-press="focusInput(regConfirmPasswordRef)" class="tight-gap">
+              <template #suffix>
+                <button type="button" @click="showRegisterPassword = !showRegisterPassword" class="icon-btn">
+                  <IconEyeClose v-if="showRegisterPassword" />
+                  <IconEyeOpen v-else />
+                </button>
+              </template>
             </BaseInput>
-            <form>
-              <div>
-                <label for="password">確認密碼</label>
-              </div>
-              <input type="password" class="form-input" placeholder="請再輸入一次密碼" />
-            </form>
+
+            <BaseInput ref="regConfirmPasswordRef" v-model="registerData.confirmPassword" label="確認密碼"
+              placeholder="請輸入再輸入一次密碼" :type="showRegisterPassword ? 'text' : 'password'"
+              :status="registerStatus.confirmPassword" :message="registerMessage.confirmPassword"
+              @blur="touched.register.confirmPassword = true" @enter-press="handleRegister" class="tight-gap" />
             <BaseBtn title="註冊" variant="solid" @click="handleRegister" :width="244" :height="50" />
           </div>
         </div>
       </div>
-
-
       <!-- 活動翻頁層 (.book__cover)：這是關鍵！它寬度只有書本的一半（50%），初始位置在右邊。 -->
       <div class="book__cover">
         <div class="book__face book__face--front">
           <!-- ==========================================
-              前往會員註冊
-          ========================================== -->
+                    前往會員註冊
+                ========================================== -->
           <div class="registration-invite">
             <img src="/img/site/Recimo-logo-black.svg" />
             <div class="registration-invite__content">
@@ -260,11 +306,10 @@ const handleClose = () => {
             </div>
           </div>
         </div>
-
         <div class="book__face book__face--back">
           <!-- ==========================================
-              前往會員登入
-          ========================================== -->
+                    前往會員登入
+                ========================================== -->
           <div class="login-invite">
             <img src="/img/site/Recimo-logo-black.svg" />
             <div class="login-invite__content">
@@ -275,7 +320,6 @@ const handleClose = () => {
           </div>
         </div>
       </div>
-
       <!-- 書脊：書本的轉軸和裝飾，還能起到遮醜與強化立體感的作用 -->
       <div class="book__spine"></div>
     </div>
@@ -283,8 +327,32 @@ const handleClose = () => {
 </template>
 
 <style lang="scss" scoped>
-.auth-form {
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #ccc;
+  cursor: pointer;
+  z-index: 20;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
 
+  &:hover {
+    color: $accent-color-700;
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: rotate(90deg);
+  }
+}
+
+.auth-form {
   margin: 20px 0;
   display: flex;
   flex-direction: column; // 讓內容由上往下排
@@ -326,13 +394,37 @@ const handleClose = () => {
 
 .forgot-password-link {
   font-size: 12px;
-  color: #4a7c59; // 配合你的主色調
+  color: #4a7c59;
   text-decoration: none;
   transition: color 0.3s;
 
   &:hover {
     color: $accent-color-700;
     text-decoration: underline; // 移上去加下底線
+  }
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $primary-color-700;
+  transition: color 0.2s ease;
+
+  svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  &:hover {
+    color: $accent-color-700;
+  }
+
+  &:focus {
+    outline: none; // 去除按鈕預設藍框
   }
 }
 
@@ -343,10 +435,10 @@ const handleClose = () => {
 }
 
 .auth-form__divider {
-  display: flex; // 使用 Flexbox
+  display: flex;
   align-items: center; // 垂直居中對齊文字與線條
   width: 100%; // 確保容器寬度足夠
-  color: #888; // 文字顏色
+  color: $neutral-color-700;
 
   // 線條的共同樣式
   &::before,
@@ -354,7 +446,7 @@ const handleClose = () => {
     content: "";
     flex: 1; // 讓線條自動填滿剩餘空間
     height: 1px; // 線條高度
-    background-color: #ddd; // 線條顏色
+    background-color: $neutral-color-400;
   }
 
   // 文字與線條之間的間距
@@ -377,16 +469,15 @@ const handleClose = () => {
     transition: transform 0.3s ease; // 設定動畫時間與曲線
 
     &:hover {
-      // 放大 1.15 倍
       transform: scale(1.15);
 
       // 增加一點陰影，讓它看起來像浮起來
-      // filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
     }
 
     &:active {
-      // 點擊瞬間縮小回 0.95 倍，增加點擊回饋感
-      transform: scale(0.95);
+      // 點擊瞬間縮小回 0.6 倍，增加點擊回饋感
+      transform: scale(0.6);
     }
   }
 }
@@ -546,20 +637,9 @@ const handleClose = () => {
     }
   }
 
-  // 6. 書脊裝飾 (中間的小圓圈標籤)
+  // 6. 書脊裝飾
 
   &__spine {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
-    background-color: #4a7c59; // 配合設計圖綠色
-    border-radius: 50%;
-    z-index: 10;
-    pointer-events: none; // 避免擋住點擊事件
-
     &::after {
       content: '';
       position: absolute;
