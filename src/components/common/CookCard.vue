@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 
 // 定義可以從外部傳入的資料 (Props)
 const props = defineProps({
@@ -30,6 +30,13 @@ const emit = defineEmits(['add-to-cart']);
 const handleAddClick = () => {
     emit('add-ingredient'); // 發送訊號給父層
 };
+
+const normalizedImageSrc = computed(() => {
+    if (!props.imageSrc) return '';
+    return props.imageSrc.startsWith('/')
+        ? props.imageSrc
+        : '/' + props.imageSrc;
+});
 </script>
 
 <template>
@@ -44,7 +51,7 @@ const handleAddClick = () => {
         </div>
 
         <div class="image-wrapper">
-            <img :src="imageSrc" :alt="name" class="product-img" />
+            <img :src="normalizedImageSrc" :alt="name" class="product-img" />
         </div>
 
         <button class="add-btn" @click.stop="handleAddClick" aria-label="加入食材">
