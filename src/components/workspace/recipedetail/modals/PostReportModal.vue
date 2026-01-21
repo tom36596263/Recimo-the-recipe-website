@@ -35,7 +35,7 @@ const handleSubmit = () => {
         reason: selectedReason.value,
         note: reportNote.value
     });
-    alert("已送出檢舉");
+    alert("感謝您的檢舉！為了維護優質的社群分享品質，我們將會盡快審核該內容。謝謝您與我們共同守護美食社群！");
 };
 </script>
 
