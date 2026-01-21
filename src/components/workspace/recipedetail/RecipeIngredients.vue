@@ -1,9 +1,16 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, watchEffect } from 'vue';
 
 const props = defineProps({
     servings: { type: Number, default: 1 },
     list: { type: Array, default: () => [] }
+});
+
+// 將偵錯訊息改為 console 輸出
+watchEffect(() => {
+    if (props.list.length === 0) {
+        console.warn('偵錯：父組件傳入的食材陣列為空');
+    }
 });
 
 const computedIngredients = computed(() => {
@@ -19,8 +26,6 @@ const computedIngredients = computed(() => {
 
 <template>
     <section class="ingredients-container">
-        <p v-if="list.length === 0" class="debug-msg">偵錯：父組件傳入的食材陣列為空</p>
-
         <div class="table-wrapper">
             <div class="table-header">
                 <div class="cell name">食材</div>
@@ -48,7 +53,7 @@ const computedIngredients = computed(() => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-// 1. 定義統一比例變數，方便維護
+
 $flex-name: 0.8;
 $flex-amount: 0.8;
 $flex-note: 1.8;
@@ -73,19 +78,19 @@ $flex-note: 1.8;
     background-color: $neutral-color-white;
 }
 
-// 2. 抽離共用的 Flex 佈局邏輯
+
 .table-header,
 .table-row {
     display: flex;
-    align-items: center; // 垂直置中
+    align-items: center; 
     padding: 12px 20px;
 
     .cell {
-        min-width: 0; // 防止 Flex 子元素被內容撐破
+        min-width: 0; 
         word-break: break-all;
         overflow-wrap: break-word;
 
-        // 統一比例分配
+
         &.name {
             flex: $flex-name;
             text-align: left;
@@ -94,25 +99,18 @@ $flex-note: 1.8;
         &.amount {
             flex: $flex-amount;
             padding-left: 12px;
-            text-align: center; // 讓標題與數字都置中
+            text-align: center; 
         }
 
         &.note {
             flex: $flex-note;
             text-align: left;
-            padding-left: 10px; // 備註稍微空出一點距離
+            padding-left: 10px; 
         }
     }
 }
 
-// .table-header {
-//     .cell.amount {
-//         text-align: left;
-//         padding-left: 12px;
-//     }
-// }
-
-// 3. 標題專屬樣式
+// 3. 標題
 .table-header {
     background-color: $primary-color-700;
 
@@ -126,7 +124,7 @@ $flex-note: 1.8;
     }
 }
 
-// 4. 內容列專屬樣式
+// 4. 內容列
 .table-body {
     .table-row {
         transition: background-color 0.2s;
@@ -163,7 +161,7 @@ $flex-note: 1.8;
     }
 }
 
-// 5. 手機版優化
+
 @media screen and (max-width: 576px) {
 
     .table-header,
@@ -171,7 +169,7 @@ $flex-note: 1.8;
         padding: 10px 12px;
 
         .cell.note {
-            flex: 1.5; // 手機版縮小備註比例，留給食材名
+            flex: 1.5;
         }
     }
 }

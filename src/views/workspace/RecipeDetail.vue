@@ -48,12 +48,10 @@ const handleGoToEdit = () => {
         editId: currentId
     };
 
-    // ✅ 只要不是 preview，點 edit 就一定是改編
     if (!isPreviewMode.value) {
         queryParams.action = 'adapt';
     }
 
-    // ✅ preview 返回編輯（維持你原本邏輯）
     if (isPreviewMode.value) {
         const parentId =
             recipeStore.previewData?.parent_recipe_id ||
@@ -70,7 +68,6 @@ const handleGoToEdit = () => {
         query: queryParams
     });
 };
-
 
 const backToEdit = () => {
     handleGoToEdit();
@@ -335,7 +332,7 @@ const onReportSubmit = (data) => {
 
     <div class="recipe-container-root" v-if="!isLoading && rawRecipe" :class="{ 'preview-padding': isPreviewMode }">
         <main class="container">
-            <div class="title-content">
+            <div class="title-content fade-up" style="--delay: 1">
                 <div class="zh-h2">
                     <i-material-symbols-restaurant-rounded class="main-icon" />
                     {{ recipeIntroData.title }}
@@ -369,37 +366,40 @@ const onReportSubmit = (data) => {
 
             <div class="row">
                 <div class="col-7 col-lg-12">
-                    <RecipeIntro :info="recipeIntroData" :is-preview="isPreviewMode" />
+                    <RecipeIntro :info="recipeIntroData" :is-preview="isPreviewMode" class="fade-up"
+                        style="--delay: 2" />
+
                     <div class="d-lg-none">
-                        <section class="mb-10">
+                        <section class="mb-10 fade-up" style="--delay: 3">
                             <NutritionCard :servings="servings" :ingredients="nutritionWrapper"
                                 @change-servings="handleServingsChange" />
                         </section>
-                        <section class="mb-10">
+                        <section class="mb-10 fade-up" style="--delay: 4">
                             <RecipeIngredients :servings="servings" :list="ingredientsData" />
                         </section>
                     </div>
-                    <section class="mb-10 steps-section">
+
+                    <section class="mb-10 steps-section fade-up" style="--delay: 5">
                         <RecipeSteps :steps="stepsData" />
                     </section>
                 </div>
 
                 <div class="col-5 col-lg-12">
                     <div class="d-none-lg">
-                        <section class="mb-10">
+                        <section class="mb-10 fade-up" style="--delay: 3">
                             <NutritionCard :servings="servings" :ingredients="nutritionWrapper"
                                 @change-servings="handleServingsChange" />
                         </section>
-                        <section class="mb-10">
+                        <section class="mb-10 fade-up" style="--delay: 4">
                             <RecipeIngredients :servings="servings" :list="ingredientsData" />
                         </section>
                     </div>
-                    <section v-if="!isPreviewMode" class="mb-10">
+                    <section v-if="!isPreviewMode" class="mb-10 fade-up" style="--delay: 6">
                         <RecipeComments :list="commentList" />
                     </section>
                 </div>
 
-                <div v-if="!isPreviewMode" class="col-12 cook-snap-full">
+                <div v-if="!isPreviewMode" class="col-12 cook-snap-full fade-up" style="--delay: 7">
                     <section class="mb-10 content-wrapper">
                         <CookSnap :list="snapsData" />
                     </section>
@@ -423,7 +423,7 @@ const onReportSubmit = (data) => {
         image: recipeIntroData?.image
     }" @submit="onReportSubmit" />
 
-    <div v-if="!isPreviewMode" class="col-12">
+    <div v-if="!isPreviewMode" class="col-12 fade-up" style="--delay: 8">
         <RelatedRecipes :currentId="route.params.id" />
     </div>
 </template>
@@ -431,25 +431,55 @@ const onReportSubmit = (data) => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
+// --- 新增淡入動畫樣式 ---
+.fade-up {
+    opacity: 0;
+    animation: fadeUpIn 0.8s cubic-bezier(0.2, 0.6, 0.35, 1) forwards;
+    animation-delay: calc(var(--delay) * 0.12s); // 每個順序差 0.12 秒
+}
+
+@keyframes fadeUpIn {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .preview-sticky-bar {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 9999;
-    padding-top: 12px;
+    z-index: 110;
+    padding: 12px 0;
     pointer-events: none;
     transition: all 0.3s ease;
 
-    @media screen and (min-width: 1025px) {
-        left: 260px;
+
+    @media screen and (min-width: 810px) {
+        left: 260px; 
         width: calc(100% - 260px);
+        background: transparent; 
+    }
+
+
+    @media screen and (max-width: 809px) {
+        left: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.7); 
+        backdrop-filter: blur(8px);
+        padding: 8px 0;
     }
 
     .container {
         max-width: 1000px;
         margin: 0 auto;
-        padding: 0 12px;
+        padding: 0 16px;
     }
 
     .bar-content {
@@ -461,7 +491,16 @@ const onReportSubmit = (data) => {
         padding: 10px 20px;
         border-radius: 12px;
         pointer-events: auto;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+        // 極小螢幕優化
+        @media screen and (max-width: 480px) {
+            padding: 8px 12px;
+
+            span {
+                font-size: 11px;
+            }
+        }
 
         span {
             font-weight: 500;
@@ -481,10 +520,13 @@ const onReportSubmit = (data) => {
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            margin-left: 8px;
+            margin-left: 12px;
+            white-space: nowrap;
+            transition: transform 0.2s ease;
 
             &:hover {
                 background-color: $primary-color-100;
+                transform: scale(1.05);
             }
         }
     }
@@ -540,7 +582,6 @@ const onReportSubmit = (data) => {
             gap: 16px;
             width: 100%;
             justify-content: flex-start;
-            /* 保持圖示靠左 */
         }
 
         &.is-preview {
@@ -581,7 +622,6 @@ const onReportSubmit = (data) => {
             font-size: 24px;
         }
 
-        /* ✨ 讓改編集按鈕在手機版推到最右邊 */
         .adapt-btn-wrapper {
             @media screen and (max-width: 768px) {
                 margin-left: auto;
