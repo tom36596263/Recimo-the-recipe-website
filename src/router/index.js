@@ -6,6 +6,7 @@ import IconHandMeal from 'virtual:icons/material-symbols/Hand-Meal-outline'
 import IconInboxTextPerson from 'virtual:icons/material-symbols/Inbox-Text-Person-outline'
 import IconShoppingCart from 'virtual:icons/material-symbols/Shopping-Cart-outline'
 import IconAssignment from 'virtual:icons/material-symbols/Assignment-outline'
+import IconAccount from 'virtual:icons/material-symbols/Account-circle'
 
 const pageicon = ref([
   markRaw(IconForkSpoon),
@@ -216,7 +217,12 @@ const routes = [
         path: 'profile',
         name: 'user-profile',
         component: () => import('@/views/workspace/ProfileView.vue'),
-        meta: { layout: 'workspace', requiresAuth: true }
+        meta: { 
+          title: '個人主頁',
+          icon: markRaw(IconAccount), 
+          layout: 'workspace', 
+          requiresAuth: true,
+        }
       },
       {
         path: 'settings',
