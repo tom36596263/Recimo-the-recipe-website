@@ -93,18 +93,30 @@ const closeMore = () => isMoreOpen.value = false;
         </div>
 
     </nav>
-
-    <div class="slide-up">
-        <div v-if="isMoreOpen" class="more-menu-panel">
-            <div class="panel-items">
-                <router-link v-for="item in mobileMoreItems" :key="item.path" :to="item.path" class="panel-link"
-                    @click="closeMore">
-                    <span class="panel-text">{{ item.title }}</span>
-                </router-link>
-                <BaseBtn title="登出" height="30" />
+    <Transition name="slide">
+        <div v-if="isMoreOpen" class="slide-up">
+            <div class="overlay" @click="closeMore"></div>
+            <div class="more-menu-panel">
+                <div class="panel-header">
+                    <router-link to="/">
+                        <img :src="$parsePublicFile('img/site/Recimo-logo-white.svg')" alt="logo" class="logo">
+                    </router-link>
+                    <BaseBtn title="登出" height="30" />
+                </div>
+                <div class="panel-items">
+                    <router-link v-for="item in mobileMoreItems" :key="item.path" :to="item.path" class="panel-link"
+                        @click="closeMore">
+                        <span class="p-p1">{{ item.title }}</span>
+                    </router-link>
+                    <router-link to="settings" class="panel-link">
+                        <p class="p-p1">會員設定</p>
+                    </router-link>
+                </div>
             </div>
+            
         </div>
-    </div>
+    </Transition>
+    
 </template>
 <style lang="scss" scoped>
 .workspace-sidebar {
@@ -204,6 +216,7 @@ const closeMore = () => isMoreOpen.value = false;
             align-items: center;
             color: white;
             text-decoration: none;
+            cursor: pointer;
 
             &.router-link-active,
             &.active {
@@ -235,7 +248,9 @@ const closeMore = () => isMoreOpen.value = false;
             font-size: 24px;
         }
     }
-
+}
+.slide-up{
+    display: none;
 }
 
 @media screen and (max-width: 810px) {
@@ -243,8 +258,79 @@ const closeMore = () => isMoreOpen.value = false;
         display: none;
     }
 
-    .mobile-tabbar {
+    .mobile-tabbar,.slide-up {
         display: block;
     }
+}
+.slide-enter-active, 
+.slide-leave-active {
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    .more-menu-panel {
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .overlay {
+        transition: opacity 0.4s ease;
+    }
+}
+
+.slide-enter-from, 
+.slide-leave-to {
+    .more-menu-panel {
+        transform: translateY(100%);
+    }
+    .overlay {
+        opacity: 0;
+    }
+}
+.slide-up{
+    .more-menu-panel{
+        position: fixed;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        z-index: 10;
+        bottom: 70px;
+        .panel-header{
+            background-color: $primary-color-700;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            .logo{
+                height: 40px;
+            }
+        }
+        
+    }
+    .panel-items{
+        display: flex;
+        flex-direction: column;
+        background-color: $primary-color-100;
+        text-align: center;
+        
+        .panel-link{
+            padding: 20px;
+            text-decoration: none;
+            color: $neutral-color-black;
+            transition: .3s ease;
+            .p-p1{
+                padding-bottom: 20px;
+            }
+            &:hover{
+                background-color: $accent-color-400;
+            }
+        }
+    }
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 3;
 }
 </style>
