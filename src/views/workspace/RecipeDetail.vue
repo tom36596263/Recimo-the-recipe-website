@@ -460,18 +460,18 @@ const onReportSubmit = (data) => {
     pointer-events: none;
     transition: all 0.3s ease;
 
-  
+
     @media screen and (min-width: 810px) {
-        left: 260px; // 這裡請確保跟你的 Sidebar 寬度一致
+        left: 260px; 
         width: calc(100% - 260px);
-        background: transparent; // 桌機版背景透明，靠內層 bar-content 顯色
+        background: transparent; 
     }
 
-    // 手機/平板版 (小於 810px)，側邊欄隱藏時
+
     @media screen and (max-width: 809px) {
         left: 0;
         width: 100%;
-        background: rgba(255, 255, 255, 0.7); // 加上半透明背景，蓋過可能重疊的文字
+        background: rgba(255, 255, 255, 0.7); 
         backdrop-filter: blur(8px);
         padding: 8px 0;
     }
