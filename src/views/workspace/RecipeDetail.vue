@@ -661,7 +661,7 @@ const onReportSubmit = (data) => {
     color: $primary-color-700;
 }
 
-/* 修正後的斷點邏輯 */
+/* 修正後的斷點邏輯 */    
 
 .d-lg-none {
 
