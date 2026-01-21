@@ -225,7 +225,7 @@ const openKitchen = () => {
             </div>
         </div>
     </section>
-    <section class="container">
+    <section class="container recipes-cta-group">
         <div class="row">
             <div class="col-12">
                 <RecipesCtaGroup @open-kitchen="openKitchen" />
@@ -271,6 +271,9 @@ const openKitchen = () => {
 @media screen and (max-width: 810px) {
     .page-btn {
         margin-bottom: 20px;
+    }
+    .recipes-cta-group{
+        display: none;
     }
 }
 </style>

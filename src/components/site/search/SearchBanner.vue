@@ -108,6 +108,13 @@ const handleTagClick = (tagName) => {
                 display: flex;
                 gap: 10px;
                 flex-wrap: wrap;
+                overflow-x: scroll;
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+
                 .tag-item{
                     word-wrap: nowrap;
                 }

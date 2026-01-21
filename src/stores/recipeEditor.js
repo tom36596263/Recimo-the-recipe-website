@@ -57,6 +57,7 @@ export const useRecipeStore = defineStore('recipeEditor', {
                 recipe_cover_image: form.coverImg || 'https://placehold.co/800x600?text=No+Cover',
                 recipe_difficulty: form.difficulty || 3,
                 recipe_total_time: formattedTime,
+                totalTime: totalMinutes,
                 recipe_kcal_per_100g: Math.round(totalKcal),
                 recipe_protein_per_100g: parseFloat(totalProtein.toFixed(1)),
                 recipe_fat_per_100g: parseFloat(totalFat.toFixed(1)),
