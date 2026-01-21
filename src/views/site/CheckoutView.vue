@@ -2,21 +2,23 @@
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import card from '@/components/mall/CheckCard.vue';
-import axios from 'axios';
-import { publicApi } from '@/utils/publicApi';
+// import axios from 'axios';
+// import { publicApi } from '@/utils/publicApi';
+import { useCartStore } from '@/stores/cartStore';
 
+
+const cartStore = useCartStore(); // 2. 初始化 Store
 const router = useRouter();
-const orderItems = ref([]);
-
-onMounted(() => {
-  publicApi.get('data/mall/order_product.json')
-    .then(res => {
-      orderItems.value = res.data;
-    })
-    .catch(err => {
-      console.error('讀取 JSON 失敗', err);
-    });
-})
+const orderItems = computed(() => cartStore.items);
+// onMounted(() => {
+//   publicApi.get('data/mall/order_product.json')
+//     .then(res => {
+//       orderItems.value = res.data;
+//     })
+//     .catch(err => {
+//       console.error('讀取 JSON 失敗', err);
+//     });
+// })
 
 
 // 資料打包送進後端
@@ -400,8 +402,11 @@ const totalAmount = computed(() => {
         <div class="card-container">
           <div class="order-list">
             <div class="order-list">
-              <CheckCard v-for="item in orderItems" :key="item.id" :product-name="item.product_name"
-                :quantity="item.quantity" :price="item.price" :image="item.images?.[0] || '/default.png'" />
+              <CheckCard v-for="item in orderItems" :key="item.id || item.product_id"
+                :product-name="item.product_name || item.name" :quantity="item.count || item.quantity"
+                :price="item.product_price || item.price" :image="item.product_image?.[0]?.image_url
+                  ? item.product_image[0].image_url.replace('public', '')
+                  : '/default.png'" />
             </div>
           </div>
         </div>
