@@ -9,11 +9,11 @@ const currentPage = ref(1);
 const pageSize = 2; // 設定每頁顯示幾筆
 
 // 日期與標籤狀態
-const today = new Date()
-const selectedDate = ref(`${today.getFullYear()}-${String((today.getMonth() + 1)).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`); // 綁定日期輸入框
+// const today = new Date()
+// const selectedDate = ref(`${today.getFullYear()}-${String((today.getMonth() + 1)).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`); // 綁定日期輸入框
 const activeTag = ref('全部訂單');
-// const selectedDate = ref(''); // 綁定日期輸入框
-// const activeTag = ref('全部訂單');
+const selectedDate = ref(''); // 綁定日期輸入框
+
 
 // 1. 讀取資料
 onMounted(() => {
