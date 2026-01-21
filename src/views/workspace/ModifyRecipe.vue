@@ -87,9 +87,14 @@ function initEmptyRecipe() {
 
 function handleCreateNew() {
     if (!originalRecipe.value.id) return;
+
+    // ✨ 修正：改用 path 並確保參數格式正確
     router.push({
-        name: 'edit-recipe',
-        query: { editId: originalRecipe.value.id, action: 'adapt' }
+        path: '/workspace/edit-recipe',
+        query: {
+            editId: originalRecipe.value.id,
+            action: 'adapt'
+        }
     });
 }
 

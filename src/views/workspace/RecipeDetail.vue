@@ -32,7 +32,7 @@ const localLikesOffset = ref(0);
 
 const isPreviewMode = computed(() => route.query.mode === 'preview');
 
-// --- 2. 功能函式 ---
+// --- 2. 功能函式 (修正跳轉邏輯) ---
 const toggleRecipeLike = () => {
     if (isPreviewMode.value) return;
     isLiked.value = !isLiked.value;
@@ -40,12 +40,37 @@ const toggleRecipeLike = () => {
 };
 
 const handleGoToEdit = () => {
-    const currentId = rawRecipe.value?.recipe_id || route.params.id;
+    const currentId = isPreviewMode.value
+        ? (route.query.editId || recipeStore.previewData?.recipe_id)
+        : (rawRecipe.value?.recipe_id || route.params.id);
+
+    const queryParams = {
+        editId: currentId
+    };
+
+    // ✅ 只要不是 preview，點 edit 就一定是改編
+    if (!isPreviewMode.value) {
+        queryParams.action = 'adapt';
+    }
+
+    // ✅ preview 返回編輯（維持你原本邏輯）
+    if (isPreviewMode.value) {
+        const parentId =
+            recipeStore.previewData?.parent_recipe_id ||
+            recipeStore.previewData?.parent_id;
+
+        if (parentId) {
+            queryParams.editId = parentId;
+            queryParams.action = 'adapt';
+        }
+    }
+
     router.push({
         path: '/workspace/edit-recipe',
-        query: { editId: currentId }
+        query: queryParams
     });
 };
+
 
 const backToEdit = () => {
     handleGoToEdit();
@@ -243,7 +268,7 @@ const handleShare = async () => {
         catch (err) { console.log('分享取消'); }
     } else {
         await navigator.clipboard.writeText(url);
-        alert('連結已複製到剪貼簿！');
+        await alert('連結已複製到剪貼簿！');
     }
 };
 
