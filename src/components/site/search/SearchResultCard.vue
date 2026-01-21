@@ -39,7 +39,7 @@ const displayDescription = computed(() => {
 })
 
 const goToRecipeDetail = () => {
-    if(!props.recipe) return;
+    if(!props.recipe) return; 
     router.push({
         name: 'workspace-recipe-detail',
         params: { id: props.recipe.recipe_id }
