@@ -160,7 +160,7 @@ function goBack() {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-/* --- 核心修正：桌機版隱藏手機按鈕 --- */
+
 .mobile-only-btn {
     display: none !important;
 }

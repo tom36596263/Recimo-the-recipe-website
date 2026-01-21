@@ -129,7 +129,7 @@ const swiperBreakpoints = {
 }
 
 .recipe-swiper {
-    // ✨ 修正裁切：留出頂部空間給 hover 放大使用
+
     padding: 30px 20px 50px 20px;
     margin: -30px -20px 0 -20px;
     overflow: visible !important;
@@ -146,7 +146,6 @@ const swiperBreakpoints = {
         }
     }
 
-    // ✨ 修正按鈕顏色為綠色 ($primary-color-700)
     :deep(.swiper-button-next),
     :deep(.swiper-button-prev) {
         color: $primary-color-700 !important;
@@ -172,7 +171,7 @@ const swiperBreakpoints = {
         right: 10px;
     }
 
-    // ✨ 修正分頁點顏色
+
     :deep(.swiper-pagination-bullet) {
         width: 5px;
         height: 5px;
@@ -188,7 +187,6 @@ const swiperBreakpoints = {
     }
 }
 
-// ✨ 強制修正卡片內部箭頭顏色
 :deep(.recipe-card-sm) {
     .arrow-icon {
         color: $primary-color-700 !important;

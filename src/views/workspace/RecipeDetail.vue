@@ -471,7 +471,7 @@ const onReportSubmit = (data) => {
     @media screen and (max-width: 809px) {
         left: 0;
         width: 100%;
-        background: rgba(255, 255, 255, 0.7); 
+        background: rgba(255, 255, 255, 0.7); // 加上半透明背景，蓋過可能重疊的文字
         backdrop-filter: blur(8px);
         padding: 8px 0;
     }
@@ -661,14 +661,21 @@ const onReportSubmit = (data) => {
     color: $primary-color-700;
 }
 
+/* 修正後的斷點邏輯 */
+
 .d-lg-none {
+
+    // 當寬度大於等於 1024px 時，隱藏「手機版專用」的組件
     @media screen and (min-width: 1024px) {
         display: none !important;
     }
 }
 
 .d-none-lg {
-    @media screen and (max-width: 1024px) {
+
+    // 當寬度小於 1024px 時，隱藏「桌機版專用」的組件
+    // 使用 1023.98px 避免與 min-width: 1024px 衝突
+    @media screen and (max-width: 1023.98px) {
         display: none !important;
     }
 }

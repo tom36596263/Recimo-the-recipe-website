@@ -1,6 +1,13 @@
 <script setup>
 import { computed } from 'vue'
+import { ref } from 'vue';
+const inputRef = ref(null);
 
+defineExpose({
+    focus() {
+        inputRef.value?.focus();
+    }
+});
 
 const model = defineModel({ type: String, default: '' });
 
@@ -37,7 +44,11 @@ const inputClasses = computed(() => ({
     'is-success': props.status === 'success'
 }));
 
-const emit = defineEmits(['blur', 'enter-press'])
+const emit = defineEmits([
+    'update:modelValue',
+    'blur',
+    'enter-press'
+])
 
 </script>
 
@@ -52,8 +63,8 @@ const emit = defineEmits(['blur', 'enter-press'])
         </div>
 
         <div class="input-field-wrapper">
-            <input v-model="model" :type="type" :class="inputClasses" :placeholder="placeholder" @blur="emit('blur')"
-                @keyup.enter="$emit('enter-press')" />
+            <input ref="inputRef" v-model="model" :type="type" :class="inputClasses" :placeholder="placeholder"
+                @blur="emit('blur')" @keydown.enter.prevent="$emit('enter-press')" />
 
             <div class="suffix-icon">
                 <slot name="suffix"></slot>
