@@ -5,6 +5,7 @@ import axios from 'axios';
 import { publicApi } from '@/utils/publicApi';
 import { useRouter, useRoute } from 'vue-router';
 import PageBtn from '@/components/common/PageBtn.vue'
+import { useAuthStore } from '@/stores/authStore';
 
 // --- Swiper 相關設定 (請用這段取代舊的) ---
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -25,8 +26,9 @@ const handleFollow = () => {
     console.log("已登入，執行關注 API");
   });
 };
+const authStore = useAuthStore(); // [新增] 啟用 store
 
-// 註冊模組：也寫在一起
+
 const modules = [Pagination, FreeMode];
 // --- 新增：Swiper RWD 斷點設定 ---
 const swiperBreakpoints = {
@@ -249,12 +251,23 @@ const columns = ref([
 
       <div class="overlay-content">
         <div class="card">
-          <h2 class="zh-h2-bold">Get your Recimo ID</h2>
-          <p class="zh-h3">
-            您需要 Recimo ID 才能購買 Recimo 提供的商品。<br />
-            註冊完全免費。
-          </p>
-          <BaseBtn title="會員登入" :width="102" @click="handleFollow" />
+          <template v-if="!authStore.isLoggedIn">
+            <h2 class="zh-h2-bold">Get your Recimo ID</h2>
+            <p class="zh-h3">
+              您需要 Recimo ID 才能購買 Recimo 提供的商品。<br />
+              註冊完全免費。
+            </p>
+            <BaseBtn title="會員登入" :width="102" @click="handleFollow" />
+          </template>
+
+          <template v-else>
+            <h2 class="zh-h2-bold">Welcome Back!</h2>
+            <p class="zh-h3">
+              已登入 Recimo<br />
+              現在就可以完成購買，享受 Recimo 提供的完整服務。
+            </p>
+            <BaseBtn title="前往購物車" :width="120" @click="router.push({ name: 'cart' })" />
+          </template>
         </div>
       </div>
     </div>
