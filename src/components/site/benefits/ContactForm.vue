@@ -14,19 +14,40 @@ const categories = ['【R 幣與商城】', '【Recimo功能】', '【食譜與�
 // 用來追蹤是否點擊過送出，開啟驗證狀態
 const isSubmitted = ref(false);
 
+// 驗證 Email 格式
+const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+};
+
+// 驗證表單內容是否完整
+const checkFormValid = () => {
+    const { name, email, category, subject, content } = formData.value;
+    return (
+        name.trim() !== '' &&
+        validateEmail(email) &&
+        category !== '' &&
+        subject.trim() !== '' &&
+        content.trim() !== ''
+    );
+};
+
+// 處理表單送出
 const handleSave = () => {
     isSubmitted.value = true;
 
-    // 檢查是否有任何欄位是空的 (去除空格後)
-    const isFormValid = Object.values(formData.value).every(value => value && value.trim() !== '');
+    if (formData.value.email !== '' && !validateEmail(formData.value.email)) {
+        alert('電子信箱格式不正確，請重新檢查。');
+        return;
+    }
 
-    if (isFormValid) {
-        alert('✅ 訊息已成功送出！我們會盡快回覆您。');
-        // 送出後重置表單
+    // 檢查整體表單
+    if (checkFormValid()) {
+        alert('訊息已成功送出！我們會盡快回覆您。');
         formData.value = { name: '', email: '', category: '', subject: '', content: '' };
         isSubmitted.value = false;
     } else {
-        alert('❌ 請填寫所有必填欄位。');
+        alert('請填寫所有必填欄位。');
     }
 };
 </script>
@@ -39,103 +60,90 @@ const handleSave = () => {
             <div class="form-grid">
                 <div class="column">
                     <div class="field">
-                        <label class="p-p1">姓名</label>
+                        <label class="p-p1">姓名 <span class="required">*</span></label>
                         <div class="input-container">
-                            <input 
-                                v-model="formData.name" 
-                                class="form-input p-p1" 
-                                :class="(isSubmitted && !formData.name) ? 'is-error' : 'is-success'"
-                                style="width: 100%" 
-                                placeholder="請輸入姓名" 
-                            />
+                            <input v-model.trim="formData.name" class="form-input p-p1"
+                                :class="(isSubmitted && !formData.name.trim()) ? 'is-error' : 'is-success'"
+                                style="width: 100%" placeholder="請輸入姓名" />
                         </div>
                     </div>
 
                     <div class="field">
-                        <label class="p-p1">電子信箱</label>
+                        <label class="p-p1">電子信箱 <span class="required">*</span></label>
                         <div class="input-container">
-                            <input 
-                                v-model="formData.email" 
-                                type="email" 
-                                class="form-input p-p1" 
-                                :class="(isSubmitted && !formData.email) ? 'is-error' : 'is-success'"
-                                style="width: 100%" 
-                                placeholder="請輸入電子信箱" 
-                            />
+                            <input v-model.trim="formData.email" type="email" class="form-input p-p1"
+                                :class="(isSubmitted && (!formData.email || !validateEmail(formData.email))) ? 'is-error' : 'is-success'"
+                                style="width: 100%" placeholder="請輸入電子信箱" />
                         </div>
                     </div>
 
                     <div class="field">
-                        <label class="p-p1">問題分類</label>
+                        <label class="p-p1">問題分類 <span class="required">*</span></label>
                         <div class="input-container">
                             <div class="select-wrapper">
-                                <select 
-                                    v-model="formData.category" 
-                                    class="form-input p-p1" 
+                                <select v-model="formData.category" class="form-input p-p1"
                                     :class="(isSubmitted && !formData.category) ? 'is-error' : 'is-success'"
-                                    style="width: 100%"
-                                >
+                                    style="width: 100%">
                                     <option value="" disabled selected>請選擇問題分類</option>
                                     <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
 
                 <div class="column">
                     <div class="field">
-                        <label class="p-p1">問題名稱</label>
+                        <label class="p-p1">問題名稱 <span class="required">*</span></label>
                         <div class="input-container">
-                            <input 
-                                v-model="formData.subject" 
-                                class="form-input p-p1" 
-                                :class="(isSubmitted && !formData.subject) ? 'is-error' : 'is-success'"
-                                style="width: 100%" 
-                                placeholder="請輸入問題名稱" 
-                            />
+                            <input v-model.trim="formData.subject" class="form-input p-p1"
+                                :class="(isSubmitted && !formData.subject.trim()) ? 'is-error' : 'is-success'"
+                                style="width: 100%" placeholder="請輸入問題名稱" />
                         </div>
                     </div>
 
                     <div class="field grow">
-                        <label class="p-p1">問題內容</label>
+                        <label class="p-p1">問題內容 <span class="required">*</span></label>
                         <div class="input-container">
-                            <textarea 
-                                v-model="formData.content" 
-                                class="form-input p-p1 text-area" 
-                                :class="(isSubmitted && !formData.content) ? 'is-error' : 'is-success'"
-                                style="width: 100%" 
-                                placeholder="請輸入問題內容"
-                            ></textarea>
+                            <textarea v-model.trim="formData.content" class="form-input p-p1 text-area"
+                                :class="(isSubmitted && !formData.content.trim()) ? 'is-error' : 'is-success'"
+                                style="width: 100%" placeholder="請輸入問題內容"></textarea>
                         </div>
                     </div>
-                </div> 
+                </div>
             </div>
 
             <div class="submit-area">
-                <BaseBtn 
-                    title="傳送" 
-                    :width="180"
-                    @click="handleSave"
-                />
+                <BaseBtn title="傳送" :width="180" @click="handleSave" />
             </div>
         </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
-
+.required {
+    color: $secondary-color-danger-700;
+    margin-left: 4px;
+}
 
 .form-input {
-    box-sizing: border-box !important; 
-    max-width: 100%; 
+    border: 1px solid $neutral-color-400;
+    transition: all 0.3s ease;
+
+    &:focus {
+        border-color: $primary-color-400;
+    }
+
+    &.is-error {
+        border-color: $secondary-color-danger-700 !important;
+        background-color: $neutral-color-100;
+    }
 }
 
 .contact-section {
     max-width: 1000px;
     margin: 40px auto;
     padding: 0 20px;
-    
 
     .main-title {
         text-align: center;
@@ -148,16 +156,15 @@ const handleSave = () => {
         border-radius: 12px;
         padding: 40px;
         background-color: $neutral-color-white;
-        // 確保內部元素垂直排列
         display: flex;
         flex-direction: column;
     }
 
     .form-grid {
         display: flex;
-        gap: 60px; 
-        margin-bottom: 40px; // 給下方按鈕留出空間
-        
+        gap: 60px;
+        margin-bottom: 40px;
+
         .column {
             flex: 1;
             display: flex;
@@ -202,9 +209,9 @@ const handleSave = () => {
             }
 
             .text-area {
-                height: 220px; 
+                height: 220px;
                 resize: none;
-                display: block; 
+                display: block;
             }
         }
     }
@@ -212,23 +219,17 @@ const handleSave = () => {
     .submit-area {
         display: flex;
         justify-content: center;
-        margin-top: 0; 
     }
 
-    /* 簡易 RWD */
     @media (max-width: 768px) {
         .form-card {
-            padding: 20px; 
+            padding: 20px;
         }
 
         .form-grid {
-            flex-direction: column; 
+            flex-direction: column;
             gap: 24px;
             margin-bottom: 24px;
-        }
-
-        .main-title {
-            margin-bottom: 40px;
         }
     }
 }
