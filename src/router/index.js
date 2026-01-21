@@ -199,15 +199,14 @@ const routes = [
         path: 'edit-recipe',
         name: 'edit-recipe',
         component: () => import('@/views/workspace/EditRecipe.vue'),
-        meta: { title: '食譜編輯', layout: 'workspace', requiresAuth: true, hideTopBar: true }
+        meta: { title: '食譜編輯', layout: 'workspace', requiresAuth: true }
       },
       {
-        path: 'guide',
+        path: 'guide/:id',
         name: 'recipe-guide',
         component: () => import('@/views/workspace/RecipeGuide.vue'),
         meta: {
           title: '步驟播放',
-          icon: markRaw(IconHandMeal),
           layout: 'workspace',
           requiresAuth: true
         }

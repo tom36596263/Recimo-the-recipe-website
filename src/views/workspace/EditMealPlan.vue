@@ -45,6 +45,14 @@ const fetchData = async () => {
   }
 };
 
+// --- 生命週期 ---
+onMounted(fetchData);
+
+// 監聽路由 ID 變化：若使用者在網址直接輸入不同 ID，需重新抓取資料
+watch(() => route.params.id, (newId) => {
+  if (newId) fetchData();
+});
+
 // --- 計算屬性 ---
 
 // 根據計畫的開始與結束日期，生成一個 Date 物件陣列 (用於週視圖欄位)
@@ -101,13 +109,7 @@ const openPanel = () => { showPanel.value = true; };
 const closePanel = () => { showPanel.value = false; };
 const onWheel = (e) => { e.currentTarget.scrollLeft += e.deltaY * 0.2; };
 
-// --- 生命週期 ---
-onMounted(fetchData);
 
-// 監聽路由 ID 變化：若使用者在網址直接輸入不同 ID，需重新抓取資料
-watch(() => route.params.id, (newId) => {
-  if (newId) fetchData();
-});
 </script>
 
 <template>
