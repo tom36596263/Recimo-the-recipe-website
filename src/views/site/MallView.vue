@@ -193,26 +193,27 @@ const columns = ref([
     <div class="product-title">
       <h2 class="zh-h2">Recimo料理包</h2>
     </div>
-    <!-- 標籤 -->
-    <div class="tag-wrapper">
-      <div class="tag">
-        <BaseTag v-for="item in tags" :key="item.text" :text="item.text" :width="item.width" :show-icon="false"
-          :variant="activeTag === item.text ? 'primary' : 'action'" @click="selectTag(item.text)"></BaseTag>
-      </div>
-
-      <div class="tag-swiper">
-        <swiper :slidesPerView="'auto'" :spaceBetween="14" :freeMode="true" :modules="modules" class="mySwiper">
-          <swiper-slide v-for="item in tags" :key="item.text" class="tag-slide">
-            <BaseTag :text="item.text" :width="item.width" :show-icon="false"
-              :variant="activeTag === item.text ? 'primary' : 'action'" @click="selectTag(item.text)"></BaseTag>
-          </swiper-slide>
-        </swiper>
-      </div>
-    </div>
 
     <section>
       <!-- 商品 -->
       <div class="container">
+        <!-- 標籤 -->
+        <div class="tag-wrapper">
+          <div class="tag">
+            <BaseTag v-for="item in tags" :key="item.text" :text="item.text" :width="item.width" :show-icon="false"
+              :variant="activeTag === item.text ? 'primary' : 'action'" @click="selectTag(item.text)"></BaseTag>
+          </div>
+
+          <div class="tag-swiper">
+            <swiper :slidesPerView="'auto'" :spaceBetween="14" :freeMode="true" :modules="modules" class="mySwiper">
+              <swiper-slide v-for="item in tags" :key="item.text" class="tag-slide">
+                <BaseTag :text="item.text" :width="item.width" :show-icon="false"
+                  :variant="activeTag === item.text ? 'primary' : 'action'" @click="selectTag(item.text)"></BaseTag>
+              </swiper-slide>
+            </swiper>
+          </div>
+        </div>
+
         <div class="row desktop-view">
           <div v-if="displayedProducts.length === 0" class="col-12 col-lg-6" style="text-align: center; padding: 40px">
             目前沒有此分類的商品
@@ -379,6 +380,7 @@ const columns = ref([
 
   .container {
     display: flex;
+    flex-direction: column;
     justify-content: space-evenly;
     margin-bottom: 30px;
   }

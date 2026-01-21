@@ -21,19 +21,19 @@
     "product_image": [
       {
         "id": 1,
-        "image_url": "public/img/mall/PROD-001_01.jpg",
+        "image_url": "img/mall/PROD-001_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 2,
-        "image_url": "public/img/mall/PROD-001_02.jpg",
+        "image_url": "img/mall/PROD-001_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 3,
-        "image_url": "public/img/mall/PROD-001_03.jpg",
+        "image_url": "img/mall/PROD-001_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -61,19 +61,19 @@
     "product_image": [
       {
         "id": 4,
-        "image_url": "public/img/mall/PROD-002_01.jpg",
+        "image_url": "img/mall/PROD-002_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 5,
-        "image_url": "public/img/mall/PROD-002_02.jpg",
+        "image_url": "img/mall/PROD-002_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 6,
-        "image_url": "public/img/mall/PROD-002_03.jpg",
+        "image_url": "img/mall/PROD-002_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -101,19 +101,19 @@
     "product_image": [
       {
         "id": 7,
-        "image_url": "public/img/mall/PROD-003_01.jpg",
+        "image_url": "img/mall/PROD-003_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 8,
-        "image_url": "public/img/mall/PROD-003_02.jpg",
+        "image_url": "img/mall/PROD-003_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 9,
-        "image_url": "public/img/mall/PROD-003_03.jpg",
+        "image_url": "img/mall/PROD-003_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -141,19 +141,19 @@
     "product_image": [
       {
         "id": 10,
-        "image_url": "public/img/mall/PROD-004_01.jpg",
+        "image_url": "img/mall/PROD-004_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 11,
-        "image_url": "public/img/mall/PROD-004_02.jpg",
+        "image_url": "img/mall/PROD-004_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 12,
-        "image_url": "public/img/mall/PROD-004_03.jpg",
+        "image_url": "img/mall/PROD-004_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -181,19 +181,19 @@
     "product_image": [
       {
         "id": 13,
-        "image_url": "public/img/mall/PROD-005_01.jpg",
+        "image_url": "img/mall/PROD-005_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 14,
-        "image_url": "public/img/mall/PROD-005_02.jpg",
+        "image_url": "img/mall/PROD-005_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 15,
-        "image_url": "public/img/mall/PROD-005_03.jpg",
+        "image_url": "img/mall/PROD-005_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -221,19 +221,19 @@
     "product_image": [
       {
         "id": 16,
-        "image_url": "public/img/mall/PROD-006_01.jpg",
+        "image_url": "img/mall/PROD-006_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 17,
-        "image_url": "public/img/mall/PROD-006_02.jpg",
+        "image_url": "img/mall/PROD-006_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 18,
-        "image_url": "public/img/mall/PROD-006_03.jpg",
+        "image_url": "img/mall/PROD-006_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -261,19 +261,19 @@
     "product_image": [
       {
         "id": 19,
-        "image_url": "public/img/mall/PROD-007_01.jpg",
+        "image_url": "img/mall/PROD-007_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 20,
-        "image_url": "public/img/mall/PROD-007_02.jpg",
+        "image_url": "img/mall/PROD-007_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 21,
-        "image_url": "public/img/mall/PROD-007_03.jpg",
+        "image_url": "img/mall/PROD-007_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -301,19 +301,19 @@
     "product_image": [
       {
         "id": 22,
-        "image_url": "public/img/mall/PROD-008_01.jpg",
+        "image_url": "img/mall/PROD-008_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 23,
-        "image_url": "public/img/mall/PROD-008_02.jpg",
+        "image_url": "img/mall/PROD-008_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 24,
-        "image_url": "public/img/mall/PROD-008_03.jpg",
+        "image_url": "img/mall/PROD-008_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -341,19 +341,19 @@
     "product_image": [
       {
         "id": 25,
-        "image_url": "public/img/mall/PROD-009_01.jpg",
+        "image_url": "img/mall/PROD-009_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 26,
-        "image_url": "public/img/mall/PROD-009_02.jpg",
+        "image_url": "img/mall/PROD-009_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 27,
-        "image_url": "public/img/mall/PROD-009_03.jpg",
+        "image_url": "img/mall/PROD-009_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -381,19 +381,19 @@
     "product_image": [
       {
         "id": 28,
-        "image_url": "public/img/mall/PROD-010_01.jpg",
+        "image_url": "img/mall/PROD-010_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 29,
-        "image_url": "public/img/mall/PROD-010_02.jpg",
+        "image_url": "img/mall/PROD-010_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 30,
-        "image_url": "public/img/mall/PROD-010_03.jpg",
+        "image_url": "img/mall/PROD-010_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -421,19 +421,19 @@
     "product_image": [
       {
         "id": 31,
-        "image_url": "public/img/mall/PROD-011_01.jpg",
+        "image_url": "img/mall/PROD-011_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 32,
-        "image_url": "public/img/mall/PROD-011_02.jpg",
+        "image_url": "img/mall/PROD-011_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 33,
-        "image_url": "public/img/mall/PROD-011_03.jpg",
+        "image_url": "img/mall/PROD-011_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -461,19 +461,19 @@
     "product_image": [
       {
         "id": 34,
-        "image_url": "public/img/mall/PROD-012_01.jpg",
+        "image_url": "img/mall/PROD-012_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 35,
-        "image_url": "public/img/mall/PROD-012_02.jpg",
+        "image_url": "img/mall/PROD-012_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 36,
-        "image_url": "public/img/mall/PROD-012_03.jpg",
+        "image_url": "img/mall/PROD-012_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -501,19 +501,19 @@
     "product_image": [
       {
         "id": 37,
-        "image_url": "public/img/mall/PROD-013_01.jpg",
+        "image_url": "img/mall/PROD-013_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 38,
-        "image_url": "public/img/mall/PROD-013_02.jpg",
+        "image_url": "img/mall/PROD-013_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 39,
-        "image_url": "public/img/mall/PROD-013_03.jpg",
+        "image_url": "img/mall/PROD-013_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -541,19 +541,19 @@
     "product_image": [
       {
         "id": 40,
-        "image_url": "public/img/mall/PROD-014_01.jpg",
+        "image_url": "img/mall/PROD-014_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 41,
-        "image_url": "public/img/mall/PROD-014_02.jpg",
+        "image_url": "img/mall/PROD-014_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 42,
-        "image_url": "public/img/mall/PROD-014_03.jpg",
+        "image_url": "img/mall/PROD-014_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -581,19 +581,19 @@
     "product_image": [
       {
         "id": 43,
-        "image_url": "public/img/mall/PROD-015_01.jpg",
+        "image_url": "img/mall/PROD-015_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 44,
-        "image_url": "public/img/mall/PROD-015_02.jpg",
+        "image_url": "img/mall/PROD-015_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 45,
-        "image_url": "public/img/mall/PROD-015_03.jpg",
+        "image_url": "img/mall/PROD-015_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -621,19 +621,19 @@
     "product_image": [
       {
         "id": 46,
-        "image_url": "public/img/mall/PROD-016_01.jpg",
+        "image_url": "img/mall/PROD-016_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 47,
-        "image_url": "public/img/mall/PROD-016_02.jpg",
+        "image_url": "img/mall/PROD-016_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 48,
-        "image_url": "public/img/mall/PROD-016_03.jpg",
+        "image_url": "img/mall/PROD-016_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -661,19 +661,19 @@
     "product_image": [
       {
         "id": 49,
-        "image_url": "public/img/mall/PROD-017_01.jpg",
+        "image_url": "img/mall/PROD-017_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 50,
-        "image_url": "public/img/mall/PROD-017_02.jpg",
+        "image_url": "img/mall/PROD-017_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 51,
-        "image_url": "public/img/mall/PROD-017_03.jpg",
+        "image_url": "img/mall/PROD-017_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -701,19 +701,19 @@
     "product_image": [
       {
         "id": 52,
-        "image_url": "public/img/mall/PROD-018_01.jpg",
+        "image_url": "img/mall/PROD-018_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 53,
-        "image_url": "public/img/mall/PROD-018_02.jpg",
+        "image_url": "img/mall/PROD-018_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 54,
-        "image_url": "public/img/mall/PROD-018_03.jpg",
+        "image_url": "img/mall/PROD-018_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -741,19 +741,19 @@
     "product_image": [
       {
         "id": 55,
-        "image_url": "public/img/mall/PROD-019_01.jpg",
+        "image_url": "img/mall/PROD-019_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 56,
-        "image_url": "public/img/mall/PROD-019_02.jpg",
+        "image_url": "img/mall/PROD-019_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 57,
-        "image_url": "public/img/mall/PROD-019_03.jpg",
+        "image_url": "img/mall/PROD-019_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
@@ -781,19 +781,19 @@
     "product_image": [
       {
         "id": 58,
-        "image_url": "public/img/mall/PROD-020_01.jpg",
+        "image_url": "img/mall/PROD-020_01.jpg",
         "sort_order": 1,
         "is_cover": true
       },
       {
         "id": 59,
-        "image_url": "public/img/mall/PROD-020_02.jpg",
+        "image_url": "img/mall/PROD-020_02.jpg",
         "sort_order": 2,
         "is_cover": false
       },
       {
         "id": 60,
-        "image_url": "public/img/mall/PROD-020_03.jpg",
+        "image_url": "img/mall/PROD-020_03.jpg",
         "sort_order": 3,
         "is_cover": false
       }
