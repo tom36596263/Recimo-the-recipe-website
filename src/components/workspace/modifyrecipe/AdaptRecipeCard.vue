@@ -6,14 +6,24 @@ const props = defineProps({
     recipe: {
         type: Object,
         required: true
+    },
+    // ✨ 新增：判斷是否為唯讀模式（總覽頁使用）
+    readonly: {
+        type: Boolean,
+        default: false
     }
 });
 
 const router = useRouter();
 
-// Demo 模式不跳轉，但保留結構
+// ✨ 點擊行為：唯讀模式下點擊卡片跳轉詳情頁
 const goToDetail = () => {
-    console.log('Demo 模式：已停用跳轉', props.recipe.id);
+    if (props.readonly) {
+        const targetId = props.recipe.id || props.recipe.recipe_id;
+        if (targetId) {
+            router.push(`/workspace/recipe-detail/${targetId}`);
+        }
+    }
 };
 
 const handleLikeChange = (val, recipe) => {
@@ -22,14 +32,15 @@ const handleLikeChange = (val, recipe) => {
 </script>
 
 <template>
-    <div v-if="recipe" class="recipe-card-sm readonly-card-effect">
+    <div v-if="recipe" class="recipe-card-sm" :class="{ 'is-readonly': readonly }" @click="goToDetail">
+
         <header class="card-header" :style="{
             backgroundImage: recipe.coverImg ? `url(${recipe.coverImg})` : '',
             backgroundSize: 'cover',
             backgroundPosition: 'center'
         }">
-            <div class="change-hint-overlay">
-                <span class="p-p2">改編成果照</span>
+            <div v-if="!readonly" class="change-hint-overlay">
+                <span class="p-p2">+ 更換成品照</span>
             </div>
         </header>
 
@@ -40,7 +51,7 @@ const handleLikeChange = (val, recipe) => {
 
             <div class="input-group content-input">
                 <i-material-symbols-arrow-right-alt-rounded class="arrow-icon" />
-                <input type="text" :value="recipe.description" placeholder="關鍵更改內容..." readonly>
+                <input type="text" :value="recipe.description || recipe.adapt_title" placeholder="關鍵更改內容..." readonly>
             </div>
         </div>
 
@@ -70,14 +81,6 @@ const handleLikeChange = (val, recipe) => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-.readonly-card-effect {
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-
-    &:hover {
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-}
-
 .recipe-card-sm {
     border: 1px solid $neutral-color-400;
     border-radius: 12px;
@@ -86,6 +89,17 @@ const handleLikeChange = (val, recipe) => {
     height: 100%;
     display: flex;
     flex-direction: column;
+    transition: all 0.3s ease;
+
+    // ✨ 唯讀模式下的樣式（總覽頁用）
+    &.is-readonly {
+        cursor: pointer;
+
+        &:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+    }
 
     .card-header {
         position: relative;
@@ -96,16 +110,17 @@ const handleLikeChange = (val, recipe) => {
     .change-hint-overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.2);
+        background: rgba(0, 0, 0, 0.4);
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
         opacity: 0;
-        transition: opacity 0.3s;
+        transition: opacity 0.2s;
     }
 
-    &:hover .change-hint-overlay {
+    // 只有非 readonly 時 hover 圖片才顯示文字
+    &:not(.is-readonly) .card-header:hover .change-hint-overlay {
         opacity: 1;
     }
 
@@ -125,21 +140,20 @@ const handleLikeChange = (val, recipe) => {
                 background: transparent;
                 color: $neutral-color-700;
                 padding: 4px 0;
-                cursor: default;
+                cursor: default; // 總覽頁不可輸入
             }
         }
 
         .title-input input {
             font-weight: 600;
             font-size: 16px;
-            color: $neutral-color-800;
         }
 
         .content-input {
             .arrow-icon {
                 font-size: 20px;
                 margin-right: 6px;
-                color: $primary-color-700; // 箭頭用主色標註
+                color: $primary-color-700;
             }
 
             input {
@@ -155,14 +169,14 @@ const handleLikeChange = (val, recipe) => {
         .personal-info {
             display: flex;
             align-items: center;
-            width: 100%;
             justify-content: space-between;
+            width: 100%;
 
             .p-p1 {
                 font-size: 14px;
-                color: $neutral-color-400;
-                margin-right: auto;
                 margin-left: 8px;
+                margin-right: auto;
+                color: $neutral-color-400;
             }
         }
 
@@ -170,8 +184,8 @@ const handleLikeChange = (val, recipe) => {
             width: 28px;
             height: 28px;
             border-radius: 50%;
-            border: 1px solid $neutral-color-100;
             background-color: $neutral-color-100;
+            border: 1px solid $neutral-color-400;
         }
     }
 }

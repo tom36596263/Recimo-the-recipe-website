@@ -93,6 +93,12 @@ function handleCreateNew() {
     });
 }
 
+// ✨ 新增跳轉功能
+function goToRecipeDetail(recipeId) {
+    if (!recipeId) return;
+    router.push(`/workspace/recipe-detail/${recipeId}`);
+}
+
 function goBack() {
     if (!originalRecipe.value.id) return;
     router.push(`/workspace/recipe-detail/${originalRecipe.value.id}`);
@@ -143,7 +149,8 @@ function goBack() {
             <TransitionGroup name="staggered-list">
                 <div v-for="(item, index) in variantItems" :key="item.id"
                     class="col-3 col-lg-4 col-md-6 mb-24 grid-item" :style="{ '--delay': index + 1 }">
-                    <AdaptRecipeCard :recipe="item" class="full-height demo-readonly-card" />
+                    <AdaptRecipeCard :recipe="item" class="full-height demo-readonly-card"
+                        @click="goToRecipeDetail(item.id)" />
                 </div>
             </TransitionGroup>
         </div>
@@ -339,7 +346,8 @@ function goBack() {
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
     }
 
-    /* 🔥 核心：強制關閉改編卡片上的黑底與文字 */
+    /* ✨ 核心：強制關閉改編卡片上的所有黑底、遮罩與文字 (涵蓋多種命名可能) */
+    :deep(.change-hint-overlay),
     :deep(.hover-overlay),
     :deep(.mask),
     :deep(.result-overlay),
@@ -351,11 +359,8 @@ function goBack() {
         display: none !important;
         opacity: 0 !important;
         visibility: hidden !important;
-    }
-
-    /* 防止有 absolute 的遮罩擋點擊 */
-    :deep(*) {
-        pointer-events: auto;
+        pointer-events: none !important;
+        /* 確保不擋住點擊 */
     }
 }
 

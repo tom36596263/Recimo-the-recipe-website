@@ -261,7 +261,7 @@
     "child_recipe_id": 3,
     "adaptation_title": "舒肥版宮保雞丁",
     "adaptation_note": "舒肥後快炒，肉質極嫩且多汁。",
-    "adaptation_image_url": "/img/adaptations/11_1.png",
+    "adaptation_image_url": "/img/adaptation/11/1.jpg",
     "key_changes": [
       { "type": "肉質硬度", "from": "乾炒緊實", "to": "水嫩多汁" },
       { "type": "烹飪順序", "from": "生炒至熟", "to": "低溫熟成後掛漿" }
@@ -273,7 +273,7 @@
     "child_recipe_id": 13,
     "adaptation_title": "蒜香舒肥雞肉沙拉",
     "adaptation_note": "濃厚蒜醬搭配舒肥雞，輕盈飽足。",
-    "adaptation_image_url": "/img/adaptations/11_2.png",
+    "adaptation_image_url": "/img/adaptation/11/2.jpg",
     "key_changes": [
       { "type": "澱粉量", "from": "藜麥飯為主", "to": "增加葉菜與毛豆" },
       { "type": "調味風格", "from": "原味清淡", "to": "濃厚蒜味醬油" }
@@ -285,7 +285,7 @@
     "child_recipe_id": 20,
     "adaptation_title": "照燒鮭魚糙米飯",
     "adaptation_note": "鮭魚刷上照燒醬，米飯更入味。",
-    "adaptation_image_url": "/img/adaptations/12_1.png",
+    "adaptation_image_url": "/img/adaptation/12/1.jpg",
     "key_changes": [
       { "type": "表面塗層", "from": "海鹽胡椒", "to": "濃稠照燒醬" },
       { "type": "風味感", "from": "歐式原味", "to": "日式濃郁" }
@@ -297,7 +297,7 @@
     "child_recipe_id": 28,
     "adaptation_title": "蔥油鮭魚便當",
     "adaptation_note": "淋上滾燙蔥油，激發鮭魚香氣。",
-    "adaptation_image_url": "/img/adaptations/12_2.png",
+    "adaptation_image_url": "/img/adaptation/12/2.jpg",
     "key_changes": [
       { "type": "香氣技術", "from": "鍋底煎香", "to": "高溫蔥油淋噴" },
       { "type": "配料", "from": "清淡蔬菜", "to": "蔥絲與薑絲" }
@@ -309,7 +309,7 @@
     "child_recipe_id": 17,
     "adaptation_title": "韓式蒜香毛豆豬",
     "adaptation_note": "加入泡菜酸度，平衡豬排油脂。",
-    "adaptation_image_url": "/img/adaptations/13_1.png",
+    "adaptation_image_url": "/img/adaptation/13/1.jpg",
     "key_changes": [
       { "type": "平衡物", "from": "蒜片", "to": "發酵酸泡菜" },
       { "type": "口感", "from": "乾香", "to": "濕潤辣爽" }
@@ -321,7 +321,7 @@
     "child_recipe_id": 30,
     "adaptation_title": "毛豆版客家小炒",
     "adaptation_note": "豬排切絲配毛豆，口感豐富。",
-    "adaptation_image_url": "/img/adaptations/13_2.png",
+    "adaptation_image_url": "/img/adaptation/13/2.jpg",
     "key_changes": [
       { "type": "切割方式", "from": "整塊豬排", "to": "細長豬肉絲" },
       { "type": "複合配料", "from": "單純毛豆", "to": "魷魚絲與豆乾" }
@@ -333,7 +333,7 @@
     "child_recipe_id": 4,
     "adaptation_title": "松露奶醬豆腐排",
     "adaptation_note": "淋上松露奶醬，升級精緻西餐。",
-    "adaptation_image_url": "/img/adaptations/14_1.png",
+    "adaptation_image_url": "/img/adaptation/14/1.jpg",
     "key_changes": [
       { "type": "醬汁升級", "from": "和風野菇汁", "to": "法式松露奶油醬" },
       { "type": "定位", "from": "家常便當菜", "to": "精緻西式排餐" }
@@ -345,7 +345,7 @@
     "child_recipe_id": 29,
     "adaptation_title": "豆腐排版麻婆料理",
     "adaptation_note": "豆腐排結合麻婆醬，辛香入味。",
-    "adaptation_image_url": "/img/adaptations/14_2.png",
+    "adaptation_image_url": "/img/adaptation/14/2.jpg",
     "key_changes": [
       { "type": "調味轉向", "from": "清爽鹹鮮", "to": "重口麻辣" },
       { "type": "結構", "from": "乾煎排狀", "to": "醬汁浸泡燉煮" }
@@ -357,7 +357,7 @@
     "child_recipe_id": 24,
     "adaptation_title": "紙包白酒蛤蜊魚",
     "adaptation_note": "魚汁與白酒蒸熟麵條，極其鮮美。",
-    "adaptation_image_url": "/img/adaptations/15_1.png",
+    "adaptation_image_url": "/img/adaptation/15/1.jpg",
     "key_changes": [
       {
         "type": "食材組合",
@@ -373,7 +373,7 @@
     "child_recipe_id": 10,
     "adaptation_title": "蒜香紙包蝦拼盤",
     "adaptation_note": "蒜香與魚蝦密封烘烤，海味加倍。",
-    "adaptation_image_url": "/img/adaptations/15_2.png",
+    "adaptation_image_url": "/img/adaptation/15/2.jpg",
     "key_changes": [
       { "type": "海鮮豐富度", "from": "單一白肉魚", "to": "魚蝦綜合海鮮包" },
       { "type": "香氣核心", "from": "酸香為主", "to": "濃郁蒜油感" }
@@ -385,7 +385,7 @@
     "child_recipe_id": 21,
     "adaptation_title": "壽喜燒風肉醬麵",
     "adaptation_note": "壽喜燒甜味肉醬，驚喜日式風格。",
-    "adaptation_image_url": "/img/adaptations/16_1.png",
+    "adaptation_image_url": "/img/adaptation/16/1.jpg",
     "key_changes": [
       { "type": "醬汁甜度", "from": "番茄酸感", "to": "日式糖醬油甜感" },
       { "type": "肉類處理", "from": "牛肉碎", "to": "牛肉薄片" }
@@ -397,7 +397,7 @@
     "child_recipe_id": 19,
     "adaptation_title": "薑汁壽喜燒豬丼",
     "adaptation_note": "加入薑泥調味，融合兩種經典風味。",
-    "adaptation_image_url": "/img/adaptations/16_2.png",
+    "adaptation_image_url": "/img/adaptation/16/2.jpg",
     "key_changes": [
       { "type": "肉類替代", "from": "牛胸肉片", "to": "梅花豬肉片" },
       { "type": "核心辛香", "from": "洋蔥甜味", "to": "辛辣薑泥" }
@@ -409,7 +409,7 @@
     "child_recipe_id": 26,
     "adaptation_title": "三杯泡菜雞",
     "adaptation_note": "泡菜酸辣帶入三杯雞，香氣奇特。",
-    "adaptation_image_url": "/img/adaptations/17_1.png",
+    "adaptation_image_url": "/img/adaptation/17/1.jpg",
     "key_changes": [
       { "type": "發酵元素", "from": "單純九層塔", "to": "九層塔加韓式泡菜" },
       { "type": "醬汁比例", "from": "鹹甜麻油", "to": "鹹甜酸辣" }
@@ -421,7 +421,7 @@
     "child_recipe_id": 29,
     "adaptation_title": "韓式麻婆豆腐",
     "adaptation_note": "泡菜汁增添果酸，清爽解膩。",
-    "adaptation_image_url": "/img/adaptations/17_2.png",
+    "adaptation_image_url": "/img/adaptation/17/2.jpg",
     "key_changes": [
       { "type": "辣味層次", "from": "川味麻辣", "to": "韓式甜辣" },
       { "type": "湯底感", "from": "厚重油感", "to": "清爽酸感" }
@@ -433,7 +433,7 @@
     "child_recipe_id": 22,
     "adaptation_title": "奶香咖哩燉飯",
     "adaptation_note": "咖哩濃稠度作基底，米粒一體。",
-    "adaptation_image_url": "/img/adaptations/18_1.png",
+    "adaptation_image_url": "/img/adaptation/18/1.jpg",
     "key_changes": [
       { "type": "主食型態", "from": "白飯配淋醬", "to": "米粒一體燉飯" },
       { "type": "質地", "from": "流動醬汁", "to": "濃郁掛米感" }
@@ -445,7 +445,7 @@
     "child_recipe_id": 7,
     "adaptation_title": "北海道咖哩拉麵",
     "adaptation_note": "咖哩溶入豚骨湯，復刻經典風味。",
-    "adaptation_image_url": "/img/adaptations/18_2.png",
+    "adaptation_image_url": "/img/adaptation/18/2.jpg",
     "key_changes": [
       { "type": "湯頭基底", "from": "清水與咖哩", "to": "豚骨白湯與咖哩" },
       { "type": "主食替代", "from": "日式米飯", "to": "鹼水拉麵" }
@@ -457,7 +457,7 @@
     "child_recipe_id": 13,
     "adaptation_title": "味噌薑汁嫩豬排",
     "adaptation_note": "味噌酵素分解，肉質更軟嫩。",
-    "adaptation_image_url": "/img/adaptations/19_1.png",
+    "adaptation_image_url": "/img/adaptation/19/1.jpg",
     "key_changes": [
       { "type": "肉質處理", "from": "斷筋拍打", "to": "味噌酵素分解" },
       { "type": "呈現", "from": "肉片疊加", "to": "厚切單塊豬排" }
@@ -469,7 +469,7 @@
     "child_recipe_id": 30,
     "adaptation_title": "薑汁燒肉風客家炒",
     "adaptation_note": "味噌薑汁結合五花，和風感十足。",
-    "adaptation_image_url": "/img/adaptations/19_2.png",
+    "adaptation_image_url": "/img/adaptation/19/2.jpg",
     "key_changes": [
       { "type": "風味骨架", "from": "鹹鮮收乾", "to": "甜味噌濕潤感" },
       { "type": "香氣對比", "from": "乾煸香", "to": "薑泥清香" }
@@ -481,7 +481,7 @@
     "child_recipe_id": 1,
     "adaptation_title": "和風照燒鮭魚披薩",
     "adaptation_note": "照燒鮭魚舖上披薩，風味獨特。",
-    "adaptation_image_url": "/img/adaptations/20_1.png",
+    "adaptation_image_url": "/img/adaptation/20/1.jpg",
     "key_changes": [
       { "type": "醬料結合", "from": "紅醬 (番茄)", "to": "照燒醬搭配美乃滋" },
       { "type": "蛋白質", "from": "莫札瑞拉起司", "to": "起司加照燒鮭魚" }
@@ -493,7 +493,7 @@
     "child_recipe_id": 12,
     "adaptation_title": "照燒鮭魚輕食餐",
     "adaptation_note": "高纖低GI餐盒，營養均衡。",
-    "adaptation_image_url": "/img/adaptations/20_2.png",
+    "adaptation_image_url": "/img/adaptation/20/2.jpg",
     "key_changes": [
       { "type": "營養配置", "from": "一般便當菜", "to": "高纖低GI餐盒" },
       { "type": "飽足感來源", "from": "精製澱粉", "to": "糙米與原型鮭魚" }
