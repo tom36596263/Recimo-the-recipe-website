@@ -47,5 +47,11 @@
   { "tag_id": 46, "tag_name": "豆腐料理", "tag_type": "食材分類" },
   { "tag_id": 47, "tag_name": "客家料理", "tag_type": "異國風味" },
   { "tag_id": 48, "tag_name": "溫補料理", "tag_type": "餐點分類" },
-  { "tag_id": 49, "tag_name": "下午茶", "tag_type": "餐點分類" }
+  { "tag_id": 49, "tag_name": "下午茶", "tag_type": "餐點分類" },
+  { "tag_id": 50, "tag_name": "布丁/果凍", "tag_type": "料理種類" },
+  { "tag_id": 51, "tag_name": "磅蛋糕", "tag_type": "料理種類" },
+  { "tag_id": 52, "tag_name": "餅乾", "tag_type": "料理種類" },
+  { "tag_id": 53, "tag_name": "瑪德蓮", "tag_type": "料理種類" },
+  { "tag_id": 54, "tag_name": "司康", "tag_type": "料理種類" },
+  { "tag_id": 55, "tag_name": "布朗尼", "tag_type": "料理種類" }
 ]
