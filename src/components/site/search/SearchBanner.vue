@@ -107,8 +107,10 @@ const handleTagClick = (tagName) => {
             .tags-group{
                 display: flex;
                 gap: 10px;
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 overflow-x: scroll;
+                white-space: nowrap;
+
                 &::-webkit-scrollbar {
                     display: none;
                 }
