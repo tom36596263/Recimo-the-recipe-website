@@ -2,7 +2,6 @@
 import { useRouter } from 'vue-router';
 import LikeButton from '@/components/common/LikeButton.vue'
 
-// 接收來自父組件的食譜資料
 const props = defineProps({
     recipe: {
         type: Object,
@@ -12,22 +11,24 @@ const props = defineProps({
 
 const router = useRouter();
 
-// 跳轉詳情頁邏輯
+// ✨ Demo 暫時封印：不執行跳轉
 const goToDetail = () => {
+    console.log('Demo 模式：已停用跳轉', props.recipe.id);
+    /* 暫不跳轉
     router.push({
         name: 'workspace-recipe-detail',
         params: { id: props.recipe.id || props.recipe.recipe_id }
     });
+    */
 };
 
-// 處理按讚變更
 const handleLikeChange = (val, recipe) => {
     console.log('讚數更新:', val);
 };
 </script>
 
 <template>
-    <div v-if="recipe" class="recipe-card-sm" @click="goToDetail">
+    <div v-if="recipe" class="recipe-card-sm readonly-card-effect">
         <header class="card-header" :style="{
             backgroundImage: recipe.coverImg ? `url(${recipe.coverImg})` : '',
             backgroundSize: 'cover',
@@ -60,12 +61,10 @@ const handleLikeChange = (val, recipe) => {
                     backgroundPosition: 'center'
                 }">
                 </div>
-
                 <p class="p-p1">
                     {{ (recipe.author && typeof recipe.author === 'object') ? recipe.author.author_name : (recipe.author
                     || 'Recimo') }}
                 </p>
-
                 <div @click.prevent.stop>
                     <LikeButton :initial-likes="recipe.likes || 0"
                         @update:liked="(val) => handleLikeChange(val, recipe)" />
@@ -78,21 +77,32 @@ const handleLikeChange = (val, recipe) => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
+// ✨ Demo 特效：Hover 放大與投影
+.readonly-card-effect {
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+
+    &:hover {
+        transform: scale(1.03); // 輕微放大
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); // 增加浮動感投影
+    }
+}
+
 .recipe-card-sm {
     border: 1px solid $neutral-color-400;
     border-radius: $radius-base;
     overflow: hidden;
     background-color: $neutral-color-white;
-    cursor: pointer;
+    // cursor: pointer; // Demo 建議改回 default，或保留 pointer 假裝可以點
+    cursor: default;
 
+    /* ... 其餘原有樣式保持不變 ... */
     .card-header {
-        position: relative; // ✨ 必加：讓遮罩可以定位
+        position: relative;
         overflow: hidden;
         height: 150px;
         width: 100%;
         background-color: $neutral-color-100;
 
-        // ✨ 2. 當滑鼠移入圖片區塊時顯示遮罩
         &:hover {
             .change-hint-overlay {
                 opacity: 1;
@@ -100,7 +110,6 @@ const handleLikeChange = (val, recipe) => {
         }
     }
 
-    // ✨ 3. 遮罩樣式
     .change-hint-overlay {
         position: absolute;
         inset: 0;
@@ -111,7 +120,7 @@ const handleLikeChange = (val, recipe) => {
         justify-content: center;
         opacity: 0;
         transition: opacity 0.2s ease-in-out;
-        pointer-events: none; // 讓點擊可以穿透到 header
+        pointer-events: none;
     }
 
     .card-body {
@@ -146,12 +155,10 @@ const handleLikeChange = (val, recipe) => {
             font-size: 16px;
         }
 
-        .content-input {
-            .arrow-icon {
-                font-size: 20px;
-                margin-right: 4px;
-                color: $neutral-color-800;
-            }
+        .content-input .arrow-icon {
+            font-size: 20px;
+            margin-right: 4px;
+            color: $neutral-color-800;
         }
     }
 
@@ -179,16 +186,6 @@ const handleLikeChange = (val, recipe) => {
             display: flex;
             justify-content: center;
             background-color: $neutral-color-100;
-        }
-    }
-}
-
-@media screen and (max-width: 1300px) {
-    .recipe-card-lg {
-        footer {
-            .btn {
-                width: 85px;
-            }
         }
     }
 }

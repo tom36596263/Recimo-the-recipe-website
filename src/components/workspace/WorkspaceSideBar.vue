@@ -67,7 +67,7 @@ const closeMore = () => isMoreOpen.value = false;
                 </div>
             </router-link>
         </div>
-        <BaseBtn title="登出" height="30" />
+        <BaseBtn title="登出" height="30" class="logout-btn"/>
     </aside>
 
     <nav class="mobile-tabbar">
@@ -114,6 +114,9 @@ const closeMore = () => isMoreOpen.value = false;
     flex-direction: column;
     padding: 24px;
 
+    .logout-btn{
+        margin-top: 50px;
+    }
     .logo {
         margin-bottom: 1rem;
 

@@ -83,7 +83,11 @@ onMounted(async () => {
         }
 
         recipeForm.value.difficulty = found.recipe_difficulty || 1;
-        recipeForm.value.totalTime = found.recipe_total_time || '00:30';
+
+        // --- ✨ 時間解析修正 (總時間) ---
+        const totalTimeStr = found.recipe_total_time || '00:30';
+        const tParts = totalTimeStr.split(':');
+        recipeForm.value.totalTime = (parseInt(tParts[0], 10) * 60) + (parseInt(tParts[1], 10) || 0);
 
         // 圖片路徑轉換
         const rawCover = recipeForm.value.coverImg || '';
@@ -112,12 +116,18 @@ onMounted(async () => {
           let finalImg = (rawImg && !rawImg.startsWith('http') && !rawImg.startsWith('data:') && !rawImg.startsWith('/'))
             ? `/img/recipes/${recipeId}/steps/${rawImg}`
             : rawImg;
+
+          // --- ✨ 時間解析修正 (步驟時間) ---
+          const stepTimeStr = s.step_total_time || '00:00:00';
+          const sParts = stepTimeStr.split(':');
+          const stepMinutes = (parseInt(sParts[0], 10) * 60) + (parseInt(sParts[1], 10) || 0);
+
           return {
             id: isAdapt ? null : (s.step_id || `s-${recipeId}-${index}`),
             title: s.step_title || '',
             content: s.step_content || '',
             image: finalImg,
-            time: parseInt(s.step_total_time) || 0,
+            time: stepMinutes,
             tags: resStepIng.data.filter(si => Number(si.step_id) === Number(s.step_id)).map(si => si.ingredient_id)
           };
         });
