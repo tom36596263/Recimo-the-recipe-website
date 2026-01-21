@@ -24,10 +24,10 @@
             isRotating.value = false
         }, 500)
     }
-
+    const base = import.meta.env.BASE_URL;
     const fetchData = async () => {
         try {
-            const response = await fetch('/data/others/remove-bg-ingredients.json') 
+            const response = await fetch(`${import.meta.env.BASE_URL}data/others/remove-bg-ingredients.json`) 
             const data = await response.json()
             
             recipesData.value = data
