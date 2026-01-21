@@ -18,6 +18,9 @@ const route = useRoute();
 const router = useRouter();
 const recipeStore = useRecipeStore();
 
+// --- 讀取 Vite 的 Base 路徑 ---
+const baseUrl = import.meta.env.BASE_URL;
+
 // --- 1. 響應式資料狀態 ---
 const rawRecipe = ref(null);
 const rawIngredients = ref([]);
@@ -32,7 +35,7 @@ const localLikesOffset = ref(0);
 
 const isPreviewMode = computed(() => route.query.mode === 'preview');
 
-// --- 2. 功能函式 (修正跳轉邏輯) ---
+// --- 2. 功能函式 ---
 const toggleRecipeLike = () => {
     if (isPreviewMode.value) return;
     isLiked.value = !isLiked.value;
@@ -44,40 +47,26 @@ const handleGoToEdit = () => {
         ? (route.query.editId || recipeStore.previewData?.recipe_id)
         : (rawRecipe.value?.recipe_id || route.params.id);
 
-    const queryParams = {
-        editId: currentId
-    };
+    const queryParams = { editId: currentId };
 
-    if (!isPreviewMode.value) {
-        queryParams.action = 'adapt';
-    }
+    if (!isPreviewMode.value) { queryParams.action = 'adapt'; }
 
     if (isPreviewMode.value) {
-        const parentId =
-            recipeStore.previewData?.parent_recipe_id ||
-            recipeStore.previewData?.parent_id;
-
+        const parentId = recipeStore.previewData?.parent_recipe_id || recipeStore.previewData?.parent_id;
         if (parentId) {
             queryParams.editId = parentId;
             queryParams.action = 'adapt';
         }
     }
 
-    router.push({
-        path: '/workspace/edit-recipe',
-        query: queryParams
-    });
+    router.push({ path: '/workspace/edit-recipe', query: queryParams });
 };
 
-const backToEdit = () => {
-    handleGoToEdit();
-};
+const backToEdit = () => { handleGoToEdit(); };
 
 const toggleWorkspaceTopBar = (show) => {
     const topBar = document.querySelector('.workspace-top-bar');
-    if (topBar) {
-        topBar.style.display = show ? '' : 'none';
-    }
+    if (topBar) { topBar.style.display = show ? '' : 'none'; }
 };
 
 // --- 3. fetchData 核心邏輯 ---
@@ -156,24 +145,18 @@ const fetchData = async () => {
 
 onMounted(() => {
     fetchData();
-    if (isPreviewMode.value) {
-        toggleWorkspaceTopBar(false);
-    }
+    if (isPreviewMode.value) { toggleWorkspaceTopBar(false); }
 });
 
-onUnmounted(() => {
-    toggleWorkspaceTopBar(true);
-});
+onUnmounted(() => { toggleWorkspaceTopBar(true); });
 
-watch(() => isPreviewMode.value, (newVal) => {
-    toggleWorkspaceTopBar(!newVal);
-});
+watch(() => isPreviewMode.value, (newVal) => { toggleWorkspaceTopBar(!newVal); });
 
-watch(() => [route.params.id, route.query.mode], () => {
-    fetchData();
-}, { deep: true });
+watch(() => [route.params.id, route.query.mode], () => { fetchData(); }, { deep: true });
 
-// --- 4. 計算屬性 ---
+// --- 4. 計算屬性 (修正路徑) ---
+
+// 1. 食譜封面圖
 const recipeIntroData = computed(() => {
     if (!rawRecipe.value) return null;
 
@@ -184,10 +167,12 @@ const recipeIntroData = computed(() => {
     let finalImg = '';
 
     if (rawImg) {
-        if (rawImg.startsWith('http') || rawImg.startsWith('data:') || rawImg.startsWith('/')) {
+        if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
             finalImg = rawImg;
         } else {
-            finalImg = `/${rawImg}`;
+            // ✅ 防呆校正：清除開頭斜線，拼街後清理重複斜線
+            const cleanPath = rawImg.replace(/^\//, '');
+            finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
         }
     } else {
         finalImg = 'https://placehold.co/800x600?text=No+Image';
@@ -202,6 +187,7 @@ const recipeIntroData = computed(() => {
     };
 });
 
+// 2. 步驟圖
 const stepsData = computed(() => {
     if (!rawSteps.value || rawSteps.value.length === 0) return [];
     const rId = rawRecipe.value?.recipe_id || route.params.id || '0';
@@ -213,10 +199,11 @@ const stepsData = computed(() => {
                 finalImg = rawImg;
             } else {
                 let cleanPath = rawImg.replace(/^\//, '');
+                // ✅ 檢查是否已經包含完整路徑，若無則自動補齊
                 if (cleanPath.includes('img/recipes/')) {
-                    finalImg = `/${cleanPath}`;
+                    finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
                 } else {
-                    finalImg = `/img/recipes/${rId}/steps/${cleanPath}`;
+                    finalImg = `${baseUrl}/img/recipes/${rId}/steps/${cleanPath}`.replace(/\/+/g, '/');
                 }
             }
         }
@@ -231,6 +218,23 @@ const stepsData = computed(() => {
     });
 });
 
+// 3. 成品照
+const snapsData = computed(() => rawGallery.value.map(g => {
+    let rawUrl = g.GALLERY_URL || '';
+    let finalUrl = '';
+    if (rawUrl.startsWith('http') || rawUrl.startsWith('data:')) {
+        finalUrl = rawUrl;
+    } else {
+        const cleanPath = rawUrl.replace(/^\//, '');
+        finalUrl = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
+    }
+    return {
+        url: finalUrl,
+        comment: g.GALLERY_TEXT
+    };
+}));
+
+// --- 其他邏輯保持不變 ---
 const commentList = computed(() => {
     return rawComments.value.map(c => ({
         userName: c.USER_NAME,
@@ -251,11 +255,6 @@ watch(rawRecipe, (newVal) => {
 
 const displayRecipeLikes = computed(() => baseRecipeLikes.value + localLikesOffset.value);
 
-const snapsData = computed(() => rawGallery.value.map(g => ({
-    url: g.GALLERY_URL.startsWith('/') ? g.GALLERY_URL : `/${g.GALLERY_URL}`,
-    comment: g.GALLERY_TEXT
-})));
-
 const handleShare = async () => {
     if (isPreviewMode.value) return;
     const title = recipeIntroData.value?.title || '美味食譜';
@@ -265,7 +264,7 @@ const handleShare = async () => {
         catch (err) { console.log('分享取消'); }
     } else {
         await navigator.clipboard.writeText(url);
-        await alert('連結已複製到剪貼簿！');
+        alert('連結已複製到剪貼簿！');
     }
 };
 
@@ -308,7 +307,6 @@ const nutritionWrapper = computed(() => {
 
 const handleServingsChange = (newVal) => { servings.value = newVal; };
 
-// --- 5. 檢舉食譜燈箱 ---
 const isReportModalOpen = ref(false);
 const onReportSubmit = (data) => {
     console.log('收到檢舉內容:', data);
@@ -429,13 +427,13 @@ const onReportSubmit = (data) => {
 </template>
 
 <style lang="scss" scoped>
+/* 原有的樣式保持不變... */
 @import '@/assets/scss/abstracts/_color.scss';
 
-// --- 新增淡入動畫樣式 ---
 .fade-up {
     opacity: 0;
     animation: fadeUpIn 0.8s cubic-bezier(0.2, 0.6, 0.35, 1) forwards;
-    animation-delay: calc(var(--delay) * 0.12s); // 每個順序差 0.12 秒
+    animation-delay: calc(var(--delay) * 0.12s);
 }
 
 @keyframes fadeUpIn {
@@ -460,18 +458,16 @@ const onReportSubmit = (data) => {
     pointer-events: none;
     transition: all 0.3s ease;
 
-
     @media screen and (min-width: 810px) {
-        left: 260px; 
+        left: 260px;
         width: calc(100% - 260px);
-        background: transparent; 
+        background: transparent;
     }
-
 
     @media screen and (max-width: 809px) {
         left: 0;
         width: 100%;
-        background: rgba(255, 255, 255, 0.7); // 加上半透明背景，蓋過可能重疊的文字
+        background: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(8px);
         padding: 8px 0;
     }
@@ -493,7 +489,6 @@ const onReportSubmit = (data) => {
         pointer-events: auto;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 
-        // 極小螢幕優化
         @media screen and (max-width: 480px) {
             padding: 8px 12px;
 
@@ -661,20 +656,13 @@ const onReportSubmit = (data) => {
     color: $primary-color-700;
 }
 
-/* 修正後的斷點邏輯 */    
-
 .d-lg-none {
-
-    // 當寬度大於等於 1024px 時，隱藏「手機版專用」的組件
     @media screen and (min-width: 1024px) {
         display: none !important;
     }
 }
 
 .d-none-lg {
-
-    // 當寬度小於 1024px 時，隱藏「桌機版專用」的組件
-    // 使用 1023.98px 避免與 min-width: 1024px 衝突
     @media screen and (max-width: 1023.98px) {
         display: none !important;
     }
