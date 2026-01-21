@@ -155,30 +155,25 @@ watch(() => [route.params.id, route.query.mode], () => {
 const recipeIntroData = computed(() => {
     if (!rawRecipe.value) return null;
 
-    // 1. 抓取原始圖片欄位
     let rawImg = rawRecipe.value.recipe_image_url ||
         rawRecipe.value.coverImg ||
         rawRecipe.value.recipe_cover_image || '';
 
     let finalImg = '';
 
-    // 2. 處理路徑邏輯
     if (rawImg) {
         if (rawImg.startsWith('http') || rawImg.startsWith('data:') || rawImg.startsWith('/')) {
-            // 如果是 網址、Base64 或 已經有斜線了，直接使用
             finalImg = rawImg;
         } else {
-            // 如果是像 "img/recipes/..." 這種相對路徑，強制在最前面補上 "/"
             finalImg = `/${rawImg}`;
         }
     } else {
-        // 如果完全沒圖，給一個預設圖（可選）
         finalImg = 'https://placehold.co/800x600?text=No+Image';
     }
 
     return {
         title: rawRecipe.value.recipe_title || rawRecipe.value.title || '未命名食譜',
-        image: finalImg, // 使用處理後的圖片路徑
+        image: finalImg,
         time: formatTime(rawRecipe.value.recipe_total_time),
         difficulty: rawRecipe.value.recipe_difficulty || rawRecipe.value.difficulty || 1,
         description: rawRecipe.value.recipe_descreption || rawRecipe.value.recipe_description || rawRecipe.value.description || '暫無簡介'
@@ -233,9 +228,8 @@ watch(rawRecipe, (newVal) => {
 }, { immediate: true });
 
 const displayRecipeLikes = computed(() => baseRecipeLikes.value + localLikesOffset.value);
-// 找到這一行
+
 const snapsData = computed(() => rawGallery.value.map(g => ({
-    // 修改為：
     url: g.GALLERY_URL.startsWith('/') ? g.GALLERY_URL : `/${g.GALLERY_URL}`,
     comment: g.GALLERY_TEXT
 })));
@@ -255,10 +249,7 @@ const handleShare = async () => {
 
 const formatTime = (timeVal) => {
     if (!timeVal || timeVal === '00:00' || timeVal === 0) return '0 分鐘';
-
     const timeStr = String(timeVal);
-
-    // 如果是 Pinia 傳來的 "HH:mm" 格式
     if (timeStr.includes(':')) {
         const parts = timeStr.split(':');
         const hh = parseInt(parts[0], 10) || 0;
@@ -266,8 +257,6 @@ const formatTime = (timeVal) => {
         if (hh === 0) return `${mm} 分鐘`;
         return `${hh} 小時 ${mm} 分鐘`;
     }
-
-    // 如果是原本 JSON 的純分鐘數字 (例如 30)
     return `${timeStr} 分鐘`;
 };
 
@@ -321,12 +310,6 @@ const onReportSubmit = (data) => {
 
     <div class="recipe-container-root" v-if="!isLoading && rawRecipe" :class="{ 'preview-padding': isPreviewMode }">
         <main class="container">
-            <header class="page-header">
-                <router-link v-if="!isPreviewMode" :to="`/workspace/modify-recipe/${rawRecipe.recipe_id}`">
-                    <BaseBtn title="改編集+" variant="outline" height="30" class="w-auto" />
-                </router-link>
-            </header>
-
             <div class="title-content">
                 <div class="zh-h2">
                     <i-material-symbols-restaurant-rounded class="main-icon" />
@@ -349,6 +332,12 @@ const onReportSubmit = (data) => {
 
                     <div class="action-item" @click="isReportModalOpen = true">
                         <i-material-symbols-error-outline-rounded class="action-icon report-btn" />
+                    </div>
+
+                    <div v-if="!isPreviewMode" class="adapt-btn-wrapper">
+                        <router-link :to="`/workspace/modify-recipe/${rawRecipe.recipe_id}`">
+                            <BaseBtn title="改編集+" variant="outline" height="40" class="w-auto" />
+                        </router-link>
                     </div>
                 </div>
             </div>
@@ -490,12 +479,6 @@ const onReportSubmit = (data) => {
     }
 }
 
-.page-header {
-    display: flex;
-    justify-content: flex-end;
-    padding-top: 10px;
-}
-
 .title-content {
     display: flex;
     justify-content: space-between;
@@ -532,6 +515,7 @@ const onReportSubmit = (data) => {
             gap: 16px;
             width: 100%;
             justify-content: flex-start;
+            /* 保持圖示靠左 */
         }
 
         &.is-preview {
@@ -561,8 +545,6 @@ const onReportSubmit = (data) => {
             &:hover {
                 color: $primary-color-400;
             }
-
-            // ✨ 統一 hover 變色
         }
 
         .count-text {
@@ -572,6 +554,19 @@ const onReportSubmit = (data) => {
 
         .action-icon {
             font-size: 24px;
+        }
+
+        /* ✨ 讓改編集按鈕在手機版推到最右邊 */
+        .adapt-btn-wrapper {
+            @media screen and (max-width: 768px) {
+                margin-left: auto;
+            }
+
+            :deep(.base-btn) {
+                padding: 0 10px;
+                font-size: 13px;
+                border-radius: 6px;
+            }
         }
     }
 }
