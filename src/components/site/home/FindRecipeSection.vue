@@ -4,7 +4,7 @@
     import { ref, onMounted } from 'vue'
 
     const recipesData = ref([])
-    const currentBigImg = ref('')
+    const currentBigImg = ref('img/recipes/1/cover.png')
     const displayIngredients = ref([])
     const activeId = ref(null)
     const isRotating = ref(false)
@@ -51,9 +51,9 @@
         }
     }
 
-    const toggleRecipe = (recipePath, recipeId) => {
+    const toggleRecipe = (recipePath, Id) => {
         currentBigImg.value = recipePath
-        activeId.value = recipeId
+        activeId.value = Id
     }
 
     onMounted(() => {
@@ -94,7 +94,6 @@
                 </transition>
             </div>
         </router-link>
-        
         
     </div>
     <div class="col-12 ingredients">
@@ -239,19 +238,11 @@
     .list-fade-enter-active {
         animation: fadeInUp 0.5s ease-out forwards;
     }
-
     /* 離開時的動畫（可以選用簡單的消失） */
     .list-fade-leave-active {
-        // transition: all 0.3s ease;
-        position: absolute; /* 讓列表在重新排列時更平滑 */
+        position: absolute;
     }
-
     .list-fade-leave-to {
         opacity: 0;
     }
-
-    /* 處理列表項目移動時的動畫（當其他項目消失，剩下的項目補位時） */
-    // .list-fade-move {
-    //     transition: transform 0.5s ease;
-    // }
 </style>
