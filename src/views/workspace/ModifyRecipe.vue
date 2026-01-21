@@ -35,31 +35,48 @@ async function loadRecipeData(recipeId) {
 
         const found = allRecipes.find(r => Number(r.recipe_id) === Number(recipeId));
         if (found) {
-            let finalImg = found.recipe_image_url || '';
-            if (finalImg && !finalImg.startsWith('http') && !finalImg.startsWith('/img/recipes/')) {
-                finalImg = `/img/recipes/${found.recipe_id}/${finalImg}`;
+            // --- 修正 1: 主食譜圖片處理 ---
+            let rawImg = found.recipe_image_url || found.recipe_cover_image || '';
+            let finalImg = '';
+
+            if (rawImg) {
+                if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
+                    finalImg = rawImg;
+                } else {
+                    // 確保開頭只有一個斜線，且不重複拼接
+                    const cleanPath = rawImg.replace(/^\//, '');
+                    finalImg = `/${cleanPath}`;
+                }
             }
 
             originalRecipe.value = {
                 id: found.recipe_id,
                 title: found.recipe_title,
-                description: found.recipe_description || found.recipe_descreption || '',
+                description: found.recipe_description || found.recipe_descreption || '暫無簡介',
                 coverImg: finalImg
             };
 
+            // --- 修正 2: 改編版本圖片處理 ---
             const filteredAdaptations = allAdaptations.filter(
                 a => Number(a.parent_recipe_id) === Number(recipeId)
             );
 
             variantItems.value = filteredAdaptations.map(adapt => {
                 const childInfo = allRecipes.find(r => Number(r.recipe_id) === Number(adapt.child_recipe_id));
+
+                // 處理改編圖或子食譜原圖
+                let adaptImg = adapt.adaptation_image_url || childInfo?.recipe_image_url || '';
+                if (adaptImg && !adaptImg.startsWith('http') && !adaptImg.startsWith('data:')) {
+                    adaptImg = adaptImg.startsWith('/') ? adaptImg : `/${adaptImg}`;
+                }
+
                 return {
                     id: adapt.child_recipe_id,
                     title: childInfo?.recipe_title || '未知食譜',
                     adapt_title: adapt.adaptation_title,
                     author: childInfo?.author_name || 'Recimo User',
                     likes: childInfo?.likes_count || 0,
-                    coverImg: adapt.adaptation_image_url || childInfo?.recipe_image_url || ''
+                    coverImg: adaptImg // 統一使用處理後的圖片
                 };
             });
         }

@@ -26,15 +26,32 @@ const fetchRelated = async () => {
     try {
         const res = await publicApi.get('data/recipe/recipes.json');
 
-        const cleanedData = res.data.map(r => ({
-            ...r,
-            id: r.recipe_id,
-            recipe_name: r.recipe_title || '美味食譜',
-            image_url: r.recipe_image_url || r.recipe_cover_image,
-            author: {
-                likes: r.likes || 0
+        const cleanedData = res.data.map(r => {
+            // 1. 處理圖片路徑：確保開頭有 /
+            let rawImg = r.recipe_image_url || r.recipe_cover_image || '';
+            let finalImg = '';
+
+            if (rawImg) {
+                // 如果已經是絕對路徑或 base64 就不用動，否則補上 /
+                finalImg = (rawImg.startsWith('http') || rawImg.startsWith('/') || rawImg.startsWith('data:'))
+                    ? rawImg
+                    : `/${rawImg}`;
             }
-        }));
+
+            return {
+                ...r,
+                id: r.recipe_id,
+                recipe_name: r.recipe_title || '美味食譜',
+                // 2. 這裡要確保 RecipeCardSm 吃的是 image_url 還是 cover_image？
+                // 建議兩個都給，增加相容性
+                image_url: finalImg,
+                cover_image: finalImg,
+                author: {
+                    name: r.author_name || '作者',
+                    likes: r.likes || 0
+                }
+            };
+        });
 
         relatedList.value = cleanedData
             .filter(r => Number(r.id) !== Number(props.currentId))

@@ -154,9 +154,31 @@ watch(() => [route.params.id, route.query.mode], () => {
 // --- 4. 計算屬性 ---
 const recipeIntroData = computed(() => {
     if (!rawRecipe.value) return null;
+
+    // 1. 抓取原始圖片欄位
+    let rawImg = rawRecipe.value.recipe_image_url ||
+        rawRecipe.value.coverImg ||
+        rawRecipe.value.recipe_cover_image || '';
+
+    let finalImg = '';
+
+    // 2. 處理路徑邏輯
+    if (rawImg) {
+        if (rawImg.startsWith('http') || rawImg.startsWith('data:') || rawImg.startsWith('/')) {
+            // 如果是 網址、Base64 或 已經有斜線了，直接使用
+            finalImg = rawImg;
+        } else {
+            // 如果是像 "img/recipes/..." 這種相對路徑，強制在最前面補上 "/"
+            finalImg = `/${rawImg}`;
+        }
+    } else {
+        // 如果完全沒圖，給一個預設圖（可選）
+        finalImg = 'https://placehold.co/800x600?text=No+Image';
+    }
+
     return {
         title: rawRecipe.value.recipe_title || rawRecipe.value.title || '未命名食譜',
-        image: rawRecipe.value.recipe_image_url || rawRecipe.value.coverImg || rawRecipe.value.recipe_cover_image,
+        image: finalImg, // 使用處理後的圖片路徑
         time: formatTime(rawRecipe.value.recipe_total_time),
         difficulty: rawRecipe.value.recipe_difficulty || rawRecipe.value.difficulty || 1,
         description: rawRecipe.value.recipe_descreption || rawRecipe.value.recipe_description || rawRecipe.value.description || '暫無簡介'
@@ -211,7 +233,12 @@ watch(rawRecipe, (newVal) => {
 }, { immediate: true });
 
 const displayRecipeLikes = computed(() => baseRecipeLikes.value + localLikesOffset.value);
-const snapsData = computed(() => rawGallery.value.map(g => ({ url: g.GALLERY_URL, comment: g.GALLERY_TEXT })));
+// 找到這一行
+const snapsData = computed(() => rawGallery.value.map(g => ({
+    // 修改為：
+    url: g.GALLERY_URL.startsWith('/') ? g.GALLERY_URL : `/${g.GALLERY_URL}`,
+    comment: g.GALLERY_TEXT
+})));
 
 const handleShare = async () => {
     if (isPreviewMode.value) return;
