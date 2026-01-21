@@ -331,7 +331,7 @@ function goBack() {
 }
 
 .demo-readonly-card {
-    cursor: default;
+    cursor: pointer;
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 
     &:hover {
@@ -339,8 +339,23 @@ function goBack() {
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
     }
 
-    :deep(input) {
-        pointer-events: none;
+    /* 🔥 核心：強制關閉改編卡片上的黑底與文字 */
+    :deep(.hover-overlay),
+    :deep(.mask),
+    :deep(.result-overlay),
+    :deep(.adaptation-hover-info),
+    :deep(.adaptation-result),
+    :deep(.adapt-result-text),
+    :deep(.overlay),
+    :deep(.overlay-content) {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+
+    /* 防止有 absolute 的遮罩擋點擊 */
+    :deep(*) {
+        pointer-events: auto;
     }
 }
 
