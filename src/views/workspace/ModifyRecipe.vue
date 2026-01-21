@@ -7,6 +7,9 @@ import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard
 const router = useRouter();
 const route = useRoute();
 
+// --- 讀取 Vite 的 Base 路徑 ---
+const baseUrl = import.meta.env.BASE_URL;
+
 const originalRecipe = ref({ id: null, title: '', coverImg: '', description: '' });
 const variantItems = ref([]);
 
@@ -36,12 +39,18 @@ async function loadRecipeData(recipeId) {
         const found = allRecipes.find(r => Number(r.recipe_id) === Number(recipeId));
         if (!found) return;
 
+        // --- ✅ 修正：原食譜圖片路徑防呆 ---
         let rawImg = found.recipe_image_url || found.recipe_cover_image || '';
-        let finalImg = rawImg
-            ? rawImg.startsWith('http') || rawImg.startsWith('data:')
-                ? rawImg
-                : `/${rawImg.replace(/^\//, '')}`
-            : '';
+        let finalImg = '';
+        if (rawImg) {
+            if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
+                finalImg = rawImg;
+            } else {
+                // 清理開頭斜線並拼街 baseUrl，最後統一校正重複斜線
+                const cleanPath = rawImg.replace(/^\//, '');
+                finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
+            }
+        }
 
         originalRecipe.value = {
             id: found.recipe_id,
@@ -59,10 +68,11 @@ async function loadRecipeData(recipeId) {
                 r => Number(r.recipe_id) === Number(adapt.child_recipe_id)
             );
 
-            let adaptImg =
-                adapt.adaptation_image_url || childInfo?.recipe_image_url || '';
+            // --- ✅ 修正：改編食譜圖片路徑防呆 ---
+            let adaptImg = adapt.adaptation_image_url || childInfo?.recipe_image_url || '';
             if (adaptImg && !adaptImg.startsWith('http') && !adaptImg.startsWith('data:')) {
-                adaptImg = adaptImg.startsWith('/') ? adaptImg : `/${adaptImg}`;
+                const cleanAdaptPath = adaptImg.replace(/^\//, '');
+                adaptImg = `${baseUrl}/${cleanAdaptPath}`.replace(/\/+/g, '/');
             }
 
             return {
@@ -148,7 +158,6 @@ function goBack() {
             <TransitionGroup name="staggered-list">
                 <div v-for="(item, index) in variantItems" :key="item.id"
                     class="col-3 col-lg-4 col-md-6 mb-24 grid-item" :style="{ '--delay': index + 1 }">
-                    <!-- ✅ 唯讀、不可點擊 -->
                     <AdaptRecipeCard :recipe="item" :readonly="true" class="full-height demo-readonly-card" />
                 </div>
             </TransitionGroup>

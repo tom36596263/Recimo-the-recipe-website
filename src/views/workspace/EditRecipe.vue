@@ -12,6 +12,9 @@ const router = useRouter();
 const route = useRoute();
 const recipeStore = useRecipeStore();
 
+// --- 讀取 Vite 的 Base 路徑 ---
+const baseUrl = import.meta.env.BASE_URL;
+
 const isEditing = ref(true);
 const isPublished = ref(false);
 
@@ -23,7 +26,7 @@ const recipeForm = ref({
   description: '',
   coverImg: null,
   difficulty: 1,
-  totalTime: 30, // 預設 30 分鐘數字
+  totalTime: 30,
   ingredients: [],
   steps: [],
   original_title: '',
@@ -31,7 +34,6 @@ const recipeForm = ref({
   adapt_description: ''
 });
 
-// ✨ 改編模式判定
 const isAdaptModeActive = computed(() => {
   const hasParentId = !!recipeForm.value.parent_recipe_id;
   const hasAdaptQuery = route.query.action === 'adapt';
@@ -44,7 +46,6 @@ onMounted(async () => {
   const editIdFromUrl = rawId ? Number(rawId) : null;
   const isAdapt = route.query.action === 'adapt';
 
-  // 如果從預覽頁返回，恢復暫存資料
   if (recipeStore.rawEditorData) {
     recipeForm.value = { ...recipeStore.rawEditorData };
     recipeStore.rawEditorData = null;
@@ -65,9 +66,8 @@ onMounted(async () => {
     const found = resR.data.find(r => Number(r.recipe_id) === editIdFromUrl);
     if (!found) return;
 
-    // 設定 ID 與標題邏輯
     if (isAdapt) {
-      recipeForm.value.recipe_id = null; // 改編是新草稿，所以 ID 為空
+      recipeForm.value.recipe_id = null;
       recipeForm.value.parent_recipe_id = editIdFromUrl;
       recipeForm.value.original_title = found.recipe_title;
       recipeForm.value.title = `${found.recipe_title} (改編版)`;
@@ -79,21 +79,21 @@ onMounted(async () => {
     recipeForm.value.description = found.recipe_description || found.recipe_descreption || '';
     recipeForm.value.difficulty = found.recipe_difficulty || 1;
 
-    // --- 封面圖處理 ---
+    // --- 修正：封面圖路徑拼接 ---
     const rawCover = found.recipe_image_url || found.recipe_cover_image || '';
     if (rawCover && !rawCover.startsWith('http') && !rawCover.startsWith('data:')) {
-      recipeForm.value.coverImg = `/${rawCover.replace(/^\//, '')}`;
+      const cleanPath = rawCover.replace(/^\//, '');
+      // 使用正則確保路徑中沒有重複的斜線
+      recipeForm.value.coverImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
     } else {
       recipeForm.value.coverImg = rawCover || 'https://placehold.co/800x600?text=No+Image';
     }
 
-    // --- 總時間處理 (分鐘) ---
     const totalTimeStr = String(found.recipe_total_time || '30');
     recipeForm.value.totalTime = totalTimeStr.includes(':')
       ? parseInt(totalTimeStr.split(':')[0], 10) * 60 + (parseInt(totalTimeStr.split(':')[1], 10) || 0)
       : parseInt(totalTimeStr, 10) || 30;
 
-    // --- 食材處理 ---
     const links = resRecipeIng.data.filter(i => Number(i.recipe_id) === editIdFromUrl);
     recipeForm.value.ingredients = links.map(link => {
       const master = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
@@ -107,7 +107,6 @@ onMounted(async () => {
       };
     });
 
-    // --- ✨ 步驟圖片關鍵修正點 ---
     const stepsData = resS.data
       .filter(s => Number(s.recipe_id) === editIdFromUrl)
       .sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
@@ -117,13 +116,13 @@ onMounted(async () => {
       let finalStepImg = '';
 
       if (rawImg) {
-        if (rawImg.startsWith('http') || rawImg.startsWith('data:') || rawImg.startsWith('/')) {
+        if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
           finalStepImg = rawImg;
         } else {
-          // 清除可能已經帶有的重複路徑，確保拼接乾淨
+          // --- 修正：步驟圖片路徑拼接 ---
           const cleanPath = rawImg.replace(/^img\/recipes\/\d+\/steps\//, '').replace(/^\//, '');
-          // ⚠️ 改編模式時，圖片一定要去原始 ID 的資料夾抓
-          finalStepImg = `/img/recipes/${editIdFromUrl}/steps/${cleanPath}`;
+          // 強制使用 / 作為分隔並清理重複斜線
+          finalStepImg = `${baseUrl}/img/recipes/${editIdFromUrl}/steps/${cleanPath}`.replace(/\/+/g, '/');
         }
       }
 
@@ -149,41 +148,29 @@ onMounted(async () => {
   }
 });
 
-// --- 3. 預覽 ---
 const handlePreview = () => {
   const previewForm = JSON.parse(JSON.stringify(recipeForm.value));
-
-  // 處理剛上傳的檔案 (Blob URL)
   if (recipeForm.value.coverImg instanceof File) {
     previewForm.coverImg = URL.createObjectURL(recipeForm.value.coverImg);
   }
-
   recipeForm.value.steps.forEach((step, index) => {
     if (step.image instanceof File) {
       previewForm.steps[index].image = URL.createObjectURL(step.image);
     }
   });
-
   recipeStore.rawEditorData = { ...recipeForm.value };
   recipeStore.setPreviewFromEditor(previewForm);
-
   const currentId = route.query.editId || route.params.id || 0;
   const query = { mode: 'preview', editId: currentId };
   if (isAdaptModeActive.value) query.action = 'adapt';
-
-  router.push({
-    path: `/workspace/recipe-detail/${currentId}`,
-    query
-  });
+  router.push({ path: `/workspace/recipe-detail/${currentId}`, query });
 };
 
-// --- 4. 儲存 ---
 const handleSave = () => {
   if (!recipeForm.value.title) {
     alert('請輸入食譜標題再發布喔！');
     return;
   }
-
   if (isPublished.value) {
     const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
     localRevisions.unshift({
@@ -198,9 +185,7 @@ const handleSave = () => {
   } else {
     alert('草稿儲存成功！');
   }
-
   recipeStore.rawEditorData = null;
-
   if (isAdaptModeActive.value && recipeForm.value.parent_recipe_id) {
     router.push(`/workspace/modify-recipe/${recipeForm.value.parent_recipe_id}`);
   } else {
@@ -210,7 +195,6 @@ const handleSave = () => {
 
 provide('isEditing', isEditing);
 </script>
-
 
 <template>
   <div :class="['recipe-editor-page', { 'is-editing': isEditing }]">
@@ -245,6 +229,7 @@ provide('isEditing', isEditing);
 </template>
 
 <style lang="scss" scoped>
+/* 樣式保持不變... */
 @import '@/assets/scss/abstracts/_color.scss';
 
 .recipe-editor-page {
