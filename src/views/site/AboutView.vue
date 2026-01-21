@@ -35,8 +35,8 @@ const headerList = [
         bg: '$neutral-color-white',
         // 下方介紹區內容
         images: [
-            '/img/about/introduce-01.jpg',
-            '/img/about/introduce-02.jpg'
+            new URL('@/assets/images/about/introduce-01.jpg', import.meta.url).href,
+            new URL('@/assets/images/about/introduce-02.jpg', import.meta.url).href,
         ],
         mainDescription: '利用系統化工具深度管理您的廚房生活，讓每一次的烹飪決策都變得更高效、更智慧，從容享受下廚樂趣。',
         features: [
@@ -84,10 +84,10 @@ const headerList = [
         bg: '$primary-color-100',
         // 下方介紹區內容
         images: [
-            '/img/about/introduce-03.jpg',
-            '/img/about/introduce-04.jpg',
-            '/img/about/introduce-05.jpg',
-            '/img/about/introduce-06.jpg'
+            new URL('@/assets/images/about/introduce-03.jpg', import.meta.url).href,
+            new URL('@/assets/images/about/introduce-04.jpg', import.meta.url).href,
+            new URL('@/assets/images/about/introduce-05.jpg', import.meta.url).href,
+            new URL('@/assets/images/about/introduce-06.jpg', import.meta.url).href
         ],
         mainDescription: '告別照本宣科，Recimo打造專注的實作空間，結合Recipe + Memo設計，讓您即時紀錄火候與靈感，封存每一場實踐。',
         features: [
@@ -137,11 +137,11 @@ const headerList = [
         bg: '$primary-color-100',
         // 下方介紹區內容
         images: [
-            '/img/about/introduce-07.jpg',
-            '/img/about/introduce-08.jpg',
-            '/img/about/introduce-09.jpg',
-            '/img/about/introduce-10.jpg',
-            '/img/about/introduce-11.jpg'
+            new URL('@/assets/images/about/introduce-07.jpg', import.meta.url).href,
+            new URL('@/assets/images/about/introduce-08.jpg', import.meta.url).href,
+            new URL('@/assets/images/about/introduce-09.jpg', import.meta.url).href,
+            new URL('@/assets/images/about/introduce-10.jpg', import.meta.url).href,
+            new URL('@/assets/images/about/introduce-11.jpg', import.meta.url).href
         ],
         mainDescription: '專屬的廚藝數據庫，透過精密且直觀的圖表分析，深度剖析您的烹飪習慣與飲食偏好，讓每一次下廚都成為進步的基石。',
         features: [
@@ -191,8 +191,8 @@ const headerList = [
         bg: '$primary-color-100',
         // 下方介紹區內容
         images: [
-            '/img/about/introduce-12.jpg',
-            '/img/about/introduce-13.jpg'
+            new URL('@/assets/images/about/introduce-12.jpg', import.meta.url).href,
+            new URL('@/assets/images/about/introduce-13.jpg', import.meta.url).href
         ],
         mainDescription: '從個人私廚筆記到具備影響力的社群分享，Recimo 協助您將烹飪靈感轉化為實質價值，串起從食譜到餐桌的最後一哩路。',
         features: [
@@ -264,7 +264,7 @@ const getUniqueFoodImg = (index) => {
     if (shuffledFoods.value.length === 0) return '';
     // 使用餘數運算確保如果 index 超過陣列長度也能循環取圖
     const foodName = shuffledFoods.value[index % shuffledFoods.value.length];
-    return `/img/about/${foodName}`;
+    return new URL(`../../assets/images/about/${foodName}`, import.meta.url).href;
 };
 
 // 4. 生命週期鉤子
@@ -385,7 +385,8 @@ onMounted(() => {
 
                 <div class="btn-align-right">
                     <router-link :to="sub.link">
-                        <CircleBtn :title="sub.btnTitle" type="white" :href="sub.link" />
+                        <CircleBtn :title="sub.btnTitle" type="white" :href="sub.link"
+                            :class="{ 'hide-on-mobile': sub.id === 'kitchen' }" />
                     </router-link>
                 </div>
             </div>
@@ -421,7 +422,7 @@ onMounted(() => {
 
 h1 {
     text-align: center;
-    color: $primary-color-800;
+    color: $neutral-color-white;
 }
 
 // ==========================================
@@ -721,6 +722,13 @@ div .introduce .container {
         @media screen and (max-width: 890px) {
             left: 0;
         }
+    }
+}
+
+// 手機板把靈感小廚房按鈕移除
+@media screen and (max-width: 810px) {
+    .hide-on-mobile {
+        display: none !important;
     }
 }
 </style>

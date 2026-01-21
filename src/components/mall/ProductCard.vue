@@ -1,6 +1,7 @@
 <script setup>
-import { defineProps, computed, defineEmits } from 'vue';
-import { useCartStore } from '@/stores/cartStore'
+import { ref, defineProps, computed, defineEmits } from 'vue';
+import { useCartStore } from '@/stores/cartStore';
+import BaseModal from '@/components/BaseModal.vue';
 
 // 接收父元件傳過來的商品資料，item是資料傳送的「對口名稱」取的 (父子必須一致)，整段的意思是「各位父組件請注意！我是商品卡片，如果你要用我，請務必 (required) 給我一個物件型態 (Object) 的資料，並且請貼上 item 這個標籤交給我。」
 const props = defineProps({
@@ -21,14 +22,17 @@ const baseURL = import.meta.env.BASE_URL
 // ==========================================
 const cartStore = useCartStore()
 
+// 定義控制 Modal 顯示的變數
+const showSuccess = ref(false);
+
 const addToCart = () => {
     // 檢查點：先印出簡單的字串，確認按鈕有沒有被點到
     // console.log("把商品", props.item.product_name, "加入購物車");
 
     cartStore.add(props.item);
 
-    // 提示使用者 (可選)
-    alert(`「${props.item.product_name}」已加入購物車~`);
+    // alert(`「${props.item.product_name}」已加入購物車~`);
+    showSuccess.value = true;
 };
 
 // ==========================================
@@ -88,7 +92,11 @@ const productImage = computed(() => {
 
             </div>
         </div>
+
     </router-link>
+    <BaseModal :isOpen="showSuccess" type="success" iconClass="fa-solid fa-check"
+        :title="`已將【${item.product_name}】\n加入購物車`" @close="showSuccess = false">
+    </BaseModal>
 </template>
 <style lang="scss" scoped>
 @use "sass:map";

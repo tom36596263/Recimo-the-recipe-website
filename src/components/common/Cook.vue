@@ -100,63 +100,63 @@ const handleDrop = (event) => {
 };
 
 // 平板/手機觸控邏輯
-let ghostEl = null; // 用來存儲跟隨手指的暫存 DOM
+// 平板/手機拖曳
+let ghostEl = null;
+let isDragging = false;
+let startX = 0;
+let startY = 0;
 
-const handleTouchStart = (event, item) => {
-    // 紀錄被拖曳的資料
+const handleTouchStart = (e, item) => {
+    const touch = e.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
     draggedItem.value = item;
-
-    // 建立「分身」元素跟隨手指
-    const target = event.currentTarget; // 獲取原本的卡片 DOM
-    ghostEl = target.cloneNode(true);   // 複製一份
-
-    // 3. 設定分身樣式
-    ghostEl.style.position = 'fixed';
-    ghostEl.style.zIndex = '9999';
-    ghostEl.style.pointerEvents = 'none'; // 讓觸控事件能穿透分身偵測到底下的鍋子
-    ghostEl.style.opacity = '0.8';
-    ghostEl.style.width = `${target.offsetWidth}px`;
-    // ghostEl.style.transform = 'scale()'; // 稍微放大更有感
-    ghostEl.style.transition = 'none'; // 移除動畫以免延遲
-
-    // 4. 初始位置
-    const touch = event.touches[0];
-    updateGhostPosition(touch.clientX, touch.clientY);
-
-    document.body.appendChild(ghostEl);
+    isDragging = false; // 初始不是拖曳
 };
 
-const handleTouchMove = (event) => {
-    if (!ghostEl) return;
+const handleTouchMove = (e) => {
+    if (!draggedItem.value) return;
+    const touch = e.touches[0];
+    const deltaX = Math.abs(touch.clientX - startX);
+    const deltaY = Math.abs(touch.clientY - startY);
 
-    // 防止畫面跟著手指捲動 (重要！)
-    if (event.cancelable) event.preventDefault();
+    // 如果移動距離超過 10px 才認定拖曳
+    if (!isDragging && (deltaX > 10 || deltaY > 10)) {
+        isDragging = true;
 
-    const touch = event.touches[0];
-    updateGhostPosition(touch.clientX, touch.clientY);
-
-    // 碰撞檢測：檢查手指是否在鍋子範圍內
-    checkCollision(touch.clientX, touch.clientY);
-};
-
-const handleTouchEnd = (event) => {
-    if (!ghostEl) return;
-
-    // 移除分身
-    document.body.removeChild(ghostEl);
-    ghostEl = null;
-
-    // 如果手指放開時是在鍋子上 (isDragOver 為 true)，則加入食材
-    if (isDragOver.value && draggedItem.value) {
-        addToPot(draggedItem.value);
+        // 建立分身
+        const target = e.currentTarget;
+        ghostEl = target.cloneNode(true);
+        ghostEl.style.position = 'fixed';
+        ghostEl.style.zIndex = '9999';
+        ghostEl.style.pointerEvents = 'none';
+        ghostEl.style.opacity = '0.8';
+        ghostEl.style.width = `${target.offsetWidth}px`;
+        ghostEl.style.transition = 'none';
+        document.body.appendChild(ghostEl);
     }
 
-    // 重置狀態
-    isDragOver.value = false;
-    draggedItem.value = null;
+    // 只有真的拖曳才阻止滾動
+    if (isDragging && e.cancelable) e.preventDefault();
+
+    if (isDragging) {
+        updateGhostPosition(touch.clientX, touch.clientY);
+        checkCollision(touch.clientX, touch.clientY);
+    }
 };
 
-// 輔助：更新分身位置 (置中於手指)
+const handleTouchEnd = () => {
+    if (ghostEl) {
+        document.body.removeChild(ghostEl);
+        ghostEl = null;
+    }
+    if (isDragOver.value && draggedItem.value) addToPot(draggedItem.value);
+    draggedItem.value = null;
+    isDragging = false;
+    isDragOver.value = false;
+};
+
+// ghostEl位置
 const updateGhostPosition = (x, y) => {
     if (ghostEl) {
         ghostEl.style.left = `${x - ghostEl.offsetWidth / 2}px`;
@@ -164,29 +164,18 @@ const updateGhostPosition = (x, y) => {
     }
 };
 
-// 輔助：碰撞檢測 (Hit Testing)
+// 碰撞檢測
 const checkCollision = (x, y) => {
     if (!potZoneRef.value) return;
-
-    // 取得鍋子的座標範圍
     const rect = potZoneRef.value.getBoundingClientRect();
-
-    // 判斷手指座標是否在鍋子範圍內
-    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-        isDragOver.value = true;
-    } else {
-        isDragOver.value = false;
-    }
+    isDragOver.value = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
 };
 
-// 共用邏輯：加入鍋子
-const addToPot = (item) => {
+// 加入鍋子
+const addToPot = item => {
     potIngredients.value.push(item);
-    console.log('加入鍋子:', item.ingredient_name);
-    isDragOver.value = true;
-    setTimeout(() => {
-        isDragOver.value = false;
-    }, 200); // 0.2秒後蓋回去
+    draggedItem.value = null;
+    setTimeout(() => isDragOver.value = false, 200);
 };
 
 
@@ -195,7 +184,7 @@ const handleDelete = () => {
     alert(`鍋子裡現在有 ${potIngredients.value.length} 個食材！`);
 };
 
-// 新增：烹飪狀態
+//烹飪狀態
 const isCooking = ref(false);
 const emit = defineEmits(['cook-finish', 'close']);//送資料
 // 新增火焰爆炸狀態變數
@@ -301,7 +290,7 @@ const startCooking = () => {
                             @touchend="handleTouchEnd">
 
                             <CookCard :name="item.ingredient_name" :calories="item.kcal_per_100g"
-                                :fat="item.fat_per_100g" :image-src="item.ingredient_image_url"
+                                :fat="item.fat_per_100g" :image-src="$parsePublicFile(item.ingredient_image_url)"
                                 @add-ingredient="addToPot(item)" />
                         </div>
                     </div>
@@ -338,6 +327,7 @@ const startCooking = () => {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     border-radius: $radius-base;
     overflow: hidden;
+
     .cook-wrap {
         display: flex;
         flex-direction: column;
@@ -577,8 +567,10 @@ const startCooking = () => {
 .card-container {
     margin-top: 15px;
     width: 100%;
-    flex: 1;
+    flex: 1 1 auto;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch; // 平滑滾動
+    max-height: calc(100% - 150px);
     padding: 0 20px 20px 20px;
 }
 </style>

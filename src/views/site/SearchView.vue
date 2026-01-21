@@ -29,6 +29,7 @@ onMounted(async () => {
         products.value = resProducts.data;
         recipeTags.value = resRecipeTags.data;
         tags.value = resTags.data;
+        console.log(products.value)
 
     }catch(err){
         console.error("載入失敗", err);

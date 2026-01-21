@@ -18,6 +18,9 @@ const route = useRoute();
 const router = useRouter();
 const recipeStore = useRecipeStore();
 
+// --- 讀取 Vite 的 Base 路徑 ---
+const baseUrl = import.meta.env.BASE_URL;
+
 // --- 1. 響應式資料狀態 ---
 const rawRecipe = ref(null);
 const rawIngredients = ref([]);
@@ -40,22 +43,30 @@ const toggleRecipeLike = () => {
 };
 
 const handleGoToEdit = () => {
-    const currentId = rawRecipe.value?.recipe_id || route.params.id;
-    router.push({
-        path: '/workspace/edit-recipe',
-        query: { editId: currentId }
-    });
+    const currentId = isPreviewMode.value
+        ? (route.query.editId || recipeStore.previewData?.recipe_id)
+        : (rawRecipe.value?.recipe_id || route.params.id);
+
+    const queryParams = { editId: currentId };
+
+    if (!isPreviewMode.value) { queryParams.action = 'adapt'; }
+
+    if (isPreviewMode.value) {
+        const parentId = recipeStore.previewData?.parent_recipe_id || recipeStore.previewData?.parent_id;
+        if (parentId) {
+            queryParams.editId = parentId;
+            queryParams.action = 'adapt';
+        }
+    }
+
+    router.push({ path: '/workspace/edit-recipe', query: queryParams });
 };
 
-const backToEdit = () => {
-    handleGoToEdit();
-};
+const backToEdit = () => { handleGoToEdit(); };
 
 const toggleWorkspaceTopBar = (show) => {
     const topBar = document.querySelector('.workspace-top-bar');
-    if (topBar) {
-        topBar.style.display = show ? '' : 'none';
-    }
+    if (topBar) { topBar.style.display = show ? '' : 'none'; }
 };
 
 // --- 3. fetchData 核心邏輯 ---
@@ -134,24 +145,18 @@ const fetchData = async () => {
 
 onMounted(() => {
     fetchData();
-    if (isPreviewMode.value) {
-        toggleWorkspaceTopBar(false);
-    }
+    if (isPreviewMode.value) { toggleWorkspaceTopBar(false); }
 });
 
-onUnmounted(() => {
-    toggleWorkspaceTopBar(true);
-});
+onUnmounted(() => { toggleWorkspaceTopBar(true); });
 
-watch(() => isPreviewMode.value, (newVal) => {
-    toggleWorkspaceTopBar(!newVal);
-});
+watch(() => isPreviewMode.value, (newVal) => { toggleWorkspaceTopBar(!newVal); });
 
-watch(() => [route.params.id, route.query.mode], () => {
-    fetchData();
-}, { deep: true });
+watch(() => [route.params.id, route.query.mode], () => { fetchData(); }, { deep: true });
 
-// --- 4. 計算屬性 ---
+// --- 4. 計算屬性 (修正路徑) ---
+
+// 1. 食譜封面圖
 const recipeIntroData = computed(() => {
     if (!rawRecipe.value) return null;
 
@@ -162,10 +167,12 @@ const recipeIntroData = computed(() => {
     let finalImg = '';
 
     if (rawImg) {
-        if (rawImg.startsWith('http') || rawImg.startsWith('data:') || rawImg.startsWith('/')) {
+        if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
             finalImg = rawImg;
         } else {
-            finalImg = `/${rawImg}`;
+            // ✅ 防呆校正：清除開頭斜線，拼街後清理重複斜線
+            const cleanPath = rawImg.replace(/^\//, '');
+            finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
         }
     } else {
         finalImg = 'https://placehold.co/800x600?text=No+Image';
@@ -180,6 +187,7 @@ const recipeIntroData = computed(() => {
     };
 });
 
+// 2. 步驟圖
 const stepsData = computed(() => {
     if (!rawSteps.value || rawSteps.value.length === 0) return [];
     const rId = rawRecipe.value?.recipe_id || route.params.id || '0';
@@ -191,10 +199,11 @@ const stepsData = computed(() => {
                 finalImg = rawImg;
             } else {
                 let cleanPath = rawImg.replace(/^\//, '');
+                // ✅ 檢查是否已經包含完整路徑，若無則自動補齊
                 if (cleanPath.includes('img/recipes/')) {
-                    finalImg = `/${cleanPath}`;
+                    finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
                 } else {
-                    finalImg = `/img/recipes/${rId}/steps/${cleanPath}`;
+                    finalImg = `${baseUrl}/img/recipes/${rId}/steps/${cleanPath}`.replace(/\/+/g, '/');
                 }
             }
         }
@@ -209,6 +218,23 @@ const stepsData = computed(() => {
     });
 });
 
+// 3. 成品照
+const snapsData = computed(() => rawGallery.value.map(g => {
+    let rawUrl = g.GALLERY_URL || '';
+    let finalUrl = '';
+    if (rawUrl.startsWith('http') || rawUrl.startsWith('data:')) {
+        finalUrl = rawUrl;
+    } else {
+        const cleanPath = rawUrl.replace(/^\//, '');
+        finalUrl = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
+    }
+    return {
+        url: finalUrl,
+        comment: g.GALLERY_TEXT
+    };
+}));
+
+// --- 其他邏輯保持不變 ---
 const commentList = computed(() => {
     return rawComments.value.map(c => ({
         userName: c.USER_NAME,
@@ -228,11 +254,6 @@ watch(rawRecipe, (newVal) => {
 }, { immediate: true });
 
 const displayRecipeLikes = computed(() => baseRecipeLikes.value + localLikesOffset.value);
-
-const snapsData = computed(() => rawGallery.value.map(g => ({
-    url: g.GALLERY_URL.startsWith('/') ? g.GALLERY_URL : `/${g.GALLERY_URL}`,
-    comment: g.GALLERY_TEXT
-})));
 
 const handleShare = async () => {
     if (isPreviewMode.value) return;
@@ -286,7 +307,6 @@ const nutritionWrapper = computed(() => {
 
 const handleServingsChange = (newVal) => { servings.value = newVal; };
 
-// --- 5. 檢舉食譜燈箱 ---
 const isReportModalOpen = ref(false);
 const onReportSubmit = (data) => {
     console.log('收到檢舉內容:', data);
@@ -310,7 +330,7 @@ const onReportSubmit = (data) => {
 
     <div class="recipe-container-root" v-if="!isLoading && rawRecipe" :class="{ 'preview-padding': isPreviewMode }">
         <main class="container">
-            <div class="title-content">
+            <div class="title-content fade-up" style="--delay: 1">
                 <div class="zh-h2">
                     <i-material-symbols-restaurant-rounded class="main-icon" />
                     {{ recipeIntroData.title }}
@@ -344,37 +364,40 @@ const onReportSubmit = (data) => {
 
             <div class="row">
                 <div class="col-7 col-lg-12">
-                    <RecipeIntro :info="recipeIntroData" :is-preview="isPreviewMode" />
+                    <RecipeIntro :info="recipeIntroData" :is-preview="isPreviewMode" class="fade-up"
+                        style="--delay: 2" />
+
                     <div class="d-lg-none">
-                        <section class="mb-10">
+                        <section class="mb-10 fade-up" style="--delay: 3">
                             <NutritionCard :servings="servings" :ingredients="nutritionWrapper"
                                 @change-servings="handleServingsChange" />
                         </section>
-                        <section class="mb-10">
+                        <section class="mb-10 fade-up" style="--delay: 4">
                             <RecipeIngredients :servings="servings" :list="ingredientsData" />
                         </section>
                     </div>
-                    <section class="mb-10 steps-section">
+
+                    <section class="mb-10 steps-section fade-up" style="--delay: 5">
                         <RecipeSteps :steps="stepsData" />
                     </section>
                 </div>
 
                 <div class="col-5 col-lg-12">
                     <div class="d-none-lg">
-                        <section class="mb-10">
+                        <section class="mb-10 fade-up" style="--delay: 3">
                             <NutritionCard :servings="servings" :ingredients="nutritionWrapper"
                                 @change-servings="handleServingsChange" />
                         </section>
-                        <section class="mb-10">
+                        <section class="mb-10 fade-up" style="--delay: 4">
                             <RecipeIngredients :servings="servings" :list="ingredientsData" />
                         </section>
                     </div>
-                    <section v-if="!isPreviewMode" class="mb-10">
+                    <section v-if="!isPreviewMode" class="mb-10 fade-up" style="--delay: 6">
                         <RecipeComments :list="commentList" />
                     </section>
                 </div>
 
-                <div v-if="!isPreviewMode" class="col-12 cook-snap-full">
+                <div v-if="!isPreviewMode" class="col-12 cook-snap-full fade-up" style="--delay: 7">
                     <section class="mb-10 content-wrapper">
                         <CookSnap :list="snapsData" />
                     </section>
@@ -398,33 +421,61 @@ const onReportSubmit = (data) => {
         image: recipeIntroData?.image
     }" @submit="onReportSubmit" />
 
-    <div v-if="!isPreviewMode" class="col-12">
+    <div v-if="!isPreviewMode" class="col-12 fade-up" style="--delay: 8">
         <RelatedRecipes :currentId="route.params.id" />
     </div>
 </template>
 
 <style lang="scss" scoped>
+/* 原有的樣式保持不變... */
 @import '@/assets/scss/abstracts/_color.scss';
+
+.fade-up {
+    opacity: 0;
+    animation: fadeUpIn 0.8s cubic-bezier(0.2, 0.6, 0.35, 1) forwards;
+    animation-delay: calc(var(--delay) * 0.12s);
+}
+
+@keyframes fadeUpIn {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 .preview-sticky-bar {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 9999;
-    padding-top: 12px;
+    z-index: 110;
+    padding: 12px 0;
     pointer-events: none;
     transition: all 0.3s ease;
 
-    @media screen and (min-width: 1025px) {
+    @media screen and (min-width: 810px) {
         left: 260px;
         width: calc(100% - 260px);
+        background: transparent;
+    }
+
+    @media screen and (max-width: 809px) {
+        left: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(8px);
+        padding: 8px 0;
     }
 
     .container {
         max-width: 1000px;
         margin: 0 auto;
-        padding: 0 12px;
+        padding: 0 16px;
     }
 
     .bar-content {
@@ -436,7 +487,15 @@ const onReportSubmit = (data) => {
         padding: 10px 20px;
         border-radius: 12px;
         pointer-events: auto;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+        @media screen and (max-width: 480px) {
+            padding: 8px 12px;
+
+            span {
+                font-size: 11px;
+            }
+        }
 
         span {
             font-weight: 500;
@@ -456,10 +515,13 @@ const onReportSubmit = (data) => {
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            margin-left: 8px;
+            margin-left: 12px;
+            white-space: nowrap;
+            transition: transform 0.2s ease;
 
             &:hover {
                 background-color: $primary-color-100;
+                transform: scale(1.05);
             }
         }
     }
@@ -515,7 +577,6 @@ const onReportSubmit = (data) => {
             gap: 16px;
             width: 100%;
             justify-content: flex-start;
-            /* 保持圖示靠左 */
         }
 
         &.is-preview {
@@ -556,7 +617,6 @@ const onReportSubmit = (data) => {
             font-size: 24px;
         }
 
-        /* ✨ 讓改編集按鈕在手機版推到最右邊 */
         .adapt-btn-wrapper {
             @media screen and (max-width: 768px) {
                 margin-left: auto;
@@ -603,7 +663,7 @@ const onReportSubmit = (data) => {
 }
 
 .d-none-lg {
-    @media screen and (max-width: 1024px) {
+    @media screen and (max-width: 1023.98px) {
         display: none !important;
     }
 }

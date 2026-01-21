@@ -6,6 +6,7 @@ import { defineStore } from 'pinia';
 import { useRouteName } from '@/composables/useRouteName';
 import { useCartStore } from '@/stores/cartStore';
 import ProductRmd from '@/components/mall/ProductRmd.vue';
+import BaseModal from '@/components/BaseModal.vue';
 // 門禁守衛
 import { useAuthGuard } from '@/composables/useAuthGuard';
 const { runWithAuth } = useAuthGuard();
@@ -46,6 +47,9 @@ const count = ref(1); // 預設數量是 1
 // 按鈕動作定義 (避免 Template 報錯)
 
 const cartStore = useCartStore()
+
+//定義控制 Modal 顯示的變數
+const showSuccess = ref(false);
 const addToCart = () => {
   if (productInfo.value) {
     // console.log("把商品", productInfo.value.product_name, "數量", count.value, "加入購物車");
@@ -58,21 +62,17 @@ const addToCart = () => {
 
     cartStore.add(productInfo.value, count.value);
 
-    alert(`「${count.value}件${productInfo.value.product_name}」已加入購物車~`);
+    // alert(`「${count.value}件${productInfo.value.product_name}」已加入購物車~`);
+    showSuccess.value = true;
   }
 };
 
 const buyNow = () => {
-  runWithAuth(() => {
-    if (productInfo.value) {
-      // 呼叫 Store 的 add，把當前選擇的數量 count.value 傳進去
-      cartStore.add(productInfo.value, count.value);
-
-      // 直接跳轉到結帳頁面
-      router.push('/checkout');
-      console.log("準備跳轉至結帳畫面");
-    }
-  });
+  if (productInfo.value) {
+    // 呼叫 Store 的 add，把當前選擇的數量 count.value 傳進去
+    cartStore.add(productInfo.value, count.value);
+    router.push('/cart');
+  }
 };
 
 // ==========================================
@@ -291,7 +291,9 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
-
+    <BaseModal :isOpen="showSuccess" type="success" iconClass="fa-solid fa-check"
+      :title="`${count} 件【${productInfo.product_name}】\n已加入至購物車`" @close="showSuccess = false">
+    </BaseModal>
     <ProductRmd class="detail-recommend-section" />
   </section>
 

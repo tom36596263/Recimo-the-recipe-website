@@ -47,13 +47,8 @@ const displayTime = computed(() => {
 const adaptRecipeData = computed(() => {
   return {
     ...props.modelValue,
-    // 【修正點】標題只連動「改編標題」，不填入原始標題作為預設
-    // 這樣右邊沒寫字，左邊就會顯示 placeholder
     title: props.modelValue.adapt_title || '',
-
-    // 內容連動「改編說明」
     description: props.modelValue.adapt_description || '',
-
     recipe_id: props.modelValue.parent_recipe_id || props.modelValue.recipe_id,
     coverImg: props.modelValue.coverImg,
   };
@@ -89,8 +84,7 @@ const handleCoverUpload = (e) => {
           :style="{ cursor: isEditing ? 'pointer' : 'default' }">
           <AdaptRecipeCard :recipe="adaptRecipeData" />
         </div>
-        <BaseBtn title="查看原始食譜詳情" variant="outline" :width="320" @click="goToOriginal"
-          class="back-original-btn d-none-mobile" />
+        <BaseBtn title="查看原始食譜詳情" variant="outline" :width="320" @click="goToOriginal" class="back-original-btn" />
       </div>
     </template>
 
@@ -168,7 +162,6 @@ const handleCoverUpload = (e) => {
 </template>
 
 <style lang="scss" scoped>
-/* 樣式部分保持不變... */
 @import '@/assets/scss/abstracts/_color.scss';
 
 .adapt-card-section {
@@ -176,19 +169,20 @@ const handleCoverUpload = (e) => {
   flex-direction: column;
   gap: 16px;
   align-items: center;
+  width: 100%; // 手機版撐滿
 
   @media (min-width: 768px) {
-    width: 320px;
+    width: 320px; // 電腦版維持寬度
   }
 }
 
 .back-original-btn {
-  &.d-none-mobile {
-    margin-top: 60px;
+  width: 100%; // 手機版預設寬度
+  margin-top: 16px; // 手機版間距小一點
 
-    @media (max-width: 767px) {
-      display: none;
-    }
+  @media (min-width: 768px) {
+    width: 320px;
+    margin-top: 60px; // 桌機版恢復 60px 間距
   }
 }
 
@@ -279,7 +273,6 @@ const handleCoverUpload = (e) => {
   border-radius: 8px;
   overflow: hidden;
 
-  /* 確保 Hover 效果與點擊能作用 */
   &.readonly-overlay {
     pointer-events: auto;
     user-select: none;
@@ -341,7 +334,7 @@ const handleCoverUpload = (e) => {
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.4);
-    color: #fff;
+    color: $neutral-color-white;
     opacity: 0;
     transition: opacity 0.2s;
     border-radius: 6px;

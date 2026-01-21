@@ -7,6 +7,9 @@ import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard
 const router = useRouter();
 const route = useRoute();
 
+// --- 讀取 Vite 的 Base 路徑 ---
+const baseUrl = import.meta.env.BASE_URL;
+
 const originalRecipe = ref({ id: null, title: '', coverImg: '', description: '' });
 const variantItems = ref([]);
 
@@ -34,47 +37,57 @@ async function loadRecipeData(recipeId) {
         const allAdaptations = resAdaptations.data;
 
         const found = allRecipes.find(r => Number(r.recipe_id) === Number(recipeId));
-        if (found) {
-            let rawImg = found.recipe_image_url || found.recipe_cover_image || '';
-            let finalImg = '';
+        if (!found) return;
 
-            if (rawImg) {
-                if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
-                    finalImg = rawImg;
-                } else {
-                    const cleanPath = rawImg.replace(/^\//, '');
-                    finalImg = `/${cleanPath}`;
-                }
+        // --- ✅ 修正：原食譜圖片路徑防呆 ---
+        let rawImg = found.recipe_image_url || found.recipe_cover_image || '';
+        let finalImg = '';
+        if (rawImg) {
+            if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
+                finalImg = rawImg;
+            } else {
+                // 清理開頭斜線並拼街 baseUrl，最後統一校正重複斜線
+                const cleanPath = rawImg.replace(/^\//, '');
+                finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
             }
+        }
 
-            originalRecipe.value = {
-                id: found.recipe_id,
-                title: found.recipe_title,
-                description: found.recipe_description || found.recipe_descreption || '暫無簡介',
-                coverImg: finalImg
-            };
+        originalRecipe.value = {
+            id: found.recipe_id,
+            title: found.recipe_title,
+            description: found.recipe_description || found.recipe_descreption || '暫無簡介',
+            coverImg: finalImg
+        };
 
-            const filteredAdaptations = allAdaptations.filter(
-                a => Number(a.parent_recipe_id) === Number(recipeId)
+        const filteredAdaptations = allAdaptations.filter(
+            a => Number(a.parent_recipe_id) === Number(recipeId)
+        );
+
+        variantItems.value = filteredAdaptations.map(adapt => {
+            const childInfo = allRecipes.find(
+                r => Number(r.recipe_id) === Number(adapt.child_recipe_id)
             );
 
-            variantItems.value = filteredAdaptations.map(adapt => {
-                const childInfo = allRecipes.find(r => Number(r.recipe_id) === Number(adapt.child_recipe_id));
-                let adaptImg = adapt.adaptation_image_url || childInfo?.recipe_image_url || '';
-                if (adaptImg && !adaptImg.startsWith('http') && !adaptImg.startsWith('data:')) {
-                    adaptImg = adaptImg.startsWith('/') ? adaptImg : `/${adaptImg}`;
-                }
+            // --- ✅ 修正：改編食譜圖片路徑防呆 ---
+            let adaptImg = adapt.adaptation_image_url || childInfo?.recipe_image_url || '';
+            if (adaptImg && !adaptImg.startsWith('http') && !adaptImg.startsWith('data:')) {
+                const cleanAdaptPath = adaptImg.replace(/^\//, '');
+                adaptImg = `${baseUrl}/${cleanAdaptPath}`.replace(/\/+/g, '/');
+            }
 
-                return {
-                    id: adapt.child_recipe_id,
-                    title: childInfo?.recipe_title || '未知食譜',
-                    adapt_title: adapt.adaptation_title,
-                    author: childInfo?.author_name || 'Recimo User',
-                    likes: childInfo?.likes_count || 0,
-                    coverImg: adaptImg
-                };
-            });
-        }
+            return {
+                id: adapt.child_recipe_id,
+                title: adapt.adaptation_title || childInfo?.recipe_title || '未命名改編',
+                description:
+                    adapt.adaptation_note ||
+                    (adapt.key_changes?.[0]
+                        ? `${adapt.key_changes[0].from} ➔ ${adapt.key_changes[0].to}`
+                        : '關鍵內容載入中...'),
+                author: childInfo?.author_name || 'Recimo User',
+                likes: childInfo?.likes_count || 0,
+                coverImg: adaptImg
+            };
+        });
     } catch (err) {
         console.error('資料載入失敗', err);
     }
@@ -88,7 +101,7 @@ function initEmptyRecipe() {
 function handleCreateNew() {
     if (!originalRecipe.value.id) return;
     router.push({
-        name: 'edit-recipe',
+        path: '/workspace/edit-recipe',
         query: { editId: originalRecipe.value.id, action: 'adapt' }
     });
 }
@@ -101,7 +114,7 @@ function goBack() {
 
 <template>
     <div class="variants-gallery container">
-        <div class="row mb-40 desktop-only-btn">
+        <div class="row mb-40 desktop-only-btn fade-in-down">
             <div class="col-12 text-right">
                 <BaseBtn title="返回原食譜" variant="outline" :width="120" @click="goBack" />
             </div>
@@ -118,7 +131,9 @@ function goBack() {
                     <div class="info-content">
                         <h1 class="zh-h2 mb-16">{{ originalRecipe.title }}</h1>
                         <p class="p-p1 color-p1 mb-24">{{ originalRecipe.description }}</p>
-                        <div class="stat-tag p-p3 mb-24">共有 {{ variantItems.length }} 個改編版本</div>
+                        <div class="stat-tag p-p3 mb-24">
+                            共有 {{ variantItems.length }} 個改編版本
+                        </div>
 
                         <div class="mobile-only-btn">
                             <BaseBtn title="返回原食譜" variant="outline" class="w-100" @click="goBack" />
@@ -126,7 +141,7 @@ function goBack() {
                     </div>
                 </div>
             </div>
-            <div class="decorative-line mt-40"></div>
+            <div class="decorative-line"></div>
         </section>
 
         <div class="row align-stretch custom-grid">
@@ -140,26 +155,119 @@ function goBack() {
                 </div>
             </div>
 
-            <div v-for="(item, index) in variantItems" :key="index" class="col-3 col-lg-4 col-md-6 mb-24 grid-item">
-                <AdaptRecipeCard :recipe="item" class="full-height demo-readonly-card" />
-            </div>
+            <TransitionGroup name="staggered-list">
+                <div v-for="(item, index) in variantItems" :key="item.id"
+                    class="col-3 col-lg-4 col-md-6 mb-24 grid-item" :style="{ '--delay': index + 1 }">
+                    <AdaptRecipeCard :recipe="item" :readonly="true" class="full-height demo-readonly-card" />
+                </div>
+            </TransitionGroup>
         </div>
     </div>
 </template>
 
+
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-/* 顯示控制 */
+
+.mobile-only-btn {
+    display: none !important;
+}
+
 .desktop-only-btn {
     display: block;
 }
 
-.mobile-only-btn {
-    display: none;
+/* --- 動畫定義 --- */
+.fade-in-down {
+    animation: fadeInDown 0.6s ease-out;
 }
 
-/* 基礎樣式 */
+.original-recipe-hero {
+    animation: fadeInUp 0.8s ease-out;
+
+    .main-image-container {
+        overflow: hidden;
+
+        img {
+            animation: imageScale 1.2s ease-out;
+        }
+    }
+}
+
+.staggered-list-enter-active {
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-delay: calc(var(--delay) * 0.1s);
+}
+
+.staggered-list-enter-from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.9);
+}
+
+.decorative-line {
+    height: 10px;
+    background-color: $primary-color-100;
+    border-radius: 4px;
+    margin-top: 40px;
+    transform-origin: left;
+    animation: lineExtend 1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes lineExtend {
+    from {
+        transform: scaleX(0);
+    }
+
+    to {
+        transform: scaleX(1);
+    }
+}
+
+@keyframes imageScale {
+    from {
+        transform: scale(1.1);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+/* --- 佈局樣式 --- */
+.custom-grid {
+    display: flex;
+    flex-wrap: wrap;
+
+    &>span {
+        display: contents;
+    }
+}
+
 .variants-gallery {
     padding: 20px 0 60px;
 }
@@ -177,7 +285,6 @@ function goBack() {
         width: 100%;
         height: 320px;
         border-radius: 16px;
-        overflow: hidden;
         background-color: $neutral-color-100;
 
         .hero-img {
@@ -202,13 +309,6 @@ function goBack() {
         color: $primary-color-800;
         padding: 6px 16px;
         border-radius: 20px;
-    }
-
-    .decorative-line {
-        height: 10px;
-        background-color: $primary-color-100;
-        border-radius: 4px;
-        margin-top: 40px;
     }
 }
 
@@ -247,32 +347,39 @@ function goBack() {
 }
 
 .demo-readonly-card {
-    cursor: default;
+    cursor: pointer;
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 
     &:hover {
         transform: scale(1.05);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-        z-index: 10;
     }
 
-    :deep(.change-hint-overlay) {
+    /* ✨ 核心：強制關閉改編卡片上的遮罩樣式 */
+    :deep(.change-hint-overlay),
+    :deep(.hover-overlay),
+    :deep(.mask),
+    :deep(.result-overlay),
+    :deep(.adaptation-hover-info),
+    :deep(.adaptation-result),
+    :deep(.adapt-result-text),
+    :deep(.overlay),
+    :deep(.overlay-content) {
         display: none !important;
-    }
-
-    :deep(input) {
-        pointer-events: none;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
     }
 }
 
-/* ✨ 手機版優化 (810px 以下) */
+/* RWD 控制 */
 @media screen and (max-width: 810px) {
     .desktop-only-btn {
-        display: none;
+        display: none !important;
     }
 
     .mobile-only-btn {
-        display: block;
+        display: block !important;
         margin-top: 16px;
     }
 
@@ -287,40 +394,11 @@ function goBack() {
         }
     }
 
-    /* 強制兩欄佈局 */
     .custom-grid {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        margin-left: -8px !important;
-        margin-right: -8px !important;
-
         .grid-item {
             flex: 0 0 50% !important;
             max-width: 50% !important;
             padding: 0 8px !important;
-            margin-bottom: 16px;
-        }
-    }
-
-    .add-card-placeholder {
-        padding: 24px 10px;
-
-        .plus-icon {
-            font-size: 32px !important;
-        }
-
-        .zh-h4 {
-            font-size: 16px !important;
-        }
-    }
-
-    :deep(.recipe-card-sm) {
-        .card-header {
-            height: 120px !important;
-        }
-
-        .card-body {
-            padding: 10px !important;
         }
     }
 }
