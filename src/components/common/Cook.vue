@@ -290,7 +290,7 @@ const startCooking = () => {
                             @touchend="handleTouchEnd">
 
                             <CookCard :name="item.ingredient_name" :calories="item.kcal_per_100g"
-                                :fat="item.fat_per_100g" :image-src="item.ingredient_image_url"
+                                :fat="item.fat_per_100g" :image-src="$parsePublicFile(item.ingredient_image_url)"
                                 @add-ingredient="addToPot(item)" />
                         </div>
                     </div>
