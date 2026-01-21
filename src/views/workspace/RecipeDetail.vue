@@ -179,6 +179,7 @@ const recipeIntroData = computed(() => {
     }
 
     return {
+        id: rawRecipe.value.recipe_id || route.params.id, // 為了帶著食譜id進入步驟播放頁而加的
         title: rawRecipe.value.recipe_title || rawRecipe.value.title || '未命名食譜',
         image: finalImg,
         time: formatTime(rawRecipe.value.recipe_total_time),

@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router'; //為了開始烹飪跳轉連結而引入的功能
 // 導入開發好的燈箱組件
 import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
 
@@ -14,6 +15,19 @@ const props = defineProps({
         default: false
     }
 });
+
+// 「開始烹飪」按鈕跳轉邏輯
+const router = useRouter(); //宣告 router 變數
+
+// 建立點擊跳轉函式
+const handleStartCooking = () => {
+    if (props.info.id) {
+        // 導向路徑：/workspace/guide/{id}
+        router.push(`/workspace/guide/${props.info.id}`);
+    } else {
+        console.error('找不到食譜 ID，無法進入烹飪模式');
+    }
+};
 
 // 控制燈箱顯隱的狀態
 const showModal = ref(false);
@@ -95,7 +109,7 @@ const onModalSubmit = (data) => {
             </div>
 
             <div class="info-right">
-                <BaseBtn v-if="!props.isPreview" title="開始烹飪" class="cook-btn" />
+                <BaseBtn v-if="!props.isPreview" title="開始烹飪" class="cook-btn" @click="handleStartCooking" />
             </div>
         </div>
 
@@ -281,9 +295,9 @@ const onModalSubmit = (data) => {
         padding: 20px;
         line-height: 2.1;
         color: $neutral-color-800;
-        inline-size: 100%; 
-        overflow-wrap: break-word; 
-        white-space: pre-wrap; 
+        inline-size: 100%;
+        overflow-wrap: break-word;
+        white-space: pre-wrap;
     }
 }
 </style>
