@@ -8,9 +8,9 @@
 
     const features = ref([
         { icon: markRaw(IconWandStars), text: '將官方食譜進化為<br>您的私房秘笈' },
-        { icon: markRaw(IconLocalFireDepartment), text: '透過熱量計算<br>為您做有效的健康管理' },
+        { icon: markRaw(IconLocalFireDepartment), text: '透過熱量計算<br>做有效的健康管理' },
         { icon: markRaw(IconInboxTextPerson), text: '告別選擇困難<br>輕鬆找尋合適的食譜' },
-        { icon: markRaw(IconHistoryEdu), text: '食譜搭配份量換算功能<br>客製化自己的菜餚' }
+        { icon: markRaw(IconHistoryEdu), text: '食譜份量換算功能<br>客製化自己的菜餚' }
     ]);
 </script>
 <template>
