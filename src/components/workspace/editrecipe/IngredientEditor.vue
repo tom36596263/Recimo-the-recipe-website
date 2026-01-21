@@ -38,7 +38,6 @@ const handleAddMultiple = (items) => {
                 note: '',
                 fromDB: true,
                 isInvalid: false,
-                // --- 關鍵：將營養資料存入物件中 ---
                 kcal_per_100g: item.kcal_per_100g || 0,
                 protein_per_100g: item.protein_per_100g || 0,
                 fat_per_100g: item.fat_per_100g || 0,
@@ -81,7 +80,7 @@ const removeItem = (id) => {
                         <div class="unit-box">
                             <span class="label">單位：</span>
                             <input v-model="ing.unit" type="text" class="custom-input unit-field p-p2" placeholder="顆"
-                                :readonly="!isEditing || ing.fromDB" />
+                                readonly tabindex="-1" />
                         </div>
                     </div>
                 </div>
@@ -103,6 +102,7 @@ const removeItem = (id) => {
 </template>
 
 <style lang="scss" scoped>
+/* 其他樣式保持不變 */
 .ingredient-editor-container {
     width: 100%;
     margin-bottom: 30px;
@@ -123,6 +123,10 @@ const removeItem = (id) => {
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+.name-field {
+    pointer-events: none;
 }
 
 .ingredient-item {
@@ -161,7 +165,6 @@ const removeItem = (id) => {
 }
 
 .input-row {
-    // background-color: #fff;
     border-bottom: 1px solid $neutral-color-100;
     padding: 6px 0;
     display: flex;
@@ -186,22 +189,23 @@ const removeItem = (id) => {
         &:read-only {
             color: $neutral-color-black;
             cursor: default;
+            pointer-events: none; // 核心修正：讓 readonly 徹底無法點擊
         }
     }
 }
 
 .note-row {
     align-items: flex-start;
-    padding-top: 8px; // 稍微拉開與上方欄位的距離
+    padding-top: 8px;
 
     .note-field {
         color: $neutral-color-700 !important;
-        resize: none; // 鎖定縮放
-        height: 52px; // 固定高度 (約兩行文字 + padding)
-        line-height: 1.4; // 適中的行高
+        resize: none;
+        height: 52px;
+        line-height: 1.4;
         font-family: inherit;
-        overflow: hidden; // 隱藏捲軸（30字內不會超過）
-        word-break: break-all; // 避免長字撐破
+        overflow: hidden;
+        word-break: break-all;
     }
 }
 
@@ -243,6 +247,11 @@ const removeItem = (id) => {
             width: 50px;
             text-align: left;
             border-bottom: 1px dashed $neutral-color-100;
+
+            // 核心修正：解決單獨針對 unit-field 的唯讀樣式
+            &:read-only {
+                border-bottom: none !important;
+            }
         }
     }
 }
