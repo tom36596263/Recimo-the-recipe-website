@@ -86,7 +86,13 @@ onMounted(async () => {
                 nutritional_info: {
                     calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
                     serving_size: recipe.recipe_servings,
-                    cooking_time: `${recipe.recipe_total_time.split(':')[1]}分鐘`
+                    cooking_time: (() => {
+                        const timeParts = recipe.recipe_total_time.split(':'); // [HH, mm, ss]
+                        const hours = parseInt(timeParts[0]) || 0;
+                        const minutes = parseInt(timeParts[1]) || 0;
+                        const totalMinutes = hours * 60 + minutes;
+                        return `${totalMinutes}分鐘`;
+                    })()
                 },
                 author: {
                     name: 'Recimo',
@@ -104,7 +110,7 @@ const filteredRecipes = computed(() => {
     return allRecipe.value.filter(recipe => {
         const timeValue = parseInt(recipe.nutritional_info.cooking_time);
         const timeMatch = activeFilters.value.time === "全部" || (
-            (activeFilters.value.time === "15分鐘內" && timeValue <= 5) ||
+            (activeFilters.value.time === "15分鐘內" && timeValue <= 15) ||
             (activeFilters.value.time === "15-30分鐘" && timeValue > 15 && timeValue <= 30) ||
             (activeFilters.value.time === "30-60分鐘" && timeValue > 30 && timeValue <= 60) ||
             (activeFilters.value.time === "1小時以上" && timeValue > 60 && timeValue <= 180) ||
