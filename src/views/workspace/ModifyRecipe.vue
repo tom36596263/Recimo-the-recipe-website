@@ -60,6 +60,8 @@ async function loadRecipeData(recipeId) {
 
             variantItems.value = filteredAdaptations.map(adapt => {
                 const childInfo = allRecipes.find(r => Number(r.recipe_id) === Number(adapt.child_recipe_id));
+
+                // 圖片路徑處理
                 let adaptImg = adapt.adaptation_image_url || childInfo?.recipe_image_url || '';
                 if (adaptImg && !adaptImg.startsWith('http') && !adaptImg.startsWith('data:')) {
                     adaptImg = adaptImg.startsWith('/') ? adaptImg : `/${adaptImg}`;
@@ -67,8 +69,13 @@ async function loadRecipeData(recipeId) {
 
                 return {
                     id: adapt.child_recipe_id,
-                    title: childInfo?.recipe_title || '未知食譜',
-                    adapt_title: adapt.adaptation_title,
+                    // 1. 顯示改編標題 (例如：瑪格麗特風舒肥雞)
+                    title: adapt.adaptation_title || childInfo?.recipe_title || '未命名改編',
+
+                    // 2. ✨ 關鍵修正：改用 JSON 裡的 "adaptation_note"
+                    // 如果沒有 note，就抓 key_changes 的第一筆作為描述
+                    description: adapt.adaptation_note || (adapt.key_changes?.[0] ? `${adapt.key_changes[0].from} ➔ ${adapt.key_changes[0].to}` : '關鍵內容載入中...'),
+
                     author: childInfo?.author_name || 'Recimo User',
                     likes: childInfo?.likes_count || 0,
                     coverImg: adaptImg
