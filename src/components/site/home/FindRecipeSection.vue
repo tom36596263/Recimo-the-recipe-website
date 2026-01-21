@@ -24,10 +24,10 @@
             isRotating.value = false
         }, 500)
     }
-
+    const base = import.meta.env.BASE_URL;
     const fetchData = async () => {
         try {
-            const response = await fetch('/data/others/remove-bg-ingredients.json') 
+            const response = await fetch(`${import.meta.env.BASE_URL}data/others/remove-bg-ingredients.json`) 
             const data = await response.json()
             
             recipesData.value = data
@@ -79,7 +79,7 @@
             class="reset-icon"
             :class="{ 'is-active': isRotating }"
             :style="{ 'animation-delay': `${index * 0.1}s` }"/>
-            隨機產生新食材
+            <p class="p-p2">隨機產生新食材</p>
         </div>
         
     </div>
