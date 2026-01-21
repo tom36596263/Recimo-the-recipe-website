@@ -10,11 +10,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { publicApi } from '@/utils/publicApi';
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
-import recipesData from '/public/data/recipe/recipes.json';
-import tagsData from '/public/data/recipe/tags.json';
-import recipeTagData from '/public/data/recipe/recipe_tag.json';
 
 const router = useRouter();
 
@@ -39,15 +37,14 @@ const totalPersonalCount = ref(0);
  * 獲取食譜的標籤列表
  * 通過關聯表查找該食譜的所有標籤
  * @param {Number} recipeId - 食譜 ID
+ * @param {Array} recipeTagData - 食譜標籤關聯數據
+ * @param {Object} tagMap - 標籤 ID 對應名稱的映射表
  * @returns {Array} 標籤名稱數組
  */
-const getRecipeTags = (recipeId) => {
+const getRecipeTags = (recipeId, recipeTagData, tagMap) => {
     const recipeTags = recipeTagData
         .filter(rt => rt.recipe_id === recipeId)
-        .map(rt => {
-            const tag = tagsData.find(t => t.tag_id === rt.tag_id);
-            return tag ? tag.tag_name : null;
-        })
+        .map(rt => tagMap[rt.tag_id])
         .filter(Boolean);
     return recipeTags.length > 0 ? recipeTags : ['未分類'];
 };
@@ -77,89 +74,120 @@ const goToPersonalRecipes = () => {
 // ========== 生命週期 ==========
 /**
  * 組件掛載時初始化數據
- * 1. 設置模擬的統計數據（實際應用中應從 API 獲取）
+ * 1. 使用 publicApi 從後端獲取 JSON 數據
  * 2. 載入最近觀看食譜（前 4 筆）
  * 3. 載入收藏食譜（第 5-8 筆）
  * 4. 載入個人食譜（第 9-12 筆）
  */
-onMounted(() => {
-    // 設置統計總數（模擬數據，實際應用中應從後端 API 獲取）
-    totalRecentCount.value = 15;
-    totalFavoriteCount.value = 23;
-    totalPersonalCount.value = 8;
+onMounted(async () => {
+    try {
+        // 並行載入所有需要的 JSON 檔案
+        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
+            publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/recipe/recipe_tag.json'),
+            publicApi.get('data/recipe/tags.json')
+        ]);
 
-    // 最近觀看：載入前 4 筆食譜
-    recentRecipes.value = recipesData.slice(0, 4).map(recipe => ({
-        id: recipe.recipe_id,
-        recipe_name: recipe.recipe_title,
-        image_url: recipe.recipe_image_url,
-        tags: getRecipeTags(recipe.recipe_id),
-        author: {
-            name: 'Recimo',
-            likes: recipe.recipe_like_count || 0
-        }
-    }));
+        const recipesData = resRecipes.data;
+        const recipeTagData = resRecipeTags.data;
+        const tagsData = resTags.data;
 
-    // 我的收藏：載入第 5-8 筆食譜
-    favoriteRecipes.value = recipesData.slice(4, 8).map(recipe => ({
-        id: recipe.recipe_id,
-        recipe_name: recipe.recipe_title,
-        image_url: recipe.recipe_image_url,
-        tags: getRecipeTags(recipe.recipe_id),
-        author: {
-            name: 'Recimo',
-            likes: recipe.recipe_like_count || 0
-        }
-    }));
+        // 建立標籤 ID 對應名稱的映射表，提高查詢效率
+        const tagMap = {};
+        tagsData.forEach(tag => {
+            tagMap[tag.tag_id] = tag.tag_name;
+        });
 
-    // 個人食譜：載入第 9-12 筆食譜
-    personalRecipes.value = recipesData.slice(8, 12).map(recipe => ({
-        id: recipe.recipe_id,
-        recipe_name: recipe.recipe_title,
-        image_url: recipe.recipe_image_url,
-        tags: getRecipeTags(recipe.recipe_id),
-        author: {
-            name: 'Recimo',
-            likes: recipe.recipe_like_count || 0
-        }
-    }));
+        // 獲取 base 路徑用於圖片 URL 補全
+        const base = import.meta.env.BASE_URL;
+
+        // 設置統計總數（模擬數據，實際應用中應從後端 API 獲取）
+        totalRecentCount.value = 15;
+        totalFavoriteCount.value = 23;
+        totalPersonalCount.value = 8;
+
+        // 最近觀看：載入前 4 筆食譜
+        recentRecipes.value = recipesData.slice(0, 4).map(recipe => ({
+            id: recipe.recipe_id,
+            recipe_name: recipe.recipe_title,
+            image_url: recipe.recipe_image_url.startsWith('http')
+                ? recipe.recipe_image_url
+                : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
+            tags: getRecipeTags(recipe.recipe_id, recipeTagData, tagMap),
+            author: {
+                name: 'Recimo',
+                likes: recipe.recipe_like_count || 0
+            }
+        }));
+
+        // 我的收藏：載入第 5-8 筆食譜
+        favoriteRecipes.value = recipesData.slice(4, 8).map(recipe => ({
+            id: recipe.recipe_id,
+            recipe_name: recipe.recipe_title,
+            image_url: recipe.recipe_image_url.startsWith('http')
+                ? recipe.recipe_image_url
+                : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
+            tags: getRecipeTags(recipe.recipe_id, recipeTagData, tagMap),
+            author: {
+                name: 'Recimo',
+                likes: recipe.recipe_like_count || 0
+            }
+        }));
+
+        // 個人食譜：載入第 9-12 筆食譜
+        personalRecipes.value = recipesData.slice(8, 12).map(recipe => ({
+            id: recipe.recipe_id,
+            recipe_name: recipe.recipe_title,
+            image_url: recipe.recipe_image_url.startsWith('http')
+                ? recipe.recipe_image_url
+                : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
+            tags: getRecipeTags(recipe.recipe_id, recipeTagData, tagMap),
+            author: {
+                name: 'Recimo',
+                likes: recipe.recipe_like_count || 0
+            }
+        }));
+    } catch (error) {
+        console.error('載入資料失敗:', error);
+    }
 });
 </script>
 
+<!-- filepath: src/views/workspace/MyRecipes.vue -->
 <template>
     <div class="my-recipes-page">
-        <!-- 最近觀看食譜 -->
-        <section class="recipe-section recent-section">
+        <!-- 個人食譜（原本在最後，現在移到最前面） -->
+        <section class="recipe-section personal-section">
             <div class="container">
                 <div class="row">
                     <div class="col-12 section-header">
                         <div class="header-left">
-                            <div class="section-icon-wrapper">
-                                <i class="fa-regular fa-clock section-icon"></i>
+                            <div class="section-icon-wrapper personal">
+                                <i class="fa-regular fa-file-lines section-icon"></i>
                             </div>
                             <div class="title-group">
-                                <h4 class="zh-h4 section-title">最近觀看食譜</h4>
-                                <span class="count-badge">{{ totalRecentCount }} 筆記錄</span>
+                                <h4 class="zh-h4 section-title">個人食譜</h4>
+                                <span class="count-badge">{{ totalPersonalCount }} 個原創</span>
                             </div>
                         </div>
-                        <BaseBtn class="view-more-btn" @click="goToRecentRecipes">
+                        <BaseBtn class="view-more-btn" @click="goToPersonalRecipes">
                             查看更多
                             <i class="fa-solid fa-chevron-right"></i>
                         </BaseBtn>
                     </div>
                 </div>
-                <div class="row recipe-cards-container" v-if="recentRecipes.length > 0">
-                    <div v-for="recipe in recentRecipes" :key="recipe.id"
+                <div class="row recipe-cards-container" v-if="personalRecipes.length > 0">
+                    <div v-for="recipe in personalRecipes" :key="recipe.id"
                         class="col-3 col-lg-6 col-md-12 recipe-card-col">
                         <RecipeCardSm :recipe="recipe" />
                     </div>
                 </div>
                 <div class="empty-state" v-else>
-                    <div class="empty-icon-wrapper">
-                        <i class="fa-regular fa-clock"></i>
+                    <div class="empty-icon-wrapper personal">
+                        <i class="fa-regular fa-file-lines"></i>
                     </div>
-                    <p class="empty-text">還沒有觀看任何食譜</p>
-                    <p class="empty-hint">開始探索美味食譜，發現更多靈感吧！</p>
+                    <p class="empty-text">還沒有創建個人食譜</p>
+                    <p class="empty-hint">開始創建你的專屬食譜，分享你的烹飪創意</p>
                 </div>
             </div>
         </section>
@@ -200,38 +228,38 @@ onMounted(() => {
             </div>
         </section>
 
-        <!-- 個人食譜 -->
-        <section class="recipe-section personal-section">
+        <!-- 最近觀看食譜（原本在最前面，現在移到最後） -->
+        <section class="recipe-section recent-section">
             <div class="container">
                 <div class="row">
                     <div class="col-12 section-header">
                         <div class="header-left">
-                            <div class="section-icon-wrapper personal">
-                                <i class="fa-regular fa-file-lines section-icon"></i>
+                            <div class="section-icon-wrapper">
+                                <i class="fa-regular fa-clock section-icon"></i>
                             </div>
                             <div class="title-group">
-                                <h4 class="zh-h4 section-title">個人食譜</h4>
-                                <span class="count-badge">{{ totalPersonalCount }} 個原創</span>
+                                <h4 class="zh-h4 section-title">最近觀看食譜</h4>
+                                <span class="count-badge">{{ totalRecentCount }} 筆記錄</span>
                             </div>
                         </div>
-                        <BaseBtn class="view-more-btn" @click="goToPersonalRecipes">
+                        <BaseBtn class="view-more-btn" @click="goToRecentRecipes">
                             查看更多
                             <i class="fa-solid fa-chevron-right"></i>
                         </BaseBtn>
                     </div>
                 </div>
-                <div class="row recipe-cards-container" v-if="personalRecipes.length > 0">
-                    <div v-for="recipe in personalRecipes" :key="recipe.id"
+                <div class="row recipe-cards-container" v-if="recentRecipes.length > 0">
+                    <div v-for="recipe in recentRecipes" :key="recipe.id"
                         class="col-3 col-lg-6 col-md-12 recipe-card-col">
                         <RecipeCardSm :recipe="recipe" />
                     </div>
                 </div>
                 <div class="empty-state" v-else>
-                    <div class="empty-icon-wrapper personal">
-                        <i class="fa-regular fa-file-lines"></i>
+                    <div class="empty-icon-wrapper">
+                        <i class="fa-regular fa-clock"></i>
                     </div>
-                    <p class="empty-text">還沒有創建個人食譜</p>
-                    <p class="empty-hint">開始創建你的專屬食譜，分享你的烹飪創意</p>
+                    <p class="empty-text">還沒有觀看任何食譜</p>
+                    <p class="empty-hint">開始探索美味食譜，發現更多靈感吧！</p>
                 </div>
             </div>
         </section>

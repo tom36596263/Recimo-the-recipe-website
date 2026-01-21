@@ -9,16 +9,14 @@
 * 6. 空狀態處理：無食譜時顯示引導信息
 */
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { publicApi } from '@/utils/publicApi';
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import RecipePreviewCard from '@/components/common/RecipePreviewCard.vue';
 import BaseTag from '@/components/common/BaseTag.vue';
 import PageBtn from '@/components/common/PageBtn.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
-import recipesData from '/public/data/recipe/recipes.json';
-import tagsData from '/public/data/recipe/tags.json';
-import recipeTagData from '/public/data/recipe/recipe_tag.json';
 
 const router = useRouter();
 
@@ -28,6 +26,15 @@ const allRecipes = ref([]);
 
 // 當前選中的食譜（用於右側預覽卡片）
 const selectedRecipe = ref(null);
+
+// 彈窗狀態（用於手機版）
+const isModalOpen = ref(false);
+
+// 彈窗中顯示的食譜
+const modalRecipe = ref(null);
+
+// 螢幕寬度（用於模板中判斷）
+const windowWidth = ref(window.innerWidth);
 
 // ========== 標籤篩選 ==========
 // 可用的標籤列表
@@ -85,7 +92,20 @@ const handlePageChange = (page) => {
  * @param {Object} recipe - 選中的食譜對象
  */
 const selectRecipe = (recipe) => {
-    selectedRecipe.value = recipe;
+    // 在小螢幕上打開彈窗，不設置激活狀態
+    if (window.innerWidth <= 1024) {
+        modalRecipe.value = recipe;
+        isModalOpen.value = true;
+    } else {
+        selectedRecipe.value = recipe;
+    }
+};
+
+/**
+ * 關閉彈窗
+ */
+const closeModal = () => {
+    isModalOpen.value = false;
 };
 
 /**
@@ -107,21 +127,21 @@ const createNewRecipe = () => {
 // ========== 監聽器 ==========
 /**
  * 監聽頁面切換
- * 當用戶切換頁碼時，自動選中該頁第一筆食譜
+ * 當用戶切換頁碼時，自動選中該頁第一筆食譜（僅在大螢幕）
  */
 watch(currentPage, () => {
-    if (currentPageRecipes.value.length > 0) {
+    if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
         selectedRecipe.value = currentPageRecipes.value[0];
     }
 });
 
 /**
  * 監聽標籤切換
- * 當用戶切換標籤時，重置到第一頁並選中第一筆食譜
+ * 當用戶切換標籤時，重置到第一頁並選中第一筆食譜（僅在大螢幕）
  */
 watch(selectedTag, () => {
     currentPage.value = 1;
-    if (currentPageRecipes.value.length > 0) {
+    if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
         selectedRecipe.value = currentPageRecipes.value[0];
     }
 });
@@ -129,68 +149,101 @@ watch(selectedTag, () => {
 // ========== 生命週期 ==========
 /**
  * 組件掛載時初始化數據
- * 1. 從 JSON 文件載入食譜數據（模擬從後端獲取）
+ * 1. 使用 publicApi 從後端獲取 JSON 數據
  * 2. 處理食譜與標籤的關聯關係
  * 3. 建立標籤篩選列表
  * 4. 預設選中第一頁第一筆食譜
  */
-onMounted(() => {
-    // 載入個人食譜數據（取 recipe_id 7-26，共 20 筆）
-    const selectedRecipes = recipesData.slice(6, 26);
+onMounted(async () => {
+    // 監聽視窗大小變化
+    const handleResize = () => {
+        windowWidth.value = window.innerWidth;
+    };
+    window.addEventListener('resize', handleResize);
 
-    // 使用 Set 收集所有不重複的標籤ID
-    const allTagIds = new Set();
-
-    // 將原始食譜數據轉換為組件所需的格式
-    allRecipes.value = selectedRecipes.map(recipe => {
-        // 通過關聯表查找該食譜的所有標籤
-        const recipeTags = recipeTagData
-            .filter(rt => rt.recipe_id === recipe.recipe_id) // 篩選出該食譜的標籤關聯
-            .map(rt => {
-                const tag = tagsData.find(t => t.tag_id === rt.tag_id); // 根據 tag_id 查找標籤詳情
-                if (tag) {
-                    allTagIds.add(rt.tag_id); // 收集標籤ID用於建立篩選列表
-                    return tag.tag_name;
-                }
-                return null;
-            })
-            .filter(Boolean); // 過濾掉 null 值
-
-        // 返回格式化的食譜對象
-        return {
-            id: recipe.recipe_id,
-            recipe_name: recipe.recipe_title,
-            image_url: recipe.recipe_image_url,
-            tags: recipeTags.length > 0 ? recipeTags : ['未分類'],
-            difficulty: recipe.recipe_difficulty,
-            nutritional_info: {
-                calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
-                serving_size: recipe.recipe_servings,
-                cooking_time: `${recipe.recipe_total_time.split(':')[1]}分鐘`
-            },
-            author: {
-                name: 'Recimo',
-                likes: recipe.recipe_like_count || 0
-            }
-        };
+    // 組件卸載時移除監聽器
+    onUnmounted(() => {
+        window.removeEventListener('resize', handleResize);
     });
 
-    // 建立標籤篩選列表
-    // 從收集到的標籤ID中查找對應的標籤名稱，並添加「全部」選項
-    tags.value = ['全部', ...Array.from(allTagIds)
-        .map(tagId => {
-            const tag = tagsData.find(t => t.tag_id === tagId);
-            return tag ? tag.tag_name : null;
-        })
-        .filter(Boolean) // 過濾掉 null 值
-        .slice(0, 6)]; // 限制最多顯示 6 個標籤（加上「全部」共 7 個）
+    try {
+        // 並行載入所有需要的 JSON 檔案
+        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
+            publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/recipe/recipe_tag.json'),
+            publicApi.get('data/recipe/tags.json')
+        ]);
 
-    // 預設選擇「全部」標籤
-    selectedTag.value = '全部';
+        const recipesData = resRecipes.data;
+        const recipeTagData = resRecipeTags.data;
+        const tagsData = resTags.data;
 
-    // 預設自動選中第一頁的第一筆食譜
-    if (currentPageRecipes.value.length > 0) {
-        selectedRecipe.value = currentPageRecipes.value[0];
+        // 建立標籤 ID 對應名稱的映射表
+        const tagMap = {};
+        tagsData.forEach(tag => {
+            tagMap[tag.tag_id] = tag.tag_name;
+        });
+
+        // 獲取 base 路徑用於圖片 URL 補全
+        const base = import.meta.env.BASE_URL;
+
+        // 載入個人食譜數據（取 recipe_id 7-26，共20筆）
+        const selectedRecipes = recipesData.slice(6, 26);
+
+        // 使用 Set 收集所有不重複的標籤ID
+        const allTagIds = new Set();
+
+        // 將原始食譜數據轉換為組件所需的格式
+        allRecipes.value = selectedRecipes.map(recipe => {
+            // 通過關聯表查找該食譜的所有標籤
+            const recipeTags = recipeTagData
+                .filter(rt => rt.recipe_id === recipe.recipe_id)
+                .map(rt => {
+                    if (tagMap[rt.tag_id]) {
+                        allTagIds.add(rt.tag_id);
+                        return tagMap[rt.tag_id];
+                    }
+                    return null;
+                })
+                .filter(Boolean);
+
+            // 返回格式化的食譜對象
+            return {
+                id: recipe.recipe_id,
+                recipe_id: recipe.recipe_id,
+                recipe_name: recipe.recipe_title,
+                image_url: recipe.recipe_image_url.startsWith('http')
+                    ? recipe.recipe_image_url
+                    : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
+                tags: recipeTags.length > 0 ? recipeTags : ['未分類'],
+                difficulty: recipe.recipe_difficulty,
+                nutritional_info: {
+                    calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
+                    serving_size: recipe.recipe_servings,
+                    cooking_time: `${recipe.recipe_total_time.split(':')[1]}分鐘`
+                },
+                author: {
+                    name: 'Recimo',
+                    likes: recipe.recipe_like_count || 0
+                }
+            };
+        });
+
+        // 建立標籤篩選列表
+        tags.value = ['全部', ...Array.from(allTagIds)
+            .map(tagId => tagMap[tagId])
+            .filter(Boolean)
+            .slice(0, 6)];
+
+        // 預設選擇「全部」標籤
+        selectedTag.value = '全部';
+
+        // 預設自動選中第一頁的第一筆食譜（僅在大螢幕）
+        if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
+            selectedRecipe.value = currentPageRecipes.value[0];
+        }
+    } catch (error) {
+        console.error('載入資料失敗:', error);
     }
 });
 </script>
@@ -233,7 +286,8 @@ onMounted(() => {
 
                         <!-- 食譜卡片 -->
                         <div v-for="recipe in currentPageRecipes" :key="recipe.id" class="recipe-card-wrapper"
-                            :class="{ 'active': selectedRecipe?.id === recipe.id }" @click="selectRecipe(recipe)">
+                            :class="{ 'active': selectedRecipe?.id === recipe.id && windowWidth > 1024 }"
+                            @click="selectRecipe(recipe)">
                             <RecipeCardSm :recipe="recipe" :disable-navigation="true" />
                         </div>
                     </div>
@@ -267,6 +321,20 @@ onMounted(() => {
             </div>
         </section>
     </div>
+
+    <!-- 手機版彈窗 -->
+    <Teleport to="body">
+        <div v-if="isModalOpen" class="recipe-modal-overlay" @click="closeModal">
+            <div class="recipe-modal-wrapper">
+                <button class="modal-close-btn" @click="closeModal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="recipe-modal-content" @click.stop>
+                    <RecipePreviewCard v-if="modalRecipe" :recipe="modalRecipe" />
+                </div>
+            </div>
+        </div>
+    </Teleport>
 </template>
 
 <style lang="scss" scoped>
@@ -304,15 +372,26 @@ onMounted(() => {
     border-radius: 12px;
     overflow: hidden;
 
-    // 懸停效果
-    &:hover {
-        transform: translateY(-4px); // 向上浮動
+    // 禁用RecipeCardSm的hover上浮效果
+    :deep(.recipe-card-sm) {
+        &:hover {
+            transform: none !important;
+        }
+    }
+
+    // 懸停效果（非激活狀態）
+    &:hover:not(.active) {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     // 選中狀態：顯示主色邊框
     &.active {
         box-shadow: 0 0 0 2px $primary-color-400;
+
+        // 激活狀態下的hover效果：加深邊框顏色
+        &:hover {
+            box-shadow: 0 0 0 2px $primary-color-700;
+        }
     }
 }
 
@@ -386,6 +465,88 @@ onMounted(() => {
     }
 }
 
+/* ==================== 彈窗樣式 ==================== */
+.recipe-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.recipe-modal-wrapper {
+    position: relative;
+    max-width: 600px;
+    width: 100%;
+}
+
+.recipe-modal-content {
+    position: relative;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: $neutral-color-white;
+    border-radius: 16px;
+    animation: slideUp 0.3s ease;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: $neutral-color-white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+
+    i {
+        font-size: 20px;
+        color: $neutral-color-700;
+    }
+
+    &:hover {
+        background: $neutral-color-100;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 /* ==================== 響應式設計 ==================== */
 // 平板尺寸：雙欄佈局改為上下排列
 @media screen and (max-width: 1024px) {
@@ -399,12 +560,17 @@ onMounted(() => {
         grid-template-columns: repeat(2, 1fr); // 保持2欄網格
         margin-bottom: 32px; // 為下方預覽卡片留出間距
     }
+
+    // 隱藏右側預覽卡片
+    .col-4 {
+        display: none;
+    }
 }
 
 // 手機尺寸：網格改為單欄
 @media screen and (max-width: 810px) {
     .personal-recipes-page {
-        padding: 24px 0 40px;
+        padding: 24px 0 60px;
     }
 
     .page-title {
