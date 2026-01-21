@@ -5,8 +5,10 @@ import ProductRmd from '@/components/mall/ProductRmd.vue';
 import CartCard from '@/components/mall/CartCard.vue';
 // 門禁守衛
 import { useAuthGuard } from '@/composables/useAuthGuard';
+import { useRouter } from 'vue-router';
 const { runWithAuth } = useAuthGuard();
 const cartStore = useCartStore()
+const router = useRouter();
 
 // 計算總額
 const totalAmount = computed(() => {

@@ -1,3 +1,46 @@
+// stores/authStore.js
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+
+export const useAuthStore = defineStore('auth', () => {
+    const isLoggedIn = ref(false);
+    const isLoginAlertOpen = ref(false);
+    const isLoginLightboxOpen = ref(false);
+
+    // --- 新增：存放被攔截的動作 ---
+    const pendingAction = ref(null);
+
+    const login = () => {
+        isLoggedIn.value = true; // 真正標記為已登入
+        if (pendingAction.value) {
+            console.log("執行續傳動作...");
+            pendingAction.value(); // 執行之前被擋下的 buyNow
+            pendingAction.value = null; // 執行完清空
+        }
+    };
+
+    const openLoginLightbox = () => {
+        isLoginAlertOpen.value = false;
+        isLoginLightboxOpen.value = true;
+    };
+
+    return {
+        isLoggedIn,
+        isLoginAlertOpen,
+        isLoginLightboxOpen,
+        pendingAction, // 暴露給 guard 使用
+        login,         // 暴露給 AuthModal 使用
+        openLoginLightbox,
+        openLoginAlert: () => isLoginAlertOpen.value = true,
+        closeAll: () => {
+            isLoginAlertOpen.value = false;
+            isLoginLightboxOpen.value = false;
+        }
+    };
+});
+
+
+
 // // 這個 Store 負責管理登入狀態與控制「登入提醒燈箱」的開關。
 // import { ref, computed } from 'vue'
 // import { defineStore } from 'pinia'
@@ -76,33 +119,3 @@
 //         closeLoginAlert
 //     };
 // });
-
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
-
-export const useAuthStore = defineStore('auth', () => {
-    // 登入狀態 (實際開發中建議從 Token 或 API 取得)
-    const isLoggedIn = ref(false);
-
-    // 控制「登入提示燈箱」的顯示
-    const isLoginAlertOpen = ref(false);
-    // 控制「真正的登入燈箱」
-    const isLoginLightboxOpen = ref(false);
-
-    const openLoginLightbox = () => {
-        isLoginAlertOpen.value = false; // 關閉提示
-        isLoginLightboxOpen.value = true; // 開啟登入表單
-    };
-
-    return {
-        isLoggedIn,
-        isLoginAlertOpen,
-        isLoginLightboxOpen,
-        openLoginLightbox,
-        openLoginAlert: () => isLoginAlertOpen.value = true,
-        closeAll: () => {
-            isLoginAlertOpen.value = false;
-            isLoginLightboxOpen.value = false;
-        }
-    };
-});

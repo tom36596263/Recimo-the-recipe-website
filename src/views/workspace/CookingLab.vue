@@ -40,9 +40,7 @@ import {
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
 import PageBtn from '@/components/common/PageBtn.vue';
-import recipesData from '/public/data/recipe/recipes.json';
-import tagsData from '/public/data/recipe/tags.json';
-import recipeTagData from '/public/data/recipe/recipe_tag.json';
+import { publicApi } from '@/utils/publicApi';
 
 /**
  * 註冊 Chart.js 模組
@@ -345,13 +343,10 @@ const animateNumber = (target, endValue, duration = 1000) => {
 /**
  * 獲取食譜的標籤列表
  */
-const getRecipeTags = (recipeId) => {
+const getRecipeTags = (recipeId, recipeTagData, tagMap) => {
     const recipeTags = recipeTagData
         .filter(rt => rt.recipe_id === recipeId)
-        .map(rt => {
-            const tag = tagsData.find(t => t.tag_id === rt.tag_id);
-            return tag ? tag.tag_name : null;
-        })
+        .map(rt => tagMap[rt.tag_id])
         .filter(Boolean);
     return recipeTags.length > 0 ? recipeTags : ['未分類'];
 };
@@ -374,22 +369,48 @@ const goToPage = (page) => {
 };
 
 // ========== 生命週期 ==========
-onMounted(() => {
-    // 載入製作過的食譜（12 筆）
-    cookedRecipes.value = recipesData.slice(0, 12).map(recipe => ({
-        id: recipe.recipe_id,
-        recipe_name: recipe.recipe_title,
-        image_url: recipe.recipe_image_url,
-        tags: getRecipeTags(recipe.recipe_id),
-        author: {
-            name: 'Recimo',
-            likes: recipe.recipe_like_count || 100
-        }
-    }));
+onMounted(async () => {
+    try {
+        // 並行載入所有需要的 JSON 檔案
+        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
+            publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/recipe/recipe_tag.json'),
+            publicApi.get('data/recipe/tags.json')
+        ]);
 
-    // 初始化動畫數字
-    animateNumber(animatedWeekly, weeklyTotal.value);
-    animateNumber(animatedMonthly, monthlyTotal.value);
+        const recipesData = resRecipes.data;
+        const recipeTagData = resRecipeTags.data;
+        const tagsData = resTags.data;
+
+        // 建立標籤 ID 對應名稱的映射表
+        const tagMap = {};
+        tagsData.forEach(tag => {
+            tagMap[tag.tag_id] = tag.tag_name;
+        });
+
+        // 獲取 base 路徑用於圖片 URL 補全
+        const base = import.meta.env.BASE_URL;
+
+        // 載入製作過的食譜（12 筆）
+        cookedRecipes.value = recipesData.slice(0, 12).map(recipe => ({
+            id: recipe.recipe_id,
+            recipe_name: recipe.recipe_title,
+            image_url: recipe.recipe_image_url.startsWith('http')
+                ? recipe.recipe_image_url
+                : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
+            tags: getRecipeTags(recipe.recipe_id, recipeTagData, tagMap),
+            author: {
+                name: 'Recimo',
+                likes: recipe.recipe_like_count || 100
+            }
+        }));
+
+        // 初始化動畫數字
+        animateNumber(animatedWeekly, weeklyTotal.value);
+        animateNumber(animatedMonthly, monthlyTotal.value);
+    } catch (error) {
+        console.error('載入資料失敗:', error);
+    }
 });
 
 // ========== 監聽器 ==========
@@ -421,7 +442,7 @@ watch(monthlyTotal, (newVal) => {
                     <!-- 烹飪節奏感 -->
                     <section class="rhythm-section">
                         <div class="section-header">
-                            <h4 class="zh-h4 section-title">我的數據統計表</h4>
+                            <h4 class="zh-h4 section-title">我的烹飪數據總覽</h4>
                             <div class="time-range-toggle">
                                 <button :class="['toggle-btn', { active: timeRange === 'weekly' }]"
                                     @click="switchTimeRange('weekly')">
@@ -764,7 +785,7 @@ section {
 // 平板直向（810px 以下）
 @media screen and (max-width: 810px) {
     .cooking-lab-page {
-        padding: 24px 0 40px;
+        padding: 24px 0 60px;
     }
 
     .page-title {
@@ -875,7 +896,7 @@ section {
 // 手機（600px 以下）
 @media screen and (max-width: 600px) {
     .cooking-lab-page {
-        padding: 20px 0 32px;
+        padding: 20px 0 60px;
     }
 
     .page-title {
@@ -997,7 +1018,7 @@ section {
 // 小手機（420px 以下）
 @media screen and (max-width: 420px) {
     .cooking-lab-page {
-        padding: 16px 0 24px;
+        padding: 16px 0 60px;
     }
 
     .page-title {

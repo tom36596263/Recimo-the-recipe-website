@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+// icon
+import IconReplay from '~icons/material-symbols/replay-circle-filled-outline-rounded';
 
 const props = defineProps({
     modelValue: String
@@ -78,7 +80,9 @@ onMounted(() => generateCaptcha())
             <input type="text" v-model="captchaInput" @keyup.enter="$emit('enter-press')" class="form-input"
                 placeholder="請輸入驗證碼" />
             <canvas ref="canvasRef" width="120" height="40" class="captcha-canvas" @click="generateCaptcha"></canvas>
-            <button type="button" class="captcha-refresh-btn" @click="generateCaptcha">🔄</button>
+            <button type="button" class="captcha-refresh-btn" @click="generateCaptcha">
+                <IconReplay />
+            </button>
         </div>
         <div class="input-message">{{ message }}</div>
     </div>
@@ -124,12 +128,28 @@ onMounted(() => generateCaptcha())
     }
 
     .captcha-refresh-btn {
-        @include tag-base(28px, 14px, auto, 8px, $primary-color-100, $neutral-color-black, 4px);
-        font-size: 16px;
+        background: transparent;
+        border: none;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+        color: $primary-color-700;
+        transition: transform 0.3s ease, color 0.3s ease;
+
+        svg {
+            width: 30px;
+            height: 30px;
+        }
 
         &:hover {
-            background-color: $primary-color-400;
+            color: $accent-color-700;
+            transform: rotate(90deg); // 移上去時有個旋轉的小動畫，增加互動感
+        }
+
+        &:active {
+            transform: scale(0.6); // 點擊縮小的反饋
         }
     }
 }

@@ -15,6 +15,13 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import BaseBtn from '@/components/common/BaseBtn.vue';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { FreeMode } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/free-mode';
+
+// Swiper 模組
+const modules = [FreeMode];
 
 // ==================== Props 定義 ====================
 const props = defineProps({
@@ -163,7 +170,8 @@ onMounted(() => {
             <div class="author-info">
                 <div class="author-avatar">
                     <!-- 自動生成大頭照 -->
-                    <img :src="`https://ui-avatars.com/api/?name=${recipe.author?.name || 'RE'}&background=3E8D60&color=fff`" alt="Recimo">
+                    <img :src="`https://ui-avatars.com/api/?name=${recipe.author?.name || 'RE'}&background=3E8D60&color=fff`"
+                        alt="Recimo">
                 </div>
                 <!--  -->
                 <span class="author-name">{{ recipe.author?.name || 'Recimo' }}</span>
@@ -213,14 +221,20 @@ onMounted(() => {
 
         <!-- ==================== 食材預覽區（前5個） ==================== -->
         <div class="ingredients-preview">
-            <div class="ingredient-tag" v-for="ingredient in recipeIngredients" :key="ingredient.ingredient_id">
-                <!-- 食材圖示 -->
-                <div class="ingredient-icon">
-                    <!-- <i :class="getIngredientIcon(ingredient.main_category, ingredient.sub_category)"></i> -->
-                </div>
-                <!-- 食材名稱 -->
-                <span class="ingredient-name">{{ ingredient.ingredient_name }}</span>
-            </div>
+            <Swiper :modules="modules" :slides-per-view="'auto'" :space-between="12" :free-mode="true"
+                class="ingredients-swiper">
+                <SwiperSlide v-for="ingredient in recipeIngredients" :key="ingredient.ingredient_id"
+                    class="ingredient-slide">
+                    <div class="ingredient-tag">
+                        <!-- 食材圖示 -->
+                        <div class="ingredient-icon">
+                            <!-- <i :class="getIngredientIcon(ingredient.main_category, ingredient.sub_category)"></i> -->
+                        </div>
+                        <!-- 食材名稱 -->
+                        <span class="ingredient-name">{{ ingredient.ingredient_name }}</span>
+                    </div>
+                </SwiperSlide>
+            </Swiper>
         </div>
 
         <!-- ==================== 喜歡數統計 ==================== -->
@@ -369,21 +383,16 @@ onMounted(() => {
 
 /* ==================== 食材預覽區 ==================== */
 .ingredients-preview {
-    display: flex;
-    gap: 12px;
     margin-bottom: 20px;
-    overflow-x: auto; // 橫向滾動
+}
+
+.ingredients-swiper {
+    width: 100%;
     padding-bottom: 8px;
+}
 
-    /* 自定義滾動條樣式 */
-    &::-webkit-scrollbar {
-        height: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: $neutral-color-400;
-        border-radius: 2px;
-    }
+.ingredient-slide {
+    width: auto !important;
 }
 
 /* 單個食材標籤 */
@@ -392,7 +401,7 @@ onMounted(() => {
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    min-width: 80px; // 固定最小寬度避免壓縮
+    width: 80px;
 }
 
 /* 食材圖示容器 */
@@ -456,14 +465,9 @@ onMounted(() => {
         font-size: 20px;
     }
 
-    /* 減少食材間距 */
-    .ingredients-preview {
-        gap: 8px;
-    }
-
     /* 縮小食材標籤 */
     .ingredient-tag {
-        min-width: 70px;
+        width: 70px;
     }
 
     /* 縮小食材圖示 */
