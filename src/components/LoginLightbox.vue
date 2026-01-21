@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import BaseModal from '@/components/BaseModal.vue';
 import { useAuthStore } from '@/stores/authStore';
 const authStore = useAuthStore();
 
@@ -12,6 +13,10 @@ import BaseInput from '@/components/login/BaseInput.vue'
 import IconEyeOpen from '~icons/material-symbols/visibility-outline-rounded';
 import IconEyeClose from '~icons/material-symbols/visibility-off-outline-rounded';
 
+
+// 定義控制 Modal 的變數
+const showLoginSuccess = ref(false);
+const showLoginFail = ref(false);
 // ==========================================
 // 1. 登入用的資料
 // ==========================================
@@ -152,10 +157,19 @@ const handleLogin = () => {
     authStore.login(); // 這裡會把 isLoggedIn 設為 true，並觸發續傳動作
     // ----------------
 
-    alert('登入成功！');
-    handleClose(); // 關閉燈箱
+    // alert('登入成功！');
+    showLoginSuccess.value = true;
+
+    // 延遲一點點時間再關閉主燈箱，讓使用者看到成功訊息
+    setTimeout(() => {
+      showLoginSuccess.value = false;
+      handleClose();
+    }, 1500);
+
+    // handleClose(); // 關閉燈箱
   } else {
-    alert('錯誤(測試用帳號：admin@test.com / 測試用密碼：123456)');
+    // alert('錯誤(測試用帳號：admin@test.com / 測試用密碼：123456)');
+    showLoginFail.value = true;
   }
 };
 
@@ -363,6 +377,16 @@ const handleClose = () => {
         </div>
       </div>
     </div>
+    <BaseModal :isOpen="showLoginSuccess" type="success" iconClass="fa-solid fa-check" title="登入成功"
+      @close="showLoginSuccess = false" />
+
+    <BaseModal :isOpen="showLoginFail" type="danger" iconClass="fa-solid fa-exclamation" title="登入失敗"
+      @close="showLoginFail = false">
+      <template #actions>
+        <button class="btn-solid" @click="showLoginFail = false">重新登入</button>
+        <!-- <button class="btn-outline" @click="/* 導向忘記密碼邏輯 */">忘記密碼</button> -->
+      </template>
+    </BaseModal>
   </div>
 </template>
 
@@ -791,5 +815,11 @@ const handleClose = () => {
     height: 40px;
     width: 100%;
   }
+}
+
+/* 確保彈窗在燈箱之上 */
+:deep(.modal-overlay) {
+  z-index: 1100;
+  /* 比 auth-modal 的 1000 更高 */
 }
 </style>

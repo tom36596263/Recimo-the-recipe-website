@@ -1,6 +1,7 @@
 <script setup>
-import { defineProps, computed } from 'vue';
+import { ref, defineProps, computed } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
+import BaseModal from '@/components/BaseModal.vue';
 
 // icon
 import IconDelete from '~icons/material-symbols/delete-outline';
@@ -17,6 +18,9 @@ const props = defineProps({
 const baseURL = import.meta.env.BASE_URL;
 const cartStore = useCartStore();
 
+
+// 控制 Modal 顯示狀態的變數
+const showDeleteModal = ref(false);
 // ==========================================
 // 邏輯處理：串接 Pinia Store
 // ==========================================
@@ -41,12 +45,23 @@ const handleDecrement = () => {
 };
 
 // 刪除商品
+// const handleRemove = () => {
+//     const id = props.item.id || props.item.product_id;
+//     const name = props.item.product_name || props.item.name;
+//     if (confirm(`確定要從購物車中移除「${name}」嗎？`)) {
+//         cartStore.removeItem(id);
+//     }
+// };
 const handleRemove = () => {
+    // 不再使用 confirm()，改為打開自定義 Modal
+    showDeleteModal.value = true;
+};
+
+// 當在 Modal 點擊「確定刪除」時執行的函式
+const confirmDelete = () => {
     const id = props.item.id || props.item.product_id;
-    const name = props.item.product_name || props.item.name;
-    if (confirm(`確定要從購物車中移除「${name}」嗎？`)) {
-        cartStore.removeItem(id);
-    }
+    cartStore.removeItem(id);
+    showDeleteModal.value = false; // 刪除後關閉視窗
 };
 
 // 計算小計
@@ -113,6 +128,13 @@ const productImage = computed(() => {
                 <span class="subtotal-val p-p1">${{ subtotal }}</span>
             </div>
         </div>
+        <BaseModal :isOpen="showDeleteModal" type="info" iconClass="fa-regular fa-trash-can"
+            :title="`確定要從購物車中移除「${item.product_name || item.name}」嗎？`" @close="showDeleteModal = false">
+            <template #actions>
+                <button class="btn-solid" @click="confirmDelete">確定刪除</button>
+                <button class="btn-outline" @click="showDeleteModal = false">取消</button>
+            </template>
+        </BaseModal>
     </div>
 </template>
 

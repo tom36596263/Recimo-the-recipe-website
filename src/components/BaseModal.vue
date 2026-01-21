@@ -41,11 +41,7 @@ const closeModal = () => {
 </script>
 
 <template>
-  <div
-    class="modal-overlay"
-    :class="{ active: isOpen }"
-    @click.self="closeModal"
-  >
+  <div class="modal-overlay" :class="{ active: isOpen }" @click.self="closeModal">
     <div class="modal-card" :class="type">
       <button class="close-btn" @click="closeModal">
         <i class="fa-solid fa-xmark"></i>
@@ -69,4 +65,29 @@ const closeModal = () => {
   </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+:deep(.text-content .zh-h4) {
+  white-space: pre-line;
+  /* 允許正常換行 */
+  word-break: break-all;
+  /* 遇到長英文或標點符號也會強制斷行 */
+  text-align: center;
+  /* 置中對齊比較美觀 */
+  line-height: 1.4;
+  /* 設定行高，折行後才不會太擠 */
+}
+
+:deep(.icon-wrapper) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 防止被 Flexbox 壓縮 */
+  flex-shrink: 0;
+
+  i {
+    /* 確保圖示本身大小正確 */
+    display: block;
+  }
+}
+</style>
