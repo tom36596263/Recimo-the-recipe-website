@@ -17,14 +17,14 @@ const props = defineProps({
 const router = useRouter();
 
 // ✨ 點擊行為：唯讀模式下點擊卡片跳轉詳情頁
-const goToDetail = () => {
-    if (props.readonly) {
-        const targetId = props.recipe.id || props.recipe.recipe_id;
-        if (targetId) {
-            router.push(`/workspace/recipe-detail/${targetId}`);
-        }
-    }
-};
+// const goToDetail = () => {
+//     if (props.readonly) {
+//         const targetId = props.recipe.id || props.recipe.recipe_id;
+//         if (targetId) {
+//             router.push(`/workspace/recipe-detail/${targetId}`);
+//         }
+//     }
+// };
 
 const handleLikeChange = (val, recipe) => {
     console.log('讚數更新:', val);

@@ -34,47 +34,50 @@ async function loadRecipeData(recipeId) {
         const allAdaptations = resAdaptations.data;
 
         const found = allRecipes.find(r => Number(r.recipe_id) === Number(recipeId));
-        if (found) {
-            let rawImg = found.recipe_image_url || found.recipe_cover_image || '';
-            let finalImg = '';
+        if (!found) return;
 
-            if (rawImg) {
-                if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
-                    finalImg = rawImg;
-                } else {
-                    const cleanPath = rawImg.replace(/^\//, '');
-                    finalImg = `/${cleanPath}`;
-                }
-            }
+        let rawImg = found.recipe_image_url || found.recipe_cover_image || '';
+        let finalImg = rawImg
+            ? rawImg.startsWith('http') || rawImg.startsWith('data:')
+                ? rawImg
+                : `/${rawImg.replace(/^\//, '')}`
+            : '';
 
-            originalRecipe.value = {
-                id: found.recipe_id,
-                title: found.recipe_title,
-                description: found.recipe_description || found.recipe_descreption || '暫無簡介',
-                coverImg: finalImg
-            };
+        originalRecipe.value = {
+            id: found.recipe_id,
+            title: found.recipe_title,
+            description: found.recipe_description || found.recipe_descreption || '暫無簡介',
+            coverImg: finalImg
+        };
 
-            const filteredAdaptations = allAdaptations.filter(
-                a => Number(a.parent_recipe_id) === Number(recipeId)
+        const filteredAdaptations = allAdaptations.filter(
+            a => Number(a.parent_recipe_id) === Number(recipeId)
+        );
+
+        variantItems.value = filteredAdaptations.map(adapt => {
+            const childInfo = allRecipes.find(
+                r => Number(r.recipe_id) === Number(adapt.child_recipe_id)
             );
 
-            variantItems.value = filteredAdaptations.map(adapt => {
-                const childInfo = allRecipes.find(r => Number(r.recipe_id) === Number(adapt.child_recipe_id));
-                let adaptImg = adapt.adaptation_image_url || childInfo?.recipe_image_url || '';
-                if (adaptImg && !adaptImg.startsWith('http') && !adaptImg.startsWith('data:')) {
-                    adaptImg = adaptImg.startsWith('/') ? adaptImg : `/${adaptImg}`;
-                }
+            let adaptImg =
+                adapt.adaptation_image_url || childInfo?.recipe_image_url || '';
+            if (adaptImg && !adaptImg.startsWith('http') && !adaptImg.startsWith('data:')) {
+                adaptImg = adaptImg.startsWith('/') ? adaptImg : `/${adaptImg}`;
+            }
 
-                return {
-                    id: adapt.child_recipe_id,
-                    title: adapt.adaptation_title || childInfo?.recipe_title || '未命名改編',
-                    description: adapt.adaptation_note || (adapt.key_changes?.[0] ? `${adapt.key_changes[0].from} ➔ ${adapt.key_changes[0].to}` : '關鍵內容載入中...'),
-                    author: childInfo?.author_name || 'Recimo User',
-                    likes: childInfo?.likes_count || 0,
-                    coverImg: adaptImg
-                };
-            });
-        }
+            return {
+                id: adapt.child_recipe_id,
+                title: adapt.adaptation_title || childInfo?.recipe_title || '未命名改編',
+                description:
+                    adapt.adaptation_note ||
+                    (adapt.key_changes?.[0]
+                        ? `${adapt.key_changes[0].from} ➔ ${adapt.key_changes[0].to}`
+                        : '關鍵內容載入中...'),
+                author: childInfo?.author_name || 'Recimo User',
+                likes: childInfo?.likes_count || 0,
+                coverImg: adaptImg
+            };
+        });
     } catch (err) {
         console.error('資料載入失敗', err);
     }
@@ -91,12 +94,6 @@ function handleCreateNew() {
         path: '/workspace/edit-recipe',
         query: { editId: originalRecipe.value.id, action: 'adapt' }
     });
-}
-
-// ✨ 新增跳轉功能
-function goToRecipeDetail(recipeId) {
-    if (!recipeId) return;
-    router.push(`/workspace/recipe-detail/${recipeId}`);
 }
 
 function goBack() {
@@ -124,7 +121,9 @@ function goBack() {
                     <div class="info-content">
                         <h1 class="zh-h2 mb-16">{{ originalRecipe.title }}</h1>
                         <p class="p-p1 color-p1 mb-24">{{ originalRecipe.description }}</p>
-                        <div class="stat-tag p-p3 mb-24">共有 {{ variantItems.length }} 個改編版本</div>
+                        <div class="stat-tag p-p3 mb-24">
+                            共有 {{ variantItems.length }} 個改編版本
+                        </div>
 
                         <div class="mobile-only-btn">
                             <BaseBtn title="返回原食譜" variant="outline" class="w-100" @click="goBack" />
@@ -149,13 +148,14 @@ function goBack() {
             <TransitionGroup name="staggered-list">
                 <div v-for="(item, index) in variantItems" :key="item.id"
                     class="col-3 col-lg-4 col-md-6 mb-24 grid-item" :style="{ '--delay': index + 1 }">
-                    <AdaptRecipeCard :recipe="item" class="full-height demo-readonly-card"
-                        @click="goToRecipeDetail(item.id)" />
+                    <!-- ✅ 唯讀、不可點擊 -->
+                    <AdaptRecipeCard :recipe="item" :readonly="true" class="full-height demo-readonly-card" />
                 </div>
             </TransitionGroup>
         </div>
     </div>
 </template>
+
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
@@ -346,7 +346,7 @@ function goBack() {
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
     }
 
-    /* ✨ 核心：強制關閉改編卡片上的所有黑底、遮罩與文字 (涵蓋多種命名可能) */
+    /* ✨ 核心：強制關閉改編卡片上的遮罩樣式 */
     :deep(.change-hint-overlay),
     :deep(.hover-overlay),
     :deep(.mask),
@@ -360,7 +360,6 @@ function goBack() {
         opacity: 0 !important;
         visibility: hidden !important;
         pointer-events: none !important;
-        /* 確保不擋住點擊 */
     }
 }
 
