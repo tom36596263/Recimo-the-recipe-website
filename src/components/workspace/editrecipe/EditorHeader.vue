@@ -47,7 +47,7 @@ const displayTime = computed(() => {
 const adaptRecipeData = computed(() => {
   return {
     ...props.modelValue,
-    // 【修正點】標題只連動「改編標題」，不填入原始標題作為預設
+    // 標題只連動「改編標題」，不填入原始標題作為預設
     // 這樣右邊沒寫字，左邊就會顯示 placeholder
     title: props.modelValue.adapt_title || '',
 
@@ -341,7 +341,7 @@ const handleCoverUpload = (e) => {
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.4);
-    color: #fff;
+    color: $neutral-color-white;
     opacity: 0;
     transition: opacity 0.2s;
     border-radius: 6px;

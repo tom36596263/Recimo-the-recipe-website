@@ -1,12 +1,22 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import BenefitTable from '@/components/site/benefits/BenefitTable.vue';
 import ContactForm from '@/components/site/benefits/ContactForm.vue';
 import FAQCollapse from '@/components/site/benefits/FAQCollapse.vue';
 import BenefitBanner from '../../components/site/benefits/BenefitBanner.vue';
+import LoginLightbox from '@/components/LoginLightbox.vue';
 
-// 建立一個簡單的觀察者來觸發動畫
-const sections = ref([]);
+const isLoginVisible = ref(false);
+
+// 燈箱開啟時鎖定 body 捲動
+watch(isLoginVisible, (val) => {
+    if (val) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
+});
+
 onMounted(() => {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -14,8 +24,7 @@ onMounted(() => {
                 entry.target.classList.add('is-visible');
             }
         });
-    }, { threshold: 0.1 }); // 只要看到 10% 就觸發
-
+    }, { threshold: 0.1 });
     const elements = document.querySelectorAll('.reveal');
     elements.forEach(el => observer.observe(el));
 });
@@ -25,7 +34,7 @@ onMounted(() => {
     <div class="container fade-in-init">
         <div class="row">
             <div class="col-12">
-                <BenefitBanner />
+                <BenefitBanner @open-login="isLoginVisible = true" />
             </div>
         </div>
     </div>
@@ -50,24 +59,24 @@ onMounted(() => {
             </div>
         </div>
     </div>
+
+    <LoginLightbox v-if="isLoginVisible" @close="isLoginVisible = false" />
 </template>
 
 <style lang="scss" scoped>
-// --- 基礎樣式 ---
+/* 樣式保持不變 */
 .benefit-table-bg {
     margin-top: 100px;
     margin-bottom: 80px;
     width: 100%;
     background-color: $neutral-color-100;
-    padding: 80px 0; // 稍微增加 padding 讓背景更有呼吸感
+    padding: 80px 0;
 }
 
 .contact-content {
     margin-top: 100px;
     margin-bottom: 90px;
 }
-
-// --- 動畫定義 ---
 
 .fade-in-init {
     animation: fadeInScale 0.8s ease-out forwards;
@@ -85,7 +94,6 @@ onMounted(() => {
     }
 }
 
-// 捲動揭示動畫
 .reveal {
     opacity: 0;
     transform: translateY(30px);
@@ -96,7 +104,6 @@ onMounted(() => {
         transform: translateY(0);
     }
 }
-
 
 .contact-content.reveal {
     transition-delay: 0.2s;

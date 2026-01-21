@@ -1,27 +1,32 @@
 <script setup>
 
+import CircleBtn from '@/components/common/CircleBtn.vue';
+
+const emit = defineEmits(['open-login']);
+
+const handleOpen = () => {
+    emit('open-login');
+};
 </script>
 
 <template>
-
     <div class="membership-banner">
         <div class="banner-content">
             <img src="@/assets/images/benifit/Placeholder Image.png" alt="會員權益 Banner" />
-
             <div class="banner-text">
                 <div class="zh-h2">會員權益</div>
                 <div class="zh-h5">
                     「快加入 Recimo，解鎖各項專屬功能！用數據<br />
                     與靈感，定義您的新烹飪生活~」
                 </div>
-                <CircleBtn title="立即加入會員" href="/loginlightbox" />
+                <CircleBtn title="立即加入會員" @click="handleOpen" />
             </div>
-
         </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
+
 .membership-banner {
     width: 100%;
     height: 60vh;
@@ -57,8 +62,6 @@
         color: $primary-color-800;
         display: flex;
         flex-direction: column;
-        // gap: 12px;
-
 
         .zh-h2 {
             margin-bottom: 8px;
@@ -72,6 +75,11 @@
     }
 }
 
+
+:deep(::selection) {
+    background: rgba($primary-color-700, 0.2);
+    color: $primary-color-800;
+}
 
 @media (max-width: 768px) {
     .membership-banner {

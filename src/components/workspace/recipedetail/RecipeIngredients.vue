@@ -6,7 +6,7 @@ const props = defineProps({
     list: { type: Array, default: () => [] }
 });
 
-// 將偵錯訊息改為 console 輸出
+
 watchEffect(() => {
     if (props.list.length === 0) {
         console.warn('偵錯：父組件傳入的食材陣列為空');
@@ -16,7 +16,7 @@ watchEffect(() => {
 const computedIngredients = computed(() => {
     return props.list.map(item => ({
         ...item,
-        // 優化：數字太大轉科學記號，避免爆版
+        // 數字太大轉科學記號，避免破版
         displayAmount: ((Number(item.amount) || 0) * props.servings) > 1e12
             ? ((Number(item.amount) || 0) * props.servings).toExponential(2)
             : parseFloat(((Number(item.amount) || 0) * props.servings).toFixed(1))

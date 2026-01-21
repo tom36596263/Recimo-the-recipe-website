@@ -102,7 +102,7 @@ const removeItem = (id) => {
 </template>
 
 <style lang="scss" scoped>
-/* 其他樣式保持不變 */
+
 .ingredient-editor-container {
     width: 100%;
     margin-bottom: 30px;
@@ -189,7 +189,7 @@ const removeItem = (id) => {
         &:read-only {
             color: $neutral-color-black;
             cursor: default;
-            pointer-events: none; // 核心修正：讓 readonly 徹底無法點擊
+            pointer-events: none; // 讓 readonly 無法點擊
         }
     }
 }
@@ -248,7 +248,6 @@ const removeItem = (id) => {
             text-align: left;
             border-bottom: 1px dashed $neutral-color-100;
 
-            // 核心修正：解決單獨針對 unit-field 的唯讀樣式
             &:read-only {
                 border-bottom: none !important;
             }

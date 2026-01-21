@@ -7,7 +7,7 @@ const props = defineProps({
         type: Object,
         required: true
     },
-    // ✨ 新增：判斷是否為唯讀模式（總覽頁使用）
+
     readonly: {
         type: Boolean,
         default: false
@@ -16,7 +16,6 @@ const props = defineProps({
 
 const router = useRouter();
 
-// ✨ 點擊行為：唯讀模式下點擊卡片跳轉詳情頁
 // const goToDetail = () => {
 //     if (props.readonly) {
 //         const targetId = props.recipe.id || props.recipe.recipe_id;
@@ -91,7 +90,7 @@ const handleLikeChange = (val, recipe) => {
     flex-direction: column;
     transition: all 0.3s ease;
 
-    // ✨ 唯讀模式下的樣式（總覽頁用）
+
     &.is-readonly {
         cursor: pointer;
 
