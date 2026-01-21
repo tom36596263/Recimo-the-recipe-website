@@ -205,11 +205,13 @@ const subtotal = computed(() => {
     return 0;
   }
 
-  // 記得要加 .value 才能拿到陣列
   return orderItems.value.reduce((total, item) => {
-    // 確保 price 和 quantity 是數字，避免 undefined 計算變成 NaN
-    const price = item.price || 0;
-    const qty = item.quantity || 0;
+    // 價格:優先找 product_price，沒有再找 price，都沒有就當 0
+    const price = Number(item.product_price) || Number(item.price) || 0;
+
+    // 數量:優先找 count，沒有再找 quantity，都沒有就當 0
+    const qty = Number(item.count) || Number(item.quantity) || 0;
+
     return total + (price * qty);
   }, 0);
 });
