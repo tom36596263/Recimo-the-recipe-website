@@ -1818,5 +1818,485 @@
     "step_content": "底部呈金黃色後小心翻面，再悶煎 3 分鐘即可出爐。",
     "step_image_url": "img/recipes/32/steps/6.jpg",
     "is_modified": false
+  },
+  {
+    "step_id": 183,
+    "recipe_id": 33,
+    "step_order": 1,
+    "step_title": "熬煮焦糖液",
+    "step_total_time": "00:10:00",
+    "step_content": "將 50g 砂糖與 15ml 冷水放入鍋中，以小火加熱（過程中切勿攪拌）。待糖液轉為深琥珀色並散發焦香味後熄火，迅速倒入 15ml 熱水拌勻。趁熱倒入模具底部並靜置至凝固。",
+    "step_image_url": "img/recipes/33/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 184,
+    "recipe_id": 33,
+    "step_order": 2,
+    "step_title": "加熱甜鮮乳",
+    "step_total_time": "00:05:00",
+    "step_content": "將鮮乳與 40g 砂糖放入鍋中，小火加熱至砂糖完全溶解即可熄火（約 50-60°C，不需沸騰），隨後滴入香草精拌勻。",
+    "step_image_url": "img/recipes/33/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 185,
+    "recipe_id": 33,
+    "step_order": 3,
+    "step_title": "蛋奶液結合",
+    "step_total_time": "00:05:00",
+    "step_content": "雞蛋在碗中輕輕打散（避免產生過多泡沫）。將微溫的牛奶液分次緩緩倒入蛋液中，邊倒邊攪拌均勻，確保雞蛋不被燙熟。",
+    "step_image_url": "img/recipes/33/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 186,
+    "recipe_id": 33,
+    "step_order": 4,
+    "step_title": "過篩去雜質",
+    "step_total_time": "00:03:00",
+    "step_content": "將混合好的布丁液透過細濾網過篩至少兩次，濾掉繫帶與氣泡，這是確保布丁口感滑順無孔洞的關鍵。",
+    "step_image_url": "img/recipes/33/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 187,
+    "recipe_id": 33,
+    "step_order": 5,
+    "step_title": "水浴烘烤",
+    "step_total_time": "00:45:00",
+    "step_content": "將布丁液倒入模具，放在深烤盤中。在烤盤內注入約模具一半高度的熱水。放入預熱 150°C 的烤箱烘烤約 40 分鐘，直到布丁中心輕晃呈現布丁般的彈性感。",
+    "step_image_url": "img/recipes/33/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 188,
+    "recipe_id": 33,
+    "step_order": 6,
+    "step_title": "冷藏與脫模",
+    "step_total_time": "00:05:00",
+    "step_content": "出爐冷卻後，放入冰箱冷藏至少 4 小時。食用時用小刀沿邊緣劃一圈，倒扣在盤子上，讓焦糖醬汁自然流下。",
+    "step_image_url": "img/recipes/33/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 189,
+    "recipe_id": 34,
+    "step_order": 1,
+    "step_title": "劃開吐司切痕",
+    "step_total_time": "00:02:00",
+    "step_content": "在厚片吐司表面使用麵包刀劃出深約 1 公分的「井」字型切痕（注意不要切斷底部），這有助於烘烤時受熱均勻，並讓抹醬深入麵包芯部。",
+    "step_image_url": "img/recipes/34/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 190,
+    "recipe_id": 34,
+    "step_order": 2,
+    "step_title": "填入奶油抹醬",
+    "step_total_time": "00:02:00",
+    "step_content": "將無鹽奶油切成小塊填入「井」字切痕中，並在吐司表面也均勻抹上一層薄薄的奶油。",
+    "step_image_url": "img/recipes/34/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 191,
+    "recipe_id": 34,
+    "step_order": 3,
+    "step_title": "烘烤至酥脆",
+    "step_total_time": "00:05:00",
+    "step_content": "放入預熱至 180°C 的烤箱中，烘烤約 5 分鐘，直到吐司表面呈現微焦的誘人金黃色與酥脆質感。",
+    "step_image_url": "img/recipes/34/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 192,
+    "recipe_id": 34,
+    "step_order": 4,
+    "step_title": "淋上蜂蜜收尾",
+    "step_total_time": "00:01:00",
+    "step_content": "出爐後趁熱淋上適量蜂蜜。熱氣會使蜂蜜與半融化的奶油完美結合，滲入切痕中，即可享用。",
+    "step_image_url": "img/recipes/34/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 193,
+    "recipe_id": 35,
+    "step_order": 1,
+    "step_title": "泡軟吉利丁片",
+    "step_total_time": "00:05:00",
+    "step_content": "準備一盆冰水（需完全蓋過片狀），放入吉利丁片浸泡約 5 分鐘。待吉利丁片完全軟化後，撈起並徹底擠乾水分，置於小碗備用。",
+    "step_image_url": "img/recipes/35/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 194,
+    "recipe_id": 35,
+    "step_order": 2,
+    "step_title": "加熱液體混合物",
+    "step_total_time": "00:08:00",
+    "step_content": "將鮮乳、鮮奶油與砂糖倒入鍋中，以小火慢加熱，邊加熱邊輕輕攪拌讓砂糖溶解。當液體周圍微冒泡（約 60°C）時立即熄火，避免沸騰影響乳化穩定度。",
+    "step_image_url": "img/recipes/35/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 195,
+    "recipe_id": 35,
+    "step_order": 3,
+    "step_title": "混合凝固與調味",
+    "step_total_time": "00:05:00",
+    "step_content": "趁熱加入香草精攪拌均勻，接著放入擠乾水分的吉利丁片，持續攪拌直到吉利丁片完全溶解於乳液中。",
+    "step_image_url": "img/recipes/35/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 196,
+    "recipe_id": 35,
+    "step_order": 4,
+    "step_title": "裝杯與冷藏",
+    "step_total_time": "04:00:00",
+    "step_content": "將奶酪液均勻倒入模具或杯中。若表面有氣泡，可用牙籤戳破或噴少許高度酒消泡。蓋上保鮮膜，放入冰箱冷藏至少 4 小時直至凝固完全。",
+    "step_image_url": "img/recipes/35/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 197,
+    "recipe_id": 36,
+    "step_order": 1,
+    "step_title": "預備香蕉與奶油",
+    "step_total_time": "00:05:00",
+    "step_content": "將熟透的香蕉剝皮後壓成泥狀備用。無鹽奶油切成小塊，置於室溫軟化至手指可以輕易按壓下痕跡的程度（不可融化為液態）。",
+    "step_image_url": "img/recipes/36/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 198,
+    "recipe_id": 36,
+    "step_order": 2,
+    "step_title": "奶油打發",
+    "step_total_time": "00:08:00",
+    "step_content": "將軟化的奶油與砂糖放入盆中，用打蛋器高速攪打。直到奶油顏色轉白且質地呈現蓬鬆、輕盈的羽毛狀（這是蛋糕口感細緻的關鍵）。",
+    "step_image_url": "img/recipes/36/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 199,
+    "recipe_id": 36,
+    "step_order": 3,
+    "step_title": "分次拌入蛋液",
+    "step_total_time": "00:05:00",
+    "step_content": "雞蛋先打散。將蛋液分成 3-4 次慢慢加入奶油糊中，每次加入都要確保完全攪拌吸收後再加下一次，以防止油水分離導致麵糊結塊。",
+    "step_image_url": "img/recipes/36/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 200,
+    "recipe_id": 36,
+    "step_order": 4,
+    "step_title": "粉類與香蕉泥混和",
+    "step_total_time": "00:05:00",
+    "step_content": "將低筋麵粉與泡打粉混勻後篩入盆中。加入香蕉泥，改用橡皮刮刀以切拌的手法攪拌均勻，直到看不見乾粉即可，切記不要過度攪拌以免產生筋性。",
+    "step_image_url": "img/recipes/36/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 201,
+    "recipe_id": 36,
+    "step_order": 5,
+    "step_title": "入模烘烤",
+    "step_total_time": "00:45:00",
+    "step_content": "將麵糊倒入鋪好烘焙紙的長條烤模，表面抹平。放入預熱至 170°C 的烤箱烘烤約 40-45 分鐘。若表面上色過快，中途可蓋上鋁箔紙。",
+    "step_image_url": "img/recipes/36/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 202,
+    "recipe_id": 36,
+    "step_order": 6,
+    "step_title": "熟成測試與脫模",
+    "step_total_time": "00:05:00",
+    "step_content": "使用竹籤插入蛋糕中心，拔出後若無濕麵糊沾黏即表示熟透。出爐後連同烤模放在架上冷卻 10 分鐘再脫模，完全冷卻後切片口感更佳。",
+    "step_image_url": "img/recipes/36/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 203,
+    "recipe_id": 37,
+    "step_order": 1,
+    "step_title": "奶油打發",
+    "step_total_time": "00:08:00",
+    "step_content": "將無鹽奶油置於室溫軟化。加入黑糖與砂糖，使用電動打蛋器以中高速攪打至顏色轉淺、質地呈現蓬鬆狀。",
+    "step_image_url": "img/recipes/37/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 204,
+    "recipe_id": 37,
+    "step_order": 2,
+    "step_title": "拌入濕性材料",
+    "step_total_time": "00:02:00",
+    "step_content": "加入一顆雞蛋與香草精，持續攪拌直到與奶油糊完全融合，質地呈現滑順狀態。",
+    "step_image_url": "img/recipes/37/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 205,
+    "recipe_id": 37,
+    "step_order": 3,
+    "step_title": "粉類過篩與混合",
+    "step_total_time": "00:05:00",
+    "step_content": "將中筋麵粉、小蘇打粉與鹽混合過篩。分兩次加入奶油糊中，改用刮刀以切拌方式混合至看不見乾粉即可，避免過度攪拌。",
+    "step_image_url": "img/recipes/37/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 206,
+    "recipe_id": 37,
+    "step_order": 4,
+    "step_title": "加入燕麥與果乾",
+    "step_total_time": "00:03:00",
+    "step_content": "倒入燕麥片與蔓越莓乾，用刮刀輕輕拌勻，讓配料均勻分佈在麵糰中。",
+    "step_image_url": "img/recipes/37/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 207,
+    "recipe_id": 37,
+    "step_order": 5,
+    "step_title": "成形排盤",
+    "step_total_time": "00:05:00",
+    "step_content": "烤箱預熱 175°C。取適量麵糰揉成圓球（約高爾夫球大小），整齊排列在鋪有烘焙紙的烤盤上，並用手掌略微壓扁。",
+    "step_image_url": "img/recipes/37/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 208,
+    "recipe_id": 37,
+    "step_order": 6,
+    "step_title": "烘烤與冷卻",
+    "step_total_time": "00:12:00",
+    "step_content": "放入烤箱烘烤約 10-12 分鐘，直到餅乾邊緣呈現焦糖金黃色。取出後留在烤盤上冷卻 5 分鐘使其定型，再移至架上完全冷卻。",
+    "step_image_url": "img/recipes/37/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 209,
+    "recipe_id": 38,
+    "step_order": 1,
+    "step_title": "茶葉預處理",
+    "step_total_time": "00:05:00",
+    "step_content": "將伯爵茶葉使用研缽或調理機磨至細碎，若是使用茶包則直接拆開取出內部的細粉末備用，以確保茶香能均勻釋放。",
+    "step_image_url": "img/recipes/38/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 210,
+    "recipe_id": 38,
+    "step_order": 2,
+    "step_title": "蛋糖液混合",
+    "step_total_time": "00:05:00",
+    "step_content": "將雞蛋與砂糖放入盆中打散，加入蜂蜜混合均勻。不需要打發，只需輕輕攪拌至砂糖略微溶解即可。",
+    "step_image_url": "img/recipes/38/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 211,
+    "recipe_id": 38,
+    "step_order": 3,
+    "step_title": "拌入乾粉類",
+    "step_total_time": "00:05:00",
+    "step_content": "將低筋麵粉與泡打粉過篩加入蛋液中，撒入磨好的伯爵茶葉碎，使用打蛋器以輕柔的手法拌勻至無粉粒狀態。",
+    "step_image_url": "img/recipes/38/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 212,
+    "recipe_id": 38,
+    "step_order": 4,
+    "step_title": "奶油乳化與靜置",
+    "step_total_time": "01:05:00",
+    "step_content": "將無鹽奶油加熱融化至微溫狀態，分次緩緩倒入麵糊中，攪拌至表面呈現光澤且完全乳化。蓋上保鮮膜，放入冰箱冷藏靜置至少 1 小時（此步驟為長出凸肚臍的關鍵）。",
+    "step_image_url": "img/recipes/38/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 213,
+    "recipe_id": 38,
+    "step_order": 5,
+    "step_title": "入模準備",
+    "step_total_time": "00:05:00",
+    "step_content": "烤箱預熱至 200°C。將瑪德蓮烤模抹上一層薄薄奶油並撒上少許麵粉。將靜置好的麵糊取出裝入擠花袋，填入模具約八分滿。",
+    "step_image_url": "img/recipes/38/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 214,
+    "recipe_id": 38,
+    "step_order": 6,
+    "step_title": "高溫烘烤",
+    "step_total_time": "00:10:00",
+    "step_content": "放入烤箱以 200°C 烘烤約 8-10 分鐘。觀察中心點膨脹出明顯的「凸肚臍」且邊緣呈現深金黃色後即可出爐，稍冷後脫模即可。",
+    "step_image_url": "img/recipes/38/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 215,
+    "recipe_id": 39,
+    "step_order": 1,
+    "step_title": "混合乾性材料",
+    "step_total_time": "00:05:00",
+    "step_content": "將中筋麵粉、泡打粉與鹽混合過篩至大盆中。將核桃稍微切碎，可先入烤箱 150°C 烘烤 5 分鐘逼出香氣，冷卻後備用。",
+    "step_image_url": "img/recipes/39/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 216,
+    "recipe_id": 39,
+    "step_order": 2,
+    "step_title": "切拌奶油",
+    "step_total_time": "00:08:00",
+    "step_content": "從冰箱取出剛切丁的「冰」無鹽奶油放入粉盆。使用刮板以「切、拌」的手法將奶油與麵粉混合，直到呈現類似粗砂或碎米狀（奶油需保持塊狀不融化）。",
+    "step_image_url": "img/recipes/39/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 217,
+    "recipe_id": 39,
+    "step_order": 3,
+    "step_title": "拌入堅果",
+    "step_total_time": "00:01:00",
+    "step_content": "將切碎的核桃加入粉盆中，稍微攪動讓核桃均勻分佈在乾粉中。",
+    "step_image_url": "img/recipes/39/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 218,
+    "recipe_id": 39,
+    "step_order": 4,
+    "step_title": "混合濕性液體",
+    "step_total_time": "00:02:00",
+    "step_content": "在另一個量杯中，將鮮乳與楓糖漿攪拌均勻備用。",
+    "step_image_url": "img/recipes/39/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 219,
+    "recipe_id": 39,
+    "step_order": 5,
+    "step_title": "輕壓成團",
+    "step_total_time": "00:05:00",
+    "step_content": "在粉盆中心挖一個洞，倒入液體。使用刮刀由底部向上撥動，以輕壓而非搓揉的方式混合至無粉狀（切記勿過度揉捏，以免產生筋性導致口感變硬）。",
+    "step_image_url": "img/recipes/39/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 220,
+    "recipe_id": 39,
+    "step_order": 6,
+    "step_title": "摺疊與切塊",
+    "step_total_time": "00:05:00",
+    "step_content": "將麵糰移至撒有手粉的桌面上，輕輕壓成 2.5 公分厚的圓餅狀。使用刀子或切模將其對切成 8 等份的三角形。",
+    "step_image_url": "img/recipes/39/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 221,
+    "recipe_id": 39,
+    "step_order": 7,
+    "step_title": "表面裝飾",
+    "step_total_time": "00:02:00",
+    "step_content": "將司康整齊排列在烤盤上。在表面均勻刷上少許鮮乳（這能讓成品更有光澤感）。",
+    "step_image_url": "img/recipes/39/steps/7.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 222,
+    "recipe_id": 39,
+    "step_order": 8,
+    "step_title": "高溫烘烤",
+    "step_total_time": "00:18:00",
+    "step_content": "放入預熱 200°C 的烤箱，烘烤約 15-20 分鐘。直到司康側邊出現橫向裂紋（狼牙口），且表面與底部呈金黃焦香即可出爐。",
+    "step_image_url": "img/recipes/39/steps/8.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 223,
+    "recipe_id": 40,
+    "step_order": 1,
+    "step_title": "隔水融化巧克力",
+    "step_total_time": "00:08:00",
+    "step_content": "將黑巧克力磚切碎，與無鹽奶油塊一同放入耐熱盆中。採用隔水加熱（水溫不需沸騰，避免巧克力過熱變質）的方式，攪拌至兩者完全融化且質地光滑。",
+    "step_image_url": "img/recipes/40/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 224,
+    "recipe_id": 40,
+    "step_order": 2,
+    "step_title": "冷卻降溫",
+    "step_total_time": "00:05:00",
+    "step_content": "將巧克力盆移離火源，在室溫下稍作冷卻至不燙手的微溫狀態。這能避免後續加入雞蛋時將其燙熟。",
+    "step_image_url": "img/recipes/40/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 225,
+    "recipe_id": 40,
+    "step_order": 3,
+    "step_title": "攪拌砂糖與蛋",
+    "step_total_time": "00:05:00",
+    "step_content": "在巧克力液中加入砂糖拌勻。接著將雞蛋分次加入，每加入一顆都要確實攪拌，直到麵糊呈現細緻且帶有亮度的狀態。",
+    "step_image_url": "img/recipes/40/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 226,
+    "recipe_id": 40,
+    "step_order": 4,
+    "step_title": "乾粉類過篩",
+    "step_total_time": "00:02:00",
+    "step_content": "將中筋麵粉、可可粉與鹽混合，均勻篩入巧克力麵糊盆中，以防粉類結塊影響口感。",
+    "step_image_url": "img/recipes/40/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 227,
+    "recipe_id": 40,
+    "step_order": 5,
+    "step_title": "輕柔切拌混合",
+    "step_total_time": "00:03:00",
+    "step_content": "使用刮刀以翻拌（Fold）的手法混合。直到看不見白色乾粉即可停止攪拌，切記勿過度運作以免攪入過多空氣或產生筋性。",
+    "step_image_url": "img/recipes/40/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 228,
+    "recipe_id": 40,
+    "step_order": 6,
+    "step_title": "入模準備",
+    "step_total_time": "00:02:00",
+    "step_content": "烤箱預熱 175°C。將方形烤模鋪上烘焙紙，將布朗尼麵糊倒入模具中，並用刮刀將表面抹平齊。",
+    "step_image_url": "img/recipes/40/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 229,
+    "recipe_id": 40,
+    "step_order": 7,
+    "step_title": "烘烤與熟成測試",
+    "step_total_time": "00:30:00",
+    "step_content": "放入烤箱中層烘烤 25-30 分鐘。使用竹籤插入中心，拔出時若沾有些許「濕潤的碎屑」即代表完成（若竹籤全乾則表示烤過頭，口感會較乾硬）。",
+    "step_image_url": "img/recipes/40/steps/7.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 230,
+    "recipe_id": 40,
+    "step_order": 8,
+    "step_title": "冷卻切塊",
+    "step_total_time": "00:20:00",
+    "step_content": "出爐後在模具中完全放涼，巧克力結構才會定型。冷卻後取出切成長方塊即可享用，冷藏後口感更為紮實。",
+    "step_image_url": "img/recipes/40/steps/8.jpg",
+    "is_modified": false
   }
 ]

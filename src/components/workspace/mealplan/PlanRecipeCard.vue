@@ -1,9 +1,5 @@
 <script setup>
-import { useRouter } from 'vue-router';
 import BaseTag from '@/components/common/BaseTag.vue';
-import BaseBtn from '@/components/common/BaseBtn.vue';
-import LikeButton from '@/components/common/LikeButton.vue';
-import LogoBlack from '/img/site/Recimo-logo-black.svg';
 
 /**
  * PlanRecipeCard.vue
@@ -55,10 +51,12 @@ const handleAdd = () => {
     background-color: $neutral-color-white;
     cursor: pointer;
     transition: .3s ease;
+    width: auto;
+    margin: 10px auto;
 
     .card-header {
         overflow: hidden;
-        height: 220px;
+        height: 150px;
         width: 100%;
 
         img {
