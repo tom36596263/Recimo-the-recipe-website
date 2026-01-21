@@ -1,11 +1,10 @@
 <script setup>
 import { computed, watch } from 'vue';
 import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard.vue';
-// 1. ✨ 修正：必須匯入 useRoute
 import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
-const route = useRoute(); // 2. ✨ 修正：定義 route
+const route = useRoute();
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
@@ -15,25 +14,16 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
+// 跳轉邏輯
 const goToOriginal = () => {
-  // 1. 抓取 ID (優先從資料抓，沒有就從網址抓)
-  const targetId =
-    props.modelValue.recipe_id ||
-    props.modelValue.id ||
-    route.query.editId ||
-    route.params.id;
-
+  const targetId = props.modelValue.parent_recipe_id || props.modelValue.recipe_id;
   if (targetId) {
-    // ✨ 修正：改為正確的工作區路徑
-    console.log("✅ 準備跳轉至正確路徑:", `/workspace/recipe-detail/${targetId}`);
     router.push(`/workspace/recipe-detail/${targetId}`);
   } else {
-    console.error("❌ 找不到 ID");
-    alert("系統找不到原始食譜編號");
+    alert("找不到原始食譜編號");
   }
 };
 
-// ...其餘 updateField, setDifficulty, computed 等維持不變
 const updateField = (field, value) => {
   emit('update:modelValue', { ...props.modelValue, [field]: value });
 };
@@ -42,6 +32,7 @@ const setDifficulty = (val) => {
   if (props.isEditing) updateField('difficulty', val);
 };
 
+// 自動計算步驟總時間
 const autoTotalTime = computed(() => {
   if (!props.modelValue.steps) return 0;
   return props.modelValue.steps.reduce((sum, step) => sum + (Number(step.time) || 0), 0);
@@ -50,6 +41,22 @@ const autoTotalTime = computed(() => {
 const displayTime = computed(() => {
   const manualTime = Number(props.modelValue.totalTime);
   return manualTime > 0 ? manualTime : autoTotalTime.value;
+});
+
+// EditorHeader.vue 內的 adaptRecipeData
+const adaptRecipeData = computed(() => {
+  return {
+    ...props.modelValue,
+    // 【修正點】標題只連動「改編標題」，不填入原始標題作為預設
+    // 這樣右邊沒寫字，左邊就會顯示 placeholder
+    title: props.modelValue.adapt_title || '',
+
+    // 內容連動「改編說明」
+    description: props.modelValue.adapt_description || '',
+
+    recipe_id: props.modelValue.parent_recipe_id || props.modelValue.recipe_id,
+    coverImg: props.modelValue.coverImg,
+  };
 });
 
 watch(
@@ -70,14 +77,6 @@ const handleCoverUpload = (e) => {
   reader.onload = (evt) => updateField('coverImg', evt.target.result);
   reader.readAsDataURL(file);
 };
-
-const adaptRecipeData = computed(() => {
-  return {
-    ...props.modelValue,
-    title: props.modelValue.adapt_title || '',
-    description: props.modelValue.adapt_description || ''
-  };
-});
 </script>
 
 <template>
@@ -86,7 +85,8 @@ const adaptRecipeData = computed(() => {
 
     <template v-if="isAdaptMode">
       <div class="adapt-card-section">
-        <div class="adapt-card-wrapper readonly-overlay">
+        <div class="adapt-card-wrapper" @click="isEditing && $refs.fileInput.click()"
+          :style="{ cursor: isEditing ? 'pointer' : 'default' }">
           <AdaptRecipeCard :recipe="adaptRecipeData" />
         </div>
         <BaseBtn title="查看原始食譜詳情" variant="outline" :width="320" @click="goToOriginal"
@@ -114,7 +114,7 @@ const adaptRecipeData = computed(() => {
       <div class="row-title">
         <template v-if="isAdaptMode">
           <div class="title-with-tag">
-            <h2 class="title-display zh-h2-bold">{{ modelValue.original_title || modelValue.title || '原始食譜' }}</h2>
+            <h2 class="title-display zh-h2-bold">{{ modelValue.original_title || modelValue.title || '未命名食譜' }}</h2>
             <span class="adapt-tag p-p3">改編自此食譜</span>
           </div>
         </template>
@@ -163,14 +163,12 @@ const adaptRecipeData = computed(() => {
           maxlength="200"></textarea>
         <p v-else class="desc-display p-p2">{{ modelValue.description || '暫無簡介' }}</p>
       </div>
-
-      <BaseBtn v-if="isAdaptMode" title="查看原始食譜詳情" variant="outline" :width="100" @click="goToOriginal"
-        class="back-original-btn d-only-mobile" />
     </div>
   </section>
 </template>
 
 <style lang="scss" scoped>
+/* 樣式部分保持不變... */
 @import '@/assets/scss/abstracts/_color.scss';
 
 .adapt-card-section {
@@ -185,16 +183,6 @@ const adaptRecipeData = computed(() => {
 }
 
 .back-original-btn {
-  &.d-only-mobile {
-    display: none;
-
-    @media (max-width: 767px) {
-      display: flex;
-      width: 100% !important;
-      margin-top: 24px;
-    }
-  }
-
   &.d-none-mobile {
     margin-top: 60px;
 
@@ -226,7 +214,6 @@ const adaptRecipeData = computed(() => {
   min-width: 0;
 }
 
-/* 基礎樣式保持不變 */
 .title-with-tag {
   display: flex;
   align-items: center;
@@ -292,8 +279,9 @@ const adaptRecipeData = computed(() => {
   border-radius: 8px;
   overflow: hidden;
 
+  /* 確保 Hover 效果與點擊能作用 */
   &.readonly-overlay {
-    pointer-events: none;
+    pointer-events: auto;
     user-select: none;
     cursor: default;
   }
@@ -317,7 +305,6 @@ const adaptRecipeData = computed(() => {
     border-style: solid;
   }
 
-  // ✨ 修正：確保加號與文字完全置中且不偏移
   .upload-placeholder {
     display: flex;
     align-items: center;
@@ -358,10 +345,6 @@ const adaptRecipeData = computed(() => {
     opacity: 0;
     transition: opacity 0.2s;
     border-radius: 6px;
-
-    span {
-      font-weight: 500;
-    }
   }
 
   &:hover .change-hint {

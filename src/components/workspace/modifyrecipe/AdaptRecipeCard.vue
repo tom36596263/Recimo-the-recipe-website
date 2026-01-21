@@ -11,15 +11,8 @@ const props = defineProps({
 
 const router = useRouter();
 
-// ✨ Demo 暫時封印：不執行跳轉
 const goToDetail = () => {
     console.log('Demo 模式：已停用跳轉', props.recipe.id);
-    /* 暫不跳轉
-    router.push({
-        name: 'workspace-recipe-detail',
-        params: { id: props.recipe.id || props.recipe.recipe_id }
-    });
-    */
 };
 
 const handleLikeChange = (val, recipe) => {
@@ -41,13 +34,12 @@ const handleLikeChange = (val, recipe) => {
 
         <div class="card-body">
             <div class="input-group title-input">
-                <input type="text" :value="recipe.title || ''" placeholder="請輸入更改版本標題..." @click.stop>
+                <input type="text" :value="recipe.title || ''" placeholder="改編版本標題..." readonly>
             </div>
 
             <div class="input-group content-input">
                 <i-material-symbols-arrow-right-alt-rounded class="arrow-icon" />
-                <input type="text" :value="recipe.description || recipe.adapt_title || ''" placeholder="請輸入關鍵更改內容..."
-                    @click.stop>
+                <input type="text" :value="recipe.description || ''" placeholder="關鍵更改內容..." readonly>
             </div>
         </div>
 
@@ -63,7 +55,7 @@ const handleLikeChange = (val, recipe) => {
                 </div>
                 <p class="p-p1">
                     {{ (recipe.author && typeof recipe.author === 'object') ? recipe.author.author_name : (recipe.author
-                    || 'Recimo') }}
+                        || 'Recimo') }}
                 </p>
                 <div @click.prevent.stop>
                     <LikeButton :initial-likes="recipe.likes || 0"
@@ -77,13 +69,12 @@ const handleLikeChange = (val, recipe) => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-// ✨ Demo 特效：Hover 放大與投影
 .readonly-card-effect {
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 
     &:hover {
-        transform: scale(1.03); // 輕微放大
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); // 增加浮動感投影
+        // ✨ 修改：移除 transform: scale(1.03)，只保留投影感
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 }
 
@@ -92,10 +83,8 @@ const handleLikeChange = (val, recipe) => {
     border-radius: $radius-base;
     overflow: hidden;
     background-color: $neutral-color-white;
-    // cursor: pointer; // Demo 建議改回 default，或保留 pointer 假裝可以點
     cursor: default;
 
-    /* ... 其餘原有樣式保持不變 ... */
     .card-header {
         position: relative;
         overflow: hidden;

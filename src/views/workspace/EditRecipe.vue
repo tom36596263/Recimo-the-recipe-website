@@ -182,9 +182,41 @@ const handlePreview = () => {
 };
 
 const handleSave = () => {
-  if (window.confirm('確定要儲存目前的編輯內容嗎？')) {
-    alert('💾 食譜已成功儲存！');
-    recipeStore.rawEditorData = null;
+  // 1. 基本驗證
+  if (!recipeForm.value.title) {
+    alert('請輸入食譜標題再發布喔！');
+    return;
+  }
+
+  // 2. 儲存邏輯 (如果是發布，則存入 LocalStorage)
+  if (isPublished.value) {
+    const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
+
+    const newPublishData = {
+      ...recipeForm.value,
+      id: Date.now(),
+      publishDate: new Date().toLocaleDateString(),
+      is_local: true
+    };
+
+    localRevisions.unshift(newPublishData);
+    localStorage.setItem('user_revisions', JSON.stringify(localRevisions));
+
+    alert(`🎉 恭喜！「${recipeForm.value.title}」已公開發布！`);
+  } else {
+    alert('草稿儲存成功！');
+  }
+
+  // 3. 重點：根據模式決定返回路徑
+  recipeStore.rawEditorData = null; // 清除 Store 暫存
+
+  if (isAdaptModeActive.value && recipeForm.value.parent_recipe_id) {
+    // 【情況 A：改編模式】
+    // 返回該食譜的改編集一覽頁面
+    router.push(`/workspace/modify-recipe/${recipeForm.value.parent_recipe_id}`);
+  } else {
+    // 【情況 B：創建模式 / 一般編輯】
+    // 返回我的食譜總覽頁面
     router.push('/workspace');
   }
 };
