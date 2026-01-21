@@ -27,12 +27,10 @@ const fetchRelated = async () => {
         const res = await publicApi.get('data/recipe/recipes.json');
 
         const cleanedData = res.data.map(r => {
-            // 1. 處理圖片路徑：確保開頭有 /
             let rawImg = r.recipe_image_url || r.recipe_cover_image || '';
             let finalImg = '';
 
             if (rawImg) {
-                // 如果已經是絕對路徑或 base64 就不用動，否則補上 /
                 finalImg = (rawImg.startsWith('http') || rawImg.startsWith('/') || rawImg.startsWith('data:'))
                     ? rawImg
                     : `/${rawImg}`;
@@ -42,8 +40,6 @@ const fetchRelated = async () => {
                 ...r,
                 id: r.recipe_id,
                 recipe_name: r.recipe_title || '美味食譜',
-                // 2. 這裡要確保 RecipeCardSm 吃的是 image_url 還是 cover_image？
-                // 建議兩個都給，增加相容性
                 image_url: finalImg,
                 cover_image: finalImg,
                 author: {
@@ -71,7 +67,6 @@ const fetchRelated = async () => {
 onMounted(fetchRelated);
 watch(() => props.currentId, fetchRelated);
 
-// 調整斷點：讓卡片更緊湊，間距縮小
 const swiperBreakpoints = {
     320: { slidesPerView: 2, spaceBetween: 10 },
     768: { slidesPerView: 3, spaceBetween: 12 },
@@ -105,7 +100,7 @@ const swiperBreakpoints = {
     padding: 10px 0 20px 0;
     margin: 20px 0 40px 0;
     min-width: 0;
-    overflow: hidden;
+    overflow: hidden; // 保持外層整潔
     position: relative;
     background-color: transparent;
 }
@@ -115,61 +110,69 @@ const swiperBreakpoints = {
     align-items: center;
     justify-content: center;
     text-align: center;
-    margin-bottom: 40px; 
+    margin-bottom: 40px;
     color: $neutral-color-800;
-    white-space: nowrap; 
-
+    white-space: nowrap;
 
     &::before,
     &::after {
         content: "";
-        flex: 1; 
-        height: 1px; 
-        background-color: $neutral-color-400; 
-        margin: 0 20px; 
+        flex: 1;
+        height: 1px;
+        background-color: $neutral-color-400;
+        margin: 0 20px;
     }
 
-    
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
 }
 
 .recipe-swiper {
-    padding: 0 0 40px 0;
+    // ✨ 修正裁切：留出頂部空間給 hover 放大使用
+    padding: 30px 20px 50px 20px;
+    margin: -30px -20px 0 -20px;
+    overflow: visible !important;
 
     :deep(.swiper-slide) {
         display: flex;
         justify-content: center;
         height: auto;
+        overflow: visible !important;
+        transition: z-index 0.3s;
+
+        &:hover {
+            z-index: 10;
+        }
     }
 
-
+    // ✨ 修正按鈕顏色為綠色 ($primary-color-700)
     :deep(.swiper-button-next),
     :deep(.swiper-button-prev) {
-        color: $neutral-color-700;
-        opacity: 0.1;
+        color: $primary-color-700 !important;
+        opacity: 0.3;
         transition: all 0.3s ease;
 
         &::after {
-            font-size: 14px; 
+            font-size: 16px;
             font-weight: bold;
         }
 
         &:hover {
-            opacity: 0.8;
-            color: $primary-color-700;
+            opacity: 1;
+            color: $primary-color-700 !important;
         }
     }
 
     :deep(.swiper-button-prev) {
-        left: 0px;
+        left: 10px;
     }
 
     :deep(.swiper-button-next) {
-        right: 0px;
+        right: 10px;
     }
 
+    // ✨ 修正分頁點顏色
     :deep(.swiper-pagination-bullet) {
         width: 5px;
         height: 5px;
@@ -178,10 +181,17 @@ const swiperBreakpoints = {
     }
 
     :deep(.swiper-pagination-bullet-active) {
-        background: $primary-color-700;
+        background: $primary-color-700 !important;
         opacity: 1;
         width: 10px;
         border-radius: 4px;
+    }
+}
+
+// ✨ 強制修正卡片內部箭頭顏色
+:deep(.recipe-card-sm) {
+    .arrow-icon {
+        color: $primary-color-700 !important;
     }
 }
 

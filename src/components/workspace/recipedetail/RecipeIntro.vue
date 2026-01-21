@@ -17,6 +17,18 @@ const props = defineProps({
 
 // 控制燈箱顯隱的狀態
 const showModal = ref(false);
+const isFavorited = ref(false);
+
+const toggleFavorite = () => {
+    if (!isFavorited.value) {
+        // 尚未收藏 → 收藏 + 開 modal
+        isFavorited.value = true;
+        showModal.value = true;
+    } else {
+        // 已收藏 → 取消收藏（不開 modal）
+        isFavorited.value = false;
+    }
+};
 
 // 產生星星陣列
 const starArray = computed(() => {
@@ -46,9 +58,14 @@ const onModalSubmit = (data) => {
                 </div>
             </div>
 
-            <div v-if="!props.isPreview" class="badge-favorite" @click="showModal = true">
-                <i-material-symbols-favorite-outline-rounded />
-                <div class="favorite-text">加收藏</div>
+            <div v-if="!props.isPreview" class="badge-favorite" :class="{ active: isFavorited }"
+                @click="toggleFavorite">
+
+                <i-material-symbols-favorite-outline-rounded v-if="!isFavorited" />
+                <i-material-symbols-favorite-rounded v-else />
+                <div class="favorite-text">
+                    {{ isFavorited ? '已收藏' : '加收藏' }}
+                </div>
             </div>
         </div>
 
@@ -150,6 +167,10 @@ const onModalSubmit = (data) => {
     &:hover {
         color: $accent-color-700;
         transform: scale(1.05);
+    }
+
+    &.active {
+        color: $secondary-color-danger-700; // 紅色
     }
 }
 

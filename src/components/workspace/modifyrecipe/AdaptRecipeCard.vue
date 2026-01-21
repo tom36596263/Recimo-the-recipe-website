@@ -6,14 +6,25 @@ const props = defineProps({
     recipe: {
         type: Object,
         required: true
+    },
+    // ✨ 新增：判斷是否為唯讀模式（總覽頁使用）
+    readonly: {
+        type: Boolean,
+        default: false
     }
 });
 
 const router = useRouter();
 
-const goToDetail = () => {
-    console.log('Demo 模式：已停用跳轉', props.recipe.id);
-};
+// ✨ 點擊行為：唯讀模式下點擊卡片跳轉詳情頁
+// const goToDetail = () => {
+//     if (props.readonly) {
+//         const targetId = props.recipe.id || props.recipe.recipe_id;
+//         if (targetId) {
+//             router.push(`/workspace/recipe-detail/${targetId}`);
+//         }
+//     }
+// };
 
 const handleLikeChange = (val, recipe) => {
     console.log('讚數更新:', val);
@@ -21,25 +32,26 @@ const handleLikeChange = (val, recipe) => {
 </script>
 
 <template>
-    <div v-if="recipe" class="recipe-card-sm readonly-card-effect">
+    <div v-if="recipe" class="recipe-card-sm" :class="{ 'is-readonly': readonly }" @click="goToDetail">
+
         <header class="card-header" :style="{
             backgroundImage: recipe.coverImg ? `url(${recipe.coverImg})` : '',
             backgroundSize: 'cover',
             backgroundPosition: 'center'
         }">
-            <div class="change-hint-overlay">
+            <div v-if="!readonly" class="change-hint-overlay">
                 <span class="p-p2">+ 更換成品照</span>
             </div>
         </header>
 
         <div class="card-body">
             <div class="input-group title-input">
-                <input type="text" :value="recipe.title || ''" placeholder="改編版本標題..." readonly>
+                <input type="text" :value="recipe.title" placeholder="改編版本標題..." readonly>
             </div>
 
             <div class="input-group content-input">
                 <i-material-symbols-arrow-right-alt-rounded class="arrow-icon" />
-                <input type="text" :value="recipe.description || ''" placeholder="關鍵更改內容..." readonly>
+                <input type="text" :value="recipe.description || recipe.adapt_title" placeholder="關鍵更改內容..." readonly>
             </div>
         </div>
 
@@ -55,7 +67,7 @@ const handleLikeChange = (val, recipe) => {
                 </div>
                 <p class="p-p1">
                     {{ (recipe.author && typeof recipe.author === 'object') ? recipe.author.author_name : (recipe.author
-                        || 'Recimo') }}
+                        || 'Recimo User') }}
                 </p>
                 <div @click.prevent.stop>
                     <LikeButton :initial-likes="recipe.likes || 0"
@@ -69,34 +81,30 @@ const handleLikeChange = (val, recipe) => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-.readonly-card-effect {
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-
-    &:hover {
-        // ✨ 修改：移除 transform: scale(1.03)，只保留投影感
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-}
-
 .recipe-card-sm {
     border: 1px solid $neutral-color-400;
-    border-radius: $radius-base;
+    border-radius: 12px;
     overflow: hidden;
     background-color: $neutral-color-white;
-    cursor: default;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+
+    // ✨ 唯讀模式下的樣式（總覽頁用）
+    &.is-readonly {
+        cursor: pointer;
+
+        &:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+    }
 
     .card-header {
         position: relative;
-        overflow: hidden;
-        height: 150px;
-        width: 100%;
+        height: 160px;
         background-color: $neutral-color-100;
-
-        &:hover {
-            .change-hint-overlay {
-                opacity: 1;
-            }
-        }
     }
 
     .change-hint-overlay {
@@ -108,12 +116,17 @@ const handleLikeChange = (val, recipe) => {
         align-items: center;
         justify-content: center;
         opacity: 0;
-        transition: opacity 0.2s ease-in-out;
-        pointer-events: none;
+        transition: opacity 0.2s;
+    }
+
+    // 只有非 readonly 時 hover 圖片才顯示文字
+    &:not(.is-readonly) .card-header:hover .change-hint-overlay {
+        opacity: 1;
     }
 
     .card-body {
         padding: 12px 16px;
+        flex-grow: 1;
 
         .input-group {
             display: flex;
@@ -125,56 +138,54 @@ const handleLikeChange = (val, recipe) => {
                 border: none;
                 outline: none;
                 background: transparent;
-                font-size: 14px;
                 color: $neutral-color-700;
                 padding: 4px 0;
-
-                &::placeholder {
-                    color: $neutral-color-400;
-                }
-
-                &:focus {
-                    border-bottom: 1px solid $primary-color-400;
-                }
+                cursor: default; // 總覽頁不可輸入
             }
         }
 
         .title-input input {
-            font-weight: 500;
+            font-weight: 600;
             font-size: 16px;
         }
 
-        .content-input .arrow-icon {
-            font-size: 20px;
-            margin-right: 4px;
-            color: $neutral-color-800;
+        .content-input {
+            .arrow-icon {
+                font-size: 20px;
+                margin-right: 6px;
+                color: $primary-color-700;
+            }
+
+            input {
+                font-size: 14px;
+                color: $neutral-color-400;
+            }
         }
     }
 
     footer {
-        padding: 0 16px 16px 16px;
-        justify-content: space-between;
-        display: flex;
+        padding: 0 16px 16px;
 
         .personal-info {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            width: 100%;
 
             .p-p1 {
-                margin-right: 6px;
+                font-size: 14px;
+                margin-left: 8px;
+                margin-right: auto;
+                color: $neutral-color-400;
             }
         }
 
         .personal-img {
-            width: 24px;
-            height: 24px;
-            margin-right: 8px;
-            border-radius: $radius-pill;
-            border: 1px solid $neutral-color-700;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
             background-color: $neutral-color-100;
+            border: 1px solid $neutral-color-400;
         }
     }
 }
