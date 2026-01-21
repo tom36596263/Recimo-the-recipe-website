@@ -79,7 +79,7 @@
             class="reset-icon"
             :class="{ 'is-active': isRotating }"
             :style="{ 'animation-delay': `${index * 0.1}s` }"/>
-            隨機產生新食材
+            <p class="p-p2">隨機產生新食材</p>
         </div>
         
     </div>

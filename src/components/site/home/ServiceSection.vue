@@ -122,7 +122,7 @@
     }
     @media screen and (max-width: 810px){
         .my-swiper{
-            height:50vh;
+            height:40vh;
             width: 100%;
         }
     }
