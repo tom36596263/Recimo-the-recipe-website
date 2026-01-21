@@ -455,20 +455,31 @@ const onReportSubmit = (data) => {
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 9999;
-    padding-top: 12px;
+    z-index: 110;
+    padding: 12px 0;
     pointer-events: none;
     transition: all 0.3s ease;
 
-    @media screen and (min-width: 1025px) {
-        left: 260px;
+  
+    @media screen and (min-width: 810px) {
+        left: 260px; // 這裡請確保跟你的 Sidebar 寬度一致
         width: calc(100% - 260px);
+        background: transparent; // 桌機版背景透明，靠內層 bar-content 顯色
+    }
+
+    // 手機/平板版 (小於 810px)，側邊欄隱藏時
+    @media screen and (max-width: 809px) {
+        left: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.7); // 加上半透明背景，蓋過可能重疊的文字
+        backdrop-filter: blur(8px);
+        padding: 8px 0;
     }
 
     .container {
         max-width: 1000px;
         margin: 0 auto;
-        padding: 0 12px;
+        padding: 0 16px;
     }
 
     .bar-content {
@@ -480,7 +491,16 @@ const onReportSubmit = (data) => {
         padding: 10px 20px;
         border-radius: 12px;
         pointer-events: auto;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+        // 極小螢幕優化
+        @media screen and (max-width: 480px) {
+            padding: 8px 12px;
+
+            span {
+                font-size: 11px;
+            }
+        }
 
         span {
             font-weight: 500;
@@ -500,10 +520,13 @@ const onReportSubmit = (data) => {
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            margin-left: 8px;
+            margin-left: 12px;
+            white-space: nowrap;
+            transition: transform 0.2s ease;
 
             &:hover {
                 background-color: $primary-color-100;
+                transform: scale(1.05);
             }
         }
     }
