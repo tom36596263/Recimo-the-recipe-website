@@ -84,6 +84,16 @@ const handleAddRecipe = (payload) => {
   });
 };
 
+// 處理從 RecipePicker 傳回來的「刪除食譜」事件
+const handleRemoveRecipe = (itemId) => {
+  // 透過 itemId 找出索引並移除
+  const index = mealPlanItems.value.findIndex(item => item.item_id === itemId);
+  if (index !== -1) {
+    mealPlanItems.value.splice(index, 1);
+    console.log('已刪除項目 ID:', itemId);
+  }
+};
+
 // UI 切換方法
 const handleDateSelect = (date) => { selectedDate.value = date; };
 const closeDetail = () => { selectedDate.value = null; };
@@ -127,7 +137,7 @@ watch(() => route.params.id, (newId) => {
 
         <div v-else key="picker" class="meal-detail-view col-12">
           <RecipePicker :date="selectedDate" :current-items="getItemsByDate(selectedDate)" :all-recipes="allRecipes"
-            @back="closeDetail" @add="handleAddRecipe" />
+            @back="closeDetail" @add="handleAddRecipe" @remove="handleRemoveRecipe" />
         </div>
       </Transition>
     </div>

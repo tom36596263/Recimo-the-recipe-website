@@ -20,7 +20,7 @@ const props = defineProps({
 });
 
 // 定義 Emit 事件，用於通知父組件行為
-const emit = defineEmits(['back', 'add']);
+const emit = defineEmits(['back', 'add', 'remove']);
 
 // --- 響應式狀態管理 ---
 const recipes = ref([]);          // 存放顯示在瀏覽器中的食譜清單
@@ -66,6 +66,11 @@ const selectRecipe = (recipe) => {
     });
 };
 
+// 從slot刪除食譜
+const removeRecipe = (item_id) => {
+    emit('remove', item_id)
+}
+
 // 元件掛載時初始化食譜資料
 onMounted(async () => {
     // 優先使用父組件傳入的 allRecipes 減少 API 請求次數
@@ -80,9 +85,9 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="recipe-picker">
-        <header class="recipe-picker__header">
-            <div class="header-left">
+    <div class="recipe-picker container">
+        <header class="recipe-picker__header row">
+            <div class="header-left col-6">
                 <button class="back-btn" @click="emit('back')" title="返回週計畫視圖">
                     <i-material-symbols-arrow-back-ios-new />
                     返回週計畫
@@ -90,7 +95,7 @@ onMounted(async () => {
                 <h2 class="date-title">{{ displayDate }}</h2>
             </div>
 
-            <div class="header-right">
+            <div class="header-right col-6">
                 <div class="kcal-status-box">
                     <div class="kcal-item">
                         目前總熱量：<span class="value">{{ currentTotalKcal }}</span> kcal
@@ -102,8 +107,8 @@ onMounted(async () => {
             </div>
         </header>
 
-        <section class="recipe-picker__overview">
-            <div v-for="(label, type) in { 0: '早餐', 1: '午餐', 2: '晚餐' }" :key="type" class="meal-slot"
+        <section class="recipe-picker__overview row">
+            <div v-for="(label, type) in { 0: '早餐', 1: '午餐', 2: '晚餐' }" :key="type" class="meal-slot col-4"
                 :class="{ 'is-active': selectedMealType === Number(type) }" @click="selectedMealType = Number(type)">
 
                 <div class="meal-slot__header">
@@ -115,7 +120,10 @@ onMounted(async () => {
                     <div v-if="getItemsByType(Number(type)).length > 0" class="mini-list">
                         <div v-for="item in getItemsByType(Number(type))" :key="item.item_id" class="mini-item"
                             :title="item.detail?.recipe_title">
-                            {{ item.detail?.recipe_title }}
+                            <span class="item-title">{{ item.detail?.recipe_title }}</span>
+                            <button class="delete-btn" @click.stop="removeRecipe(item.item_id)" title="移除此食譜">
+                                <i-material-symbols-delete-outline-rounded />
+                            </button>
                         </div>
                     </div>
                     <div v-else class="empty-hint">點選下方卡片加入{{ label }}</div>
@@ -123,26 +131,26 @@ onMounted(async () => {
             </div>
         </section>
 
-        <section class="recipe-picker__browser">
-            <div class="browser-header">
-                <div class="search-bar">
-                    <i-material-symbols-search />
-                    <input v-model="searchQuery" type="text" placeholder="搜尋食譜名稱..." />
-                </div>
-                <button class="filter-btn">
-                    篩選條件 <i-material-symbols-keyboard-arrow-down />
-                </button>
+        <section class="recipe-picker__browser-header row">
+            <div class="search-bar col-10">
+                <i-material-symbols-search />
+                <input v-model="searchQuery" type="text" placeholder="搜尋食譜名稱..." />
+            </div>
+            <button class="filter-btn">
+                篩選條件 <i-material-symbols-keyboard-arrow-down />
+            </button>
+        </section>
+
+        <section class="recipe-picker__browser-scroll-area row">
+            <div class="col-3" v-for="recipe in filteredRecipes" :key="recipe.recipe_id" @click="selectRecipe(recipe)">
+                <PlanRecipeCard :recipe="recipe" />
             </div>
 
-            <div class="recipe-scroll-area">
-                <div class="recipe-grid">
-                    <PlanRecipeCard v-for="recipe in filteredRecipes" :key="recipe.recipe_id" :recipe="recipe"
-                        @click="selectRecipe(recipe)" />
-                </div>
-                <div v-if="filteredRecipes.length === 0" class="no-results">
-                    沒有找到符合「{{ searchQuery }}」的食譜。
-                </div>
+
+            <div v-if="filteredRecipes.length === 0" class="no-results col-12 col-lg-6 col-md-12">
+                沒有找到符合「{{ searchQuery }}」的食譜。
             </div>
+
         </section>
     </div>
 </template>
@@ -151,14 +159,13 @@ onMounted(async () => {
 .recipe-picker {
     display: flex;
     flex-direction: column;
-    /* 鎖定總高度為視窗高度減去預估的 Navbar 空間，確保內部捲動生效 */
     height: calc(100vh - 120px);
     gap: 16px;
     animation: fadeIn 0.3s ease;
 
     /* 頂部標題列 */
     &__header {
-        flex-shrink: 0; // 防止標題列被壓縮
+        flex-shrink: 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -278,7 +285,7 @@ onMounted(async () => {
                 justify-content: flex-start;
                 overflow-y: auto;
                 scrollbar-width: none;
-                height: auto;
+                height: 100px;
 
                 &::-webkit-scrollbar {
                     display: none;
@@ -297,17 +304,59 @@ onMounted(async () => {
                         margin-bottom: 4px;
                         border-radius: 4px;
                         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-
-                        /* 單行文字截斷處理：防止長標題破版 */
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        position: relative;
+                        transition: all 0.2s ease;
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
-                        display: block;
                         width: 100%;
                     }
 
                     .mini-item:last-child {
                         margin-bottom: 0;
+                    }
+
+                    item-title {
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        flex: 1;
+                    }
+                }
+
+                .delete-btn {
+                    display: none; // 預設隱藏
+                    background: none;
+                    border: none;
+                    color: $neutral-color-400;
+                    cursor: pointer;
+                    padding: 0;
+                    margin-left: 8px;
+                    display: flex;
+                    align-items: center;
+                    opacity: 0; // 預設透明
+                    transition: color 0.2s, opacity 0.2s;
+
+                    &:hover {
+                        color: #ff4d4f; // 垃圾桶 hover 變紅色
+                    }
+
+                    svg {
+                        width: 18px;
+                        height: 18px;
+                    }
+                }
+
+                // 當 mini-item 被 hover 時，顯示垃圾桶
+                &:hover {
+                    background: $neutral-color-100; // 稍微變色增加回饋感
+
+                    .delete-btn {
+                        display: flex;
+                        opacity: 1;
                     }
                 }
 
@@ -324,94 +373,63 @@ onMounted(async () => {
         }
     }
 
-    /* --- 下方食譜選單瀏覽器 --- */
-    &__browser {
-        flex: 1; // 佔滿剩餘高度
-        min-height: 0; // 關鍵屬性：允許彈性項目正確縮小以觸發內部 overflow
+    /* --- 食譜搜尋欄和篩選器 --- */
+    &__browser-header {
         display: flex;
-        flex-direction: column;
         background: $neutral-color-white;
-        border: 1px solid $neutral-color-100;
-        border-top-left-radius: 24px;
-        border-top-right-radius: 24px;
-        padding: 24px 24px 0 24px;
+        gap: 20px;
 
-        .browser-header {
-            flex-shrink: 0;
-            display: flex;
-            gap: 16px;
-            margin-bottom: 20px;
-
-            .search-bar {
-                flex: 1;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                background: $neutral-color-100;
-                padding: 10px 20px;
-                border-radius: 30px;
-
-                input {
-                    border: none;
-                    background: transparent;
-                    outline: none;
-                    width: 100%;
-                    font-size: 1rem;
-                }
-
-                svg {
-                    color: $neutral-color-700;
-                    font-size: 1.2rem;
-                }
-            }
-
-            .filter-btn {
-                background: $neutral-color-white;
-                border: 1px solid $neutral-color-100;
-                padding: 0 20px;
-                border-radius: 30px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                color: $neutral-color-800;
-                transition: 0.3s;
-
-                &:hover {
-                    border-color: $primary-color-400;
-                    color: $primary-color-700;
-                }
-            }
-        }
-
-        // /* 食譜清單捲動容器 */
-        .recipe-scroll-area {
+        .search-bar {
             flex: 1;
-            overflow-y: auto;
-            padding-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: $neutral-color-100;
+            padding: 10px 20px;
+            border-radius: 30px;
 
-            /* 客製化現代感捲動條 */
-            &::-webkit-scrollbar {
-                width: 6px;
-            }
-
-            &::-webkit-scrollbar-thumb {
-                background: $neutral-color-100;
-                border-radius: 10px;
+            input {
+                border: none;
+                background: transparent;
+                outline: none;
+                width: 100%;
+                font-size: 1rem;
             }
         }
 
-        .recipe-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
+        .filter-btn {
+            background: $neutral-color-white;
+            border: 1px solid $neutral-color-100;
+            padding: 0 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: $neutral-color-800;
+            transition: 0.3s;
+
+            &:hover {
+                border-color: $primary-color-400;
+                color: $primary-color-700;
+            }
+        }
+    }
+
+    // /* 食譜清單捲動容器 */
+    &__browser-scroll-area {
+        display: flex;
+        flex-wrap: wrap;
+        flex: 1;
+        overflow-y: auto;
+
+        &::-webkit-scrollbar {
+            width: 6px;
         }
 
-        /* 使用深層選取器強制覆寫子元件的標籤配色 */
-        :deep(.tag) {
-            color: $primary-color-800 !important;
-            background-color: $primary-color-100 !important;
-            font-weight: bold;
+        &::-webkit-scrollbar-thumb {
+            background: $neutral-color-100;
+            border-radius: 10px;
         }
 
         .no-results {
@@ -421,6 +439,8 @@ onMounted(async () => {
             font-size: 1.1rem;
         }
     }
+
+
 }
 
 /* 入場淡入動畫 */
