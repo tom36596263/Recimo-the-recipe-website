@@ -60,8 +60,6 @@ async function loadRecipeData(recipeId) {
 
             variantItems.value = filteredAdaptations.map(adapt => {
                 const childInfo = allRecipes.find(r => Number(r.recipe_id) === Number(adapt.child_recipe_id));
-
-                // 圖片路徑處理
                 let adaptImg = adapt.adaptation_image_url || childInfo?.recipe_image_url || '';
                 if (adaptImg && !adaptImg.startsWith('http') && !adaptImg.startsWith('data:')) {
                     adaptImg = adaptImg.startsWith('/') ? adaptImg : `/${adaptImg}`;
@@ -69,13 +67,8 @@ async function loadRecipeData(recipeId) {
 
                 return {
                     id: adapt.child_recipe_id,
-                    // 1. 顯示改編標題 (例如：瑪格麗特風舒肥雞)
                     title: adapt.adaptation_title || childInfo?.recipe_title || '未命名改編',
-
-                    // 2. ✨ 關鍵修正：改用 JSON 裡的 "adaptation_note"
-                    // 如果沒有 note，就抓 key_changes 的第一筆作為描述
                     description: adapt.adaptation_note || (adapt.key_changes?.[0] ? `${adapt.key_changes[0].from} ➔ ${adapt.key_changes[0].to}` : '關鍵內容載入中...'),
-
                     author: childInfo?.author_name || 'Recimo User',
                     likes: childInfo?.likes_count || 0,
                     coverImg: adaptImg
@@ -94,14 +87,9 @@ function initEmptyRecipe() {
 
 function handleCreateNew() {
     if (!originalRecipe.value.id) return;
-
-    // ✨ 修正：改用 path 並確保參數格式正確
     router.push({
         path: '/workspace/edit-recipe',
-        query: {
-            editId: originalRecipe.value.id,
-            action: 'adapt'
-        }
+        query: { editId: originalRecipe.value.id, action: 'adapt' }
     });
 }
 
@@ -113,7 +101,7 @@ function goBack() {
 
 <template>
     <div class="variants-gallery container">
-        <div class="row mb-40 desktop-only-btn">
+        <div class="row mb-40 desktop-only-btn fade-in-down">
             <div class="col-12 text-right">
                 <BaseBtn title="返回原食譜" variant="outline" :width="120" @click="goBack" />
             </div>
@@ -138,7 +126,7 @@ function goBack() {
                     </div>
                 </div>
             </div>
-            <div class="decorative-line mt-40"></div>
+            <div class="decorative-line"></div>
         </section>
 
         <div class="row align-stretch custom-grid">
@@ -152,9 +140,12 @@ function goBack() {
                 </div>
             </div>
 
-            <div v-for="(item, index) in variantItems" :key="index" class="col-3 col-lg-4 col-md-6 mb-24 grid-item">
-                <AdaptRecipeCard :recipe="item" class="full-height demo-readonly-card" />
-            </div>
+            <TransitionGroup name="staggered-list">
+                <div v-for="(item, index) in variantItems" :key="item.id"
+                    class="col-3 col-lg-4 col-md-6 mb-24 grid-item" :style="{ '--delay': index + 1 }">
+                    <AdaptRecipeCard :recipe="item" class="full-height demo-readonly-card" />
+                </div>
+            </TransitionGroup>
         </div>
     </div>
 </template>
@@ -162,16 +153,105 @@ function goBack() {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-/* 顯示控制 */
+/* --- 核心修正：桌機版隱藏手機按鈕 --- */
+.mobile-only-btn {
+    display: none !important;
+}
+
 .desktop-only-btn {
     display: block;
 }
 
-.mobile-only-btn {
-    display: none;
+/* --- 動畫定義 --- */
+.fade-in-down {
+    animation: fadeInDown 0.6s ease-out;
 }
 
-/* 基礎樣式 */
+.original-recipe-hero {
+    animation: fadeInUp 0.8s ease-out;
+
+    .main-image-container {
+        overflow: hidden;
+
+        img {
+            animation: imageScale 1.2s ease-out;
+        }
+    }
+}
+
+.staggered-list-enter-active {
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-delay: calc(var(--delay) * 0.1s);
+}
+
+.staggered-list-enter-from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.9);
+}
+
+.decorative-line {
+    height: 10px;
+    background-color: $primary-color-100;
+    border-radius: 4px;
+    margin-top: 40px;
+    transform-origin: left;
+    animation: lineExtend 1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes lineExtend {
+    from {
+        transform: scaleX(0);
+    }
+
+    to {
+        transform: scaleX(1);
+    }
+}
+
+@keyframes imageScale {
+    from {
+        transform: scale(1.1);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+/* --- 佈局樣式 --- */
+.custom-grid {
+    display: flex;
+    flex-wrap: wrap;
+
+    &>span {
+        display: contents;
+    }
+}
+
 .variants-gallery {
     padding: 20px 0 60px;
 }
@@ -189,7 +269,6 @@ function goBack() {
         width: 100%;
         height: 320px;
         border-radius: 16px;
-        overflow: hidden;
         background-color: $neutral-color-100;
 
         .hero-img {
@@ -214,13 +293,6 @@ function goBack() {
         color: $primary-color-800;
         padding: 6px 16px;
         border-radius: 20px;
-    }
-
-    .decorative-line {
-        height: 10px;
-        background-color: $primary-color-100;
-        border-radius: 4px;
-        margin-top: 40px;
     }
 }
 
@@ -265,11 +337,6 @@ function goBack() {
     &:hover {
         transform: scale(1.05);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-        z-index: 10;
-    }
-
-    :deep(.change-hint-overlay) {
-        display: none !important;
     }
 
     :deep(input) {
@@ -277,14 +344,14 @@ function goBack() {
     }
 }
 
-/* ✨ 手機版優化 (810px 以下) */
+/* RWD 控制 */
 @media screen and (max-width: 810px) {
     .desktop-only-btn {
-        display: none;
+        display: none !important;
     }
 
     .mobile-only-btn {
-        display: block;
+        display: block !important;
         margin-top: 16px;
     }
 
@@ -299,40 +366,11 @@ function goBack() {
         }
     }
 
-    /* 強制兩欄佈局 */
     .custom-grid {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        margin-left: -8px !important;
-        margin-right: -8px !important;
-
         .grid-item {
             flex: 0 0 50% !important;
             max-width: 50% !important;
             padding: 0 8px !important;
-            margin-bottom: 16px;
-        }
-    }
-
-    .add-card-placeholder {
-        padding: 24px 10px;
-
-        .plus-icon {
-            font-size: 32px !important;
-        }
-
-        .zh-h4 {
-            font-size: 16px !important;
-        }
-    }
-
-    :deep(.recipe-card-sm) {
-        .card-header {
-            height: 120px !important;
-        }
-
-        .card-body {
-            padding: 10px !important;
         }
     }
 }
