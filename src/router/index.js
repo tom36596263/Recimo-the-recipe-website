@@ -175,7 +175,7 @@ const routes = [
         path: 'edit-plan/:id',
         name: 'edit-meal-plan',
         component: () => import('@/views/workspace/EditMealPlan.vue'),
-        meta: { layout: 'workspace', requiresAuth: true },
+        meta: { title: '編輯計畫', layout: 'workspace', requiresAuth: true },
         props: true
       },
       {
@@ -193,13 +193,24 @@ const routes = [
         path: 'recipe-detail/:id',
         name: 'workspace-recipe-detail',
         component: () => import('@/views/workspace/RecipeDetail.vue'),
-        meta: { layout: 'workspace', requiresAuth: true }
+        meta: { title: '食譜詳情', layout: 'workspace', requiresAuth: true }
       },
       {
         path: 'edit-recipe',
         name: 'edit-recipe',
         component: () => import('@/views/workspace/EditRecipe.vue'),
-        meta: { layout: 'workspace', requiresAuth: true, hideTopBar: true }
+        meta: { title: '食譜編輯', layout: 'workspace', requiresAuth: true, hideTopBar: true }
+      },
+      {
+        path: 'guide',
+        name: 'recipe-guide',
+        component: () => import('@/views/workspace/RecipeGuide.vue'),
+        meta: {
+          title: '步驟播放',
+          icon: markRaw(IconHandMeal),
+          layout: 'workspace',
+          requiresAuth: true
+        }
       },
       {
         path: 'orders',
@@ -216,19 +227,20 @@ const routes = [
         path: 'profile',
         name: 'user-profile',
         component: () => import('@/views/workspace/ProfileView.vue'),
-        meta: { layout: 'workspace', requiresAuth: true }
+        meta: { title: '個人主頁', layout: 'workspace', requiresAuth: true }
       },
       {
         path: 'settings',
         name: 'user-settings',
         component: () => import('@/views/workspace/SettingsView.vue'),
-        meta: { layout: 'workspace', requiresAuth: true }
+        meta: { title: '會員中心', layout: 'workspace', requiresAuth: true }
       },
       {
         path: 'modify-recipe/:id?', // :id 代表食譜的編號
         name: 'modify-recipe',
         component: () => import('@/views/workspace/ModifyRecipe.vue'),
         meta: {
+          title: '食譜改編',
           layout: 'workspace',
           requiresAuth: true
         }
