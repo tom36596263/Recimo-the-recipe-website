@@ -398,7 +398,7 @@ onMounted(() => {
 // banner
 // ==========================================
 .hero-banner {
-    background-image: url(@/assets/images/about/about-bg.jpg);
+    background-image: url(@/assets/images/about/about-bg.jpg); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

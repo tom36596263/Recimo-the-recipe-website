@@ -32,7 +32,7 @@ const handleOpen = () => {
     height: 60vh;
     min-height: 320px;
     max-height: 560px;
-    margin-top: 5%;
+    margin-top: 30px;
     position: relative;
     overflow: hidden;
     border-radius: 10px;
