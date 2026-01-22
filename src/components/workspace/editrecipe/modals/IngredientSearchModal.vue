@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { publicApi } from '@/utils/publicApi';
+
 
 const props = defineProps({
     modelValue: Boolean,
@@ -30,13 +32,18 @@ const categoryMap = {
 
 const fetchIngredients = async () => {
     try {
-        const response = await fetch('/data/recipe/ingredients.json');
-        const data = await response.json();
-        rawIngredients.value = data;
+        // 1. 使用 publicApi.get 代替原生 fetch
+        // 2. Axios 會自動解析 JSON，不需要再執行 .json()
+        const res = await publicApi.get('data/recipe/ingredients.json');
+
+        // 3. Axios 的回傳資料會放在 res.data 屬性中
+        rawIngredients.value = res.data;
+
         if (rawIngredients.value.length > 0 && !currentCategory.value) {
             currentCategory.value = rawIngredients.value[0].main_category;
         }
     } catch (error) {
+        // 如果 API 報錯（例如 404 或 500），會直接進到這裡
         console.error("食材資料讀取失敗:", error);
     }
 };

@@ -38,7 +38,6 @@ import {
     Legend
 } from 'chart.js';
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
-import BaseBtn from '@/components/common/BaseBtn.vue';
 import PageBtn from '@/components/common/PageBtn.vue';
 import { publicApi } from '@/utils/publicApi';
 
@@ -75,14 +74,8 @@ const cookingRhythmData = ref({
     }
 });
 
-// 常用食材 Top5（包含使用次數）
-const topIngredients = ref([
-    { id: 1, name: '大蒜', image: '/img/ingredients/pantry-spices-nuts/garlic.png', rank: 1, count: 28 },
-    { id: 2, name: '酪梨', image: '/img/ingredients/fresh-produce/avocado.png', rank: 2, count: 23 },
-    { id: 3, name: '馬鈴薯', image: '/img/ingredients/fresh-produce/potato.png', rank: 3, count: 18 },
-    { id: 4, name: '番茄', image: '/img/ingredients/fresh-produce/tomato.png', rank: 4, count: 15 },
-    { id: 5, name: '洋蔥', image: '/img/ingredients/fresh-produce/onion.png', rank: 5, count: 12 }
-]);
+// 常用食材 Top5（包含使用次數）- 將動態從 ingredients.json 載入
+const topIngredients = ref([]);
 
 // 食材使用比例
 const ingredientUsagePercent = ref(55);
@@ -372,15 +365,17 @@ const goToPage = (page) => {
 onMounted(async () => {
     try {
         // 並行載入所有需要的 JSON 檔案
-        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
+        const [resRecipes, resRecipeTags, resTags, resIngredients] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_tag.json'),
-            publicApi.get('data/recipe/tags.json')
+            publicApi.get('data/recipe/tags.json'),
+            publicApi.get('data/recipe/ingredients.json')
         ]);
 
         const recipesData = resRecipes.data;
         const recipeTagData = resRecipeTags.data;
         const tagsData = resTags.data;
+        const ingredientsData = resIngredients.data;
 
         // 建立標籤 ID 對應名稱的映射表
         const tagMap = {};
@@ -390,6 +385,38 @@ onMounted(async () => {
 
         // 獲取 base 路徑用於圖片 URL 補全
         const base = import.meta.env.BASE_URL;
+
+        // 模擬食材使用次數統計（實際應從烹飪日誌計算）
+        // 這裡選取前5個食材作為 Top5 常用食材
+        const topIngredientsData = [
+            { ingredient_id: 1, count: 28 },  // 蒜頭
+            { ingredient_id: 3, count: 23 },  // 洋蔥
+            { ingredient_id: 6, count: 18 },  // 薑
+            { ingredient_id: 16, count: 15 }, // 番茄
+            { ingredient_id: 51, count: 12 }  // 馬鈴薯
+        ];
+
+        // 建立食材 ID 對應食材資料的映射表
+        const ingredientMap = {};
+        ingredientsData.forEach(ingredient => {
+            ingredientMap[ingredient.ingredient_id] = ingredient;
+        });
+
+        // 組合 Top5 食材資料
+        topIngredients.value = topIngredientsData.map((item, index) => {
+            const ingredient = ingredientMap[item.ingredient_id];
+            if (!ingredient) return null;
+            
+            return {
+                id: ingredient.ingredient_id,
+                name: ingredient.ingredient_name,
+                image: ingredient.ingredient_image_url.startsWith('http')
+                    ? ingredient.ingredient_image_url
+                    : `${base}${ingredient.ingredient_image_url}`.replace(/\/+/g, '/'),
+                rank: index + 1,
+                count: item.count
+            };
+        }).filter(Boolean);
 
         // 載入製作過的食譜（12 筆）
         cookedRecipes.value = recipesData.slice(0, 12).map(recipe => ({
