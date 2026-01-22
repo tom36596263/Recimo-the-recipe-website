@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router'; // 引入vue內建的useRoute和useRouter
 import { publicApi } from '@/utils/publicApi'; // 引入路徑變數
 import GuideStepCard from '../../components/workspace/recipeguide/GuideStepCard.vue';
@@ -123,6 +123,14 @@ watch(currentStepData, (newStep) => {
     isTimerRunning.value = false;
     timeLeft.value = timeToSeconds(newStep.step_total_time);
 }, { immediate: true });
+// 在組件銷毀前，確保計時器被清除
+onUnmounted(() => {
+    if (timerInterval.value) {
+        clearInterval(timerInterval.value);
+        console.log('計時器已隨頁面切換自動關閉');
+    }
+});
+
 
 // 筆記圖片上傳
 const noteImages = ref({}); // 存放每個步驟的預覽圖 { step_id: 'blob_url' }
