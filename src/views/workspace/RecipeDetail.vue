@@ -18,7 +18,7 @@ const route = useRoute();
 const router = useRouter();
 const recipeStore = useRecipeStore();
 
-// --- 讀取 Vite 的 Base 路徑 ---
+// --- 核心變數：讀取 Vite 的 Base 路徑 ---
 const baseUrl = import.meta.env.BASE_URL;
 
 // --- 1. 響應式資料狀態 ---
@@ -48,7 +48,6 @@ const handleGoToEdit = () => {
         : (rawRecipe.value?.recipe_id || route.params.id);
 
     const queryParams = { editId: currentId };
-
     if (!isPreviewMode.value) { queryParams.action = 'adapt'; }
 
     if (isPreviewMode.value) {
@@ -58,7 +57,6 @@ const handleGoToEdit = () => {
             queryParams.action = 'adapt';
         }
     }
-
     router.push({ path: '/workspace/edit-recipe', query: queryParams });
 };
 
@@ -78,6 +76,7 @@ const fetchData = async () => {
 
     const recipeId = Number(route.params.id);
 
+    // 處理預覽模式
     if (isPreviewMode.value) {
         const preview = recipeStore.previewData;
         if (preview) {
@@ -85,7 +84,7 @@ const fetchData = async () => {
             rawIngredients.value = preview.ingredients || [];
             rawSteps.value = preview.steps || [];
             rawComments.value = [];
-            rawGallery.value = [];
+            rawGallery.value = preview.gallery || []; // 支援預覽中的成品照
             setTimeout(() => { isLoading.value = false; }, 300);
             return;
         } else {
@@ -151,26 +150,20 @@ onMounted(() => {
 onUnmounted(() => { toggleWorkspaceTopBar(true); });
 
 watch(() => isPreviewMode.value, (newVal) => { toggleWorkspaceTopBar(!newVal); });
-
 watch(() => [route.params.id, route.query.mode], () => { fetchData(); }, { deep: true });
 
-// --- 4. 計算屬性 (修正路徑) ---
+// --- 4. 計算屬性 (關鍵路徑修復) ---
 
 // 1. 食譜封面圖
 const recipeIntroData = computed(() => {
     if (!rawRecipe.value) return null;
-
-    let rawImg = rawRecipe.value.recipe_image_url ||
-        rawRecipe.value.coverImg ||
-        rawRecipe.value.recipe_cover_image || '';
-
+    let rawImg = rawRecipe.value.recipe_image_url || rawRecipe.value.coverImg || rawRecipe.value.recipe_cover_image || '';
     let finalImg = '';
 
     if (rawImg) {
-        if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
+        if (rawImg.startsWith('http') || rawImg.startsWith('data:') || rawImg.startsWith('blob:')) {
             finalImg = rawImg;
         } else {
-            // ✅ 防呆校正：清除開頭斜線，拼街後清理重複斜線
             const cleanPath = rawImg.replace(/^\//, '');
             finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
         }
@@ -195,11 +188,10 @@ const stepsData = computed(() => {
         let rawImg = s.step_image_url || s.image || s.img || '';
         let finalImg = '';
         if (rawImg && typeof rawImg === 'string' && rawImg.length > 0) {
-            if (rawImg.startsWith('data:') || rawImg.startsWith('http')) {
+            if (rawImg.startsWith('data:') || rawImg.startsWith('http') || rawImg.startsWith('blob:')) {
                 finalImg = rawImg;
             } else {
                 let cleanPath = rawImg.replace(/^\//, '');
-                // ✅ 檢查是否已經包含完整路徑，若無則自動補齊
                 if (cleanPath.includes('img/recipes/')) {
                     finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
                 } else {
@@ -220,21 +212,57 @@ const stepsData = computed(() => {
 
 // 3. 成品照
 const snapsData = computed(() => rawGallery.value.map(g => {
-    let rawUrl = g.GALLERY_URL || '';
+    let rawUrl = g.GALLERY_URL || g.url || '';
     let finalUrl = '';
-    if (rawUrl.startsWith('http') || rawUrl.startsWith('data:')) {
+    if (rawUrl.startsWith('http') || rawUrl.startsWith('data:') || rawUrl.startsWith('blob:')) {
         finalUrl = rawUrl;
-    } else {
+    } else if (rawUrl) {
         const cleanPath = rawUrl.replace(/^\//, '');
         finalUrl = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
     }
     return {
         url: finalUrl,
-        comment: g.GALLERY_TEXT
+        comment: g.GALLERY_TEXT || g.comment || ''
     };
 }));
 
-// --- 其他邏輯保持不變 ---
+// --- 5. 其他工具函式與計算屬性 ---
+const formatTime = (timeVal) => {
+    if (!timeVal || timeVal === '00:00' || timeVal === 0) return '0 分鐘';
+    const timeStr = String(timeVal);
+    if (timeStr.includes(':')) {
+        const parts = timeStr.split(':');
+        const hh = parseInt(parts[0], 10) || 0;
+        const mm = parseInt(parts[1], 10) || 0;
+        return hh === 0 ? `${mm} 分鐘` : `${hh} 小時 ${mm} 分鐘`;
+    }
+    return `${timeStr} 分鐘`;
+};
+
+const ingredientsData = computed(() => rawIngredients.value.map(item => ({
+    INGREDIENT_NAME: item.ingredient_name,
+    amount: item.amount,
+    unit_name: item.unit_name,
+    note: item.note || '',
+    calories_per_100g: item.calories_per_100g || 0,
+    protein_per_100g: item.protein_per_100g || 0,
+    fat_per_100g: item.fat_per_100g || 0,
+    carbs_per_100g: item.carbs_per_100g || 0,
+    unit_weight: 1
+})));
+
+const nutritionWrapper = computed(() => {
+    if (!rawRecipe.value) return [];
+    return [{
+        calories_per_100g: rawRecipe.value.recipe_kcal_per_100g || 0,
+        protein_per_100g: rawRecipe.value.recipe_protein_per_100g || 0,
+        fat_per_100g: rawRecipe.value.recipe_fat_per_100g || 0,
+        carbs_per_100g: rawRecipe.value.recipe_carbs_per_100g || 0,
+        amount: 100,
+        unit_weight: 1
+    }];
+});
+
 const commentList = computed(() => {
     return rawComments.value.map(c => ({
         userName: c.USER_NAME,
@@ -268,45 +296,7 @@ const handleShare = async () => {
     }
 };
 
-const formatTime = (timeVal) => {
-    if (!timeVal || timeVal === '00:00' || timeVal === 0) return '0 分鐘';
-    const timeStr = String(timeVal);
-    if (timeStr.includes(':')) {
-        const parts = timeStr.split(':');
-        const hh = parseInt(parts[0], 10) || 0;
-        const mm = parseInt(parts[1], 10) || 0;
-        if (hh === 0) return `${mm} 分鐘`;
-        return `${hh} 小時 ${mm} 分鐘`;
-    }
-    return `${timeStr} 分鐘`;
-};
-
-const ingredientsData = computed(() => rawIngredients.value.map(item => ({
-    INGREDIENT_NAME: item.ingredient_name,
-    amount: item.amount,
-    unit_name: item.unit_name,
-    note: item.note || '',
-    calories_per_100g: item.calories_per_100g || 0,
-    protein_per_100g: item.protein_per_100g || 0,
-    fat_per_100g: item.fat_per_100g || 0,
-    carbs_per_100g: item.carbs_per_100g || 0,
-    unit_weight: 1
-})));
-
-const nutritionWrapper = computed(() => {
-    if (!rawRecipe.value) return [];
-    return [{
-        calories_per_100g: rawRecipe.value.recipe_kcal_per_100g || 0,
-        protein_per_100g: rawRecipe.value.recipe_protein_per_100g || 0,
-        fat_per_100g: rawRecipe.value.recipe_fat_per_100g || 0,
-        carbs_per_100g: rawRecipe.value.recipe_carbs_per_100g || 0,
-        amount: 100,
-        unit_weight: 1
-    }];
-});
-
 const handleServingsChange = (newVal) => { servings.value = newVal; };
-
 const isReportModalOpen = ref(false);
 const onReportSubmit = (data) => {
     console.log('收到檢舉內容:', data);
