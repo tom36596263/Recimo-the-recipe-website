@@ -17,6 +17,8 @@ import { useRouter } from 'vue-router';
 import BaseBtn from '@/components/common/BaseBtn.vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { FreeMode } from 'swiper/modules';
+import { publicApi } from '@/utils/publicApi';
+import { parsePublicFile } from '@/utils/parseFile';
 import 'swiper/css';
 import 'swiper/css/free-mode';
 
@@ -73,13 +75,14 @@ const getDifficultyStars = (difficulty) => {
  */
 const loadIngredients = async () => {
     try {
-        // 載入所有食材資料
-        const ingredientsResponse = await fetch('/data/recipe/ingredients.json');
-        ingredientsData.value = await ingredientsResponse.json();
+        // 並行載入所有食材資料
+        const [ingredientsResponse, relationResponse] = await Promise.all([
+            publicApi.get('data/recipe/ingredients.json'),
+            publicApi.get('data/recipe/recipe_ingredient.json')
+        ]);
 
-        // 載入食譜-食材關聯表
-        const relationResponse = await fetch('/data/recipe/recipe_ingredient.json');
-        recipeIngredientsRelation.value = await relationResponse.json();
+        ingredientsData.value = ingredientsResponse.data;
+        recipeIngredientsRelation.value = relationResponse.data;
 
         // 篩選出當前食譜的食材
         loadRecipeIngredients();
@@ -126,9 +129,8 @@ const getIngredientImageUrl = (imageUrl) => {
         return imageUrl;
     }
     
-    // 否則補上 base URL
-    const base = import.meta.env.BASE_URL;
-    return `${base}${imageUrl}`.replace(/\/+/g, '/');
+    // 使用 parseFile.js 處理路徑
+    return parsePublicFile(imageUrl);
 };
 
 /**
