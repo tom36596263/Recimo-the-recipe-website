@@ -40,6 +40,7 @@ import {
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import PageBtn from '@/components/common/PageBtn.vue';
 import { publicApi } from '@/utils/publicApi';
+import { parsePublicFile } from '@/utils/parseFile';
 
 /**
  * 註冊 Chart.js 模組
@@ -383,9 +384,6 @@ onMounted(async () => {
             tagMap[tag.tag_id] = tag.tag_name;
         });
 
-        // 獲取 base 路徑用於圖片 URL 補全
-        const base = import.meta.env.BASE_URL;
-
         // 模擬食材使用次數統計（實際應從烹飪日誌計算）
         // 這裡選取前5個食材作為 Top5 常用食材
         const topIngredientsData = [
@@ -412,7 +410,7 @@ onMounted(async () => {
                 name: ingredient.ingredient_name,
                 image: ingredient.ingredient_image_url.startsWith('http')
                     ? ingredient.ingredient_image_url
-                    : `${base}${ingredient.ingredient_image_url}`.replace(/\/+/g, '/'),
+                    : parsePublicFile(ingredient.ingredient_image_url),
                 rank: index + 1,
                 count: item.count
             };
@@ -424,7 +422,7 @@ onMounted(async () => {
             recipe_name: recipe.recipe_title,
             image_url: recipe.recipe_image_url.startsWith('http')
                 ? recipe.recipe_image_url
-                : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
+                : parsePublicFile(recipe.recipe_image_url),
             tags: getRecipeTags(recipe.recipe_id, recipeTagData, tagMap),
             author: {
                 name: 'Recimo',

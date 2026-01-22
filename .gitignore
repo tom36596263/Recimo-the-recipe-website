@@ -49,3 +49,4 @@ recimo
 .eslintcache
 .stylelintcache
 /public/mock-temp/  # 如果有臨時測試用的圖片或 JSON 可放在此處忽略
+.github
