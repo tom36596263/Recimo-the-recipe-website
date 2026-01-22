@@ -2298,5 +2298,685 @@
     "step_content": "出爐後在模具中完全放涼，巧克力結構才會定型。冷卻後取出切成長方塊即可享用，冷藏後口感更為紮實。",
     "step_image_url": "img/recipes/40/steps/8.jpg",
     "is_modified": false
+  },
+  {
+    "step_id": 231,
+    "recipe_id": 41,
+    "step_order": 1,
+    "step_title": "加熱香草牛奶液",
+    "step_total_time": "00:10:00",
+    "step_content": "將鮮乳、無鹽奶油與香草精放入鍋中，以中小火加熱至奶油融化，且邊緣微微冒泡（即將沸騰前）即可熄火。靜置冷卻至微溫（約 50°C）備用。",
+    "step_image_url": "/img/recipes/41/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 232,
+    "recipe_id": 41,
+    "step_order": 2,
+    "step_title": "混合乾料與蛋黃",
+    "step_total_time": "00:05:00",
+    "step_content": "在大盆中將砂糖與過篩的低筋麵粉拌勻。加入蛋黃，並倒入約 100ml 的微溫牛奶液，用打蛋器輕輕攪拌成濃稠無粉粒的糊狀。",
+    "step_image_url": "/img/recipes/41/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 233,
+    "recipe_id": 41,
+    "step_order": 3,
+    "step_title": "完成稀麵糊",
+    "step_total_time": "00:05:00",
+    "step_content": "將剩餘的牛奶液分次倒入，持續輕攪至融合。最後拌入蘭姆酒，此時麵糊應呈非常稀的液態流動狀。",
+    "step_image_url": "/img/recipes/41/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 234,
+    "recipe_id": 41,
+    "step_order": 4,
+    "step_title": "過篩與靜置熟成",
+    "step_total_time": "24:00:00",
+    "step_content": "將麵糊透過細濾網過篩至少兩次以確保無結塊。蓋上保鮮膜緊貼液面，放入冰箱冷藏靜置熟成至少 24 小時（最高可至 48 小時），這是形成蜂巢組織的關鍵步驟。",
+    "step_image_url": "/img/recipes/41/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 235,
+    "recipe_id": 41,
+    "step_order": 5,
+    "step_title": "烤模預熱與抹油",
+    "step_total_time": "00:10:00",
+    "step_content": "將麵糊移出冰箱回溫。烤箱連同烤盤預熱至 230°C。在可麗露模具內部均勻塗抹一層薄薄的無鹽奶油或蜂蠟，並倒扣瀝出多餘油脂。",
+    "step_image_url": "/img/recipes/41/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 236,
+    "recipe_id": 41,
+    "step_order": 6,
+    "step_title": "入模與首段高溫烘烤",
+    "step_total_time": "00:15:00",
+    "step_content": "輕輕攪拌回溫後的麵糊（避免產生氣泡），倒入模具中約 8-9 分滿。放入烤箱以 230°C 烤 15 分鐘，使外皮迅速定型並焦糖化。",
+    "step_image_url": "/img/recipes/41/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 237,
+    "recipe_id": 41,
+    "step_order": 7,
+    "step_title": "二段恆溫燉烤",
+    "step_total_time": "00:50:00",
+    "step_content": "將烤箱溫度調降至 190°C，繼續烘烤 45-50 分鐘。若麵糊在過程中因沸騰過度衝出模具，可暫時取出稍微敲擊桌面再放回。烤至頂部呈現深焦褐色且帶有硬殼感。",
+    "step_image_url": "/img/recipes/41/steps/7.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 238,
+    "recipe_id": 41,
+    "step_order": 8,
+    "step_title": "脫模與冷卻",
+    "step_total_time": "00:10:00",
+    "step_content": "出爐後立即倒扣脫模，將可麗露置於架上冷卻。需完全冷卻後，外層焦糖殼才會變硬酥脆，內部則會保持濕潤，即可享用。",
+    "step_image_url": "/img/recipes/41/steps/8.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 239,
+    "recipe_id": 42,
+    "step_order": 1,
+    "step_title": "塔皮麵糰製作",
+    "step_total_time": "00:15:00",
+    "step_content": "將 75g 軟化奶油與糖粉打發至發白。分次加入一顆雞蛋液拌勻。篩入低筋麵粉與杏仁粉，以刮刀切拌成團（切勿揉捏以免出筋）。用保鮮膜包覆，放入冰箱冷藏至少 1 小時靜置。",
+    "step_image_url": "/img/recipes/42/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 240,
+    "recipe_id": 42,
+    "step_order": 2,
+    "step_title": "桿皮與入模",
+    "step_total_time": "00:10:00",
+    "step_content": "取出冰硬的麵糰，桿成約 0.3 公分厚的圓片，平鋪於塔模內。去除多餘邊緣並用叉子在底部戳出小孔，防止烘烤時隆起。",
+    "step_image_url": "/img/recipes/42/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 241,
+    "recipe_id": 42,
+    "step_order": 3,
+    "step_title": "盲烤塔殼",
+    "step_total_time": "00:25:00",
+    "step_content": "在塔皮上鋪烘焙紙並放上鎮石（或豆類）。放入預熱 180°C 的烤箱烤 15 分鐘，移除鎮石後再烤 10 分鐘至表面呈現均勻金黃色。取出徹底放涼。",
+    "step_image_url": "/img/recipes/42/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 242,
+    "recipe_id": 42,
+    "step_order": 4,
+    "step_title": "熬煮檸檬凝乳",
+    "step_total_time": "00:15:00",
+    "step_content": "將 3 顆雞蛋、砂糖、檸檬汁與檸檬皮屑混合攪勻。隔水加熱（水微滾）並持續攪拌，直到液體變為濃稠糊狀（中心溫度約 82°C）即可離火。",
+    "step_image_url": "/img/recipes/42/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 243,
+    "recipe_id": 42,
+    "step_order": 5,
+    "step_title": "奶油乳化（關鍵）",
+    "step_total_time": "00:10:00",
+    "step_content": "待檸檬凝乳降溫至約 60°C 時，分次加入 100g 室溫奶油塊。使用均質機或手動打蛋器快速攪拌，讓奶油完全乳化進醬汁中，呈現絲滑光澤感。",
+    "step_image_url": "/img/recipes/42/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 244,
+    "recipe_id": 42,
+    "step_order": 6,
+    "step_title": "填餡與冷藏定型",
+    "step_total_time": "01:05:00",
+    "step_content": "將完成的檸檬凝乳趁熱倒入放涼的塔殼中抹平。室溫冷卻後放入冰箱冷藏至少 2 小時，待內餡凝固後即可脫模並切片享用。",
+    "step_image_url": "/img/recipes/42/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 245,
+    "recipe_id": 43,
+    "step_order": 1,
+    "step_title": "製作打發蛋白霜",
+    "step_total_time": "00:10:00",
+    "step_content": "將 2 顆雞蛋的蛋白放入無油無水的盆中，分三次加入 60g 砂糖，打發至呈現結實、拉起有直立尖角的硬性發泡狀態。",
+    "step_image_url": "/img/recipes/43/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 246,
+    "recipe_id": 43,
+    "step_order": 2,
+    "step_title": "低溫烘烤蛋白餅底",
+    "step_total_time": "01:00:00",
+    "step_content": "將蛋白霜裝入圓形花嘴，在烤盤上擠出 6 個直徑約 5 公分的圓餅。放入預熱 100°C 的烤箱低溫烘烤 60 分鐘，直到完全乾燥酥脆，取出放涼。",
+    "step_image_url": "/img/recipes/43/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 247,
+    "recipe_id": 43,
+    "step_order": 3,
+    "step_title": "製作香緹鮮奶油",
+    "step_total_time": "00:08:00",
+    "step_content": "將鮮奶油與 15g 砂糖混合，墊冰水打發至 9 分發（紋路深且挺立）。裝入擠花袋備用。",
+    "step_image_url": "/img/recipes/43/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 248,
+    "recipe_id": 43,
+    "step_order": 4,
+    "step_title": "調製栗子奶油餡",
+    "step_total_time": "00:10:00",
+    "step_content": "將栗子泥、軟化奶油與蘭姆酒混合拌勻。若質地太乾可加入極少許剩餘鮮奶油，攪拌至絲滑，裝入蒙布朗專用的多孔花嘴。",
+    "step_image_url": "/img/recipes/43/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 249,
+    "recipe_id": 43,
+    "step_order": 5,
+    "step_title": "內部結構組合",
+    "step_total_time": "00:05:00",
+    "step_content": "在蛋白餅底中心擠上一小球鮮奶油，放上一整顆熟栗子（糖漬栗子），再用鮮奶油由下往上將栗子完全覆蓋包裹成錐形。",
+    "step_image_url": "/img/recipes/43/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 250,
+    "recipe_id": 43,
+    "step_order": 6,
+    "step_title": "螺旋擠餡與裝飾",
+    "step_total_time": "00:10:00",
+    "step_content": "手持蒙布朗花嘴，由下而上、由外向內以螺旋狀均勻地將栗子奶油擠在鮮奶油表面。最後篩上糖粉模擬山頂積雪即可完成。",
+    "step_image_url": "/img/recipes/43/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 251,
+    "recipe_id": 44,
+    "step_order": 1,
+    "step_title": "打發硬性鮮奶油",
+    "step_total_time": "00:10:00",
+    "step_content": "將冰鮮奶油與砂糖放入盆中，盆底墊冰水。使用電動打蛋器打發至「硬性發泡」狀態（紋路極深、拉起尖角直立不塌陷）。三明治用的奶油需比蛋糕裝飾用的更硬，切開才不會流動。",
+    "step_image_url": "/img/recipes/44/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 252,
+    "recipe_id": 44,
+    "step_order": 2,
+    "step_title": "水果預處理",
+    "step_total_time": "00:05:00",
+    "step_content": "草莓去蒂頭，芒果切成長條狀。水果洗淨後必須用廚房紙巾徹底擦乾水分，避免水分滲出導致奶油融化。",
+    "step_image_url": "/img/recipes/44/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 253,
+    "recipe_id": 44,
+    "step_order": 3,
+    "step_title": "底層奶油塗抹",
+    "step_total_time": "00:02:00",
+    "step_content": "將兩片生吐司去邊（或依喜好保留）。在兩片吐司的一面皆均勻塗上約 0.5 公分厚的鮮奶油層。",
+    "step_image_url": "/img/recipes/44/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 254,
+    "recipe_id": 44,
+    "step_order": 4,
+    "step_title": "水果定位排列",
+    "step_total_time": "00:03:00",
+    "step_content": "選定對角線作為切線位置。將水果整齊排列在對角線上，其餘空白處也填入水果。記住大顆水果（如草莓）的中心點要在切線上，切開才會漂亮。",
+    "step_image_url": "/img/recipes/44/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 255,
+    "recipe_id": 44,
+    "step_order": 5,
+    "step_title": "填補空隙與覆蓋",
+    "step_total_time": "00:05:00",
+    "step_content": "將剩餘的鮮奶油厚厚地覆蓋在水果上，並用刮刀仔細填滿水果間的每個縫隙。蓋上另一片吐司，輕輕壓平。",
+    "step_image_url": "/img/recipes/44/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 256,
+    "recipe_id": 44,
+    "step_order": 6,
+    "step_title": "包覆與冷藏定型",
+    "step_total_time": "01:00:00",
+    "step_content": "使用保鮮膜將三明治緊緊包裹，並在保鮮膜上標註「對角切線」的位置。放入冰箱冷藏至少 1 小時定型，讓奶油、吐司與水果緊密契合。",
+    "step_image_url": "/img/recipes/44/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 257,
+    "recipe_id": 44,
+    "step_order": 7,
+    "step_title": "對角切割",
+    "step_total_time": "00:05:00",
+    "step_content": "準備一把鋒利的刀，先浸入熱水擦乾。對準標註的切線一刀切下。每切一刀都要擦淨刀面再重複，呈現完美的切面。",
+    "step_image_url": "/img/recipes/44/steps/7.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 258,
+    "recipe_id": 45,
+    "step_order": 1,
+    "step_title": "食材預備與器皿挑選",
+    "step_total_time": "00:02:00",
+    "step_content": "準備一個洗淨瀝乾的透明玻璃杯或廣口瓶，以便展示漂亮的側面層次。藍莓洗淨後擦乾水分，薄荷葉洗淨備用。",
+    "step_image_url": "/img/recipes/45/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 259,
+    "recipe_id": 45,
+    "step_order": 2,
+    "step_title": "鋪設優格基底",
+    "step_total_time": "00:01:00",
+    "step_content": "在杯底填入約 1/3 份量的希臘優格，用小湯勺背面稍微抹平邊緣，讓層次線條更清晰。",
+    "step_image_url": "/img/recipes/45/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 260,
+    "recipe_id": 45,
+    "step_order": 3,
+    "step_title": "增加脆口層次",
+    "step_total_time": "00:01:00",
+    "step_content": "撒上一層燕麥片（或烤過的堅果碎）。燕麥片能吸收部分優格水分，同時提供飽足感與酥脆口感。",
+    "step_image_url": "/img/recipes/45/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 261,
+    "recipe_id": 45,
+    "step_order": 4,
+    "step_title": "添加果實與甜味",
+    "step_total_time": "00:01:00",
+    "step_content": "鋪上一層新鮮藍莓，並淋上少許蜂蜜增加風味深度與潤滑感。",
+    "step_image_url": "/img/recipes/45/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 262,
+    "recipe_id": 45,
+    "step_order": 5,
+    "step_title": "循環堆疊至滿",
+    "step_total_time": "00:03:00",
+    "step_content": "重複上述步驟（優格、燕麥、藍莓、蜂蜜），直到裝滿杯子。每一層都要輕壓一下，避免中間產生過大的空洞。",
+    "step_image_url": "/img/recipes/45/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 263,
+    "recipe_id": 45,
+    "step_order": 6,
+    "step_title": "頂層點綴與裝飾",
+    "step_total_time": "00:02:00",
+    "step_content": "在最上層點綴幾顆較大的藍莓，放上新鮮薄荷葉增加清新香氣。建議現做現吃以保持燕麥的脆度，或冷藏 20 分鐘後享用風味更佳。",
+    "step_image_url": "/img/recipes/45/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 264,
+    "recipe_id": 46,
+    "step_order": 1,
+    "step_title": "泡軟吉利丁",
+    "step_total_time": "00:05:00",
+    "step_content": "將吉利丁片剪成小段，完全浸泡在冰水中（需加冰塊保持低溫）約 5 分鐘，待其軟化如綢緞狀。撈起後用力擠乾多餘水分備用。",
+    "step_image_url": "/img/recipes/46/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 265,
+    "recipe_id": 46,
+    "step_order": 2,
+    "step_title": "混合基底與加熱",
+    "step_total_time": "00:08:00",
+    "step_content": "在小鍋中倒入無糖豆漿、黑芝麻粉與砂糖。開小火加熱，期間需持續使用手動打蛋器攪拌，確保黑芝麻粉均勻散開且砂糖完全溶解。",
+    "step_image_url": "/img/recipes/46/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 266,
+    "recipe_id": 46,
+    "step_order": 3,
+    "step_title": "精準溫控與定型",
+    "step_total_time": "00:02:00",
+    "step_content": "當豆漿液溫熱且邊緣出現微小氣泡（約 60-70°C）時立即熄火。切記不可煮沸，以免豆漿產生皮膜或破壞吉利丁的凝固力。",
+    "step_image_url": "/img/recipes/46/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 267,
+    "recipe_id": 46,
+    "step_order": 4,
+    "step_title": "融入吉利丁",
+    "step_total_time": "00:02:00",
+    "step_content": "將擠乾水分的吉利丁片放入溫熱的豆漿液中，持續攪拌直到吉利丁完全隱形溶解。",
+    "step_image_url": "/img/recipes/46/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 268,
+    "recipe_id": 46,
+    "step_order": 5,
+    "step_title": "提升滑順質感",
+    "step_total_time": "00:03:00",
+    "step_content": "倒入少許鮮奶油增加乳脂含量與厚度，攪拌均勻。這能讓豆乳凍口感更接近奶酪，減少單薄感。",
+    "step_image_url": "/img/recipes/46/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 269,
+    "recipe_id": 46,
+    "step_order": 6,
+    "step_title": "兩次過篩",
+    "step_total_time": "00:05:00",
+    "step_content": "將液體透過細濾網過篩至少兩次，濾掉未溶解的芝麻顆粒與氣泡。這是確保豆乳凍口感絲滑的關鍵細節。",
+    "step_image_url": "/img/recipes/46/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 270,
+    "recipe_id": 46,
+    "step_order": 7,
+    "step_title": "分裝與冷藏",
+    "step_total_time": "04:00:00",
+    "step_content": "將濾好的液體平均倒入玻璃杯或模具中。蓋上保鮮膜，放入冰箱冷藏至少 4 小時（建議隔夜）直到完全凝固。食用時可點綴少許黑芝麻粒。",
+    "step_image_url": "/img/recipes/46/steps/7.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 271,
+    "recipe_id": 47,
+    "step_order": 1,
+    "step_title": "堅果切碎處理",
+    "step_total_time": "00:05:00",
+    "step_content": "將杏仁果與核桃用刀切成約 0.3-0.5 公分的小碎粒。不要切得太細碎，保留一點顆粒感能增加餅乾的咀嚼香氣。",
+    "step_image_url": "/img/recipes/47/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 272,
+    "recipe_id": 47,
+    "step_order": 2,
+    "step_title": "乾粉混合",
+    "step_total_time": "00:02:00",
+    "step_content": "在大盆中放入全麥麵粉與鹽。全麥麵粉顆粒較粗不需過篩，直接用手動打蛋器攪拌均勻即可。",
+    "step_image_url": "/img/recipes/47/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 273,
+    "recipe_id": 47,
+    "step_order": 3,
+    "step_title": "加入油糖潤濕",
+    "step_total_time": "00:02:00",
+    "step_content": "將橄欖油與楓糖漿一次性倒入粉盆中。這兩者將提供餅乾酥脆的質地與天然的甜度。",
+    "step_image_url": "/img/recipes/47/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 274,
+    "recipe_id": 47,
+    "step_order": 4,
+    "step_title": "按壓混合成團",
+    "step_total_time": "00:05:00",
+    "step_content": "使用刮刀以「按壓、切拌」的方式讓粉類吸收水分。切記不要像揉麵糰一樣過度施力，直到剛好成團、看不見乾粉即可。",
+    "step_image_url": "/img/recipes/47/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 275,
+    "recipe_id": 47,
+    "step_order": 5,
+    "step_title": "拌入堅果碎",
+    "step_total_time": "00:01:00",
+    "step_content": "將切好的堅果碎倒入麵糰中，輕輕拌勻，讓堅果均勻分散在麵糰各處。",
+    "step_image_url": "/img/recipes/47/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 276,
+    "recipe_id": 47,
+    "step_order": 6,
+    "step_title": "捏製成型",
+    "step_total_time": "00:05:00",
+    "step_content": "烤箱預熱 170°C。取約 15-20g 的麵糰，先在手掌揉成小圓球，再輕輕壓扁成直徑約 4 公分的圓餅狀，整齊排放在烤盤上。",
+    "step_image_url": "/img/recipes/47/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 277,
+    "recipe_id": 47,
+    "step_order": 7,
+    "step_title": "恆溫烘烤",
+    "step_total_time": "00:18:00",
+    "step_content": "放入烤箱中層烘烤 15-18 分鐘。由於是全麥麵粉，色澤本就較深，需觀察邊緣微微焦乾即代表完成。",
+    "step_image_url": "/img/recipes/47/steps/7.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 278,
+    "recipe_id": 47,
+    "step_order": 8,
+    "step_title": "完全冷卻定型",
+    "step_total_time": "00:05:00",
+    "step_content": "出爐後先留在烤盤上 5 分鐘，剛烤好時口感較軟，待完全放涼後，質地會變得乾爽酥脆，即可盛盤。",
+    "step_image_url": "/img/recipes/47/steps/8.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 279,
+    "recipe_id": 48,
+    "step_order": 1,
+    "step_title": "紅豆預泡處理",
+    "step_total_time": "08:00:00",
+    "step_content": "將生紅豆洗淨，加入足量的水浸泡至少 8 小時（或隔夜）。這能縮短燉煮時間並確保紅豆內芯徹底軟化。",
+    "step_image_url": "/img/recipes/48/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 280,
+    "recipe_id": 48,
+    "step_order": 2,
+    "step_title": "慢火燉煮紅豆",
+    "step_total_time": "00:40:00",
+    "step_content": "瀝乾泡豆水，重新加入 300ml 水。以大火煮滾後轉小火燉煮約 40 分鐘，直到紅豆用手指輕壓即可化開，但外皮仍保持完整不破裂。",
+    "step_image_url": "/img/recipes/48/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 281,
+    "recipe_id": 48,
+    "step_order": 3,
+    "step_title": "熬製蜜紅豆",
+    "step_total_time": "00:10:00",
+    "step_content": "加入約 60g 砂糖至紅豆鍋中，持續小火拌煮至水分收乾，讓糖份徹底滲入豆芯變成「蜜紅豆」。取出放涼備用。",
+    "step_image_url": "/img/recipes/48/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 282,
+    "recipe_id": 48,
+    "step_order": 4,
+    "step_title": "吉利丁泡軟",
+    "step_total_time": "00:05:00",
+    "step_content": "將吉利丁片剪段，浸泡在冰水中約 5 分鐘。待變軟後撈起，徹底擠乾水分備用。",
+    "step_image_url": "/img/recipes/48/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 283,
+    "recipe_id": 48,
+    "step_order": 5,
+    "step_title": "加熱牛奶液",
+    "step_total_time": "00:05:00",
+    "step_content": "將鮮乳與剩餘的 20g 砂糖放入小鍋，以微火加熱至約 60°C（鍋邊冒細小氣泡、手感微燙）。切勿煮滾以免破壞乳香與凝固效果。",
+    "step_image_url": "/img/recipes/48/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 284,
+    "recipe_id": 48,
+    "step_order": 6,
+    "step_title": "溶解吉利丁",
+    "step_total_time": "00:02:00",
+    "step_content": "熄火，加入擠乾的吉利丁片。使用攪拌器不斷攪動，直到吉利丁完全溶解於牛奶中，呈現光滑液體狀。",
+    "step_image_url": "/img/recipes/48/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 285,
+    "recipe_id": 48,
+    "step_order": 7,
+    "step_title": "層次入模",
+    "step_total_time": "00:03:00",
+    "step_content": "在容器（或玻璃杯）底部鋪上厚厚一層蜜紅豆。緩緩倒入牛奶液，若有氣泡可用小匙撇除，以確保外觀美觀。",
+    "step_image_url": "/img/recipes/48/steps/7.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 286,
+    "recipe_id": 48,
+    "step_order": 8,
+    "step_title": "冷藏與脫模",
+    "step_total_time": "04:00:00",
+    "step_content": "放入冰箱冷藏至少 4 小時至完全凝固。食用前可用溫熱毛巾稍微包裹容器外側，即可輕鬆倒扣切塊享用。",
+    "step_image_url": "/img/recipes/48/steps/8.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 287,
+    "recipe_id": 49,
+    "step_order": 1,
+    "step_title": "食材預處理",
+    "step_total_time": "00:08:00",
+    "step_content": "將韓式年糕條浸泡在冷水中約 10 分鐘使其軟化；韓式魚板切成長方片狀；蔥切成長段；高麗菜撕或切成一口大小的塊狀備用。",
+    "step_image_url": "/img/recipes/49/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 288,
+    "recipe_id": 49,
+    "step_order": 2,
+    "step_title": "熬煮甜辣基底湯頭",
+    "step_total_time": "00:05:00",
+    "step_content": "在平底鍋中倒入魚高湯，煮滾後加入韓式辣椒醬、韓式辣椒粉、砂糖與醬油。充分攪拌均勻，確保辣椒醬完全融化無塊狀。",
+    "step_image_url": "/img/recipes/49/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 289,
+    "recipe_id": 49,
+    "step_order": 3,
+    "step_title": "烹煮年糕與魚板",
+    "step_total_time": "00:07:00",
+    "step_content": "將瀝乾的年糕與魚板放入鍋中。轉中小火熬煮，期間需不時用鏟子推動鍋底，避免年糕因澱粉釋出而黏鍋。煮至年糕變軟且開始膨脹。",
+    "step_image_url": "/img/recipes/49/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 290,
+    "recipe_id": 49,
+    "step_order": 4,
+    "step_title": "加入配料入味",
+    "step_total_time": "00:05:00",
+    "step_content": "放入高麗菜塊與剝好殼的水煮蛋。持續燉煮，讓高麗菜釋放甜味並軟化，同時讓水煮蛋表皮裹上一層深紅色的醬汁。",
+    "step_image_url": "/img/recipes/49/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 291,
+    "recipe_id": 49,
+    "step_order": 5,
+    "step_title": "收汁至濃厚狀態",
+    "step_total_time": "00:03:00",
+    "step_content": "繼續以中小火加熱，直到醬汁因水分蒸發變得濃稠（呈紅亮掛糊狀）。此時可試味道，依個人喜好增減糖或辣椒粉。",
+    "step_image_url": "/img/recipes/49/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 292,
+    "recipe_id": 49,
+    "step_order": 6,
+    "step_title": "最後點綴與盛盤",
+    "step_total_time": "00:02:00",
+    "step_content": "撒入蔥段快速拌勻後熄火。盛盤後撒上白芝麻增加香氣與視覺美感，趁熱享用口感最佳。",
+    "step_image_url": "/img/recipes/49/steps/6.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 293,
+    "recipe_id": 50,
+    "step_order": 1,
+    "step_title": "調製祕製湯底醬",
+    "step_total_time": "00:05:00",
+    "step_content": "在小碗中將韓式辣椒醬、韓式辣椒粉、蒜泥與少許醬油混合均勻。若喜歡更滑順的口感，可加入少許高湯先將醬料化開備用。",
+    "step_image_url": "/img/recipes/50/steps/1.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 294,
+    "recipe_id": 50,
+    "step_order": 2,
+    "step_title": "食材切分預備",
+    "step_total_time": "00:08:00",
+    "step_content": "將午餐肉、熱狗與豆腐切成厚度均勻的片狀；洋蔥切成粗絲；豬五花肉切成易入口的小段。洗淨金針菇並去除根部備用。",
+    "step_image_url": "/img/recipes/50/steps/2.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 295,
+    "recipe_id": 50,
+    "step_order": 3,
+    "step_title": "環狀擺盤邏輯",
+    "step_total_time": "00:05:00",
+    "step_content": "準備一個淺型平底鍋。將洋蔥與泡菜鋪在鍋底，其餘切好的午餐肉、熱狗、豆腐、豬五花與金針菇環繞著鍋緣依序重疊擺放整齊。",
+    "step_image_url": "/img/recipes/50/steps/3.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 296,
+    "recipe_id": 50,
+    "step_order": 4,
+    "step_title": "中心靈魂配料",
+    "step_total_time": "00:02:00",
+    "step_content": "在鍋子中心留出的空位放入一整塊泡麵。在麵體上方放上一大匙焗豆罐頭，最後鋪上一片切達起司片。",
+    "step_image_url": "/img/recipes/50/steps/4.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 297,
+    "recipe_id": 50,
+    "step_order": 5,
+    "step_title": "加入高湯與燉煮",
+    "step_total_time": "00:05:00",
+    "step_content": "將調好的湯底醬放在泡麵旁。緩緩沿著鍋邊倒入魚高湯（或清水），注意不要沖散擺好的食材。蓋上鍋蓋大火煮滾。",
+    "step_image_url": "/img/recipes/50/steps/5.jpg",
+    "is_modified": false
+  },
+  {
+    "step_id": 298,
+    "recipe_id": 50,
+    "step_order": 6,
+    "step_title": "起司融合與開動",
+    "step_total_time": "00:05:00",
+    "step_content": "煮滾後轉中火。用湯匙輕輕將醬料攪散融入湯中。待麵條煮至個人喜好的軟硬度，且起司片半融化地覆蓋在麵條上時，即可整鍋端上桌享用。",
+    "step_image_url": "/img/recipes/50/steps/6.jpg",
+    "is_modified": false
   }
 ]

@@ -53,5 +53,11 @@
   { "tag_id": 52, "tag_name": "餅乾", "tag_type": "料理種類" },
   { "tag_id": 53, "tag_name": "瑪德蓮", "tag_type": "料理種類" },
   { "tag_id": 54, "tag_name": "司康", "tag_type": "料理種類" },
-  { "tag_id": 55, "tag_name": "布朗尼", "tag_type": "料理種類" }
+  { "tag_id": 55, "tag_name": "布朗尼", "tag_type": "料理種類" },
+  { "tag_id": 56, "tag_name": "可麗露", "tag_type": "料理種類" },
+  { "tag_id": 57, "tag_name": "塔/派", "tag_type": "料理種類" },
+  { "tag_id": 58, "tag_name": "蒙布朗", "tag_type": "料理種類" },
+  { "tag_id": 59, "tag_name": "三明治", "tag_type": "料理種類" },
+  { "tag_id": 60, "tag_name": "優格杯", "tag_type": "料理種類" },
+  { "tag_id": 61, "tag_name": "奶凍", "tag_type": "料理種類" }
 ]
