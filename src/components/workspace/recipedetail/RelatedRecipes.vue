@@ -19,6 +19,9 @@ const relatedList = ref([]);
 const isLoading = ref(true);
 const isReady = ref(false);
 
+// --- 讀取 Vite 的 Base 路徑 ---
+const baseUrl = import.meta.env.BASE_URL;
+
 const fetchRelated = async () => {
     isLoading.value = true;
     isReady.value = false;
@@ -31,9 +34,16 @@ const fetchRelated = async () => {
             let finalImg = '';
 
             if (rawImg) {
-                finalImg = (rawImg.startsWith('http') || rawImg.startsWith('/') || rawImg.startsWith('data:'))
-                    ? rawImg
-                    : `/${rawImg}`;
+                // 如果是 http 開頭或 data: 圖片，直接使用
+                if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
+                    finalImg = rawImg;
+                } else {
+                    // ✅ 核心修正：移除開頭斜線，並加上 baseUrl 進行拼接
+                    const cleanPath = rawImg.replace(/^\//, '');
+                    finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
+                }
+            } else {
+                finalImg = 'https://placehold.co/300x200?text=No+Image';
             }
 
             return {

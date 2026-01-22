@@ -90,7 +90,7 @@ const handleTagClick = (tagName) => {
             left: 0;
             width: 100%;
             height: 100%;
-            padding: 0 8%;
+            
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -100,6 +100,7 @@ const handleTagClick = (tagName) => {
                 align-items: center;
                 margin-bottom: 10px;
                 gap:8px;
+                padding: 0 8%;
                 .main-icon {
                     font-size: 24px;
                 }
@@ -108,6 +109,7 @@ const handleTagClick = (tagName) => {
                 display: flex;
                 gap: 10px;
                 flex-wrap: nowrap;
+                width: 100%;
                 overflow-x: scroll;
                 white-space: nowrap;
 
@@ -116,7 +118,7 @@ const handleTagClick = (tagName) => {
                 }
                 -ms-overflow-style: none;
                 scrollbar-width: none;
-
+                padding: 0 8%;
                 .tag-item{
                     word-wrap: nowrap;
                 }
@@ -124,6 +126,7 @@ const handleTagClick = (tagName) => {
             .search-container{
                 width: 50%;
                 margin-bottom: 20px;
+                padding: 0 8%;
             }
         }
         

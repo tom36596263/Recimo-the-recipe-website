@@ -17,6 +17,7 @@ import IconEyeClose from '~icons/material-symbols/visibility-off-outline-rounded
 // 定義控制 Modal 的變數
 const showLoginSuccess = ref(false);
 const showLoginFail = ref(false);
+const showTypeFail = ref(false);
 // ==========================================
 // 1. 登入用的資料
 // ==========================================
@@ -145,7 +146,7 @@ const onCaptchaVerified = (success) => {
 const handleLogin = () => {
   // 1. 基本前端驗證 (email, password, captcha)
   if (loginMessage.value.email || loginMessage.value.password || !captchaVerified.value) {
-    alert('請輸入完整');
+    showTypeFail.value = true;
     return;
   }
 
@@ -379,6 +380,14 @@ const handleClose = () => {
     </div>
     <BaseModal :isOpen="showLoginSuccess" type="success" iconClass="fa-solid fa-check" title="登入成功"
       @close="showLoginSuccess = false" />
+
+    <BaseModal :isOpen="showTypeFail" type="danger" iconClass="fa-solid fa-exclamation" title="請輸入完整"
+      @close="showTypeFail = false">
+      <template #actions>
+        <button class="btn-solid" @click="showTypeFail = false">回去修改</button>
+        <!-- <button class="btn-outline" @click="/* 導向忘記密碼邏輯 */">忘記密碼</button> -->
+      </template>
+    </BaseModal>
 
     <BaseModal :isOpen="showLoginFail" type="danger" iconClass="fa-solid fa-exclamation" title="登入失敗"
       @close="showLoginFail = false">

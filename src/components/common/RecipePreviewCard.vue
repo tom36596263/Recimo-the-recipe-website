@@ -114,7 +114,25 @@ const loadRecipeIngredients = () => {
 };
 
 /**
- * 根據食材分類返回對應的圖示 class
+ * 取得食材圖片 URL
+ * @param {String} imageUrl - 食材圖片路徑
+ * @returns {String} - 完整的圖片 URL
+ */
+const getIngredientImageUrl = (imageUrl) => {
+    if (!imageUrl) return '';
+    
+    // 如果是完整 URL，直接返回
+    if (imageUrl.startsWith('http')) {
+        return imageUrl;
+    }
+    
+    // 否則補上 base URL
+    const base = import.meta.env.BASE_URL;
+    return `${base}${imageUrl}`.replace(/\/+/g, '/');
+};
+
+/**
+ * 根據食材分類返回對應的圖示 class（備用）
  * @param {String} mainCategory - 主分類
  * @param {String} subCategory - 次分類
  * @returns {String} - FontAwesome 圖示 class
@@ -226,9 +244,13 @@ onMounted(() => {
                 <SwiperSlide v-for="ingredient in recipeIngredients" :key="ingredient.ingredient_id"
                     class="ingredient-slide">
                     <div class="ingredient-tag">
-                        <!-- 食材圖示 -->
+                        <!-- 食材圖片 -->
                         <div class="ingredient-icon">
-                            <!-- <i :class="getIngredientIcon(ingredient.main_category, ingredient.sub_category)"></i> -->
+                            <img v-if="ingredient.ingredient_image_url" 
+                                :src="getIngredientImageUrl(ingredient.ingredient_image_url)" 
+                                :alt="ingredient.ingredient_name"
+                                class="ingredient-image" />
+                            <i v-else :class="getIngredientIcon(ingredient.main_category, ingredient.sub_category)"></i>
                         </div>
                         <!-- 食材名稱 -->
                         <span class="ingredient-name">{{ ingredient.ingredient_name }}</span>
@@ -413,10 +435,18 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 
     i {
         font-size: 24px;
         color: $primary-color-700;
+    }
+
+    .ingredient-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 8px;
     }
 }
 
