@@ -95,7 +95,7 @@ onMounted(async () => {
                 <h2 class="date-title">{{ displayDate }}</h2>
             </div>
 
-            <div class="header-right col-6">
+            <div class="header-right">
                 <div class="kcal-status-box">
                     <div class="kcal-item">
                         目前總熱量：<span class="value">{{ currentTotalKcal }}</span> kcal
