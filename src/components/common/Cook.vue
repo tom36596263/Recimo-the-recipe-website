@@ -37,34 +37,45 @@ const selectTag = (tagName) => {
 
 //搜尋關鍵字變數
 const keyword = ref('');
-
 const filteredIngredients = computed(() => {
+    // 1. 防呆：如果原本就沒資料，回傳空陣列
     if (!ingredients.value || ingredients.value.length === 0) {
         return [];
     }
+
+    let results = [];
+
+    // 2. 第一層篩選：決定是「搜尋模式」還是「分類模式」
     if (keyword.value.trim() !== '') {
+        // --- A. 搜尋模式：無視分類，搜尋全部 ---
         const searchText = keyword.value.trim().toLowerCase();
-        return ingredients.value.filter(item => {
+        results = ingredients.value.filter(item => {
             const itemName = item.ingredient_name ? String(item.ingredient_name) : '';
             return itemName.toLowerCase().includes(searchText);
         });
+    } else {
+        // --- B. 分類模式：依照上方標籤 (activeTag) ---
+        const currentTagObj = tags.find(tag => tag.text === activeTag.value);
+
+        // 確保有找到對應的標籤設定
+        if (currentTagObj) {
+            const targetCategory = currentTagObj.value;
+            results = ingredients.value.filter(item => {
+                return item.main_category === targetCategory;
+            });
+        }
     }
-    const currentTagObj = tags.find(tag => tag.text === activeTag.value);
-    if (!currentTagObj) return [];
 
-    const targetCategory = currentTagObj.value;
-
-    let results = ingredients.value.filter((item) => {
-        return item.main_category === targetCategory;
-    });
-
-    if (keyword.value.trim() !== '') {
-        const searchText = keyword.value.trim();
-        results = results.filter(item => {
-            return item.ingredient_name.includes(searchText);
+    // 3. 第二層篩選：把「已經在鍋子裡」的扣掉
+    // 這裡會檢查 potIngredients 陣列，如果 ID 一樣就不顯示
+    return results.filter(item => {
+        const isInPot = potIngredients.value.some(potItem => {
+            // 請特別注意：這裡假設你的 JSON 資料欄位名稱是 ingredient_id
+            return potItem.ingredient_id === item.ingredient_id;
         });
-    }
-    return results;
+        // 回傳 !isInPot (如果「不在」鍋子裡，才要顯示)
+        return !isInPot;
+    });
 });
 
 
@@ -173,6 +184,16 @@ const checkCollision = (x, y) => {
 
 // 加入鍋子
 const addToPot = item => {
+    if (potIngredients.value.length >= 8) {
+        alert('鍋子已經滿了！最多只能放 8 個食材喔！');
+
+        // 拖曳結束的狀態重置一下，避免卡住
+        draggedItem.value = null;
+        isDragOver.value = false;
+        return; // 直接結束，不執行下面的 push
+    }
+
+
     potIngredients.value.push(item);
     draggedItem.value = null;
     setTimeout(() => isDragOver.value = false, 200);
@@ -252,9 +273,18 @@ const startCooking = () => {
                             <div v-if="potIngredients.length > 0" class="count-badge">
                                 {{ potIngredients.length }}
                             </div>
+
                             <div class="lid" :class="{ 'lid-open': isDragOver, 'lid-boiling': isCooking }">
                                 <img src="/src/assets/images/cook/lid.png" alt="">
                             </div>
+
+                            <TransitionGroup name="fade-drop" tag="div" class="floating-ingredients-container">
+                                <img v-for="(item, index) in potIngredients" :key="item.ingredient_id"
+                                    :src="$parsePublicFile(item.ingredient_image_url)" alt=""
+                                    class="floating-ingredient-item" :class="{ 'falling-in': isCooking }"
+                                    :style="{ '--i': index }">
+                            </TransitionGroup>
+
                             <div class="pot" :class="{ 'shaking': isCooking }">
                                 <img src="/src/assets/images/cook/pot.png" alt="">
                             </div>
@@ -572,5 +602,101 @@ const startCooking = () => {
     -webkit-overflow-scrolling: touch; // 平滑滾動
     max-height: calc(100% - 150px);
     padding: 0 20px 20px 20px;
+}
+
+// 1. 容器定位
+.floating-ingredients-container {
+    position: absolute;
+    top: 60px; // 大約在鍋口的位置
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px; // 比鍋身稍微窄一點
+    height: 60px;
+    z-index: 3; // 重點：介於鍋蓋(5)和鍋身(預設0)之間
+    pointer-events: none; // 避免擋住滑鼠操作
+}
+
+// 2. 個別食材圖片樣式
+.floating-ingredient-item {
+    position: absolute;
+    width: 45px; // 設定一個合適的大小
+    height: 45px;
+    border-radius: 50%;
+    object-fit: contain;
+    // top: 50px;
+    // // left: 50%;
+    margin-left: -22.5px; // width 的一半，用來居中
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)); // 加一點陰影更有立體感
+
+    // 利用 nth-child 加上 CSS 變數，讓前5個食材位置稍微錯開
+    // 這裡設定簡單的左右交錯和旋轉，看起來比較自然
+    &:nth-child(1) {
+        top: -100px;
+        left: -120%;
+        transform: rotate(-20deg);
+    }
+
+    &:nth-child(2) {
+        top: -100px;
+        left: -90%;
+        transform: rotate(-10deg);
+        z-index: 2;
+    }
+
+    &:nth-child(3) {
+        top: -100px;
+        left: -60%;
+        transform: rotate(5deg);
+        z-index: 3;
+    }
+
+    // 疊在最上面
+    &:nth-child(4) {
+        top: -100px;
+        left: -30%;
+        transform: rotate(-25deg);
+    }
+
+    &:nth-child(5) {
+        top: -100px;
+        left: 0%;
+        transform: rotate(20deg);
+        z-index: 1;
+    }
+
+    // 超過5個的就隨意一點(雖然你的邏輯也會擋住)
+    &:nth-child(n+6) {
+        top: -100px;
+        left: 30%;
+        opacity: 0.8;
+    }
+
+    &:nth-child(n+7) {
+        top: -100px;
+        left: 60%;
+        opacity: 0.8;
+    }
+
+    &:nth-child(n+8) {
+        top: -100px;
+        left: 90%;
+        opacity: 0.8;
+    }
+}
+
+
+// 定義進入前和離開後的狀態 (起始點)
+.fade-drop-enter-from,
+.fade-drop-leave-to {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.5) !important;
+}
+
+.falling-in {
+    left: 50% !important;
+    transform: translateX(-50%) translateY(120px) scale(0.2) !important;
+    opacity: 0 !important;
+    transition: all 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.3);
+    transition-delay: calc(var(--i) * 0.1s);
 }
 </style>
