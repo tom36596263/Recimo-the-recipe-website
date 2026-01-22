@@ -385,7 +385,8 @@ onMounted(() => {
 
                 <div class="btn-align-right">
                     <router-link :to="sub.link">
-                        <CircleBtn :title="sub.btnTitle" type="white" :href="sub.link" />
+                        <CircleBtn :title="sub.btnTitle" type="white" :href="sub.link"
+                            :class="{ 'hide-on-mobile': sub.id === 'kitchen' }" />
                     </router-link>
                 </div>
             </div>
@@ -721,6 +722,13 @@ div .introduce .container {
         @media screen and (max-width: 890px) {
             left: 0;
         }
+    }
+}
+
+// 手機板把靈感小廚房按鈕移除
+@media screen and (max-width: 810px) {
+    .hide-on-mobile {
+        display: none !important;
     }
 }
 </style>

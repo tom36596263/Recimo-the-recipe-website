@@ -10,5 +10,29 @@
     "start_date": "2026-01-19",
     "end_date": "2026-01-21",
     "created_at": "2026-01-18 20:30:00"
+  },
+  {
+    "plan_id": 2,
+    "user_id": 2,
+    "source_template_id": null,
+    "title": "活力輕食三日自煮計畫",
+    "cover_type": 1,
+    "custom_cover_url": null,
+    "cover_template_id": 2,
+    "start_date": "2026-01-22",
+    "end_date": "2026-01-24",
+    "created_at": "2026-01-21 10:00:00"
+  },
+  {
+    "plan_id": 3,
+    "user_id": 2,
+    "source_template_id": null,
+    "title": "春節團圓年菜五日計畫",
+    "cover_type": 1,
+    "custom_cover_url": null,
+    "cover_template_id": 3,
+    "start_date": "2026-02-16",
+    "end_date": "2026-02-20",
+    "created_at": "2026-01-22 08:30:00"
   }
 ]
