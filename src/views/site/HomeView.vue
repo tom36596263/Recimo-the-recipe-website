@@ -5,7 +5,7 @@
     import Service from '@/components/site/home/ServiceSection.vue';
     import HotRecipe from '@/components/site/home/HotRecipeSection.vue';
     import FindRecipe from '@/components/site/home/FindRecipeSection.vue';
-    import LoadingPage from '@/components/LoadingPage.vue';
+    import ProductRmd from '@/components/mall/ProductRmd.vue';
 </script>
 
 <template>
@@ -53,6 +53,11 @@
     <section class="find-recipe-section container">
         <div class="row">
             <FindRecipe />
+        </div>
+    </section>
+    <section class="container">
+        <div class="row">
+            <ProductRmd class="detail-recommend-section" />
         </div>
     </section>
     
