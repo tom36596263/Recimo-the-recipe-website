@@ -30,7 +30,7 @@ const categoryMap = {
 
 const fetchIngredients = async () => {
     try {
-        const response = await fetch('/data/recipe/ingredients.json');
+        const response = await fetch('data/recipe/ingredients.json');
         const data = await response.json();
         rawIngredients.value = data;
         if (rawIngredients.value.length > 0 && !currentCategory.value) {
