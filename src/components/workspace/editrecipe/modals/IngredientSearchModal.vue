@@ -153,10 +153,9 @@ const handleConfirm = () => {
                     </div>
 
                     <div class="info-right more-box">
-                        <button data-v-bc6311fa="" type="button" class="btn btn-solid h-40 cook-btn"
-                            style="--btn-width: auto;" @click="handleConfirm">
-                            確認新增 ({{ tempSelected.length }})
-                        </button>
+
+                        <BaseBtn :title="`確認新增 (${tempSelected.length})`" :width="200" @click="handleConfirm"
+                            class="cook-btn" />
                     </div>
 
                 </div>
@@ -345,9 +344,8 @@ const handleConfirm = () => {
 
     .cook-btn {
         padding: 8px 40px;
-        border-radius: 30px;
         cursor: pointer;
-        font-weight: bold;
+        // font-weight: bold;
     }
 }
 
