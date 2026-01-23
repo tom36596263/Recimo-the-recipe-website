@@ -5,8 +5,10 @@ import card from '@/components/mall/CheckCard.vue';
 // import axios from 'axios';
 // import { publicApi } from '@/utils/publicApi';
 import { useCartStore } from '@/stores/cartStore';
+import Modal from '@/components/BaseModal.vue';
 
-
+// 控制彈窗顯示的變數
+const showSuccessModal = ref(false);
 const cartStore = useCartStore(); // 2. 初始化 Store
 const router = useRouter();
 const orderItems = computed(() => cartStore.items);
@@ -153,7 +155,7 @@ const formatExpiryDate = (e) => {
 
 
 // 接收 template 傳進來的 navigate 函式
-const handleDelete = (navigate) => {
+const handleSubmit = (navigate) => {
 
   // --- 1. 執行原本的驗證邏輯 (保持不變) ---
   validateField('name');
@@ -190,15 +192,20 @@ const handleDelete = (navigate) => {
   } else {
     // --- 3. 驗證通過，執行跳轉 ---
     console.log('送出資料：', form.value);
-    alert('訂單送出成功');
-
-    // 呼叫 router-link 提供的跳轉功能
-    // 這會自動套用 router-link 計算好的正確路徑 (包含部署的 base url)
-    if (navigate) {
-      navigate();
-    }
-    // router.push('../workspacr/OrderInquiry.vue');
+    showSuccessModal.value = true;
+    setTimeout(() => {
+      handleModalCloseAndRedirect();
+    }, 3000);
   }
+};
+
+// --- 處理彈窗關閉並跳轉 ---
+const handleModalCloseAndRedirect = () => {
+  // 關閉彈窗
+  showSuccessModal.value = false;
+
+  // 執行跳轉
+  router.push('../workspace/orders');
 };
 
 const backcart = () => {
@@ -232,10 +239,62 @@ const shippingFee = computed(() => {
 const totalAmount = computed(() => {
   return subtotal.value + shippingFee.value;
 });
+
+//按下 Enter 切換到下一個 Input
+const handleNextInput = (e) => {
+  // 只針對 input 標籤作用，且排除 checkbox (checkbox 通常用空白鍵或點擊)
+  if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') {
+    e.preventDefault(); // 阻止 Enter 送出表單
+
+    // 取得所有 input 元素
+    const inputs = Array.from(document.querySelectorAll('input'));
+
+    // 過濾出「可見」且「未被 disable」的輸入框
+    // offsetParent !== null 是判斷元素是否可見的常用技巧 (能過濾掉 v-show="false" 的元素)
+    const visibleInputs = inputs.filter(input =>
+      input.offsetParent !== null &&
+      !input.disabled &&
+      input.type !== 'hidden'
+    );
+
+    // 找到目前焦點所在的 index
+    const index = visibleInputs.indexOf(e.target);
+
+    // 如果不是最後一個，就 focus 下一個
+    if (index > -1 && index < visibleInputs.length - 1) {
+      visibleInputs[index + 1].focus();
+    } else {
+      // 如果是最後一個 input，可以選擇移除焦點或是直接執行送出
+      e.target.blur();
+    }
+  }
+};
+
+// 定義 DOM 參照 (Ref)
+const cardInput2 = ref(null);
+const cardInput3 = ref(null);
+const cardInput4 = ref(null);
+
+// 處理信用卡輸入與跳轉
+const handleCardInput = (e, fieldName, nextInputRef) => {
+  // 1. 清除該欄位的錯誤訊息
+  errors.value[fieldName] = '';
+
+  // 2. 過濾非數字 (防呆)
+  // 注意：因為有 v-model，我們直接修改 form 的值即可觸發畫面更新
+  const val = e.target.value.replace(/\D/g, '');
+  form.value[fieldName] = val;
+
+  // 3. 判斷是否跳轉
+  // 如果輸入滿 4 碼，且有傳入下一個欄位的 ref，就將焦點移過去
+  if (val.length === 4 && nextInputRef) {
+    nextInputRef.focus();
+  }
+};
 </script>
 
 <template>
-  <div class="container">
+  <div class="container" @keydown.enter="handleNextInput">
     <div class="title">
       <h2 class="zh-h2">結帳 Checkout</h2>
     </div>
@@ -362,23 +421,29 @@ const totalAmount = computed(() => {
                 <div class="card-row">
                   <input type="text" maxlength="4" v-model="form.cardnum1" class="form-input" placeholder="0000"
                     :class="{ 'is-error': errors.cardnum1 }" @blur="validateField('cardnum1')"
-                    @input="errors.cardnum1 = ''" />
+                    @input="handleCardInput($event, 'cardnum1', cardInput2)" />
+
                   <span class="separator">-</span>
+
                   <input type="text" maxlength="4" v-model="form.cardnum2" class="form-input" placeholder="0000"
-                    :class="{ 'is-error': errors.cardnum2 }" @blur="validateField('cardnum2')"
-                    @input="errors.cardnum2 = ''" />
+                    ref="cardInput2" :class="{ 'is-error': errors.cardnum2 }" @blur="validateField('cardnum2')"
+                    @input="handleCardInput($event, 'cardnum2', cardInput3)" />
+
                   <span class="separator">-</span>
+
                   <input type="text" maxlength="4" v-model="form.cardnum3" class="form-input" placeholder="0000"
-                    :class="{ 'is-error': errors.cardnum3 }" @blur="validateField('cardnum3')"
-                    @input="errors.cardnum3 = ''" />
+                    ref="cardInput3" :class="{ 'is-error': errors.cardnum3 }" @blur="validateField('cardnum3')"
+                    @input="handleCardInput($event, 'cardnum3', cardInput4)" />
+
                   <span class="separator">-</span>
+
                   <input type="text" maxlength="4" v-model="form.cardnum4" class="form-input" placeholder="0000"
-                    :class="{ 'is-error': errors.cardnum4 }" @blur="validateField('cardnum4')"
-                    @input="errors.cardnum4 = ''" />
+                    ref="cardInput4" :class="{ 'is-error': errors.cardnum4 }" @blur="validateField('cardnum4')"
+                    @input="handleCardInput($event, 'cardnum4', null)" />
                 </div>
                 <span class="error-msg p-p2"
                   v-if="errors.cardnum1 || errors.cardnum2 || errors.cardnum3 || errors.cardnum4">
-                  請檢查卡號是否填寫完整
+                  *請檢查卡號是否填寫完整
                 </span>
               </div>
               <div class="field-flex">
@@ -399,11 +464,12 @@ const totalAmount = computed(() => {
               </div>
             </div>
           </div>
-          <router-link to="../workspace/orders" custom v-slot="{ navigate }">
-            <div class="submit">
-              <BaseBtn title="確定結帳" @click="handleDelete(navigate)" />
-            </div>
-          </router-link>
+          <div class="submit">
+            <BaseBtn title="確定結帳" @click="handleSubmit" />
+          </div>
+          <Modal :is-open="showSuccessModal" type="success" title="訂單已送出" description="感謝您的購買，您可以在訂單查詢頁面查看詳情。"
+            icon-class="fa-solid fa-circle-check" @close="handleModalCloseAndRedirect">
+          </Modal>
 
         </div>
       </div>
@@ -495,7 +561,7 @@ input[type='checkbox'] {
 
 .error-msg {
   color: $secondary-color-danger-700;
-  margin-top: -15px;
+  margin-top: -10px;
   margin-left: 5px;
 
 }
