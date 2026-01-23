@@ -2714,5 +2714,589 @@
     "amount": 1.0,
     "unit_name": "克",
     "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 320,
+    "recipe_id": 41,
+    "ingredient_id": 238,
+    "amount": 500.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 321,
+    "recipe_id": 41,
+    "ingredient_id": 499,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 322,
+    "recipe_id": 41,
+    "ingredient_id": 389,
+    "amount": 1.0,
+    "unit_name": "茶匙",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 323,
+    "recipe_id": 41,
+    "ingredient_id": 410,
+    "amount": 200.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 324,
+    "recipe_id": 41,
+    "ingredient_id": 392,
+    "amount": 125.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 231,
+    "recipe_id": 41,
+    "ingredient_id": 231,
+    "amount": 2.0,
+    "unit_name": "個",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 326,
+    "recipe_id": 41,
+    "ingredient_id": 343,
+    "amount": 40.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 327,
+    "recipe_id": 42,
+    "ingredient_id": 392,
+    "amount": 150.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 328,
+    "recipe_id": 42,
+    "ingredient_id": 499,
+    "amount": 175.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 329,
+    "recipe_id": 42,
+    "ingredient_id": 413,
+    "amount": 40.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 330,
+    "recipe_id": 42,
+    "ingredient_id": 453,
+    "amount": 20.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 331,
+    "recipe_id": 42,
+    "ingredient_id": 230,
+    "amount": 4.0,
+    "unit_name": "顆",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 332,
+    "recipe_id": 42,
+    "ingredient_id": 503,
+    "amount": 120.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 333,
+    "recipe_id": 42,
+    "ingredient_id": 19,
+    "amount": 5.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 334,
+    "recipe_id": 42,
+    "ingredient_id": 410,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 335,
+    "recipe_id": 43,
+    "ingredient_id": 230,
+    "amount": 2.0,
+    "unit_name": "顆",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 336,
+    "recipe_id": 43,
+    "ingredient_id": 410,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 337,
+    "recipe_id": 43,
+    "ingredient_id": 239,
+    "amount": 150.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 338,
+    "recipe_id": 43,
+    "ingredient_id": 385,
+    "amount": 200.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 339,
+    "recipe_id": 43,
+    "ingredient_id": 499,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 340,
+    "recipe_id": 43,
+    "ingredient_id": 343,
+    "amount": 10.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 341,
+    "recipe_id": 43,
+    "ingredient_id": 461,
+    "amount": 6.0,
+    "unit_name": "顆",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 342,
+    "recipe_id": 43,
+    "ingredient_id": 413,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 343,
+    "recipe_id": 44,
+    "ingredient_id": 297,
+    "amount": 2.0,
+    "unit_name": "片",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 344,
+    "recipe_id": 44,
+    "ingredient_id": 239,
+    "amount": 150.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 345,
+    "recipe_id": 44,
+    "ingredient_id": 410,
+    "amount": 15.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 346,
+    "recipe_id": 44,
+    "ingredient_id": 143,
+    "amount": 6.0,
+    "unit_name": "顆",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 347,
+    "recipe_id": 44,
+    "ingredient_id": 107,
+    "amount": 0.5,
+    "unit_name": "顆",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 348,
+    "recipe_id": 45,
+    "ingredient_id": 241,
+    "amount": 200.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 349,
+    "recipe_id": 45,
+    "ingredient_id": 144,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 350,
+    "recipe_id": 45,
+    "ingredient_id": 274,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 351,
+    "recipe_id": 45,
+    "ingredient_id": 387,
+    "amount": 15.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 352,
+    "recipe_id": 45,
+    "ingredient_id": 29,
+    "amount": 2.0,
+    "unit_name": "片",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 353,
+    "recipe_id": 46,
+    "ingredient_id": 260,
+    "amount": 400.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 354,
+    "recipe_id": 46,
+    "ingredient_id": 464,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 355,
+    "recipe_id": 46,
+    "ingredient_id": 410,
+    "amount": 40.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 356,
+    "recipe_id": 46,
+    "ingredient_id": 409,
+    "amount": 2.0,
+    "unit_name": "片",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 357,
+    "recipe_id": 46,
+    "ingredient_id": 239,
+    "amount": 50.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 358,
+    "recipe_id": 47,
+    "ingredient_id": 393,
+    "amount": 200.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 359,
+    "recipe_id": 47,
+    "ingredient_id": 345,
+    "amount": 60.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 360,
+    "recipe_id": 47,
+    "ingredient_id": 388,
+    "amount": 60.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 361,
+    "recipe_id": 47,
+    "ingredient_id": 452,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 362,
+    "recipe_id": 47,
+    "ingredient_id": 455,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 363,
+    "recipe_id": 47,
+    "ingredient_id": 416,
+    "amount": 1.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 364,
+    "recipe_id": 48,
+    "ingredient_id": 477,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 365,
+    "recipe_id": 48,
+    "ingredient_id": 496,
+    "amount": 300.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 366,
+    "recipe_id": 48,
+    "ingredient_id": 410,
+    "amount": 80.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 367,
+    "recipe_id": 48,
+    "ingredient_id": 238,
+    "amount": 400.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 368,
+    "recipe_id": 48,
+    "ingredient_id": 409,
+    "amount": 3.0,
+    "unit_name": "片",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 369,
+    "recipe_id": 49,
+    "ingredient_id": 294,
+    "amount": 300.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 370,
+    "recipe_id": 49,
+    "ingredient_id": 223,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 371,
+    "recipe_id": 49,
+    "ingredient_id": 360,
+    "amount": 45.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 372,
+    "recipe_id": 49,
+    "ingredient_id": 421,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 373,
+    "recipe_id": 49,
+    "ingredient_id": 41,
+    "amount": 150.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 374,
+    "recipe_id": 49,
+    "ingredient_id": 13,
+    "amount": 2.0,
+    "unit_name": "支",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 375,
+    "recipe_id": 49,
+    "ingredient_id": 233,
+    "amount": 2.0,
+    "unit_name": "顆",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 376,
+    "recipe_id": 49,
+    "ingredient_id": 352,
+    "amount": 400.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 377,
+    "recipe_id": 49,
+    "ingredient_id": 410,
+    "amount": 15.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 378,
+    "recipe_id": 49,
+    "ingredient_id": 331,
+    "amount": 15.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 379,
+    "recipe_id": 49,
+    "ingredient_id": 462,
+    "amount": 2.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 380,
+    "recipe_id": 50,
+    "ingredient_id": 179,
+    "amount": 150.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 381,
+    "recipe_id": 50,
+    "ingredient_id": 197,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 382,
+    "recipe_id": 50,
+    "ingredient_id": 196,
+    "amount": 2.0,
+    "unit_name": "根",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 383,
+    "recipe_id": 50,
+    "ingredient_id": 491,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 384,
+    "recipe_id": 50,
+    "ingredient_id": 256,
+    "amount": 0.5,
+    "unit_name": "盒",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 385,
+    "recipe_id": 50,
+    "ingredient_id": 3,
+    "amount": 0.5,
+    "unit_name": "顆",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 386,
+    "recipe_id": 50,
+    "ingredient_id": 478,
+    "amount": 1.0,
+    "unit_name": "大匙",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 387,
+    "recipe_id": 50,
+    "ingredient_id": 295,
+    "amount": 1.0,
+    "unit_name": "包",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 388,
+    "recipe_id": 50,
+    "ingredient_id": 248,
+    "amount": 1.0,
+    "unit_name": "片",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 389,
+    "recipe_id": 50,
+    "ingredient_id": 352,
+    "amount": 600.0,
+    "unit_name": "毫升",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 390,
+    "recipe_id": 50,
+    "ingredient_id": 360,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 391,
+    "recipe_id": 50,
+    "ingredient_id": 421,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false
+  },
+  {
+    "recipe_ingredient_id": 392,
+    "recipe_id": 50,
+    "ingredient_id": 2,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false
   }
 ]
