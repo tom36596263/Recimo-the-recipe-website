@@ -163,7 +163,7 @@ const handleLogin = async () => {
 
     if (foundUser) {
       if (!foundUser.is_active) {
-        alert('此帳號已被停用，請聯絡管理員');
+        alert('此帳號已被停用，請聯絡官方人員');
         return;
       }
 
@@ -177,8 +177,9 @@ const handleLogin = async () => {
 
         // --- 新增跳轉邏輯 ---
         // 檢查網址列有沒有存 redirect 參數，沒有的話就回首頁 '/'
-        const redirectPath = route.query.redirect || '/';
-        router.push(redirectPath);
+        if (!authStore.pendingAction) {
+          router.push('/');
+        }
       }, 1500);
 
     } else {

@@ -2,8 +2,12 @@
 import { useRouter } from 'vue-router';
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import BaseBtn from '@/components/common/BaseBtn.vue'
+// 引用 Pinia Store (權限狀態管理)
+import { useAuthStore } from '@/stores/authStore';
 
 const router = useRouter();
+const authStore = useAuthStore();
+
 const isMenuOpen = ref(false);
 const isVisible = ref(true);  //控制顯示隱藏
 const lastScrollTop = ref(0);  //紀錄上次捲動位置
@@ -44,6 +48,12 @@ const navItems = computed(() => {
         }));
 });
 
+// --- 登出邏輯 ---
+const handleLogout = () => {
+    authStore.logout();   // 執行清除狀態
+    closeMenu();          // 關閉手機版選單
+    router.push('/');     // 跳轉回首頁
+};
 </script>
 <template>
     <nav class="site-nav" :class="{ 'nav--hidden': !isVisible }">
@@ -56,22 +66,19 @@ const navItems = computed(() => {
                         <span></span>
                     </div>
                     <div class="logo">
-                        <router-link to="/"><img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo" ></router-link>
+                        <router-link to="/"><img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')"
+                                alt="logo"></router-link>
                     </div>
                     <div class="link-group">
                         <div class="page-link" :class="{ 'mobile-active': isMenuOpen }">
-                            <router-link to="/search" class="search-btn" :class="{ 'mobile-active': isMenuOpen }" @click="closeMenu">
+                            <router-link to="/search" class="search-btn" :class="{ 'mobile-active': isMenuOpen }"
+                                @click="closeMenu">
                                 <p class=" p-p1 text">搜尋好料理</p>
                                 <i class="fa-solid fa-magnifying-glass icon-search"></i>
                             </router-link>
 
-                            <router-link 
-                                v-for="item in navItems" 
-                                :key="item.path" 
-                                :to="item.path" 
-                                class="p-p1"
-                                @click="closeMenu"
-                            >
+                            <router-link v-for="item in navItems" :key="item.path" :to="item.path" class="p-p1"
+                                @click="closeMenu">
                                 {{ item.title }}
                             </router-link>
 
@@ -88,10 +95,10 @@ const navItems = computed(() => {
                             </div>
                             <div class="side-menu-only">
                                 <router-link to="/">
-                                    <img :src="$parsePublicFile('img/site/Recimo-logo-white.svg')" alt="logo" >
+                                    <img :src="$parsePublicFile('img/site/Recimo-logo-white.svg')" alt="logo">
                                 </router-link>
 
-                                <BaseBtn title="登出" height="30" />
+                                <BaseBtn v-if="authStore.isLoggedIn" title="登出" height="30" @click="handleLogout" />
                             </div>
 
                         </div>
@@ -151,7 +158,8 @@ const navItems = computed(() => {
                 background-color: $accent-color-800;
                 color: $accent-color-100;
             }
-            .icon-search{
+
+            .icon-search {
                 display: none;
             }
         }
@@ -163,12 +171,13 @@ const navItems = computed(() => {
             align-items: center;
             padding: 0 0 0 50px;
             border-radius: 50px 0 0 50px;
-            margin-right:12px;
+            margin-right: 12px;
 
             .btn-text,
             .side-menu-only {
                 display: none;
             }
+
             .nav-icon-link {
                 display: flex;
                 flex-direction: row;
@@ -257,14 +266,16 @@ const navItems = computed(() => {
             transform: rotate(0deg);
         }
 
-        &.menu-open{
+        &.menu-open {
             span:first-child {
                 top: 21.5px;
                 transform: rotate(45deg);
             }
+
             span:nth-child(2) {
                 opacity: 0;
             }
+
             span:nth-child(3) {
                 top: 21.5px;
                 transform: rotate(135deg);
@@ -279,43 +290,52 @@ const navItems = computed(() => {
 
             .search-btn {
                 left: -90px;
-                .icon-search{
+
+                .icon-search {
                     display: block;
                 }
-                .text{
+
+                .text {
                     display: none;
                 }
             }
-            .page-link{
+
+            .page-link {
                 gap: 10px;
                 padding: 0 0 0 35px;
             }
         }
+
         .logo img {
             height: 70%;
         }
+
         .nav-box {
             width: 800px;
         }
-    
+
     }
-    
+
 }
+
 @media screen and (max-width: 810px) {
 
     .site-nav {
         .link-group {
             display: block;
+
             .search-btn {
                 position: static;
                 margin-bottom: 20px;
                 width: 100%;
                 max-width: 160px;
                 height: auto;
-                .icon-search{
+
+                .icon-search {
                     display: none;
                 }
             }
+
             .page-link {
                 position: fixed;
                 top: 0;
@@ -337,9 +357,11 @@ const navItems = computed(() => {
                     flex-wrap: nowrap;
                     overflow-x: scroll;
                     white-space: nowrap;
+
                     &::-webkit-scrollbar {
                         display: none;
                     }
+
                     -ms-overflow-style: none;
                     scrollbar-width: none;
 
@@ -351,6 +373,7 @@ const navItems = computed(() => {
                         width: 100%;
                         height: 45px;
                     }
+
                     a.p-p1 {
                         flex-shrink: 0;
                     }
@@ -363,9 +386,11 @@ const navItems = computed(() => {
 
                         .btn-text {
                             color: $neutral-color-white;
+
                             &:hover {
                                 color: $accent-color-700;
                             }
+
                             .p-p1 {
                                 display: block;
                                 font-size: 1rem;
@@ -434,6 +459,7 @@ const navItems = computed(() => {
             width: 45px;
             z-index: 20;
         }
+
         .cart-btn,
         .login-btn {
             color: $neutral-color-800;
@@ -468,19 +494,23 @@ const navItems = computed(() => {
             visibility: visible;
         }
     }
+
     .nav-box {
         display: none;
     }
 }
+
 @keyframes searchPulse {
     0% {
         box-shadow: 0 0 0 0 rgba(255, 180, 0, 0.6);
         transform: scale(1);
     }
+
     50% {
         box-shadow: 0 0 0 8px rgba(255, 180, 0, 0);
         transform: scale(1.03);
     }
+
     100% {
         box-shadow: 0 0 0 0 rgba(255, 180, 0, 0);
         transform: scale(1);
