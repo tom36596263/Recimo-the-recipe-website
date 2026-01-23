@@ -113,7 +113,7 @@ watch(searchQuery, () => {
 </script>
 
 <template>
-    <div class="container">
+    <div class="container fade-in-init">
         <div class="row">
             <div class="col-12">
                 <SearchBanner v-model="searchQuery"/>
@@ -172,5 +172,20 @@ watch(searchQuery, () => {
         display: flex;
         align-items: end;
         gap: 12px;
+    }
+    .fade-in-init {
+        animation: fadeInScale 0.8s ease-out forwards;
+    }
+
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.98);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
     }
 </style>

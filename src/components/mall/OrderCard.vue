@@ -9,8 +9,29 @@ const props = defineProps({
   }
 });
 
-// 2. 定義 Emits：通知父層取消訂單
+//定義 Emits：通知父層取消訂單
 const emit = defineEmits(['cancel-order']);
+
+// 定義一個變數來判斷「是否可取消」
+// 只有狀態為 0 (新訂單) 或 1 (已確認) 時回傳 true
+const isCancellable = computed(() => {
+  return props.order.status === 0 || props.order.status === 1;
+});
+
+// 定義按鈕顯示的文字
+const buttonText = computed(() => {
+  // 1. 已經取消的
+  if (props.order.status === -1) {
+    return '訂單已取消';
+  }
+  // 2. 還沒取消，但狀態已進展到無法取消 (已出貨、已完成)
+  if (!isCancellable.value) {
+    return '無法取消';
+  }
+  // 3. 可以取消 (新訂單、已確認)
+  return '取消訂單';
+});
+
 
 // 狀態定義
 const statusSteps = ['訂購成功', '訂單確認', '出貨', '送達'];
@@ -75,8 +96,7 @@ const handleConfirmCancel = (data) => {
           </div>
         </div>
       </div>
-      <BaseBtn :title="order.status === -1 ? '訂單已取消' : '取消訂單'" :disabled="order.status === -1" variant="outline"
-        @click="onCancel" />
+      <BaseBtn class="btn-status" :title="buttonText" :disabled="!isCancellable" variant="outline" @click="onCancel" />
     </div>
 
 

@@ -389,7 +389,8 @@ const columns = ref([
     display: flex;
     flex-wrap: wrap; // 必加：確保商品多時會換行，不會全部擠在同一排
     justify-content: flex-start; // 靠左對齊
-    width: 100%; // 必加：不管裡面有幾個商品，這一排都要佔滿整個 container
+    row-gap: 20px;
+    width: 100%; // 必加：不管裡面有幾個商品，這一排都要佔滿整個 ga
   }
 
   .product-card {

@@ -59,14 +59,22 @@ const navItems = computed(() => {
                         <router-link to="/"><img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo" ></router-link>
                     </div>
                     <div class="link-group">
-                        
-
                         <div class="page-link" :class="{ 'mobile-active': isMenuOpen }">
-                            <router-link to="/search" class="search-btn p-p1" :class="{ 'mobile-active': isMenuOpen }" >搜尋好料理</router-link>
+                            <router-link to="/search" class="search-btn" :class="{ 'mobile-active': isMenuOpen }" @click="closeMenu">
+                                <p class=" p-p1 text">搜尋好料理</p>
+                                <i class="fa-solid fa-magnifying-glass icon-search"></i>
+                            </router-link>
 
-                            <router-link v-for="item in navItems" :key="item.path" :to="item.path" class="p-p1">
+                            <router-link 
+                                v-for="item in navItems" 
+                                :key="item.path" 
+                                :to="item.path" 
+                                class="p-p1"
+                                @click="closeMenu"
+                            >
                                 {{ item.title }}
                             </router-link>
+
                             <div class="nav-icon-link">
                                 <router-link to="/cart" class="cart-btn" @click="closeMenu">
                                     <span class="btn-text  p-p1">我的購物車</span>
@@ -79,13 +87,15 @@ const navItems = computed(() => {
                                 </router-link>
                             </div>
                             <div class="side-menu-only">
-                                <router-link to="/"><img :src="$parsePublicFile('img/site/Recimo-logo-white.svg')" alt="logo" ></router-link>
+                                <router-link to="/">
+                                    <img :src="$parsePublicFile('img/site/Recimo-logo-white.svg')" alt="logo" >
+                                </router-link>
+
                                 <BaseBtn title="登出" height="30" />
                             </div>
+
                         </div>
-
                     </div>
-
                     <div class="nav-box"></div>
                 </div>
             </div>
@@ -94,13 +104,18 @@ const navItems = computed(() => {
 
     </nav>
 </template>
+
 <style lang="scss" scoped>
 .site-nav {
     transition: transform 0.4s ease, opacity .4s ease;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 
     &.nav--hidden {
         opacity: 0;
         pointer-events: none;
+        transform: translateY(-100%);
     }
 
     .content {
@@ -131,32 +146,33 @@ const navItems = computed(() => {
             position: absolute;
             left: -160px;
             animation: searchPulse 2.4s ease-in-out infinite;
+
             &:hover {
                 background-color: $accent-color-800;
                 color: $accent-color-100;
             }
+            .icon-search{
+                display: none;
+            }
         }
 
         .page-link {
-
-            .btn-text,
-            .side-menu-only {
-                display: none;
-            }
-
             background-color: $primary-color-800;
             display: flex;
-            gap: 20px;
+            gap: 16px;
             align-items: center;
             padding: 0 0 0 50px;
             border-radius: 50px 0 0 50px;
             margin-right:12px;
 
+            .btn-text,
+            .side-menu-only {
+                display: none;
+            }
             .nav-icon-link {
                 display: flex;
                 flex-direction: row;
                 gap: 14px;
-
             }
         }
     }
@@ -231,18 +247,9 @@ const navItems = computed(() => {
             transform: rotate(0deg);
         }
 
-        &.menu-open span:first-child {
-            top: 21.5px;
-            transform: rotate(45deg);
-        }
-
         span:nth-child(2) {
             top: 21.5px;
             transform: rotate(0deg);
-        }
-
-        &.menu-open span:nth-child(2) {
-            opacity: 0;
         }
 
         span:nth-child(3) {
@@ -250,9 +257,18 @@ const navItems = computed(() => {
             transform: rotate(0deg);
         }
 
-        &.menu-open span:nth-child(3) {
-            top: 21.5px;
-            transform: rotate(135deg);
+        &.menu-open{
+            span:first-child {
+                top: 21.5px;
+                transform: rotate(45deg);
+            }
+            span:nth-child(2) {
+                opacity: 0;
+            }
+            span:nth-child(3) {
+                top: 21.5px;
+                transform: rotate(135deg);
+            }
         }
     }
 }
@@ -260,39 +276,45 @@ const navItems = computed(() => {
 @media screen and (max-width: 1000px) {
     .site-nav {
         .link-group {
+
             .search-btn {
-                display: none;
+                left: -90px;
+                .icon-search{
+                    display: block;
+                }
+                .text{
+                    display: none;
+                }
+            }
+            .page-link{
+                gap: 10px;
+                padding: 0 0 0 35px;
             }
         }
-
         .logo img {
             height: 70%;
         }
+        .nav-box {
+            width: 800px;
+        }
+    
     }
-
-}
-@keyframes searchPulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 180, 0, 0.6);
-        transform: scale(1);
-    }
-    50% {
-        box-shadow: 0 0 0 8px rgba(255, 180, 0, 0);
-        transform: scale(1.03);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 180, 0, 0);
-        transform: scale(1);
-    }
+    
 }
 @media screen and (max-width: 810px) {
 
     .site-nav {
         .link-group {
+            display: block;
             .search-btn {
                 position: static;
                 margin-bottom: 20px;
-                width: 150px;
+                width: 100%;
+                max-width: 160px;
+                height: auto;
+                .icon-search{
+                    display: none;
+                }
             }
             .page-link {
                 position: fixed;
@@ -311,7 +333,15 @@ const navItems = computed(() => {
 
                 &.mobile-active {
                     transform: translateX(0);
-                    padding: 100px 30px 0;
+                    padding: 80px 30px 30px;
+                    flex-wrap: nowrap;
+                    overflow-x: scroll;
+                    white-space: nowrap;
+                    &::-webkit-scrollbar {
+                        display: none;
+                    }
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
 
                     .p-p1,
                     .nav-icon-link a {
@@ -320,6 +350,9 @@ const navItems = computed(() => {
                         justify-content: center;
                         width: 100%;
                         height: 45px;
+                    }
+                    a.p-p1 {
+                        flex-shrink: 0;
                     }
 
                     .nav-icon-link {
@@ -330,16 +363,13 @@ const navItems = computed(() => {
 
                         .btn-text {
                             color: $neutral-color-white;
-
                             &:hover {
                                 color: $accent-color-700;
                             }
-
                             .p-p1 {
                                 display: block;
                                 font-size: 1rem;
                             }
-
                         }
 
                         .btn-icon {
@@ -440,6 +470,20 @@ const navItems = computed(() => {
     }
     .nav-box {
         display: none;
+    }
+}
+@keyframes searchPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 180, 0, 0.6);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(255, 180, 0, 0);
+        transform: scale(1.03);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 180, 0, 0);
+        transform: scale(1);
     }
 }
 </style>

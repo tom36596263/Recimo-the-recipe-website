@@ -17,6 +17,8 @@ import { useRouter } from 'vue-router';
 import BaseBtn from '@/components/common/BaseBtn.vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { FreeMode } from 'swiper/modules';
+import { publicApi } from '@/utils/publicApi';
+import { parsePublicFile } from '@/utils/parseFile';
 import 'swiper/css';
 import 'swiper/css/free-mode';
 
@@ -73,13 +75,14 @@ const getDifficultyStars = (difficulty) => {
  */
 const loadIngredients = async () => {
     try {
-        // 載入所有食材資料
-        const ingredientsResponse = await fetch('/data/recipe/ingredients.json');
-        ingredientsData.value = await ingredientsResponse.json();
+        // 並行載入所有食材資料
+        const [ingredientsResponse, relationResponse] = await Promise.all([
+            publicApi.get('data/recipe/ingredients.json'),
+            publicApi.get('data/recipe/recipe_ingredient.json')
+        ]);
 
-        // 載入食譜-食材關聯表
-        const relationResponse = await fetch('/data/recipe/recipe_ingredient.json');
-        recipeIngredientsRelation.value = await relationResponse.json();
+        ingredientsData.value = ingredientsResponse.data;
+        recipeIngredientsRelation.value = relationResponse.data;
 
         // 篩選出當前食譜的食材
         loadRecipeIngredients();
@@ -114,7 +117,24 @@ const loadRecipeIngredients = () => {
 };
 
 /**
- * 根據食材分類返回對應的圖示 class
+ * 取得食材圖片 URL
+ * @param {String} imageUrl - 食材圖片路徑
+ * @returns {String} - 完整的圖片 URL
+ */
+const getIngredientImageUrl = (imageUrl) => {
+    if (!imageUrl) return '';
+    
+    // 如果是完整 URL，直接返回
+    if (imageUrl.startsWith('http')) {
+        return imageUrl;
+    }
+    
+    // 使用 parseFile.js 處理路徑
+    return parsePublicFile(imageUrl);
+};
+
+/**
+ * 根據食材分類返回對應的圖示 class（備用）
  * @param {String} mainCategory - 主分類
  * @param {String} subCategory - 次分類
  * @returns {String} - FontAwesome 圖示 class
@@ -226,9 +246,13 @@ onMounted(() => {
                 <SwiperSlide v-for="ingredient in recipeIngredients" :key="ingredient.ingredient_id"
                     class="ingredient-slide">
                     <div class="ingredient-tag">
-                        <!-- 食材圖示 -->
+                        <!-- 食材圖片 -->
                         <div class="ingredient-icon">
-                            <!-- <i :class="getIngredientIcon(ingredient.main_category, ingredient.sub_category)"></i> -->
+                            <img v-if="ingredient.ingredient_image_url" 
+                                :src="getIngredientImageUrl(ingredient.ingredient_image_url)" 
+                                :alt="ingredient.ingredient_name"
+                                class="ingredient-image" />
+                            <i v-else :class="getIngredientIcon(ingredient.main_category, ingredient.sub_category)"></i>
                         </div>
                         <!-- 食材名稱 -->
                         <span class="ingredient-name">{{ ingredient.ingredient_name }}</span>
@@ -413,10 +437,18 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 
     i {
         font-size: 24px;
         color: $primary-color-700;
+    }
+
+    .ingredient-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 8px;
     }
 }
 

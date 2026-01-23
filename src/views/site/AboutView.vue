@@ -22,6 +22,8 @@ import IconChef from '~icons/material-symbols/chef-hat-outline';
 import IconAddReaction from '~icons/material-symbols/add-reaction-outline';
 import IconCart from '~icons/material-symbols/Shopping-Cart-outline';
 
+import AboutBanner from '@/components/site/about/AboutBanner.vue'
+
 // 在組件中定義 modules 方便 template 使用
 const swiperModules = [Pagination, Autoplay];
 
@@ -282,10 +284,10 @@ onMounted(() => {
     <!-- ==========================================
             banner
     ========================================= -->
-    <div class="hero-container container">
+    <div class="hero-container container fade-in-init">
         <div class="row">
             <div class="hero-banner col-12">
-                <h1 class="zh-h2">關於Recimo</h1>
+                <AboutBanner />
             </div>
         </div>
     </div>
@@ -398,16 +400,12 @@ onMounted(() => {
 // banner
 // ==========================================
 .hero-banner {
-    background-image: url(@/assets/images/about/about-bg.jpg);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 415px;
-    margin-top: 40px;
+    margin-top: 20px;
     margin-bottom: 40px;
+    border-radius: $radius-base;
 
     @media screen and (max-width: 1024px) {
         // 如果圖片主體在右邊，就把位置往右靠，避免右側被裁切
@@ -419,11 +417,9 @@ onMounted(() => {
         margin-bottom: 20px;
     }
 }
-
-h1 {
-    text-align: center;
-    color: $neutral-color-white;
-}
+.fade-in-init {
+        animation: fadeInScale 0.8s ease-out forwards;
+    }
 
 // ==========================================
 // 功能介紹-頁籤切換
@@ -725,10 +721,21 @@ div .introduce .container {
     }
 }
 
-// 手機板把靈感小廚房按鈕移除
-@media screen and (max-width: 810px) {
-    .hide-on-mobile {
-        display: none !important;
+    // 手機板把靈感小廚房按鈕移除
+    @media screen and (max-width: 810px) {
+        .hide-on-mobile {
+            display: none !important;
+        }
     }
-}
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.98);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
 </style>

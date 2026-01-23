@@ -57,9 +57,9 @@ onMounted(() => {
                 把煮飯變成最療癒的創作</p>
             <router-link to="/recipes" class="circle-btn" :class="{ 'fade-in': showOtherText }"><CircleBtn title="尋找食譜" /></router-link>
         </div>
-        <div class="bg-layout">
+        <!-- <div class="bg-layout">
             <img :src="$parsePublicFile('img/site/hero.png')" alt="hero-bg" >
-        </div>
+        </div> -->
     </div>
     
     
@@ -117,19 +117,6 @@ onMounted(() => {
             transition: opacity 1s ease-in-out 0.5s; // 稍微延遲淡入
             &.fade-in {
                 opacity: 1;
-            }
-        }
-        .bg-layout{
-            z-index: -1;
-            position: absolute;
-            top: 0;
-            left: 0; 
-            height: 100vh;
-            img{
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                object-position: center;
             }
         }
         .circle-btn{

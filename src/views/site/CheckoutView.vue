@@ -152,23 +152,21 @@ const formatExpiryDate = (e) => {
 };
 
 
-// --- 送出按鈕 (檢查所有必填) ---
-const handleDelete = () => {
-  // 1. 觸發 [訂購人] 必填驗證 (不包含 home)
+// 接收 template 傳進來的 navigate 函式
+const handleDelete = (navigate) => {
+
+  // --- 1. 執行原本的驗證邏輯 (保持不變) ---
   validateField('name');
   validateField('phone');
   validateField('email');
   validateField('adress');
 
-  // 2. 觸發 [宅配] 必填驗證 (如果有選配送方式)
   if (form.value.shippingType) {
     validateField('addname');
     validateField('addphone');
-    // validateField('addhome'); // 這行故意註解掉，不檢查家用電話
     validateField('addadress');
   }
 
-  // 3. 觸發 [信用卡] 必填驗證 (如果有選信用卡)
   if (form.value.paymentMethod === 'card') {
     validateField('cardnum1');
     validateField('cardnum2');
@@ -178,19 +176,28 @@ const handleDelete = () => {
     validateField('savenum');
   }
 
-  // 4. 總檢查
   const hasError = Object.values(errors.value).some((msg) => msg !== '');
+
+  // --- 2. 判斷邏輯 ---
 
   if (hasError) {
     alert('資料填寫有誤，請檢查紅色欄位');
+    // 這裡不呼叫 navigate()，所以雖然外面有 router-link，但不會跳轉！
   } else if (!form.value.shippingType) {
     alert('請選擇宅配地址方式');
   } else if (!form.value.paymentMethod) {
     alert('請選擇付款方式');
   } else {
+    // --- 3. 驗證通過，執行跳轉 ---
     console.log('送出資料：', form.value);
     alert('訂單送出成功');
-    router.push('../workspace/OrderInquiry.vue');
+
+    // 呼叫 router-link 提供的跳轉功能
+    // 這會自動套用 router-link 計算好的正確路徑 (包含部署的 base url)
+    if (navigate) {
+      navigate();
+    }
+    // router.push('../workspacr/OrderInquiry.vue');
   }
 };
 
@@ -392,9 +399,9 @@ const totalAmount = computed(() => {
               </div>
             </div>
           </div>
-          <router-link to="orders">
+          <router-link to="../workspace/orders" custom v-slot="{ navigate }">
             <div class="submit">
-              <BaseBtn title="確定結帳" @click="handleDelete" />
+              <BaseBtn title="確定結帳" @click="handleDelete(navigate)" />
             </div>
           </router-link>
 
