@@ -6706,5 +6706,70 @@
     "carbs_per_100g": 0.0,
     "unit_name": "克",
     "gram_conversion": 1.0
+  },
+  {
+    "ingredient_id": 517,
+    "ingredient_name": "白蘿蔔 (整根)",
+    "main_category": "fresh-produce",
+    "sub_category": "root-vegetables",
+    "ingredient_image_url": "img/ingredients/fresh-produce/root-vegetables/white-radish-whole.png",
+    "kcal_per_100g": 18.0,
+    "protein_per_100g": 0.6,
+    "fat_per_100g": 0.1,
+    "carbs_per_100g": 4.1,
+    "unit_name": "根",
+    "gram_conversion": 500.0
+  },
+  {
+    "ingredient_id": 518,
+    "ingredient_name": "甜玉米",
+    "main_category": "fresh-produce",
+    "sub_category": "stalk-vegetables",
+    "ingredient_image_url": "img/ingredients/fresh-produce/stalk-vegetables/sweet-corn.png",
+    "kcal_per_100g": 107.0,
+    "protein_per_100g": 3.5,
+    "fat_per_100g": 2.2,
+    "carbs_per_100g": 22.0,
+    "unit_name": "根",
+    "gram_conversion": 250.0
+  },
+  {
+    "ingredient_id": 519,
+    "ingredient_name": "豬肉絲",
+    "main_category": "meat-poultry",
+    "sub_category": "pork",
+    "ingredient_image_url": "img/ingredients/meat-poultry/pork/pork-shredds.png",
+    "kcal_per_100g": 155.0,
+    "protein_per_100g": 18.5,
+    "fat_per_100g": 8.5,
+    "carbs_per_100g": 0.0,
+    "unit_name": "克",
+    "gram_conversion": 1.0
+  },
+  {
+    "ingredient_id": 520,
+    "ingredient_name": "罐裝剝皮辣椒",
+    "main_category": "pantry-spices-nuts",
+    "sub_category": "pickles-preserves",
+    "ingredient_image_url": "img/ingredients/pantry-spices-nuts/pickles-preserves/peeled-chili-canned.png",
+    "kcal_per_100g": 85.0,
+    "protein_per_100g": 1.5,
+    "fat_per_100g": 3.8,
+    "carbs_per_100g": 11.2,
+    "unit_name": "罐",
+    "gram_conversion": 450.0
+  },
+  {
+    "ingredient_id": 521,
+    "ingredient_name": "牛絞肉",
+    "main_category": "meat-poultry",
+    "sub_category": "beef",
+    "ingredient_image_url": "img/ingredients/meat-poultry/beef/ground-beef.png",
+    "kcal_per_100g": 250.0,
+    "protein_per_100g": 18.2,
+    "fat_per_100g": 19.4,
+    "carbs_per_100g": 0.0,
+    "unit_name": "克",
+    "gram_conversion": 1.0
   }
 ]

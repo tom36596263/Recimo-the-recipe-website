@@ -42,7 +42,7 @@ const fetchData = async () => {
         //再以步驟+食材關聯資料表(step_ingredients.json)的ingredient_id對比ingredients.json的ingredient_id
         const ingredientIds = stepIngredientItems.value.map(i => i.ingredient_id);
         allIngredients.value = ingredientsRes.data.filter(i => ingredientIds.includes(i.ingredient_id));
-    } catch (error) { //error是
+    } catch (error) { //error是自訂義的變數，而catch是try出錯後會執行的部分，try/catch是一組，最後也可以接finally。try(嘗試執行)/catch(若try執行失敗)/finally(無論如何都會執行)
         console.error('資料讀取失敗', error.message);
     }
 };
@@ -55,7 +55,7 @@ watch(() => route.params.id, (newId) => {
 });
 
 const currentStepIndex = ref(0); // 預設顯示第一步 (索引為 0)
-const stepNotes = ref({}); // 用來儲存每個步驟的筆記，格式如 { step_id: '筆記內容' }
+const stepNotes = ref({}); // 宣告變數以儲存每個步驟的筆記，格式如 { step_id: '筆記內容' }
 
 // 計算屬性：獲取目前顯示的步驟資料
 const currentStepData = computed(() => allSteps.value[currentStepIndex.value] || {});
