@@ -5,8 +5,10 @@ import card from '@/components/mall/CheckCard.vue';
 // import axios from 'axios';
 // import { publicApi } from '@/utils/publicApi';
 import { useCartStore } from '@/stores/cartStore';
+import Modal from '@/components/BaseModal.vue';
 
-
+// 控制彈窗顯示的變數
+const showSuccessModal = ref(false);
 const cartStore = useCartStore(); // 2. 初始化 Store
 const router = useRouter();
 const orderItems = computed(() => cartStore.items);
@@ -153,7 +155,7 @@ const formatExpiryDate = (e) => {
 
 
 // 接收 template 傳進來的 navigate 函式
-const handleDelete = (navigate) => {
+const handleSubmit = (navigate) => {
 
   // --- 1. 執行原本的驗證邏輯 (保持不變) ---
   validateField('name');
@@ -190,15 +192,20 @@ const handleDelete = (navigate) => {
   } else {
     // --- 3. 驗證通過，執行跳轉 ---
     console.log('送出資料：', form.value);
-    alert('訂單送出成功');
-
-    // 呼叫 router-link 提供的跳轉功能
-    // 這會自動套用 router-link 計算好的正確路徑 (包含部署的 base url)
-    if (navigate) {
-      navigate();
-    }
-    // router.push('../workspacr/OrderInquiry.vue');
+    showSuccessModal.value = true;
+    setTimeout(() => {
+      handleModalCloseAndRedirect();
+    }, 3000);
   }
+};
+
+// --- 處理彈窗關閉並跳轉 ---
+const handleModalCloseAndRedirect = () => {
+  // 關閉彈窗
+  showSuccessModal.value = false;
+
+  // 執行跳轉
+  router.push('../workspace/orders');
 };
 
 const backcart = () => {
@@ -457,11 +464,12 @@ const handleCardInput = (e, fieldName, nextInputRef) => {
               </div>
             </div>
           </div>
-          <router-link to="../workspace/orders" custom v-slot="{ navigate }">
-            <div class="submit">
-              <BaseBtn title="確定結帳" @click="handleDelete(navigate)" />
-            </div>
-          </router-link>
+          <div class="submit">
+            <BaseBtn title="確定結帳" @click="handleSubmit" />
+          </div>
+          <Modal :is-open="showSuccessModal" type="success" title="訂單已送出" description="感謝您的購買，您可以在訂單查詢頁面查看詳情。"
+            icon-class="fa-solid fa-circle-check" @close="handleModalCloseAndRedirect">
+          </Modal>
 
         </div>
       </div>
