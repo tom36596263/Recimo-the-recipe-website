@@ -66,11 +66,11 @@ onMounted(() => {
 <style lang="scss" scoped>
 /* 樣式保持不變 */
 .benefit-table-bg {
-    margin-top: 100px;
-    margin-bottom: 80px;
+    margin-top: 40px;
+    margin-bottom: 40px;
     width: 100%;
     background-color: $neutral-color-100;
-    padding: 80px 0;
+    padding: 40px 0;
 }
 
 .contact-content {

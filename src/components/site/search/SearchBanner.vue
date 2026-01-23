@@ -131,7 +131,6 @@ const handleTagClick = (tagName) => {
         }
         
     }
-    
     @media screen and (max-width: 810px){
         .search-banner{
             .content-overlay{

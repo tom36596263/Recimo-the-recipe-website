@@ -29,24 +29,24 @@ const handleOpen = () => {
 
 .membership-banner {
     width: 100%;
-    height: 60vh;
-    min-height: 320px;
-    max-height: 560px;
+    // height: 60vh;
+    // min-height: 320px;
+    // max-height: 560px;
     margin-top: 30px;
     position: relative;
     overflow: hidden;
     border-radius: 10px;
 
     .banner-content {
-        width: 100%;
-        height: 100%;
+        // width: 100%;
+        // height: 100%;
         position: relative;
         overflow: hidden;
     }
 
     img {
         width: 100%;
-        height: 100%;
+        // height: 100%;
         object-fit: cover;
         object-position: center;
         display: block;
