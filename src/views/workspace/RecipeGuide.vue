@@ -55,10 +55,13 @@ watch(() => route.params.id, (newId) => {
 });
 
 const currentStepIndex = ref(0); // 預設顯示第一步 (索引為 0)
+// computed是vue內建的API，從JavaScript的角度來看它也是函式，是vue提供的一套流水線。
+// computed裡面需要放置一段邏輯，不能直接給變數，否則computed只會在網頁載入的當下接收到該變數代表的資料，後續就算該變數有變動computed也不知道要變。
+const currentStepData = computed(() => allSteps.value[currentStepIndex.value] || {});
+
 const stepNotes = ref({}); // 宣告變數以儲存每個步驟的筆記，格式如 { step_id: '筆記內容' }
 
-// 計算屬性：獲取目前顯示的步驟資料
-const currentStepData = computed(() => allSteps.value[currentStepIndex.value] || {});
+
 
 // 計算屬性：獲取目前步驟對應的食材（包含名稱、份量、單位）
 const currentStepIngredients = computed(() => {

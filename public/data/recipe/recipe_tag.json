@@ -178,5 +178,11 @@
   { "recipe_tag_id": 177, "tag_id": 43, "recipe_id": 59 },
   { "recipe_tag_id": 178, "tag_id": 64, "recipe_id": 60 },
   { "recipe_tag_id": 179, "tag_id": 65, "recipe_id": 60 },
-  { "recipe_tag_id": 180, "tag_id": 40, "recipe_id": 60 }
+  { "recipe_tag_id": 180, "tag_id": 40, "recipe_id": 60 },
+  { "recipe_tag_id": 181, "tag_id": 12, "recipe_id": 61 },
+  { "recipe_tag_id": 182, "tag_id": 25, "recipe_id": 61 },
+  { "recipe_tag_id": 183, "tag_id": 27, "recipe_id": 61 },
+  { "recipe_tag_id": 184, "tag_id": 17, "recipe_id": 62 },
+  { "recipe_tag_id": 185, "tag_id": 22, "recipe_id": 62 },
+  { "recipe_tag_id": 186, "tag_id": 66, "recipe_id": 62 }
 ]
