@@ -153,6 +153,11 @@ const formatExpiryDate = (e) => {
   form.value.num = val;
 };
 
+// 新增一個產生 8 位數亂碼的函式
+const generateOrderId = () => {
+  // 產生 10000000 ~ 99999999 之間的亂數
+  return String(Math.floor(10000000 + Math.random() * 90000000));
+};
 
 // 接收 template 傳進來的 navigate 函式
 const handleSubmit = (navigate) => {
@@ -190,8 +195,55 @@ const handleSubmit = (navigate) => {
   } else if (!form.value.paymentMethod) {
     alert('請選擇付款方式');
   } else {
-    // --- 3. 驗證通過，執行跳轉 ---
-    console.log('送出資料：', form.value);
+    // 1. 決定收件人資訊 (如果是同訂購人，就用訂購人的資料，否則用新增的)
+    const receiverName = form.value.shippingType === 'same' ? form.value.name : form.value.addname;
+    const receiverPhone = form.value.shippingType === 'same' ? form.value.phone : form.value.addphone;
+
+    // 2. 轉換商品格式 (對應 OrderCard 的 items: [{ name, qty, price }] )
+    const formattedItems = orderItems.value.map(item => ({
+      name: item.product_name || item.name, // 確保抓得到名稱
+      qty: Number(item.count || item.quantity || 1),
+      price: Number(item.product_price || item.price || 0)
+    }));
+
+    // 3. 建立訂單物件
+    const newOrder = {
+      // 需求：8位數訂單編號
+      id: generateOrderId(),
+
+      date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+      status: 0, // 0: 新訂單/訂購成功
+
+      // OrderCard 顯示需要的欄位
+      trackingNo: '處理中', // 新訂單還沒有物流編號
+      receiver: receiverName,
+      phone: receiverPhone,
+      method: '宅配到府', // 固定或根據 shippingType 顯示
+      payment: form.value.paymentMethod === 'card' ? '已付款' : '未付款',
+
+      // 商品列表
+      items: formattedItems,
+
+      // 保留原始金額資訊 (給後端或除錯用)
+      total_amount: totalAmount.value,
+      shipping_fee: shippingFee.value
+    };
+
+    // B. 從 LocalStorage 取出舊訂單 (如果有)
+    const existingOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
+
+    // C. 加入新訂單 (放在最前面)
+    existingOrders.unshift(newOrder);
+
+    // D. 存回 LocalStorage
+    localStorage.setItem('mall_orders', JSON.stringify(existingOrders));
+
+    // E. 清空購物車 Store
+    cartStore.items = [];
+
+    console.log('訂單已儲存：', newOrder);
+
+    // F. 顯示成功彈窗
     showSuccessModal.value = true;
     setTimeout(() => {
       handleModalCloseAndRedirect();
