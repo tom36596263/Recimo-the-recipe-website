@@ -6,7 +6,7 @@ import IconReplay from '~icons/material-symbols/replay-circle-filled-outline-rou
 const props = defineProps({
     modelValue: String
 })
-const emit = defineEmits(['update:modelValue', 'verified'])
+const emit = defineEmits(['update:modelValue', 'verified', 'enter-press'])
 
 const captchaInput = ref('')
 const canvasRef = ref(null)

@@ -30,6 +30,13 @@ const props = defineProps({
     }
 });
 
+const emit = defineEmits([
+    'update:modelValue',
+    'blur',
+    'enter-press'
+])
+
+
 // 計算容器寬度
 const containerStyle = computed(() => {
     if (!props.maxWidth) return {};
@@ -44,11 +51,7 @@ const inputClasses = computed(() => ({
     'is-success': props.status === 'success'
 }));
 
-const emit = defineEmits([
-    'update:modelValue',
-    'blur',
-    'enter-press'
-])
+
 
 </script>
 

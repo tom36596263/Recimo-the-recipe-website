@@ -1,37 +1,32 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
-import BaseModal from '@/components/BaseModal.vue';
+
+// 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
 const authStore = useAuthStore();
-
-// ==========================================
-// input前端驗證
-// ==========================================
+// 引用彈窗
+import BaseModal from '@/components/BaseModal.vue';
+// 引用input
 import BaseInput from '@/components/login/BaseInput.vue'
-
-// icon
+// 引用icon
 import IconEyeOpen from '~icons/material-symbols/visibility-outline-rounded';
 import IconEyeClose from '~icons/material-symbols/visibility-off-outline-rounded';
+// 引用驗證碼
+import CaptchaInput from '@/components/login/CaptchaInput.vue'
 
 
-// 定義控制 Modal 的變數
+// 定義控制彈窗的變數
 const showLoginSuccess = ref(false);
 const showLoginFail = ref(false);
-const showTypeFail = ref(false);
+
 // ==========================================
-// 1. 登入用的資料
+// 登入.註冊前端驗證
 // ==========================================
 const loginData = ref({
   email: '',
   password: ''
 });
-const USER = {
-  email: 'admin@test.com',
-  password: '123456'
-};
-// ==========================================
-// 2. 註冊用的資料
-// ==========================================
+
 const registerData = ref({
   name: '',
   email: '',
@@ -39,16 +34,13 @@ const registerData = ref({
   confirmPassword: ''
 });
 
-// const showPassword = ref(false);
-
 // 追蹤每個欄位是否被觸碰
 const touched = ref({
   login: { email: false, password: false },
   register: { name: false, email: false, password: false, confirmPassword: false }
 });
 
-// 訊息內容
-// --- 登入驗證邏輯 ---
+// 登入input前端驗證訊息內容
 const loginMessage = computed(() => {
   const t = touched.value.login;
   const d = loginData.value;
@@ -63,7 +55,7 @@ const loginStatus = computed(() => ({
   password: touched.value.login.password ? (loginMessage.value.password ? 'error' : 'success') : ''
 }));
 
-// --- 註冊驗證邏輯 ---
+// 註冊input前端驗證訊息內容
 const registerMessage = computed(() => {
   const t = touched.value.register;
   const d = registerData.value;
@@ -74,7 +66,14 @@ const registerMessage = computed(() => {
     if (!d.email) msg.email = '* 此欄為必填';
     else if (!/^\S+@\S+\.\S+$/.test(d.email)) msg.email = '* email 格式錯誤';
   }
-  if (t.password && !d.password) msg.password = '* 此欄為必填';
+  // 檢查密碼規則是否全過
+  const isPasswordValid = Object.values(passwordRules.value).every(v => v);
+  if (t.password && !isPasswordValid) {
+    // 回傳一個帶空格的字串，這會讓 BaseInput 的 status 判定為 error (顯示紅框)
+    // 但因為內容是空的，所以畫面上不會看到錯誤文字
+    msg.password = ' ';
+  }
+  // 確認密碼驗證
   if (t.confirmPassword) {
     if (!d.confirmPassword) msg.confirmPassword = '* 此欄為必填';
     else if (d.confirmPassword !== d.password) msg.confirmPassword = '* 兩次密碼不一致';
@@ -98,7 +97,9 @@ const registerStatus = computed(() => {
   };
 });
 
-// enter會進下一個input
+// ==========================================
+// enter會進下一個input(尚未成功)
+// ==========================================
 const loginEmailRef = ref(null);
 const loginPasswordRef = ref(null);
 const captchaRef = ref(null);
@@ -128,7 +129,6 @@ const focusInput = async (targetRef) => {
 // ==========================================
 // 驗證碼
 // ==========================================
-import CaptchaInput from '@/components/login/CaptchaInput.vue'
 const loginForm = ref({
   captchaInput: ''
 })
@@ -140,40 +140,81 @@ const onCaptchaVerified = (success) => {
 }
 
 // ==========================================
-// 登入按鈕
+// 登入及註冊按鈕邏輯
 // ==========================================
-// Login 按鈕邏輯
-const handleLogin = () => {
-  // 1. 基本前端驗證 (email, password, captcha)
-  if (loginMessage.value.email || loginMessage.value.password || !captchaVerified.value) {
-    showTypeFail.value = true;
-    return;
-  }
+// 登入按鈕邏輯
+const handleLogin = async () => {
 
-  // 2. 假帳密比對邏輯
-  const { email, password } = loginData.value;
-  if (email === 'admin@test.com' && password === '123456') {
+  // 1. 強制觸發所有欄位驗證顯示
+  Object.keys(touched.value.login).forEach(key => touched.value.login[key] = true);
 
-    // --- 關鍵步驟 ---
-    authStore.login(); // 這裡會把 isLoggedIn 設為 true，並觸發續傳動作
-    // ----------------
+  try {
+    // 這裡 fetch 路徑請確保檔案存在於 public/data/users.json
+    const response = await fetch('/data/user/users.json');
+    if (!response.ok) throw new Error('無法讀取使用者資料');
 
-    // alert('登入成功！');
-    showLoginSuccess.value = true;
+    const users = await response.json();
+    const { email, password } = loginData.value;
 
-    // 延遲一點點時間再關閉主燈箱，讓使用者看到成功訊息
-    setTimeout(() => {
-      showLoginSuccess.value = false;
-      handleClose();
-    }, 1500);
+    // 2. 比對資料
+    const foundUser = users.find(u =>
+      u.user_email === email && u.user_password === password
+    );
 
-    // handleClose(); // 關閉燈箱
-  } else {
-    // alert('錯誤(測試用帳號：admin@test.com / 測試用密碼：123456)');
-    showLoginFail.value = true;
+    if (foundUser) {
+      if (!foundUser.is_active) {
+        alert('此帳號已被停用，請聯絡管理員');
+        return;
+      }
+
+      // 3. 登入成功
+      authStore.login(foundUser);
+
+      showLoginSuccess.value = true;
+      setTimeout(() => {
+        showLoginSuccess.value = false;
+        handleClose();
+
+        // --- 新增跳轉邏輯 ---
+        // 檢查網址列有沒有存 redirect 參數，沒有的話就回首頁 '/'
+        const redirectPath = route.query.redirect || '/';
+        router.push(redirectPath);
+      }, 1500);
+
+    } else {
+      // 4. 登入失敗
+      showLoginFail.value = true;
+    }
+  } catch (error) {
+    console.error('取得資料失敗:', error);
+    alert('伺服器連線異常，請稍後再試');
   }
 };
 
+// 重置登入表單
+const captchaKey = ref(0);
+const resetLoginForm = () => {
+  // 1. 清空輸入資料
+  loginData.value = {
+    email: '',
+    password: ''
+  };
+
+  // 2. 清空驗證碼輸入 (如果有需要)
+  loginForm.value.captchaInput = '';
+
+  // 3. 重置「已觸碰」狀態，這樣錯誤訊息（紅字）才會消失
+  touched.value.login = {
+    email: false,
+    password: false
+  };
+
+  // 4. 重置驗證碼成功狀態
+  captchaVerified.value = false;
+  captchaKey.value += 1;
+};
+
+// 註冊按鈕邏輯
 const handleRegister = () => {
   // 1. 觸發所有欄位的 touched 狀態 (強制顯示驗證錯誤)
   touched.value.register = {
@@ -182,6 +223,14 @@ const handleRegister = () => {
     password: true,
     confirmPassword: true
   };
+
+  // 新增規則檢查
+  const allRulesMet = Object.values(passwordRules.value).every(val => val === true);
+
+  if (!allRulesMet) {
+    alert('密碼不符合規定，請重新檢查');
+    return;
+  }
 
   // 2. 檢查是否有錯誤訊息
   const hasError = Object.values(registerMessage.value).some(msg => msg !== '');
@@ -198,26 +247,39 @@ const handleRegister = () => {
   // 註冊完通常會直接幫使用者登入或跳轉到登入頁
   goToLogin();
 };
+
+// 補上重置註冊表單的函式
+const resetRegisterForm = () => {
+  registerData.value = {
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  };
+  // 同時重置錯誤狀態，否則翻回來會看到滿片紅字
+  touched.value.register = {
+    name: false,
+    email: false,
+    password: false,
+    confirmPassword: false
+  };
+};
 // ==========================================
-// 翻頁效果
+// 翻頁效果與自動清空
 // ==========================================
 const isRegister = ref(false);
 const isVisible = ref(true);
 
-watch(
-  [isVisible, isRegister],
-  async ([visible, isReg]) => {
-    if (!visible) return;
-
-    await nextTick();
-
-    if (isReg) {
-      regNameRef.value?.focus?.();
-    } else {
-      loginEmailRef.value?.focus?.();
-    }
+// 核心監聽：只要頁面一切換，就清空「對方」的資料
+watch(isRegister, (newVal) => {
+  if (newVal) {
+    // 切換到註冊 -> 清空登入表單
+    resetLoginForm();
+  } else {
+    // 切換到登入 -> 清空註冊表單
+    resetRegisterForm();
   }
-);
+});
 
 // 切換翻頁狀態的函式
 const goToRegister = () => {
@@ -230,16 +292,24 @@ const goToLogin = () => {
   // console.log('切換到登入頁', isRegister.value);
 };
 
+// ==========================================
 // 關閉燈箱
-
+// ==========================================
 const emit = defineEmits(['close']);
-
 const handleClose = () => {
   // console.log('Close button clicked'); // 如果沒印出來，代表按鈕沒點到
   emit('close'); // 通知 GlobalModalManager 把 Pinia 的狀態關掉
 };
 
-
+// 密碼規定檢查
+const passwordRules = computed(() => {
+  const pwd = registerData.value.password;
+  return {
+    length: pwd.length >= 8,                       // 至少 8 個字元
+    hasUpper: /[A-Z]/.test(pwd),                  // 含一大寫字母
+    hasLower: /[a-z]/.test(pwd),                  // 含一小寫字母
+  };
+});
 </script>
 
 <template>
@@ -286,8 +356,8 @@ const handleClose = () => {
                     </button>
                   </template>
                 </BaseInput>
-                <CaptchaInput ref="captchaRef" v-model="loginForm.captchaInput" @verified="onCaptchaVerified"
-                  @enter-press="handleLogin" class="tight-gap" />
+                <CaptchaInput :key="captchaKey" ref="captchaRef" v-model="loginForm.captchaInput"
+                  @verified="onCaptchaVerified" @enter-press="handleLogin" class="tight-gap" />
                 <div class="login-options">
                   <BaseBtn title=" 登入" variant="solid" @click="handleLogin" :width="244" :height="50"
                     class="login-btn" />
@@ -329,8 +399,29 @@ const handleClose = () => {
                     </button>
                   </template>
                 </BaseInput>
+
+                <div class="password-requirements">
+                  <p class="requirements-title p-p3">密碼規定：</p>
+                  <ul>
+                    <li class="p-p3" :class="{ 'met': passwordRules.length }">
+                      <i
+                        :class="passwordRules.length ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
+                      至少含八個字元
+                    </li>
+                    <li class="p-p3" :class="{ 'met': passwordRules.hasUpper }">
+                      <i
+                        :class="passwordRules.hasUpper ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
+                      含一大寫英文字母
+                    </li>
+                    <li class="p-p3" :class="{ 'met': passwordRules.hasLower }">
+                      <i
+                        :class="passwordRules.hasLower ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
+                      含一小寫英文字母
+                    </li>
+                  </ul>
+                </div>
                 <BaseInput ref="regConfirmPasswordRef" v-model="registerData.confirmPassword" label="確認密碼"
-                  placeholder="請輸入再輸入一次密碼" :type="showRegisterPassword ? 'text' : 'password'"
+                  placeholder="請再輸入一次密碼" :type="showRegisterPassword ? 'text' : 'password'"
                   :status="registerStatus.confirmPassword" :message="registerMessage.confirmPassword"
                   @blur="touched.register.confirmPassword = true" @enter-press="handleRegister" class="tight-gap" />
                 <BaseBtn title="註冊" variant="solid" @click="handleRegister" :width="244" :height="50" />
@@ -381,18 +472,10 @@ const handleClose = () => {
     <BaseModal :isOpen="showLoginSuccess" type="success" iconClass="fa-solid fa-check" title="登入成功"
       @close="showLoginSuccess = false" />
 
-    <BaseModal :isOpen="showTypeFail" type="danger" iconClass="fa-solid fa-exclamation" title="請輸入完整"
-      @close="showTypeFail = false">
-      <template #actions>
-        <button class="btn-solid" @click="showTypeFail = false">回去修改</button>
-        <!-- <button class="btn-outline" @click="/* 導向忘記密碼邏輯 */">忘記密碼</button> -->
-      </template>
-    </BaseModal>
-
     <BaseModal :isOpen="showLoginFail" type="danger" iconClass="fa-solid fa-exclamation" title="登入失敗"
       @close="showLoginFail = false">
       <template #actions>
-        <button class="btn-solid" @click="showLoginFail = false">重新登入</button>
+        <button class="btn-solid" @click="showLoginFail = false; resetLoginForm()">重新登入</button>
         <!-- <button class="btn-outline" @click="/* 導向忘記密碼邏輯 */">忘記密碼</button> -->
       </template>
     </BaseModal>
@@ -445,15 +528,12 @@ const handleClose = () => {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin: 5px 0;
 }
 
 //標題
 .auth-form__title {
   text-align: center;
-  margin: 10px 0;
-}
-
-.tight-gap {
   margin: 10px 0;
 }
 
@@ -463,7 +543,6 @@ const handleClose = () => {
   justify-content: space-between; // 讓標籤跟連結分開在左右兩頭
   align-items: center;
   width: 100%;
-  margin-bottom: 4px; // 與 input 的距離
 }
 
 .forgot-password-link {
@@ -740,6 +819,11 @@ const handleClose = () => {
   }
 }
 
+.book__face--back {
+  pointer-events: auto; // 確保背面元素可點擊
+  z-index: 10; // 稍微提高一點點
+}
+
 // 手機版切換文字樣式
 .mobile-switch-text {
   display: none; // 桌機版隱藏
@@ -824,11 +908,42 @@ const handleClose = () => {
     height: 40px;
     width: 100%;
   }
+
+  .book__cover {
+    display: none !important;
+    pointer-events: none; // 徹底防禦
+  }
 }
 
 /* 確保彈窗在燈箱之上 */
 :deep(.modal-overlay) {
   z-index: 1100;
   /* 比 auth-modal 的 1000 更高 */
+}
+
+.password-requirements {
+  width: 100%;
+  margin-top: -10px; // 稍微往上靠攏 input
+  margin-bottom: 5px;
+  padding-left: 5px;
+
+  .requirements-title {
+    color: $neutral-color-700;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    color: #ff5252; // 預設紅色（未通過）
+    transition: color 0.3s ease;
+
+    i {
+      font-size: 12px;
+    }
+
+    &.met {
+      color: #4caf50; // 通過後變綠色
+    }
+  }
 }
 </style>
