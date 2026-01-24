@@ -11,4 +11,13 @@ export const publicApi = axios.create({
     timeout: 5000
 })
 
+export const testApi = axios.create({
+  baseURL: 'https://tibamef2e.com/cjd101/g1/api',
+  timeout: 5000,
+})
+export const testApi2 = axios.create({
+  baseURL: 'https://notes.webmix.cc/ajax/teach/api',
+  timeout: 5000,
+})
+
 console.log('目前的 API 基準路徑為:', base); // 打開控制台可以看到目前抓到的路徑

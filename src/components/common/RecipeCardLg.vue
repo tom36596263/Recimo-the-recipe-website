@@ -86,7 +86,7 @@
                     <img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo" >
                 </div>
                 <p class="p-p1">Recimo</p>
-                <div @click.prevent.stopp>
+                <div @click.prevent.stop>
                     <LikeButton 
                     :initial-likes="recipe.author.likes || 0" 
                     @update:liked="(val) => handleLikeChange(val, item)"
@@ -95,9 +95,9 @@
                 
             </div>
             
-            <div class="btn-group">
+            <!-- <div class="btn-group">
                 <BaseBtn title="食譜詳情" variant="solid" height="30" @click="goToDetail" class="btn" />
-            </div>
+            </div> -->
             
         </footer>
     </div>
