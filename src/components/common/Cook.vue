@@ -306,7 +306,7 @@ const startCooking = () => {
                         <i class="fa-solid fa-xmark"></i>
                     </div>
                     <div class="search">
-                        <SearchBar v-model="keyword" placeholder="搜尋食譜" style="width: 270px;" />
+                        <SearchBar v-model="keyword" placeholder="搜尋食材" style="width: 270px;" />
                     </div>
                     <div class="tag">
                         <BaseTag v-for="item in tags" :key="item.text" :text="item.text" :width="item.width"

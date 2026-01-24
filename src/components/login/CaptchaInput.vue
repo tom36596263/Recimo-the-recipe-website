@@ -16,6 +16,10 @@ function rand(min, max) { return Math.floor(Math.random() * (max - min) + min) }
 
 // 產生驗證碼
 const generateCaptcha = () => {
+    // 每次產生新的驗證碼，就把輸入框清空並通知父層「尚未驗證」
+    captchaInput.value = '';
+    emit('verified', false);
+
     const canvas = canvasRef.value
     if (!canvas) return
     const ctx = canvas.getContext('2d')
