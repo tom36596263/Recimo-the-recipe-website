@@ -7,7 +7,7 @@
     "user_address": "桃園市中壢區復興路46號9樓",
     "user_password": "G2Recimo",
     "user_startdate": "2025-12-09 00:00:00",
-    "user_url": "https://example.com/images/user1.jpg",
+    "user_url": "/img/site/Recimo_avatar.svg",
     "is_verified": true,
     "is_active": true
   },
@@ -19,7 +19,7 @@
     "user_address": "桃園市中壢區復興路46號9樓",
     "user_password": "123456",
     "user_startdate": "2026-01-22 22:25:00",
-    "user_url": "https://example.com/images/user2.jpg",
+    "user_url": null,
     "is_verified": true,
     "is_active": true
   },
@@ -31,7 +31,7 @@
     "user_address": "桃園市中壢區復興路46號9樓",
     "user_password": "123456",
     "user_startdate": "2026-01-23 10:07:00",
-    "user_url": "https://example.com/images/user3.jpg",
+    "user_url": null,
     "is_verified": true,
     "is_active": false
   },
@@ -43,7 +43,7 @@
     "user_address": "新竹市北區北大路5號",
     "user_password": "password06",
     "user_startdate": "2023-06-25 08:30:00",
-    "user_url": "https://example.com/images/user6.jpg",
+    "user_url": null,
     "is_verified": false,
     "is_active": true
   },
@@ -55,7 +55,7 @@
     "user_address": "桃園市桃園區中正路300號",
     "user_password": "password05",
     "user_startdate": "2023-05-18 11:00:00",
-    "user_url": "https://example.com/images/user5.jpg",
+    "user_url": null,
     "is_verified": true,
     "is_active": true
   },
@@ -67,7 +67,7 @@
     "user_address": "桃園市中壢區復興路46號8樓",
     "user_password": "Aa111111",
     "user_startdate": "2026-01-23 16:20:00",
-    "user_url": "/img/site/P_avatar.jpg",
+    "user_url": "/img/site/P_avatar.svg",
     "is_verified": true,
     "is_active": true
   },
@@ -91,7 +91,7 @@
     "user_address": "新北市板橋區縣民大道二段7號",
     "user_password": "password08",
     "user_startdate": "2023-07-15 15:40:00",
-    "user_url": "https://example.com/images/user8.jpg",
+    "user_url": null,
     "is_verified": true,
     "is_active": true
   },
@@ -103,7 +103,7 @@
     "user_address": "台北市中山區南京東路三段88號",
     "user_password": "password09",
     "user_startdate": "2023-08-10 17:50:00",
-    "user_url": "https://example.com/images/user9.jpg",
+    "user_url": null,
     "is_verified": true,
     "is_active": true
   },
@@ -127,7 +127,7 @@
     "user_address": "台北市內湖區瑞光路500號",
     "user_password": "password11",
     "user_startdate": "2023-09-20 14:10:00",
-    "user_url": "https://example.com/images/user11.jpg",
+    "user_url": null,
     "is_verified": true,
     "is_active": true
   },
@@ -139,7 +139,7 @@
     "user_address": "苗栗縣苗栗市府前路1號",
     "user_password": "password12",
     "user_startdate": "2023-10-12 09:45:00",
-    "user_url": "https://example.com/images/user12.jpg",
+    "user_url": null,
     "is_verified": true,
     "is_active": true
   },
@@ -163,7 +163,7 @@
     "user_address": "台北市松山區民生東路四段20號",
     "user_password": "password14",
     "user_startdate": "2023-11-15 13:55:00",
-    "user_url": "https://example.com/images/user14.jpg",
+    "user_url": null,
     "is_verified": true,
     "is_active": true
   },
@@ -175,7 +175,7 @@
     "user_address": "南投縣南投市中興路1號",
     "user_password": "password15",
     "user_startdate": "2023-12-05 16:30:00",
-    "user_url": "https://example.com/images/user15.jpg",
+    "user_url": null,
     "is_verified": true,
     "is_active": true
   },
@@ -199,7 +199,7 @@
     "user_address": "基隆市仁愛區忠一路1號",
     "user_password": "password17",
     "user_startdate": "2024-01-02 10:15:00",
-    "user_url": "https://example.com/images/user17.jpg",
+    "user_url": null,
     "is_verified": false,
     "is_active": true
   },
@@ -211,7 +211,7 @@
     "user_address": "雲林縣斗六市大學路三段123號",
     "user_password": "password18",
     "user_startdate": "2024-01-10 14:40:00",
-    "user_url": "https://example.com/images/user18.jpg",
+    "user_url": null,
     "is_verified": true,
     "is_active": true
   },
@@ -235,7 +235,7 @@
     "user_address": "台東縣台東市中山路50號",
     "user_password": "password20",
     "user_startdate": "2024-02-01 11:30:00",
-    "user_url": "https://example.com/images/user20.jpg",
+    "user_url": null,
     "is_verified": true,
     "is_active": true
   }
