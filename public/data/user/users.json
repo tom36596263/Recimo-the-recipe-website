@@ -67,9 +67,9 @@
     "user_address": "桃園市中壢區復興路46號8樓",
     "user_password": "Aa111111",
     "user_startdate": "2026-01-23 16:20:00",
-    "user_url": null,
+    "user_url": "/img/site/P_avatar.jpg",
     "is_verified": true,
-    "is_active": false
+    "is_active": true
   },
   {
     "user_id": 7,
