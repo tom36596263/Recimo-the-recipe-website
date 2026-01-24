@@ -3618,5 +3618,125 @@
     "step_content": "在頂部淋上酸奶油與莎莎醬，撒上新鮮香菜碎。盛盤時附上檸檬角，食用前由使用者親自擠上鮮榨檸檬汁效果最佳。",
     "step_image_url": "img/recipes/60/steps/6.png",
     "is_modified": false
+  },
+  {
+    "step_id": 363,
+    "recipe_id": 61,
+    "step_order": 1,
+    "step_title": "海鮮與香料處理",
+    "step_total_time": "00:15:00",
+    "step_content": "將大虎蝦剪去鬚足並去除腸泥，切下蝦頭備用，蝦身剝殼（保留尾巴較美觀）。香茅斜切段後用刀背拍碎；南薑切薄片；檸檬葉撕開以釋放香氣；小番茄對半切。",
+    "step_image_url": "img/recipes/61/steps/1.png",
+    "is_modified": false
+  },
+  {
+    "step_id": 364,
+    "recipe_id": 61,
+    "step_order": 2,
+    "step_title": "煸炒蝦頭與熬湯",
+    "step_total_time": "00:08:00",
+    "step_content": "熱鍋下少許油，放入蝦頭中火煸炒至顏色轉紅並滲出橘紅色蝦油。倒入 800ml 水煮滾，隨後放入香茅、南薑、檸檬葉。蓋上鍋蓋微火燉煮 10 分鐘熬出香氣。",
+    "step_image_url": "img/recipes/61/steps/2.png",
+    "is_modified": false
+  },
+  {
+    "step_id": 365,
+    "recipe_id": 61,
+    "step_order": 3,
+    "step_title": "過濾與加入蔬菜",
+    "step_total_time": "00:05:00",
+    "step_content": "將蝦頭撈出棄置。在清澈的香料湯頭中放入綜合菇類與小番茄塊，煮至菇類熟軟並釋放鮮甜味。",
+    "step_image_url": "img/recipes/61/steps/3.png",
+    "is_modified": false
+  },
+  {
+    "step_id": 366,
+    "recipe_id": 61,
+    "step_order": 4,
+    "step_title": "海鮮熟成",
+    "step_total_time": "00:05:00",
+    "step_content": "轉大火，放入蝦身與吐沙乾淨的蛤蜊。煮至蛤蜊完全開口、蝦子變色彎曲即可，切勿久煮以免縮水影響口感。",
+    "step_image_url": "img/recipes/61/steps/4.png",
+    "is_modified": false
+  },
+  {
+    "step_id": 367,
+    "recipe_id": 61,
+    "step_order": 5,
+    "step_title": "調製冬蔭風味",
+    "step_total_time": "00:05:00",
+    "step_content": "加入魚露、特製辣醬組（紅椒粉+糖+蒜末）與椰奶。充分攪拌讓湯頭轉為誘人的粉橘色並呈現微濃稠狀。煮滾後立刻試味。",
+    "step_image_url": "img/recipes/61/steps/5.png",
+    "is_modified": false
+  },
+  {
+    "step_id": 368,
+    "recipe_id": 61,
+    "step_order": 6,
+    "step_title": "酸度點綴與完成",
+    "step_total_time": "00:02:00",
+    "step_content": "熄火。立刻倒入新鮮檸檬汁並輕輕攪勻。此步驟必須在熄火後進行，以免高溫破壞檸檬的果香味並產生苦澀感。盛盤後可加少許香菜裝飾。",
+    "step_image_url": "img/recipes/61/steps/6.png",
+    "is_modified": false
+  },
+  {
+    "step_id": 369,
+    "recipe_id": 62,
+    "step_order": 1,
+    "step_title": "雞胸肉烹調與靜置",
+    "step_total_time": "00:10:00",
+    "step_content": "雞胸肉抹上少許鹽與黑胡椒，入鍋煎至兩面金黃熟透。取出後靜置 5 分鐘鎖住肉汁，再切成約 1 公分厚的片狀備用。",
+    "step_image_url": "img/recipes/62/steps/1.png",
+    "is_modified": false
+  },
+  {
+    "step_id": 370,
+    "recipe_id": 62,
+    "step_order": 2,
+    "step_title": "生菜預處理",
+    "step_total_time": "00:08:00",
+    "step_content": "將蘿蔓生菜逐片洗淨，使用蔬果脫水器徹底甩乾水分（水分會稀釋醬汁）。用手將葉片撕成適合入口的大片狀，放入冰箱冷藏保持脆度。",
+    "step_image_url": "img/recipes/62/steps/2.png",
+    "is_modified": false
+  },
+  {
+    "step_id": 371,
+    "recipe_id": 62,
+    "step_order": 3,
+    "step_title": "凱薩醬基底調製",
+    "step_total_time": "00:05:00",
+    "step_content": "將油浸鯷魚用叉子壓成泥狀。在碗中混合鯷魚泥、蒜末、生蛋黃與檸檬汁，攪拌至均勻滑順。",
+    "step_image_url": "img/recipes/62/steps/3.png",
+    "is_modified": false
+  },
+  {
+    "step_id": 372,
+    "recipe_id": 62,
+    "step_order": 4,
+    "step_title": "關鍵：乳化滴油技術",
+    "step_total_time": "00:05:00",
+    "step_content": "一邊快速攪拌基底，一邊「極少量且緩慢」地滴入橄欖油。直到醬汁呈現如同美乃滋般濃稠且發亮的乳化狀態。最後拌入帕馬森起司粉。",
+    "step_image_url": "img/recipes/62/steps/4.png",
+    "is_modified": false
+  },
+  {
+    "step_id": 373,
+    "recipe_id": 62,
+    "step_order": 5,
+    "step_title": "均勻沾裹醬汁",
+    "step_total_time": "00:02:00",
+    "step_content": "取一大盆，放入冰鎮過的生菜。倒入適量凱薩醬，用沙拉夾輕輕翻拌，確保每一片葉片正反面都薄薄掛上一層醬汁。",
+    "step_image_url": "img/recipes/62/steps/5.png",
+    "is_modified": false
+  },
+  {
+    "step_id": 374,
+    "recipe_id": 62,
+    "step_order": 6,
+    "step_title": "盛盤與裝飾",
+    "step_total_time": "00:02:00",
+    "step_content": "將生菜疊放於盤中。撒上香酥麵包丁，刨上額外的帕馬森起司碎，最後擺上雞胸肉片。建議完成後立即食用以享用最佳脆度。",
+    "step_image_url": "img/recipes/62/steps/6.png",
+    "is_modified": false
   }
 ]
