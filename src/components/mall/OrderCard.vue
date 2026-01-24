@@ -200,7 +200,6 @@ const handleConfirmCancel = (data) => {
 </template>
 
 <style lang="scss" scoped>
-/* 樣式與之前相同，針對卡片設計 */
 .order-card {
   background-color: $neutral-color-100;
   border-radius: $radius-base;
@@ -209,6 +208,10 @@ const handleConfirmCancel = (data) => {
   /* 卡片與卡片之間的距離 */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   font-family: sans-serif;
+
+  @media (max-width: 390px) {
+    padding: 15px;
+  }
 }
 
 .card-header {
@@ -216,28 +219,44 @@ const handleConfirmCancel = (data) => {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 20px;
+  gap: 16px;
 
-  @media (max-width: 530px) {
+  @media (max-width: 1024px) {
+    // flex-direction: column;
+    // align-items: flex-end;
+    gap: 0px;
+  }
+
+  @media (max-width: 540px) {
     flex-direction: column;
-    align-items: flex-end;
+    align-items: flex-start;
   }
 }
 
 .info-row {
   display: flex;
-  gap: 15px;
   margin-bottom: 15px;
   flex-wrap: wrap;
+  gap: 30px;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    gap: 0;
+  }
 }
 
 .flex {
   display: flex;
-  gap: 10px;
+  gap: 30px;
 
   @media (max-width: 430px) {
     flex-direction: column;
+    gap: 0;
   }
+
 }
+
+
 
 /* Status Bar */
 .status-bar {
