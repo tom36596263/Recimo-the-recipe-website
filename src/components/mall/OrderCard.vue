@@ -1,6 +1,8 @@
 <script setup>
 import { computed, ref } from 'vue';
 
+
+
 // 1. 定義 Props：接收父層傳來的「單筆」訂單物件
 const props = defineProps({
   order: {
@@ -9,8 +11,72 @@ const props = defineProps({
   }
 });
 
+// 取得商品列表
+const displayItems = computed(() => {
+  return props.order.products || props.order.items || [];
+});
+
+// 取得收件人姓名 (判斷同訂購人或新增)
+const receiverName = computed(() => {
+  const info = props.order.purchaser_info;
+  if (info) {
+    // 如果是 'same' (同訂購人) 取 name，否則取 addname
+    return info.shippingType === 'same' ? info.name : info.addname;
+  }
+  return props.order.receiver || '未知';
+});
+
+// 取得收件人電話
+const receiverPhone = computed(() => {
+  const info = props.order.purchaser_info;
+  if (info) {
+    return info.shippingType === 'same' ? info.phone : info.addphone;
+  }
+  return props.order.phone || '未知';
+});
+
+// 取得付款方式
+const paymentText = computed(() => {
+  const info = props.order.purchaser_info;
+
+  // 1. 防呆：如果沒有 info 或 paymentMethod，回傳預設值
+  if (!info || !info.paymentMethod) {
+    return props.order.payment || '未付款'; // 嘗試抓外層 payment，真的沒有才回傳未付款
+  }
+
+  // 2. 轉成小寫並移除前後空白，避免 'Card' 或 ' card ' 導致對應失敗
+  const method = String(info.paymentMethod).toLowerCase().trim();
+
+  const map = {
+    // 貨到付款
+    'cod': '貨到付款',
+
+    // 信用卡 (涵蓋常見的各種寫法)
+    'card': '信用卡付款',
+    'credit': '信用卡付款',
+    'credit_card': '信用卡付款',
+    'visa': '信用卡付款',
+    'master': '信用卡付款',
+
+    // 轉帳
+    'transfer': '銀行轉帳',
+    'atm': '銀行轉帳',
+    'bank': '銀行轉帳'
+  };
+
+  // 3. 回傳對應中文，如果找不到，就直接顯示原本的英文代碼 (方便除錯)
+  return map[method] || info.paymentMethod;
+});
+
+
 //定義 Emits：通知父層取消訂單
 const emit = defineEmits(['cancel-order']);
+
+const formatShortId = (value) => {
+  if (!value) return '';
+  const str = String(value);
+  return str.length > 8 ? str.slice(-8) : str;
+};
 
 // 定義一個變數來判斷「是否可取消」
 // 只有狀態為 0 (新訂單) 或 1 (已確認) 時回傳 true
@@ -38,11 +104,13 @@ const statusSteps = ['訂購成功', '訂單確認', '出貨', '送達'];
 
 // 自動計算單筆訂單的總數量
 const totalQuantity = computed(() => {
+  if (!props.order.items || !Array.isArray(props.order.items)) return 0;
   return props.order.items.reduce((sum, item) => sum + item.qty, 0);
 });
 
 // 自動計算單筆訂單的總金額
 const totalAmount = computed(() => {
+  if (!props.order.items || !Array.isArray(props.order.items)) return 0;
   return props.order.items.reduce(
     (sum, item) => sum + item.price * item.qty,
     0
@@ -83,22 +151,21 @@ const handleConfirmCancel = (data) => {
         <div class="info-row p-p1">
           <span>訂購日期：{{ order.date }}</span>
           <div class="flex">
-            <span>訂單編號：{{ order.id }}</span>
-            <span>物流編號：{{ order.trackingNo }}</span>
+            <span>訂單編號：{{ formatShortId(order.id) }}</span>
+            <span>物流編號：{{ order.trackingNo ? formatShortId(order.trackingNo) : '處理中' }}</span>
           </div>
         </div>
         <div class="info-row p-p1">
-          <span>收件人：{{ order.receiver }}</span>
-          <span>手機號碼：{{ order.phone }}</span>
+          <span>收件人：{{ receiverName }}</span>
+          <span>手機號碼：{{ receiverPhone }}</span>
           <div class="flex">
-            <span>配送方式：{{ order.method }}</span>
-            <span>付款狀態：{{ order.payment }}</span>
+            <span>配送方式：宅配</span>
+            <span>付款狀態：{{ paymentText }}</span>
           </div>
         </div>
       </div>
       <BaseBtn class="btn-status" :title="buttonText" :disabled="!isCancellable" variant="outline" @click="onCancel" />
     </div>
-
 
     <div class="status-bar p-p1">
       <div v-for="(step, index) in statusSteps" :key="index" class="status-step"
@@ -116,10 +183,10 @@ const handleConfirmCancel = (data) => {
       </div>
 
       <ul class="product-list">
-        <li v-for="(item, idx) in order.items" :key="idx" class="product-item">
-          <span class="col-name p-p1">{{ item.name }}</span>
-          <span class="col-qty p-p1">{{ item.qty }}</span>
-          <span class="col-price p-p1">${{ item.price }}</span>
+        <li v-for="(item, idx) in displayItems" :key="idx" class="product-item">
+          <span class="col-name p-p1">{{ item.product_name || item.name }}</span>
+          <span class="col-qty p-p1">{{ item.count || item.qty || item.quantity }}</span>
+          <span class="col-price p-p1">{{ item.product_price || item.price }}</span>
         </li>
       </ul>
     </div>
