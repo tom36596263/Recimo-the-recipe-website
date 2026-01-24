@@ -89,8 +89,18 @@ const handleLogout = () => {
                                 </router-link>
 
                                 <router-link to="/workspace" class="login-btn" @click="closeMenu">
-                                    <span class="btn-text p-p1">我的廚房</span>
-                                    <i-material-symbols-Account-Circle-outline class="btn-icon" />
+                                    <template v-if="authStore.isLoggedIn">
+                                        <span class="btn-text p-p1">{{ authStore.user?.user_name }}</span>
+                                        <div class="user-avatar-min">
+                                            <img :src="authStore.user?.user_url || '/img/site/None_avatar.svg'"
+                                                alt="avatar">
+                                        </div>
+                                    </template>
+
+                                    <template v-else>
+                                        <span class="btn-text p-p1">我的廚房</span>
+                                        <i-material-symbols-Account-Circle-outline class="btn-icon" />
+                                    </template>
                                 </router-link>
                             </div>
                             <div class="side-menu-only">
@@ -204,7 +214,42 @@ const handleLogout = () => {
         }
     }
 
-    .login-btn,
+    .login-btn {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: $neutral-color-white;
+
+        .btn-icon {
+            font-size: 24px;
+        }
+
+        // 頭像容器
+        .user-avatar-min {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid $neutral-color-white;
+            transition: border-color 0.4s ease, transform 0.4s ease, opacity 0.4s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        &:hover {
+            .user-avatar-min {
+                border-color: $accent-color-700;
+            }
+        }
+    }
+
     .cart-btn {
         color: $neutral-color-white;
         font-size: 24px;

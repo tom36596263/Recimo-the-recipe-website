@@ -31,7 +31,7 @@ const handleClickOutside = (event) => {
 // 1. 定義使用者資訊狀態 (給予初始預設值)
 const userInfo = ref({
     user_name: 'Recimo',
-    user_url: '/img/site/Recimo_avatar.svg'
+    user_url: '/img/site/None_avatar.svg'
 });
 
 onMounted(() => {
