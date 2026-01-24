@@ -11,20 +11,30 @@ const pageSize = 2; // 設定每頁顯示幾筆
 // 日期與標籤狀態
 // const today = new Date()
 // const selectedDate = ref(`${today.getFullYear()}-${String((today.getMonth() + 1)).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`); // 綁定日期輸入框
+
 const activeTag = ref('全部訂單');
 const selectedDate = ref(''); // 綁定日期輸入框
 
 
 // 1. 讀取資料
-onMounted(() => {
-  // 修正拼字 maill -> mall
-  publicApi.get('data/mall/orders.json')
-    .then(res => {
-      ordersData.value = res.data;
-    })
-    .catch(err => {
-      console.error('讀取 JSON 失敗', err);
-    });
+onMounted(async () => {
+  try {
+    // 步驟 A: 從 LocalStorage 讀取使用者剛結帳的訂單
+    const localOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
+
+    // 步驟 B: 從 JSON 讀取預設/歷史訂單 (模擬後端資料)
+    const res = await publicApi.get('data/mall/orders.json');
+    const jsonOrders = res.data || [];
+
+    // 步驟 C: 合併資料 (本地訂單排在最前面)
+    ordersData.value = [...localOrders, ...jsonOrders];
+
+  } catch (err) {
+    console.error('讀取訂單失敗', err);
+    // 即使 JSON 讀取失敗，至少顯示 LocalStorage 的資料
+    const localOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
+    ordersData.value = localOrders;
+  }
 });
 
 // --- 標籤設定 ---

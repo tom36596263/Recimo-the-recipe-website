@@ -53,10 +53,12 @@ const buttonClasses = computed(() => {
 
 const handleClick = (event) => {
     if (props.disabled) return;
-    if (props.href && props.href.startsWith('/')) {
+    // 如果 href 不是 '#' 且存在，才走路由跳轉
+    if (props.href && props.href !== '#' && props.href.startsWith('/')) {
         event.preventDefault();
         router.push(props.href);
     } else {
+        // 如果只是要點擊觸發功能，必須 emit 事件
         emit('click', event);
     }
 };
@@ -136,10 +138,12 @@ const buttonStyle = computed(() => {
     &:disabled,
     &.btn-disabled {
         cursor: not-allowed;
-        &.btn-outline, &.btn-solid {
-        border-color: $neutral-color-400;
-        color: $neutral-color-400;
-        // background-color: $neutral-color-400;
+
+        &.btn-outline,
+        &.btn-solid {
+            border-color: $neutral-color-400;
+            color: $neutral-color-400;
+            // background-color: $neutral-color-400;
         }
     }
 }
