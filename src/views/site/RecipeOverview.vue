@@ -3,7 +3,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { publicApi } from '@/utils/publicApi'
 import { useRouter } from 'vue-router'
 import { useAuthGuard } from '@/composables/useAuthGuard'
-
+import BaseBtn from '@/components/common/BaseBtn.vue';
 
 import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
 import FilterSection from '@/components/site/RecipeOverview/FilterSection.vue'
@@ -20,6 +20,7 @@ const currentPage = ref(1)
 const pageSize = 6
 //新增
 const searchIngredientIds = ref([]);
+const searchIngredientNames = ref([]);
 
 const activeFilters = ref({
     time: "全部",
@@ -188,11 +189,41 @@ const handleEmptyAction = (action) => {
 const showCook = ref(false);
 const handleCookFinish = (ingredients) => {
     if (ingredients && ingredients.length > 0) {
+        // 設定篩選 ID
         searchIngredientIds.value = ingredients.map(item => item.ingredient_id);
+
+        // 存著名稱，方便 UI 顯示 "您選了：雞肉、洋蔥..."
+        searchIngredientNames.value = ingredients.map(item => item.ingredient_name || '未知食材');
+
+        //重置其他篩選器，避免條件衝突導致無結果
+        activeFilters.value = {
+            time: "全部",
+            difficulty: "全部",
+            mealPortions: "全部",
+            kcal: "全部"
+        };
+
+        //關閉燈箱
+        showCook.value = false;
+
+        //滾動到食譜列表頂部 
+        window.scrollTo({
+            top: document.querySelector('.recipe-cards-section')?.offsetTop - 100 || 0,
+            behavior: 'smooth'
+        });
+
     } else {
-        searchIngredientIds.value = [];
+        // 如果沒選食材就送出，視為取消
+        clearIngredientFilter();
+        showCook.value = false;
     }
-    showCook.value = false;
+};
+
+//新增：清除食材篩選 
+const clearIngredientFilter = () => {
+    searchIngredientIds.value = [];
+    searchIngredientNames.value = [];
+
 };
 const openKitchen = () => {
     console.log("父層收到訊號了！準備打開燈箱..."); // 加入這行
@@ -214,12 +245,29 @@ const handleCardClick = (id) => {
         <div class="row">
             <FilterSection v-model="activeFilters" @open-kitchen="openKitchen" />
         </div>
+
+        <div v-if="searchIngredientIds.length > 0" class="row ingredient-filter-tag">
+            <div class="col-12">
+                <div class="alert-box p-p2">
+                    <span>
+                        <i class="fa-solid fa-utensils"></i>
+                        正在搜尋包含以下食材的食譜：
+                        <span class="highlight">{{ searchIngredientNames.join('、') }}</span>
+                    </span>
+                    <BaseBtn title="清除篩選" class="clear-btn" width="100px " variant="outline" height="30"
+                        @click="clearIngredientFilter">
+                    </BaseBtn>
+                </div>
+            </div>
+        </div>
         <Cook v-if="showCook" @close="showCook = false" @cook-finish="handleCookFinish" />
+    </section>
+
+    <section class="container recipe-cards-section">
     </section>
     <section class="container recipe-cards-section">
         <div v-if="recipes.length > 0" class="row">
-            <div v-for="item in recipes" :key="item.id"
-                @click.prevent="handleCardClick(item.id)"
+            <div v-for="item in recipes" :key="item.id" @click.prevent="handleCardClick(item.id)"
                 class="col-4 col-md-12 recipe-cards">
                 <RecipeCardLg :recipe="item" class="recipe-card" />
             </div>
@@ -289,8 +337,30 @@ const handleCardClick = (id) => {
     .page-btn {
         margin-bottom: 20px;
     }
-    .recipes-cta-group{
+
+    .recipes-cta-group {
         display: none;
+    }
+}
+
+.alert-box {
+    margin-top: 20px;
+    margin-bottom: -10px;
+    display: flex;
+    align-items: center;
+
+    @media screen and (max-width: 810px) {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+.clear-btn {
+    margin-left: 10px;
+
+    @media screen and (max-width: 810px) {
+        margin-top: 10px;
+        margin-bottom: -15px;
     }
 }
 </style>

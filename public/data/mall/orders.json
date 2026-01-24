@@ -1,38 +1,37 @@
 [
   {
-    "id": "111018",
-    "date": "2026-01-22",
-    "trackingNo": "1211031",
-    "receiver": "王小花",
-    "phone": "0952875365",
-    "method": "宅配",
-    "payment": "貨到付款",
-    "status": 1,
+    "ORDER_ID": 111018,
+    "CREATED": "2026-01-22",
+    "LOGISTICS_ID": "1211031",
+    "RECIPIENT_NAME": "王小花",
+    "RECIPIENT_PHONE": "0952875365",
+    "PAYMENT_METHOD": "cod",
+    "ORDER_STATUS": 1,
+    "TOTAL_AMOUNT": 310,
     "items": [
-      { "name": "舒肥雞胸藜麥飯", "qty": 1, "price": 160 },
-      { "name": "豆腐漢堡排佐野菇", "qty": 1, "price": 150 }
+      {
+        "PRODUCT_NAME": "舒肥雞胸藜麥飯",
+        "QUANTITY": 1,
+        "SNAPSHOT_PRICE": 160
+      },
+      {
+        "PRODUCT_NAME": "豆腐漢堡排佐野菇",
+        "QUANTITY": 1,
+        "SNAPSHOT_PRICE": 150
+      }
     ]
   },
   {
-    "id": "111019",
-    "date": "2026-01-19",
-    "trackingNo": "1211032",
-    "receiver": "李大明",
-    "phone": "0912345678",
-    "method": "超商取貨",
-    "payment": "已付款",
-    "status": 3,
-    "items": [{ "name": "鮮蝦義大利麵", "qty": 2, "price": 220 }]
-  },
-  {
-    "id": "111019",
-    "date": "2026-01-13",
-    "trackingNo": "1211032",
-    "receiver": "李大明",
-    "phone": "0912345678",
-    "method": "超商取貨",
-    "payment": "已付款",
-    "status": 3,
-    "items": [{ "name": "鮮蝦義大利麵", "qty": 2, "price": 220 }]
+    "ORDER_ID": 111019,
+    "CREATED": "2026-01-19",
+    "LOGISTICS_ID": "1211032",
+    "RECIPIENT_NAME": "李大明",
+    "RECIPIENT_PHONE": "0912345678",
+    "PAYMENT_METHOD": "cod",
+    "ORDER_STATUS": 3,
+    "TOTAL_AMOUNT": 440,
+    "items": [
+      { "PRODUCT_NAME": "鮮蝦義大利麵", "QUANTITY": 2, "SNAPSHOT_PRICE": 220 }
+    ]
   }
 ]

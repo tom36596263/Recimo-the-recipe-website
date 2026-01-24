@@ -260,6 +260,16 @@ const startCooking = () => {
 
 <template>
     <div class="overlay" @click="emit('close')">
+
+        <div class="orientation-lock" @click.stop>
+            <div class="phone-icon">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+            </div>
+            <p>為了最佳體驗<br>請將手機轉為橫向</p>
+            <BaseBtn class="close-warning-btn" @click="emit('close')" title="關閉靈感廚房" />
+
+        </div>
+
         <div class="cook-container" @click.stop>
             <div class="row">
                 <div class="col-7">
@@ -358,13 +368,72 @@ const startCooking = () => {
     border-radius: $radius-base;
     overflow: hidden;
 
+    // transform-origin: center center;
+    // transition: transform 0.3s ease;
+
     .cook-wrap {
         display: flex;
         flex-direction: column;
         align-items: center;
         position: relative;
     }
+
 }
+
+@media screen and (max-height: 500px) {
+    .cook-container {
+        width: 90%;
+        height: 100%;
+
+    }
+
+}
+
+@media screen and (max-height: 400px) {
+    .cook-container {
+        width: 100%;
+        height: 100%;
+
+    }
+
+}
+
+
+/* 1. 平板且直向 (portrait) */
+@media screen and (max-width: 810px) and (orientation: portrait) {
+
+    // 隱藏真正的廚房
+    .cook-content-wrapper {
+        display: none !important;
+    }
+
+    // 顯示轉向提示
+    .orientation-lock {
+        display: flex !important;
+    }
+}
+
+// /* 2. 手機橫向 (landscape) 且高度較小 (通常手機橫向高度 < 500px) */
+// @media screen and (max-height: 500px) and (orientation: landscape) {
+//     .orientation-lock {
+//         display: none !important;
+//     }
+
+//     .cook-content-wrapper {
+//         display: block !important;
+//         /* 自動縮放：如果手機橫向寬度不夠 790px，將整個廚房縮小 */
+//         transform: scale(0.1);
+//         box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.8); // 加深背景讓視線集中
+//     }
+// }
+
+// /* 針對特別小的手機橫向 (例如 iPhone SE 橫向) */
+// @media screen and (max-width: 810px) and (orientation: landscape) {
+//     .cook-content-wrapper {
+//         transform: scale(0.65);
+//         /* 縮得更小一點 */
+//     }
+// }
 
 .row {
     height: 100%;
@@ -555,6 +624,32 @@ const startCooking = () => {
     }
 }
 
+
+
+@media screen and (max-height: 390px) {
+    .cook-stage {
+        transform: scale(0.8);
+        margin-right: 50px;
+        margin-top: -2px;
+    }
+
+    .btn {
+        margin-top: -20px;
+    }
+}
+
+
+@media screen and (max-height: 430px) {
+    .cook-stage {
+        transform: scale(0.9);
+        margin-right: 30px;
+    }
+
+    .btn {
+        margin-top: -15px;
+    }
+}
+
 .search-wrap {
     background-color: $neutral-color-100;
     display: flex;
@@ -698,5 +793,72 @@ const startCooking = () => {
     opacity: 0 !important;
     transition: all 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.3);
     transition-delay: calc(var(--i) * 0.1s);
+}
+
+.orientation-lock {
+    display: none; // 預設隱藏
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(50, 50, 50, 0.95);
+    z-index: 10001;
+    color: #fff;
+    text-align: center;
+    backdrop-filter: blur(10px);
+
+    p {
+        margin-top: 20px;
+        font-size: 1.2rem;
+        line-height: 1.6;
+        letter-spacing: 1.5px;
+    }
+
+    .phone-icon {
+        font-size: 3rem;
+        animation: rotate-device 2s infinite ease-in-out;
+    }
+
+    .close-warning-btn {
+        margin-top: 30px;
+        background: transparent;
+        border: 1px solid #fff;
+        color: #fff;
+        padding: 8px 20px;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: 0.3s;
+
+        &:hover {
+            background: #fff;
+            color: #333;
+        }
+    }
+}
+
+@keyframes rotate-device {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    30% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(-90deg);
+    }
+
+    80% {
+        transform: rotate(-90deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
 }
 </style>

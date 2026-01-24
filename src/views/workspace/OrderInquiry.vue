@@ -1,43 +1,37 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import OrderCard from '@/components/mall/OrderCard.vue'; // 建議變數名稱改大寫開頭
+import OrderCard from '@/components/mall/OrderCard.vue';
 import { publicApi } from '@/utils/publicApi';
 
 // 資料容器
 const ordersData = ref([]);
 const currentPage = ref(1);
-const pageSize = 2; // 設定每頁顯示幾筆
-
-// 日期與標籤狀態
-// const today = new Date()
-// const selectedDate = ref(`${today.getFullYear()}-${String((today.getMonth() + 1)).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`); // 綁定日期輸入框
+const pageSize = 2;
 
 const activeTag = ref('全部訂單');
-const selectedDate = ref(''); // 綁定日期輸入框
+const selectedDate = ref('');
 
-
-// 1. 讀取資料
+// 讀取資料
 onMounted(async () => {
   try {
-    // 步驟 A: 從 LocalStorage 讀取使用者剛結帳的訂單
+    //讀取剛結帳的訂單 (前端格式: id, date, status)
     const localOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
 
-    // 步驟 B: 從 JSON 讀取預設/歷史訂單 (模擬後端資料)
+    //讀取歷史訂單 (資料庫格式: ORDER_ID, CREATED, ORDER_STATUS)
+    // 假設你的 json 檔案內容已經改成資料庫欄位名稱了
     const res = await publicApi.get('data/mall/orders.json');
     const jsonOrders = res.data || [];
 
-    // 步驟 C: 合併資料 (本地訂單排在最前面)
+    //合併資料
     ordersData.value = [...localOrders, ...jsonOrders];
 
   } catch (err) {
     console.error('讀取訂單失敗', err);
-    // 即使 JSON 讀取失敗，至少顯示 LocalStorage 的資料
     const localOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
     ordersData.value = localOrders;
   }
 });
 
-// --- 標籤設定 ---
 const tags = [
   { text: '全部訂單', width: '138px' },
   { text: '已確認訂單', width: '138px' },
@@ -46,65 +40,83 @@ const tags = [
   { text: '已取消訂單', width: '138px' }
 ];
 
-// 狀態對照表 (請確保 JSON 裡的 status 數字與這裡對應)
+//狀態對照表 (維持不變，對應 0, 1, 2...)
 const statusMapping = {
-  "新訂單": 0,  //對應資料庫:訂購成功
-  '已確認訂單': 1,//對應資料庫:訂單確認
-  '已出貨訂單': 2,//對應資料庫:出貨
-  '已完成訂單': 3,//對應資料庫:送達
-  '已取消訂單': -1//對應資料庫:取消
+  "新訂單": 0,
+  '已確認訂單': 1,
+  '已出貨訂單': 2,
+  '已完成訂單': 3,
+  '已取消訂單': -1
 };
 
-// --- 2. 核心篩選邏輯 (同時篩選：標籤 + 日期) ---
+//兼容資料庫與前端格式
 const filteredProducts = computed(() => {
   let result = ordersData.value;
 
-  // A. 先過濾狀態
+  // 過濾狀態
   if (activeTag.value !== '全部訂單') {
     const targetStatus = statusMapping[activeTag.value];
-    result = result.filter((item) => item.status === targetStatus);
-  }
 
-  // B. 再過濾日期 (假設 JSON 裡的 date 格式是 "YYYY-MM-DD")
-  if (selectedDate.value) {
-    result = result.filter(item => {
-      return item.date === selectedDate.value;
+    result = result.filter((item) => {
+      //優先抓 ORDER_STATUS，抓不到才抓 status
+      const itemStatus = item.ORDER_STATUS !== undefined ? item.ORDER_STATUS : item.status;
+      return itemStatus === targetStatus;
     });
   }
+
+  //過濾日期
+  if (selectedDate.value) {
+    result = result.filter(item => {
+      // 取得日期字串
+      const rawDate = item.CREATED || item.date || '';
+
+      // 格式處理：資料庫可能是 "2026-01-24 14:00:00"，我們只取前 10 碼 "2026-01-24"
+      // 如果是前端存的 "2026-01-24" 也不會受影響
+      const itemDate = String(rawDate).substring(0, 10);
+
+      return itemDate === selectedDate.value;
+    });
+  }
+
+
+  // 剛結帳完的訂單會在最上面
+  result.sort((a, b) => {
+    const dateA = new Date(a.CREATED || a.date);
+    const dateB = new Date(b.CREATED || b.date);
+    return dateB - dateA; // 降序
+  });
 
   return result;
 });
 
-// --- 3. 頁碼計算 (依據篩選後的資料) ---
+//頁碼計算 
 const totalPages = computed(() => {
   if (filteredProducts.value.length === 0) return 0;
   return Math.ceil(filteredProducts.value.length / pageSize);
 });
 
-// --- 4. 分頁裁切 (給 HTML 顯示用) ---
+//分頁裁切
 const paginatedOrders = computed(() => {
   const startIndex = (currentPage.value - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   return filteredProducts.value.slice(startIndex, endIndex);
 });
 
-// --- 事件處理 ---
+//事件處理
 const selectTag = (tagName) => {
   activeTag.value = tagName;
-  currentPage.value = 1; // 切換標籤時重置回第一頁
+  currentPage.value = 1;
 }
 
 const setPage = (page) => {
   currentPage.value = page;
-  window.scrollTo({ top: 0, behavior: 'smooth' }); // 換頁時滾動到頂部
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// 監聽日期變動，也要重置頁碼
 watch(selectedDate, () => {
   currentPage.value = 1;
 });
 
-// 顯示日曆 (透過 ref 操作 DOM)
 const dateInput = ref(null);
 const openCalender = () => {
   if (dateInput.value && dateInput.value.showPicker) {
@@ -114,12 +126,28 @@ const openCalender = () => {
   }
 }
 
-// 取消訂單 (模擬前端刪除)
+//取消訂單邏輯
 const onCancel = (orderId) => {
-  //在 ordersData 中找到這筆訂單的索引位置
-  const targetIndex = ordersData.value.findIndex(order => order.id === orderId);
+
+
+  // 在陣列中尋找
+  const targetIndex = ordersData.value.findIndex(order => {
+    const currentId = order.ORDER_ID || order.id;
+    return currentId === orderId;
+  });
+
   if (targetIndex !== -1) {
-    ordersData.value[targetIndex].status = -1;
+
+    if (ordersData.value[targetIndex].ORDER_STATUS !== undefined) {
+      ordersData.value[targetIndex].ORDER_STATUS = -1;
+    } else {
+      ordersData.value[targetIndex].status = -1;
+    }
+
+
+    if (!ordersData.value[targetIndex].ORDER_ID) {
+      localStorage.setItem('mall_orders', JSON.stringify(ordersData.value.filter(o => !o.ORDER_ID)));
+    }
   }
 }
 </script>
@@ -147,7 +175,9 @@ const onCancel = (orderId) => {
           <div v-if="paginatedOrders.length === 0" class="no-data">
             目前沒有符合條件的訂單
           </div>
-          <OrderCard v-else v-for="order in paginatedOrders" :key="order.id" :order="order" @cancel-order="onCancel" />
+
+          <OrderCard v-else v-for="order in paginatedOrders" :key="order.ORDER_ID || order.id" :order="order"
+            @cancel-order="onCancel" />
         </div>
       </div>
     </div>
@@ -162,6 +192,7 @@ const onCancel = (orderId) => {
 </template>
 
 <style>
+/* 你的 CSS 樣式保持原樣即可 */
 .tag-container {
   display: flex;
   justify-content: space-between;
@@ -195,11 +226,8 @@ const onCancel = (orderId) => {
   >* {
     flex-shrink: 0;
   }
-
-  /* 選取 .tag 這個容器底下，所有第一層的子元素，不管它是什麼標籤。 */
 }
 
-/* calender */
 input[type=date] {
   height: 25px;
   cursor: pointer;
