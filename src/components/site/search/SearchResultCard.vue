@@ -1,9 +1,12 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router'
+import { useAuthGuard } from '@/composables/useAuthGuard';
 
 import BaseTag from '@/components/common/BaseTag.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
+
+const { runWithAuth } = useAuthGuard();
 
 const props = defineProps({
     recipe: {
@@ -40,10 +43,14 @@ const displayDescription = computed(() => {
 
 const goToRecipeDetail = () => {
     if(!props.recipe) return; 
-    router.push({
-        name: 'workspace-recipe-detail',
-        params: { id: props.recipe.recipe_id }
+
+    runWithAuth(() => {
+        router.push({
+            name: 'workspace-recipe-detail',
+            params: { id: props.recipe.recipe_id }
+        })
     })
+    
 }
 const goToProductDetail = () => {
     if(!props.product) return;

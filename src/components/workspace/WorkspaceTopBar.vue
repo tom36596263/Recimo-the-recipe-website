@@ -28,7 +28,30 @@ const handleClickOutside = (event) => {
     }
 };
 
+// 1. 定義使用者資訊狀態 (給予初始預設值)
+const userInfo = ref({
+    user_name: 'Recimo',
+    user_url: '/img/site/Recimo_avatar.svg'
+});
+
 onMounted(() => {
+    // 2. 從 localStorage 取得登入時存入的資料
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+        try {
+            const parseData = JSON.parse(savedUser);
+            // 更新狀態
+            // 只有當 parseData.name 有值時才更新，否則維持初始值 "Recimo"
+            if (parseData.user_name) userInfo.value.user_name = parseData.user_name;
+
+            // 只有當 parseData.avatar 有值時才更新，否則維持初始預設圖
+            if (parseData.user_url) {
+                userInfo.value.user_url = parseData.user_url;
+            }
+        } catch (error) {
+            console.error("解析使用者資料失敗", error);
+        }
+    }
     document.addEventListener('click', handleClickOutside);
 });
 
@@ -41,11 +64,11 @@ onUnmounted(() => {
     <div class="workspace-top-bar">
         <div class="col-6 col-md-12 personal-info">
             <div class="personal-img">
-                <img src="/img/site/Recimo-logo-black.svg" alt="">
+                <img :src="userInfo.user_url" :alt="userInfo.user_name">
             </div>
 
             <div class="title">
-                <h3 class="en-h3">Hi,<span>Recimo</span></h3>
+                <h3 class="en-h3">Hi~ <span>{{ userInfo.user_name }}</span></h3>
                 <h5 class="zh-h5">一起來發現食譜的新創意吧!</h5>
             </div>
         </div>
@@ -109,8 +132,10 @@ onUnmounted(() => {
             justify-content: center;
 
             img {
-                width: 40px;
-
+                // width: 40px;
+                width: 100%; // 寬度填滿父層
+                height: 100%; // 高度填滿父層
+                object-fit: cover; // 裁切並填滿，不會變形
             }
         }
 

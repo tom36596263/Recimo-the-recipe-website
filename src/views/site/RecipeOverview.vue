@@ -1,7 +1,9 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue'
 import { publicApi } from '@/utils/publicApi'
 import { useRouter } from 'vue-router'
+import { useAuthGuard } from '@/composables/useAuthGuard'
+
 
 import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
 import FilterSection from '@/components/site/RecipeOverview/FilterSection.vue'
@@ -11,7 +13,8 @@ import RecipesCtaGroup from '@/components/site/RecipeOverview/RecipesCtaGroup.vu
 import Cook from '@/components/common/Cook.vue'
 
 
-const router = useRouter();
+const router = useRouter()
+const { runWithAuth } = useAuthGuard()
 const allRecipe = ref([])
 const currentPage = ref(1)
 const pageSize = 6
@@ -196,7 +199,14 @@ const openKitchen = () => {
     showCook.value = true;
 }
 
-
+const handleCardClick = (id) => {
+    runWithAuth(() => {
+        router.push({
+            name: 'workspace-recipe-detail',
+            params: { id: id }
+        })
+    })
+}
 </script>
 
 <template>
@@ -208,10 +218,11 @@ const openKitchen = () => {
     </section>
     <section class="container recipe-cards-section">
         <div v-if="recipes.length > 0" class="row">
-            <router-link v-for="item in recipes" :key="item.id"
-                :to="{ name: 'workspace-recipe-detail', params: { id: item.id } }" class="col-4 col-md-12 recipe-cards">
+            <div v-for="item in recipes" :key="item.id"
+                @click.prevent="handleCardClick(item.id)"
+                class="col-4 col-md-12 recipe-cards">
                 <RecipeCardLg :recipe="item" class="recipe-card" />
-            </router-link>
+            </div>
         </div>
         <div v-else class="row">
             <div class="no-result col-12">
@@ -252,7 +263,7 @@ const openKitchen = () => {
 .recipe-cards {
     text-decoration: none;
     color: $neutral-color-800;
-
+    cursor: pointer;
 }
 
 .page-btn {

@@ -6771,5 +6771,18 @@
     "carbs_per_100g": 0.0,
     "unit_name": "克",
     "gram_conversion": 1.0
+  },
+  {
+    "ingredient_id": 522,
+    "ingredient_name": "鯷魚 (油浸)",
+    "main_category": "pantry-spices-nuts",
+    "sub_category": "pickles-preserves",
+    "ingredient_image_url": "img/ingredients/pantry-spices-nuts/pickles-preserves/anchovies-oil.png",
+    "kcal_per_100g": 210.0,
+    "protein_per_100g": 20.4,
+    "fat_per_100g": 14.2,
+    "carbs_per_100g": 0.0,
+    "unit_name": "克",
+    "gram_conversion": 1.0
   }
 ]

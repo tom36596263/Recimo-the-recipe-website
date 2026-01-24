@@ -16,7 +16,7 @@ export function useAuthGuard() {
             authStore.pendingAction = action;
 
             // 3. 改為直接開啟登入燈箱 (取代原本的小彈窗 openLoginAlert)
-            authStore.openLoginLightbox();
+            authStore.openLoginAlert();
         }
     };
 
