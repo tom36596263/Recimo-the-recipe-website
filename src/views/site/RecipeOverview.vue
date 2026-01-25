@@ -283,7 +283,7 @@ const handleCardClick = (id) => {
 
     </section>
 
-    <section class="container page-btn">
+    <section v-if="recipes.length > 0" class="container page-btn">
         <div class="row">
             <div class="col-12">
                 <PageBtn :currentPage="currentPage" :totalPages="totalPages" @update:page="handlePageChange" />
@@ -344,9 +344,9 @@ const handleCardClick = (id) => {
 }
 
 .alert-box {
-    margin-top: 20px;
+    margin-top: 30px;
     margin-bottom: -10px;
-    display: flex;
+    // display: flex;
     align-items: center;
 
     @media screen and (max-width: 810px) {
@@ -356,7 +356,7 @@ const handleCardClick = (id) => {
 }
 
 .clear-btn {
-    margin-left: 10px;
+    margin-left: 24px;
 
     @media screen and (max-width: 810px) {
         margin-top: 10px;
