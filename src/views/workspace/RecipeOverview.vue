@@ -247,7 +247,8 @@ const openKitchen = () => {
 }
 
 .page-btn {
-    margin-bottom: 30px;
+    margin-top: 0px;
+    margin-bottom: 80px;
 }
 
 .recipe-card {

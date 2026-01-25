@@ -30,14 +30,16 @@ const goToDetail = () => {
 <template>
     <div class="recipe-card-sm" @click="goToDetail">
         <header class="card-header">
+            <div class="icon-group">
+                <i-material-symbols-Favorite-outline @click.prevent.stop />
+            </div>
             <img :src="recipe.image_url" alt="recipe.recipe_name">
+            
         </header>
         <div class="card-body">
             <div class="title">
                 <h5 class="zh-h5">{{ recipe.recipe_name }}</h5>
-                <div class="icon-group">
-                    <i-material-symbols-Favorite-outline @click.prevent.stop />
-                </div>
+                
             </div>
         </div>
         <footer>
@@ -70,9 +72,18 @@ const goToDetail = () => {
     }
     .card-header {
         overflow: hidden;
+        position: relative;
         height: 150px;
         width: 100%;
-
+        .icon-group {
+            position: absolute;
+            top: 10px;
+            right:10px;
+            z-index: 10;
+            &:hover{
+                color: $secondary-color-danger-700;
+            }
+        }
         img {
             width: fit-content;
             object-fit: cover;
@@ -97,11 +108,7 @@ const goToDetail = () => {
             margin-bottom: 6px;
             color: $primary-color-700;
         }
-
-        .icon-group {
-            display: flex;
-            gap: 12px;
-        }
+        
 
         .tag {
             display: flex;
