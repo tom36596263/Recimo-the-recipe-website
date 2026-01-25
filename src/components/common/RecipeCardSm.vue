@@ -79,7 +79,7 @@ const goToDetail = () => {
             position: absolute;
             top: 10px;
             right:10px;
-            z-index: 10;
+            z-index: 3;
             &:hover{
                 color: $secondary-color-danger-700;
             }
