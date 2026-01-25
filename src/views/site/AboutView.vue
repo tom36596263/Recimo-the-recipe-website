@@ -417,9 +417,10 @@ onMounted(() => {
         margin-bottom: 20px;
     }
 }
+
 .fade-in-init {
-        animation: fadeInScale 0.8s ease-out forwards;
-    }
+    animation: fadeInScale 0.8s ease-out forwards;
+}
 
 // ==========================================
 // 功能介紹-頁籤切換
@@ -720,22 +721,4 @@ div .introduce .container {
         }
     }
 }
-
-    // 手機板把靈感小廚房按鈕移除
-    @media screen and (max-width: 810px) {
-        .hide-on-mobile {
-            display: none !important;
-        }
-    }
-    @keyframes fadeInScale {
-        from {
-            opacity: 0;
-            transform: scale(0.98);
-        }
-
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
 </style>
