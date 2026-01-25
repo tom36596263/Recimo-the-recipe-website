@@ -83,10 +83,13 @@ const route = useRoute();
 const productId = computed(() => route.params.id); // 將 ID 改為 computed，確保網址變了它也跟著變
 
 const productInfo = ref(null); // 儲存當前商品的所有資訊
+const isNotFound = ref(false); // 用來記錄是否找不到商品
 const { setDetailName } = useRouteName()
 
 const fetchData = async () => {
   try {
+    isNotFound.value = false; // 每次重新抓取前先重設
+    productInfo.value = null; // 確保每次切換時先清空
     // const response = await axios.get(`${base}data/mall/products.json`);
     const response = await publicApi.get(`data/mall/products.json`);
 
@@ -94,8 +97,11 @@ const fetchData = async () => {
     // 並使用 String() 確保兩邊型別一致（字串對字串）
     const item = response.data.find(p => String(p.product_id) === String(productId.value));
 
+    document.title = `${item.product_name} | Recimo`;
+
     if (item) {
       productInfo.value = item;
+      document.title = `${item.product_name} | Recimo`;
 
       // 2. 修正圖片初始化：
       // 確保使用 item.product_image 並透過 getImageUrl 處理路徑
@@ -113,9 +119,14 @@ const fetchData = async () => {
 
       // console.log("成功找到商品：", item.product_name);
     } else {
-      console.warn("找不到該 ID 的商品資料，請確認 JSON 中的 product_id 值");
+      productInfo.value = null; // 確保清空舊資料
+      isNotFound.value = true;
+      document.title = `無此商品 | Recimo`;
+      console.warn("找不到該 ID 的商品資料");
     }
   } catch (error) {
+    isNotFound.value = true;
+    document.title = `載入失敗 | Recimo`;
     console.error("抓取失敗", error);
   }
 };
@@ -297,6 +308,25 @@ onUnmounted(() => {
     <ProductRmd class="detail-recommend-section" />
   </section>
 
+  <!-- ==========================================
+            找不到商品
+      ========================================= -->
+  <section v-if="productInfo && !isNotFound" class="product-detail-page container">
+  </section>
+
+  <section v-else-if="isNotFound" class="not-found-section container">
+    <div class="not-found-content">
+      <h2 class="zh-h2">哎呀！找不到這項商品</h2>
+      <p class="p-p1">這份好料可能已經下架，或者網址輸入錯誤了。</p>
+      <BaseBtn title="回商城逛逛" variant="outline" @click="router.push('/mall')" :width="210" />
+    </div>
+  </section>
+
+  <section v-else class="loading-section container">
+    <div style="text-align: center; padding: 100px 0;">
+      <p class="zh-h5">美味載入中...</p>
+    </div>
+  </section>
 </template>
 
 <style lang="scss" scoped>
@@ -514,6 +544,31 @@ td {
 
   @media screen and (max-width: map.get($breakpoints, "lg")) {
     margin-top: 60px;
+  }
+}
+
+// ==========================================
+// 找不到商品
+// ==========================================
+.not-found-section {
+  padding: 100px 0;
+  text-align: center;
+
+  .not-found-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+
+    h2 {
+      color: $primary-color-700;
+    }
+
+    p {
+      color: $neutral-color-700;
+      margin-bottom: 20px;
+    }
   }
 }
 </style>

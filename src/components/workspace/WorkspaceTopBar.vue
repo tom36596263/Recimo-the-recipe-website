@@ -1,9 +1,9 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import SearchBar from '@/components/common/SearchBar.vue';
 import NotificationPanel from '@/components/common/NotificationPanel.vue';
-
+import { useCartStore } from '@/stores/cartStore';
 const route = useRoute();
 
 // 通知相關狀態
@@ -58,6 +58,10 @@ onMounted(() => {
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
+
+//購物車數量圓點
+const cartStore = useCartStore();
+const cartTotal = computed(() => cartStore.totalCount);
 </script>
 
 <template>
@@ -78,7 +82,10 @@ onUnmounted(() => {
                 <SearchBar />
                 <div class="tools">
                     <router-link to="/cart" class="cart-btn" @click="closeMenu">
-                        <i-material-symbols-Shopping-Cart-outline class="btn-icon" />
+                        <div class="cart-icon-wrapper">
+                            <i-material-symbols-Shopping-Cart-outline class="btn-icon" />
+                            <span v-if="cartTotal > 0" class="cart-badge">{{ cartTotal }}</span>
+                        </div>
                     </router-link>
 
                     <!-- 通知按鈕 -->
@@ -202,17 +209,70 @@ onUnmounted(() => {
 
 .notification-badge {
     position: absolute;
+    // 稍微調整位置，讓圓心對準圖示右上角
     top: -6px;
     right: -6px;
+
     background: $secondary-color-danger-700;
     color: $neutral-color-white;
-    border-radius: 10px;
-    padding: 2px 6px;
-    font-size: 11px;
+
+    // 強制寬高相等並設為圓形
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+
+    // 確保內容置中
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 11px; // 圓形內空間較小，稍微縮小字體
     font-weight: 600;
-    min-width: 18px;
-    text-align: center;
-    line-height: 1.2;
+    line-height: 1;
+    padding: 0; // 圓形不需要 padding，靠 flex 置中即可
+
+    // 防止數字擠壓變形
+    flex-shrink: 0;
+
+    // 超過 99 還是圓的
+    aspect-ratio: 1 / 1;
+}
+
+.cart-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .cart-badge {
+        position: absolute;
+        // 稍微調整位置，讓圓心對準圖示右上角
+        top: -6px;
+        right: -6px;
+
+        background: $secondary-color-danger-700;
+        color: $neutral-color-white;
+
+        // 強制寬高相等並設為圓形
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+
+        // 確保內容置中
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        font-size: 11px; // 圓形內空間較小，稍微縮小字體
+        font-weight: 600;
+        line-height: 1;
+        padding: 0; // 圓形不需要 padding，靠 flex 置中即可
+
+        // 防止數字擠壓變形
+        flex-shrink: 0;
+
+        // 超過 99 還是圓的
+        aspect-ratio: 1 / 1;
+    }
 }
 
 
