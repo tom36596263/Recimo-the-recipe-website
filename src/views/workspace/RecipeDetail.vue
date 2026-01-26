@@ -18,7 +18,6 @@ const route = useRoute();
 const router = useRouter();
 const recipeStore = useRecipeStore();
 
-// --- 核心變數：讀取 Vite 的 Base 路徑 ---
 const baseUrl = import.meta.env.BASE_URL;
 
 // --- 1. 響應式資料狀態 ---
@@ -27,6 +26,7 @@ const rawIngredients = ref([]);
 const rawSteps = ref([]);
 const rawComments = ref([]);
 const rawGallery = ref([]);
+const rawUsers = ref([]); // 初始化為空陣列
 const servings = ref(1);
 const isLoading = ref(true);
 
@@ -70,73 +70,71 @@ const toggleWorkspaceTopBar = (show) => {
 // --- 3. fetchData 核心邏輯 ---
 const fetchData = async () => {
     isLoading.value = true;
-    rawRecipe.value = null;
-    rawIngredients.value = [];
-    rawSteps.value = [];
-
     const recipeId = Number(route.params.id);
 
-    // 處理預覽模式
+    // 預覽模式
     if (isPreviewMode.value) {
         const preview = recipeStore.previewData;
         if (preview) {
             rawRecipe.value = preview;
             rawIngredients.value = preview.ingredients || [];
             rawSteps.value = preview.steps || [];
-            rawComments.value = [];
-            rawGallery.value = preview.gallery || []; // 支援預覽中的成品照
+            rawGallery.value = preview.gallery || [];
             setTimeout(() => { isLoading.value = false; }, 300);
             return;
-        } else {
-            router.replace('/workspace/edit-recipe');
-            return;
         }
+        router.replace('/workspace/edit-recipe');
+        return;
     }
 
-    recipeStore.previewData = null;
-
     try {
-        const [resR, resRecipeIng, resIngMaster, resS, resC, resG] = await Promise.all([
+        // 發送請求 (直接取 .data)
+        const [resR, resRecipeIng, resIngMaster, resS, resC, resG, resU] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_ingredient.json'),
             publicApi.get('data/recipe/ingredients.json'),
             publicApi.get('data/recipe/steps.json'),
             publicApi.get('data/social/comments.json'),
-            publicApi.get('data/social/gallery.json')
+            publicApi.get('data/social/gallery.json'),
+            publicApi.get('data/user/users.json')
         ]);
 
-        const found = resR.data.find(r => Number(r.recipe_id) === recipeId);
-        if (!found) {
-            rawRecipe.value = null;
-            return;
-        }
-        rawRecipe.value = found;
+        // 1. 存入使用者資料
+        rawUsers.value = resU.data || [];
 
-        const filteredLinks = resRecipeIng.data.filter(i => Number(i.recipe_id) === recipeId);
+        // 2. 找到目標食譜
+        const recipes = resR.data || [];
+        rawRecipe.value = recipes.find(r => Number(r.recipe_id || r.RECIPE_ID) === recipeId);
+
+        if (!rawRecipe.value) return;
+
+        // 3. 留言與相簿過濾
+        rawComments.value = (resC.data || []).filter(c => Number(c.RECIPE_ID || c.recipe_id) === recipeId);
+        rawGallery.value = (resG.data || []).filter(g => Number(g.RECIPE_ID || g.recipe_id) === recipeId);
+
+        // 4. 食材拼接
+        const masterIng = resIngMaster.data || [];
+        const recipeIng = resRecipeIng.data || [];
+        const filteredLinks = recipeIng.filter(i => Number(i.recipe_id || i.RECIPE_ID) === recipeId);
+
         rawIngredients.value = filteredLinks.map(link => {
-            const masterInfo = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
+            const master = masterIng.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
             return {
                 ...link,
-                ingredient_name: masterInfo?.ingredient_name || `食材 ID: ${link.ingredient_id}`,
-                calories_per_100g: masterInfo?.kcal_per_100g || 0,
-                protein_per_100g: masterInfo?.protein_per_100g || 0,
-                fat_per_100g: masterInfo?.fat_per_100g || 0,
-                carbs_per_100g: masterInfo?.carbs_per_100g || 0,
-                unit_name: link.unit_name || masterInfo?.unit_name || '份',
-                note: link.remark || ''
+                ingredient_name: master?.ingredient_name || `未知食材`,
+                unit_name: link.unit_name || master?.unit_name || '份'
             };
         });
 
-        rawSteps.value = resS.data.filter(s => Number(s.recipe_id) === recipeId)
+        // 5. 步驟排序
+        const steps = resS.data || [];
+        rawSteps.value = steps.filter(s => Number(s.recipe_id || s.RECIPE_ID) === recipeId)
             .sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
 
-        rawComments.value = resC.data.filter(c => Number(c.RECIPE_ID) === recipeId);
-        const galleryRaw = resG.data.data || resG.data;
-        rawGallery.value = galleryRaw.filter(g => Number(g.RECIPE_ID) === recipeId);
         servings.value = 1;
 
     } catch (err) {
-        console.error('API 讀取失敗：', err);
+        console.error('資料讀取出錯');
     } finally {
         setTimeout(() => { isLoading.value = false; }, 100);
     }
@@ -152,9 +150,8 @@ onUnmounted(() => { toggleWorkspaceTopBar(true); });
 watch(() => isPreviewMode.value, (newVal) => { toggleWorkspaceTopBar(!newVal); });
 watch(() => [route.params.id, route.query.mode], () => { fetchData(); }, { deep: true });
 
-// --- 4. 計算屬性 (關鍵路徑修復) ---
+// --- 4. 計算屬性 ---
 
-// 1. 食譜封面圖
 const recipeIntroData = computed(() => {
     if (!rawRecipe.value) return null;
     let rawImg = rawRecipe.value.recipe_image_url || rawRecipe.value.coverImg || rawRecipe.value.recipe_cover_image || '';
@@ -172,7 +169,7 @@ const recipeIntroData = computed(() => {
     }
 
     return {
-        id: rawRecipe.value.recipe_id || route.params.id, // 為了帶著食譜id進入步驟播放頁而加的
+        id: rawRecipe.value.recipe_id || route.params.id,
         title: rawRecipe.value.recipe_title || rawRecipe.value.title || '未命名食譜',
         image: finalImg,
         time: formatTime(rawRecipe.value.recipe_total_time),
@@ -181,7 +178,6 @@ const recipeIntroData = computed(() => {
     };
 });
 
-// 2. 步驟圖
 const stepsData = computed(() => {
     if (!rawSteps.value || rawSteps.value.length === 0) return [];
     const rId = rawRecipe.value?.recipe_id || route.params.id || '0';
@@ -211,7 +207,6 @@ const stepsData = computed(() => {
     });
 });
 
-// 3. 成品照
 const snapsData = computed(() => rawGallery.value.map(g => {
     let rawUrl = g.GALLERY_URL || g.url || '';
     let finalUrl = '';
@@ -227,7 +222,6 @@ const snapsData = computed(() => rawGallery.value.map(g => {
     };
 }));
 
-// --- 5. 其他工具函式與計算屬性 ---
 const formatTime = (timeVal) => {
     if (!timeVal || timeVal === '00:00' || timeVal === 0) return '0 分鐘';
     const timeStr = String(timeVal);
@@ -264,15 +258,31 @@ const nutritionWrapper = computed(() => {
     }];
 });
 
+// 修正：留言列表與 User 資料對接
+
 const commentList = computed(() => {
-    return rawComments.value.map(c => ({
-        userName: c.USER_NAME,
-        handle: `user_${c.USER_ID}`,
-        time: c.COMMENT_AT,
-        content: c.COMMENT_TEXT,
-        avatar: c.USER_URL || 'https://i.pravatar.cc/150',
-        likes: Math.floor(Math.random() * 50)
-    }));
+    if (!rawComments.value.length) return [];
+
+    return rawComments.value.map(c => {
+        const userId = Number(c.USER_ID || c.user_id);
+        const user = rawUsers.value.find(u => Number(u.USER_ID) === userId);
+
+        // 處理頭像
+        let avatar = 'https://i.pravatar.cc/150';
+        const rawAvatar = user?.USER_URL || user?.user_url;
+        if (rawAvatar) {
+            avatar = rawAvatar.startsWith('http') ? rawAvatar : `${baseUrl}/${rawAvatar.replace(/^\//, '')}`.replace(/\/+/g, '/');
+        }
+
+        return {
+            userName: user?.USER_NAME || 'Recimo 用戶',
+            handle: `user_${userId}`,
+            time: c.COMMENT_AT || '剛剛',
+            content: c.COMMENT_TEXT || '',
+            avatar: avatar,
+            likes: c.LIKES || 0
+        };
+    });
 });
 
 const baseRecipeLikes = ref(0);
