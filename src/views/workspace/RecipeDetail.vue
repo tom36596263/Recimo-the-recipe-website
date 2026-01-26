@@ -359,7 +359,7 @@ const onReportSubmit = (data) => {
 
                     <div v-if="!isPreviewMode" class="adapt-btn-wrapper">
                         <router-link :to="`/workspace/modify-recipe/${rawRecipe.recipe_id}`">
-                            <BaseBtn title="改編集+" variant="outline" height="40" class="w-auto" />
+                            <BaseBtn title="改編一覽" variant="outline" height="40" class="w-auto" />
                         </router-link>
                     </div>
                 </div>

@@ -9,12 +9,11 @@ const props = defineProps({
     recipe: Object
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'delete-recipe']);
 
 const currentServings = ref(1);
 const closeModal = () => emit('update:modelValue', false);
 
-// --- 模擬評論區的頭像顏色邏輯 ---
 const getAvatarStyle = (name) => {
     if (!name) return { backgroundColor: '#74D09C' };
     const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
@@ -31,30 +30,79 @@ watch(() => props.recipe, (newVal) => {
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
+
+    // 抓取目前登入者
+    const loginUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const today = new Date().toISOString().split('T')[0];
+
+    // 關鍵判斷：食譜本身有沒有 ID (判斷是資料庫紀錄還是前端草稿)
+    const isExistingRecord = !!(r.id || r.recipe_id);
+
+    let displayName = "";
+    let displayHandle = "";
+    let displayDate = "";
+    let isOwner = false;
+
+    if (isExistingRecord) {
+        // --- 模式：舊紀錄 (優先顯示原發布者資料) ---
+        // 兼容多種可能的使用者名稱 Key
+        displayName = r.user_name || r.author_name || r.userName || "未知作者";
+
+        // 兼容多種 Email Key 並處理 Handle
+        const rawEmail = r.user_email || r.email || r.author_email || "guest@mail.com";
+        displayHandle = rawEmail.split('@')[0];
+
+        // 兼容多種日期格式
+        const rawDate = r.created_at || r.user_startdate || r.publish_date || today;
+        displayDate = rawDate.split(' ')[0];
+
+        // 【權限判斷】：嚴格比對 ID
+        const recordAuthorId = String(r.user_id || r.author_id || "");
+        const currentLoginId = String(loginUser.user_id || "");
+        isOwner = (recordAuthorId === currentLoginId) && currentLoginId !== "";
+    } else {
+        // --- 模式：新草稿 (強制顯示目前登入者) ---
+        displayName = loginUser.user_name || "新創作者";
+        displayHandle = (loginUser.user_email || "guest@mail.com").split('@')[0];
+        displayDate = today;
+        isOwner = true;
+    }
+
+    // 時間與說明的格式化
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
 
-    let finalDescription = '暫無詳細說明';
-    if (r.recipe_descreption) finalDescription = r.recipe_descreption;
-    else if (r.description && r.description !== r.adapt_description) finalDescription = r.description;
+    // 修正你之前代碼中的 descreption 拼字錯誤，並增加兼容性
+    const finalDescription = r.recipe_description || r.recipe_descreption || r.description || r.desc || '暫無詳細說明';
 
     return {
-        id: r.id,
-        title: r.adaptation_title || r.title || '改編食譜',
+        id: r.id || r.recipe_id,
+        title: r.adaptation_title || r.title || '新改編食譜',
         image: r.adaptation_image_url || r.coverImg || 'https://placehold.co/800x600?text=No+Image',
         description: finalDescription,
         time: formattedTime,
         difficulty: r.difficulty || 1,
-        // --- 這裡先放假資料 ---
-        userName: "小當家",
-        handle: "cooking_master",
-        publishTime: "2024-05-20"
+        userName: displayName,
+        handle: displayHandle,
+        publishTime: displayDate,
+        isOwner: isOwner
     };
 });
 
+const handleDelete = () => {
+    if (!introData.value.id) {
+        alert("尚未儲存的內容，關閉視窗即可。");
+        return;
+    }
+    if (confirm("確定要刪除這份食譜紀錄嗎？")) {
+        emit('delete-recipe', introData.value.id);
+        closeModal();
+    }
+};
+
 const ingredientsData = computed(() => {
-    if (!props.recipe?.ingredients) return [];
-    return props.recipe.ingredients.map(item => ({
+    const list = props.recipe?.ingredients || [];
+    return list.map(item => ({
         INGREDIENT_NAME: item.name || item.ingredient_name || '未知食材',
         amount: item.amount,
         unit_name: item.unit || item.unit_name || 'g',
@@ -63,8 +111,8 @@ const ingredientsData = computed(() => {
 });
 
 const stepsData = computed(() => {
-    if (!props.recipe?.steps) return [];
-    return props.recipe.steps.map((s, idx) => ({
+    const steps = props.recipe?.steps || [];
+    return steps.map((s, idx) => ({
         id: s.id || idx,
         title: s.step_title || s.title || `步驟 ${idx + 1}`,
         content: s.content || s.step_content || '',
@@ -89,6 +137,11 @@ const stepsData = computed(() => {
                                     {{ introData?.title }}
                                 </h2>
                                 <span class="badge">改編版本</span>
+
+                                <button v-if="introData?.isOwner" @click="handleDelete" class="delete-btn">
+                                    <i-material-symbols-delete-outline-rounded />
+                                    刪除此版本
+                                </button>
                             </div>
 
                             <div class="user-info-box">
@@ -126,6 +179,27 @@ const stepsData = computed(() => {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
+
+// 刪除按鈕樣式
+.delete-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #FFF0F0;
+    color: #FF4D4D;
+    border: 1px solid #FFD6D6;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        background: #FF4D4D;
+        color: white;
+    }
+}
 
 .adaptation-modal-overlay {
     position: fixed;
@@ -290,11 +364,11 @@ const stepsData = computed(() => {
             font-size: 15px;
             border: 1px solid rgba(0, 0, 0, 0.05);
             flex-shrink: 0;
-            order: 2; // 電腦版頭像在右
+            order: 2;
         }
 
         .user-text-meta {
-            order: 1; // 電腦版文字在左
+            order: 1;
         }
     }
 
@@ -302,18 +376,18 @@ const stepsData = computed(() => {
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
-        padding-right: 30px; // 給關閉按鈕留空間
+        padding-right: 30px;
 
         .user-info-box {
             width: 100%;
             justify-content: flex-start;
 
             .user-avatar-circle {
-                order: 1; // 手機版頭像改到左邊
+                order: 1;
             }
 
             .user-text-meta {
-                order: 2; // 手機版文字改到右邊
+                order: 2;
                 text-align: left;
             }
         }
