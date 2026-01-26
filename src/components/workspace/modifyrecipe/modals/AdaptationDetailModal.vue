@@ -399,7 +399,7 @@ const stepsData = computed(() => {
     top: 0;
 
     .ingredients-wrapper {
-        background: $neutral-color-100;
+        background: $primary-color-100;
         padding: 24px;
         border-radius: 20px;
         border: 1px solid rgba($primary-color-400, 0.2);
