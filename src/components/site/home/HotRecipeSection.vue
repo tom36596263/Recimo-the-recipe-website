@@ -1,10 +1,23 @@
 <script setup>
     import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
     import CircleBtn from '@/components/common/CircleBtn.vue'
+    import { useAuthGuard } from '@/composables/useAuthGuard'
+    import { useRouter } from 'vue-router';
     import { ref, onMounted } from 'vue';
     import { publicApi } from '@/utils/publicApi'
 
+    const { runWithAuth } = useAuthGuard();
+    const router = useRouter();
     const recipes = ref([])
+
+    const handleCardClick = (id) => {
+        runWithAuth(() => {
+            router.push({
+                name: 'workspace-recipe-detail',
+                params: { id: id }
+            })
+        })
+    }
 
 onMounted(async () => {
     try {
@@ -72,13 +85,13 @@ onMounted(async () => {
         <h2 class="zh-h2">熱門食譜推薦</h2>
         <h2 class="en-h3">Hot Recipe</h2>
     </div>
-    <router-link 
+    <div 
     v-for="item in recipes" 
     :key="item.id"
-    :to="{ name: 'workspace-recipe-detail', params: { id: item.id } }" 
+    @click.prevent="handleCardClick(item.id)"
     class="col-4 col-md-12 recipe-cards">
         <RecipeCardLg :recipe="item" class="recipe-card" />
-    </router-link> 
+    </div> 
     <div class="col-12 more-recipe-btn">
         <router-link to="/recipes">
             <CircleBtn title="看更多食譜" />
@@ -100,6 +113,7 @@ onMounted(async () => {
         text-decoration: none;
         color: $neutral-color-800;
         margin-bottom: 20px;
+        cursor: pointer;
     }
     .more-recipe-btn{
         display: flex;

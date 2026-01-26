@@ -5,6 +5,13 @@ export const useCartStore = defineStore('cart', () => {
   // 初始化：從 LocalStorage 讀取資料
   const items = ref(JSON.parse(localStorage.getItem('CART_DATA')) || [])
 
+  // 計算商品總數量 (給 Navbar 小紅點使用)
+  const totalCount = computed(() => {
+    return items.value.reduce((total, item) => {
+      return total + (item.count || item.qty || 0)
+    }, 0)
+  })
+
   // 計算總金額
   const totalAmount = computed(() => {
     return items.value.reduce((total, item) => {
@@ -92,6 +99,7 @@ export const useCartStore = defineStore('cart', () => {
 
   return {
     items,
+    totalCount,
     totalAmount,
     add,
     incrementQty,

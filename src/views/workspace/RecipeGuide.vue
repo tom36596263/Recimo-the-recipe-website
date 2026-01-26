@@ -42,7 +42,7 @@ const fetchData = async () => {
         //再以步驟+食材關聯資料表(step_ingredients.json)的ingredient_id對比ingredients.json的ingredient_id
         const ingredientIds = stepIngredientItems.value.map(i => i.ingredient_id);
         allIngredients.value = ingredientsRes.data.filter(i => ingredientIds.includes(i.ingredient_id));
-    } catch (error) { //error是
+    } catch (error) { //error是自訂義的變數，而catch是try出錯後會執行的部分，try/catch是一組，最後也可以接finally。try(嘗試執行)/catch(若try執行失敗)/finally(無論如何都會執行)
         console.error('資料讀取失敗', error.message);
     }
 };
@@ -55,10 +55,14 @@ watch(() => route.params.id, (newId) => {
 });
 
 const currentStepIndex = ref(0); // 預設顯示第一步 (索引為 0)
-const stepNotes = ref({}); // 用來儲存每個步驟的筆記，格式如 { step_id: '筆記內容' }
-
-// 計算屬性：獲取目前顯示的步驟資料
+// computed是vue內建的API，從JavaScript的角度來看它也是函式，是vue提供的一套流水線。
+// computed裡面需要放置一段邏輯，不能直接給變數，否則computed只會在網頁載入的當下接收到該變數代表的資料，後續就算該變數有變動computed也不知道要變。
+// currentStepData是變數，也是計算屬性
 const currentStepData = computed(() => allSteps.value[currentStepIndex.value] || {});
+// 一般屬性
+const stepNotes = ref({}); // 宣告變數以儲存每個步驟的筆記，格式如 { step_id: '筆記內容' }
+
+
 
 // 計算屬性：獲取目前步驟對應的食材（包含名稱、份量、單位）
 const currentStepIngredients = computed(() => {

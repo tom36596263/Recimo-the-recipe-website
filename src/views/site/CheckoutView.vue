@@ -1,241 +1,299 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import card from '@/components/mall/CheckCard.vue';
-// import axios from 'axios';
-// import { publicApi } from '@/utils/publicApi';
 import { useCartStore } from '@/stores/cartStore';
+import Modal from '@/components/BaseModal.vue';
 
-
-const cartStore = useCartStore(); // 2. 初始化 Store
+//初始化變數
+const showSuccessModal = ref(false);
+const cartStore = useCartStore();
 const router = useRouter();
 const orderItems = computed(() => cartStore.items);
-// onMounted(() => {
-//   publicApi.get('data/mall/order_product.json')
-//     .then(res => {
-//       orderItems.value = res.data;
-//     })
-//     .catch(err => {
-//       console.error('讀取 JSON 失敗', err);
-//     });
-// })
 
+//DOM Refs(用於信用卡輸入跳轉)
+const cardInput2 = ref(null);
+const cardInput3 = ref(null);
+const cardInput4 = ref(null);
 
-// 資料打包送進後端
+// 表單資料 (前端使用 snake_case，送出時會轉成 DB 格式)
 const form = ref({
-  // 訂購人
-  name: '',
-  phone: '',
-  email: '',
-  home: '', // 非必填
-  adress: '',
+  // 訂購人資料
+  user_name: '',
+  user_phone: '',
+  user_email: '',
+  user_tel: '',
+  user_address: '',
 
-  // 宅配收件人
-  addname: '',
-  addphone: '',
-  addhome: '', // 非必填
-  addadress: '',
+  // 收件人資料
+  recipient_name: '',    // 對應 RECIPIENT_NAME
+  recipient_phone: '',   // 對應 RECIPIENT_PHONE
+  recipient_tel: '',     // 對應 RECIPIENT_PHONE 或備註
+  shipping_address: '',  // 對應 SHIPPING_ADDRESS
 
-  // 信用卡
-  cardnum1: '',
-  cardnum2: '',
-  cardnum3: '',
-  cardnum4: '',
-  expire: '', // 對應有效期限
-  cvc: '',
+  // 訂單設定
+  logistics_id: 1,       // 對應 LOGISTICS_ID
+  payment_method: '',    // 對應 PATMENT_METHOD (依照你的 DB 拼字)
+  shipping_type: '',     // 前端控制用 ('new' or 'same')
 
-  // 雖然模板是用 num 和 savenum，建議這邊統一對應
-  num: '', // 有效期限 (MM/YY)
-  savenum: '', // 安全碼 (CVC)
-
-  // 狀態控制
-  shippingType: '', // 'new' 或 'same'
-  paymentMethod: '' // 'card' 或 'cod'
+  // 信用卡 (不存 DB)
+  card_num_1: '',
+  card_num_2: '',
+  card_num_3: '',
+  card_num_4: '',
+  card_expiry: '',
+  card_cvc: '',
 });
 
 const errors = ref({});
 
-// --- 監聽邏輯 (保持不變) ---
+//監聽邏輯
 watch(
-  () => form.value.shippingType,
+  () => form.value.shipping_type,
   (val) => {
     if (val === 'same') {
-      form.value.addname = form.value.name;
-      form.value.addphone = form.value.phone;
-      form.value.addhome = form.value.home;
-      form.value.addadress = form.value.adress;
+      form.value.recipient_name = form.value.user_name;
+      form.value.recipient_phone = form.value.user_phone;
+      form.value.recipient_tel = form.value.user_tel;
+      form.value.shipping_address = form.value.user_address;
     } else if (val === 'new') {
-      form.value.addname = '';
-      form.value.addphone = '';
-      form.value.addhome = '';
-      form.value.addadress = '';
+      form.value.recipient_name = '';
+      form.value.recipient_phone = '';
+      form.value.recipient_tel = '';
+      form.value.shipping_address = '';
     }
   }
 );
 
 watch(
-  () => form.value.paymentMethod,
+  () => form.value.payment_method,
   (val) => {
     if (val === 'cod') {
-      errors.value.cardnum1 = '';
-      errors.value.cardnum2 = '';
-      errors.value.cardnum3 = '';
-      errors.value.cardnum4 = '';
-      errors.value.num = '';
-      errors.value.savenum = '';
+      errors.value.card_num_1 = '';
+      errors.value.card_num_2 = '';
+      errors.value.card_num_3 = '';
+      errors.value.card_num_4 = '';
+      errors.value.card_expiry = '';
+      errors.value.card_cvc = '';
     }
   }
 );
 
-// --- 驗證邏輯 (已排除家用電話) ---
+// 驗證邏輯
 const validateField = (field) => {
-  // 先清除該欄位舊錯誤
   errors.value[field] = '';
 
-  // 1. 訂購人必填檢查 (跳過 home)
-  if (field === 'name' && !form.value.name) errors.value.name = '*請輸入姓名';
-  if (field === 'phone') {
-    if (!form.value.phone) errors.value.phone = '*請輸入手機號碼';
-    else if (!/^09\d{8}$/.test(form.value.phone))
-      errors.value.phone = '*手機格式錯誤';
+  //訂購人
+  if (field === 'user_name' && !form.value.user_name) errors.value.user_name = '*請輸入姓名';
+  if (field === 'user_phone') {
+    if (!form.value.user_phone) errors.value.user_phone = '*請輸入手機號碼';
+    else if (!/^09\d{8}$/.test(form.value.user_phone)) errors.value.user_phone = '*手機格式錯誤';
   }
-  if (field === 'email') {
-    if (!form.value.email) errors.value.email = '*請輸入電子信箱';
-    else if (!form.value.email.includes('@'))
-      errors.value.email = '*電子信箱格式錯誤';
+  if (field === 'user_email') {
+    if (!form.value.user_email) errors.value.user_email = '*請輸入電子信箱';
+    else if (!form.value.user_email.includes('@')) errors.value.user_email = '*電子信箱格式錯誤';
   }
-  if (field === 'adress' && !form.value.adress)
-    errors.value.adress = '*請輸入地址';
+  if (field === 'user_address' && !form.value.user_address) errors.value.user_address = '*請輸入地址';
 
-  // 2. 宅配收件人必填檢查 (跳過 addhome)
-  // 只要有選配送方式(不管是同訂購人還是新增)，這些欄位都必須有值
-  if (form.value.shippingType) {
-    if (field === 'addname' && !form.value.addname)
-      errors.value.addname = '*請輸入收件人';
-    if (field === 'addadress' && !form.value.addadress)
-      errors.value.addadress = '*請輸入地址';
-    if (field === 'addphone') {
-      if (!form.value.addphone) errors.value.addphone = '*請輸入手機';
-      else if (!/^09\d{8}$/.test(form.value.addphone))
-        errors.value.addphone = '*格式錯誤';
+  // 收件人
+  if (form.value.shipping_type) {
+    if (field === 'recipient_name' && !form.value.recipient_name) errors.value.recipient_name = '*請輸入收件人';
+    if (field === 'shipping_address' && !form.value.shipping_address) errors.value.shipping_address = '*請輸入地址';
+    if (field === 'recipient_phone') {
+      if (!form.value.recipient_phone) errors.value.recipient_phone = '*請輸入手機';
+      else if (!/^09\d{8}$/.test(form.value.recipient_phone)) errors.value.recipient_phone = '*格式錯誤';
     }
   }
 
-  // 3. 信用卡必填檢查
-  if (form.value.paymentMethod === 'card') {
-    if (field.includes('cardnum') && !form.value[field])
-      errors.value[field] = '*必填';
-    if (field === 'num' && !form.value.num) errors.value.num = '*必填';
-    if (field === 'savenum' && !form.value.savenum)
-      errors.value.savenum = '*必填';
+  // 信用卡
+  if (form.value.payment_method === 'card') {
+    if (field.includes('card_num') && !form.value[field]) errors.value[field] = '*必填';
+    if (field === 'card_expiry' && !form.value.card_expiry) errors.value.card_expiry = '*必填';
+    if (field === 'card_cvc' && !form.value.card_cvc) errors.value.card_cvc = '*必填';
   }
 };
+
+//輔助函式
 const formatExpiryDate = (e) => {
-  //取得當前輸入值，並只保留數字 (移除所有非數字字元)
   let val = e.target.value.replace(/\D/g, '');
-
-  //限制最多只有 4 個數字 (MMYY)
   if (val.length > 4) val = val.slice(0, 4);
-
-  //自動補斜線邏輯
-  //數字超過 2 碼 (例如輸入了 123 -> 變成 12/3)
   if (val.length > 2) {
     val = val.slice(0, 2) + '/' + val.slice(2);
-  }
-  //剛好輸入第 2 碼，且「不是」在按刪除鍵 (例如輸入 12 -> 變成 12/)
-  else if (val.length === 2 && e.inputType !== 'deleteContentBackward') {
+  } else if (val.length === 2 && e.inputType !== 'deleteContentBackward') {
     val = val + '/';
   }
-
-  //將處理好的值寫回 form
-  form.value.num = val;
+  form.value.card_expiry = val;
 };
 
+const handleCardInput = (e, fieldName, nextInputRef) => {
+  errors.value[fieldName] = '';
+  const val = e.target.value.replace(/\D/g, '');
+  form.value[fieldName] = val;
+  if (val.length === 4 && nextInputRef) {
+    nextInputRef.focus();
+  }
+};
 
-// 接收 template 傳進來的 navigate 函式
-const handleDelete = (navigate) => {
+const handleNextInput = (e) => {
+  if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') {
+    e.preventDefault();
+    const inputs = Array.from(document.querySelectorAll('input'));
+    const visibleInputs = inputs.filter(input =>
+      input.offsetParent !== null && !input.disabled && input.type !== 'hidden'
+    );
+    const index = visibleInputs.indexOf(e.target);
+    if (index > -1 && index < visibleInputs.length - 1) {
+      visibleInputs[index + 1].focus();
+    } else {
+      e.target.blur();
+    }
+  }
+};
 
-  // --- 1. 執行原本的驗證邏輯 (保持不變) ---
-  validateField('name');
-  validateField('phone');
-  validateField('email');
-  validateField('adress');
+//金額計算
+const subtotal = computed(() => {
+  if (!orderItems.value || orderItems.value.length === 0) return 0;
+  return orderItems.value.reduce((total, item) => {
+    const price = Number(item.product_price) || Number(item.price) || 0;
+    const qty = Number(item.count) || Number(item.quantity) || 0;
+    return total + (price * qty);
+  }, 0);
+});
 
-  if (form.value.shippingType) {
-    validateField('addname');
-    validateField('addphone');
-    validateField('addadress');
+const shippingFee = computed(() => {
+  return subtotal.value >= 1000 ? 0 : 60;
+});
+
+const totalAmount = computed(() => {
+  return subtotal.value + shippingFee.value;
+});
+
+//送出訂單 (handleSubmit)
+const handleSubmit = () => {
+  // 執行驗證
+  validateField('user_name');
+  validateField('user_phone');
+  validateField('user_email');
+  validateField('user_address');
+
+  if (form.value.shipping_type) {
+    validateField('recipient_name');
+    validateField('recipient_phone');
+    validateField('shipping_address');
   }
 
-  if (form.value.paymentMethod === 'card') {
-    validateField('cardnum1');
-    validateField('cardnum2');
-    validateField('cardnum3');
-    validateField('cardnum4');
-    validateField('num');
-    validateField('savenum');
+  if (form.value.payment_method === 'card') {
+    validateField('card_num_1');
+    validateField('card_num_2');
+    validateField('card_num_3');
+    validateField('card_num_4');
+    validateField('card_expiry');
+    validateField('card_cvc');
   }
 
   const hasError = Object.values(errors.value).some((msg) => msg !== '');
 
-  // --- 2. 判斷邏輯 ---
-
   if (hasError) {
     alert('資料填寫有誤，請檢查紅色欄位');
-    // 這裡不呼叫 navigate()，所以雖然外面有 router-link，但不會跳轉！
-  } else if (!form.value.shippingType) {
+  } else if (!form.value.shipping_type) {
     alert('請選擇宅配地址方式');
-  } else if (!form.value.paymentMethod) {
+  } else if (!form.value.payment_method) {
     alert('請選擇付款方式');
   } else {
-    // --- 3. 驗證通過，執行跳轉 ---
-    console.log('送出資料：', form.value);
-    alert('訂單送出成功');
+    // === 準備送給後端的資料 ===
 
-    // 呼叫 router-link 提供的跳轉功能
-    // 這會自動套用 router-link 計算好的正確路徑 (包含部署的 base url)
-    if (navigate) {
-      navigate();
+    //商品明細
+    const orderDetailsPayload = orderItems.value.map(item => {
+      const price = Number(item.product_price || item.price || 0);
+      const qty = Number(item.count || item.quantity || 1);
+
+      return {
+        //資料庫欄位
+        PRODUCT_ID: item.id || item.product_id,
+        SNAPSHOT_PRICE: price,
+        QUANTITY: qty,
+        SUBTOTAL: price * qty,
+
+        //前端模擬顯示用
+        PRODUCT_NAME: item.product_name || item.name,
+        PRODUCT_IMAGE: item.product_image?.[0]?.image_url || item.image || ''
+      };
+    });
+
+    // 訂單主檔
+    // 產生一個模擬的 ID (用當下時間戳記)
+    const fakeOrderId = Number(Date.now().toString().slice(-8));
+
+    const orderMasterPayload = {
+      //加入模擬 ID
+      ORDER_ID: fakeOrderId,
+
+      USER_ID: 1,
+      LOGISTICS_ID: form.value.logistics_id,
+      SUBTOTAL: subtotal.value,
+      DISCOUNT_AMOUNT: 0,
+      SHIPPING_FEE: shippingFee.value,
+      TOTAL_AMOUNT: totalAmount.value,
+      CREATED: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      RECIPIENT_NAME: form.value.shipping_type === 'same' ? form.value.user_name : form.value.recipient_name,
+      RECIPIENT_PHONE: form.value.shipping_type === 'same' ? form.value.user_phone : form.value.recipient_phone,
+      SHIPPING_ADDRESS: form.value.shipping_type === 'same' ? form.value.user_address : form.value.shipping_address,
+      ORDER_STATUS: 0,
+      PAYMENT_METHOD: form.value.payment_method,
+      PAYMENT_STATUS: form.value.payment_method === 'card' ? 1 : 0,
+
+      // 將商品明細夾帶在 items
+      items: orderDetailsPayload,
+
+      //為了相容OrderCard，也可以多存 products
+      products: orderDetailsPayload
+    };
+
+    console.log('準備寫入的訂單資料：', orderMasterPayload);
+
+
+    // 寫入 LocalStorage (模擬資料庫)
+
+    try {
+      // 讀取舊資料
+      const existingOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
+
+      // 把新訂單加到最前面
+      existingOrders.unshift(orderMasterPayload);
+
+      // 存回去
+      localStorage.setItem('mall_orders', JSON.stringify(existingOrders));
+
+      console.log('寫入 LocalStorage 成功！');
+    } catch (e) {
+      console.error('寫入失敗', e);
     }
-    // router.push('../workspacr/OrderInquiry.vue');
+    // ==========================================
+
+    // TODO: 這裡接 axios.post API (等後端好了再打開)
+    // axios.post('/api/orders', orderMasterPayload).then(...)
+
+    // 清空購物車並顯示成功
+    cartStore.items = [];
+    showSuccessModal.value = true;
+    setTimeout(() => {
+      handleModalCloseAndRedirect();
+    }, 3000);
   }
+};
+
+const handleModalCloseAndRedirect = () => {
+  showSuccessModal.value = false;
+  router.push('../workspace/orders');
 };
 
 const backcart = () => {
   router.push('./CartView.vue');
 }
-
-// 計算商品總金額 (小計)
-const subtotal = computed(() => {
-  // 檢查 orderItems.value 是否有值
-  if (!orderItems.value || orderItems.value.length === 0) {
-    return 0;
-  }
-
-  return orderItems.value.reduce((total, item) => {
-    // 價格:優先找 product_price，沒有再找 price，都沒有就當 0
-    const price = Number(item.product_price) || Number(item.price) || 0;
-
-    // 數量:優先找 count，沒有再找 quantity，都沒有就當 0
-    const qty = Number(item.count) || Number(item.quantity) || 0;
-
-    return total + (price * qty);
-  }, 0);
-});
-
-// 計算運費 (小計 >= 1000 免運，否則 60)
-const shippingFee = computed(() => {
-  return subtotal.value >= 1000 ? 0 : 60;
-});
-
-// 計算總結帳金額 (小計 + 運費)
-const totalAmount = computed(() => {
-  return subtotal.value + shippingFee.value;
-});
 </script>
 
 <template>
-  <div class="container">
+  <div class="container" @keydown.enter="handleNextInput">
     <div class="title">
       <h2 class="zh-h2">結帳 Checkout</h2>
     </div>
@@ -243,6 +301,7 @@ const totalAmount = computed(() => {
     <div class="row">
       <div class="col-6 col-lg-12">
         <div class="checkout-container">
+
           <div class="purchaser">
             <div class="purchaser-title">
               <h5 class="zh-h5">訂購人資料</h5>
@@ -250,37 +309,42 @@ const totalAmount = computed(() => {
             <div class="field-flex">
               <div class="field">
                 <label class="p-p1">姓名</label>
-                <input type="text" v-model="form.name" class="form-input" placeholder="請輸入姓名"
-                  :class="{ 'is-error': errors.name }" @blur="validateField('name')" @input="errors.name = ''" />
-                <span class="error-msg p-p2 p-p2" v-if="errors.name">{{ errors.name }}</span>
+                <input type="text" v-model="form.user_name" class="form-input" placeholder="請輸入姓名" :class="{
+                  'is-error': errors.user_name,
+                  'is-valid': !errors.user_name && form.user_name
+                }" @blur="validateField('user_name')" @input="errors.user_name = ''" />
+                <span class="error-msg p-p2" v-if="errors.user_name">{{ errors.user_name }}</span>
               </div>
 
               <div class="field">
                 <label class="p-p1">手機</label>
-                <input type="tel" v-model="form.phone" maxlength="10" class="form-input" placeholder="請輸入手機"
-                  :class="{ 'is-error': errors.phone }" @blur="validateField('phone')" @input="errors.phone = ''" />
-                <span class="error-msg p-p2 p-p2" v-if="errors.phone">{{ errors.phone }}</span>
+                <input type="tel" v-model="form.user_phone" maxlength="10" class="form-input" placeholder="請輸入手機"
+                  :class="{ 'is-error': errors.user_phone, 'is-valid': !errors.user_phone && form.user_phone }"
+                  @blur="validateField('user_phone')" @input="errors.user_phone = ''" />
+                <span class="error-msg p-p2" v-if="errors.user_phone">{{ errors.user_phone }}</span>
               </div>
             </div>
             <div class="field-flex">
               <div class="field">
                 <label class="p-p1">電子信箱</label>
-                <input type="email" v-model="form.email" class="form-input" placeholder="請輸入電子信箱"
-                  :class="{ 'is-error': errors.email }" @blur="validateField('email')" @input="errors.email = ''" />
-                <span class="error-msg p-p2 p-p2" v-if="errors.email">{{ errors.email }}</span>
+                <input type="email" v-model="form.user_email" class="form-input" placeholder="請輸入電子信箱"
+                  :class="{ 'is-error': errors.user_email, 'is-valid': !errors.user_email && form.user_email }"
+                  @blur="validateField('user_email')" @input="errors.user_email = ''" />
+                <span class="error-msg p-p2" v-if="errors.user_email">{{ errors.user_email }}</span>
               </div>
 
               <div class="field">
                 <label class="p-p1">家用電話</label>
-                <input type="tel" v-model="form.home" placeholder="請輸入電話 (選填)" class="form-input" />
+                <input type="tel" v-model="form.user_tel" placeholder="請輸入電話 (選填)" class="form-input" />
               </div>
             </div>
 
             <div class="field lg">
               <label class="p-p1">地址</label>
-              <input type="text" v-model="form.adress" class="form-input" placeholder="請輸入地址"
-                :class="{ 'is-error': errors.adress }" @blur="validateField('adress')" @input="errors.adress = ''" />
-              <span class="error-msg p-p2 p-p2" v-if="errors.adress">{{ errors.adress }}</span>
+              <input type="text" v-model="form.user_address" class="form-input" placeholder="請輸入地址"
+                :class="{ 'is-error': errors.user_address, 'is-valid': !errors.user_address && form.user_address }"
+                @blur="validateField('user_address')" @input="errors.user_address = ''" />
+              <span class="error-msg p-p2" v-if="errors.user_address">{{ errors.user_address }}</span>
             </div>
           </div>
 
@@ -293,46 +357,47 @@ const totalAmount = computed(() => {
               <div class="deliver-other-text">
                 <div class="other-address-text">
                   <div class="add">
-                    <input type="checkbox" :checked="form.shippingType === 'new'" @click="form.shippingType = 'new'" />
+                    <input type="checkbox" :checked="form.shipping_type === 'new'"
+                      @click="form.shipping_type = 'new'" />
                     <p class="p-p1">新增宅配地址</p>
                   </div>
                   <div class="same">
-                    <input type="checkbox" :checked="form.shippingType === 'same'"
-                      @click="form.shippingType = 'same'" />
+                    <input type="checkbox" :checked="form.shipping_type === 'same'"
+                      @click="form.shipping_type = 'same'" />
                     <p class="p-p1">同訂購人</p>
                   </div>
                 </div>
 
-                <div class="add-address" v-show="form.shippingType === 'new' || form.shippingType === 'same'
-                  ">
+                <div class="add-address" v-show="form.shipping_type === 'new' || form.shipping_type === 'same'">
                   <div class="field-flex">
                     <div class="field add-field">
                       <label class="p-p1">收貨人</label>
-                      <input type="text" v-model="form.addname" class="form-input" placeholder="請輸入姓名"
-                        :class="{ 'is-error': errors.addname }" @blur="validateField('addname')"
-                        @input="errors.addname = ''" />
-                      <span class="error-msg p-p2 p-p2" v-if="errors.addname">{{ errors.addname }}</span>
+                      <input type="text" v-model="form.recipient_name" class="form-input" placeholder="請輸入姓名"
+                        :class="{ 'is-error': errors.recipient_name, 'is-valid': !errors.recipient_name && form.recipient_name }"
+                        @blur="validateField('recipient_name')" @input="errors.recipient_name = ''" />
+                      <span class="error-msg p-p2" v-if="errors.recipient_name">{{ errors.recipient_name }}</span>
                     </div>
                     <div class="field add-field">
                       <label class="p-p1">手機號碼</label>
-                      <input type="text" maxlength="10" v-model="form.addphone" class="form-input" placeholder="請輸入手機"
-                        :class="{ 'is-error': errors.addphone }" @blur="validateField('addphone')"
-                        @input="errors.addphone = ''" />
-                      <span class="error-msg p-p2" v-if="errors.addphone">{{ errors.addphone }}</span>
+                      <input type="text" maxlength="10" v-model="form.recipient_phone" class="form-input"
+                        placeholder="請輸入手機"
+                        :class="{ 'is-error': errors.recipient_phone, 'is-valid': !errors.recipient_phone && form.recipient_phone }"
+                        @blur="validateField('recipient_phone')" @input="errors.recipient_phone = ''" />
+                      <span class="error-msg p-p2" v-if="errors.recipient_phone">{{ errors.recipient_phone }}</span>
                     </div>
                   </div>
                   <div class="field-flex">
                     <div class="field add-field">
                       <label class="p-p1">家用電話</label>
-                      <input type="text" v-model="form.addhome" placeholder="請輸入電話號碼 (選填)" class="form-input" />
+                      <input type="text" v-model="form.recipient_tel" placeholder="請輸入電話號碼 (選填)" class="form-input" />
                     </div>
 
                     <div class="field add-field">
                       <label class="p-p1">寄件地址</label>
-                      <input type="text" v-model="form.addadress" class="form-input" placeholder="請輸入地址"
-                        :class="{ 'is-error': errors.addadress }" @blur="validateField('addadress')"
-                        @input="errors.addadress = ''" />
-                      <span class="error-msg p-p2 p-p2" v-if="errors.addadress">{{ errors.addadress }}</span>
+                      <input type="text" v-model="form.shipping_address" class="form-input" placeholder="請輸入地址"
+                        :class="{ 'is-error': errors.shipping_address, 'is-valid': !errors.shipping_address && form.shipping_address }"
+                        @blur="validateField('shipping_address')" @input="errors.shipping_address = ''" />
+                      <span class="error-msg p-p2" v-if="errors.shipping_address">{{ errors.shipping_address }}</span>
                     </div>
                   </div>
                 </div>
@@ -347,66 +412,81 @@ const totalAmount = computed(() => {
             </div>
             <div class="pay-flex">
               <div class="same">
-                <input type="checkbox" :checked="form.paymentMethod === 'card'" @click="form.paymentMethod = 'card'" />
+                <input type="checkbox" :checked="form.payment_method === 'card'"
+                  @click="form.payment_method = 'card'" />
                 <p class="p-p1">信用卡付款</p>
               </div>
 
               <div class="same">
-                <input type="checkbox" :checked="form.paymentMethod === 'cod'" @click="form.paymentMethod = 'cod'" />
+                <input type="checkbox" :checked="form.payment_method === 'cod'" @click="form.payment_method = 'cod'" />
                 <p class="p-p1">貨到付款</p>
               </div>
             </div>
-            <div v-show="form.paymentMethod === 'card'">
+
+            <div v-show="form.payment_method === 'card'">
               <div class="pay-field">
                 <label class="p-p1">卡號</label>
                 <div class="card-row">
-                  <input type="text" maxlength="4" v-model="form.cardnum1" class="form-input" placeholder="0000"
-                    :class="{ 'is-error': errors.cardnum1 }" @blur="validateField('cardnum1')"
-                    @input="errors.cardnum1 = ''" />
+                  <input type="text" maxlength="4" v-model="form.card_num_1" class="form-input" placeholder="0000"
+                    :class="{ 'is-error': errors.card_num_1, 'is-valid': !errors.card_num_1 && form.card_num_1 }"
+                    @blur="validateField('card_num_1')" @input="handleCardInput($event, 'card_num_1', cardInput2)" />
+
                   <span class="separator">-</span>
-                  <input type="text" maxlength="4" v-model="form.cardnum2" class="form-input" placeholder="0000"
-                    :class="{ 'is-error': errors.cardnum2 }" @blur="validateField('cardnum2')"
-                    @input="errors.cardnum2 = ''" />
+
+                  <input type="text" maxlength="4" v-model="form.card_num_2" class="form-input" placeholder="0000"
+                    ref="cardInput2"
+                    :class="{ 'is-error': errors.card_num_2, 'is-valid': !errors.card_num_2 && form.card_num_2 }"
+                    @blur="validateField('card_num_2')" @input="handleCardInput($event, 'card_num_2', cardInput3)" />
+
                   <span class="separator">-</span>
-                  <input type="text" maxlength="4" v-model="form.cardnum3" class="form-input" placeholder="0000"
-                    :class="{ 'is-error': errors.cardnum3 }" @blur="validateField('cardnum3')"
-                    @input="errors.cardnum3 = ''" />
+
+                  <input type="text" maxlength="4" v-model="form.card_num_3" class="form-input" placeholder="0000"
+                    ref="cardInput3"
+                    :class="{ 'is-error': errors.card_num_3, 'is-valid': !errors.card_num_3 && form.card_num_3 }"
+                    @blur="validateField('card_num_3')" @input="handleCardInput($event, 'card_num_3', cardInput4)" />
+
                   <span class="separator">-</span>
-                  <input type="text" maxlength="4" v-model="form.cardnum4" class="form-input" placeholder="0000"
-                    :class="{ 'is-error': errors.cardnum4 }" @blur="validateField('cardnum4')"
-                    @input="errors.cardnum4 = ''" />
+
+                  <input type="text" maxlength="4" v-model="form.card_num_4" class="form-input" placeholder="0000"
+                    ref="cardInput4"
+                    :class="{ 'is-error': errors.card_num_4, 'is-valid': !errors.card_num_4 && form.card_num_4 }"
+                    @blur="validateField('card_num_4')" @input="handleCardInput($event, 'card_num_4', null)" />
                 </div>
                 <span class="error-msg p-p2"
-                  v-if="errors.cardnum1 || errors.cardnum2 || errors.cardnum3 || errors.cardnum4">
-                  請檢查卡號是否填寫完整
+                  v-if="errors.card_num_1 || errors.card_num_2 || errors.card_num_3 || errors.card_num_4">
+                  *請檢查卡號是否填寫完整
                 </span>
               </div>
               <div class="field-flex">
                 <div class="field">
                   <label class="p-p1">有效期限</label>
-                  <input type="text" v-model="form.num" class="form-input" placeholder="MM/YY" maxlength="5"
-                    :class="{ 'is-error': errors.num }" @blur="validateField('num')" @input="formatExpiryDate">
-                  <span class="error-msg p-p2" v-if="errors.num">{{ errors.num }}</span>
+                  <input type="text" v-model="form.card_expiry" class="form-input" placeholder="MM/YY" maxlength="5"
+                    :class="{ 'is-error': errors.card_expiry, 'is-valid': !errors.card_expiry && form.card_expiry }"
+                    @blur="validateField('card_expiry')" @input="formatExpiryDate">
+                  <span class="error-msg p-p2" v-if="errors.card_expiry">{{ errors.card_expiry }}</span>
                 </div>
 
                 <div class="field">
                   <label class="p-p1">安全碼</label>
-                  <input type="text" maxlength="3" v-model="form.savenum" class="form-input" placeholder="CVC"
-                    :class="{ 'is-error': errors.savenum }" @blur="validateField('savenum')"
-                    @input="errors.savenum = ''" />
-                  <span class="error-msg p-p2" v-if="errors.savenum">{{ errors.savenum }}</span>
+                  <input type="text" maxlength="3" v-model="form.card_cvc" class="form-input" placeholder="CVC"
+                    :class="{ 'is-error': errors.card_cvc, 'is-valid': !errors.card_cvc && form.card_cvc }"
+                    @blur="validateField('card_cvc')" @input="errors.card_cvc = ''" />
+                  <span class="error-msg p-p2" v-if="errors.card_cvc">{{ errors.card_cvc }}</span>
                 </div>
               </div>
             </div>
           </div>
-          <router-link to="../workspace/orders" custom v-slot="{ navigate }">
-            <div class="submit">
-              <BaseBtn title="確定結帳" @click="handleDelete(navigate)" />
-            </div>
-          </router-link>
+
+          <div class="submit">
+            <BaseBtn title="確定結帳" @click="handleSubmit" />
+          </div>
+          <Modal :is-open="showSuccessModal" type="success" title="訂單已送出" description="感謝您的購買，您可以在訂單查詢頁面查看詳情。"
+            icon-class="fa-solid fa-circle-check" @close="handleModalCloseAndRedirect">
+          </Modal>
 
         </div>
       </div>
+
       <div class="col-6 col-lg-12">
         <div class="card-container">
           <div class="order-list">
@@ -447,13 +527,13 @@ const totalAmount = computed(() => {
 
 <style lang="scss" scoped>
 input[type='checkbox'] {
-  accent-color: $primary-color-700; // 控制勾選時的顏色
+  accent-color: $primary-color-700;
   width: 18px;
   height: 18px;
   cursor: pointer;
   margin-top: 13px;
   margin-right: 8px;
-  vertical-align: middle; // 建議加上這行，讓它跟旁邊的文字垂直置中對齊
+  vertical-align: middle;
 }
 
 .title {
@@ -461,8 +541,6 @@ input[type='checkbox'] {
   margin-bottom: 10px;
 }
 
-
-//訂購人資料
 .checkout-container {
   display: flex;
   flex-direction: column;
@@ -495,9 +573,12 @@ input[type='checkbox'] {
 
 .error-msg {
   color: $secondary-color-danger-700;
-  margin-top: -15px;
+  margin-top: -10px;
   margin-left: 5px;
+}
 
+.form-input.is-valid {
+  border: 1px solid $primary-color-400;
 }
 
 @media (max-width: 1024px) {
@@ -539,7 +620,6 @@ input[type='checkbox'] {
   }
 }
 
-
 .deliver-title {
   margin-bottom: 15px;
   position: relative;
@@ -551,38 +631,6 @@ input[type='checkbox'] {
   align-items: flex-start;
   gap: 3px;
   margin-top: -20px;
-}
-
-.check-address {
-  display: flex;
-  align-items: flex-end;
-  gap: 15px;
-}
-
-.wrap {
-  display: flex;
-}
-
-.check-address-text {
-  display: flex;
-  flex-direction: column;
-  margin-top: 5px;
-}
-
-.adderess-text-flex {
-  display: flex;
-  gap: 20px;
-}
-
-.choose {
-  display: flex;
-  align-items: center;
-  margin-left: 40px;
-}
-
-.choose>i {
-  cursor: pointer;
-  flex: 1;
 }
 
 .other-address-text {
@@ -606,16 +654,12 @@ input[type='checkbox'] {
 }
 
 @media (max-width: 1024px) {
-  .choose {
-    margin-left: -1px;
-  }
-
   .deliver-text {
     align-items: stretch;
   }
 }
 
-//信用卡
+// 信用卡
 .pay-flex {
   display: flex;
   gap: 50px;
@@ -649,27 +693,20 @@ input[type='checkbox'] {
   position: relative;
 }
 
-//商品卡片
-
-/* 桌機直向卷軸 */
+/* 訂單列表 */
 .order-list {
   max-height: 500px;
   overflow-y: auto;
 }
 
-/* 平板 & 手機 */
 @media (max-width: 1024px) {
   .order-list {
     display: flex;
     gap: 15px;
     overflow-x: auto;
-    /* 可以滑 */
     overflow-y: hidden;
-    /* 只關掉垂直 */
     -webkit-overflow-scrolling: touch;
-    /* iOS 慣性 */
     scrollbar-width: none;
-    /* Firefox */
   }
 
   .order-list ::-webkit-scrollbar {
@@ -677,7 +714,7 @@ input[type='checkbox'] {
   }
 }
 
-//總計
+// 總計
 .total-sum {
   display: flex;
   justify-content: space-around;

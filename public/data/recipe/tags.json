@@ -59,5 +59,10 @@
   { "tag_id": 58, "tag_name": "蒙布朗", "tag_type": "料理種類" },
   { "tag_id": 59, "tag_name": "三明治", "tag_type": "料理種類" },
   { "tag_id": 60, "tag_name": "優格杯", "tag_type": "料理種類" },
-  { "tag_id": 61, "tag_name": "奶凍", "tag_type": "料理種類" }
+  { "tag_id": 61, "tag_name": "奶凍", "tag_type": "料理種類" },
+  { "tag_id": 62, "tag_name": "石鍋拌飯", "tag_type": "料理種類" },
+  { "tag_id": 63, "tag_name": "炸雞", "tag_type": "料理種類" },
+  { "tag_id": 64, "tag_name": "墨西哥料理", "tag_type": "異國風味" },
+  { "tag_id": 65, "tag_name": "塔可", "tag_type": "料理種類" },
+  { "tag_id": 66, "tag_name": "沙拉", "tag_type": "餐點分類" }
 ]

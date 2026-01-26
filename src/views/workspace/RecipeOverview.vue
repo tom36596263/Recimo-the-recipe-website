@@ -208,7 +208,7 @@ const openKitchen = () => {
     <section class="container recipe-cards-section">
         <div v-if="recipes.length > 0" class="row">
             <div v-for="item in recipes" :key="item.id"
-                :to="{ name: 'workspace-recipe-detail', params: { id: item.id } }" class="col-3 col-lg-12 recipe-cards">
+                :to="{ name: 'workspace-recipe-detail', params: { id: item.id } }" class="col-3 col-lg-6 recipe-cards">
                 <RecipeCardSm :recipe="item" class="recipe-card" />
             </div>
         </div>
@@ -247,7 +247,8 @@ const openKitchen = () => {
 }
 
 .page-btn {
-    margin-bottom: 30px;
+    margin-top: 0px;
+    margin-bottom: 80px;
 }
 
 .recipe-card {

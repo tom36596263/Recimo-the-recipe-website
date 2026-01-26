@@ -1,9 +1,9 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import SearchBar from '@/components/common/SearchBar.vue';
 import NotificationPanel from '@/components/common/NotificationPanel.vue';
-
+import { useCartStore } from '@/stores/cartStore';
 const route = useRoute();
 
 // 通知相關狀態
@@ -28,24 +28,51 @@ const handleClickOutside = (event) => {
     }
 };
 
+// 1. 定義使用者資訊狀態 (給予初始預設值)
+const userInfo = ref({
+    user_name: 'Recimo',
+    user_url: '/img/site/None_avatar.svg'
+});
+
 onMounted(() => {
+    // 2. 從 localStorage 取得登入時存入的資料
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+        try {
+            const parseData = JSON.parse(savedUser);
+            // 更新狀態
+            // 只有當 parseData.name 有值時才更新，否則維持初始值 "Recimo"
+            if (parseData.user_name) userInfo.value.user_name = parseData.user_name;
+
+            // 只有當 parseData.avatar 有值時才更新，否則維持初始預設圖
+            if (parseData.user_url) {
+                userInfo.value.user_url = parseData.user_url;
+            }
+        } catch (error) {
+            console.error("解析使用者資料失敗", error);
+        }
+    }
     document.addEventListener('click', handleClickOutside);
 });
 
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
+
+//購物車數量圓點
+const cartStore = useCartStore();
+const cartTotal = computed(() => cartStore.totalCount);
 </script>
 
 <template>
     <div class="workspace-top-bar">
         <div class="col-6 col-md-12 personal-info">
             <div class="personal-img">
-                <img src="/img/site/Recimo-logo-black.svg" alt="">
+                <img :src="userInfo.user_url" :alt="userInfo.user_name">
             </div>
 
             <div class="title">
-                <h3 class="en-h3">Hi,<span>Recimo</span></h3>
+                <h3 class="en-h3">Hi~ <span>{{ userInfo.user_name }}</span></h3>
                 <h5 class="zh-h5">一起來發現食譜的新創意吧!</h5>
             </div>
         </div>
@@ -55,7 +82,10 @@ onUnmounted(() => {
                 <SearchBar />
                 <div class="tools">
                     <router-link to="/cart" class="cart-btn" @click="closeMenu">
-                        <i-material-symbols-Shopping-Cart-outline class="btn-icon" />
+                        <div class="cart-icon-wrapper">
+                            <i-material-symbols-Shopping-Cart-outline class="btn-icon" />
+                            <span v-if="cartTotal > 0" class="cart-badge">{{ cartTotal }}</span>
+                        </div>
                     </router-link>
 
                     <!-- 通知按鈕 -->
@@ -109,8 +139,10 @@ onUnmounted(() => {
             justify-content: center;
 
             img {
-                width: 40px;
-
+                // width: 40px;
+                width: 100%; // 寬度填滿父層
+                height: 100%; // 高度填滿父層
+                object-fit: cover; // 裁切並填滿，不會變形
             }
         }
 
@@ -177,17 +209,70 @@ onUnmounted(() => {
 
 .notification-badge {
     position: absolute;
+    // 稍微調整位置，讓圓心對準圖示右上角
     top: -6px;
     right: -6px;
+
     background: $secondary-color-danger-700;
     color: $neutral-color-white;
-    border-radius: 10px;
-    padding: 2px 6px;
-    font-size: 11px;
+
+    // 強制寬高相等並設為圓形
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+
+    // 確保內容置中
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 11px; // 圓形內空間較小，稍微縮小字體
     font-weight: 600;
-    min-width: 18px;
-    text-align: center;
-    line-height: 1.2;
+    line-height: 1;
+    padding: 0; // 圓形不需要 padding，靠 flex 置中即可
+
+    // 防止數字擠壓變形
+    flex-shrink: 0;
+
+    // 超過 99 還是圓的
+    aspect-ratio: 1 / 1;
+}
+
+.cart-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .cart-badge {
+        position: absolute;
+        // 稍微調整位置，讓圓心對準圖示右上角
+        top: -6px;
+        right: -6px;
+
+        background: $secondary-color-danger-700;
+        color: $neutral-color-white;
+
+        // 強制寬高相等並設為圓形
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+
+        // 確保內容置中
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        font-size: 11px; // 圓形內空間較小，稍微縮小字體
+        font-weight: 600;
+        line-height: 1;
+        padding: 0; // 圓形不需要 padding，靠 flex 置中即可
+
+        // 防止數字擠壓變形
+        flex-shrink: 0;
+
+        // 超過 99 還是圓的
+        aspect-ratio: 1 / 1;
+    }
 }
 
 

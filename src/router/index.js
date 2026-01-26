@@ -1,5 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router';
 import { ref, markRaw } from 'vue';
+// 引用 Pinia Store (權限狀態管理)
+import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+// 引用icon
 import IconForkSpoon from 'virtual:icons/material-symbols/Fork-Spoon'
 import IconSkillet from 'virtual:icons/material-symbols/Skillet-outline'
 import IconHandMeal from 'virtual:icons/material-symbols/Hand-Meal-outline'
@@ -26,16 +29,10 @@ const routes = [
     component: () => import('@/layouts/DefaultLayout.vue'),
     children: [
       {
-        // 隨便借用一個現有的 Layout 或直接載入組件
-        path: '/loginlightbox',
-        name: 'loginlightbox',
-        component: () => import('@/components/LoginLightbox.vue')
-      },
-      {
         path: '/',
         name: 'home',
         component: () => import('@/views/site/HomeView.vue'),
-        meta: { layout: 'default', breadcrumb: null }
+        meta: { title: '首頁', layout: 'default', breadcrumb: null }
       },
       {
         path: '/search',
@@ -96,17 +93,17 @@ const routes = [
         path: '/checkout',
         name: 'checkout',
         component: () => import('@/views/site/CheckoutView.vue'),
-        meta: { layout: 'default', title: '結帳', breadcrumb: '結帳' }
+        meta: { layout: 'default', title: '結帳', breadcrumb: '結帳', requiresAuth: true }
       }
     ]
   },
-
   // ==========================================
   // 2. 前台工作區 (使用 WorkspaceLayout)
   // ==========================================
   {
     path: '/workspace',
     redirect: '/workspace/my-recipes',
+    meta: { requiresAuth: true }, // 標記此路徑及其子路徑需要登入
     component: () => import('@/layouts/WorkspaceLayout.vue'),
     children: [
       {
@@ -264,6 +261,38 @@ const router = createRouter({
   routes,
   scrollBehavior(to, from, savedPosition) {
     return { top: 0 };
+  }
+});
+
+// ==========================================
+// 全域導航守衛
+// ==========================================
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+
+  // 修改網頁頁籤名稱
+  const siteName = 'Recimo'; // 你的網站名稱
+  // 優先找子路由的 title，如果沒有就用預設名稱
+  document.title = to.meta.title ? `${to.meta.title} | ${siteName}` : siteName;
+
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!authStore.isLoggedIn) {
+      // 1. 開啟燈箱
+      // authStore.openLoginLightbox();
+      // --- 核心修改：存入一個跳轉動作 ---
+      authStore.pendingAction = () => {
+        router.push(to.fullPath);
+      };
+
+      authStore.openLoginLightbox();
+      // 2. 停止目前的導航（保持在原頁面）
+      // 或者你想讓使用者回首頁同時開燈箱，就用 next({ path: '/' })
+      next(false);
+    } else {
+      next();
+    }
+  } else {
+    next();
   }
 });
 

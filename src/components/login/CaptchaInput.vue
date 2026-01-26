@@ -6,7 +6,7 @@ import IconReplay from '~icons/material-symbols/replay-circle-filled-outline-rou
 const props = defineProps({
     modelValue: String
 })
-const emit = defineEmits(['update:modelValue', 'verified'])
+const emit = defineEmits(['update:modelValue', 'verified', 'enter-press'])
 
 const captchaInput = ref('')
 const canvasRef = ref(null)
@@ -16,6 +16,10 @@ function rand(min, max) { return Math.floor(Math.random() * (max - min) + min) }
 
 // 產生驗證碼
 const generateCaptcha = () => {
+    // 每次產生新的驗證碼，就把輸入框清空並通知父層「尚未驗證」
+    captchaInput.value = '';
+    emit('verified', false);
+
     const canvas = canvasRef.value
     if (!canvas) return
     const ctx = canvas.getContext('2d')
