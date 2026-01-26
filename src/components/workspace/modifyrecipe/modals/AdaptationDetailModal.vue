@@ -1,71 +1,57 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-// 引用原本詳情頁的組件
 import RecipeIntro from '@/components/workspace/recipedetail/RecipeIntro.vue';
 import RecipeIngredients from '@/components/workspace/recipedetail/RecipeIngredients.vue';
 import RecipeSteps from '@/components/workspace/recipedetail/RecipeSteps.vue';
-import NutritionCard from '@/components/workspace/recipedetail/NutritionCard.vue';
 
 const props = defineProps({
-    modelValue: Boolean, // 控制燈箱開啟
-    recipe: Object       // 傳入的改編食譜資料
+    modelValue: Boolean,
+    recipe: Object
 });
 
 const emit = defineEmits(['update:modelValue']);
 
-// --- 狀態定義 ---
-const currentServings = ref(1); // 本地份數狀態
-
+const currentServings = ref(1);
 const closeModal = () => emit('update:modelValue', false);
 
-// 監聽 recipe 變化，當開啟不同食譜時重設份數
+// --- 模擬評論區的頭像顏色邏輯 ---
+const getAvatarStyle = (name) => {
+    if (!name) return { backgroundColor: '#74D09C' };
+    const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
+    const charCodeSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
+};
+
 watch(() => props.recipe, (newVal) => {
     if (newVal) {
-        // 優先使用資料帶來的 servings，若無則設為 1
         currentServings.value = Number(newVal.servings) || 1;
     }
 }, { immediate: true });
 
-// 處理份數變更事件
-const handleServingsChange = (newVal) => {
-    currentServings.value = newVal;
-};
-
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
-
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
 
-    // ✨ 邏輯重寫：
     let finalDescription = '暫無詳細說明';
-
-    // 1. 如果有專用的描述欄位，優先使用
-    if (r.recipe_descreption) {
-        finalDescription = r.recipe_descreption;
-    }
-    // 2. 如果沒有，且 description 不是「心得」，就用 description
-    else if (r.description && r.description !== r.adapt_description) {
-        finalDescription = r.description;
-    }
-    // 3. 只有當上述都失敗，且有心得時，我們才考慮是否顯示
-    else if (r.adapt_description) {
-        // 這裡可以決定內頁要不要顯示心得，如果不想要心得跑進來，就保持「暫無詳細說明」
-        finalDescription = '暫無詳細說明';
-    }
+    if (r.recipe_descreption) finalDescription = r.recipe_descreption;
+    else if (r.description && r.description !== r.adapt_description) finalDescription = r.description;
 
     return {
+        id: r.id,
         title: r.adaptation_title || r.title || '改編食譜',
         image: r.adaptation_image_url || r.coverImg || 'https://placehold.co/800x600?text=No+Image',
         description: finalDescription,
         time: formattedTime,
-        difficulty: r.difficulty || 1
+        difficulty: r.difficulty || 1,
+        // --- 這裡先放假資料 ---
+        userName: "小當家",
+        handle: "cooking_master",
+        publishTime: "2024-05-20"
     };
 });
 
-
-// 2. 橋接 食材 資料
 const ingredientsData = computed(() => {
     if (!props.recipe?.ingredients) return [];
     return props.recipe.ingredients.map(item => ({
@@ -76,7 +62,6 @@ const ingredientsData = computed(() => {
     }));
 });
 
-// 3. 橋接 步驟 資料
 const stepsData = computed(() => {
     if (!props.recipe?.steps) return [];
     return props.recipe.steps.map((s, idx) => ({
@@ -86,33 +71,6 @@ const stepsData = computed(() => {
         image: s.image || s.step_image_url || '',
         time: s.time || ''
     }));
-});
-
-// 4. 橋接 營養 資料 - 修正換算權重
-const nutritionWrapper = computed(() => {
-    if (!props.recipe?.ingredients) return [];
-
-    return props.recipe.ingredients.map(item => {
-        // 確保所有數值都是數字
-        const kcal = parseFloat(item.kcal_per_100g || item.calories_per_100g || 0);
-        const protein = parseFloat(item.protein_per_100g || 0);
-        const fat = parseFloat(item.fat_per_100g || 0);
-        const carbs = parseFloat(item.carbs_per_100g || 0);
-        const amount = parseFloat(item.amount) || 0;
-
-        // 關鍵修正：確保抓到 gram_conversion，這決定了「1大匙」是幾克
-        const unitWeight = parseFloat(item.gram_conversion || item.unit_weight || 1);
-
-        return {
-            calories_per_100g: kcal,
-            protein_per_100g: protein,
-            fat_per_100g: fat,
-            carbs_per_100g: carbs,
-            amount: amount,
-            unit_weight: unitWeight, // 傳遞正確的換算率給 NutritionCard
-            INGREDIENT_NAME: item.name || item.ingredient_name
-        };
-    });
 });
 </script>
 
@@ -124,29 +82,38 @@ const nutritionWrapper = computed(() => {
 
                 <div class="modal-scroll-body">
                     <div class="container-fluid">
-                        <div class="modal-title-bar mb-24">
-                            <h2 class="zh-h2">
-                                <i-material-symbols-restaurant-rounded class="mr-8" />
-                                {{ introData?.title }}
-                            </h2>
-                            <span class="badge">改編版本</span>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-7 col-md-12">
-                                <RecipeIntro :info="introData" />
-                                <div class="mt-32">
-                                    <RecipeSteps :steps="stepsData" />
-                                </div>
+                        <div class="modal-title-bar mb-32">
+                            <div class="title-group">
+                                <h2 class="zh-h2">
+                                    <i-material-symbols-restaurant-rounded class="mr-8 icon-v-align" />
+                                    {{ introData?.title }}
+                                </h2>
+                                <span class="badge">改編版本</span>
                             </div>
 
-                            <div class="col-5 col-md-12">
+                            <div class="user-info-box">
+                                <div class="user-avatar-circle" :style="getAvatarStyle(introData?.userName || '')">
+                                    {{ introData?.userName?.charAt(0).toUpperCase() }}
+                                </div>
+                                <div class="user-text-meta">
+                                    <div class="user-name">{{ introData?.userName }}</div>
+                                    <div class="user-sub">@{{ introData?.handle }} • {{ introData?.publishTime }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row main-content-row">
+                            <div class="col-7 col-md-12 content-left">
+                                <RecipeIntro :info="introData" :hide-actions="true" class="intro-section" />
+                                <RecipeSteps :steps="stepsData" class="steps-section" />
+                            </div>
+
+                            <div class="col-5 col-md-12 sidebar-right">
                                 <div class="sticky-sidebar">
-                                    <div class="mb-16">
-                                        <NutritionCard :ingredients="nutritionWrapper" :servings="currentServings"
-                                            :readonly="false" @change-servings="handleServingsChange" />
+                                    <div class="ingredients-wrapper">
+                                        <h3 class="zh-h3 mb-16 sidebar-title">所需食材</h3>
+                                        <RecipeIngredients :list="ingredientsData" :readonly="true" />
                                     </div>
-                                    <RecipeIngredients :list="ingredientsData" :readonly="true" />
                                 </div>
                             </div>
                         </div>
@@ -186,83 +153,216 @@ const nutritionWrapper = computed(() => {
     flex-direction: column;
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
 
-.close-x {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: $neutral-color-100;
-    cursor: pointer;
-    z-index: 10;
-    transition: all 0.3s;
+    .close-x {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 26px;
+        color: $neutral-color-700;
+        cursor: pointer;
+        line-height: 1;
+        padding: 5px;
+        transition: color 0.2s;
+        z-index: 10;
 
-    &:hover {
-        background: $primary-color-100;
-        transform: rotate(90deg);
+        &:hover {
+            color: $neutral-color-black;
+        }
     }
 }
 
 .modal-scroll-body {
     flex: 1;
     overflow-y: auto;
-    padding: 40px;
+    padding: 48px;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $neutral-color-100;
+        border-radius: 10px;
+
+        &:hover {
+            background: $neutral-color-400;
+        }
+    }
+
+    scrollbar-width: thin;
+    scrollbar-color: $neutral-color-100 transparent;
 
     @media (max-width: 768px) {
-        padding: 20px;
+        padding: 24px;
+    }
+}
+
+.main-content-row {
+    @media (max-width: 768px) {
+        display: flex;
+        flex-direction: column;
+
+        .content-left {
+            display: contents;
+        }
+
+        .intro-section {
+            order: 1;
+            margin-bottom: 32px;
+        }
+
+        .sidebar-right {
+            order: 2;
+            margin-bottom: 32px;
+        }
+
+        .steps-section {
+            order: 3;
+        }
     }
 }
 
 .modal-title-bar {
     display: flex;
     align-items: center;
-    gap: 16px;
+    justify-content: space-between;
     border-bottom: 2px solid $neutral-color-100;
-    padding-bottom: 16px;
+    padding-bottom: 20px;
+    padding-right: 40px;
+
+    .title-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .zh-h2 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
 
     .badge {
         background: $primary-color-100;
         color: $primary-color-700;
-        padding: 4px 12px;
-        border-radius: 6px;
-        font-weight: bold;
+        padding: 4px 14px;
+        border-radius: 99px;
+        font-weight: 600;
         font-size: 14px;
+    }
+
+    .user-info-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .user-text-meta {
+            text-align: right;
+
+            .user-name {
+                font-weight: 600;
+                margin-bottom: 7px;
+                color: $neutral-color-800;
+                font-size: 15px;
+            }
+
+            .user-sub {
+                font-size: 12px;
+                color: $neutral-color-400;
+            }
+        }
+
+        .user-avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 15px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+            order: 2; // 電腦版頭像在右
+        }
+
+        .user-text-meta {
+            order: 1; // 電腦版文字在左
+        }
+    }
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding-right: 30px; // 給關閉按鈕留空間
+
+        .user-info-box {
+            width: 100%;
+            justify-content: flex-start;
+
+            .user-avatar-circle {
+                order: 1; // 手機版頭像改到左邊
+            }
+
+            .user-text-meta {
+                order: 2; // 手機版文字改到右邊
+                text-align: left;
+            }
+        }
     }
 }
 
 .sticky-sidebar {
     position: sticky;
     top: 0;
+
+    .ingredients-wrapper {
+        background: $neutral-color-100;
+        padding: 24px;
+        border-radius: 20px;
+        border: 1px solid rgba($primary-color-400, 0.2);
+    }
+
+    .sidebar-title {
+        padding-left: 10px;
+    }
 }
 
-.mt-32 {
-    margin-top: 32px;
-}
-
-.mb-16 {
-    margin-bottom: 16px;
-}
-
-.mb-24 {
-    margin-bottom: 24px;
+.content-left {
+    padding-right: 32px;
 }
 
 .mr-8 {
     margin-right: 8px;
 }
 
-/* 動畫 */
-.modal-fade-enter-active,
+.mb-16 {
+    margin-bottom: 16px;
+}
+
+.mb-32 {
+    margin-bottom: 32px;
+}
+
+.modal-fade-enter-active {
+    transition: all 0.4s ease-out;
+}
+
 .modal-fade-leave-active {
-    transition: opacity 0.4s;
+    transition: all 0.3s ease-in;
 }
 
 .modal-fade-enter-from,
 .modal-fade-leave-to {
     opacity: 0;
+    transform: translateY(20px);
 }
 </style>

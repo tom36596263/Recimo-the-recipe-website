@@ -240,7 +240,8 @@ const ingredientsData = computed(() => rawIngredients.value.map(item => ({
     INGREDIENT_NAME: item.ingredient_name || item.INGREDIENT_NAME || '未知食材',
     amount: item.amount || item.AMOUNT || 0,
     unit_name: item.unit_name || item.UNIT_NAME || '份',
-    note: item.note || item.NOTE || '',
+    // 修正這裡：加入 item.remark
+    note: item.remark || item.note || item.NOTE || '',
     calories_per_100g: item.calories_per_100g || 0,
     protein_per_100g: item.protein_per_100g || 0,
     fat_per_100g: item.fat_per_100g || 0,

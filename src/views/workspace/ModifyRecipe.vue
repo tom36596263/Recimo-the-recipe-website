@@ -17,6 +17,10 @@ const isModalOpen = ref(false);
 const selectedRecipe = ref(null);
 
 function openAdaptDetail(item) {
+    // ✨ 邏輯攔截：判斷如果是 json- 開頭的假資料就不執行後續開啟燈箱的動作
+    if (String(item.id).startsWith('json-')) {
+        return;
+    }
     // 這裡傳入的 item 已經過 loadRecipeData 標準化處理
     selectedRecipe.value = item;
     isModalOpen.value = true;
@@ -100,7 +104,7 @@ async function loadRecipeData(recipeId) {
                 };
             }).filter(Boolean);
 
-        // 3. 處理本地資料 (將截圖中的 description 轉為 summary)
+        // 3. 處理本地資料
         const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
         const localAdaptations = localRevisions
             .filter(r => Number(r.parent_recipe_id) === targetParentId)
@@ -195,13 +199,14 @@ function goBack() {
 
             <TransitionGroup name="staggered-list">
                 <div v-for="(item, index) in variantItems" :key="item.id"
-                    class="col-3 col-lg-4 col-md-6 mb-24 grid-item" :style="{ '--delay': index + 1 }"
-                    @click="openAdaptDetail(item)">
+                    class="col-3 col-lg-4 col-md-6 mb-24 grid-item" :style="{
+                        '--delay': index + 1,
+                        'cursor': String(item.id).startsWith('json-') ? 'default' : 'pointer'
+                    }" @click="openAdaptDetail(item)">
 
                     <div class="card-wrapper" style="position: relative; height: 100%;">
                         <AdaptRecipeCard :recipe="{
                             title: item.title,
-                            // ✨ 這裡統一改用 item.summary
                             summary: item.summary,
                             coverImg: item.coverImg
                         }" :readonly="true" />
@@ -220,7 +225,7 @@ function goBack() {
 </template>
 
 <style lang="scss" scoped>
-/* 保持你原本的 Scoped Style 不變 */
+/* 此部分完全保留，不做任何修改 */
 @import '@/assets/scss/abstracts/_color.scss';
 
 .mobile-only-btn {
