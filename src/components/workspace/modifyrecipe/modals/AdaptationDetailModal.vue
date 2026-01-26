@@ -21,7 +21,8 @@ const closeModal = () => emit('update:modelValue', false);
 // 監聽 recipe 變化，當開啟不同食譜時重設份數
 watch(() => props.recipe, (newVal) => {
     if (newVal) {
-        currentServings.value = newVal.servings || 1;
+        // 優先使用資料帶來的 servings，若無則設為 1
+        currentServings.value = Number(newVal.servings) || 1;
     }
 }, { immediate: true });
 
@@ -30,28 +31,47 @@ const handleServingsChange = (newVal) => {
     currentServings.value = newVal;
 };
 
-// --- 資料橋接邏輯 ---
-
-// 1. 橋接 Intro 資料
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
+
+    const rawTime = r.totalTime || r.time || 30;
+    const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
+
+    // ✨ 邏輯重寫：
+    let finalDescription = '暫無詳細說明';
+
+    // 1. 如果有專用的描述欄位，優先使用
+    if (r.recipe_descreption) {
+        finalDescription = r.recipe_descreption;
+    }
+    // 2. 如果沒有，且 description 不是「心得」，就用 description
+    else if (r.description && r.description !== r.adapt_description) {
+        finalDescription = r.description;
+    }
+    // 3. 只有當上述都失敗，且有心得時，我們才考慮是否顯示
+    else if (r.adapt_description) {
+        // 這裡可以決定內頁要不要顯示心得，如果不想要心得跑進來，就保持「暫無詳細說明」
+        finalDescription = '暫無詳細說明';
+    }
+
     return {
-        title: r.title || '未命名改編',
-        image: r.coverImg || 'https://placehold.co/800x600?text=No+Image',
-        description: r.description || '暫無簡介',
-        time: r.time || '0 分鐘',
+        title: r.adaptation_title || r.title || '改編食譜',
+        image: r.adaptation_image_url || r.coverImg || 'https://placehold.co/800x600?text=No+Image',
+        description: finalDescription,
+        time: formattedTime,
         difficulty: r.difficulty || 1
     };
 });
+
 
 // 2. 橋接 食材 資料
 const ingredientsData = computed(() => {
     if (!props.recipe?.ingredients) return [];
     return props.recipe.ingredients.map(item => ({
-        INGREDIENT_NAME: item.name || item.ingredient_name,
+        INGREDIENT_NAME: item.name || item.ingredient_name || '未知食材',
         amount: item.amount,
-        unit_name: item.unit || item.unit_name,
+        unit_name: item.unit || item.unit_name || 'g',
         note: item.note || ''
     }));
 });
@@ -61,23 +81,26 @@ const stepsData = computed(() => {
     if (!props.recipe?.steps) return [];
     return props.recipe.steps.map((s, idx) => ({
         id: s.id || idx,
-        title: s.title || `步驟 ${idx + 1}`,
-        content: s.content || '',
-        image: s.image || s.img || '',
+        title: s.step_title || s.title || `步驟 ${idx + 1}`,
+        content: s.content || s.step_content || '',
+        image: s.image || s.step_image_url || '',
         time: s.time || ''
     }));
 });
 
-// 4. 橋接 營養 資料 - 強制對齊版
+// 4. 橋接 營養 資料 - 修正換算權重
 const nutritionWrapper = computed(() => {
     if (!props.recipe?.ingredients) return [];
 
     return props.recipe.ingredients.map(item => {
-        const kcal = parseFloat(item.kcal_per_100g || item.calories_per_100g || item.kcal || item.calories || 0);
-        const protein = parseFloat(item.protein_per_100g || item.protein || 0);
-        const fat = parseFloat(item.fat_per_100g || item.fat || 0);
-        const carbs = parseFloat(item.carbs_per_100g || item.carbs || 0);
+        // 確保所有數值都是數字
+        const kcal = parseFloat(item.kcal_per_100g || item.calories_per_100g || 0);
+        const protein = parseFloat(item.protein_per_100g || 0);
+        const fat = parseFloat(item.fat_per_100g || 0);
+        const carbs = parseFloat(item.carbs_per_100g || 0);
         const amount = parseFloat(item.amount) || 0;
+
+        // 關鍵修正：確保抓到 gram_conversion，這決定了「1大匙」是幾克
         const unitWeight = parseFloat(item.gram_conversion || item.unit_weight || 1);
 
         return {
@@ -86,8 +109,8 @@ const nutritionWrapper = computed(() => {
             fat_per_100g: fat,
             carbs_per_100g: carbs,
             amount: amount,
-            unit_weight: unitWeight,
-            INGREDIENT_NAME: item.ingredient_name || item.name
+            unit_weight: unitWeight, // 傳遞正確的換算率給 NutritionCard
+            INGREDIENT_NAME: item.name || item.ingredient_name
         };
     });
 });

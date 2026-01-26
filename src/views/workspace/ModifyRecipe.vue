@@ -17,10 +17,25 @@ const isModalOpen = ref(false);
 const selectedRecipe = ref(null);
 
 function openAdaptDetail(item) {
+    // 這裡傳入的 item 已經過 loadRecipeData 標準化處理
     selectedRecipe.value = item;
     isModalOpen.value = true;
 }
 
+// 輔助函式：處理時間顯示 (將 00:25:00 轉為 25 分鐘)
+const formatTime = (timeValue) => {
+    if (!timeValue) return '30 分鐘';
+    if (typeof timeValue === 'string' && timeValue.includes(':')) {
+        const parts = timeValue.split(':');
+        const h = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        return h > 0 ? `${h} 小時 ${m} 分鐘` : `${m} 分鐘`;
+    }
+    // 如果已經是數字或純文字，確保帶有「分鐘」單位
+    return String(timeValue).includes('分') ? timeValue : `${timeValue} 分鐘`;
+};
+
+// 監聽路由變化載入資料
 watch(
     () => [route.params.id, route.query.editId],
     async ([id, editId]) => {
@@ -61,77 +76,47 @@ async function loadRecipeData(recipeId) {
         originalRecipe.value = {
             id: found.recipe_id,
             title: found.recipe_title || found.title,
-            // 增加對 recipe_descreption (拼錯版) 的支援
             description: found.recipe_description || found.recipe_descreption || found.description || '暫無簡介',
             coverImg: fixPath(found.recipe_image_url || found.recipe_cover_image || found.coverImg)
         };
 
-        // 2. 處理改編食譜 (JSON)
+        // 2. 處理改編食譜 (對接資料庫欄位名稱)
         const jsonAdaptations = allAdaptations
             .filter(a => Number(a.parent_recipe_id) === targetParentId)
             .map(adapt => {
                 const childId = Number(adapt.child_recipe_id);
-                // 精確匹配對應的食譜主檔
                 const childInfo = allRecipes.find(r => Number(r.recipe_id) === childId);
-
                 if (!childInfo) return null;
 
-                // 步驟處理
-                const steps = resSteps.data
-                    .filter(s => Number(s.recipe_id) === childId)
-                    .sort((a, b) => a.step_order - b.step_order)
-                    .map(s => ({
-                        step_title: s.step_title || '',
-                        content: s.step_content,
-                        image: fixPath(s.step_image_url),
-                        time: s.step_total_time || 0
-                    }));
-
-                // 食材與營養成分處理 (對齊燈箱組件 props)
-                const ingredients = resIngredients.data
-                    .filter(link => Number(link.recipe_id) === childId)
-                    .map(link => {
-                        const master = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
-                        return {
-                            name: master?.ingredient_name || '未知食材',
-                            amount: Number(link.amount) || 0,
-                            unit: link.unit_name || master?.unit_name || 'g',
-                            kcal_per_100g: Number(master?.kcal_per_100g || master?.calories_per_100g || 0),
-                            protein_per_100g: Number(master?.protein_per_100g || 0),
-                            fat_per_100g: Number(master?.fat_per_100g || 0),
-                            carbs_per_100g: Number(master?.carbs_per_100g || 0),
-                            gram_conversion: Number(master?.gram_conversion || 1)
-                        };
-                    });
-
                 return {
-                    id: childId,
+                    id: `json-${childId}`,
                     title: adapt.adaptation_title || childInfo.recipe_title,
-                    description: adapt.adaptation_note || childInfo.recipe_description || '暫無簡介',
-                    author: childInfo.author_name || 'Recimo User',
-                    likes: childInfo.likes_count || 0,
+                    // ✨ 統一欄位名稱為 summary
+                    summary: adapt.adaptation_note || '暫無改編心得',
                     coverImg: fixPath(adapt.adaptation_image_url || childInfo.recipe_image_url),
-                    steps,
-                    ingredients,
-                    servings: Number(childInfo.servings) || 1,
-                    is_json_data: true
+                    is_mine: false,
+                    // 燈箱需要的詳細內容
+                    recipe_descreption: childInfo.recipe_description || '暫無詳細內容'
                 };
-            })
-            .filter(Boolean);
+            }).filter(Boolean);
 
-        // 3. 處理本地資料
+        // 3. 處理本地資料 (將截圖中的 description 轉為 summary)
         const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
         const localAdaptations = localRevisions
             .filter(r => Number(r.parent_recipe_id) === targetParentId)
             .map(r => ({
                 ...r,
-                id: r.id || `local-${Date.now()}`,
-                title: r.adapt_title || r.title,
-                author: '我',
+                id: r.id || `local-${Date.now()}-${Math.random()}`,
+                title: r.title || '未命名改編',
+                // ✨ 強制對接：將你截圖看到的 description 塞進 summary
+                summary: r.description || '暫無改編心得',
+                coverImg: r.coverImg || '',
                 is_mine: true
             }));
 
+        // 合併並更新狀態
         variantItems.value = [...localAdaptations, ...jsonAdaptations];
+
 
     } catch (err) {
         console.error('載入失敗:', err);
@@ -214,7 +199,12 @@ function goBack() {
                     @click="openAdaptDetail(item)">
 
                     <div class="card-wrapper" style="position: relative; height: 100%;">
-                        <AdaptRecipeCard :recipe="item" :readonly="true" class="full-height demo-readonly-card" />
+                        <AdaptRecipeCard :recipe="{
+                            title: item.title,
+                            // ✨ 這裡統一改用 item.summary
+                            summary: item.summary,
+                            coverImg: item.coverImg
+                        }" :readonly="true" />
 
                         <button v-if="item.is_mine" class="local-delete-btn" title="刪除此改編版本"
                             @click.stop="deleteLocalRecipe(item.id)">

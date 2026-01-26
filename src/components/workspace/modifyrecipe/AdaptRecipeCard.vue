@@ -61,9 +61,11 @@ const handleUploadImage = () => {
             <div class="input-group title-input">
                 <input type="text" :value="recipe.title" placeholder="改編版本標題..." readonly>
             </div>
+
             <div class="input-group content-input" :class="{ 'has-tag': recipe.keyChangeTag }">
                 <i-material-symbols-arrow-right-alt-rounded class="arrow-icon" />
-                <input type="text" :value="recipe.description || recipe.adapt_title" placeholder="關鍵更改內容..." readonly>
+                <input type="text" :value="recipe.summary || recipe.adaptation_note || recipe.description"
+                    placeholder="關鍵更改內容..." readonly>
             </div>
         </div>
 

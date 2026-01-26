@@ -34,8 +34,19 @@ const goToOriginal = () => {
   }
 };
 
+// EditorHeader.vue 
 const updateField = (field, value) => {
-  emit('update:modelValue', { ...props.modelValue, [field]: value });
+  // 如果是改編模式，且我們正在改「心得」
+  if (props.isAdaptMode && field === 'adapt_description') {
+    emit('update:modelValue', {
+      ...props.modelValue,
+      [field]: value,
+      // ✨ 同時多存一份備份，確保燈箱絕對抓得到
+      recipe_descreption: props.modelValue.description
+    });
+  } else {
+    emit('update:modelValue', { ...props.modelValue, [field]: value });
+  }
 };
 
 const setDifficulty = (val) => {
@@ -53,14 +64,31 @@ const displayTime = computed(() => {
   return manualTime > 0 ? manualTime : autoTotalTime.value;
 });
 
-// EditorHeader.vue 內的 adaptRecipeData
+// EditorHeader.vue 內的 adaptRecipeData (修正預覽顯示)
+// EditorHeader.vue 內的 adaptRecipeData (修正預覽顯示)
 const adaptRecipeData = computed(() => {
+  const m = props.modelValue;
+
   return {
-    ...props.modelValue,
-    title: props.modelValue.adapt_title || '',
-    description: props.modelValue.adapt_description || '',
-    recipe_id: props.modelValue.parent_recipe_id || props.modelValue.recipe_id,
-    coverImg: props.modelValue.coverImg,
+    ...m,
+    // 1. 小卡標題：顯示「改編標題」(例如：低脂版)
+    title: m.adapt_title || m.title || '未命名改編',
+
+    // 2. 小卡第二列 (關鍵更改)：顯示「改編心得」
+    // ✨ 這裡是為了讓 AdaptRecipeCard 的 input 顯示心得
+    summary: m.adapt_description || '',
+    description: m.adapt_description || '',
+
+    // 3. ✨ 這是最重要的！為了讓「燈箱」能抓到說明：
+    // 我們必須保留一個乾淨的欄位給燈箱的 introData 使用
+    // 這裡把灰框框下面的那個「詳細說明」欄位存進 recipe_descreption
+    recipe_descreption: m.description || '暫無詳細說明',
+
+    // 基礎資訊
+    recipe_id: m.parent_recipe_id || m.recipe_id,
+    coverImg: m.adaptation_image_url || m.coverImg,
+    adaptation_title: m.adapt_title,
+    adaptation_note: m.adapt_description
   };
 });
 
