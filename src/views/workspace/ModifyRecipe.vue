@@ -3,15 +3,23 @@ import { ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { publicApi } from '@/utils/publicApi';
 import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard.vue';
+import AdaptationDetailModal from '@/components/workspace/modifyrecipe/modals/AdaptationDetailModal.vue';
 
 const router = useRouter();
 const route = useRoute();
 
-// --- 讀取 Vite 的 Base 路徑 ---
-const baseUrl = import.meta.env.BASE_URL;
-
+// --- 狀態定義 ---
 const originalRecipe = ref({ id: null, title: '', coverImg: '', description: '' });
 const variantItems = ref([]);
+
+// --- 燈箱控制 ---
+const isModalOpen = ref(false);
+const selectedRecipe = ref(null);
+
+function openAdaptDetail(item) {
+    selectedRecipe.value = item;
+    isModalOpen.value = true;
+}
 
 watch(
     () => [route.params.id, route.query.editId],
@@ -28,69 +36,114 @@ watch(
 
 async function loadRecipeData(recipeId) {
     try {
-        const [resRecipes, resAdaptations] = await Promise.all([
+        const [resRecipes, resAdaptations, resSteps, resIngredients, resIngMaster] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/recipe/recipe_adaptations.json')
+            publicApi.get('data/recipe/recipe_adaptations.json'),
+            publicApi.get('data/recipe/steps.json'),
+            publicApi.get('data/recipe/recipe_ingredient.json'),
+            publicApi.get('data/recipe/ingredients.json')
         ]);
 
         const allRecipes = resRecipes.data;
         const allAdaptations = resAdaptations.data;
+        const targetParentId = Number(recipeId);
+        const baseUrl = import.meta.env.BASE_URL;
 
-        const found = allRecipes.find(r => Number(r.recipe_id) === Number(recipeId));
+        const fixPath = (url) => {
+            if (!url || url.startsWith('http') || url.startsWith('data:')) return url;
+            return `${baseUrl}/${url.replace(/^\//, '')}`.replace(/\/+/g, '/');
+        };
+
+        // 1. 處理母食譜
+        const found = allRecipes.find(r => Number(r.recipe_id) === targetParentId);
         if (!found) return;
-
-        // --- ✅ 修正：原食譜圖片路徑防呆 ---
-        let rawImg = found.recipe_image_url || found.recipe_cover_image || '';
-        let finalImg = '';
-        if (rawImg) {
-            if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
-                finalImg = rawImg;
-            } else {
-                // 清理開頭斜線並拼街 baseUrl，最後統一校正重複斜線
-                const cleanPath = rawImg.replace(/^\//, '');
-                finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
-            }
-        }
 
         originalRecipe.value = {
             id: found.recipe_id,
-            title: found.recipe_title,
-            description: found.recipe_description || found.recipe_descreption || '暫無簡介',
-            coverImg: finalImg
+            title: found.recipe_title || found.title,
+            // 增加對 recipe_descreption (拼錯版) 的支援
+            description: found.recipe_description || found.recipe_descreption || found.description || '暫無簡介',
+            coverImg: fixPath(found.recipe_image_url || found.recipe_cover_image || found.coverImg)
         };
 
-        const filteredAdaptations = allAdaptations.filter(
-            a => Number(a.parent_recipe_id) === Number(recipeId)
-        );
+        // 2. 處理改編食譜 (JSON)
+        const jsonAdaptations = allAdaptations
+            .filter(a => Number(a.parent_recipe_id) === targetParentId)
+            .map(adapt => {
+                const childId = Number(adapt.child_recipe_id);
+                // 精確匹配對應的食譜主檔
+                const childInfo = allRecipes.find(r => Number(r.recipe_id) === childId);
 
-        variantItems.value = filteredAdaptations.map(adapt => {
-            const childInfo = allRecipes.find(
-                r => Number(r.recipe_id) === Number(adapt.child_recipe_id)
-            );
+                if (!childInfo) return null;
 
-            // --- ✅ 修正：改編食譜圖片路徑防呆 ---
-            let adaptImg = adapt.adaptation_image_url || childInfo?.recipe_image_url || '';
-            if (adaptImg && !adaptImg.startsWith('http') && !adaptImg.startsWith('data:')) {
-                const cleanAdaptPath = adaptImg.replace(/^\//, '');
-                adaptImg = `${baseUrl}/${cleanAdaptPath}`.replace(/\/+/g, '/');
-            }
+                // 步驟處理
+                const steps = resSteps.data
+                    .filter(s => Number(s.recipe_id) === childId)
+                    .sort((a, b) => a.step_order - b.step_order)
+                    .map(s => ({
+                        step_title: s.step_title || '',
+                        content: s.step_content,
+                        image: fixPath(s.step_image_url),
+                        time: s.step_total_time || 0
+                    }));
 
-            return {
-                id: adapt.child_recipe_id,
-                title: adapt.adaptation_title || childInfo?.recipe_title || '未命名改編',
-                description:
-                    adapt.adaptation_note ||
-                    (adapt.key_changes?.[0]
-                        ? `${adapt.key_changes[0].from} ➔ ${adapt.key_changes[0].to}`
-                        : '關鍵內容載入中...'),
-                author: childInfo?.author_name || 'Recimo User',
-                likes: childInfo?.likes_count || 0,
-                coverImg: adaptImg
-            };
-        });
+                // 食材與營養成分處理 (對齊燈箱組件 props)
+                const ingredients = resIngredients.data
+                    .filter(link => Number(link.recipe_id) === childId)
+                    .map(link => {
+                        const master = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
+                        return {
+                            name: master?.ingredient_name || '未知食材',
+                            amount: Number(link.amount) || 0,
+                            unit: link.unit_name || master?.unit_name || 'g',
+                            kcal_per_100g: Number(master?.kcal_per_100g || master?.calories_per_100g || 0),
+                            protein_per_100g: Number(master?.protein_per_100g || 0),
+                            fat_per_100g: Number(master?.fat_per_100g || 0),
+                            carbs_per_100g: Number(master?.carbs_per_100g || 0),
+                            gram_conversion: Number(master?.gram_conversion || 1)
+                        };
+                    });
+
+                return {
+                    id: childId,
+                    title: adapt.adaptation_title || childInfo.recipe_title,
+                    description: adapt.adaptation_note || childInfo.recipe_description || '暫無簡介',
+                    author: childInfo.author_name || 'Recimo User',
+                    likes: childInfo.likes_count || 0,
+                    coverImg: fixPath(adapt.adaptation_image_url || childInfo.recipe_image_url),
+                    steps,
+                    ingredients,
+                    servings: Number(childInfo.servings) || 1,
+                    is_json_data: true
+                };
+            })
+            .filter(Boolean);
+
+        // 3. 處理本地資料
+        const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
+        const localAdaptations = localRevisions
+            .filter(r => Number(r.parent_recipe_id) === targetParentId)
+            .map(r => ({
+                ...r,
+                id: r.id || `local-${Date.now()}`,
+                title: r.adapt_title || r.title,
+                author: '我',
+                is_mine: true
+            }));
+
+        variantItems.value = [...localAdaptations, ...jsonAdaptations];
+
     } catch (err) {
-        console.error('資料載入失敗', err);
+        console.error('載入失敗:', err);
     }
+}
+
+function deleteLocalRecipe(targetId) {
+    if (!confirm('確定要刪除這個本地改編版本嗎？')) return;
+    const localData = JSON.parse(localStorage.getItem('user_revisions') || '[]');
+    const filtered = localData.filter(r => String(r.id) !== String(targetId));
+    localStorage.setItem('user_revisions', JSON.stringify(filtered));
+    loadRecipeData(route.params.id || route.query.editId);
 }
 
 function initEmptyRecipe() {
@@ -157,18 +210,28 @@ function goBack() {
 
             <TransitionGroup name="staggered-list">
                 <div v-for="(item, index) in variantItems" :key="item.id"
-                    class="col-3 col-lg-4 col-md-6 mb-24 grid-item" :style="{ '--delay': index + 1 }">
-                    <AdaptRecipeCard :recipe="item" :readonly="true" class="full-height demo-readonly-card" />
+                    class="col-3 col-lg-4 col-md-6 mb-24 grid-item" :style="{ '--delay': index + 1 }"
+                    @click="openAdaptDetail(item)">
+
+                    <div class="card-wrapper" style="position: relative; height: 100%;">
+                        <AdaptRecipeCard :recipe="item" :readonly="true" class="full-height demo-readonly-card" />
+
+                        <button v-if="item.is_mine" class="local-delete-btn" title="刪除此改編版本"
+                            @click.stop="deleteLocalRecipe(item.id)">
+                            ✕
+                        </button>
+                    </div>
                 </div>
             </TransitionGroup>
         </div>
+
+        <AdaptationDetailModal v-model="isModalOpen" :recipe="selectedRecipe" />
     </div>
 </template>
 
-
 <style lang="scss" scoped>
+/* 保持你原本的 Scoped Style 不變 */
 @import '@/assets/scss/abstracts/_color.scss';
-
 
 .mobile-only-btn {
     display: none !important;
@@ -178,7 +241,6 @@ function goBack() {
     display: block;
 }
 
-/* --- 動畫定義 --- */
 .fade-in-down {
     animation: fadeInDown 0.6s ease-out;
 }
@@ -258,7 +320,6 @@ function goBack() {
     }
 }
 
-/* --- 佈局樣式 --- */
 .custom-grid {
     display: flex;
     flex-wrap: wrap;
@@ -355,7 +416,8 @@ function goBack() {
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
     }
 
-    /* ✨ 核心：強制關閉改編卡片上的遮罩樣式 */
+    :deep(.key-change-badge),
+    :deep(.key-change-wrapper),
     :deep(.change-hint-overlay),
     :deep(.hover-overlay),
     :deep(.mask),
@@ -372,7 +434,6 @@ function goBack() {
     }
 }
 
-/* RWD 控制 */
 @media screen and (max-width: 810px) {
     .desktop-only-btn {
         display: none !important;
@@ -400,6 +461,40 @@ function goBack() {
             max-width: 50% !important;
             padding: 0 8px !important;
         }
+    }
+}
+
+.card-wrapper {
+    &:hover {
+        .local-delete-btn {
+            opacity: 1;
+        }
+    }
+}
+
+.local-delete-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 28px;
+    height: 28px;
+    background-color: #ff4d4f;
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 20;
+    opacity: 0;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: #ff7875;
+        transform: scale(1.1);
     }
 }
 
