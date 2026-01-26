@@ -167,31 +167,49 @@ const handlePreview = () => {
 };
 
 const handleSave = () => {
-  if (!recipeForm.value.title) {
+  // 1. 基礎檢查：改編模式優先檢查 adapt_title，普通模式檢查 title
+  const finalTitle = isAdaptModeActive.value
+    ? (recipeForm.value.adapt_title || recipeForm.value.title)
+    : recipeForm.value.title;
+
+  if (!finalTitle) {
     alert('請輸入食譜標題再發布喔！');
     return;
   }
+
   if (isPublished.value) {
     const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
+
+    // 2. 存入時，確保包含了所有關鍵欄位
     localRevisions.unshift({
-      ...recipeForm.value,
+      ...recipeForm.value, // 這裡已經包含了步驟、食材、highlightTags 等
       id: Date.now(),
+      display_title: finalTitle, // 額外存一個顯示用的標題，方便列表抓取
+      display_desc: isAdaptModeActive.value ? recipeForm.value.adapt_description : recipeForm.value.description,
       publishDate: new Date().toLocaleDateString(),
       is_local: true,
       is_adaptation: isAdaptModeActive.value
     });
+
     localStorage.setItem('user_revisions', JSON.stringify(localRevisions));
-    alert(`🎉「${recipeForm.value.title}」已公開發布！`);
+    alert(`🎉「${finalTitle}」已公開發布！`);
   } else {
     alert('草稿儲存成功！');
   }
+
   recipeStore.rawEditorData = null;
+
+  // 3. 跳轉邏輯
   if (isAdaptModeActive.value && recipeForm.value.parent_recipe_id) {
+    // 如果是從改編頁來的，回改編列表
     router.push(`/workspace/modify-recipe/${recipeForm.value.parent_recipe_id}`);
   } else {
+    // 否則回總工作區
     router.push('/workspace');
   }
 };
+
+
 
 provide('isEditing', isEditing);
 </script>

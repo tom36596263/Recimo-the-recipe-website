@@ -1,5 +1,5 @@
 <script setup>
-import { computed, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard.vue';
 import { useRouter, useRoute } from 'vue-router';
 
@@ -13,6 +13,16 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue']);
+
+// 1. 宣告 ref 來對應 template 中的 input
+const fileInput = ref(null);
+
+// 2. 處理從小卡傳上來的點擊訊號
+const handleUploadClick = () => {
+  if (props.isEditing && fileInput.value) {
+    fileInput.value.click();
+  }
+};
 
 // 跳轉邏輯
 const goToOriginal = () => {
@@ -80,9 +90,8 @@ const handleCoverUpload = (e) => {
 
     <template v-if="isAdaptMode">
       <div class="adapt-card-section">
-        <div class="adapt-card-wrapper" @click="isEditing && $refs.fileInput.click()"
-          :style="{ cursor: isEditing ? 'pointer' : 'default' }">
-          <AdaptRecipeCard :recipe="adaptRecipeData" />
+        <div class="adapt-card-wrapper" :style="{ cursor: isEditing ? 'pointer' : 'default' }">
+          <AdaptRecipeCard :recipe="adaptRecipeData" :readonly="!isEditing" @upload-image="handleUploadClick" />
         </div>
         <BaseBtn title="查看原始食譜詳情" variant="outline" :width="320" @click="goToOriginal" class="back-original-btn" />
       </div>
@@ -91,7 +100,7 @@ const handleCoverUpload = (e) => {
     <template v-else>
       <div class="cover-section" :class="{ 'has-image': modelValue.coverImg }"
         :style="{ backgroundImage: modelValue.coverImg ? `url(${modelValue.coverImg})` : '' }"
-        @click="isEditing && $refs.fileInput.click()">
+        @click="isEditing && fileInput.click()">
         <div v-if="!modelValue.coverImg" class="upload-placeholder">
           <div class="placeholder-content">
             <span class="plus-icon">+</span>
@@ -169,20 +178,20 @@ const handleCoverUpload = (e) => {
   flex-direction: column;
   gap: 16px;
   align-items: center;
-  width: 100%; // 手機版撐滿
+  width: 100%;
 
   @media (min-width: 768px) {
-    width: 320px; // 電腦版維持寬度
+    width: 320px;
   }
 }
 
 .back-original-btn {
-  width: 100%; // 手機版預設寬度
-  margin-top: 16px; // 手機版間距小一點
+  width: 100%;
+  margin-top: 16px;
 
   @media (min-width: 768px) {
     width: 320px;
-    margin-top: 60px; // 桌機版恢復 60px 間距
+    margin-top: 60px;
   }
 }
 
@@ -272,12 +281,6 @@ const handleCoverUpload = (e) => {
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
-
-  &.readonly-overlay {
-    pointer-events: auto;
-    user-select: none;
-    cursor: default;
-  }
 }
 
 .cover-section {
