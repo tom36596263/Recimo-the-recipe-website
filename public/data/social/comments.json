@@ -5,7 +5,8 @@
     "USER_ID": 5,
     "COMMENT_TEXT": "餅皮又脆又香，番茄醬汁比例完美！",
     "COMMENT_AT": "2024-01-01 10:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 12
   },
   {
     "COMMENT_ID": 2,
@@ -13,7 +14,8 @@
     "USER_ID": 3,
     "COMMENT_TEXT": "這道經典瑪格麗特披薩是我吃過最好做的食譜。",
     "COMMENT_AT": "2024-01-02 12:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 8
   },
   {
     "COMMENT_ID": 3,
@@ -21,7 +23,8 @@
     "USER_ID": 8,
     "COMMENT_TEXT": "羅勒葉一定要最後放，香味才留得住。",
     "COMMENT_AT": "2024-01-03 18:15:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 5
   },
   {
     "COMMENT_ID": 4,
@@ -29,7 +32,8 @@
     "USER_ID": 2,
     "COMMENT_TEXT": "抹茶味好濃郁，切開後流心的感覺太療癒了！",
     "COMMENT_AT": "2024-01-05 14:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 25
   },
   {
     "COMMENT_ID": 5,
@@ -37,7 +41,8 @@
     "USER_ID": 6,
     "COMMENT_TEXT": "照著步驟做真的沒失敗，這甜點招待朋友超有面子。",
     "COMMENT_AT": "2024-01-06 15:20:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 14
   },
   {
     "COMMENT_ID": 6,
@@ -45,7 +50,8 @@
     "USER_ID": 4,
     "COMMENT_TEXT": "建議烤箱溫度要控制好，不然裡面會太熟變固體。",
     "COMMENT_AT": "2024-01-07 11:10:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 21
   },
   {
     "COMMENT_ID": 7,
@@ -53,7 +59,8 @@
     "USER_ID": 7,
     "COMMENT_TEXT": "太甜了，下次會減少一點糖量。",
     "COMMENT_AT": "2024-01-08 09:45:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 2
   },
   {
     "COMMENT_ID": 8,
@@ -61,7 +68,8 @@
     "USER_ID": 5,
     "COMMENT_TEXT": "這道宮保雞丁非常下飯，辣度剛剛好。",
     "COMMENT_AT": "2024-01-10 20:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 17
   },
   {
     "COMMENT_ID": 9,
@@ -69,7 +77,8 @@
     "USER_ID": 2,
     "COMMENT_TEXT": "雞胸肉竟然可以處理得這麼嫩，太強了。",
     "COMMENT_AT": "2024-01-11 19:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 23
   },
   {
     "COMMENT_ID": 10,
@@ -77,7 +86,8 @@
     "USER_ID": 8,
     "COMMENT_TEXT": "我多加了些花生米，口感層次更豐富。",
     "COMMENT_AT": "2024-01-12 12:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 9
   },
   {
     "COMMENT_ID": 11,
@@ -85,7 +95,8 @@
     "USER_ID": 4,
     "COMMENT_TEXT": "松露味真的超高級，感覺像在餐廳吃飯。",
     "COMMENT_AT": "2024-01-15 13:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 28
   },
   {
     "COMMENT_ID": 12,
@@ -93,7 +104,8 @@
     "USER_ID": 3,
     "COMMENT_TEXT": "寬麵吸滿了醬汁，每一口都很濃郁。",
     "COMMENT_AT": "2024-01-16 21:10:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 11
   },
   {
     "COMMENT_ID": 13,
@@ -101,7 +113,8 @@
     "USER_ID": 6,
     "COMMENT_TEXT": "野菇炒香是重點，謝謝分享祕訣！",
     "COMMENT_AT": "2024-01-17 12:45:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 6
   },
   {
     "COMMENT_ID": 14,
@@ -109,7 +122,8 @@
     "USER_ID": 5,
     "COMMENT_TEXT": "雖然熱量高，但真的停不下來。",
     "COMMENT_AT": "2024-01-18 19:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 4
   },
   {
     "COMMENT_ID": 15,
@@ -117,7 +131,8 @@
     "USER_ID": 7,
     "COMMENT_TEXT": "椰奶讓辣味變得很順口，配泰國米超讚。",
     "COMMENT_AT": "2024-01-20 18:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 19
   },
   {
     "COMMENT_ID": 16,
@@ -125,7 +140,8 @@
     "USER_ID": 2,
     "COMMENT_TEXT": "青咖哩醬我是自己買現成的，照這食譜煮依然好喝。",
     "COMMENT_AT": "2024-01-21 17:20:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 3
   },
   {
     "COMMENT_ID": 17,
@@ -133,7 +149,8 @@
     "USER_ID": 8,
     "COMMENT_TEXT": "雞腿肉煮得很入味，這道菜全家人都愛。",
     "COMMENT_AT": "2024-01-22 12:15:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 22
   },
   {
     "COMMENT_ID": 18,
@@ -141,7 +158,8 @@
     "USER_ID": 4,
     "COMMENT_TEXT": "荷蘭醬的比例抓得很準，不會太膩。",
     "COMMENT_AT": "2024-01-25 08:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 15
   },
   {
     "COMMENT_ID": 19,
@@ -149,7 +167,8 @@
     "USER_ID": 3,
     "COMMENT_TEXT": "水波蛋切開的那一瞬間太療癒了。",
     "COMMENT_AT": "2024-01-26 09:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 27
   },
   {
     "COMMENT_ID": 20,
@@ -157,7 +176,8 @@
     "USER_ID": 6,
     "COMMENT_TEXT": "早午餐就靠這一道征服小孩的胃了。",
     "COMMENT_AT": "2024-01-27 10:45:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 13
   },
   {
     "COMMENT_ID": 21,
@@ -165,7 +185,8 @@
     "USER_ID": 2,
     "COMMENT_TEXT": "湯頭真的要熬很久，但成果非常值得。",
     "COMMENT_AT": "2024-02-01 22:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 20
   },
   {
     "COMMENT_ID": 22,
@@ -173,7 +194,8 @@
     "USER_ID": 5,
     "COMMENT_TEXT": "叉燒肉入口即化，這滷汁配方太厲害了。",
     "COMMENT_AT": "2024-02-02 21:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 24
   },
   {
     "COMMENT_ID": 23,
@@ -181,7 +203,8 @@
     "USER_ID": 7,
     "COMMENT_TEXT": "在家也能吃到專業拉麵店的水準！",
     "COMMENT_AT": "2024-02-03 12:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 16
   },
   {
     "COMMENT_ID": 24,
@@ -189,7 +212,8 @@
     "USER_ID": 8,
     "COMMENT_TEXT": "沒想到自製鷹嘴豆泥這麼簡單，口感好綿密。",
     "COMMENT_AT": "2024-02-05 14:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 7
   },
   {
     "COMMENT_ID": 25,
@@ -197,7 +221,8 @@
     "USER_ID": 3,
     "COMMENT_TEXT": "配上口袋餅真的很健康，是減脂期的好夥伴。",
     "COMMENT_AT": "2024-02-06 15:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 11
   },
   {
     "COMMENT_ID": 26,
@@ -205,7 +230,8 @@
     "USER_ID": 4,
     "COMMENT_TEXT": "橄欖油多加一點會更香喔！",
     "COMMENT_AT": "2024-02-07 10:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 0
   },
   {
     "COMMENT_ID": 27,
@@ -213,7 +239,8 @@
     "USER_ID": 6,
     "COMMENT_TEXT": "洋蔥一定要炒到焦糖化才有靈魂。",
     "COMMENT_AT": "2024-02-10 18:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 21
   },
   {
     "COMMENT_ID": 28,
@@ -221,7 +248,8 @@
     "USER_ID": 2,
     "COMMENT_TEXT": "法式長棍麵包加起司後再烤一下簡直完美。",
     "COMMENT_AT": "2024-02-11 19:15:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 14
   },
   {
     "COMMENT_ID": 29,
@@ -229,7 +257,8 @@
     "USER_ID": 5,
     "COMMENT_TEXT": "冬天喝這碗湯真的好暖胃。",
     "COMMENT_AT": "2024-02-12 20:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 10
   },
   {
     "COMMENT_ID": 30,
@@ -237,7 +266,8 @@
     "USER_ID": 7,
     "COMMENT_TEXT": "大蝦的蒜香味很足，檸檬去腥效果很好。",
     "COMMENT_AT": "2024-02-15 11:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 18
   },
   {
     "COMMENT_ID": 31,
@@ -245,7 +275,8 @@
     "USER_ID": 8,
     "COMMENT_TEXT": "很適合當派對開胃菜，大家都搶著吃。",
     "COMMENT_AT": "2024-02-16 12:40:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 5
   },
   {
     "COMMENT_ID": 32,
@@ -253,7 +284,8 @@
     "USER_ID": 3,
     "COMMENT_TEXT": "蝦子一定要挑新鮮的，口感才會彈牙。",
     "COMMENT_AT": "2024-02-17 15:20:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 12
   },
   {
     "COMMENT_ID": 33,
@@ -261,7 +293,8 @@
     "USER_ID": 4,
     "COMMENT_TEXT": "舒肥後的雞胸肉一點都不柴，超嫩！",
     "COMMENT_AT": "2024-02-20 12:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 26
   },
   {
     "COMMENT_ID": 34,
@@ -269,7 +302,8 @@
     "USER_ID": 6,
     "COMMENT_TEXT": "藜麥飯很有嚼勁，飽足感十足。",
     "COMMENT_AT": "2024-02-21 13:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 8
   },
   {
     "COMMENT_ID": 35,
@@ -277,7 +311,8 @@
     "USER_ID": 2,
     "COMMENT_TEXT": "健身人的救星食譜，推薦給大家。",
     "COMMENT_AT": "2024-02-22 18:50:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 15
   },
   {
     "COMMENT_ID": 36,
@@ -285,7 +320,8 @@
     "USER_ID": 5,
     "COMMENT_TEXT": "鮭魚煎得焦香帶嫩，配糙米飯很清爽。",
     "COMMENT_AT": "2024-02-25 11:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 17
   },
   {
     "COMMENT_ID": 37,
@@ -293,7 +329,8 @@
     "USER_ID": 7,
     "COMMENT_TEXT": "便當菜色很豐富，下次想試試看換成藜麥。",
     "COMMENT_AT": "2024-02-26 12:20:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 3
   },
   {
     "COMMENT_ID": 38,
@@ -301,7 +338,8 @@
     "USER_ID": 8,
     "COMMENT_TEXT": "帶去辦公室當午餐剛剛好，冷了也好吃。",
     "COMMENT_AT": "2024-02-27 14:10:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 9
   },
   {
     "COMMENT_ID": 39,
@@ -309,7 +347,8 @@
     "USER_ID": 3,
     "COMMENT_TEXT": "蒜香味很濃，毛豆加在裡面意外地搭。",
     "COMMENT_AT": "2024-03-01 19:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 6
   },
   {
     "COMMENT_ID": 40,
@@ -317,7 +356,8 @@
     "USER_ID": 4,
     "COMMENT_TEXT": "豬排很軟嫩，這道菜備餐非常快。",
     "COMMENT_AT": "2024-03-02 20:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 11
   },
   {
     "COMMENT_ID": 41,
@@ -325,7 +365,8 @@
     "USER_ID": 6,
     "COMMENT_TEXT": "簡單又美味的家常菜，給讚！",
     "COMMENT_AT": "2024-03-03 12:15:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 4
   },
   {
     "COMMENT_ID": 42,
@@ -333,7 +374,8 @@
     "USER_ID": 2,
     "COMMENT_TEXT": "豆腐讓漢堡排變得好輕盈，熱量負擔少很多。",
     "COMMENT_AT": "2024-03-05 18:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 13
   },
   {
     "COMMENT_ID": 43,
@@ -341,7 +383,8 @@
     "USER_ID": 5,
     "COMMENT_TEXT": "野菇醬汁是精華，讓整道菜高級了起來。",
     "COMMENT_AT": "2024-03-06 19:40:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 19
   },
   {
     "COMMENT_ID": 44,
@@ -349,7 +392,8 @@
     "USER_ID": 7,
     "COMMENT_TEXT": "雖然是蔬食為主的漢堡，但吃起來很滿足。",
     "COMMENT_AT": "2024-03-07 12:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 2
   },
   {
     "COMMENT_ID": 45,
@@ -357,7 +401,8 @@
     "USER_ID": 8,
     "COMMENT_TEXT": "紙包魚完整保留了魚的鮮味，肉質超軟。",
     "COMMENT_AT": "2024-03-10 11:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 25
   },
   {
     "COMMENT_ID": 46,
@@ -365,7 +410,8 @@
     "USER_ID": 3,
     "COMMENT_TEXT": "檸檬和香料的味道滲透進去，真的非常清爽。",
     "COMMENT_AT": "2024-03-11 12:50:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 10
   },
   {
     "COMMENT_ID": 47,
@@ -373,7 +419,8 @@
     "USER_ID": 4,
     "COMMENT_TEXT": "這道做法很簡單，懶人必學！",
     "COMMENT_AT": "2024-03-12 18:10:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 7
   },
   {
     "COMMENT_ID": 48,
@@ -381,7 +428,8 @@
     "USER_ID": 6,
     "COMMENT_TEXT": "洋蔥甜味充分融入牛肉中，真的很好吃。",
     "COMMENT_AT": "2024-03-15 12:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 22
   },
   {
     "COMMENT_ID": 49,
@@ -389,7 +437,8 @@
     "USER_ID": 2,
     "COMMENT_TEXT": "拌入生蛋黃後口感更滑順了。",
     "COMMENT_AT": "2024-03-16 13:40:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 16
   },
   {
     "COMMENT_ID": 50,
@@ -397,7 +446,8 @@
     "USER_ID": 5,
     "COMMENT_TEXT": "這道牛丼完勝外面的連鎖店。",
     "COMMENT_AT": "2024-03-17 19:20:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 8
   },
   {
     "COMMENT_ID": 51,
@@ -405,7 +455,8 @@
     "USER_ID": 7,
     "COMMENT_TEXT": "泡菜的酸度跟豬肉結合得非常好，超級開胃。",
     "COMMENT_AT": "2024-03-20 20:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 18
   },
   {
     "COMMENT_ID": 52,
@@ -413,7 +464,8 @@
     "USER_ID": 8,
     "COMMENT_TEXT": "我最後加了一點芝麻，香味更濃了。",
     "COMMENT_AT": "2024-03-21 18:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 5
   },
   {
     "COMMENT_ID": 53,
@@ -421,7 +473,8 @@
     "USER_ID": 3,
     "COMMENT_TEXT": "喜歡辣的人一定要多加一點辣椒粉。",
     "COMMENT_AT": "2024-03-22 11:15:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 12
   },
   {
     "COMMENT_ID": 54,
@@ -429,7 +482,8 @@
     "USER_ID": 4,
     "COMMENT_TEXT": "北海道咖哩就是有一種獨特的甜味 and 濃郁感。",
     "COMMENT_AT": "2024-03-25 12:45:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 20
   },
   {
     "COMMENT_ID": 55,
@@ -437,7 +491,8 @@
     "USER_ID": 6,
     "COMMENT_TEXT": "加了馬鈴薯和紅蘿蔔一起燉，真的很有料。",
     "COMMENT_AT": "2024-03-26 19:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 14
   },
   {
     "COMMENT_ID": 56,
@@ -445,7 +500,8 @@
     "USER_ID": 2,
     "COMMENT_TEXT": "適合全家大小一起吃的口味。",
     "COMMENT_AT": "2024-03-27 10:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 3
   },
   {
     "COMMENT_ID": 57,
@@ -453,7 +509,8 @@
     "USER_ID": 5,
     "COMMENT_TEXT": "薑汁的微辣加上味增的鹹香，這道菜無敵。",
     "COMMENT_AT": "2024-04-01 12:20:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 27
   },
   {
     "COMMENT_ID": 58,
@@ -461,7 +518,8 @@
     "USER_ID": 7,
     "COMMENT_TEXT": "豬肉片一定要選帶點油脂的才會Q彈。",
     "COMMENT_AT": "2024-04-02 18:40:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 9
   },
   {
     "COMMENT_ID": 59,
@@ -469,7 +527,8 @@
     "USER_ID": 8,
     "COMMENT_TEXT": "快速上手又好吃的經典日式料理。",
     "COMMENT_AT": "2024-04-03 21:10:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 5
   },
   {
     "COMMENT_ID": 60,
@@ -477,7 +536,8 @@
     "USER_ID": 3,
     "COMMENT_TEXT": "照燒醬汁甜甜鹹鹹的，鮭魚非常入味。",
     "COMMENT_AT": "2024-04-05 13:00:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 21
   },
   {
     "COMMENT_ID": 61,
@@ -485,7 +545,8 @@
     "USER_ID": 4,
     "COMMENT_TEXT": "簡單煎一下就很好吃，魚皮酥脆是關鍵。",
     "COMMENT_AT": "2024-04-06 12:30:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 15
   },
   {
     "COMMENT_ID": 62,
@@ -493,6 +554,7 @@
     "USER_ID": 6,
     "COMMENT_TEXT": "這道配白飯真的可以吃兩碗。",
     "COMMENT_AT": "2024-04-07 19:15:00",
-    "IS_DISPLAY": true
+    "IS_DISPLAY": true,
+    "LIKE_COUNT": 28
   }
 ]

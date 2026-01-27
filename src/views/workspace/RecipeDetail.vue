@@ -282,7 +282,7 @@ const commentList = computed(() => {
             time: c.COMMENT_AT || c.comment_at || '剛剛',
             content: c.COMMENT_TEXT || c.comment_text || '',
             avatar: avatar,
-            likes: c.LIKES || c.likes || 0
+            likes: c.LIKE_COUNT || c.likes || c.LIKES || 0
         };
     });
 });
