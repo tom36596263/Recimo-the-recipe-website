@@ -22,5 +22,6 @@ defineProps({
     background-color: $primary-color-100;
     color: $primary-color-700;
     border-radius: 10px;
+    flex-shrink: 0;
 }
 </style>
