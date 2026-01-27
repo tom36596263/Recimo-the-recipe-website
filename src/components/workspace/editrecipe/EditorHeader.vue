@@ -35,18 +35,28 @@ const goToOriginal = () => {
 };
 
 // EditorHeader.vue 
+
 const updateField = (field, value) => {
-  // 如果是改編模式，且我們正在改「心得」
-  if (props.isAdaptMode && field === 'adapt_description') {
-    emit('update:modelValue', {
-      ...props.modelValue,
-      [field]: value,
-      // ✨ 同時多存一份備份，確保燈箱絕對抓得到
-      recipe_descreption: props.modelValue.description
-    });
-  } else {
-    emit('update:modelValue', { ...props.modelValue, [field]: value });
+  // 1. 產生一個乾淨的拷貝
+  const nextData = { ...props.modelValue };
+
+  // 2. 執行欄位更新
+  nextData[field] = value;
+
+  // 3. ✨ 核心修正：實名制隔離
+  // 當我們在改「心得」時，絕對不准動到「說明」
+  if (field === 'adapt_description') {
+    nextData.description = props.modelValue.description;
+    // 額外存一個「燈箱專用」的乾淨說明欄位
+    nextData.clean_description = props.modelValue.description;
   }
+
+  // 當我們在改「大框框說明」時，更新說明，並同步更新乾淨欄位
+  if (field === 'description') {
+    nextData.clean_description = value;
+  }
+
+  emit('update:modelValue', nextData);
 };
 
 const setDifficulty = (val) => {

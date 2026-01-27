@@ -31,11 +31,9 @@ const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
 
-    // 抓取目前登入者
+    // 1. 處理登入者與日期資訊 (保持原樣)
     const loginUser = JSON.parse(localStorage.getItem('user') || '{}');
     const today = new Date().toISOString().split('T')[0];
-
-    // 關鍵判斷：食譜本身有沒有 ID (判斷是資料庫紀錄還是前端草稿)
     const isExistingRecord = !!(r.id || r.recipe_id);
 
     let displayName = "";
@@ -44,40 +42,38 @@ const introData = computed(() => {
     let isOwner = false;
 
     if (isExistingRecord) {
-        // --- 模式：舊紀錄 (優先顯示原發布者資料) ---
-        // 兼容多種可能的使用者名稱 Key
         displayName = r.user_name || r.author_name || r.userName || "未知作者";
-
-        // 兼容多種 Email Key 並處理 Handle
         const rawEmail = r.user_email || r.email || r.author_email || "guest@mail.com";
         displayHandle = rawEmail.split('@')[0];
-
-        // 兼容多種日期格式
         const rawDate = r.created_at || r.user_startdate || r.publish_date || today;
         displayDate = rawDate.split(' ')[0];
 
-        // 【權限判斷】：嚴格比對 ID
         const recordAuthorId = String(r.user_id || r.author_id || "");
         const currentLoginId = String(loginUser.user_id || "");
         isOwner = (recordAuthorId === currentLoginId) && currentLoginId !== "";
     } else {
-        // --- 模式：新草稿 (強制顯示目前登入者) ---
         displayName = loginUser.user_name || "新創作者";
         displayHandle = (loginUser.user_email || "guest@mail.com").split('@')[0];
         displayDate = today;
         isOwner = true;
     }
 
-    // 時間與說明的格式化
+    // 2. 格式化時間與標題
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
 
-    // 修正你之前代碼中的 descreption 拼字錯誤，並增加兼容性
-    const finalDescription = r.recipe_description || r.recipe_descreption || r.description || r.desc || '暫無詳細說明';
+    // 燈箱大標題：改編標題優先
+    const finalTitle = r.adapt_title || r.title || '新改編食譜';
+
+    // 3. ✨【絕不動搖的修正重點】✨
+    // 我們強制「只」抓 description。
+    // 即使 r.adapt_description (心得框) 有內容，這裡也絕對不准去抓它。
+    // 這樣就能保證燈箱顯示的是你大框框裡那段「口感濃郁的抹茶蛋糕...」
+    const finalDescription = r.clean_description || r.description || '暫無詳細說明';
 
     return {
         id: r.id || r.recipe_id,
-        title: r.adaptation_title || r.title || '新改編食譜',
+        title: r.adapt_title || r.title || '新改編食譜',
         image: r.adaptation_image_url || r.coverImg || 'https://placehold.co/800x600?text=No+Image',
         description: finalDescription,
         time: formattedTime,
@@ -175,6 +171,8 @@ const stepsData = computed(() => {
             </div>
         </div>
     </Transition>
+
+    
 </template>
 
 <style lang="scss" scoped>
