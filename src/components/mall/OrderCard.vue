@@ -94,7 +94,10 @@ const paymentText = computed(() => {
   const map = {
     'cod': '貨到付款',
     'card': '信用卡付款', 'credit': '信用卡付款', 'visa': '信用卡付款', 'master': '信用卡付款',
-    'transfer': '銀行轉帳', 'atm': '銀行轉帳', 'bank': '銀行轉帳'
+    'transfer': '銀行轉帳', 'atm': '銀行轉帳', 'bank': '銀行轉帳',
+    '0': '貨到付款',  // 資料庫的 0
+    '1': '信用卡付款' // 資料庫的 1
+
   };
   return map[method] || methodRaw;
 });
