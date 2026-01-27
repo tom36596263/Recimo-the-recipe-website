@@ -64,5 +64,16 @@
   { "tag_id": 63, "tag_name": "炸雞", "tag_type": "料理種類" },
   { "tag_id": 64, "tag_name": "墨西哥料理", "tag_type": "異國風味" },
   { "tag_id": 65, "tag_name": "塔可", "tag_type": "料理種類" },
-  { "tag_id": 66, "tag_name": "沙拉", "tag_type": "餐點分類" }
+  { "tag_id": 66, "tag_name": "沙拉", "tag_type": "餐點分類" },
+  { "tag_id": 67, "tag_name": "牛排", "tag_type": "料理種類" },
+  { "tag_id": 68, "tag_name": "越式料理", "tag_type": "異國風味" },
+  { "tag_id": 69, "tag_name": "輕食", "tag_type": "餐點分類" },
+  { "tag_id": 70, "tag_name": "西班牙料理", "tag_type": "異國風味" },
+  { "tag_id": 71, "tag_name": "西班牙大鍋飯", "tag_type": "料理種類" },
+  { "tag_id": 72, "tag_name": "蒸煮料理", "tag_type": "料理方式" },
+  { "tag_id": 73, "tag_name": "俄式料理", "tag_type": "異國風味" },
+  { "tag_id": 74, "tag_name": "天婦羅", "tag_type": "料理種類" },
+  { "tag_id": 75, "tag_name": "炸物", "tag_type": "料理方式" },
+  { "tag_id": 76, "tag_name": "夜市小吃", "tag_type": "餐點分類" },
+  { "tag_id": 77, "tag_name": "煎炸料理", "tag_type": "料理方式" }
 ]
