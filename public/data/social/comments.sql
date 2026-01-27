@@ -1,15 +1,18 @@
-CREATE TABLE IF NOT EXISTS RECIPE_COMMENTS (
-    COMMENT_ID INT PRIMARY KEY,           -- 留言 ID
-    RECIPE_ID INT NOT NULL,              -- 食譜 ID
-    USER_ID INT NOT NULL,                -- 使用者 ID
-    COMMENT_TEXT TEXT NOT NULL,          -- 留言內容
-    COMMENT_AT DATETIME NOT NULL,        -- 留言時間
-    IS_DISPLAY BOOLEAN DEFAULT TRUE,     -- 是否顯示
-    LIKE_COUNT INT DEFAULT 0             -- 讚數
+CREATE TABLE IF NOT EXISTS recipe_comments (
+    comment_id INT PRIMARY KEY AUTO_INCREMENT,
+    recipe_id INT NOT NULL,
+    user_id INT NOT NULL,
+    comment_text TEXT NOT NULL,
+    comment_at DATETIME NOT NULL,
+    is_display BOOLEAN DEFAULT TRUE,
+    like_count INT DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-INSERT INTO RECIPE_COMMENTS (COMMENT_ID, RECIPE_ID, USER_ID, COMMENT_TEXT, COMMENT_AT, IS_DISPLAY, LIKE_COUNT) VALUES
+TRUNCATE TABLE recipe_comments;
+
+
+INSERT INTO recipe_comments (comment_id, recipe_id, user_id, comment_text, comment_at, is_display, like_count) VALUES
 (1, 1, 5, '餅皮又脆又香，番茄醬汁比例完美！', '2024-01-01 10:00:00', 1, 12),
 (2, 1, 3, '這道經典瑪格麗特披薩是我吃過最好做的食譜。', '2024-01-02 12:30:00', 1, 8),
 (3, 1, 8, '羅勒葉一定要最後放，香味才留得住。', '2024-01-03 18:15:00', 1, 5),
@@ -44,7 +47,7 @@ INSERT INTO RECIPE_COMMENTS (COMMENT_ID, RECIPE_ID, USER_ID, COMMENT_TEXT, COMME
 (32, 10, 3, '蝦子一定要挑新鮮的，口感才會彈牙。', '2024-02-17 15:20:00', 1, 12),
 (33, 11, 4, '舒肥後的雞胸肉一點都不柴，超嫩！', '2024-02-20 12:00:00', 1, 26),
 (34, 11, 6, '藜麥飯很有嚼勁，飽足感十足。', '2024-02-21 13:30:00', 1, 8),
-(35, 11, 2, '健身人的救星食譜，推薦給大家。", "2024-02-22 18:50:00", 1, 15),
+(35, 11, 2, '健身人的救星食譜，推薦給大家。', '2024-02-22 18:50:00', 1, 15),
 (36, 12, 5, '鮭魚煎得焦香帶嫩，配糙米飯很清爽。', '2024-02-25 11:30:00', 1, 17),
 (37, 12, 7, '便當菜色很豐富，下次想試試看換成藜麥。', '2024-02-26 12:20:00', 1, 3),
 (38, 12, 8, '帶去辦公室當午餐剛剛好，冷了也好吃。', '2024-02-27 14:10:00', 1, 9),
@@ -64,7 +67,7 @@ INSERT INTO RECIPE_COMMENTS (COMMENT_ID, RECIPE_ID, USER_ID, COMMENT_TEXT, COMME
 (52, 17, 8, '我最後加了一點芝麻，香味更濃了。', '2024-03-21 18:30:00', 1, 5),
 (53, 17, 3, '喜歡辣的人一定要多加一點辣椒粉。', '2024-03-22 11:15:00', 1, 12),
 (54, 18, 4, '北海道咖哩就是有一種獨特的甜味 and 濃郁感。', '2024-03-25 12:45:00', 1, 20),
-(55, 18, 6, '加了馬鈴薯和紅蘿蔔一起燉，真的很有料。", "2024-03-26 19:00:00", 1, 14),
+(55, 18, 6, '加了馬鈴薯和紅蘿蔔一起燉，真的很有料。', '2024-03-26 19:00:00', 1, 14),
 (56, 18, 2, '適合全家大小一起吃的口味。', '2024-03-27 10:30:00', 1, 3),
 (57, 19, 5, '薑汁的微辣加上味增的鹹香，這道菜無敵。', '2024-04-01 12:20:00', 1, 27),
 (58, 19, 7, '豬肉片一定要選帶點油脂的才會Q彈。', '2024-04-02 18:40:00', 1, 9),

@@ -1,23 +1,24 @@
--- 1. 建立表格結構 (如果還不存在的話)
 CREATE TABLE IF NOT EXISTS ingredients (
     ingredient_id INT PRIMARY KEY AUTO_INCREMENT,
-    ingredient_name VARCHAR(100) NOT NULL COMMENT '食材名稱',
-    main_category VARCHAR(50) NOT NULL COMMENT '主分類',
-    sub_category VARCHAR(50) NOT NULL COMMENT '子分類',
-    ingredient_image_url VARCHAR(255) COMMENT '圖片路徑',
-    kcal_per_100g DECIMAL(6, 2) DEFAULT 0 COMMENT '每100g熱量',
-    protein_per_100g DECIMAL(6, 2) DEFAULT 0 COMMENT '每100g蛋白質',
-    fat_per_100g DECIMAL(6, 2) DEFAULT 0 COMMENT '每100g脂肪',
-    carbs_per_100g DECIMAL(6, 2) DEFAULT 0 COMMENT '每100g碳水',
-    unit_name VARCHAR(10) COMMENT '預設單位',
-    gram_conversion FLOAT DEFAULT 1 COMMENT '單位轉換克數'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ingredient_name VARCHAR(100) NOT NULL,
+    main_category VARCHAR(50) NOT NULL,
+    sub_category VARCHAR(50) NOT NULL,
+    ingredient_image_url VARCHAR(255),
+    kcal_per_100g DECIMAL(6, 2) DEFAULT 0,
+    protein_per_100g DECIMAL(6, 2) DEFAULT 0,
+    fat_per_100g DECIMAL(6, 2) DEFAULT 0,
+    carbs_per_100g DECIMAL(6, 2) DEFAULT 0,
+    unit_name VARCHAR(10),
+    gram_conversion DECIMAL(10, 2) DEFAULT 1.00
+);
 
--- 2. 清空現有資料 (這可以確保你每次跑這份 SQL 都不會因為 ID 重複而失敗)
 TRUNCATE TABLE ingredients;
 
--- 3. 批量匯入食材資料
-INSERT INTO ingredients (ingredient_id, ingredient_name, main_category, sub_category, ingredient_image_url, kcal_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g, unit_name, gram_conversion) VALUES
+INSERT INTO ingredients (
+    ingredient_id, ingredient_name, main_category, sub_category, 
+    ingredient_image_url, kcal_per_100g, protein_per_100g, 
+    fat_per_100g, carbs_per_100g, unit_name, gram_conversion
+) VALUES
   (1, '蒜頭 (整粒)', 'fresh-produce', 'aromatics', 'img/ingredients/fresh-produce/aromatics/garlic-clove.png', 149, 6.4, 0.5, 33.1, '瓣', 5),
   (2, '蒜末', 'fresh-produce', 'aromatics', 'img/ingredients/fresh-produce/aromatics/minced-garlic.png', 149, 6.4, 0.5, 33.1, '克', 1),
   (3, '洋蔥 (整顆)', 'fresh-produce', 'aromatics', 'img/ingredients/fresh-produce/aromatics/onion-whole.png', 40, 1.1, 0.1, 9.3, '顆', 150),

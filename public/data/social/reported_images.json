@@ -1,0 +1,35 @@
+[
+  {
+    "REPORTED_GALLERY_ID": 1,
+    "GALLERY_ID": 5,
+    "REPORTER_ID": 5,
+    "REPORT_TYPE": 3,
+    "REPORT_REASON": "盜用網路圖片且公然侮辱食譜作者，語氣極度惡劣。",
+    "STATUS": 0,
+    "HANDLER_ID": null,
+    "REPORTED_AT": "2026-01-21 09:15:00",
+    "UPDATE_AT": null
+  },
+  {
+    "REPORTED_GALLERY_ID": 2,
+    "GALLERY_ID": 12,
+    "REPORTER_ID": 7,
+    "REPORT_TYPE": 1,
+    "REPORT_REASON": "在成品分享區散佈疑似投資詐騙的 LINE 帳號資訊。",
+    "STATUS": 1,
+    "HANDLER_ID": 2,
+    "REPORTED_AT": "2026-01-21 10:30:00",
+    "UPDATE_AT": "2026-01-21 10:45:00"
+  },
+  {
+    "REPORTED_GALLERY_ID": 3,
+    "GALLERY_ID": 25,
+    "REPORTER_ID": 8,
+    "REPORT_TYPE": 3,
+    "REPORT_REASON": "涉及恐嚇與偏激謾罵，內容與食譜分享無關，純屬惡意鬧板。",
+    "STATUS": 0,
+    "HANDLER_ID": null,
+    "REPORTED_AT": "2026-01-21 11:45:00",
+    "UPDATE_AT": null
+  }
+]

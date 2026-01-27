@@ -1,16 +1,15 @@
--- 1. 建立表格 
-CREATE TABLE IF NOT EXISTS FAQS (
-    FAQ_ID INT PRIMARY KEY AUTO_INCREMENT,
-    FAQ_TYPE VARCHAR(100) NOT NULL,
-    FAQ_TITLE VARCHAR(255) NOT NULL,
-    FAQ_ANSWER VARCHAR(1000) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS faqs (
+    faq_id INT PRIMARY KEY AUTO_INCREMENT,
+    faq_type VARCHAR(100) NOT NULL,
+    faq_title VARCHAR(255) NOT NULL,
+    faq_answer TEXT NOT NULL
+);
 
--- 2. 清空現有資料 (避免重複匯入)
-TRUNCATE TABLE FAQS;
+TRUNCATE TABLE faqs;
 
--- 3. 匯入完整資料
-INSERT INTO FAQS (FAQ_TYPE, FAQ_TITLE, FAQ_ANSWER) VALUES
+INSERT INTO faqs (
+    faq_type, faq_title, faq_answer
+) VALUES 
 ('Recimo商城', 'Recimo 商城賣什麼？與食譜有什麼關係？', '我們專門販售由「官方食譜」轉化而成的即食料理包。您可以將其視為食譜的實體縮影，讓您省去備料繁瑣，在家也能快速還原與官方食譜一模一樣的美味。'),
 ('Recimo商城', '下單後多久會出貨？', '待管理員在後台確認訂單後，通常於 1-2 個工作天內完成備貨並出貨。出貨後，您會收到「商品運送進度通知」。'),
 ('Recimo商城', '如果收到料理包後發現品質有問題該怎麼辦？', '請立即拍照並透過網站的「聯絡我們表單」反映。管理員會在後台查看您的訂單詳情並進行售後處理。'),

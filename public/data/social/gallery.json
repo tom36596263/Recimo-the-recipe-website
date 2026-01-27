@@ -34,13 +34,21 @@
   {
     "GALLERY_ID": 5,
     "RECIPE_ID": 2,
+    "USER_ID": 3,
+    "GALLERY_TEXT": "這成品照是我在網路上截圖的啦，配方超級爛，大家不要被騙了，笑死。",
+    "UPLOAD_AT": "2026-01-20 09:00:00",
+    "GALLERY_URL": "img/social/32/gallery/2/reported.jpg"
+  },
+  {
+    "GALLERY_ID": 6,
+    "RECIPE_ID": 2,
     "USER_ID": 7,
     "GALLERY_TEXT": "日常下午茶時光，抹茶熔岩蛋糕配黑咖啡真是絕配。",
     "UPLOAD_AT": "2026-01-17 13:45:00",
     "GALLERY_URL": "img/social/32/gallery/2/2.jpg"
   },
   {
-    "GALLERY_ID": 6,
+    "GALLERY_ID": 7,
     "RECIPE_ID": 3,
     "USER_ID": 3,
     "GALLERY_TEXT": "四川宮保雞丁，火候掌握得剛好，雞肉鮮嫩多汁。",
@@ -48,7 +56,7 @@
     "GALLERY_URL": "img/social/32/gallery/3/1.jpg"
   },
   {
-    "GALLERY_ID": 7,
+    "GALLERY_ID": 8,
     "RECIPE_ID": 3,
     "USER_ID": 6,
     "GALLERY_TEXT": "花生米一定要最後放才酥脆，這道宮保雞丁超下飯。",
@@ -56,7 +64,7 @@
     "GALLERY_URL": "img/social/32/gallery/3/2.jpg"
   },
   {
-    "GALLERY_ID": 8,
+    "GALLERY_ID": 9,
     "RECIPE_ID": 3,
     "USER_ID": 2,
     "GALLERY_TEXT": "今天的晚餐主角，香辣過癮的四川口味。",
@@ -64,7 +72,7 @@
     "GALLERY_URL": "img/social/32/gallery/3/3.jpg"
   },
   {
-    "GALLERY_ID": 9,
+    "GALLERY_ID": 10,
     "RECIPE_ID": 3,
     "USER_ID": 8,
     "GALLERY_TEXT": "特寫一下宮保雞丁的色澤，很有食慾吧！",
@@ -72,7 +80,7 @@
     "GALLERY_URL": "img/social/32/gallery/3/4.jpg"
   },
   {
-    "GALLERY_ID": 10,
+    "GALLERY_ID": 11,
     "RECIPE_ID": 4,
     "USER_ID": 5,
     "GALLERY_TEXT": "奶油松露野菇寬麵，松露醬的味道一打開就散發出來了。",
@@ -80,7 +88,15 @@
     "GALLERY_URL": "img/social/32/gallery/4/1.jpg"
   },
   {
-    "GALLERY_ID": 11,
+    "GALLERY_ID": 12,
+    "RECIPE_ID": 4,
+    "USER_ID": 2,
+    "GALLERY_TEXT": "想學這道義大利麵的秘訣？加我 LINE 看更多：scam888，教你一週賺進十萬，免學費！",
+    "UPLOAD_AT": "2026-01-20 10:15:00",
+    "GALLERY_URL": "img/social/32/gallery/4/reported.jpg"
+  },
+  {
+    "GALLERY_ID": 13,
     "RECIPE_ID": 4,
     "USER_ID": 4,
     "GALLERY_TEXT": "選用了新鮮野菇，跟奶油醬汁完美融合在寬麵上。",
@@ -88,7 +104,7 @@
     "GALLERY_URL": "img/social/32/gallery/4/2.jpg"
   },
   {
-    "GALLERY_ID": 12,
+    "GALLERY_ID": 14,
     "RECIPE_ID": 4,
     "USER_ID": 7,
     "GALLERY_TEXT": "在家也能做出餐廳質感的松露野菇寬麵。",
@@ -96,7 +112,7 @@
     "GALLERY_URL": "img/social/32/gallery/4/3.jpg"
   },
   {
-    "GALLERY_ID": 13,
+    "GALLERY_ID": 15,
     "RECIPE_ID": 4,
     "USER_ID": 3,
     "GALLERY_TEXT": "最後撒上現磨起司粉，松露寬麵層次感爆發。",
@@ -104,7 +120,7 @@
     "GALLERY_URL": "img/social/32/gallery/4/4.jpg"
   },
   {
-    "GALLERY_ID": 14,
+    "GALLERY_ID": 16,
     "RECIPE_ID": 5,
     "USER_ID": 6,
     "GALLERY_TEXT": "泰式青咖哩雞，香蘭葉與椰奶的結合真的好道地。",
@@ -112,7 +128,7 @@
     "GALLERY_URL": "img/social/32/gallery/5/1.jpg"
   },
   {
-    "GALLERY_ID": 15,
+    "GALLERY_ID": 17,
     "RECIPE_ID": 5,
     "USER_ID": 2,
     "GALLERY_TEXT": "稍微偏辣的青咖哩，拌在飯上可以連吃兩碗。",
@@ -120,7 +136,7 @@
     "GALLERY_URL": "img/social/32/gallery/5/2.jpg"
   },
   {
-    "GALLERY_ID": 16,
+    "GALLERY_ID": 18,
     "RECIPE_ID": 5,
     "USER_ID": 8,
     "GALLERY_TEXT": "燉煮後的雞肉吸滿青咖哩醬汁，非常入味。",
@@ -128,7 +144,7 @@
     "GALLERY_URL": "img/social/32/gallery/5/3.jpg"
   },
   {
-    "GALLERY_ID": 17,
+    "GALLERY_ID": 19,
     "RECIPE_ID": 6,
     "USER_ID": 5,
     "GALLERY_TEXT": "經典班尼迪克蛋，水波蛋切開後的蛋液流出好療癒。",
@@ -136,7 +152,7 @@
     "GALLERY_URL": "img/social/32/gallery/6/1.jpg"
   },
   {
-    "GALLERY_ID": 18,
+    "GALLERY_ID": 20,
     "RECIPE_ID": 6,
     "USER_ID": 4,
     "GALLERY_TEXT": "荷蘭醬比例調得很成功，濃稠度剛好。",
@@ -144,7 +160,7 @@
     "GALLERY_URL": "img/social/32/gallery/6/2.jpg"
   },
   {
-    "GALLERY_ID": 19,
+    "GALLERY_ID": 21,
     "RECIPE_ID": 6,
     "USER_ID": 7,
     "GALLERY_TEXT": "完美的早午餐，班尼迪克蛋配上酥脆瑪芬。",
@@ -152,7 +168,7 @@
     "GALLERY_URL": "img/social/32/gallery/6/3.jpg"
   },
   {
-    "GALLERY_ID": 20,
+    "GALLERY_ID": 22,
     "RECIPE_ID": 7,
     "USER_ID": 3,
     "GALLERY_TEXT": "濃厚豚骨叉燒拉麵，湯頭熬了超久，非常醇厚。",
@@ -160,7 +176,7 @@
     "GALLERY_URL": "img/social/32/gallery/7/1.jpg"
   },
   {
-    "GALLERY_ID": 21,
+    "GALLERY_ID": 23,
     "RECIPE_ID": 7,
     "USER_ID": 6,
     "GALLERY_TEXT": "特製叉燒肉肥而不膩，入口即化。",
@@ -168,7 +184,7 @@
     "GALLERY_URL": "img/social/32/gallery/7/2.jpg"
   },
   {
-    "GALLERY_ID": 22,
+    "GALLERY_ID": 24,
     "RECIPE_ID": 8,
     "USER_ID": 2,
     "GALLERY_TEXT": "經典自製鷹嘴豆泥，淋上橄欖油和紅椒粉，味道好清新。",
@@ -176,7 +192,15 @@
     "GALLERY_URL": "img/social/32/gallery/8/1.jpg"
   },
   {
-    "GALLERY_ID": 23,
+    "GALLERY_ID": 25,
+    "RECIPE_ID": 8,
+    "USER_ID": 4,
+    "GALLERY_TEXT": "這鷹嘴豆泥照片我是故意拍得像廚餘的，這種食譜配這種照片剛好而已啦。",
+    "UPLOAD_AT": "2026-01-18 15:15:00",
+    "GALLERY_URL": "img/social/32/gallery/8/reported.jpg"
+  },
+  {
+    "GALLERY_ID": 26,
     "RECIPE_ID": 8,
     "USER_ID": 8,
     "GALLERY_TEXT": "拿來沾皮塔餅吃非常順口，健康的下午茶點心。",
@@ -184,7 +208,7 @@
     "GALLERY_URL": "img/social/32/gallery/8/2.jpg"
   },
   {
-    "GALLERY_ID": 24,
+    "GALLERY_ID": 27,
     "RECIPE_ID": 8,
     "USER_ID": 5,
     "GALLERY_TEXT": "打得很細膩的鷹嘴豆泥，口感綿密。",
@@ -192,7 +216,7 @@
     "GALLERY_URL": "img/social/32/gallery/8/3.jpg"
   },
   {
-    "GALLERY_ID": 25,
+    "GALLERY_ID": 28,
     "RECIPE_ID": 8,
     "USER_ID": 4,
     "GALLERY_TEXT": "自製的鷹嘴豆泥裝罐，隨時都能當抹醬。",
@@ -200,7 +224,7 @@
     "GALLERY_URL": "img/social/32/gallery/8/4.jpg"
   },
   {
-    "GALLERY_ID": 26,
+    "GALLERY_ID": 29,
     "RECIPE_ID": 9,
     "USER_ID": 7,
     "GALLERY_TEXT": "法式洋蔥濃湯，洋蔥炒到焦糖化後的甜味太棒了。",
@@ -208,7 +232,7 @@
     "GALLERY_URL": "img/social/32/gallery/9/1.png"
   },
   {
-    "GALLERY_ID": 27,
+    "GALLERY_ID": 30,
     "RECIPE_ID": 9,
     "USER_ID": 3,
     "GALLERY_TEXT": "鋪上法國麵包和起司進爐烤，濃湯精華都在這。",
@@ -216,7 +240,7 @@
     "GALLERY_URL": "img/social/32/gallery/9/2.png"
   },
   {
-    "GALLERY_ID": 28,
+    "GALLERY_ID": 31,
     "RECIPE_ID": 9,
     "USER_ID": 6,
     "GALLERY_TEXT": "冷冷的冬天，來碗暖暖的洋蔥濃湯超幸福。",
@@ -224,7 +248,7 @@
     "GALLERY_URL": "img/social/32/gallery/9/3.png"
   },
   {
-    "GALLERY_ID": 29,
+    "GALLERY_ID": 32,
     "RECIPE_ID": 9,
     "USER_ID": 2,
     "GALLERY_TEXT": "起司烤到微焦，配上濃郁洋蔥湯頭，絕配。",
@@ -232,7 +256,7 @@
     "GALLERY_URL": "img/social/32/gallery/9/4.png"
   },
   {
-    "GALLERY_ID": 30,
+    "GALLERY_ID": 33,
     "RECIPE_ID": 10,
     "USER_ID": 8,
     "GALLERY_TEXT": "蒜香檸檬烤大蝦，檸檬的酸爽跟蝦子的甜味結合。",
@@ -240,7 +264,7 @@
     "GALLERY_URL": "img/social/32/gallery/10/1.jpg"
   },
   {
-    "GALLERY_ID": 31,
+    "GALLERY_ID": 34,
     "RECIPE_ID": 10,
     "USER_ID": 5,
     "GALLERY_TEXT": "蒜末均勻鋪在蝦背上烤，香氣逼人。",
@@ -248,7 +272,7 @@
     "GALLERY_URL": "img/social/32/gallery/10/2.jpg"
   },
   {
-    "GALLERY_ID": 32,
+    "GALLERY_ID": 35,
     "RECIPE_ID": 10,
     "USER_ID": 4,
     "GALLERY_TEXT": "簡單的調味就能帶出烤大蝦的鮮甜。",
@@ -256,7 +280,7 @@
     "GALLERY_URL": "img/social/32/gallery/10/3.jpg"
   },
   {
-    "GALLERY_ID": 33,
+    "GALLERY_ID": 36,
     "RECIPE_ID": 11,
     "USER_ID": 7,
     "GALLERY_TEXT": "舒肥雞胸藜麥飯，低脂又高蛋白的健康組合。",
@@ -264,31 +288,39 @@
     "GALLERY_URL": "img/social/32/gallery/11/1.png"
   },
   {
-    "GALLERY_ID": 34,
+    "GALLERY_ID": 37,
     "RECIPE_ID": 11,
-    "USER_ID": 3,
+    "USER_ID": 6,
     "GALLERY_TEXT": "舒肥後的雞胸肉真的不乾柴，藜麥飯很有口感。",
     "UPLOAD_AT": "2026-01-18 18:15:00",
     "GALLERY_URL": "img/social/32/gallery/11/2.png"
   },
   {
-    "GALLERY_ID": 35,
+    "GALLERY_ID": 38,
     "RECIPE_ID": 11,
-    "USER_ID": 6,
+    "USER_ID": 3,
     "GALLERY_TEXT": "健身後的餐點，藜麥飯跟雞胸肉補充滿滿能量。",
     "UPLOAD_AT": "2026-01-18 18:30:00",
     "GALLERY_URL": "img/social/32/gallery/11/3.png"
   },
   {
-    "GALLERY_ID": 36,
+    "GALLERY_ID": 39,
     "RECIPE_ID": 11,
-    "USER_ID": 2,
+    "USER_ID": 6,
     "GALLERY_TEXT": "色香味俱全的輕食餐盒，舒肥雞胸大推。",
     "UPLOAD_AT": "2026-01-18 18:45:00",
     "GALLERY_URL": "img/social/32/gallery/11/4.png"
   },
   {
-    "GALLERY_ID": 37,
+    "GALLERY_ID": 40,
+    "RECIPE_ID": 11,
+    "USER_ID": 2,
+    "GALLERY_TEXT": "均衡營養的一餐，舒肥法真的能鎖住肉汁。",
+    "UPLOAD_AT": "2026-01-18 19:00:00",
+    "GALLERY_URL": "img/social/32/gallery/11/5.png"
+  },
+  {
+    "GALLERY_ID": 41,
     "RECIPE_ID": 12,
     "USER_ID": 8,
     "GALLERY_TEXT": "香煎鮭魚糙米便當，魚皮煎得金黃酥脆。",
@@ -296,7 +328,7 @@
     "GALLERY_URL": "img/social/32/gallery/12/1.jpg"
   },
   {
-    "GALLERY_ID": 38,
+    "GALLERY_ID": 42,
     "RECIPE_ID": 12,
     "USER_ID": 5,
     "GALLERY_TEXT": "鮭魚油脂香氣十足，搭配健康糙米飯很有飽足感。",
@@ -304,7 +336,7 @@
     "GALLERY_URL": "img/social/32/gallery/12/2.jpg"
   },
   {
-    "GALLERY_ID": 39,
+    "GALLERY_ID": 43,
     "RECIPE_ID": 12,
     "USER_ID": 4,
     "GALLERY_TEXT": "營養均衡的一餐，香煎鮭魚真的是百吃不厭。",
@@ -312,7 +344,7 @@
     "GALLERY_URL": "img/social/32/gallery/12/3.png"
   },
   {
-    "GALLERY_ID": 40,
+    "GALLERY_ID": 44,
     "RECIPE_ID": 13,
     "USER_ID": 7,
     "GALLERY_TEXT": "蒜香毛豆嫩豬排，第一次嘗試這樣的搭配，驚艷的清爽。",
@@ -320,7 +352,7 @@
     "GALLERY_URL": "img/social/32/gallery/13/1.png"
   },
   {
-    "GALLERY_ID": 41,
+    "GALLERY_ID": 45,
     "RECIPE_ID": 13,
     "USER_ID": 3,
     "GALLERY_TEXT": "豬排醃製得很入味，配上蒜香毛豆增加口感。",
@@ -328,7 +360,7 @@
     "GALLERY_URL": "img/social/32/gallery/13/2.jpg"
   },
   {
-    "GALLERY_ID": 42,
+    "GALLERY_ID": 46,
     "RECIPE_ID": 13,
     "USER_ID": 6,
     "GALLERY_TEXT": "這道蒜香豬排很適合當家常主菜。",
@@ -336,7 +368,7 @@
     "GALLERY_URL": "img/social/32/gallery/13/3.jpg"
   },
   {
-    "GALLERY_ID": 43,
+    "GALLERY_ID": 47,
     "RECIPE_ID": 13,
     "USER_ID": 2,
     "GALLERY_TEXT": "毛豆的甜跟蒜香完美中和了豬排的厚重感。",
@@ -344,7 +376,7 @@
     "GALLERY_URL": "img/social/32/gallery/13/4.png"
   },
   {
-    "GALLERY_ID": 44,
+    "GALLERY_ID": 48,
     "RECIPE_ID": 14,
     "USER_ID": 8,
     "GALLERY_TEXT": "豆腐漢堡排佐野菇，蔬食者的極致享受。",
@@ -352,7 +384,7 @@
     "GALLERY_URL": "img/social/32/gallery/14/1.png"
   },
   {
-    "GALLERY_ID": 45,
+    "GALLERY_ID": 49,
     "RECIPE_ID": 14,
     "USER_ID": 5,
     "GALLERY_TEXT": "豆腐排做得很紮實，野菇醬汁鮮甜濃郁。",
@@ -360,7 +392,7 @@
     "GALLERY_URL": "img/social/32/gallery/14/2.jpg"
   },
   {
-    "GALLERY_ID": 46,
+    "GALLERY_ID": 50,
     "RECIPE_ID": 15,
     "USER_ID": 4,
     "GALLERY_TEXT": "檸檬紙包魚片，鎖住了魚肉所有的鮮甜水分。",
@@ -368,7 +400,7 @@
     "GALLERY_URL": "img/social/32/gallery/15/1.png"
   },
   {
-    "GALLERY_ID": 47,
+    "GALLERY_ID": 51,
     "RECIPE_ID": 15,
     "USER_ID": 7,
     "GALLERY_TEXT": "打開紙包那一刻香氣噴發，檸檬味清新解膩。",
@@ -376,7 +408,7 @@
     "GALLERY_URL": "img/social/32/gallery/15/2.png"
   },
   {
-    "GALLERY_ID": 48,
+    "GALLERY_ID": 52,
     "RECIPE_ID": 15,
     "USER_ID": 3,
     "GALLERY_TEXT": "無油烹飪的極致，紙包魚片健康又美味。",
@@ -384,7 +416,7 @@
     "GALLERY_URL": "img/social/32/gallery/15/3.png"
   },
   {
-    "GALLERY_ID": 49,
+    "GALLERY_ID": 53,
     "RECIPE_ID": 16,
     "USER_ID": 6,
     "GALLERY_TEXT": "日式壽喜燒牛丼，蛋黃液裹在肥美牛肉片上太邪惡了。",
@@ -392,7 +424,7 @@
     "GALLERY_URL": "img/social/32/gallery/16/1.png"
   },
   {
-    "GALLERY_ID": 50,
+    "GALLERY_ID": 54,
     "RECIPE_ID": 16,
     "USER_ID": 2,
     "GALLERY_TEXT": "鹹甜適中的壽喜燒醬汁，牛丼白飯殺手。",
@@ -400,7 +432,7 @@
     "GALLERY_URL": "img/social/32/gallery/16/2.png"
   },
   {
-    "GALLERY_ID": 51,
+    "GALLERY_ID": 55,
     "RECIPE_ID": 16,
     "USER_ID": 8,
     "GALLERY_TEXT": "洋蔥煮到透亮吸滿醬汁，牛丼就是要這樣吃。",
@@ -408,7 +440,7 @@
     "GALLERY_URL": "img/social/32/gallery/16/3.jpg"
   },
   {
-    "GALLERY_ID": 52,
+    "GALLERY_ID": 56,
     "RECIPE_ID": 16,
     "USER_ID": 5,
     "GALLERY_TEXT": "自製豪華版牛丼，肉片疊得跟山一樣高。",
@@ -416,7 +448,7 @@
     "GALLERY_URL": "img/social/32/gallery/16/4.png"
   },
   {
-    "GALLERY_ID": 53,
+    "GALLERY_ID": 57,
     "RECIPE_ID": 16,
     "USER_ID": 4,
     "GALLERY_TEXT": "壽喜燒牛丼特寫，這肉質色澤太夢幻。",
@@ -424,7 +456,7 @@
     "GALLERY_URL": "img/social/32/gallery/16/5.png"
   },
   {
-    "GALLERY_ID": 54,
+    "GALLERY_ID": 58,
     "RECIPE_ID": 17,
     "USER_ID": 7,
     "GALLERY_TEXT": "韓式泡菜炒豬肉，酸辣夠味，配韓劇剛好。",
@@ -432,7 +464,7 @@
     "GALLERY_URL": "img/social/32/gallery/17/1.png"
   },
   {
-    "GALLERY_ID": 55,
+    "GALLERY_ID": 59,
     "RECIPE_ID": 17,
     "USER_ID": 3,
     "GALLERY_TEXT": "泡菜炒出香氣後加入豬五花，肥肉部分焦香美味。",
@@ -440,7 +472,7 @@
     "GALLERY_URL": "img/social/32/gallery/17/2.png"
   },
   {
-    "GALLERY_ID": 56,
+    "GALLERY_ID": 60,
     "RECIPE_ID": 17,
     "USER_ID": 6,
     "GALLERY_TEXT": "這道韓式炒豬肉不管是配飯還是包生菜都很讚。",
@@ -448,7 +480,7 @@
     "GALLERY_URL": "img/social/32/gallery/17/3.png"
   },
   {
-    "GALLERY_ID": 57,
+    "GALLERY_ID": 61,
     "RECIPE_ID": 17,
     "USER_ID": 2,
     "GALLERY_TEXT": "濃郁的紅色醬汁，這就是道地的韓式口味。",
@@ -456,7 +488,7 @@
     "GALLERY_URL": "img/social/32/gallery/17/4.png"
   },
   {
-    "GALLERY_ID": 58,
+    "GALLERY_ID": 62,
     "RECIPE_ID": 18,
     "USER_ID": 8,
     "GALLERY_TEXT": "北海道咖哩雞，湯底加了大量蔬菜泥，非常濃醇。",
@@ -464,7 +496,7 @@
     "GALLERY_URL": "img/social/32/gallery/18/1.png"
   },
   {
-    "GALLERY_ID": 59,
+    "GALLERY_ID": 63,
     "RECIPE_ID": 18,
     "USER_ID": 5,
     "GALLERY_TEXT": "北海道風格就是溫潤，咖哩雞裡面的馬鈴薯軟爛綿密。",
@@ -472,7 +504,7 @@
     "GALLERY_URL": "img/social/32/gallery/18/2.png"
   },
   {
-    "GALLERY_ID": 60,
+    "GALLERY_ID": 64,
     "RECIPE_ID": 18,
     "USER_ID": 4,
     "GALLERY_TEXT": "濃縮了蔬菜精華的北海道咖哩，口感特別豐富。",
@@ -480,7 +512,7 @@
     "GALLERY_URL": "img/social/32/gallery/18/3.png"
   },
   {
-    "GALLERY_ID": 61,
+    "GALLERY_ID": 65,
     "RECIPE_ID": 18,
     "USER_ID": 7,
     "GALLERY_TEXT": "這道咖哩雞非常有家鄉味，熱氣騰騰很幸福。",
@@ -488,7 +520,7 @@
     "GALLERY_URL": "img/social/32/gallery/18/4.png"
   },
   {
-    "GALLERY_ID": 62,
+    "GALLERY_ID": 66,
     "RECIPE_ID": 19,
     "USER_ID": 3,
     "GALLERY_TEXT": "味噌薑汁燒肉，味噌鹹香跟薑汁的微辣層次分明。",
@@ -496,7 +528,7 @@
     "GALLERY_URL": "img/social/32/gallery/19/1.png"
   },
   {
-    "GALLERY_ID": 63,
+    "GALLERY_ID": 67,
     "RECIPE_ID": 19,
     "USER_ID": 6,
     "GALLERY_TEXT": "薑泥炒出香氣後加入味噌，燒肉瞬間風味升級。",
@@ -504,7 +536,7 @@
     "GALLERY_URL": "img/social/32/gallery/19/2.png"
   },
   {
-    "GALLERY_ID": 64,
+    "GALLERY_ID": 68,
     "RECIPE_ID": 19,
     "USER_ID": 2,
     "GALLERY_TEXT": "日式家庭餐桌必備，味噌薑汁燒肉完美示範。",
@@ -512,7 +544,15 @@
     "GALLERY_URL": "img/social/32/gallery/19/3.png"
   },
   {
-    "GALLERY_ID": 65,
+    "GALLERY_ID": 69,
+    "RECIPE_ID": 20,
+    "USER_ID": 3,
+    "GALLERY_TEXT": "這什麼爛鮭魚，我照著做全家人都拉肚子，原 PO 你是想害死誰？沒被告過是不是？",
+    "UPLOAD_AT": "2026-01-20 14:00:00",
+    "GALLERY_URL": "img/social/32/gallery/20/99.jpg"
+  },
+  {
+    "GALLERY_ID": 70,
     "RECIPE_ID": 20,
     "USER_ID": 8,
     "GALLERY_TEXT": "照燒鮭魚排，照燒醬汁收得乾乾亮亮的，色澤滿分。",
@@ -520,7 +560,7 @@
     "GALLERY_URL": "img/social/32/gallery/20/1.jpg"
   },
   {
-    "GALLERY_ID": 66,
+    "GALLERY_ID": 71,
     "RECIPE_ID": 20,
     "USER_ID": 5,
     "GALLERY_TEXT": "魚肉中心剛好熟透，照燒風味帶點甜感非常好吃。",
