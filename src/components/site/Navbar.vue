@@ -4,6 +4,7 @@ import { computed, ref, onMounted, onUnmounted } from 'vue';
 import BaseBtn from '@/components/common/BaseBtn.vue'
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
+import { useCartStore } from '@/stores/cartStore';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -48,12 +49,16 @@ const navItems = computed(() => {
         }));
 });
 
-// --- 登出邏輯 ---
+// 登出邏輯
 const handleLogout = () => {
     authStore.logout();   // 執行清除狀態
     closeMenu();          // 關閉手機版選單
     router.push('/');     // 跳轉回首頁
 };
+
+//購物車數量圓點
+const cartStore = useCartStore();
+const cartTotal = computed(() => cartStore.totalCount);
 </script>
 <template>
     <nav class="site-nav" :class="{ 'nav--hidden': !isVisible }">
@@ -85,12 +90,25 @@ const handleLogout = () => {
                             <div class="nav-icon-link">
                                 <router-link to="/cart" class="cart-btn" @click="closeMenu">
                                     <span class="btn-text  p-p1">我的購物車</span>
-                                    <i-material-symbols-Shopping-Cart-outline class="btn-icon" />
+                                    <div class="cart-icon-wrapper">
+                                        <i-material-symbols-Shopping-Cart-outline class="btn-icon" />
+                                        <span v-if="cartTotal > 0" class="cart-badge">{{ cartTotal }}</span>
+                                    </div>
                                 </router-link>
 
                                 <router-link to="/workspace" class="login-btn" @click="closeMenu">
-                                    <span class="btn-text p-p1">我的廚房</span>
-                                    <i-material-symbols-Account-Circle-outline class="btn-icon" />
+                                    <template v-if="authStore.isLoggedIn">
+                                        <span class="btn-text p-p1">我的廚房</span>
+                                        <div class="user-avatar-min">
+                                            <img :src="authStore.user?.user_url || '/img/site/None_avatar.svg'"
+                                                alt="avatar">
+                                        </div>
+                                    </template>
+
+                                    <template v-else>
+                                        <span class="btn-text p-p1">我的廚房</span>
+                                        <i-material-symbols-Account-Circle-outline class="btn-icon" />
+                                    </template>
                                 </router-link>
                             </div>
                             <div class="side-menu-only">
@@ -204,7 +222,42 @@ const handleLogout = () => {
         }
     }
 
-    .login-btn,
+    .login-btn {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: $neutral-color-white;
+
+        .btn-icon {
+            font-size: 24px;
+        }
+
+        // 頭像容器
+        .user-avatar-min {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid $neutral-color-white;
+            transition: border-color 0.4s ease, transform 0.4s ease, opacity 0.4s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        &:hover {
+            .user-avatar-min {
+                border-color: $accent-color-700;
+            }
+        }
+    }
+
     .cart-btn {
         color: $neutral-color-white;
         font-size: 24px;
@@ -439,6 +492,20 @@ const handleLogout = () => {
             }
         }
 
+        .page-link.mobile-active {
+
+            // 當側邊欄展開時，針對內部的登入按鈕做調整
+            .login-btn {
+                .user-avatar-min {
+                    display: none; // 隱藏頭像
+                }
+
+                .btn-icon {
+                    display: none; // 確保手機選單內不出現小 icon
+                }
+            }
+        }
+
         .content {
             .logo img {
                 display: inline-block;
@@ -516,4 +583,60 @@ const handleLogout = () => {
         transform: scale(1);
     }
 }
-</style>
+
+.cart-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .cart-badge {
+        position: absolute;
+        // 稍微調整位置，讓圓心對準圖示右上角
+        top: -6px;
+        right: -6px;
+
+        background: $secondary-color-danger-700;
+        color: $neutral-color-white;
+
+        // 核心修改：強制寬高相等並設為圓形
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+
+        // 確保內容置中
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        font-size: 11px; // 圓形內空間較小，稍微縮小字體
+        font-weight: 600;
+        line-height: 1;
+        padding: 0; // 圓形不需要 padding，靠 flex 置中即可
+
+        // 防止數字擠壓變形
+        flex-shrink: 0;
+
+        // 超過 99 還是圓的
+        aspect-ratio: 1 / 1;
+    }
+}
+
+// // 針對手機版的調整
+// @media screen and (max-width: 810px) {
+//     .nav-icon-link {
+//         .cart-btn {
+//             // 讓手機版選單內的購物車文字與紅點並存
+//             justify-content: flex-start;
+//             padding-left: 20px;
+
+//             .cart-icon-wrapper {
+//                 margin-left: 10px; // 讓圖示跟文字有一點距離
+//             }
+
+//             .btn-icon {
+//                 display: block; // 💡 建議手機版選單內也顯示圖示，這樣紅點才有地方掛
+//                 font-size: 20px;
+//             }
+//         }
+//     }
+// }</style>

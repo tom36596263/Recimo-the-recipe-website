@@ -144,7 +144,12 @@ const onCaptchaVerified = (success) => {
 // ==========================================
 // 登入按鈕邏輯
 const handleLogin = async () => {
-
+  // 強制檢查：如果目前驗證碼輸入框的值跟圖形不符，直接攔截
+  // (雖然有 status 計算屬性，但直接在這裡擋下最安全)
+  if (!captchaVerified.value) {
+    showLoginFail.value = true;
+    return;
+  }
   // 1. 強制觸發所有欄位驗證顯示
   Object.keys(touched.value.login).forEach(key => touched.value.login[key] = true);
 

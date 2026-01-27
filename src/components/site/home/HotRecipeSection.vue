@@ -2,22 +2,22 @@
     import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
     import CircleBtn from '@/components/common/CircleBtn.vue'
     import { useAuthGuard } from '@/composables/useAuthGuard'
-
+    import { useRouter } from 'vue-router';
     import { ref, onMounted } from 'vue';
     import { publicApi } from '@/utils/publicApi'
 
     const { runWithAuth } = useAuthGuard();
-
+    const router = useRouter();
     const recipes = ref([])
 
-    const handleRecipeClick = (id) => {
+    const handleCardClick = (id) => {
         runWithAuth(() => {
-            router.push({ 
-                name: 'workspace-recipe-detail', 
-                params: { id: id } 
-            });
-        });
-    };
+            router.push({
+                name: 'workspace-recipe-detail',
+                params: { id: id }
+            })
+        })
+    }
 
 onMounted(async () => {
     try {
@@ -88,7 +88,7 @@ onMounted(async () => {
     <div 
     v-for="item in recipes" 
     :key="item.id"
-    @click="handleRecipeClick(item.id)"
+    @click.prevent="handleCardClick(item.id)"
     class="col-4 col-md-12 recipe-cards">
         <RecipeCardLg :recipe="item" class="recipe-card" />
     </div> 

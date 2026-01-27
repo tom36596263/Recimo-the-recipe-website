@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import BaseBtn from '@/components/common/BaseBtn.vue'
 import LogoBlack from '/img/site/Recimo-logo-black.svg'
@@ -7,6 +7,23 @@ import IconList from 'virtual:icons/material-symbols/List'
 import IconAdd from 'virtual:icons/material-symbols/Add'
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
+
+const isVisible = ref(true);
+let lastScrollPosition = 0;
+
+const handleScroll = (e) => {
+    const currentScrollPosition = e.target.scrollTop;
+    if(Math.abs(currentScrollPosition - lastScrollPosition) < 10) return;
+    isVisible.value = currentScrollPosition < lastScrollPosition || currentScrollPosition <= 0;
+    lastScrollPosition = currentScrollPosition;
+}
+defineExpose({ handleScroll });
+// onMounted(() => {
+//     document.querySelector('.page-content').addEventListener('scroll', handleScroll);
+// });
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+})
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -80,7 +97,7 @@ const handleLogout = () => {
         <BaseBtn v-if="authStore.isLoggedIn" title="登出" height="30" @click="handleLogout" class="logout-btn" />
     </aside>
 
-    <nav class="mobile-tabbar">
+    <nav class="mobile-tabbar" :class="{ 'tabber-hidden': !isVisible }">
         <div class="btn-group">
             <router-link v-for="item in mobileFixedItems" :key="item.path" :to="item.path" class="tab-item"
                 :class="{ 'router-link-active': isActive(item.path) }">
@@ -203,18 +220,28 @@ const handleLogout = () => {
 
 .mobile-tabbar {
     display: none;
+    position: fixed; // 確保導航欄是固定的
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: translateY(0);
+    opacity: 1;
+    &.tabber-hidden{
+        transform: translateY(100%);
+        opacity: 0;
+        pointer-events: none;
+    }
 
     .btn-group {
-        position: fixed;
-        bottom: 0;
-        left: 0;
+        position: relative;
         width: 100%;
         height: 70px;
         background: $primary-color-700;
         display: flex;
         justify-content: space-around;
         align-items: center;
-        z-index: 1000;
 
         .tab-item {
             display: flex;

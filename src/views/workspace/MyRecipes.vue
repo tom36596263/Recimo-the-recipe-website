@@ -280,7 +280,7 @@ onMounted(async () => {
 
 /* ==================== 區塊樣式 ==================== */
 .recipe-section {
-    margin-bottom: 48px;
+    // margin-bottom: 48px;
     position: relative;
 
     &:last-child {

@@ -115,11 +115,9 @@ const handleCloseModal = () => {
 
     &::-webkit-scrollbar {
         display: none;
-        /* Chrome, Safari, Opera */
     }
 
     -ms-overflow-style: none;
-    /* IE and Edge */
     scrollbar-width: none;
 
     .filter-tag {
@@ -185,7 +183,24 @@ const handleCloseModal = () => {
 
     .inspiration-kitchen-cta {
         margin-top: 20px;
-        display: none;
+        // display: none;
     }
+}
+@media screen and (max-width: 810px){
+    .inspiration-kitchen-cta {
+        padding: 20px 0;
+        .p-p1 {
+            margin-bottom: 10px;
+        }
+        .ingredient1 {
+            bottom: -20px;
+            right: 5px;
+        }
+        .ingredient15 {
+            top: 40px;
+            left: 10px;
+        }
+    }
+    
 }
 </style>

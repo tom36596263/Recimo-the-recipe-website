@@ -15,14 +15,31 @@ const props = defineProps({
 const emit = defineEmits(['update:page']);
 
 const pageNumbers = computed(() => {
+    const total = props.totalPages;
+    const current = props.currentPage;
     const pages = [];
-    for (let i = 1; i <= props.totalPages; i++) {
-        pages.push(i);
+    if(total <= 7){
+        for (let i = 1; i <= total; i++) pages.push(i);
+    }else{
+        pages.push(1);
+        if(current > 4){
+            pages.push('...');
+        }
+        const start = Math.max(2, current - 1);
+        const end = Math.min(total - 1, current + 1);
+        for(let i = start; i <= end; i++){
+            pages.push(i);
+        }
+        if(current < total - 3){
+            pages.push('...');
+        }
+        pages.push(total);
     }
     return pages;
 });
 
 const changePage = (page) => {
+    if(page === '...')return;
     if (page >= 1 && page <= props.totalPages) {
         emit('update:page', page);
     }
@@ -30,9 +47,25 @@ const changePage = (page) => {
 </script>
 <template>
     <div class="pagination">
-        <button v-for="page in pageNumbers" :key="page" @click="changePage(page)"
-            :class="['page-link', { active: page === currentPage }]">
+        <button 
+            class="page-link"
+            :disabled="currentPage === 1"
+            @click="changePage(currentPage - 1)"
+        >
+            &lt;
+        </button>
+        <button 
+            v-for="(page, index) in pageNumbers" 
+            :key="index" @click="changePage(page)"
+            :class="['page-link', { active: page === currentPage, dots: page === '...' }]">
             {{ page }}
+        </button>
+        <button 
+            class="page-link"
+            :disabled="currentPage === totalPages"
+            @click="changePage(currentPage + 1)"
+        >
+            &gt;
         </button>
     </div>
 </template>
@@ -85,6 +118,20 @@ const changePage = (page) => {
 
             &:hover {
                 background-color: transparent;
+            }
+        }
+        &[disabled]{
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: $neutral-color-700;
+            color: $neutral-color-700;
+        }
+        &.dots{
+            cursor: default;
+            border: none;
+            font-size: 30px;
+            &:hover{
+                background: none;
             }
         }
     }

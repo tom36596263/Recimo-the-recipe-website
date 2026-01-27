@@ -1,9 +1,17 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import LogoBlack from '/img/site/Recimo-logo-black.svg'
 import WorkspaceTopBar from '@/components/workspace/WorkspaceTopBar.vue';
 import WorkspaceSideBar from '@/components/workspace/WorkspaceSideBar.vue';
+
+const sidebarRef = ref(null);
+
+const onContentScroll = (e) => {
+    if (sidebarRef.value) {
+        sidebarRef.value.handleScroll(e);
+    }
+};
 
 const route = useRoute();
 
@@ -27,9 +35,9 @@ const breadcrumbs = computed(() => {
 
 <template>
     <div class="workspace-layout">
-        <WorkspaceSideBar />
+        <WorkspaceSideBar ref="sidebarRef" /> 
 
-        <main class="page-content">
+        <main class="page-content" @scroll="onContentScroll">
             <header class="container">
                 <div class="row">
                     <div class="topbar-logo">
@@ -65,13 +73,15 @@ const breadcrumbs = computed(() => {
 
 .workspace-layout {
     display: flex;
-    height: 100vh;
+    min-height: 100vh;
     overflow: hidden;
 
     .page-content {
         // padding-bottom: 80px;
-        margin-bottom: 20px;
+        // flex: 1;
+        width: 100%;
         overflow-y: auto;
+        
     }
 }
 

@@ -32,7 +32,7 @@ const routes = [
         path: '/',
         name: 'home',
         component: () => import('@/views/site/HomeView.vue'),
-        meta: { layout: 'default', breadcrumb: null }
+        meta: { title: '首頁', layout: 'default', breadcrumb: null }
       },
       {
         path: '/search',
@@ -269,6 +269,11 @@ const router = createRouter({
 // ==========================================
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
+
+  // 修改網頁頁籤名稱
+  const siteName = 'Recimo'; // 你的網站名稱
+  // 優先找子路由的 title，如果沒有就用預設名稱
+  document.title = to.meta.title ? `${to.meta.title} | ${siteName}` : siteName;
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!authStore.isLoggedIn) {
