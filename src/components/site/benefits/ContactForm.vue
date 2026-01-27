@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import axios from 'axios'; // 1. 引入 axios
 
 const formData = ref({
     name: '',
@@ -33,7 +34,7 @@ const checkFormValid = () => {
 };
 
 // 處理表單送出
-const handleSave = () => {
+const handleSave = async () => { // 加上 async
     isSubmitted.value = true;
 
     if (formData.value.email !== '' && !validateEmail(formData.value.email)) {
@@ -41,11 +42,57 @@ const handleSave = () => {
         return;
     }
 
-    // 檢查整體表單
+    const colorMap = {
+        '【R 幣與商城】': 0xF1C40F, // 金色
+        '【Recimo功能】': 0x3498DB, // 藍色
+        '【食譜與社群】': 0xE74C3C, // 紅色
+        '【其他】': 0x95A5A6      // 灰色
+    };
+
+    // 2. 根據目前選擇的分類取得顏色，若沒對應到則給予預設綠色
+    const embedColor = colorMap[formData.value.category] || 0x41b883;
+    
+
     if (checkFormValid()) {
-        alert('訊息已成功送出！我們會盡快回覆您。');
-        formData.value = { name: '', email: '', category: '', subject: '', content: '' };
-        isSubmitted.value = false;
+
+        // --- 串接 Discord ---
+        // 你的 Webhook 網址 (建議加上 corsproxy 防止瀏覽器擋掉)
+        const webhookUrl = "https://discord.com/api/webhooks/1465609882475692178/kAKFEEDnKELLFerGswWBeBD98yAZvSMYjXEsodOiy-lD2VmcgCUPzCluD7kdmAW1Tn-_";
+
+        const messageData = {
+            username: "Recimo 官網客服",
+            embeds: [{
+                title: `🔔 待處理信件：${formData.value.subject}`,
+                // 這裡要改成變數！
+                color: embedColor,
+                fields: [
+                    { name: "姓名", value: formData.value.name, inline: true },
+                    { name: "信箱", value: formData.value.email, inline: true },
+                    { name: "分類", value: formData.value.category, inline: true },
+                    { name: "內容", value: formData.value.content },
+                    {
+                        name: "快速回覆",
+                        value: `[點我立即回信](mailto:${formData.value.email}?subject=Re:${encodeURIComponent(formData.value.subject)})`
+                    }
+                ],
+                footer: { text: "來自 Recimo 官方網站聯絡表單" },
+                timestamp: new Date()
+            }]
+        };
+
+        try {
+            await axios.post(webhookUrl, messageData);
+            alert('訊息已成功送出！我們會盡快回覆您。');
+
+            // 成功後才清空表單
+            formData.value = { name: '', email: '', category: '', subject: '', content: '' };
+            isSubmitted.value = false;
+        } catch (error) {
+            console.error("Discord 傳送失敗:", error);
+            alert('抱歉，系統暫時無法送出訊息，請稍後再試。');
+        }
+        // --- 串接結束 ---
+
     } else {
         alert('請填寫所有必填欄位。');
     }

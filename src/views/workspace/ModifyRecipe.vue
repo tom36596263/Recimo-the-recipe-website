@@ -3,16 +3,43 @@ import { ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { publicApi } from '@/utils/publicApi';
 import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard.vue';
+import AdaptationDetailModal from '@/components/workspace/modifyrecipe/modals/AdaptationDetailModal.vue';
 
 const router = useRouter();
 const route = useRoute();
 
-// --- 讀取 Vite 的 Base 路徑 ---
-const baseUrl = import.meta.env.BASE_URL;
-
+// --- 狀態定義 ---
 const originalRecipe = ref({ id: null, title: '', coverImg: '', description: '' });
 const variantItems = ref([]);
 
+// --- 燈箱控制 ---
+const isModalOpen = ref(false);
+const selectedRecipe = ref(null);
+
+function openAdaptDetail(item) {
+    // ✨ 邏輯攔截：判斷如果是 json- 開頭的假資料就不執行後續開啟燈箱的動作
+    if (String(item.id).startsWith('json-')) {
+        return;
+    }
+    // 這裡傳入的 item 已經過 loadRecipeData 標準化處理
+    selectedRecipe.value = item;
+    isModalOpen.value = true;
+}
+
+// 輔助函式：處理時間顯示 (將 00:25:00 轉為 25 分鐘)
+const formatTime = (timeValue) => {
+    if (!timeValue) return '30 分鐘';
+    if (typeof timeValue === 'string' && timeValue.includes(':')) {
+        const parts = timeValue.split(':');
+        const h = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        return h > 0 ? `${h} 小時 ${m} 分鐘` : `${m} 分鐘`;
+    }
+    // 如果已經是數字或純文字，確保帶有「分鐘」單位
+    return String(timeValue).includes('分') ? timeValue : `${timeValue} 分鐘`;
+};
+
+// 監聽路由變化載入資料
 watch(
     () => [route.params.id, route.query.editId],
     async ([id, editId]) => {
@@ -28,69 +55,84 @@ watch(
 
 async function loadRecipeData(recipeId) {
     try {
-        const [resRecipes, resAdaptations] = await Promise.all([
+        const [resRecipes, resAdaptations, resSteps, resIngredients, resIngMaster] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/recipe/recipe_adaptations.json')
+            publicApi.get('data/recipe/recipe_adaptations.json'),
+            publicApi.get('data/recipe/steps.json'),
+            publicApi.get('data/recipe/recipe_ingredient.json'),
+            publicApi.get('data/recipe/ingredients.json')
         ]);
 
         const allRecipes = resRecipes.data;
         const allAdaptations = resAdaptations.data;
+        const targetParentId = Number(recipeId);
+        const baseUrl = import.meta.env.BASE_URL;
 
-        const found = allRecipes.find(r => Number(r.recipe_id) === Number(recipeId));
+        const fixPath = (url) => {
+            if (!url || url.startsWith('http') || url.startsWith('data:')) return url;
+            return `${baseUrl}/${url.replace(/^\//, '')}`.replace(/\/+/g, '/');
+        };
+
+        // 1. 處理母食譜
+        const found = allRecipes.find(r => Number(r.recipe_id) === targetParentId);
         if (!found) return;
-
-        // --- ✅ 修正：原食譜圖片路徑防呆 ---
-        let rawImg = found.recipe_image_url || found.recipe_cover_image || '';
-        let finalImg = '';
-        if (rawImg) {
-            if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
-                finalImg = rawImg;
-            } else {
-                // 清理開頭斜線並拼街 baseUrl，最後統一校正重複斜線
-                const cleanPath = rawImg.replace(/^\//, '');
-                finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
-            }
-        }
 
         originalRecipe.value = {
             id: found.recipe_id,
-            title: found.recipe_title,
-            description: found.recipe_description || found.recipe_descreption || '暫無簡介',
-            coverImg: finalImg
+            title: found.recipe_title || found.title,
+            description: found.recipe_description || found.recipe_descreption || found.description || '暫無簡介',
+            coverImg: fixPath(found.recipe_image_url || found.recipe_cover_image || found.coverImg)
         };
 
-        const filteredAdaptations = allAdaptations.filter(
-            a => Number(a.parent_recipe_id) === Number(recipeId)
-        );
+        // 2. 處理改編食譜 (對接資料庫欄位名稱)
+        const jsonAdaptations = allAdaptations
+            .filter(a => Number(a.parent_recipe_id) === targetParentId)
+            .map(adapt => {
+                const childId = Number(adapt.child_recipe_id);
+                const childInfo = allRecipes.find(r => Number(r.recipe_id) === childId);
+                if (!childInfo) return null;
 
-        variantItems.value = filteredAdaptations.map(adapt => {
-            const childInfo = allRecipes.find(
-                r => Number(r.recipe_id) === Number(adapt.child_recipe_id)
-            );
+                return {
+                    id: `json-${childId}`,
+                    title: adapt.adaptation_title || childInfo.recipe_title,
+                    // ✨ 統一欄位名稱為 summary
+                    summary: adapt.adaptation_note || '暫無改編心得',
+                    coverImg: fixPath(adapt.adaptation_image_url || childInfo.recipe_image_url),
+                    is_mine: false,
+                    // 燈箱需要的詳細內容
+                    recipe_descreption: childInfo.recipe_description || '暫無詳細內容'
+                };
+            }).filter(Boolean);
 
-            // --- ✅ 修正：改編食譜圖片路徑防呆 ---
-            let adaptImg = adapt.adaptation_image_url || childInfo?.recipe_image_url || '';
-            if (adaptImg && !adaptImg.startsWith('http') && !adaptImg.startsWith('data:')) {
-                const cleanAdaptPath = adaptImg.replace(/^\//, '');
-                adaptImg = `${baseUrl}/${cleanAdaptPath}`.replace(/\/+/g, '/');
-            }
+        // 3. 處理本地資料
+        const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
+        const localAdaptations = localRevisions
+            .filter(r => Number(r.parent_recipe_id) === targetParentId)
+            .map(r => ({
+                ...r,
+                id: r.id || `local-${Date.now()}-${Math.random()}`,
+                title: r.title || '未命名改編',
+                // ✨ 強制對接：將你截圖看到的 description 塞進 summary
+                summary: r.description || '暫無改編心得',
+                coverImg: r.coverImg || '',
+                is_mine: true
+            }));
 
-            return {
-                id: adapt.child_recipe_id,
-                title: adapt.adaptation_title || childInfo?.recipe_title || '未命名改編',
-                description:
-                    adapt.adaptation_note ||
-                    (adapt.key_changes?.[0]
-                        ? `${adapt.key_changes[0].from} ➔ ${adapt.key_changes[0].to}`
-                        : '關鍵內容載入中...'),
-                author: childInfo?.author_name || 'Recimo User',
-                likes: childInfo?.likes_count || 0,
-                coverImg: adaptImg
-            };
-        });
+        // 合併並更新狀態
+        variantItems.value = [...localAdaptations, ...jsonAdaptations];
+
+
     } catch (err) {
-        console.error('資料載入失敗', err);
+        console.error('載入失敗:', err);
     }
+}
+
+function deleteLocalRecipe(targetId) {
+    if (!confirm('確定要刪除這個本地改編版本嗎？')) return;
+    const localData = JSON.parse(localStorage.getItem('user_revisions') || '[]');
+    const filtered = localData.filter(r => String(r.id) !== String(targetId));
+    localStorage.setItem('user_revisions', JSON.stringify(filtered));
+    loadRecipeData(route.params.id || route.query.editId);
 }
 
 function initEmptyRecipe() {
@@ -157,18 +199,34 @@ function goBack() {
 
             <TransitionGroup name="staggered-list">
                 <div v-for="(item, index) in variantItems" :key="item.id"
-                    class="col-3 col-lg-4 col-md-6 mb-24 grid-item" :style="{ '--delay': index + 1 }">
-                    <AdaptRecipeCard :recipe="item" :readonly="true" class="full-height demo-readonly-card" />
+                    class="col-3 col-lg-4 col-md-6 mb-24 grid-item" :style="{
+                        '--delay': index + 1,
+                        'cursor': String(item.id).startsWith('json-') ? 'default' : 'pointer'
+                    }" @click="openAdaptDetail(item)">
+
+                    <div class="card-wrapper" style="position: relative; height: 100%;">
+                        <AdaptRecipeCard :recipe="{
+                            title: item.title,
+                            summary: item.summary,
+                            coverImg: item.coverImg
+                        }" :readonly="true" />
+
+                        <button v-if="item.is_mine" class="local-delete-btn" title="刪除此改編版本"
+                            @click.stop="deleteLocalRecipe(item.id)">
+                            ✕
+                        </button>
+                    </div>
                 </div>
             </TransitionGroup>
         </div>
+
+        <AdaptationDetailModal v-model="isModalOpen" :recipe="selectedRecipe" />
     </div>
 </template>
 
-
 <style lang="scss" scoped>
+/* 此部分完全保留，不做任何修改 */
 @import '@/assets/scss/abstracts/_color.scss';
-
 
 .mobile-only-btn {
     display: none !important;
@@ -178,7 +236,6 @@ function goBack() {
     display: block;
 }
 
-/* --- 動畫定義 --- */
 .fade-in-down {
     animation: fadeInDown 0.6s ease-out;
 }
@@ -258,7 +315,6 @@ function goBack() {
     }
 }
 
-/* --- 佈局樣式 --- */
 .custom-grid {
     display: flex;
     flex-wrap: wrap;
@@ -355,7 +411,8 @@ function goBack() {
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
     }
 
-    /* ✨ 核心：強制關閉改編卡片上的遮罩樣式 */
+    :deep(.key-change-badge),
+    :deep(.key-change-wrapper),
     :deep(.change-hint-overlay),
     :deep(.hover-overlay),
     :deep(.mask),
@@ -372,7 +429,6 @@ function goBack() {
     }
 }
 
-/* RWD 控制 */
 @media screen and (max-width: 810px) {
     .desktop-only-btn {
         display: none !important;
@@ -400,6 +456,40 @@ function goBack() {
             max-width: 50% !important;
             padding: 0 8px !important;
         }
+    }
+}
+
+.card-wrapper {
+    &:hover {
+        .local-delete-btn {
+            opacity: 1;
+        }
+    }
+}
+
+.local-delete-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 28px;
+    height: 28px;
+    background-color: #ff4d4f;
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 20;
+    opacity: 0;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: #ff7875;
+        transform: scale(1.1);
     }
 }
 

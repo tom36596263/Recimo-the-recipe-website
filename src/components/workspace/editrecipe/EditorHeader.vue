@@ -1,5 +1,5 @@
 <script setup>
-import { computed, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard.vue';
 import { useRouter, useRoute } from 'vue-router';
 
@@ -14,6 +14,16 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
+// 1. 宣告 ref 來對應 template 中的 input
+const fileInput = ref(null);
+
+// 2. 處理從小卡傳上來的點擊訊號
+const handleUploadClick = () => {
+  if (props.isEditing && fileInput.value) {
+    fileInput.value.click();
+  }
+};
+
 // 跳轉邏輯
 const goToOriginal = () => {
   const targetId = props.modelValue.parent_recipe_id || props.modelValue.recipe_id;
@@ -24,8 +34,29 @@ const goToOriginal = () => {
   }
 };
 
+// EditorHeader.vue 
+
 const updateField = (field, value) => {
-  emit('update:modelValue', { ...props.modelValue, [field]: value });
+  // 1. 產生一個乾淨的拷貝
+  const nextData = { ...props.modelValue };
+
+  // 2. 執行欄位更新
+  nextData[field] = value;
+
+  // 3. ✨ 核心修正：實名制隔離
+  // 當我們在改「心得」時，絕對不准動到「說明」
+  if (field === 'adapt_description') {
+    nextData.description = props.modelValue.description;
+    // 額外存一個「燈箱專用」的乾淨說明欄位
+    nextData.clean_description = props.modelValue.description;
+  }
+
+  // 當我們在改「大框框說明」時，更新說明，並同步更新乾淨欄位
+  if (field === 'description') {
+    nextData.clean_description = value;
+  }
+
+  emit('update:modelValue', nextData);
 };
 
 const setDifficulty = (val) => {
@@ -43,14 +74,31 @@ const displayTime = computed(() => {
   return manualTime > 0 ? manualTime : autoTotalTime.value;
 });
 
-// EditorHeader.vue 內的 adaptRecipeData
+// EditorHeader.vue 內的 adaptRecipeData (修正預覽顯示)
+// EditorHeader.vue 內的 adaptRecipeData (修正預覽顯示)
 const adaptRecipeData = computed(() => {
+  const m = props.modelValue;
+
   return {
-    ...props.modelValue,
-    title: props.modelValue.adapt_title || '',
-    description: props.modelValue.adapt_description || '',
-    recipe_id: props.modelValue.parent_recipe_id || props.modelValue.recipe_id,
-    coverImg: props.modelValue.coverImg,
+    ...m,
+    // 1. 小卡標題：顯示「改編標題」(例如：低脂版)
+    title: m.adapt_title || m.title || '未命名改編',
+
+    // 2. 小卡第二列 (關鍵更改)：顯示「改編心得」
+    // ✨ 這裡是為了讓 AdaptRecipeCard 的 input 顯示心得
+    summary: m.adapt_description || '',
+    description: m.adapt_description || '',
+
+    // 3. ✨ 這是最重要的！為了讓「燈箱」能抓到說明：
+    // 我們必須保留一個乾淨的欄位給燈箱的 introData 使用
+    // 這裡把灰框框下面的那個「詳細說明」欄位存進 recipe_descreption
+    recipe_descreption: m.description || '暫無詳細說明',
+
+    // 基礎資訊
+    recipe_id: m.parent_recipe_id || m.recipe_id,
+    coverImg: m.adaptation_image_url || m.coverImg,
+    adaptation_title: m.adapt_title,
+    adaptation_note: m.adapt_description
   };
 });
 
@@ -80,9 +128,8 @@ const handleCoverUpload = (e) => {
 
     <template v-if="isAdaptMode">
       <div class="adapt-card-section">
-        <div class="adapt-card-wrapper" @click="isEditing && $refs.fileInput.click()"
-          :style="{ cursor: isEditing ? 'pointer' : 'default' }">
-          <AdaptRecipeCard :recipe="adaptRecipeData" />
+        <div class="adapt-card-wrapper" :style="{ cursor: isEditing ? 'pointer' : 'default' }">
+          <AdaptRecipeCard :recipe="adaptRecipeData" :readonly="!isEditing" @upload-image="handleUploadClick" />
         </div>
         <BaseBtn title="查看原始食譜詳情" variant="outline" :width="320" @click="goToOriginal" class="back-original-btn" />
       </div>
@@ -91,7 +138,7 @@ const handleCoverUpload = (e) => {
     <template v-else>
       <div class="cover-section" :class="{ 'has-image': modelValue.coverImg }"
         :style="{ backgroundImage: modelValue.coverImg ? `url(${modelValue.coverImg})` : '' }"
-        @click="isEditing && $refs.fileInput.click()">
+        @click="isEditing && fileInput.click()">
         <div v-if="!modelValue.coverImg" class="upload-placeholder">
           <div class="placeholder-content">
             <span class="plus-icon">+</span>
@@ -169,20 +216,20 @@ const handleCoverUpload = (e) => {
   flex-direction: column;
   gap: 16px;
   align-items: center;
-  width: 100%; // 手機版撐滿
+  width: 100%;
 
   @media (min-width: 768px) {
-    width: 320px; // 電腦版維持寬度
+    width: 320px;
   }
 }
 
 .back-original-btn {
-  width: 100%; // 手機版預設寬度
-  margin-top: 16px; // 手機版間距小一點
+  width: 100%;
+  margin-top: 16px;
 
   @media (min-width: 768px) {
     width: 320px;
-    margin-top: 60px; // 桌機版恢復 60px 間距
+    margin-top: 60px;
   }
 }
 
@@ -272,12 +319,6 @@ const handleCoverUpload = (e) => {
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
-
-  &.readonly-overlay {
-    pointer-events: auto;
-    user-select: none;
-    cursor: default;
-  }
 }
 
 .cover-section {

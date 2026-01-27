@@ -9,14 +9,20 @@ const props = defineProps({
         type: Object,
         required: true
     },
-    // 新增：接收預覽模式狀態
+    // 用於原本的預覽模式判斷
     isPreview: {
+        type: Boolean,
+        default: false
+    },
+    // ✨ 新增：專門給「改編彈窗」使用的控制項
+    // 當這個值為 true 時，收藏與開始烹飪按鈕會被隱藏
+    hideActions: {
         type: Boolean,
         default: false
     }
 });
 
-// 「開始烹飪」按鈕跳轉邏輯
+// 「開始烹飪」按飪跳轉邏輯
 const router = useRouter(); //宣告 router 變數
 
 // 建立點擊跳轉函式
@@ -72,7 +78,7 @@ const onModalSubmit = (data) => {
                 </div>
             </div>
 
-            <div v-if="!props.isPreview" class="badge-favorite" :class="{ active: isFavorited }"
+            <div v-if="!props.isPreview && !props.hideActions" class="badge-favorite" :class="{ active: isFavorited }"
                 @click="toggleFavorite">
 
                 <i-material-symbols-favorite-outline-rounded v-if="!isFavorited" />
@@ -109,7 +115,8 @@ const onModalSubmit = (data) => {
             </div>
 
             <div class="info-right">
-                <BaseBtn v-if="!props.isPreview" title="開始烹飪" class="cook-btn" @click="handleStartCooking" />
+                <BaseBtn v-if="!props.isPreview && !props.hideActions" title="開始烹飪" class="cook-btn"
+                    @click="handleStartCooking" />
             </div>
         </div>
 
@@ -123,12 +130,10 @@ const onModalSubmit = (data) => {
     </div>
 </template>
 
-
-
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-// --- 圖片容器 ---
+// --- 樣式部分完全沒動 ---
 .image-box {
     position: relative;
     border-radius: 10px;
@@ -184,11 +189,10 @@ const onModalSubmit = (data) => {
     }
 
     &.active {
-        color: $secondary-color-danger-700; // 紅色
+        color: $secondary-color-danger-700;
     }
 }
 
-// --- 資訊列佈局 ---
 .info-bar {
     display: flex;
     justify-content: space-between;

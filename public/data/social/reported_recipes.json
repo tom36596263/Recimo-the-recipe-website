@@ -1,0 +1,35 @@
+[
+  {
+    "REPORTED_RECIPE_ID": 1,
+    "RECIPE_ID": 6,
+    "REPORTER_ID": 45,
+    "REPORT_TYPE": 2,
+    "REPORT_REASON": "關於荷蘭醬的製作步驟，文中提到的攪拌溫度與實際操作有落差，容易導致油水分離，建議官方確認步驟描述。",
+    "STATUS": 0,
+    "HANDLER_ID": null,
+    "REPORTED_AT": "2026-01-20 14:00:00",
+    "UPDATE_AT": null
+  },
+  {
+    "REPORTED_RECIPE_ID": 2,
+    "RECIPE_ID": 11,
+    "REPORTER_ID": 33,
+    "REPORT_TYPE": 1,
+    "REPORT_REASON": "食譜下方的關聯商品連結點開後跳出大量與食譜無關的抽獎廣告，懷疑連結安全性。",
+    "STATUS": 0,
+    "HANDLER_ID": null,
+    "REPORTED_AT": "2026-01-22 16:20:00",
+    "UPDATE_AT": null
+  },
+  {
+    "REPORTED_RECIPE_ID": 3,
+    "RECIPE_ID": 14,
+    "REPORTER_ID": 18,
+    "REPORT_TYPE": 4,
+    "REPORT_REASON": "這道豆腐漢堡排的分類似乎放錯了，標籤標示為全素，但食材內含有豬絞肉，請官方修正分類。",
+    "STATUS": 0,
+    "HANDLER_ID": null,
+    "REPORTED_AT": "2026-01-25 09:30:00",
+    "UPDATE_AT": null
+  }
+]

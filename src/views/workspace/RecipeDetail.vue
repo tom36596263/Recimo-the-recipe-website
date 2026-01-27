@@ -18,7 +18,6 @@ const route = useRoute();
 const router = useRouter();
 const recipeStore = useRecipeStore();
 
-// --- 核心變數：讀取 Vite 的 Base 路徑 ---
 const baseUrl = import.meta.env.BASE_URL;
 
 // --- 1. 響應式資料狀態 ---
@@ -27,6 +26,7 @@ const rawIngredients = ref([]);
 const rawSteps = ref([]);
 const rawComments = ref([]);
 const rawGallery = ref([]);
+const rawUsers = ref([]);
 const servings = ref(1);
 const isLoading = ref(true);
 
@@ -70,73 +70,73 @@ const toggleWorkspaceTopBar = (show) => {
 // --- 3. fetchData 核心邏輯 ---
 const fetchData = async () => {
     isLoading.value = true;
-    rawRecipe.value = null;
-    rawIngredients.value = [];
-    rawSteps.value = [];
-
     const recipeId = Number(route.params.id);
 
-    // 處理預覽模式
     if (isPreviewMode.value) {
         const preview = recipeStore.previewData;
         if (preview) {
             rawRecipe.value = preview;
             rawIngredients.value = preview.ingredients || [];
             rawSteps.value = preview.steps || [];
-            rawComments.value = [];
-            rawGallery.value = preview.gallery || []; // 支援預覽中的成品照
+            rawGallery.value = preview.gallery || [];
             setTimeout(() => { isLoading.value = false; }, 300);
             return;
-        } else {
-            router.replace('/workspace/edit-recipe');
-            return;
         }
+        router.replace('/workspace/edit-recipe');
+        return;
     }
 
-    recipeStore.previewData = null;
-
     try {
-        const [resR, resRecipeIng, resIngMaster, resS, resC, resG] = await Promise.all([
+        const [resR, resRecipeIng, resIngMaster, resS, resC, resG, resU] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_ingredient.json'),
             publicApi.get('data/recipe/ingredients.json'),
             publicApi.get('data/recipe/steps.json'),
             publicApi.get('data/social/comments.json'),
-            publicApi.get('data/social/gallery.json')
+            publicApi.get('data/social/gallery.json'),
+            publicApi.get('data/user/users.json')
         ]);
 
-        const found = resR.data.find(r => Number(r.recipe_id) === recipeId);
-        if (!found) {
-            rawRecipe.value = null;
+        rawUsers.value = resU.data || [];
+        const recipes = resR.data || [];
+        rawRecipe.value = recipes.find(r => Number(r.recipe_id || r.RECIPE_ID) === recipeId);
+
+        if (!rawRecipe.value) {
+            console.warn(`找不到食譜 ID: ${recipeId}`);
+            isLoading.value = false;
             return;
         }
-        rawRecipe.value = found;
 
-        const filteredLinks = resRecipeIng.data.filter(i => Number(i.recipe_id) === recipeId);
+        // 留言過濾：同時檢查大寫 RECIPE_ID 與小寫 recipe_id
+        rawComments.value = (resC.data || []).filter(c =>
+            Number(c.RECIPE_ID || c.recipe_id) === recipeId
+        );
+
+        rawGallery.value = (resG.data || []).filter(g =>
+            Number(g.RECIPE_ID || g.recipe_id) === recipeId
+        );
+
+        const masterIng = resIngMaster.data || [];
+        const recipeIng = resRecipeIng.data || [];
+        const filteredLinks = recipeIng.filter(i => Number(i.recipe_id || i.RECIPE_ID) === recipeId);
+
         rawIngredients.value = filteredLinks.map(link => {
-            const masterInfo = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
+            const master = masterIng.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
             return {
                 ...link,
-                ingredient_name: masterInfo?.ingredient_name || `食材 ID: ${link.ingredient_id}`,
-                calories_per_100g: masterInfo?.kcal_per_100g || 0,
-                protein_per_100g: masterInfo?.protein_per_100g || 0,
-                fat_per_100g: masterInfo?.fat_per_100g || 0,
-                carbs_per_100g: masterInfo?.carbs_per_100g || 0,
-                unit_name: link.unit_name || masterInfo?.unit_name || '份',
-                note: link.remark || ''
+                ingredient_name: master?.ingredient_name || `未知食材`,
+                unit_name: link.unit_name || master?.unit_name || '份'
             };
         });
 
-        rawSteps.value = resS.data.filter(s => Number(s.recipe_id) === recipeId)
+        const steps = resS.data || [];
+        rawSteps.value = steps.filter(s => Number(s.recipe_id || s.RECIPE_ID) === recipeId)
             .sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
 
-        rawComments.value = resC.data.filter(c => Number(c.RECIPE_ID) === recipeId);
-        const galleryRaw = resG.data.data || resG.data;
-        rawGallery.value = galleryRaw.filter(g => Number(g.RECIPE_ID) === recipeId);
         servings.value = 1;
 
     } catch (err) {
-        console.error('API 讀取失敗：', err);
+        console.error('資料讀取出錯:', err);
     } finally {
         setTimeout(() => { isLoading.value = false; }, 100);
     }
@@ -152,9 +152,8 @@ onUnmounted(() => { toggleWorkspaceTopBar(true); });
 watch(() => isPreviewMode.value, (newVal) => { toggleWorkspaceTopBar(!newVal); });
 watch(() => [route.params.id, route.query.mode], () => { fetchData(); }, { deep: true });
 
-// --- 4. 計算屬性 (關鍵路徑修復) ---
+// --- 4. 計算屬性 (防禦性強化) ---
 
-// 1. 食譜封面圖
 const recipeIntroData = computed(() => {
     if (!rawRecipe.value) return null;
     let rawImg = rawRecipe.value.recipe_image_url || rawRecipe.value.coverImg || rawRecipe.value.recipe_cover_image || '';
@@ -172,21 +171,20 @@ const recipeIntroData = computed(() => {
     }
 
     return {
-        id: rawRecipe.value.recipe_id || route.params.id, // 為了帶著食譜id進入步驟播放頁而加的
-        title: rawRecipe.value.recipe_title || rawRecipe.value.title || '未命名食譜',
+        id: rawRecipe.value.recipe_id || rawRecipe.value.RECIPE_ID || route.params.id,
+        title: rawRecipe.value.recipe_title || rawRecipe.value.title || rawRecipe.value.RECIPE_TITLE || '未命名食譜',
         image: finalImg,
-        time: formatTime(rawRecipe.value.recipe_total_time),
-        difficulty: rawRecipe.value.recipe_difficulty || rawRecipe.value.difficulty || 1,
-        description: rawRecipe.value.recipe_descreption || rawRecipe.value.recipe_description || rawRecipe.value.description || '暫無簡介'
+        time: formatTime(rawRecipe.value.recipe_total_time || rawRecipe.value.RECIPE_TOTAL_TIME),
+        difficulty: rawRecipe.value.recipe_difficulty || rawRecipe.value.RECIPE_DIFFICULTY || 1,
+        description: rawRecipe.value.recipe_descreption || rawRecipe.value.recipe_description || rawRecipe.value.RECIPE_DESCRIPTION || '暫無簡介'
     };
 });
 
-// 2. 步驟圖
 const stepsData = computed(() => {
     if (!rawSteps.value || rawSteps.value.length === 0) return [];
-    const rId = rawRecipe.value?.recipe_id || route.params.id || '0';
+    const rId = rawRecipe.value?.recipe_id || rawRecipe.value?.RECIPE_ID || route.params.id || '0';
     return rawSteps.value.map((s, index) => {
-        let rawImg = s.step_image_url || s.image || s.img || '';
+        let rawImg = s.step_image_url || s.image || s.img || s.STEP_IMAGE_URL || '';
         let finalImg = '';
         if (rawImg && typeof rawImg === 'string' && rawImg.length > 0) {
             if (rawImg.startsWith('data:') || rawImg.startsWith('http') || rawImg.startsWith('blob:')) {
@@ -201,19 +199,18 @@ const stepsData = computed(() => {
             }
         }
         return {
-            id: s.step_id || s.id || `s-${index}`,
-            title: s.step_title || s.title || `步驟 ${index + 1}`,
-            content: s.step_content || s.content || s.text || '',
+            id: s.step_id || s.id || s.STEP_ID || `s-${index}`,
+            title: s.step_title || s.title || s.STEP_TITLE || `步驟 ${index + 1}`,
+            content: s.step_content || s.content || s.text || s.STEP_CONTENT || '',
             image: finalImg,
-            time: s.step_total_time || s.time || '',
+            time: s.step_total_time || s.time || s.STEP_TOTAL_TIME || '',
             tags: s.tags || []
         };
     });
 });
 
-// 3. 成品照
 const snapsData = computed(() => rawGallery.value.map(g => {
-    let rawUrl = g.GALLERY_URL || g.url || '';
+    let rawUrl = g.GALLERY_URL || g.url || g.gallery_url || '';
     let finalUrl = '';
     if (rawUrl.startsWith('http') || rawUrl.startsWith('data:') || rawUrl.startsWith('blob:')) {
         finalUrl = rawUrl;
@@ -223,11 +220,10 @@ const snapsData = computed(() => rawGallery.value.map(g => {
     }
     return {
         url: finalUrl,
-        comment: g.GALLERY_TEXT || g.comment || ''
+        comment: g.GALLERY_TEXT || g.comment || g.gallery_text || ''
     };
 }));
 
-// --- 5. 其他工具函式與計算屬性 ---
 const formatTime = (timeVal) => {
     if (!timeVal || timeVal === '00:00' || timeVal === 0) return '0 分鐘';
     const timeStr = String(timeVal);
@@ -241,10 +237,11 @@ const formatTime = (timeVal) => {
 };
 
 const ingredientsData = computed(() => rawIngredients.value.map(item => ({
-    INGREDIENT_NAME: item.ingredient_name,
-    amount: item.amount,
-    unit_name: item.unit_name,
-    note: item.note || '',
+    INGREDIENT_NAME: item.ingredient_name || item.INGREDIENT_NAME || '未知食材',
+    amount: item.amount || item.AMOUNT || 0,
+    unit_name: item.unit_name || item.UNIT_NAME || '份',
+    // 修正這裡：加入 item.remark
+    note: item.remark || item.note || item.NOTE || '',
     calories_per_100g: item.calories_per_100g || 0,
     protein_per_100g: item.protein_per_100g || 0,
     fat_per_100g: item.fat_per_100g || 0,
@@ -255,24 +252,39 @@ const ingredientsData = computed(() => rawIngredients.value.map(item => ({
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value) return [];
     return [{
-        calories_per_100g: rawRecipe.value.recipe_kcal_per_100g || 0,
-        protein_per_100g: rawRecipe.value.recipe_protein_per_100g || 0,
-        fat_per_100g: rawRecipe.value.recipe_fat_per_100g || 0,
-        carbs_per_100g: rawRecipe.value.recipe_carbs_per_100g || 0,
+        calories_per_100g: rawRecipe.value.recipe_kcal_per_100g || rawRecipe.value.RECIPE_KCAL_PER_100G || 0,
+        protein_per_100g: rawRecipe.value.recipe_protein_per_100g || rawRecipe.value.RECIPE_PROTEIN_PER_100G || 0,
+        fat_per_100g: rawRecipe.value.recipe_fat_per_100g || rawRecipe.value.RECIPE_FAT_PER_100G || 0,
+        carbs_per_100g: rawRecipe.value.recipe_carbs_per_100g || rawRecipe.value.RECIPE_CARBS_PER_100G || 0,
         amount: 100,
         unit_weight: 1
     }];
 });
 
+// 最終極防禦：留言列表對接
 const commentList = computed(() => {
-    return rawComments.value.map(c => ({
-        userName: c.USER_NAME,
-        handle: `user_${c.USER_ID}`,
-        time: c.COMMENT_AT,
-        content: c.COMMENT_TEXT,
-        avatar: c.USER_URL || 'https://i.pravatar.cc/150',
-        likes: Math.floor(Math.random() * 50)
-    }));
+    if (!rawComments.value || rawComments.value.length === 0) return [];
+
+    return rawComments.value.map(c => {
+        const userId = Number(c.USER_ID || c.user_id);
+        // 在 Users 中找人，同時防禦大小寫
+        const user = rawUsers.value.find(u => Number(u.USER_ID || u.user_id) === userId);
+
+        let avatar = 'https://i.pravatar.cc/150?u=' + userId;
+        const rawAvatar = user?.USER_URL || user?.user_url;
+        if (rawAvatar) {
+            avatar = rawAvatar.startsWith('http') ? rawAvatar : `${baseUrl}/${rawAvatar.replace(/^\//, '')}`.replace(/\/+/g, '/');
+        }
+
+        return {
+            userName: user?.USER_NAME || user?.user_name || 'Recimo 用戶',
+            handle: `user_${userId}`,
+            time: c.COMMENT_AT || c.comment_at || '剛剛',
+            content: c.COMMENT_TEXT || c.comment_text || '',
+            avatar: avatar,
+            likes: c.LIKE_COUNT || c.likes || c.LIKES || 0
+        };
+    });
 });
 
 const baseRecipeLikes = ref(0);
@@ -347,7 +359,7 @@ const onReportSubmit = (data) => {
 
                     <div v-if="!isPreviewMode" class="adapt-btn-wrapper">
                         <router-link :to="`/workspace/modify-recipe/${rawRecipe.recipe_id}`">
-                            <BaseBtn title="改編集+" variant="outline" height="40" class="w-auto" />
+                            <BaseBtn title="改編一覽" variant="outline" height="40" class="w-auto" />
                         </router-link>
                     </div>
                 </div>

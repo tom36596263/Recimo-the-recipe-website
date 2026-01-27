@@ -1,58 +1,43 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
-const faqs = ref([
-    {
-    category: 'Recimo商城',
-    questions: [
-        {
-            q: 'Recimo 商城賣什麼？與食譜有什麼關係？',
-            a: '我們專門販售由「官方食譜」轉化而成的即食料理包。您可以將其視為食譜的實體縮影，讓您省去備料繁瑣，在家也能快速還原與官方食譜一模一樣的美味。',
-            isOpen: false
-        },
-        {
-            q: '下單後多久會出貨？',
-            a: '待管理員在後台確認訂單後，通常於 1-2 個工作天內完成備貨並出貨。出貨後，您會收到「商品運送進度通知」。',
-            isOpen: false
-        },
-        {
-            q: '如果收到料理包後發現品質有問題該怎麼辦？',
-            a: '請立即拍照並透過網站的「聯絡我們表單」反映。管理員會在後台查看您的訂單詳情並進行售後處理。',
-            isOpen: false
-        }
-    ]
-    },
-    {
-        category: 'Recimo功能',
-        questions: [
-        {
-            q: '沒登入可以使用網站嗎？',
-            a: '未登入狀態下，您可以瀏覽「食譜總覽」並使用「靈感廚房」小遊戲。但若要使用個人筆記、備餐計畫，則需註冊 Recimo ID。',
-            isOpen: false
-        },
-        {
-            q: '可以把別人食譜排進「備餐計劃」嗎？',
-            a: '可以，只需點擊食譜下方的「加入收藏」，即可在行事曆介面中拖曳排入。',
-            isOpen: false
-        }
-        ]
-    },
-    {
-        category: '食譜與社群',
-        questions: [
-        {
-            q: '可以怎麼「改編食譜」？',
-            a: '當您參考官方食譜想加入自己的創意時，可以點擊食譜內頁的「筆/編輯食譜/改編食譜」的按鈕，進行編輯。不必擔心會修改到官方食譜，系統會保留原食譜，完成改編後您的改編食譜會上傳至原食譜內頁中「改編輯」內。',
-            isOpen: false
-        },
-        {
-            q: '留言被檢舉會發生什麼事？',
-            a: '若留言違反社群守則並經管理員審核屬實，該留言將被移除，您也會在登入後頁面中的「小鈴鐺」收到通知。',
-            isOpen: false
-        }
-        ]
+// 1. 初始化 faqs 為空陣列
+const faqs = ref([]);
+
+// 2. 建立獲取資料的函式
+const fetchFaqs = async () => {
+    try {
+        // 因為檔案在 public 底下，路徑直接寫 /data/... 即可
+        const response = await fetch('/data/others/faqs.json');
+        const data = await response.json();
+
+        // 3. 處理資料格式
+        // 由於資料庫匯出的 JSON 是扁平的，但你的 Template 需要「按類別分組」
+        // 我們要在前端做一次 Group By 轉換
+        const grouped = data.reduce((acc, item) => {
+            let category = acc.find(c => c.category === item.FAQ_TYPE);
+            if (!category) {
+                category = { category: item.FAQ_TYPE, questions: [] };
+                acc.push(category);
+            }
+            category.questions.push({
+                q: item.FAQ_TITLE,
+                a: item.FAQ_ANSWER,
+                isOpen: false // 這裡手動補上 UI 狀態
+            });
+            return acc;
+        }, []);
+
+        faqs.value = grouped;
+    } catch (error) {
+        console.error('讀取 FAQ 失敗:', error);
     }
-]);
+};
+
+// 4. 元件掛載時執行
+onMounted(() => {
+    fetchFaqs();
+});
 
 const toggleFaq = (targetQuestion) => {
     targetQuestion.isOpen = !targetQuestion.isOpen;
