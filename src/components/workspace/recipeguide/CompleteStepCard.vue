@@ -1,28 +1,36 @@
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useCookingStore } from '@/stores/useCookingStore';
 
 const props = defineProps({
-    recipeId: {
-        type: Number,
-        required: true
-    }
+    recipeId: Number,
+    stepNotes: Object,
+    noteImages: Object
 });
 
-// 預設跳轉到評估日誌的路由路徑
-const logLink = computed(() => `/workspace/cooking-log/${props.recipeId}`);
+const router = useRouter();
+const cookingStore = useCookingStore();
+
+const handleComplete = () => {
+    // 1. 打包資料到 Store
+    cookingStore.setLogData(props.recipeId, props.stepNotes, props.noteImages);
+    // 2. 執行跳轉
+    router.push(`/workspace/cooking-log/${props.recipeId}`);
+};
 </script>
 
 <template>
-    <router-link :to="logLink" class="complete-card">
+    <div @click="handleComplete" class="complete-card">
         <div class="complete-card__icon">
             <i-material-symbols-check-circle-outline />
         </div>
         <div class="complete-card__text">
-            <span class="p-p1">製作完成</span>
+            <span class="p-p2">製作完成</span>
             <span class="p-p2">填寫本次烹飪評估</span>
         </div>
         <i-material-symbols-arrow-forward-ios-rounded class="complete-card__arrow" />
-    </router-link>
+    </div>
 </template>
 
 <style lang="scss" scoped>

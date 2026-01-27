@@ -1,5 +1,4 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
 import StepOrder from './StepOrder.vue';
 
 defineProps({
@@ -75,6 +74,7 @@ defineProps({
         width: 100%;
         display: flex;
         align-items: center;
+        gap: 10px;
     }
 
     &__step-desc {

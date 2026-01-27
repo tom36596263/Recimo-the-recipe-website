@@ -219,7 +219,7 @@ const handleFileUpload = (event) => {
                             :is-finished="stepTimers[step.step_id]?.isFinished"
                             :active-time="secondsToMinSec(stepTimers[step.step_id]?.timeLeft || 0)"
                             @click="changeStep(index)" />
-                        <CompleteStepCard :recipe-id="recipeId" />
+                        <CompleteStepCard :recipe-id="recipeId" :step-notes="stepNotes" :note-images="noteImages" />
                     </div>
                 </div>
             </aside>
@@ -269,6 +269,13 @@ const handleFileUpload = (event) => {
         justify-content: center;
         align-items: center;
         overflow: hidden;
+    }
+
+    .preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
     }
 
     // sidebar區
