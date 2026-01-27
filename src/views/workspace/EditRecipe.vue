@@ -31,13 +31,17 @@ const recipeForm = ref({
   adapt_description: ''
 });
 
-// 自動計算步驟總時間邏輯
+// 父組件的 watch 改成這樣比較安全
 watch(
   () => recipeForm.value.steps,
   (newSteps) => {
     if (!newSteps) return;
+
+    // 計算總時間
     const newSum = newSteps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
-    if (!recipeForm.value.totalTime || recipeForm.value.totalTime == 0) {
+
+    // 只有在時間真的不一樣時才更新，避免觸發不必要的父組件重新渲染
+    if (recipeForm.value.totalTime !== newSum) {
       recipeForm.value.totalTime = newSum;
     }
   },

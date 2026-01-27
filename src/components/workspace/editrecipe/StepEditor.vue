@@ -1,23 +1,104 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import draggable from 'vuedraggable';
 
 const props = defineProps(['steps', 'ingredients', 'isEditing']);
-const activeStepId = ref(null);
+const emit = defineEmits(['update:steps']);
 
+// --- ✨ 關鍵修正 1：建立本地副本，並與父組件隔離 ---
+const localSteps = ref([]);
+
+// 監控 props.steps，只有在「內容真正改變」時才更新本地副本，防止遞迴
+watch(() => props.steps, (newVal) => {
+  if (!newVal) return;
+
+  const newStr = JSON.stringify(newVal);
+  const oldStr = JSON.stringify(localSteps.value);
+
+  // 只有當父組件傳入的資料跟本地不一樣時（例如 API 剛載入），才更新 localSteps
+  if (newStr !== oldStr) {
+    localSteps.value = JSON.parse(newStr);
+  }
+}, { immediate: true, deep: true });
+
+// 監控 localSteps，當本地改動時同步回父組件
+watch(localSteps, (newVal) => {
+  const newStr = JSON.stringify(newVal);
+  const oldStr = JSON.stringify(props.steps);
+
+  // 防止回傳一模一樣的資料觸發父組件更新
+  if (newStr !== oldStr) {
+    emit('update:steps', JSON.parse(newStr));
+  }
+}, { deep: true });
+
+const activeStepId = ref(null);
 const showTimerPop = ref(false);
 const showIngPop = ref(false);
 const popStyle = ref({ top: '0px', left: '0px', position: 'fixed' });
 
-// --- ✨ 圖片解析 ---
+const addStep = () => {
+  const newStep = {
+    id: 's' + Date.now(),
+    title: '',
+    content: '',
+    image: null,
+    time: null,
+    tags: []
+  };
+
+  // ✅ 只修改本地副本，watch 會自動 emit 給父組件
+  localSteps.value.push(newStep);
+};
+
+const removeStep = (id) => {
+  // ✅ 使用 filter 產生新陣列，觸發響應
+  localSteps.value = localSteps.value.filter(s => (s.id !== id && s.step_id !== id));
+};
+
+const getActiveStep = () => {
+  if (activeStepId.value === null) return null;
+  return localSteps.value.find(s => (s.id === activeStepId.value || s.step_id === activeStepId.value));
+};
+
+const openPop = (e, stepId, type) => {
+  if (!props.isEditing) return;
+  activeStepId.value = stepId;
+  const rect = e.currentTarget.getBoundingClientRect();
+  popStyle.value = {
+    top: `${rect.bottom + 8}px`,
+    left: `${rect.left}px`,
+    position: 'fixed',
+    zIndex: 9999
+  };
+
+  if (type === 'timer') {
+    showTimerPop.value = true;
+    showIngPop.value = false;
+  } else {
+    showIngPop.value = true;
+    showTimerPop.value = false;
+  }
+  toggleBodyScroll(true);
+};
+
+const toggleTag = (step, ingId) => {
+  if (!step) return;
+  if (!step.tags) step.tags = [];
+  const index = step.tags.indexOf(ingId);
+  if (index === -1) {
+    step.tags.push(ingId);
+  } else {
+    step.tags.splice(index, 1);
+  }
+};
+
 const getStepImage = (step) => {
-  if (!step) return null;
+  if (!step || !step.image) return null;
   const imgSource = step.image;
-  if (imgSource && typeof imgSource === 'string' && imgSource.trim().length > 0) {
+  if (typeof imgSource === 'string' && imgSource.trim().length > 0) {
     if (imgSource.startsWith('data:') || imgSource.startsWith('http')) return imgSource;
-    let path = imgSource.trim();
-    if (!path.startsWith('/') && !path.startsWith('.')) path = `/${path}`;
-    return path;
+    return imgSource.startsWith('/') || imgSource.startsWith('.') ? imgSource : `/${imgSource}`;
   }
   return null;
 };
@@ -29,45 +110,13 @@ const handleImgError = (e) => {
     return;
   }
   img.dataset.tried = 'true';
-  const currentSrc = img.src;
-  if (currentSrc.toLowerCase().endsWith('.png')) img.src = currentSrc.replace(/\.png$/i, '.jpg');
-  else if (currentSrc.toLowerCase().endsWith('.jpg')) img.src = currentSrc.replace(/\.jpg$/i, '.png');
-  else img.src = 'https://placehold.co/150x120?text=No+Image';
+  img.src = img.src.toLowerCase().endsWith('.png') ? img.src.replace(/\.png$/i, '.jpg') : img.src.replace(/\.jpg$/i, '.png');
 };
 
 const toggleBodyScroll = (isLock) => {
-  if (isLock) {
-    const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = 'hidden';
-    document.body.style.paddingRight = `${scrollBarWidth}px`;
-  } else {
-    document.body.style.overflow = '';
-    document.body.style.paddingRight = '';
-  }
-};
-
-const addStep = () => {
-  props.steps.push({
-    id: 's' + Date.now(),
-    title: '',
-    content: '',
-    image: null,
-    time: null,
-    tags: []
-  });
-};
-
-const removeStep = (id) => {
-  const index = props.steps.findIndex(s => (s.id || s.step_id) === id);
-  if (index !== -1) props.steps.splice(index, 1);
-};
-
-const toggleTag = (step, ingId) => {
-  if (!step) return;
-  if (!step.tags) step.tags = [];
-  const index = step.tags.indexOf(ingId);
-  if (index === -1) step.tags.push(ingId);
-  else step.tags.splice(index, 1);
+  const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+  document.body.style.overflow = isLock ? 'hidden' : '';
+  document.body.style.paddingRight = isLock ? `${scrollBarWidth}px` : '';
 };
 
 const uploadStepImg = (step) => {
@@ -82,19 +131,9 @@ const uploadStepImg = (step) => {
     reader.onload = (f) => {
       step.image = f.target.result;
     };
-    reader.readAsDataURL(file); // ✨ 這裡已修復
+    reader.readAsDataURL(file);
   };
   input.click();
-};
-
-const openPop = (e, stepId, type) => {
-  if (!props.isEditing) return;
-  activeStepId.value = stepId;
-  const rect = e.currentTarget.getBoundingClientRect();
-  popStyle.value = { top: `${rect.bottom + 8}px`, left: `${rect.left}px`, position: 'fixed', zIndex: 9999 };
-  if (type === 'timer') { showTimerPop.value = true; showIngPop.value = false; }
-  else { showIngPop.value = true; showTimerPop.value = false; }
-  toggleBodyScroll(true);
 };
 
 const closePops = () => {
@@ -102,8 +141,6 @@ const closePops = () => {
   showIngPop.value = false;
   toggleBodyScroll(false);
 };
-
-const getActiveStep = () => props.steps.find(s => (s.id || s.step_id) === activeStepId.value);
 
 onMounted(() => window.addEventListener('click', closePops));
 onUnmounted(() => {
@@ -118,7 +155,7 @@ onUnmounted(() => {
       <h2 class="header-title zh-h4-bold">烹飪步驟</h2>
     </div>
 
-    <draggable :list="steps" class="step-list" handle=".drag-dots" item-key="id" :disabled="!isEditing"
+    <draggable :list="localSteps" class="step-list" handle=".drag-dots" item-key="id" :disabled="!isEditing"
       ghost-class="ghost-step" animation="300">
       <template #item="{ element: step, index: idx }">
         <div class="step-item-outer">
