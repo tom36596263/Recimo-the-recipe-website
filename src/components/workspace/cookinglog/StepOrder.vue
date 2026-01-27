@@ -19,9 +19,11 @@ defineProps({
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: $primary-color-100;
-    color: $primary-color-700;
+    background-color: $neutral-color-white;
+    color: $primary-color-800;
+    border: 1px solid $primary-color-800;
     border-radius: 10px;
     flex-shrink: 0;
+    cursor: pointer;
 }
 </style>
