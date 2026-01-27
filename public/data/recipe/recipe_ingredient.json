@@ -6,25 +6,25 @@
     "amount": 250.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "中粉過篩後備用，可確保麵糰口感更細緻"
+    "remark": "選用蛋白質含量 12% 以上的高粉，能揉出具延展性的薄脆餅皮"
   },
   {
     "recipe_ingredient_id": 2,
     "recipe_id": 1,
-    "ingredient_id": 496,
+    "ingredient_id": 497,
     "amount": 3.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "不可直接與鹽接觸以免脫水失效，建議先溶於溫水"
   },
   {
     "recipe_ingredient_id": 3,
     "recipe_id": 1,
-    "ingredient_id": 497,
+    "ingredient_id": 496,
     "amount": 150.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": "常溫水即可，若冬天可使用微溫水幫助發酵"
+    "remark": "使用 35-40°C 溫水可加速酵母活性，發酵效果更佳"
   },
   {
     "recipe_ingredient_id": 4,
@@ -33,7 +33,7 @@
     "amount": 10.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "加入麵糰中可增加香氣並讓烤出來的餅皮外酥內軟"
   },
   {
     "recipe_ingredient_id": 5,
@@ -51,7 +51,7 @@
     "amount": 125.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "置於室溫完全軟化，直到手指可輕鬆壓下的程度"
+    "remark": "切成 1 公分厚圓片，烤後會呈現半融化的乳白色圓點"
   },
   {
     "recipe_ingredient_id": 7,
@@ -60,7 +60,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "均勻塗抹在餅皮中心，邊緣預留 2 公分不塗抹以利膨起"
   },
   {
     "recipe_ingredient_id": 8,
@@ -69,7 +69,7 @@
     "amount": 10.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "出爐後再放上，可保留鮮綠色澤與清新的草本香氣"
   },
   {
     "recipe_ingredient_id": 9,
@@ -78,7 +78,7 @@
     "amount": 5.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "最後淋上特級初榨等級，提升整體的風味層次"
   },
   {
     "recipe_ingredient_id": 10,
@@ -87,7 +87,7 @@
     "amount": 100.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "徹底洗淨並吸乾水分，避免影響風味"
+    "remark": "選用可可脂含量較高的白巧，熔岩效果會更滑順流動"
   },
   {
     "recipe_ingredient_id": 11,
@@ -96,7 +96,7 @@
     "amount": 60.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "與巧克力一同隔水加熱，注意溫度不可超過 50°C 以防變質"
   },
   {
     "recipe_ingredient_id": 12,
@@ -105,7 +105,7 @@
     "amount": 2.0,
     "unit_name": "顆",
     "is_modified": false,
-    "remark": ""
+    "remark": "需完全室溫，打發至顏色泛白且拉起有明顯摺疊痕跡"
   },
   {
     "recipe_ingredient_id": 13,
@@ -123,7 +123,7 @@
     "amount": 40.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "與抹茶粉一同過篩，用切拌法混合避免產生麩質"
   },
   {
     "recipe_ingredient_id": 15,
@@ -132,7 +132,7 @@
     "amount": 15.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "裝飾用，建議出餐前再撒上以維持視覺美感"
+    "remark": "選用無糖純抹茶粉，苦甜平衡是這道甜點的關鍵"
   },
   {
     "recipe_ingredient_id": 16,
@@ -141,7 +141,7 @@
     "amount": 300.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "均勻切塊，大小一致可確保烹飪時受熱均勻"
+    "remark": "去骨切成丁狀，醃漬時加入太白粉可鎖住肉汁維持滑嫩"
   },
   {
     "recipe_ingredient_id": 17,
@@ -150,7 +150,7 @@
     "amount": 15.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "剪段後先去除大部分辣椒籽，炒至深紅色微焦香氣最足"
   },
   {
     "recipe_ingredient_id": 18,
@@ -159,7 +159,7 @@
     "amount": 5.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "冷油下鍋小火煸香，聞到麻香味後需立刻下肉避免焦苦"
   },
   {
     "recipe_ingredient_id": 19,
@@ -168,7 +168,7 @@
     "amount": 30.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "必須使用已烘烤過的熟花生，在起鍋前加入以保持酥脆"
   },
   {
     "recipe_ingredient_id": 20,
@@ -177,7 +177,7 @@
     "amount": 20.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "切成約 2 公分長段，爆香後可提供辛甜風味"
   },
   {
     "recipe_ingredient_id": 21,
@@ -186,7 +186,7 @@
     "amount": 10.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "去皮切片，片狀厚度約 0.2 公分左右最佳"
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 22,
@@ -222,7 +222,7 @@
     "amount": 5.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "糖量稍多可增加醬汁黏稠度，並中和醋與辣椒的衝擊"
   },
   {
     "recipe_ingredient_id": 26,
@@ -231,7 +231,7 @@
     "amount": 5.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "調成薄芡水，讓宮保醬汁均勻吸附在雞丁表面"
   },
   {
     "recipe_ingredient_id": 27,
@@ -240,7 +240,7 @@
     "amount": 100.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "先充分浸泡軟化後再進行後續處理"
+    "remark": "寬麵面積大，能吸附更多松露奶油醬汁，口感最過癮"
   },
   {
     "recipe_ingredient_id": 28,
@@ -249,7 +249,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "切細末，可讓香味更容易融入醬汁"
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 29,
@@ -258,7 +258,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "切成厚片，乾煎至邊緣金黃微縮時香氣最濃"
   },
   {
     "recipe_ingredient_id": 30,
@@ -267,7 +267,7 @@
     "amount": 100.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "與煮麵水 1:1 混合熬煮，可使醬汁濃縮且不膩口"
   },
   {
     "recipe_ingredient_id": 31,
@@ -276,7 +276,7 @@
     "amount": 15.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "於醬汁收稠前加入，過早加熱會使松露香氣逸散"
   },
   {
     "recipe_ingredient_id": 32,
@@ -285,7 +285,7 @@
     "amount": 10.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "增加鹹鮮度與醬汁黏稠度，建議現刨口感更佳"
   },
   {
     "recipe_ingredient_id": 33,
@@ -303,7 +303,7 @@
     "amount": 15.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "起鍋前加入一塊冰奶油快速攪拌（Mounter au Beurre），可增加光澤"
   },
   {
     "recipe_ingredient_id": 35,
@@ -330,7 +330,7 @@
     "amount": 250.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "建議選用肉質結實的部位，燉煮後口感較佳"
+    "remark": "切成一口大小，吸飽椰奶與咖哩香氣後風味最佳"
   },
   {
     "recipe_ingredient_id": 38,
@@ -339,7 +339,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "需先與椰奶上層的厚脂肪部分炒出綠油香氣"
   },
   {
     "recipe_ingredient_id": 39,
@@ -348,7 +348,7 @@
     "amount": 400.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "建議選用高比例椰肉萃取的椰奶，口感更醇厚"
   },
   {
     "recipe_ingredient_id": 40,
@@ -357,7 +357,7 @@
     "amount": 200.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "切成滾刀塊，煮至稍微變色變軟即可，保留些許口感"
   },
   {
     "recipe_ingredient_id": 41,
@@ -366,7 +366,7 @@
     "amount": 15.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "提供鮮鹹層次，隨個人口味分次添加調整"
   },
   {
     "recipe_ingredient_id": 42,
@@ -375,7 +375,7 @@
     "amount": 20.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "椰糖的煙燻味與青咖哩非常契合，能讓辣度變溫潤"
   },
   {
     "recipe_ingredient_id": 43,
@@ -384,7 +384,7 @@
     "amount": 5.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "需手撕揉捏後再放入，才能徹底釋放核心香氣"
   },
   {
     "recipe_ingredient_id": 44,
@@ -393,7 +393,7 @@
     "amount": 10.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "最後加入，攪拌一下即熄火，保留辛香味"
   },
   {
     "recipe_ingredient_id": 45,
@@ -402,7 +402,7 @@
     "amount": 15.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "提味用，可依據個人口味調整最後灑上的份量"
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 46,
@@ -411,7 +411,7 @@
     "amount": 2.0,
     "unit_name": "個",
     "is_modified": false,
-    "remark": "選用新鮮度高的食材，成品香氣會更足"
+    "remark": "橫切後抹上少許奶油，烤至切面金黃酥脆後再鋪料"
   },
   {
     "recipe_ingredient_id": 47,
@@ -420,7 +420,7 @@
     "amount": 2.0,
     "unit_name": "顆",
     "is_modified": false,
-    "remark": ""
+    "remark": "製作水波蛋須選用極新鮮雞蛋，濃稠蛋白才不易散開"
   },
   {
     "recipe_ingredient_id": 48,
@@ -429,7 +429,7 @@
     "amount": 2.0,
     "unit_name": "片",
     "is_modified": false,
-    "remark": ""
+    "remark": "下鍋兩面微煎至邊緣微捲曲，增加煙燻焦香味"
   },
   {
     "recipe_ingredient_id": 49,
@@ -438,7 +438,7 @@
     "amount": 2.0,
     "unit_name": "個",
     "is_modified": false,
-    "remark": ""
+    "remark": "荷蘭醬靈魂食材，需維持在 60°C 左右隔水加熱以免變炒蛋"
   },
   {
     "recipe_ingredient_id": 50,
@@ -447,7 +447,7 @@
     "amount": 100.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "融化後緩慢滴入蛋黃液中，是完成絲滑乳化醬汁的關鍵"
   },
   {
     "recipe_ingredient_id": 51,
@@ -456,7 +456,7 @@
     "amount": 15.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "果酸能中和奶油的膩口，使荷蘭醬風味更輕盈"
   },
   {
     "recipe_ingredient_id": 52,
@@ -465,7 +465,7 @@
     "amount": 10.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "加入煮蛋水中，可幫助蛋白快速凝固，鎖住蛋黃"
   },
   {
     "recipe_ingredient_id": 53,
@@ -474,7 +474,7 @@
     "amount": 2.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "最後裝飾在頂部，提供微辛香氣與點睛的視覺紅點"
   },
   {
     "recipe_ingredient_id": 54,
@@ -492,7 +492,7 @@
     "amount": 1.0,
     "unit_name": "份",
     "is_modified": false,
-    "remark": "一人份基準，烹調前請先撥鬆以利均勻受熱"
+    "remark": "煮熟後務必徹底瀝乾水分，避免稀釋濃郁的豚骨湯頭"
   },
   {
     "recipe_ingredient_id": 56,
@@ -501,7 +501,7 @@
     "amount": 400.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "加熱至沸騰狀態後再倒入碗中，激發麵條與醬汁香氣"
   },
   {
     "recipe_ingredient_id": 57,
@@ -510,7 +510,7 @@
     "amount": 30.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "包含味醂與特製醬汁，決定了拉麵湯頭的鹹度基準"
   },
   {
     "recipe_ingredient_id": 58,
@@ -519,7 +519,7 @@
     "amount": 3.0,
     "unit_name": "片",
     "is_modified": false,
-    "remark": ""
+    "remark": "可在噴槍略微炙燒，帶出油脂焦香味"
   },
   {
     "recipe_ingredient_id": 59,
@@ -528,7 +528,7 @@
     "amount": 1.0,
     "unit_name": "顆",
     "is_modified": false,
-    "remark": ""
+    "remark": "對半切開，浸泡在熱湯中約 30 秒，半熟蛋黃口感最佳"
   },
   {
     "recipe_ingredient_id": 60,
@@ -537,7 +537,7 @@
     "amount": 2.0,
     "unit_name": "片",
     "is_modified": false,
-    "remark": ""
+    "remark": "垂直插入碗邊，保持酥脆避免過早泡軟"
   },
   {
     "recipe_ingredient_id": 61,
@@ -564,7 +564,7 @@
     "amount": 5.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "少許即可，主要用於提升顏色層次"
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 64,
@@ -573,7 +573,7 @@
     "amount": 200.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "選用當季新鮮品項，口感會更為鮮甜"
+    "remark": "必須煮至一捏即碎的程度，攪打出的泥才會絲滑無顆粒"
   },
   {
     "recipe_ingredient_id": 65,
@@ -582,7 +582,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "優質的 Tahini 能提供堅果乳脂感，是正統風味來源"
   },
   {
     "recipe_ingredient_id": 66,
@@ -600,7 +600,7 @@
     "amount": 1.0,
     "unit_name": "瓣",
     "is_modified": false,
-    "remark": "稍微拍碎，讓爆香時蒜油精華能快速釋放"
+    "remark": "事先切碎或壓泥，可避免攪打不均產生過重辛辣味"
   },
   {
     "recipe_ingredient_id": 68,
@@ -609,7 +609,7 @@
     "amount": 30.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "一邊攪打一邊細流加入，可幫助乳化使質地更輕盈"
   },
   {
     "recipe_ingredient_id": 69,
@@ -618,7 +618,7 @@
     "amount": 2.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "點綴中東異國風味的核心香料"
   },
   {
     "recipe_ingredient_id": 70,
@@ -632,11 +632,11 @@
   {
     "recipe_ingredient_id": 71,
     "recipe_id": 8,
-    "ingredient_id": 497,
+    "ingredient_id": 496,
     "amount": 20.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "建議加入 1-2 塊冰塊一同攪打，能讓豆泥顏色更潔白且質地細緻"
   },
   {
     "recipe_ingredient_id": 72,
@@ -645,7 +645,7 @@
     "amount": 3.0,
     "unit_name": "顆",
     "is_modified": false,
-    "remark": "使用常溫蛋，製作出的質地會更加穩定"
+    "remark": "需小火慢炒 30 分鐘以上至深褐色，釋放焦糖化後的濃縮甜味"
   },
   {
     "recipe_ingredient_id": 73,
@@ -654,7 +654,7 @@
     "amount": 500.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "濃郁的牛骨高湯能與洋蔥甜味完美契合，形成厚實層次"
   },
   {
     "recipe_ingredient_id": 74,
@@ -663,7 +663,7 @@
     "amount": 30.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "炒洋蔥時使用奶油能帶來更醇厚的奶香風味"
   },
   {
     "recipe_ingredient_id": 75,
@@ -672,7 +672,7 @@
     "amount": 50.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "用於 Deglazing（刮起鍋底精華），酸度能平衡焦糖甜味"
   },
   {
     "recipe_ingredient_id": 76,
@@ -681,7 +681,7 @@
     "amount": 4.0,
     "unit_name": "片",
     "is_modified": false,
-    "remark": ""
+    "remark": "切厚片稍微烤過，浮在湯面支撐起司不往下沉"
   },
   {
     "recipe_ingredient_id": 77,
@@ -690,7 +690,7 @@
     "amount": 40.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "此款起司風味濃郁且拉絲效果極佳，是法式經典選材"
   },
   {
     "recipe_ingredient_id": 78,
@@ -699,7 +699,7 @@
     "amount": 2.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "加入高湯同煮，提供迷人的清新草本後韻"
   },
   {
     "recipe_ingredient_id": 79,
@@ -726,7 +726,7 @@
     "amount": 10.0,
     "unit_name": "隻",
     "is_modified": false,
-    "remark": "去腸泥並保留尾部，不僅美觀且口感較乾淨"
+    "remark": "剪去鬚足並開背去腸泥，除了去腥也能讓醬汁更入味"
   },
   {
     "recipe_ingredient_id": 82,
@@ -744,7 +744,7 @@
     "amount": 30.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "奶油與蒜末在高溫烘烤下結合，產生濃郁乳香與辛香味"
   },
   {
     "recipe_ingredient_id": 84,
@@ -762,7 +762,7 @@
     "amount": 5.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "出爐前撒上，提供顏色對比並增加清新感"
   },
   {
     "recipe_ingredient_id": 86,
@@ -789,7 +789,7 @@
     "amount": 4.0,
     "unit_name": "角",
     "is_modified": false,
-    "remark": "上桌食用前再擠上新鮮汁液，可去腥提味"
+    "remark": "食用前再擠上少許，能瞬間提升海鮮的鮮甜層次"
   },
   {
     "recipe_ingredient_id": 89,
@@ -798,7 +798,7 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "切成長條狀，厚度約 1 公分最能保持彈性口感"
+    "remark": "抹鹽與胡椒後抽真空。60°C 舒肥可確保雞胸呈現如同火腿般的粉嫩多汁感"
   },
   {
     "recipe_ingredient_id": 90,
@@ -807,7 +807,7 @@
     "amount": 20.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "建議與白米一同浸泡 15 分鐘，煮後會散發淡淡堅果香"
   },
   {
     "recipe_ingredient_id": 91,
@@ -816,7 +816,7 @@
     "amount": 60.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "與藜麥比例約 3:1，是健康與口感兼具的最佳配比"
   },
   {
     "recipe_ingredient_id": 92,
@@ -825,7 +825,7 @@
     "amount": 80.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "滾水加鹽快速汆燙，取出後立刻冰鎮可保持顏色與脆度"
   },
   {
     "recipe_ingredient_id": 93,
@@ -870,7 +870,7 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "去除筋膜後切薄片，醃漬時會更入味"
+    "remark": "煎前務必用紙巾將魚皮水分吸乾。皮朝下冷鍋入油煎，才能烤出脆皮"
   },
   {
     "recipe_ingredient_id": 98,
@@ -879,7 +879,7 @@
     "amount": 80.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "糙米吸水較慢，建議洗米後先浸泡 2 小時以上，煮出來才不夾生"
   },
   {
     "recipe_ingredient_id": 99,
@@ -888,7 +888,7 @@
     "amount": 80.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "利用平底鍋中剩餘的鮭魚油翻炒，四季豆會帶有海鮮鮮味"
   },
   {
     "recipe_ingredient_id": 100,
@@ -915,7 +915,7 @@
     "amount": 1.0,
     "unit_name": "角",
     "is_modified": false,
-    "remark": "隨餐附上，可增加清爽度"
+    "remark": "食用前擠在鮭魚皮上，可解膩並讓香氣更立體"
   },
   {
     "recipe_ingredient_id": 103,
@@ -924,7 +924,7 @@
     "amount": 2.0,
     "unit_name": "片",
     "is_modified": false,
-    "remark": "確認已完全退冰，並抹乾表面水分"
+    "remark": "用肉鎚或刀背敲打，斷開筋膜能讓豬排口感軟嫩不縮水"
   },
   {
     "recipe_ingredient_id": 104,
@@ -933,7 +933,7 @@
     "amount": 100.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "冷凍毛豆仁需先退冰。快速與醃汁拌炒，保持豆仁翠綠與鮮甜"
   },
   {
     "recipe_ingredient_id": 105,
@@ -942,7 +942,7 @@
     "amount": 15.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "切成細末混入醃汁中，煎烤時會產生迷人的蒜香焦糖色"
   },
   {
     "recipe_ingredient_id": 106,
@@ -960,7 +960,7 @@
     "amount": 15.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "提供自然甜味與光澤感，能中和醬油的死鹹"
   },
   {
     "recipe_ingredient_id": 108,
@@ -987,7 +987,7 @@
     "amount": 1.0,
     "unit_name": "盒",
     "is_modified": false,
-    "remark": "切成約 2 公分正方塊，下鍋時動作輕巧避免破碎"
+    "remark": "板豆腐需重壓 20 分鐘瀝乾水分再捏碎，漢堡排才不會在煎時散開"
   },
   {
     "recipe_ingredient_id": 111,
@@ -996,7 +996,7 @@
     "amount": 200.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "混合豆腐後，需摔打肉團至產生黏性（出筋），口感才會彈牙"
   },
   {
     "recipe_ingredient_id": 112,
@@ -1005,7 +1005,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "建議先炒至透明放涼後再拌入肉中，甜味會更濃厚"
   },
   {
     "recipe_ingredient_id": 113,
@@ -1023,7 +1023,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "與鴻喜菇一同炒出水氣後加入醬汁，香氣層次最高"
   },
   {
     "recipe_ingredient_id": 115,
@@ -1032,7 +1032,7 @@
     "amount": 20.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "稠度適中的醬油膏可讓野菇醬汁呈現亮麗色澤且包裹力強"
   },
   {
     "recipe_ingredient_id": 116,
@@ -1059,7 +1059,7 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "選用脂肪分佈均勻的部位，快炒後口感更嫩滑"
+    "remark": "切成厚度一致的片狀。紙包法可完美鎖住魚肉水分，呈現清蒸般的鮮嫩"
   },
   {
     "recipe_ingredient_id": 119,
@@ -1068,7 +1068,7 @@
     "amount": 30.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "鋪在魚片底部墊高，防止魚肉沾黏紙壁，並提供蔬菜甜味"
   },
   {
     "recipe_ingredient_id": 120,
@@ -1077,7 +1077,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "去除尾部纖維較硬的部分，斜切後與魚片同步烤熟"
   },
   {
     "recipe_ingredient_id": 121,
@@ -1086,7 +1086,7 @@
     "amount": 15.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "白酒在密封紙袋中受熱產生的蒸汽是催熟魚片與增香的重點"
   },
   {
     "recipe_ingredient_id": 122,
@@ -1095,7 +1095,7 @@
     "amount": 2.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "新鮮百里香能賦予地中海風格的雅致草本香氣"
   },
   {
     "recipe_ingredient_id": 123,
@@ -1113,7 +1113,7 @@
     "amount": 2.0,
     "unit_name": "角",
     "is_modified": false,
-    "remark": "裝飾兼調味用"
+    "remark": "連同皮一起包裹烘烤，酸度與果皮油脂會緩緩滲入魚肉中"
   },
   {
     "recipe_ingredient_id": 125,
@@ -1122,7 +1122,7 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "預先處理乾淨，確保沒有殘留雜質"
+    "remark": "選用油脂豐富的五花部位，涮至剛好轉色即熄火，口感最為滑嫩"
   },
   {
     "recipe_ingredient_id": 126,
@@ -1131,7 +1131,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "切絲後炒至焦糖透明狀，能釋放甜味與壽喜燒醬汁結合"
   },
   {
     "recipe_ingredient_id": 127,
@@ -1140,7 +1140,7 @@
     "amount": 1.0,
     "unit_name": "顆",
     "is_modified": false,
-    "remark": ""
+    "remark": "蛋液不需打得太散，保留蛋白與蛋黃層次，悶煮至 7 分熟口感最佳"
   },
   {
     "recipe_ingredient_id": 128,
@@ -1149,7 +1149,7 @@
     "amount": 1.0,
     "unit_name": "碗",
     "is_modified": false,
-    "remark": "推薦使用隔夜飯，水分較少，炒起來顆粒分明"
+    "remark": "建議選用米粒飽滿的台灣米，較能承載壽喜燒的濃厚醬汁"
   },
   {
     "recipe_ingredient_id": 129,
@@ -1194,7 +1194,7 @@
     "amount": 200.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "撕成適合入口的小片狀，增加表面積吸收醬汁"
+    "remark": "梅花肉片油花均勻，大火快炒後仍能保持彈性且不油膩"
   },
   {
     "recipe_ingredient_id": 134,
@@ -1203,7 +1203,7 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "泡菜汁記得一同下鍋，那是炒肉鮮味與酸度的靈魂來源"
   },
   {
     "recipe_ingredient_id": 135,
@@ -1212,7 +1212,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "切成長段約 4-5 公分，烹煮後外觀較整齊"
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 136,
@@ -1221,7 +1221,7 @@
     "amount": 20.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "切斜段，起鍋前拌炒 10 秒保留清脆感"
   },
   {
     "recipe_ingredient_id": 137,
@@ -1230,7 +1230,7 @@
     "amount": 30.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "加入糖調和，可讓辣味轉為渾厚且帶有微甜的回甘感"
   },
   {
     "recipe_ingredient_id": 138,
@@ -1257,25 +1257,25 @@
     "amount": 250.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "厚度建議適中，以免在燉煮過程中縮水過多"
+    "remark": "帶皮雞腿塊先煎出油脂，用原油炒蔬菜味道會更豐富"
   },
   {
     "recipe_ingredient_id": 141,
     "recipe_id": 18,
-    "ingredient_id": 56,
+    "ingredient_id": 65,
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "切均勻細絲，可縮短熟化時間並增加層次"
+    "remark": "切塊後先炒過可定型，燉煮時較不易散掉讓湯頭變濁"
   },
   {
     "recipe_ingredient_id": 142,
     "recipe_id": 18,
-    "ingredient_id": 57,
+    "ingredient_id": 55,
     "amount": 80.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "切滾刀塊，與馬鈴薯同步燉煮至軟甜"
   },
   {
     "recipe_ingredient_id": 143,
@@ -1293,7 +1293,7 @@
     "amount": 50.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "熄火後放入攪拌至完全融化，再開火小火熬煮至喜歡的濃稠度"
   },
   {
     "recipe_ingredient_id": 145,
@@ -1302,12 +1302,12 @@
     "amount": 20.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "起鍋前淋上，是營造北海道乳香風格的靈魂一筆"
   },
   {
     "recipe_ingredient_id": 146,
     "recipe_id": 18,
-    "ingredient_id": 497,
+    "ingredient_id": 496,
     "amount": 400.0,
     "unit_name": "毫升",
     "is_modified": false,
@@ -1329,25 +1329,25 @@
     "amount": 200.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "徹底清洗並去除泥沙，建議烹飪前保持低溫"
+    "remark": "豬腹肉油脂多，炒出豬油香後再下醬汁會更契合味噌風味"
   },
   {
     "recipe_ingredient_id": 149,
     "recipe_id": 19,
-    "ingredient_id": 31,
+    "ingredient_id": 41,
     "amount": 100.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "切成極細絲並冰鎮，可保持清脆口感來平衡燒肉的鹹重"
   },
   {
     "recipe_ingredient_id": 150,
     "recipe_id": 19,
-    "ingredient_id": 2,
+    "ingredient_id": 11,
     "amount": 10.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "現磨薑泥的辛香味最直接，能有效去除豬肉騷味並開胃"
   },
   {
     "recipe_ingredient_id": 151,
@@ -1356,7 +1356,7 @@
     "amount": 20.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "選用赤味噌或白味噌均可，味噌含蛋白質易焦，需快速收汁"
   },
   {
     "recipe_ingredient_id": 152,
@@ -1392,16 +1392,16 @@
     "amount": 150.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "使用斷筋處理，可避免受熱後嚴重縮小"
+    "remark": "用紙巾吸乾水分後下鍋。皮朝下煎至酥脆後再翻面，能鎖住豐富魚油"
   },
   {
     "recipe_ingredient_id": 156,
     "recipe_id": 20,
-    "ingredient_id": 43,
+    "ingredient_id": 44,
     "amount": 80.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "水滾後加鹽與油快速燙熟，可保持鮮亮翠綠"
   },
   {
     "recipe_ingredient_id": 157,
@@ -1410,7 +1410,7 @@
     "amount": 15.0,
     "unit_name": "毫升",
     "is_modified": false,
-    "remark": ""
+    "remark": "照燒醬核心。煮至起泡微濃稠時淋入，讓醬汁厚厚掛在魚肉上"
   },
   {
     "recipe_ingredient_id": 158,
@@ -1442,7 +1442,7 @@
   {
     "recipe_ingredient_id": 161,
     "recipe_id": 20,
-    "ingredient_id": 2,
+    "ingredient_id": 11,
     "amount": 5.0,
     "unit_name": "克",
     "is_modified": false,
@@ -1460,11 +1460,11 @@
   {
     "recipe_ingredient_id": 163,
     "recipe_id": 20,
-    "ingredient_id": 16,
+    "ingredient_id": 15,
     "amount": 5.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": ""
+    "remark": "切絲浸泡冰水使其捲曲，擺放在鮭魚頂部增加高度與視覺美感"
   },
   {
     "recipe_ingredient_id": 164,
@@ -1473,15 +1473,16 @@
     "amount": 10.0,
     "unit_name": "克",
     "is_modified": false,
-    "remark": "提升整體配色質感"
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 165,
     "recipe_id": 21,
-    "ingredient_id": 277,
+    "ingredient_id": 276,
     "amount": 160.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "建議煮至 8 分熟，預留後續在肉醬中吸汁的空間"
   },
   {
     "recipe_ingredient_id": 166,
@@ -1489,7 +1490,8 @@
     "ingredient_id": 187,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "牛豬混合能平衡肉質與脂香，炒時須徹底撥散"
   },
   {
     "recipe_ingredient_id": 167,
@@ -1497,7 +1499,8 @@
     "ingredient_id": 5,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "炒至半透明散發甜味後再下肉末"
   },
   {
     "recipe_ingredient_id": 168,
@@ -1505,15 +1508,17 @@
     "ingredient_id": 2,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 169,
     "recipe_id": 21,
-    "ingredient_id": 57,
+    "ingredient_id": 56,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成極小丁以便融入醬汁中"
   },
   {
     "recipe_ingredient_id": 170,
@@ -1521,7 +1526,8 @@
     "ingredient_id": 367,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需先與肉拌炒出焦香味，去除生味"
   },
   {
     "recipe_ingredient_id": 171,
@@ -1529,7 +1535,8 @@
     "ingredient_id": 369,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 172,
@@ -1537,7 +1544,8 @@
     "ingredient_id": 433,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "包含奧勒岡、羅勒等多種香草，是意式靈魂"
   },
   {
     "recipe_ingredient_id": 173,
@@ -1545,7 +1553,8 @@
     "ingredient_id": 251,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "盛盤後撒上增加濃厚口感"
   },
   {
     "recipe_ingredient_id": 174,
@@ -1553,7 +1562,8 @@
     "ingredient_id": 345,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 175,
@@ -1561,15 +1571,18 @@
     "ingredient_id": 416,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
+
   {
     "recipe_ingredient_id": 176,
     "recipe_id": 22,
     "ingredient_id": 515,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切記不可洗米，直接乾炒才能釋放澱粉讓口感黏稠"
   },
   {
     "recipe_ingredient_id": 177,
@@ -1577,7 +1590,8 @@
     "ingredient_id": 91,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 178,
@@ -1585,7 +1599,8 @@
     "ingredient_id": 92,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切片後以乾煎方式炒出野菇水氣與焦香味"
   },
   {
     "recipe_ingredient_id": 179,
@@ -1593,7 +1608,8 @@
     "ingredient_id": 501,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "於最後熄火階段拌入，可保留最完整香氣"
   },
   {
     "recipe_ingredient_id": 180,
@@ -1601,15 +1617,17 @@
     "ingredient_id": 239,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 181,
     "recipe_id": 22,
-    "ingredient_id": 3,
+    "ingredient_id": 5,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 182,
@@ -1617,7 +1635,8 @@
     "ingredient_id": 341,
     "amount": 50.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選用辛口 (Dry) 白酒，增加果酸風味層次"
   },
   {
     "recipe_ingredient_id": 183,
@@ -1625,7 +1644,8 @@
     "ingredient_id": 350,
     "amount": 500.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需保持微熱狀態，分次加入米中攪拌"
   },
   {
     "recipe_ingredient_id": 184,
@@ -1633,7 +1653,8 @@
     "ingredient_id": 499,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 185,
@@ -1641,15 +1662,18 @@
     "ingredient_id": 251,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "起鍋前拌入，利用餘溫乳化出滑順質地"
   },
+
   {
     "recipe_ingredient_id": 186,
     "recipe_id": 23,
     "ingredient_id": 165,
     "amount": 500.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "醃漬前務必用廚房紙巾吸乾表面水分，烤起來更酥脆"
   },
   {
     "recipe_ingredient_id": 187,
@@ -1657,7 +1681,8 @@
     "ingredient_id": 422,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 188,
@@ -1665,7 +1690,8 @@
     "ingredient_id": 431,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 189,
@@ -1673,7 +1699,8 @@
     "ingredient_id": 432,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 190,
@@ -1681,7 +1708,8 @@
     "ingredient_id": 419,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 191,
@@ -1689,7 +1717,8 @@
     "ingredient_id": 416,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 192,
@@ -1697,7 +1726,8 @@
     "ingredient_id": 410,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 193,
@@ -1705,7 +1735,8 @@
     "ingredient_id": 345,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 194,
@@ -1713,39 +1744,45 @@
     "ingredient_id": 387,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "最後 5 分鐘刷上，可產生焦糖光澤並防過度焦化"
   },
+
   {
     "recipe_ingredient_id": 195,
     "recipe_id": 24,
-    "ingredient_id": 279,
+    "ingredient_id": 277,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "細扁麵能更好的掛住乳化後的湯汁"
   },
   {
     "recipe_ingredient_id": 196,
     "recipe_id": 24,
-    "ingredient_id": 218,
+    "ingredient_id": 213,
     "amount": 300.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需完全吐沙並刷洗外殼"
   },
   {
     "recipe_ingredient_id": 197,
     "recipe_id": 24,
-    "ingredient_id": 2,
-    "amount": 15.0,
-    "unit_name": "克",
-    "is_modified": false
+    "ingredient_id": 1,
+    "amount": 3.0,
+    "unit_name": "瓣",
+    "is_modified": false,
+    "remark": "切薄片，低溫煸至邊緣微金黃即刻下蛤蜊"
   },
   {
     "recipe_ingredient_id": 198,
     "recipe_id": 24,
-    "ingredient_id": 500,
+    "ingredient_id": 18,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "不吃辣者可去籽，主要取其顏色與微辛香氣"
   },
   {
     "recipe_ingredient_id": 199,
@@ -1753,7 +1790,8 @@
     "ingredient_id": 341,
     "amount": 50.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "蓋上鍋蓋悶煮，利用酒氣蒸汽催熟蛤蜊"
   },
   {
     "recipe_ingredient_id": 200,
@@ -1761,7 +1799,8 @@
     "ingredient_id": 21,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "使用新鮮香草效果遠優於乾燥品"
   },
   {
     "recipe_ingredient_id": 201,
@@ -1769,7 +1808,8 @@
     "ingredient_id": 345,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "最後淋上一匙特級初榨橄欖油增加生鮮風味"
   },
   {
     "recipe_ingredient_id": 202,
@@ -1777,23 +1817,27 @@
     "ingredient_id": 416,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
+
   {
     "recipe_ingredient_id": 203,
     "recipe_id": 25,
-    "ingredient_id": 277,
+    "ingredient_id": 276,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "煮麵水鹽度應如同海水，確保麵體入味"
   },
   {
     "recipe_ingredient_id": 204,
     "recipe_id": 25,
-    "ingredient_id": 191,
+    "ingredient_id": 190,
     "amount": 60.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成厚條狀，將油脂煸出至金黃焦香"
   },
   {
     "recipe_ingredient_id": 205,
@@ -1801,7 +1845,8 @@
     "ingredient_id": 231,
     "amount": 2.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "只取蛋黃。若怕太乾可預先混合 1 匙溫麵水"
   },
   {
     "recipe_ingredient_id": 206,
@@ -1809,15 +1854,17 @@
     "ingredient_id": 251,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需磨細粉與蛋黃充分混合成泥狀"
   },
   {
     "recipe_ingredient_id": 207,
     "recipe_id": 25,
-    "ingredient_id": 419,
+    "ingredient_id": 418,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "新鮮現磨黑胡椒是這道菜最重要的調味"
   },
   {
     "recipe_ingredient_id": 208,
@@ -1825,7 +1872,8 @@
     "ingredient_id": 239,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "非傳統做法但可增加新手製作醬汁的穩定度"
   },
   {
     "recipe_ingredient_id": 209,
@@ -1833,7 +1881,8 @@
     "ingredient_id": 416,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 210,
@@ -1841,15 +1890,17 @@
     "ingredient_id": 164,
     "amount": 300.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "去骨切成約 3 公分方塊，口感最紮實"
   },
   {
     "recipe_ingredient_id": 211,
     "recipe_id": 26,
-    "ingredient_id": 516,
+    "ingredient_id": 346,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "三杯雞的靈魂，須小火慢煸薑片不可大火燒焦"
   },
   {
     "recipe_ingredient_id": 212,
@@ -1857,23 +1908,26 @@
     "ingredient_id": 1,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "整粒不去皮亦可，煸到表面金黃如馬鈴薯口感最佳"
   },
   {
     "recipe_ingredient_id": 213,
     "recipe_id": 26,
-    "ingredient_id": 2,
+    "ingredient_id": 9,
     "amount": 10.0,
-    "unit_name": "顆",
-    "is_modified": false
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "橫切薄片，煸至邊緣呈捲曲微焦狀"
   },
   {
     "recipe_ingredient_id": 214,
     "recipe_id": 26,
-    "ingredient_id": 13,
+    "ingredient_id": 17,
     "amount": 1.0,
     "unit_name": "根",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "斜切段，主要配色用，怕辣者可去籽"
   },
   {
     "recipe_ingredient_id": 215,
@@ -1881,7 +1935,8 @@
     "ingredient_id": 331,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 216,
@@ -1889,7 +1944,8 @@
     "ingredient_id": 340,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 217,
@@ -1897,7 +1953,8 @@
     "ingredient_id": 410,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 218,
@@ -1905,15 +1962,18 @@
     "ingredient_id": 25,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "起鍋前才加入拌炒 5 秒，保留翠綠色澤與濃郁香氣"
   },
+
   {
     "recipe_ingredient_id": 219,
     "recipe_id": 27,
-    "ingredient_id": 177,
+    "ingredient_id": 179,
     "amount": 600.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選擇肥瘦比例 3:7 的五花肉，口感軟糯不乾柴"
   },
   {
     "recipe_ingredient_id": 220,
@@ -1921,7 +1981,8 @@
     "ingredient_id": 414,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "冰糖能讓肉質紅潤發亮，且甜味較白糖溫潤"
   },
   {
     "recipe_ingredient_id": 221,
@@ -1929,7 +1990,8 @@
     "ingredient_id": 331,
     "amount": 60.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 222,
@@ -1937,7 +1999,8 @@
     "ingredient_id": 340,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 223,
@@ -1945,7 +2008,8 @@
     "ingredient_id": 14,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 224,
@@ -1953,63 +2017,72 @@
     "ingredient_id": 1,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 225,
     "recipe_id": 27,
-    "ingredient_id": 2,
+    "ingredient_id": 9,
     "amount": 15.0,
-    "unit_name": "顆",
-    "is_modified": false
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 226,
     "recipe_id": 27,
-    "ingredient_id": 497,
+    "ingredient_id": 496,
     "amount": 500.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "水需淹過肉塊，慢火燉煮期間切勿頻繁開蓋"
   },
+
   {
     "recipe_ingredient_id": 227,
     "recipe_id": 28,
     "ingredient_id": 204,
     "amount": 1.0,
     "unit_name": "尾",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "魚眼清澈、肉質有彈性者佳。入鍋前務必抹乾水分"
   },
   {
     "recipe_ingredient_id": 228,
     "recipe_id": 28,
-    "ingredient_id": 1,
+    "ingredient_id": 10,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "鋪在魚身下方可防沾黏並去腥"
   },
   {
     "recipe_ingredient_id": 229,
     "recipe_id": 28,
-    "ingredient_id": 16,
+    "ingredient_id": 15,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "將蔥切絲浸泡冰水會呈漂亮捲曲狀"
   },
   {
     "recipe_ingredient_id": 230,
     "recipe_id": 28,
-    "ingredient_id": 13,
+    "ingredient_id": 18,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 231,
     "recipe_id": 28,
-    "ingredient_id": 331,
+    "ingredient_id": 332,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "最後澆上可避免魚肉吸收過多鹽分變老"
   },
   {
     "recipe_ingredient_id": 232,
@@ -2017,15 +2090,18 @@
     "ingredient_id": 345,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需燒熱至微微冒煙，淋在蔥絲上激發香氣"
   },
+
   {
     "recipe_ingredient_id": 233,
     "recipe_id": 29,
     "ingredient_id": 256,
     "amount": 300.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "板豆腐較易成型，入鍋前可先燙鹽水增加韌度"
   },
   {
     "recipe_ingredient_id": 234,
@@ -2033,15 +2109,17 @@
     "ingredient_id": 186,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "炒至變色溢出油香再下醬料"
   },
   {
     "recipe_ingredient_id": 235,
     "recipe_id": 29,
-    "ingredient_id": 362,
+    "ingredient_id": 359,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "麻婆豆腐的味覺靈魂，需炒出紅亮油色"
   },
   {
     "recipe_ingredient_id": 236,
@@ -2049,15 +2127,17 @@
     "ingredient_id": 2,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 237,
     "recipe_id": 29,
-    "ingredient_id": 1,
+    "ingredient_id": 11,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 238,
@@ -2065,7 +2145,8 @@
     "ingredient_id": 16,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 239,
@@ -2073,7 +2154,8 @@
     "ingredient_id": 331,
     "amount": 15.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 240,
@@ -2081,87 +2163,99 @@
     "ingredient_id": 410,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 241,
     "recipe_id": 29,
-    "ingredient_id": 428,
+    "ingredient_id": 395,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "粉水比例 1:2，分次勾芡呈現紅油掛芡效果"
   },
   {
     "recipe_ingredient_id": 242,
     "recipe_id": 29,
-    "ingredient_id": 434,
+    "ingredient_id": 437,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "推薦研磨成粉，出鍋後撒上增加麻感層次"
   },
   {
     "recipe_ingredient_id": 243,
     "recipe_id": 29,
-    "ingredient_id": 497,
+    "ingredient_id": 496,
     "amount": 200.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
+
   {
     "recipe_ingredient_id": 244,
     "recipe_id": 30,
     "ingredient_id": 221,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需預先泡發 3 小時，洗淨切條，炒乾水分才香"
   },
   {
     "recipe_ingredient_id": 245,
     "recipe_id": 30,
-    "ingredient_id": 177,
+    "ingredient_id": 180,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成長條狀，煸炒至邊緣微焦吐出豬油"
   },
   {
     "recipe_ingredient_id": 246,
     "recipe_id": 30,
-    "ingredient_id": 254,
+    "ingredient_id": 259,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "豆乾需切絲，炒至外皮金黃微硬更有咬勁"
   },
   {
     "recipe_ingredient_id": 247,
     "recipe_id": 30,
-    "ingredient_id": 54,
+    "ingredient_id": 47,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選用台灣本土小芹菜，香味較濃"
   },
   {
     "recipe_ingredient_id": 248,
     "recipe_id": 30,
-    "ingredient_id": 16,
+    "ingredient_id": 14,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 249,
     "recipe_id": 30,
-    "ingredient_id": 2,
+    "ingredient_id": 1,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 250,
     "recipe_id": 30,
-    "ingredient_id": 13,
+    "ingredient_id": 17,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 251,
@@ -2169,7 +2263,8 @@
     "ingredient_id": 331,
     "amount": 20.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 252,
@@ -2177,7 +2272,8 @@
     "ingredient_id": 410,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 253,
@@ -2185,7 +2281,8 @@
     "ingredient_id": 340,
     "amount": 15.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 254,
@@ -2193,7 +2290,8 @@
     "ingredient_id": 345,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 255,
@@ -2201,15 +2299,17 @@
     "ingredient_id": 164,
     "amount": 500.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "帶皮雞腿肉切塊，煎至皮面出油後香氣更足"
   },
   {
     "recipe_ingredient_id": 256,
     "recipe_id": 31,
-    "ingredient_id": 1,
+    "ingredient_id": 9,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "老薑不削皮直接切片，需小火煸至乾燥微焦才不顯苦澀"
   },
   {
     "recipe_ingredient_id": 257,
@@ -2217,7 +2317,8 @@
     "ingredient_id": 516,
     "amount": 45.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選用純正黑麻油，避免長時間大火高溫導致發苦"
   },
   {
     "recipe_ingredient_id": 258,
@@ -2225,15 +2326,17 @@
     "ingredient_id": 340,
     "amount": 300.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "純酒版香氣較濃郁，若怕酒味過重可用 1:1 水稀釋"
   },
   {
     "recipe_ingredient_id": 259,
     "recipe_id": 31,
-    "ingredient_id": 497,
+    "ingredient_id": 496,
     "amount": 300.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 260,
@@ -2241,7 +2344,8 @@
     "ingredient_id": 482,
     "amount": 8.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "稍微劃開表皮，讓甜味與藥效更容易釋出"
   },
   {
     "recipe_ingredient_id": 261,
@@ -2249,7 +2353,8 @@
     "ingredient_id": 481,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "起鍋前 1 分鐘加入即可，避免久煮變酸"
   },
   {
     "recipe_ingredient_id": 262,
@@ -2257,31 +2362,36 @@
     "ingredient_id": 416,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
+
   {
     "recipe_ingredient_id": 263,
     "recipe_id": 32,
     "ingredient_id": 230,
     "amount": 2.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "蛋白不可沾到油脂或水分，否則無法打發至硬性發泡"
   },
   {
     "recipe_ingredient_id": 264,
     "recipe_id": 32,
-    "ingredient_id": 260,
+    "ingredient_id": 392,
     "amount": 35.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "務必過篩兩次，可增加麵糊空氣感使鬆餅更蓬鬆"
   },
   {
     "recipe_ingredient_id": 265,
     "recipe_id": 32,
-    "ingredient_id": 235,
+    "ingredient_id": 238,
     "amount": 20.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 266,
@@ -2289,23 +2399,26 @@
     "ingredient_id": 410,
     "amount": 25.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "分三次加入蛋白中打發，能讓蛋白霜更細緻穩定"
   },
   {
     "recipe_ingredient_id": 267,
     "recipe_id": 32,
-    "ingredient_id": 504,
+    "ingredient_id": 389,
     "amount": 2.0,
     "unit_name": "滴",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "用於去除蛋腥味，提升整體甜香層次"
   },
   {
     "recipe_ingredient_id": 268,
     "recipe_id": 32,
-    "ingredient_id": 426,
+    "ingredient_id": 408,
     "amount": 1.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "若技巧純熟可不加，新手加入可增加成功率與支撐力"
   },
   {
     "recipe_ingredient_id": 269,
@@ -2313,23 +2426,27 @@
     "ingredient_id": 345,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "用於平底鍋抹薄薄一層油，防止沾黏"
   },
+
   {
     "recipe_ingredient_id": 270,
     "recipe_id": 33,
     "ingredient_id": 230,
     "amount": 3.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "攪拌時需輕柔，避免產生過多氣泡導致蜂窩組織"
   },
   {
     "recipe_ingredient_id": 271,
     "recipe_id": 33,
-    "ingredient_id": 235,
+    "ingredient_id": 238,
     "amount": 400.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "加熱至約 60°C 微燙手感即可，切勿煮沸以免燙熟蛋液"
   },
   {
     "recipe_ingredient_id": 272,
@@ -2337,31 +2454,36 @@
     "ingredient_id": 410,
     "amount": 90.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "含焦糖層 (50g) 與布丁液 (40g)，熬煮焦糖時不可攪拌"
   },
   {
     "recipe_ingredient_id": 273,
     "recipe_id": 33,
-    "ingredient_id": 504,
+    "ingredient_id": 389,
     "amount": 3.0,
     "unit_name": "滴",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 274,
     "recipe_id": 33,
-    "ingredient_id": 497,
+    "ingredient_id": 496,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "分兩次加入砂糖中（冷水熬煮、熱水收尾），控制焦糖稠度"
   },
+
   {
     "recipe_ingredient_id": 275,
     "recipe_id": 34,
     "ingredient_id": 299,
     "amount": 1.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選用厚度 3 公分以上的吐司，口感外酥內軟"
   },
   {
     "recipe_ingredient_id": 276,
@@ -2369,7 +2491,8 @@
     "ingredient_id": 499,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "室溫略微軟化後填入切痕，烘烤時更能滲透到中心"
   },
   {
     "recipe_ingredient_id": 277,
@@ -2377,15 +2500,18 @@
     "ingredient_id": 387,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "出爐後趁熱淋上，可保留蜂蜜的原始清甜與香氣"
   },
+
   {
     "recipe_ingredient_id": 278,
     "recipe_id": 35,
-    "ingredient_id": 235,
+    "ingredient_id": 238,
     "amount": 250.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "加熱至糖溶解即可，是製作絲滑口感的基礎"
   },
   {
     "recipe_ingredient_id": 279,
@@ -2393,7 +2519,8 @@
     "ingredient_id": 239,
     "amount": 250.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "提供濃醇乳香與厚實口感，比例 1:1 為最受歡迎配方"
   },
   {
     "recipe_ingredient_id": 280,
@@ -2401,15 +2528,17 @@
     "ingredient_id": 410,
     "amount": 40.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 281,
     "recipe_id": 35,
-    "ingredient_id": 504,
+    "ingredient_id": 389,
     "amount": 1.0,
     "unit_name": "茶匙",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "或使用半根香草莢，風味層次會更自然持久"
   },
   {
     "recipe_ingredient_id": 282,
@@ -2417,7 +2546,8 @@
     "ingredient_id": 409,
     "amount": 2.5,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需完全浸泡冰水軟化並擠乾，確保能均勻溶解無結塊"
   },
   {
     "recipe_ingredient_id": 283,
@@ -2425,15 +2555,17 @@
     "ingredient_id": 109,
     "amount": 2.0,
     "unit_name": "根",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選用表皮有黑點的熟透香蕉，香氣最濃郁"
   },
   {
     "recipe_ingredient_id": 284,
     "recipe_id": 36,
-    "ingredient_id": 260,
+    "ingredient_id": 392,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "務必過篩，避免麵糊產生顆粒感"
   },
   {
     "recipe_ingredient_id": 285,
@@ -2441,7 +2573,8 @@
     "ingredient_id": 499,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "室溫軟化至手指可輕壓出痕跡的程度"
   },
   {
     "recipe_ingredient_id": 286,
@@ -2449,7 +2582,8 @@
     "ingredient_id": 410,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 287,
@@ -2457,15 +2591,17 @@
     "ingredient_id": 230,
     "amount": 2.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需使用常溫蛋，分次加入以防奶油糊乳化失敗"
   },
   {
     "recipe_ingredient_id": 288,
     "recipe_id": 36,
-    "ingredient_id": 426,
+    "ingredient_id": 408,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 289,
@@ -2473,7 +2609,8 @@
     "ingredient_id": 499,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "打發至體積略微膨大、顏色變淡的羽毛狀"
   },
   {
     "recipe_ingredient_id": 290,
@@ -2481,7 +2618,8 @@
     "ingredient_id": 412,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "黑糖需過篩避免結塊，可增加餅乾的焦糖風味"
   },
   {
     "recipe_ingredient_id": 291,
@@ -2489,7 +2627,8 @@
     "ingredient_id": 410,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 292,
@@ -2497,7 +2636,8 @@
     "ingredient_id": 230,
     "amount": 1.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 293,
@@ -2505,7 +2645,8 @@
     "ingredient_id": 389,
     "amount": 1.0,
     "unit_name": "茶匙",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 294,
@@ -2513,7 +2654,8 @@
     "ingredient_id": 391,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 295,
@@ -2521,7 +2663,8 @@
     "ingredient_id": 274,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選用大燕麥片可增加咀嚼口感"
   },
   {
     "recipe_ingredient_id": 296,
@@ -2529,7 +2672,8 @@
     "ingredient_id": 407,
     "amount": 3.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "幫助餅乾在烘烤時向外延展並呈現酥脆質感"
   },
   {
     "recipe_ingredient_id": 297,
@@ -2537,7 +2681,8 @@
     "ingredient_id": 416,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 298,
@@ -2545,7 +2690,8 @@
     "ingredient_id": 480,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "可事先用少量蘭姆酒或水泡軟增加濕潤度"
   },
   {
     "recipe_ingredient_id": 299,
@@ -2553,7 +2699,8 @@
     "ingredient_id": 230,
     "amount": 2.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 300,
@@ -2561,7 +2708,8 @@
     "ingredient_id": 410,
     "amount": 60.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 301,
@@ -2569,7 +2717,8 @@
     "ingredient_id": 392,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 302,
@@ -2577,7 +2726,8 @@
     "ingredient_id": 408,
     "amount": 3.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 303,
@@ -2585,7 +2735,8 @@
     "ingredient_id": 499,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "融化後需降溫至微溫狀態再加入麵糊，避免燙熟蛋液"
   },
   {
     "recipe_ingredient_id": 304,
@@ -2593,7 +2744,8 @@
     "ingredient_id": 445,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "磨成細粉末可均勻分佈香氣"
   },
   {
     "recipe_ingredient_id": 305,
@@ -2601,7 +2753,8 @@
     "ingredient_id": 387,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "增加濕潤度並輔助烤出深色外皮與「凸肚臍」"
   },
   {
     "recipe_ingredient_id": 306,
@@ -2609,7 +2762,8 @@
     "ingredient_id": 391,
     "amount": 300.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 307,
@@ -2617,7 +2771,8 @@
     "ingredient_id": 408,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "較大量的泡打粉是司康膨脹的關鍵"
   },
   {
     "recipe_ingredient_id": 308,
@@ -2625,7 +2780,8 @@
     "ingredient_id": 416,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 309,
@@ -2633,7 +2789,8 @@
     "ingredient_id": 499,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "必須使用剛從冰箱取出的「冰硬奶油」切丁"
   },
   {
     "recipe_ingredient_id": 310,
@@ -2641,7 +2798,8 @@
     "ingredient_id": 455,
     "amount": 60.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "事先低溫烘烤過可大幅提升堅果香氣"
   },
   {
     "recipe_ingredient_id": 311,
@@ -2649,7 +2807,8 @@
     "ingredient_id": 238,
     "amount": 100.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 312,
@@ -2657,7 +2816,8 @@
     "ingredient_id": 388,
     "amount": 40.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 313,
@@ -2665,7 +2825,8 @@
     "ingredient_id": 447,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "建議選用可可含量 60% 以上的巧克力，層次更深邃"
   },
   {
     "recipe_ingredient_id": 314,
@@ -2673,7 +2834,8 @@
     "ingredient_id": 499,
     "amount": 120.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 315,
@@ -2681,7 +2843,8 @@
     "ingredient_id": 410,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "較高的糖量能產生布丁般的濕潤中心 (Fudgy)"
   },
   {
     "recipe_ingredient_id": 316,
@@ -2689,7 +2852,8 @@
     "ingredient_id": 230,
     "amount": 2.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 317,
@@ -2697,7 +2861,8 @@
     "ingredient_id": 391,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 318,
@@ -2705,7 +2870,8 @@
     "ingredient_id": 406,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "無糖純可可粉，增加苦甜對比"
   },
   {
     "recipe_ingredient_id": 319,
@@ -2713,7 +2879,8 @@
     "ingredient_id": 416,
     "amount": 1.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "微量的鹽能有效激發巧克力的深度風味"
   },
   {
     "recipe_ingredient_id": 320,
@@ -2721,7 +2888,8 @@
     "ingredient_id": 238,
     "amount": 500.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "加熱至微冒泡即可，不須完全沸騰，避免乳脂肪變質"
   },
   {
     "recipe_ingredient_id": 321,
@@ -2729,7 +2897,8 @@
     "ingredient_id": 499,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "放入熱牛奶中融化，攪拌均勻至無油脂漂浮"
   },
   {
     "recipe_ingredient_id": 322,
@@ -2737,7 +2906,8 @@
     "ingredient_id": 389,
     "amount": 1.0,
     "unit_name": "茶匙",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 323,
@@ -2745,7 +2915,8 @@
     "ingredient_id": 410,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 324,
@@ -2753,15 +2924,17 @@
     "ingredient_id": 392,
     "amount": 125.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需過篩以確保稀麵糊質地細緻，無麵粉顆粒"
   },
   {
-    "recipe_ingredient_id": 231,
+    "recipe_ingredient_id": 325,
     "recipe_id": 41,
     "ingredient_id": 231,
     "amount": 2.0,
     "unit_name": "個",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "蛋黃能提供可麗露內芯如同卡士達般的軟嫩口感"
   },
   {
     "recipe_ingredient_id": 326,
@@ -2769,7 +2942,8 @@
     "ingredient_id": 343,
     "amount": 40.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "最後加入，香氣在靜置 24 小時後會更深邃"
   },
   {
     "recipe_ingredient_id": 327,
@@ -2777,7 +2951,8 @@
     "ingredient_id": 392,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "製作塔皮建議使用冰涼的麵粉，維持質地酥脆"
   },
   {
     "recipe_ingredient_id": 328,
@@ -2785,7 +2960,8 @@
     "ingredient_id": 499,
     "amount": 175.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "含塔皮 (100g) 與內餡 (75g) 用量"
   },
   {
     "recipe_ingredient_id": 329,
@@ -2793,7 +2969,8 @@
     "ingredient_id": 413,
     "amount": 40.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "糖粉較砂糖易於與奶油融合，使塔皮口感更細膩"
   },
   {
     "recipe_ingredient_id": 330,
@@ -2801,7 +2978,8 @@
     "ingredient_id": 453,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "加入杏仁粉可增添塔殼的堅果香氣與酥鬆感"
   },
   {
     "recipe_ingredient_id": 331,
@@ -2809,7 +2987,8 @@
     "ingredient_id": 230,
     "amount": 4.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "含塔皮 (1顆) 與內餡 (3顆) 用量"
   },
   {
     "recipe_ingredient_id": 332,
@@ -2817,7 +2996,8 @@
     "ingredient_id": 503,
     "amount": 120.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "建議使用新鮮現壓檸檬汁，酸度最為明亮"
   },
   {
     "recipe_ingredient_id": 333,
@@ -2825,7 +3005,8 @@
     "ingredient_id": 19,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "僅取黃色皮屑，避免削到白色苦澀部分"
   },
   {
     "recipe_ingredient_id": 334,
@@ -2833,7 +3014,8 @@
     "ingredient_id": 410,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "可依個人耐酸程度微幅增減"
   },
   {
     "recipe_ingredient_id": 335,
@@ -2841,7 +3023,8 @@
     "ingredient_id": 230,
     "amount": 2.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "僅取蛋白製作餅底。打發時容器需確保無油無水"
   },
   {
     "recipe_ingredient_id": 336,
@@ -2849,7 +3032,8 @@
     "ingredient_id": 410,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 337,
@@ -2857,7 +3041,8 @@
     "ingredient_id": 239,
     "amount": 150.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "打發至 8-9 分發，質地穩定後再與栗子泥組合"
   },
   {
     "recipe_ingredient_id": 338,
@@ -2865,7 +3050,8 @@
     "ingredient_id": 385,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需過篩讓質地絲滑，才不會卡住蒙布朗專用花嘴"
   },
   {
     "recipe_ingredient_id": 339,
@@ -2873,7 +3059,8 @@
     "ingredient_id": 499,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "加入栗子泥中攪拌，可增加抹漿的光澤感"
   },
   {
     "recipe_ingredient_id": 340,
@@ -2881,7 +3068,8 @@
     "ingredient_id": 343,
     "amount": 10.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "蘭姆酒能帶出栗子的深邃成熟風味"
   },
   {
     "recipe_ingredient_id": 341,
@@ -2889,7 +3077,8 @@
     "ingredient_id": 461,
     "amount": 6.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "包裹在鮮奶油中心，增加口感層次"
   },
   {
     "recipe_ingredient_id": 342,
@@ -2897,7 +3086,8 @@
     "ingredient_id": 413,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "最後於表層撒上，營造如同白雪覆蓋山巒的視覺感"
   },
   {
     "recipe_ingredient_id": 343,
@@ -2905,7 +3095,8 @@
     "ingredient_id": 297,
     "amount": 2.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選用組織綿密的手撕生吐司，口感最契合鮮奶油"
   },
   {
     "recipe_ingredient_id": 344,
@@ -2913,7 +3104,8 @@
     "ingredient_id": 239,
     "amount": 150.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "必須墊冰塊打發至硬挺，否則切面水果容易滑落"
   },
   {
     "recipe_ingredient_id": 345,
@@ -2921,7 +3113,8 @@
     "ingredient_id": 410,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 346,
@@ -2929,7 +3122,8 @@
     "ingredient_id": 143,
     "amount": 6.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "挑選大小一致的草莓，切開後的花紋最漂亮"
   },
   {
     "recipe_ingredient_id": 347,
@@ -2937,7 +3131,8 @@
     "ingredient_id": 107,
     "amount": 0.5,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成厚長條狀，擺放於吐司對角線位置"
   },
   {
     "recipe_ingredient_id": 348,
@@ -2945,7 +3140,8 @@
     "ingredient_id": 241,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "希臘優格質地濃厚，適合做成漂亮的堆疊層次"
   },
   {
     "recipe_ingredient_id": 349,
@@ -2953,7 +3149,8 @@
     "ingredient_id": 144,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "可保留部分整顆點綴，其餘略微壓碎釋放汁液"
   },
   {
     "recipe_ingredient_id": 350,
@@ -2961,7 +3158,8 @@
     "ingredient_id": 274,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "事先低溫烘烤 5 分鐘，口感會更香脆不濕軟"
   },
   {
     "recipe_ingredient_id": 351,
@@ -2969,7 +3167,8 @@
     "ingredient_id": 387,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "淋在藍莓與優格交界處，增加亮澤與風味"
   },
   {
     "recipe_ingredient_id": 352,
@@ -2977,7 +3176,8 @@
     "ingredient_id": 29,
     "amount": 2.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "頂部裝飾用"
   },
   {
     "recipe_ingredient_id": 353,
@@ -2985,7 +3185,8 @@
     "ingredient_id": 260,
     "amount": 400.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "加熱至約 60°C 即可，切勿沸騰以免豆漿變質產生碎渣"
   },
   {
     "recipe_ingredient_id": 354,
@@ -2993,7 +3194,8 @@
     "ingredient_id": 464,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "建議先與少量熱豆漿調成糊狀再倒入，避免結塊"
   },
   {
     "recipe_ingredient_id": 355,
@@ -3001,7 +3203,8 @@
     "ingredient_id": 410,
     "amount": 40.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 356,
@@ -3009,7 +3212,8 @@
     "ingredient_id": 409,
     "amount": 2.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需完全擠乾水分後再放入溫熱豆漿中攪拌溶解"
   },
   {
     "recipe_ingredient_id": 357,
@@ -3017,7 +3221,8 @@
     "ingredient_id": 239,
     "amount": 50.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "最後加入可增加質地的厚實度與乳香味"
   },
   {
     "recipe_ingredient_id": 358,
@@ -3025,7 +3230,8 @@
     "ingredient_id": 393,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "全麥粉顆粒感較重，能提供更好的膳食纖維與香氣"
   },
   {
     "recipe_ingredient_id": 359,
@@ -3033,7 +3239,8 @@
     "ingredient_id": 345,
     "amount": 60.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 360,
@@ -3041,7 +3248,8 @@
     "ingredient_id": 388,
     "amount": 60.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "提供自然甜味並幫助麵糰成型"
   },
   {
     "recipe_ingredient_id": 361,
@@ -3049,7 +3257,8 @@
     "ingredient_id": 452,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成粗碎塊，保留顆粒感風味更佳"
   },
   {
     "recipe_ingredient_id": 362,
@@ -3057,7 +3266,8 @@
     "ingredient_id": 455,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 363,
@@ -3065,7 +3275,8 @@
     "ingredient_id": 416,
     "amount": 1.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 364,
@@ -3073,7 +3284,8 @@
     "ingredient_id": 477,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "建議浸泡隔夜，並用電鍋燉煮兩次至口感鬆軟"
   },
   {
     "recipe_ingredient_id": 365,
@@ -3081,7 +3293,8 @@
     "ingredient_id": 496,
     "amount": 300.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 366,
@@ -3089,7 +3302,8 @@
     "ingredient_id": 410,
     "amount": 80.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "含蜜紅豆用糖 (60g) 與鮮奶液用糖 (20g)"
   },
   {
     "recipe_ingredient_id": 367,
@@ -3097,7 +3311,8 @@
     "ingredient_id": 238,
     "amount": 400.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 368,
@@ -3105,7 +3320,8 @@
     "ingredient_id": 409,
     "amount": 3.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "利用微溫鮮奶溶解，凝固力最為穩定"
   },
   {
     "recipe_ingredient_id": 369,
@@ -3113,7 +3329,8 @@
     "ingredient_id": 294,
     "amount": 300.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "先泡冷水 10 分鐘防止煮時開裂，且口感更 Q 彈"
   },
   {
     "recipe_ingredient_id": 370,
@@ -3121,7 +3338,8 @@
     "ingredient_id": 223,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成等長方片，提供鮮味底蘊"
   },
   {
     "recipe_ingredient_id": 371,
@@ -3129,7 +3347,8 @@
     "ingredient_id": 360,
     "amount": 45.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "濃郁度與色澤的主要來源，需徹底在湯中拌勻"
   },
   {
     "recipe_ingredient_id": 372,
@@ -3137,7 +3356,8 @@
     "ingredient_id": 421,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "用於調整辣度與成色，使醬汁呈現亮紅色"
   },
   {
     "recipe_ingredient_id": 373,
@@ -3145,7 +3365,8 @@
     "ingredient_id": 41,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成大塊狀，久煮後釋放的甜味可平衡辣醬鹹味"
   },
   {
     "recipe_ingredient_id": 374,
@@ -3153,7 +3374,8 @@
     "ingredient_id": 13,
     "amount": 2.0,
     "unit_name": "支",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 375,
@@ -3161,7 +3383,8 @@
     "ingredient_id": 233,
     "amount": 2.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "對半切或整顆放入，沾滿濃稠醬汁後風味極佳"
   },
   {
     "recipe_ingredient_id": 376,
@@ -3169,7 +3392,8 @@
     "ingredient_id": 352,
     "amount": 400.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "或使用鯷魚高湯，能讓風味更接近韓國路邊攤"
   },
   {
     "recipe_ingredient_id": 377,
@@ -3177,7 +3401,8 @@
     "ingredient_id": 410,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 378,
@@ -3185,7 +3410,8 @@
     "ingredient_id": 331,
     "amount": 15.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 379,
@@ -3193,7 +3419,8 @@
     "ingredient_id": 462,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "最後撒上點綴增加香氣"
   },
   {
     "recipe_ingredient_id": 380,
@@ -3201,7 +3428,8 @@
     "ingredient_id": 179,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成薄片，在煮滾的湯底中能快速熟成並釋放油脂"
   },
   {
     "recipe_ingredient_id": 381,
@@ -3209,7 +3437,8 @@
     "ingredient_id": 197,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "部隊鍋的標配食材，需切片擺放"
   },
   {
     "recipe_ingredient_id": 382,
@@ -3217,7 +3446,8 @@
     "ingredient_id": 196,
     "amount": 2.0,
     "unit_name": "根",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 383,
@@ -3225,7 +3455,8 @@
     "ingredient_id": 491,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選用酸味明顯的老泡菜，湯底會更厚實有層次"
   },
   {
     "recipe_ingredient_id": 384,
@@ -3233,7 +3464,8 @@
     "ingredient_id": 256,
     "amount": 0.5,
     "unit_name": "盒",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 385,
@@ -3241,7 +3473,8 @@
     "ingredient_id": 3,
     "amount": 0.5,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 386,
@@ -3249,7 +3482,8 @@
     "ingredient_id": 478,
     "amount": 1.0,
     "unit_name": "大匙",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "甜味來源，與泡菜酸度中和出溫潤湯頭"
   },
   {
     "recipe_ingredient_id": 387,
@@ -3257,7 +3491,8 @@
     "ingredient_id": 295,
     "amount": 1.0,
     "unit_name": "包",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "麵體略呈透明後再放起司片，口感最佳"
   },
   {
     "recipe_ingredient_id": 388,
@@ -3265,7 +3500,8 @@
     "ingredient_id": 248,
     "amount": 1.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "鋪在麵上微融狀態最誘人，增加湯汁濃稠度"
   },
   {
     "recipe_ingredient_id": 389,
@@ -3273,7 +3509,8 @@
     "ingredient_id": 352,
     "amount": 600.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 390,
@@ -3281,7 +3518,8 @@
     "ingredient_id": 360,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 391,
@@ -3289,7 +3527,8 @@
     "ingredient_id": 421,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 392,
@@ -3297,7 +3536,8 @@
     "ingredient_id": 2,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 393,
@@ -3305,7 +3545,8 @@
     "ingredient_id": 514,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切段後先以麻油煸炒至變色，溢出的豬油是湯頭香氣關鍵"
   },
   {
     "recipe_ingredient_id": 394,
@@ -3313,7 +3554,8 @@
     "ingredient_id": 491,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "建議選用酸味較明顯的「老泡菜」，湯底風味更濃厚"
   },
   {
     "recipe_ingredient_id": 395,
@@ -3321,7 +3563,8 @@
     "ingredient_id": 256,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "板豆腐耐煮不易碎，且能吸收酸辣湯汁"
   },
   {
     "recipe_ingredient_id": 396,
@@ -3329,7 +3572,8 @@
     "ingredient_id": 3,
     "amount": 0.3,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "炒至透明後可增加湯頭的自然甘甜感"
   },
   {
     "recipe_ingredient_id": 397,
@@ -3337,7 +3581,8 @@
     "ingredient_id": 2,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 398,
@@ -3345,7 +3590,8 @@
     "ingredient_id": 421,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "用於最後調色與調整辛辣層次"
   },
   {
     "recipe_ingredient_id": 399,
@@ -3353,7 +3599,8 @@
     "ingredient_id": 516,
     "amount": 10.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "低溫爆香蒜末與洋蔥，避免苦味"
   },
   {
     "recipe_ingredient_id": 400,
@@ -3361,7 +3608,8 @@
     "ingredient_id": 496,
     "amount": 500.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "推薦使用第二次「洗米水」燉煮，能讓湯頭質地更濃稠"
   },
   {
     "recipe_ingredient_id": 401,
@@ -3369,7 +3617,8 @@
     "ingredient_id": 272,
     "amount": 1.0,
     "unit_name": "碗",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "壓平後以中火加熱，底部形成酥脆鍋巴後口感層次最佳"
   },
   {
     "recipe_ingredient_id": 402,
@@ -3377,7 +3626,8 @@
     "ingredient_id": 101,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "燙熟後需擠乾水分，拌入少許鹽與香油調味"
   },
   {
     "recipe_ingredient_id": 403,
@@ -3385,7 +3635,8 @@
     "ingredient_id": 37,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 404,
@@ -3393,7 +3644,8 @@
     "ingredient_id": 77,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切片後快速翻炒，保持鮮脆口感與翠綠顏色"
   },
   {
     "recipe_ingredient_id": 405,
@@ -3401,7 +3653,8 @@
     "ingredient_id": 57,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 406,
@@ -3409,7 +3662,8 @@
     "ingredient_id": 92,
     "amount": 2.0,
     "unit_name": "朵",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 407,
@@ -3417,7 +3671,8 @@
     "ingredient_id": 170,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "建議橫紋切薄片，快炒熟後肉質較不乾柴"
   },
   {
     "recipe_ingredient_id": 408,
@@ -3425,7 +3680,8 @@
     "ingredient_id": 230,
     "amount": 1.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "放置於正中央。石鍋導熱快，攪拌時會形成滑順蛋香"
   },
   {
     "recipe_ingredient_id": 409,
@@ -3433,7 +3689,8 @@
     "ingredient_id": 360,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "可與砂糖、香油預調成拌飯專用醬"
   },
   {
     "recipe_ingredient_id": 410,
@@ -3441,7 +3698,8 @@
     "ingredient_id": 516,
     "amount": 20.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "塗抹於石鍋內壁，是形成香脆鍋巴的關鍵"
   },
   {
     "recipe_ingredient_id": 411,
@@ -3449,7 +3707,8 @@
     "ingredient_id": 410,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 412,
@@ -3457,7 +3716,8 @@
     "ingredient_id": 165,
     "amount": 500.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "含雞翅與小雞腿，兩次油炸（Double Fry）能確保外皮不濕軟"
   },
   {
     "recipe_ingredient_id": 413,
@@ -3465,7 +3725,8 @@
     "ingredient_id": 394,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "裹粉後靜置 5 分鐘使其「返潮」，炸皮才不易脫落"
   },
   {
     "recipe_ingredient_id": 414,
@@ -3473,7 +3734,8 @@
     "ingredient_id": 2,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需與奶油小火炒香，不可焦黑，否則會產生苦味"
   },
   {
     "recipe_ingredient_id": 415,
@@ -3481,7 +3743,8 @@
     "ingredient_id": 331,
     "amount": 20.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 416,
@@ -3489,7 +3752,8 @@
     "ingredient_id": 387,
     "amount": 60.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "醬汁煮至起大泡濃稠後再放入炸雞快速翻裹"
   },
   {
     "recipe_ingredient_id": 417,
@@ -3497,7 +3761,8 @@
     "ingredient_id": 499,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 418,
@@ -3505,7 +3770,8 @@
     "ingredient_id": 462,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 419,
@@ -3513,7 +3779,8 @@
     "ingredient_id": 416,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 420,
@@ -3521,7 +3788,8 @@
     "ingredient_id": 419,
     "amount": 1.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 421,
@@ -3529,7 +3797,8 @@
     "ingredient_id": 164,
     "amount": 400.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "冷水下鍋汆燙能更徹底去除血水，確保雞湯清澈"
   },
   {
     "recipe_ingredient_id": 422,
@@ -3537,7 +3806,8 @@
     "ingredient_id": 90,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "新鮮菇類不耐長煮，起鍋前 5-10 分鐘下鍋即可"
   },
   {
     "recipe_ingredient_id": 423,
@@ -3545,7 +3815,8 @@
     "ingredient_id": 92,
     "amount": 4.0,
     "unit_name": "朵",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "泡發後的香菇水記得保留，倒入湯中增加底蘊香氣"
   },
   {
     "recipe_ingredient_id": 424,
@@ -3553,7 +3824,8 @@
     "ingredient_id": 481,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "最後加入可保持色澤鮮紅，並帶出甘甜餘韻"
   },
   {
     "recipe_ingredient_id": 425,
@@ -3561,7 +3833,8 @@
     "ingredient_id": 482,
     "amount": 6.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 426,
@@ -3569,7 +3842,8 @@
     "ingredient_id": 9,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 427,
@@ -3577,7 +3851,8 @@
     "ingredient_id": 340,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 428,
@@ -3585,7 +3860,8 @@
     "ingredient_id": 496,
     "amount": 1000.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 429,
@@ -3593,7 +3869,8 @@
     "ingredient_id": 416,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 430,
@@ -3601,7 +3878,8 @@
     "ingredient_id": 181,
     "amount": 300.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "汆燙後洗淨浮渣，燉煮後的湯色才會透亮"
   },
   {
     "recipe_ingredient_id": 431,
@@ -3609,7 +3887,8 @@
     "ingredient_id": 517,
     "amount": 0.6,
     "unit_name": "根",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "使用滾刀塊切法，可增加受熱面積讓蘿蔔更快軟爛入味"
   },
   {
     "recipe_ingredient_id": 432,
@@ -3617,7 +3896,8 @@
     "ingredient_id": 518,
     "amount": 1.0,
     "unit_name": "根",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "釋放天然甜味，平衡排骨的肉質濃郁感"
   },
   {
     "recipe_ingredient_id": 433,
@@ -3625,7 +3905,8 @@
     "ingredient_id": 9,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 434,
@@ -3633,7 +3914,8 @@
     "ingredient_id": 496,
     "amount": 1500.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 435,
@@ -3641,7 +3923,8 @@
     "ingredient_id": 416,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 436,
@@ -3649,7 +3932,8 @@
     "ingredient_id": 27,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "選配食材，於盛盤後加入，可大幅提升台式家常風味"
   },
   {
     "recipe_ingredient_id": 437,
@@ -3657,7 +3941,8 @@
     "ingredient_id": 519,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切絲後用少許醬油抓醃，下鍋前可加一點點太白粉抓勻保持滑嫩"
   },
   {
     "recipe_ingredient_id": 438,
@@ -3665,7 +3950,8 @@
     "ingredient_id": 256,
     "amount": 1.0,
     "unit_name": "盒",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切成 0.5 公分粗細長條，放入水中防止黏連"
   },
   {
     "recipe_ingredient_id": 439,
@@ -3673,7 +3959,8 @@
     "ingredient_id": 94,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 440,
@@ -3681,7 +3968,8 @@
     "ingredient_id": 57,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 441,
@@ -3689,7 +3977,8 @@
     "ingredient_id": 50,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "可選用熟筍絲，口感較為爽脆清甜"
   },
   {
     "recipe_ingredient_id": 442,
@@ -3697,7 +3986,8 @@
     "ingredient_id": 230,
     "amount": 2.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "勾芡後再以繞圈方式淋入蛋液，才能形成漂亮懸浮的蛋花"
   },
   {
     "recipe_ingredient_id": 443,
@@ -3705,7 +3995,8 @@
     "ingredient_id": 16,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "起鍋前撒上，增加新鮮辛香味與配色"
   },
   {
     "recipe_ingredient_id": 444,
@@ -3713,7 +4004,8 @@
     "ingredient_id": 350,
     "amount": 1000.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 445,
@@ -3721,7 +4013,8 @@
     "ingredient_id": 331,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "用於調色及提供基本的鹹度層次"
   },
   {
     "recipe_ingredient_id": 446,
@@ -3729,7 +4022,8 @@
     "ingredient_id": 420,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "酸辣湯「辣味」的主角。建議熄火後再下，香氣才不會逸散"
   },
   {
     "recipe_ingredient_id": 447,
@@ -3737,7 +4031,8 @@
     "ingredient_id": 337,
     "amount": 45.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "最後熄火再加入。烏醋的酸度較厚實，與白胡椒是絕配"
   },
   {
     "recipe_ingredient_id": 448,
@@ -3745,7 +4040,8 @@
     "ingredient_id": 395,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "粉水比例 1:2。必須在淋蛋液前完成勾芡，口感才絲滑"
   },
   {
     "recipe_ingredient_id": 449,
@@ -3753,7 +4049,8 @@
     "ingredient_id": 516,
     "amount": 5.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 450,
@@ -3761,7 +4058,8 @@
     "ingredient_id": 164,
     "amount": 400.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "建議先以少量黑麻油煸炒出雞油，湯頭風味更醇厚"
   },
   {
     "recipe_ingredient_id": 451,
@@ -3769,7 +4067,8 @@
     "ingredient_id": 520,
     "amount": 0.5,
     "unit_name": "罐",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "包含辣椒與湯汁，湯汁是甘甜微辣風味的主要來源"
   },
   {
     "recipe_ingredient_id": 452,
@@ -3777,7 +4076,8 @@
     "ingredient_id": 213,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "最後轉大火放入，開口即熄火，保留肉質飽滿不縮水"
   },
   {
     "recipe_ingredient_id": 453,
@@ -3785,7 +4085,8 @@
     "ingredient_id": 1,
     "amount": 4.0,
     "unit_name": "瓣",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "拍裂後爆香，可增加湯底的辛辣層次"
   },
   {
     "recipe_ingredient_id": 454,
@@ -3793,7 +4094,8 @@
     "ingredient_id": 9,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 455,
@@ -3801,7 +4103,8 @@
     "ingredient_id": 340,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 456,
@@ -3809,7 +4112,8 @@
     "ingredient_id": 496,
     "amount": 1200.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 457,
@@ -3817,15 +4121,17 @@
     "ingredient_id": 181,
     "amount": 300.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "汆燙洗淨浮渣，可確保湯底色澤紅潤清澈"
   },
   {
     "recipe_ingredient_id": 458,
     "recipe_id": 58,
-    "ingredient_id": 38,
+    "ingredient_id": 88,
     "amount": 300.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "務必先入鍋炒至微出紅汁，茄紅素釋放後湯頭更鮮美"
   },
   {
     "recipe_ingredient_id": 459,
@@ -3833,7 +4139,8 @@
     "ingredient_id": 230,
     "amount": 2.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 460,
@@ -3841,7 +4148,8 @@
     "ingredient_id": 9,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 461,
@@ -3849,7 +4157,8 @@
     "ingredient_id": 16,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 462,
@@ -3857,7 +4166,8 @@
     "ingredient_id": 496,
     "amount": 1200.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 463,
@@ -3865,7 +4175,8 @@
     "ingredient_id": 416,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 464,
@@ -3873,7 +4184,8 @@
     "ingredient_id": 410,
     "amount": 2.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "少許糖可中和番茄酸味，讓口感更為溫潤"
   },
   {
     "recipe_ingredient_id": 465,
@@ -3881,7 +4193,8 @@
     "ingredient_id": 171,
     "amount": 600.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切大塊汆燙，需慢火燉煮 2 小時至牛筋軟 Q、肉質化開"
   },
   {
     "recipe_ingredient_id": 466,
@@ -3889,7 +4202,8 @@
     "ingredient_id": 284,
     "amount": 400.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "寬麵較耐煮且有嚼勁，能完美承載濃郁湯頭"
   },
   {
     "recipe_ingredient_id": 467,
@@ -3897,7 +4211,8 @@
     "ingredient_id": 517,
     "amount": 0.6,
     "unit_name": "根",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切大塊與肉同煮，燉至半透明狀時口感甜美"
   },
   {
     "recipe_ingredient_id": 468,
@@ -3905,7 +4220,8 @@
     "ingredient_id": 55,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 469,
@@ -3913,7 +4229,8 @@
     "ingredient_id": 36,
     "amount": 4.0,
     "unit_name": "株",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "另起鍋燙熟，擺盤時放上維持翠綠視覺效果"
   },
   {
     "recipe_ingredient_id": 470,
@@ -3921,7 +4238,8 @@
     "ingredient_id": 14,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 471,
@@ -3929,7 +4247,8 @@
     "ingredient_id": 9,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 472,
@@ -3937,7 +4256,8 @@
     "ingredient_id": 1,
     "amount": 5.0,
     "unit_name": "瓣",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 473,
@@ -3945,7 +4265,8 @@
     "ingredient_id": 359,
     "amount": 45.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需先與辛香料炒出紅油香氣，湯頭才會有濃厚底蘊"
   },
   {
     "recipe_ingredient_id": 474,
@@ -3953,7 +4274,8 @@
     "ingredient_id": 331,
     "amount": 60.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 475,
@@ -3961,7 +4283,8 @@
     "ingredient_id": 340,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 476,
@@ -3969,7 +4292,8 @@
     "ingredient_id": 436,
     "amount": 3.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "提供濃郁的回甘香氣，切勿放多以免搶味"
   },
   {
     "recipe_ingredient_id": 477,
@@ -3977,7 +4301,8 @@
     "ingredient_id": 410,
     "amount": 15.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 478,
@@ -3985,7 +4310,8 @@
     "ingredient_id": 351,
     "amount": 1500.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 479,
@@ -3993,7 +4319,8 @@
     "ingredient_id": 310,
     "amount": 4.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "平底鍋不放油乾烙至微起泡，散發穀物香氣"
   },
   {
     "recipe_ingredient_id": 480,
@@ -4001,7 +4328,8 @@
     "ingredient_id": 521,
     "amount": 250.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "炒至水分完全蒸發呈現深褐色，焦香味最重"
   },
   {
     "recipe_ingredient_id": 481,
@@ -4009,7 +4337,8 @@
     "ingredient_id": 5,
     "amount": 50.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 482,
@@ -4017,7 +4346,8 @@
     "ingredient_id": 88,
     "amount": 1.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "去籽切丁，避免多餘水分沾濕餅皮"
   },
   {
     "recipe_ingredient_id": 483,
@@ -4025,7 +4355,8 @@
     "ingredient_id": 27,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 484,
@@ -4033,7 +4364,8 @@
     "ingredient_id": 136,
     "amount": 2.0,
     "unit_name": "角",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "食用前親自擠上，鮮爽果酸可中和肉燥油脂感"
   },
   {
     "recipe_ingredient_id": 485,
@@ -4041,7 +4373,8 @@
     "ingredient_id": 377,
     "amount": 60.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 486,
@@ -4049,7 +4382,8 @@
     "ingredient_id": 54,
     "amount": 40.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 487,
@@ -4057,7 +4391,8 @@
     "ingredient_id": 240,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "濃醇奶香能柔化香料的辛辣感"
   },
   {
     "recipe_ingredient_id": 488,
@@ -4065,7 +4400,8 @@
     "ingredient_id": 426,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "核心香料，提供墨西哥料理標誌性的煙燻香氣"
   },
   {
     "recipe_ingredient_id": 489,
@@ -4073,7 +4409,8 @@
     "ingredient_id": 422,
     "amount": 5.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 490,
@@ -4081,7 +4418,8 @@
     "ingredient_id": 210,
     "amount": 6.0,
     "unit_name": "隻",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "保留蝦頭熬湯是湯頭紅亮的祕訣；蝦身去殼留尾口感更佳"
   },
   {
     "recipe_ingredient_id": 491,
@@ -4089,7 +4427,8 @@
     "ingredient_id": 213,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "務必徹底吐沙，待蛤蜊全開後即刻熄火以保肉質肥嫩"
   },
   {
     "recipe_ingredient_id": 492,
@@ -4097,7 +4436,8 @@
     "ingredient_id": 90,
     "amount": 100.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "撕成小塊增加吸收酸辣湯汁的面積"
   },
   {
     "recipe_ingredient_id": 493,
@@ -4105,7 +4445,8 @@
     "ingredient_id": 89,
     "amount": 6.0,
     "unit_name": "顆",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "對半切開，煮至微軟釋放天然果酸"
   },
   {
     "recipe_ingredient_id": 494,
@@ -4113,7 +4454,8 @@
     "ingredient_id": 31,
     "amount": 2.0,
     "unit_name": "支",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切段後用刀背拍碎，才能徹底釋放核心的柑橘香氣"
   },
   {
     "recipe_ingredient_id": 495,
@@ -4121,7 +4463,8 @@
     "ingredient_id": 12,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "切薄片，提供冬蔭功標誌性的辛香木質調風味"
   },
   {
     "recipe_ingredient_id": 496,
@@ -4129,7 +4472,8 @@
     "ingredient_id": 34,
     "amount": 4.0,
     "unit_name": "片",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "將葉片稍微揉捏或撕開葉脈，香氣釋放效果更好"
   },
   {
     "recipe_ingredient_id": 497,
@@ -4137,7 +4481,8 @@
     "ingredient_id": 335,
     "amount": 30.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "提供鮮鹹層次，隨個人口味調整，通常不需額外加鹽"
   },
   {
     "recipe_ingredient_id": 498,
@@ -4145,7 +4490,8 @@
     "ingredient_id": 348,
     "amount": 100.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "最後加入勾勒出滑順乳香，切勿久煮以免乳脂肪分離"
   },
   {
     "recipe_ingredient_id": 499,
@@ -4153,7 +4499,8 @@
     "ingredient_id": 503,
     "amount": 45.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "熄火後才加入，可防止高溫導致變苦並保留清新酸香"
   },
   {
     "recipe_ingredient_id": 500,
@@ -4161,7 +4508,8 @@
     "ingredient_id": 422,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "替代泰式辣椒膏，提供色澤紅亮且香氣溫和的效果"
   },
   {
     "recipe_ingredient_id": 501,
@@ -4169,7 +4517,8 @@
     "ingredient_id": 410,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "微量糖分能有效平衡酸辣感，讓湯頭回甘"
   },
   {
     "recipe_ingredient_id": 502,
@@ -4177,7 +4526,8 @@
     "ingredient_id": 2,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 503,
@@ -4185,7 +4535,8 @@
     "ingredient_id": 496,
     "amount": 800.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 504,
@@ -4193,7 +4544,8 @@
     "ingredient_id": 52,
     "amount": 200.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "洗淨後務必使用蔬果脫水器甩乾，否則醬汁無法附著"
   },
   {
     "recipe_ingredient_id": 505,
@@ -4201,7 +4553,8 @@
     "ingredient_id": 308,
     "amount": 30.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "出餐前最後一刻再撒上，保持極致的香酥口感"
   },
   {
     "recipe_ingredient_id": 506,
@@ -4209,7 +4562,8 @@
     "ingredient_id": 163,
     "amount": 150.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "煎熟後需靜置 5 分鐘再切片，鎖住肉汁避免乾柴"
   },
   {
     "recipe_ingredient_id": 507,
@@ -4217,7 +4571,8 @@
     "ingredient_id": 251,
     "amount": 20.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "建議現刨，新鮮乳酪的油脂感與醬汁融合度最高"
   },
   {
     "recipe_ingredient_id": 508,
@@ -4225,7 +4580,8 @@
     "ingredient_id": 522,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "凱薩醬的鹹鮮靈魂，需徹底壓成泥狀以免影響口感"
   },
   {
     "recipe_ingredient_id": 509,
@@ -4233,7 +4589,8 @@
     "ingredient_id": 2,
     "amount": 10.0,
     "unit_name": "克",
-    "is_modified": false
+    "is_modified": false,
+    "remark": ""
   },
   {
     "recipe_ingredient_id": 510,
@@ -4241,7 +4598,8 @@
     "ingredient_id": 231,
     "amount": 1.0,
     "unit_name": "個",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "必須使用室溫蛋黃，是穩定乳化醬汁的關鍵載體"
   },
   {
     "recipe_ingredient_id": 511,
@@ -4249,7 +4607,8 @@
     "ingredient_id": 345,
     "amount": 45.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "需以極緩慢的速度滴入並強力攪拌，直到形成濃稠霜狀"
   },
   {
     "recipe_ingredient_id": 512,
@@ -4257,6 +4616,1483 @@
     "ingredient_id": 503,
     "amount": 15.0,
     "unit_name": "毫升",
-    "is_modified": false
+    "is_modified": false,
+    "remark": "提供清爽果酸，用來化解起司與油脂的厚重感"
+  },
+  {
+    "recipe_ingredient_id": 513,
+    "recipe_id": 63,
+    "ingredient_id": 173,
+    "amount": 1.0,
+    "unit_name": "客",
+    "is_modified": false,
+    "remark": "厚度建議 2.5-3 公分，料理前需先置於室溫回溫 30 分鐘"
+  },
+  {
+    "recipe_ingredient_id": 514,
+    "recipe_id": 63,
+    "ingredient_id": 28,
+    "amount": 5.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "使用新鮮整株迷迭香，香氣釋放效果遠優於乾燥香料"
+  },
+  {
+    "recipe_ingredient_id": 515,
+    "recipe_id": 63,
+    "ingredient_id": 1,
+    "amount": 2.0,
+    "unit_name": "瓣",
+    "is_modified": false,
+    "remark": "不去皮直接拍扁，可防止蒜頭在高溫下過快焦黑"
+  },
+  {
+    "recipe_ingredient_id": 516,
+    "recipe_id": 63,
+    "ingredient_id": 499,
+    "amount": 20.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "提供濃郁乳香並作為傳熱介質，是法式淋油的核心"
+  },
+  {
+    "recipe_ingredient_id": 517,
+    "recipe_id": 63,
+    "ingredient_id": 417,
+    "amount": 2.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "粗鹽能提供更好的顆粒感與鹹味層次"
+  },
+  {
+    "recipe_ingredient_id": 518,
+    "recipe_id": 63,
+    "ingredient_id": 418,
+    "amount": 1.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "建議現磨黑胡椒，香氣最為辛辣清新"
+  },
+  {
+    "recipe_ingredient_id": 519,
+    "recipe_id": 63,
+    "ingredient_id": 48,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "去除尾部纖維較硬處，是理想的低碳配菜"
+  },
+  {
+    "recipe_ingredient_id": 520,
+    "recipe_id": 63,
+    "ingredient_id": 89,
+    "amount": 60.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 521,
+    "recipe_id": 63,
+    "ingredient_id": 345,
+    "amount": 10.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "選用高發煙點的橄欖油進行初始大火煎製"
+  },
+  {
+    "recipe_ingredient_id": 522,
+    "recipe_id": 64,
+    "ingredient_id": 313,
+    "amount": 6.0,
+    "unit_name": "片",
+    "is_modified": false,
+    "remark": "乾燥米紙質地脆弱，取出時需小心，浸水時間不可過長"
+  },
+  {
+    "recipe_ingredient_id": 523,
+    "recipe_id": 64,
+    "ingredient_id": 291,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "燙熟後務必過冷水並瀝乾，可保持米線 Q 彈且互不黏連"
+  },
+  {
+    "recipe_ingredient_id": 524,
+    "recipe_id": 64,
+    "ingredient_id": 210,
+    "amount": 6.0,
+    "unit_name": "隻",
+    "is_modified": false,
+    "remark": "燙熟後去殼對半片開，平舖在米紙上顏色最美"
+  },
+  {
+    "recipe_ingredient_id": 525,
+    "recipe_id": 64,
+    "ingredient_id": 512,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "川燙後切成薄片，提供油脂香氣與咬勁"
+  },
+  {
+    "recipe_ingredient_id": 526,
+    "recipe_id": 64,
+    "ingredient_id": 52,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 527,
+    "recipe_id": 64,
+    "ingredient_id": 25,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "越式風味的靈魂，建議整片葉子包入香氣最足"
+  },
+  {
+    "recipe_ingredient_id": 528,
+    "recipe_id": 64,
+    "ingredient_id": 29,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 529,
+    "recipe_id": 64,
+    "ingredient_id": 45,
+    "amount": 6.0,
+    "unit_name": "根",
+    "is_modified": false,
+    "remark": "選用細長的韭菜梗，收口時留一段露在外面是道地做法"
+  },
+  {
+    "recipe_ingredient_id": 530,
+    "recipe_id": 64,
+    "ingredient_id": 335,
+    "amount": 20.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 531,
+    "recipe_id": 64,
+    "ingredient_id": 503,
+    "amount": 20.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 532,
+    "recipe_id": 64,
+    "ingredient_id": 410,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 533,
+    "recipe_id": 64,
+    "ingredient_id": 2,
+    "amount": 5.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 534,
+    "recipe_id": 64,
+    "ingredient_id": 496,
+    "amount": 20.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "用於調釋沾醬，冷開水即可"
+  },
+  {
+    "recipe_ingredient_id": 535,
+    "recipe_id": 65,
+    "ingredient_id": 515,
+    "amount": 150.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "義大利米雖非傳統 Bomba 米，但其高澱粉特性仍能做出優秀質地，切記不可洗米"
+  },
+  {
+    "recipe_ingredient_id": 536,
+    "recipe_id": 65,
+    "ingredient_id": 440,
+    "amount": 0.1,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "世界上最昂貴的香料，只需一小撮即可提供標誌性的金黃色與藥草香"
+  },
+  {
+    "recipe_ingredient_id": 537,
+    "recipe_id": 65,
+    "ingredient_id": 214,
+    "amount": 6.0,
+    "unit_name": "顆",
+    "is_modified": false,
+    "remark": "需刷洗外殼並去除足絲，擺在表面呈現放射狀最美觀"
+  },
+  {
+    "recipe_ingredient_id": 538,
+    "recipe_id": 65,
+    "ingredient_id": 219,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 539,
+    "recipe_id": 65,
+    "ingredient_id": 210,
+    "amount": 6.0,
+    "unit_name": "隻",
+    "is_modified": false,
+    "remark": "保留蝦殼煎出蝦油，是 Paella 香氣層次的關鍵"
+  },
+  {
+    "recipe_ingredient_id": 540,
+    "recipe_id": 65,
+    "ingredient_id": 5,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 541,
+    "recipe_id": 65,
+    "ingredient_id": 86,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "切成細丁炒軟，與番紅花共同構建紅黃相間的色澤"
+  },
+  {
+    "recipe_ingredient_id": 542,
+    "recipe_id": 65,
+    "ingredient_id": 350,
+    "amount": 400.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "需維持熱態，分次加入以精準控制米飯熟度"
+  },
+  {
+    "recipe_ingredient_id": 543,
+    "recipe_id": 65,
+    "ingredient_id": 341,
+    "amount": 30.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 544,
+    "recipe_id": 65,
+    "ingredient_id": 136,
+    "amount": 2.0,
+    "unit_name": "角",
+    "is_modified": false,
+    "remark": "盛盤後裝飾，食用前擠上可平衡海鮮的濃厚味"
+  },
+  {
+    "recipe_ingredient_id": 545,
+    "recipe_id": 65,
+    "ingredient_id": 422,
+    "amount": 2.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "提供煙燻香氣與紅潤色澤"
+  },
+  {
+    "recipe_ingredient_id": 546,
+    "recipe_id": 66,
+    "ingredient_id": 186,
+    "amount": 300.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "建議選用 3:7 肥瘦比，口感濕潤不乾硬"
+  },
+  {
+    "recipe_ingredient_id": 547,
+    "recipe_id": 66,
+    "ingredient_id": 236,
+    "amount": 2.0,
+    "unit_name": "顆",
+    "is_modified": false,
+    "remark": "蛋白提供鹹度，蛋黃提供油脂香氣與視覺核心"
+  },
+  {
+    "recipe_ingredient_id": 548,
+    "recipe_id": 66,
+    "ingredient_id": 523,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "包含固體醬瓜與少許醬汁，是甘甜味的來源"
+  },
+  {
+    "recipe_ingredient_id": 549,
+    "recipe_id": 66,
+    "ingredient_id": 16,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 550,
+    "recipe_id": 66,
+    "ingredient_id": 2,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 551,
+    "recipe_id": 66,
+    "ingredient_id": 331,
+    "amount": 10.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "因鹹蛋白已有鹹味，醬油僅需少量增色提味"
+  },
+  {
+    "recipe_ingredient_id": 552,
+    "recipe_id": 66,
+    "ingredient_id": 420,
+    "amount": 1.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 553,
+    "recipe_id": 66,
+    "ingredient_id": 496,
+    "amount": 30.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "加入少許水與肉攪拌，可使蒸出來的成品質地更鬆軟"
+  },
+  {
+    "recipe_ingredient_id": 554,
+    "recipe_id": 67,
+    "ingredient_id": 175,
+    "amount": 300.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "切成約 3 公分方塊，燉煮後縮水大小最剛好"
+  },
+  {
+    "recipe_ingredient_id": 555,
+    "recipe_id": 67,
+    "ingredient_id": 60,
+    "amount": 200.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "羅宋湯的靈魂色澤來源，切細絲或薄片以便釋放顏色"
+  },
+  {
+    "recipe_ingredient_id": 556,
+    "recipe_id": 67,
+    "ingredient_id": 5,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "炒至半透明狀可為湯底提供基礎甜味"
+  },
+  {
+    "recipe_ingredient_id": 557,
+    "recipe_id": 67,
+    "ingredient_id": 55,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 558,
+    "recipe_id": 67,
+    "ingredient_id": 65,
+    "amount": 150.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "馬鈴薯釋放的澱粉能讓湯頭帶有天然的濃稠感"
+  },
+  {
+    "recipe_ingredient_id": 559,
+    "recipe_id": 67,
+    "ingredient_id": 41,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "切成寬條狀，最後加入以保留些許爽脆口感"
+  },
+  {
+    "recipe_ingredient_id": 560,
+    "recipe_id": 67,
+    "ingredient_id": 367,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "增加湯頭厚度與酸甜層次，需先入鍋略炒去除生味"
+  },
+  {
+    "recipe_ingredient_id": 561,
+    "recipe_id": 67,
+    "ingredient_id": 524,
+    "amount": 2.0,
+    "unit_name": "片",
+    "is_modified": false,
+    "remark": "提供乾燥香草特有的深邃木質香氣"
+  },
+  {
+    "recipe_ingredient_id": 562,
+    "recipe_id": 67,
+    "ingredient_id": 240,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "食用前放在湯面，提供解膩的酸度與乳香"
+  },
+  {
+    "recipe_ingredient_id": 563,
+    "recipe_id": 67,
+    "ingredient_id": 496,
+    "amount": 1200.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 564,
+    "recipe_id": 67,
+    "ingredient_id": 417,
+    "amount": 2.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 565,
+    "recipe_id": 67,
+    "ingredient_id": 419,
+    "amount": 1.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 566,
+    "recipe_id": 68,
+    "ingredient_id": 210,
+    "amount": 6.0,
+    "unit_name": "隻",
+    "is_modified": false,
+    "remark": "去殼留尾，去除腸泥並在腹部劃刀以確保炸後筆直"
+  },
+  {
+    "recipe_ingredient_id": 567,
+    "recipe_id": 68,
+    "ingredient_id": 402,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "含麵衣與預沾用的乾粉"
+  },
+  {
+    "recipe_ingredient_id": 568,
+    "recipe_id": 68,
+    "ingredient_id": 496,
+    "amount": 150.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "務必使用帶碎冰的冰水，是麵衣酥脆不回軟的關鍵"
+  },
+  {
+    "recipe_ingredient_id": 569,
+    "recipe_id": 68,
+    "ingredient_id": 58,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "輕微壓乾水分後拌入沾醬，可解膩並增加鮮甜感"
+  },
+  {
+    "recipe_ingredient_id": 570,
+    "recipe_id": 68,
+    "ingredient_id": 333,
+    "amount": 40.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "與水 1:2 稀釋，作為清爽的蘸汁底"
+  },
+  {
+    "recipe_ingredient_id": 571,
+    "recipe_id": 68,
+    "ingredient_id": 71,
+    "amount": 2.0,
+    "unit_name": "片",
+    "is_modified": false,
+    "remark": "厚度控制在 0.5 公分，炸熟後鬆軟香甜"
+  },
+  {
+    "recipe_ingredient_id": 572,
+    "recipe_id": 68,
+    "ingredient_id": 83,
+    "amount": 2.0,
+    "unit_name": "條",
+    "is_modified": false,
+    "remark": "切成長條或扇狀，表面劃花刀以便吸附麵衣"
+  },
+  {
+    "recipe_ingredient_id": 573,
+    "recipe_id": 68,
+    "ingredient_id": 525,
+    "amount": 1.0,
+    "unit_name": "顆",
+    "is_modified": false,
+    "remark": "去籽切塊，提供清爽的微苦風味層次"
+  },
+  {
+    "recipe_ingredient_id": 574,
+    "recipe_id": 68,
+    "ingredient_id": 345,
+    "amount": 500.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "需準備足量油以維持恆溫，避免食材入鍋後油溫驟降"
+  },
+  {
+    "recipe_ingredient_id": 575,
+    "recipe_id": 69,
+    "ingredient_id": 180,
+    "amount": 400.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "手切成約 0.5 公分寬、3 公分長的條狀，燉煮後口感最分明"
+  },
+  {
+    "recipe_ingredient_id": 576,
+    "recipe_id": 69,
+    "ingredient_id": 444,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "滷肉飯香氣的核心來源，份量不可過少"
+  },
+  {
+    "recipe_ingredient_id": 577,
+    "recipe_id": 69,
+    "ingredient_id": 427,
+    "amount": 2.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "提供深層的台式香料底蘊"
+  },
+  {
+    "recipe_ingredient_id": 578,
+    "recipe_id": 69,
+    "ingredient_id": 331,
+    "amount": 80.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "建議混合生抽與老抽，兼顧鹹度與紅亮色澤"
+  },
+  {
+    "recipe_ingredient_id": 579,
+    "recipe_id": 69,
+    "ingredient_id": 414,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "炒出糖色後能賦予滷肉迷人的光澤感"
+  },
+  {
+    "recipe_ingredient_id": 580,
+    "recipe_id": 69,
+    "ingredient_id": 340,
+    "amount": 50.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 581,
+    "recipe_id": 69,
+    "ingredient_id": 272,
+    "amount": 4.0,
+    "unit_name": "碗",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 582,
+    "recipe_id": 69,
+    "ingredient_id": 230,
+    "amount": 4.0,
+    "unit_name": "顆",
+    "is_modified": false,
+    "remark": "事先煮熟去殼，隨肉燥一同燉煮入味成滷蛋"
+  },
+  {
+    "recipe_ingredient_id": 583,
+    "recipe_id": 69,
+    "ingredient_id": 490,
+    "amount": 4.0,
+    "unit_name": "片",
+    "is_modified": false,
+    "remark": "清脆微酸的口感能有效解除肉燥的油膩感"
+  },
+  {
+    "recipe_ingredient_id": 584,
+    "recipe_id": 69,
+    "ingredient_id": 496,
+    "amount": 800.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 585,
+    "recipe_id": 70,
+    "ingredient_id": 216,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "選用肉質肥美、外緣黑環明顯的鮮蚵，洗淨瀝乾避免過多水分"
+  },
+  {
+    "recipe_ingredient_id": 586,
+    "recipe_id": 70,
+    "ingredient_id": 230,
+    "amount": 1.0,
+    "unit_name": "顆",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 587,
+    "recipe_id": 70,
+    "ingredient_id": 526,
+    "amount": 2.0,
+    "unit_name": "株",
+    "is_modified": false,
+    "remark": "切成約 5 公分長段，增加脆口層次"
+  },
+  {
+    "recipe_ingredient_id": 588,
+    "recipe_id": 70,
+    "ingredient_id": 397,
+    "amount": 40.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "2:1 比例中的主角，提供主要的 Q 彈咬勁"
+  },
+  {
+    "recipe_ingredient_id": 589,
+    "recipe_id": 70,
+    "ingredient_id": 395,
+    "amount": 20.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "增加粉漿的透明感與滑順度"
+  },
+  {
+    "recipe_ingredient_id": 590,
+    "recipe_id": 70,
+    "ingredient_id": 496,
+    "amount": 120.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "與粉類混合均勻，粉漿需呈現流動液狀"
+  },
+  {
+    "recipe_ingredient_id": 591,
+    "recipe_id": 70,
+    "ingredient_id": 364,
+    "amount": 30.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "海山醬是台式淋醬的基底，提供獨特的鹹甜味"
+  },
+  {
+    "recipe_ingredient_id": 592,
+    "recipe_id": 70,
+    "ingredient_id": 365,
+    "amount": 15.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": "增加微辣感與紅潤光澤"
+  },
+  {
+    "recipe_ingredient_id": 593,
+    "recipe_id": 70,
+    "ingredient_id": 16,
+    "amount": 5.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 594,
+    "recipe_id": 71,
+    "ingredient_id": 390,
+    "amount": 250.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "同原版高粉比例，確保餅皮韌性"
+  },
+  {
+    "recipe_ingredient_id": 595,
+    "recipe_id": 71,
+    "ingredient_id": 497,
+    "amount": 3.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 596,
+    "recipe_id": 71,
+    "ingredient_id": 496,
+    "amount": 150.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 597,
+    "recipe_id": 71,
+    "ingredient_id": 416,
+    "amount": 2.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 598,
+    "recipe_id": 71,
+    "ingredient_id": 345,
+    "amount": 30.0,
+    "unit_name": "毫升",
+    "is_modified": true,
+    "remark": "增量後的橄欖油，部分用於低溫煉製蒜油"
+  },
+  {
+    "recipe_ingredient_id": 599,
+    "recipe_id": 71,
+    "ingredient_id": 2,
+    "amount": 15.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "新增食材，用於熬製靈魂蒜油"
+  },
+  {
+    "recipe_ingredient_id": 600,
+    "recipe_id": 71,
+    "ingredient_id": 367,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 601,
+    "recipe_id": 71,
+    "ingredient_id": 242,
+    "amount": 125.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 602,
+    "recipe_id": 71,
+    "ingredient_id": 23,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 603,
+    "recipe_id": 71,
+    "ingredient_id": 387,
+    "amount": 15.0,
+    "unit_name": "毫升",
+    "is_modified": true,
+    "remark": "新增食材，出爐後淋上，創造甜鹹味覺衝擊"
+  },
+  {
+    "recipe_ingredient_id": 604,
+    "recipe_id": 72,
+    "ingredient_id": 390,
+    "amount": 250.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 605,
+    "recipe_id": 72,
+    "ingredient_id": 497,
+    "amount": 3.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 606,
+    "recipe_id": 72,
+    "ingredient_id": 496,
+    "amount": 150.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 607,
+    "recipe_id": 72,
+    "ingredient_id": 416,
+    "amount": 2.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 608,
+    "recipe_id": 72,
+    "ingredient_id": 345,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 609,
+    "recipe_id": 72,
+    "ingredient_id": 367,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "抹醬層，建議選用酸度明顯的番茄糊以平衡起司濃厚度"
+  },
+  {
+    "recipe_ingredient_id": 610,
+    "recipe_id": 72,
+    "ingredient_id": 242,
+    "amount": 125.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "改用整顆布拉塔起司(Burrata)，出爐後置於披薩中心，切開後讓流心鋪滿餅皮"
+  },
+  {
+    "recipe_ingredient_id": 611,
+    "recipe_id": 72,
+    "ingredient_id": 501,
+    "amount": 15.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "新增食材，塗抹在番茄糊之上共同烘烤，散發迷人香氣"
+  },
+  {
+    "recipe_ingredient_id": 612,
+    "recipe_id": 72,
+    "ingredient_id": 23,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 613,
+    "recipe_id": 73,
+    "ingredient_id": 390,
+    "amount": 250.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 614,
+    "recipe_id": 73,
+    "ingredient_id": 497,
+    "amount": 3.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 615,
+    "recipe_id": 73,
+    "ingredient_id": 496,
+    "amount": 150.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 616,
+    "recipe_id": 73,
+    "ingredient_id": 416,
+    "amount": 2.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 617,
+    "recipe_id": 73,
+    "ingredient_id": 347,
+    "amount": 15.0,
+    "unit_name": "毫升",
+    "is_modified": true,
+    "remark": "改用辣油取代普通橄欖油，從餅皮基底就帶有微辛香氣"
+  },
+  {
+    "recipe_ingredient_id": 618,
+    "recipe_id": 73,
+    "ingredient_id": 367,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 619,
+    "recipe_id": 73,
+    "ingredient_id": 243,
+    "amount": 125.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "改用莫札瑞拉絲，較易於與肉類油脂結合"
+  },
+  {
+    "recipe_ingredient_id": 620,
+    "recipe_id": 73,
+    "ingredient_id": 193,
+    "amount": 60.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "新增食材，切薄片擺放，烘烤後邊緣會微捲酥脆"
+  },
+  {
+    "recipe_ingredient_id": 621,
+    "recipe_id": 73,
+    "ingredient_id": 489,
+    "amount": 20.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "新增食材，提供酸辣度與清爽的脆度"
+  },
+  {
+    "recipe_ingredient_id": 622,
+    "recipe_id": 73,
+    "ingredient_id": 23,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 623,
+    "recipe_id": 74,
+    "ingredient_id": 498,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 624,
+    "recipe_id": 74,
+    "ingredient_id": 499,
+    "amount": 60.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 625,
+    "recipe_id": 74,
+    "ingredient_id": 230,
+    "amount": 2.0,
+    "unit_name": "顆",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 626,
+    "recipe_id": 74,
+    "ingredient_id": 410,
+    "amount": 20.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 627,
+    "recipe_id": 74,
+    "ingredient_id": 392,
+    "amount": 40.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 628,
+    "recipe_id": 74,
+    "ingredient_id": 405,
+    "amount": 15.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 629,
+    "recipe_id": 74,
+    "ingredient_id": 236,
+    "amount": 1.0,
+    "unit_name": "顆",
+    "is_modified": true,
+    "remark": "新增食材，僅取熟鹹蛋黃並壓碎，製作核心流沙球"
+  },
+  {
+    "recipe_ingredient_id": 630,
+    "recipe_id": 74,
+    "ingredient_id": 239,
+    "amount": 10.0,
+    "unit_name": "毫升",
+    "is_modified": true,
+    "remark": "新增食材，混合鹹蛋黃調整稠度，確保流動感"
+  },
+  {
+    "recipe_ingredient_id": 631,
+    "recipe_id": 75,
+    "ingredient_id": 498,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 632,
+    "recipe_id": 75,
+    "ingredient_id": 499,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 633,
+    "recipe_id": 75,
+    "ingredient_id": 230,
+    "amount": 2.0,
+    "unit_name": "顆",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 634,
+    "recipe_id": 75,
+    "ingredient_id": 410,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 635,
+    "recipe_id": 75,
+    "ingredient_id": 392,
+    "amount": 40.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 636,
+    "recipe_id": 75,
+    "ingredient_id": 405,
+    "amount": 15.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 637,
+    "recipe_id": 75,
+    "ingredient_id": 245,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "新增食材，提供乳霜般絲滑的流心質地"
+  },
+  {
+    "recipe_ingredient_id": 638,
+    "recipe_id": 75,
+    "ingredient_id": 144,
+    "amount": 10.0,
+    "unit_name": "顆",
+    "is_modified": true,
+    "remark": "新增食材，藏於起司內餡中，提供清新酸度"
+  },
+  {
+    "recipe_ingredient_id": 639,
+    "recipe_id": 76,
+    "ingredient_id": 498,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 640,
+    "recipe_id": 76,
+    "ingredient_id": 499,
+    "amount": 50.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 641,
+    "recipe_id": 76,
+    "ingredient_id": 230,
+    "amount": 2.0,
+    "unit_name": "顆",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 642,
+    "recipe_id": 76,
+    "ingredient_id": 410,
+    "amount": 20.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "因栗子泥自帶甜味，稍微減少白糖用量"
+  },
+  {
+    "recipe_ingredient_id": 643,
+    "recipe_id": 76,
+    "ingredient_id": 392,
+    "amount": 40.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 644,
+    "recipe_id": 76,
+    "ingredient_id": 405,
+    "amount": 15.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 645,
+    "recipe_id": 76,
+    "ingredient_id": 385,
+    "amount": 60.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "新增食材，選用質地細緻的栗子泥製作中心核心"
+  },
+  {
+    "recipe_ingredient_id": 646,
+    "recipe_id": 76,
+    "ingredient_id": 343,
+    "amount": 5.0,
+    "unit_name": "毫升",
+    "is_modified": true,
+    "remark": "新增食材，少許黑蘭姆酒能大幅提升抹茶與栗子的香氣層次"
+  },
+  {
+    "recipe_ingredient_id": 647,
+    "recipe_id": 77,
+    "ingredient_id": 164,
+    "amount": 300.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "選用帶皮雞腿丁，與鳳梨酵素作用後口感會極其滑嫩"
+  },
+  {
+    "recipe_ingredient_id": 648,
+    "recipe_id": 77,
+    "ingredient_id": 500,
+    "amount": 15.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 649,
+    "recipe_id": 77,
+    "ingredient_id": 437,
+    "amount": 5.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 650,
+    "recipe_id": 77,
+    "ingredient_id": 454,
+    "amount": 40.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "改用腰果取代花生，提供更溫潤的堅果乳香與酥脆感"
+  },
+  {
+    "recipe_ingredient_id": 651,
+    "recipe_id": 77,
+    "ingredient_id": 105,
+    "amount": 100.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "新增食材，選用成熟鳳梨切丁，提供天然果酸與水分"
+  },
+  {
+    "recipe_ingredient_id": 652,
+    "recipe_id": 77,
+    "ingredient_id": 14,
+    "amount": 20.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 653,
+    "recipe_id": 77,
+    "ingredient_id": 2,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 654,
+    "recipe_id": 77,
+    "ingredient_id": 331,
+    "amount": 15.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 655,
+    "recipe_id": 77,
+    "ingredient_id": 340,
+    "amount": 10.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 656,
+    "recipe_id": 77,
+    "ingredient_id": 410,
+    "amount": 5.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "減量砂糖，因為鳳梨受熱後會釋放天然糖分"
+  },
+  {
+    "recipe_ingredient_id": 657,
+    "recipe_id": 78,
+    "ingredient_id": 164,
+    "amount": 300.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "切成一口大小，酥炸後體積會微縮，口感最緊實"
+  },
+  {
+    "recipe_ingredient_id": 658,
+    "recipe_id": 78,
+    "ingredient_id": 397,
+    "amount": 80.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "新增食材，選用粗顆粒地瓜粉，是製作酥脆外殼的靈魂"
+  },
+  {
+    "recipe_ingredient_id": 659,
+    "recipe_id": 78,
+    "ingredient_id": 500,
+    "amount": 15.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 660,
+    "recipe_id": 78,
+    "ingredient_id": 437,
+    "amount": 5.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 661,
+    "recipe_id": 78,
+    "ingredient_id": 451,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": true,
+    "remark": "改用花生碎，增加與醬汁的附著表面積，口感更均衡"
+  },
+  {
+    "recipe_ingredient_id": 662,
+    "recipe_id": 78,
+    "ingredient_id": 387,
+    "amount": 40.0,
+    "unit_name": "毫升",
+    "is_modified": true,
+    "remark": "新增食材，提供醬汁高度光澤感與厚實甜味"
+  },
+  {
+    "recipe_ingredient_id": 663,
+    "recipe_id": 78,
+    "ingredient_id": 503,
+    "amount": 15.0,
+    "unit_name": "毫升",
+    "is_modified": true,
+    "remark": "新增食材，以檸檬清新果酸取代傳統食醋"
+  },
+  {
+    "recipe_ingredient_id": 664,
+    "recipe_id": 78,
+    "ingredient_id": 331,
+    "amount": 15.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 665,
+    "recipe_id": 78,
+    "ingredient_id": 340,
+    "amount": 10.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 666,
+    "recipe_id": 78,
+    "ingredient_id": 14,
+    "amount": 20.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 667,
+    "recipe_id": 79,
+    "ingredient_id": 256,
+    "amount": 2.0,
+    "unit_name": "盒",
+    "is_modified": true,
+    "remark": "改用板豆腐，需先重壓 20 分鐘去水，切成 2 公分方塊"
+  },
+  {
+    "recipe_ingredient_id": 668,
+    "recipe_id": 79,
+    "ingredient_id": 500,
+    "amount": 15.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 669,
+    "recipe_id": 79,
+    "ingredient_id": 437,
+    "amount": 5.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 670,
+    "recipe_id": 79,
+    "ingredient_id": 449,
+    "amount": 30.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 671,
+    "recipe_id": 79,
+    "ingredient_id": 331,
+    "amount": 30.0,
+    "unit_name": "毫升",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 672,
+    "recipe_id": 79,
+    "ingredient_id": 337,
+    "amount": 15.0,
+    "unit_name": "毫升",
+    "is_modified": true,
+    "remark": "新增食材，烏醋的深沉酸味比白醋更契合豆腐的豆香"
+  },
+  {
+    "recipe_ingredient_id": 673,
+    "recipe_id": 79,
+    "ingredient_id": 410,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 674,
+    "recipe_id": 79,
+    "ingredient_id": 395,
+    "amount": 5.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": "用於調製芡汁，讓醬汁能掛在豆腐的老皮上"
+  },
+  {
+    "recipe_ingredient_id": 675,
+    "recipe_id": 79,
+    "ingredient_id": 14,
+    "amount": 20.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
+  },
+  {
+    "recipe_ingredient_id": 676,
+    "recipe_id": 79,
+    "ingredient_id": 2,
+    "amount": 10.0,
+    "unit_name": "克",
+    "is_modified": false,
+    "remark": ""
   }
 ]

@@ -159,6 +159,16 @@ const routes = [
         }
       },
       {
+        path: 'cooking-log/:id',
+        name: 'cooking-log',
+        component: () => import('@/views/workspace/CookingLog.vue'),
+        meta: {
+          title: '烹飪日誌',
+          layout: 'workspace',
+          requiresAuth: true
+        }
+      },
+      {
         path: 'plan',
         name: 'meal-plan',
         component: () => import('@/views/workspace/MealPlan.vue'),

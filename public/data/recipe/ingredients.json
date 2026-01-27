@@ -6784,5 +6784,57 @@
     "carbs_per_100g": 0.0,
     "unit_name": "克",
     "gram_conversion": 1.0
+  },
+  {
+    "ingredient_id": 523,
+    "ingredient_name": "醬瓜 (花瓜)",
+    "main_category": "pantry-spices-nuts",
+    "sub_category": "pickles-preserves",
+    "ingredient_image_url": "img/ingredients/pantry-spices-nuts/pickles-preserves/pickled-cucumber-canned.png",
+    "kcal_per_100g": 78.0,
+    "protein_per_100g": 1.2,
+    "fat_per_100g": 0.2,
+    "carbs_per_100g": 18.0,
+    "unit_name": "罐",
+    "gram_conversion": 180.0
+  },
+  {
+    "ingredient_id": 524,
+    "ingredient_name": "月桂葉",
+    "main_category": "pantry-spices-nuts",
+    "sub_category": "whole-spices",
+    "ingredient_image_url": "img/ingredients/pantry-spices-nuts/whole-spices/bay-leaves.png",
+    "kcal_per_100g": 313.0,
+    "protein_per_100g": 7.6,
+    "fat_per_100g": 8.4,
+    "carbs_per_100g": 75.0,
+    "unit_name": "片",
+    "gram_conversion": 0.5
+  },
+  {
+    "ingredient_id": 525,
+    "ingredient_name": "青椒",
+    "main_category": "fresh-produce",
+    "sub_category": "nightshades",
+    "ingredient_image_url": "img/ingredients/fresh-produce/nightshades/green-bell-pepper.png",
+    "kcal_per_100g": 20.0,
+    "protein_per_100g": 0.9,
+    "fat_per_100g": 0.2,
+    "carbs_per_100g": 4.6,
+    "unit_name": "顆",
+    "gram_conversion": 40.0
+  },
+  {
+    "ingredient_id": 526,
+    "ingredient_name": "小白菜",
+    "main_category": "fresh-produce",
+    "sub_category": "leafy-greens",
+    "ingredient_image_url": "img/ingredients/fresh-produce/leafy-greens/bok-choy-small.png",
+    "kcal_per_100g": 13.0,
+    "protein_per_100g": 1.5,
+    "fat_per_100g": 0.2,
+    "carbs_per_100g": 2.2,
+    "unit_name": "株",
+    "gram_conversion": 40.0
   }
 ]

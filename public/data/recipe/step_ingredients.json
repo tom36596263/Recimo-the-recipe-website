@@ -3575,5 +3575,852 @@
     "ingredient_id": 308,
     "step_ingredient_amount": 30.0,
     "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 512,
+    "step_id": 375,
+    "ingredient_id": 173,
+    "step_ingredient_amount": 1.0,
+    "unit_name": "客"
+  },
+  {
+    "step_ingredient_id": 513,
+    "step_id": 375,
+    "ingredient_id": 417,
+    "step_ingredient_amount": 2.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 514,
+    "step_id": 375,
+    "ingredient_id": 418,
+    "step_ingredient_amount": 1.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 515,
+    "step_id": 376,
+    "ingredient_id": 345,
+    "step_ingredient_amount": 10.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 516,
+    "step_id": 377,
+    "ingredient_id": 499,
+    "step_ingredient_amount": 20.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 517,
+    "step_id": 377,
+    "ingredient_id": 1,
+    "step_ingredient_amount": 2.0,
+    "unit_name": "瓣"
+  },
+  {
+    "step_ingredient_id": 518,
+    "step_id": 377,
+    "ingredient_id": 28,
+    "step_ingredient_amount": 5.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 519,
+    "step_id": 379,
+    "ingredient_id": 48,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 520,
+    "step_id": 379,
+    "ingredient_id": 89,
+    "step_ingredient_amount": 60.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 521,
+    "step_id": 380,
+    "ingredient_id": 291,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 522,
+    "step_id": 380,
+    "ingredient_id": 210,
+    "step_ingredient_amount": 6.0,
+    "unit_name": "隻"
+  },
+  {
+    "step_ingredient_id": 523,
+    "step_id": 380,
+    "ingredient_id": 512,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 524,
+    "step_id": 381,
+    "ingredient_id": 313,
+    "step_ingredient_amount": 6.0,
+    "unit_name": "片"
+  },
+  {
+    "step_ingredient_id": 525,
+    "step_id": 382,
+    "ingredient_id": 25,
+    "step_ingredient_amount": 10.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 526,
+    "step_id": 383,
+    "ingredient_id": 45,
+    "step_ingredient_amount": 6.0,
+    "unit_name": "根"
+  },
+  {
+    "step_ingredient_id": 527,
+    "step_id": 384,
+    "ingredient_id": 335,
+    "step_ingredient_amount": 20.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 528,
+    "step_id": 384,
+    "ingredient_id": 503,
+    "step_ingredient_amount": 20.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 529,
+    "step_id": 384,
+    "ingredient_id": 410,
+    "step_ingredient_amount": 10.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 530,
+    "step_id": 385,
+    "ingredient_id": 440,
+    "step_ingredient_amount": 0.1,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 531,
+    "step_id": 386,
+    "ingredient_id": 210,
+    "step_ingredient_amount": 6.0,
+    "unit_name": "隻"
+  },
+  {
+    "step_ingredient_id": 532,
+    "step_id": 386,
+    "ingredient_id": 219,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 533,
+    "step_id": 387,
+    "ingredient_id": 515,
+    "step_ingredient_amount": 150.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 534,
+    "step_id": 387,
+    "ingredient_id": 341,
+    "step_ingredient_amount": 30.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 535,
+    "step_id": 388,
+    "ingredient_id": 350,
+    "step_ingredient_amount": 400.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 536,
+    "step_id": 389,
+    "ingredient_id": 214,
+    "step_ingredient_amount": 6.0,
+    "unit_name": "顆"
+  },
+  {
+    "step_ingredient_id": 537,
+    "step_id": 390,
+    "ingredient_id": 136,
+    "step_ingredient_amount": 2.0,
+    "unit_name": "角"
+  },
+  {
+    "step_ingredient_id": 538,
+    "step_id": 391,
+    "ingredient_id": 236,
+    "step_ingredient_amount": 2.0,
+    "unit_name": "顆"
+  },
+  {
+    "step_ingredient_id": 539,
+    "step_id": 391,
+    "ingredient_id": 523,
+    "step_ingredient_amount": 50.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 540,
+    "step_id": 392,
+    "ingredient_id": 186,
+    "step_ingredient_amount": 300.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 541,
+    "step_id": 392,
+    "ingredient_id": 331,
+    "step_ingredient_amount": 10.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 542,
+    "step_id": 392,
+    "ingredient_id": 496,
+    "step_ingredient_amount": 30.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 543,
+    "step_id": 395,
+    "ingredient_id": 16,
+    "step_ingredient_amount": 10.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 544,
+    "step_id": 396,
+    "ingredient_id": 175,
+    "step_ingredient_amount": 300.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 545,
+    "step_id": 397,
+    "ingredient_id": 5,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 546,
+    "step_id": 398,
+    "ingredient_id": 496,
+    "step_ingredient_amount": 1200.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 547,
+    "step_id": 398,
+    "ingredient_id": 60,
+    "step_ingredient_amount": 200.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 548,
+    "step_id": 398,
+    "ingredient_id": 367,
+    "step_ingredient_amount": 30.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 549,
+    "step_id": 398,
+    "ingredient_id": 524,
+    "step_ingredient_amount": 2.0,
+    "unit_name": "片"
+  },
+  {
+    "step_ingredient_id": 550,
+    "step_id": 399,
+    "ingredient_id": 55,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 551,
+    "step_id": 399,
+    "ingredient_id": 65,
+    "step_ingredient_amount": 150.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 552,
+    "step_id": 400,
+    "ingredient_id": 41,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 553,
+    "step_id": 401,
+    "ingredient_id": 240,
+    "step_ingredient_amount": 30.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 554,
+    "step_id": 402,
+    "ingredient_id": 210,
+    "step_ingredient_amount": 6.0,
+    "unit_name": "隻"
+  },
+  {
+    "step_ingredient_id": 555,
+    "step_id": 403,
+    "ingredient_id": 402,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 556,
+    "step_id": 403,
+    "ingredient_id": 496,
+    "step_ingredient_amount": 150.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 557,
+    "step_id": 405,
+    "ingredient_id": 345,
+    "step_ingredient_amount": 500.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 558,
+    "step_id": 405,
+    "ingredient_id": 71,
+    "step_ingredient_amount": 2.0,
+    "unit_name": "片"
+  },
+  {
+    "step_ingredient_id": 559,
+    "step_id": 405,
+    "ingredient_id": 83,
+    "step_ingredient_amount": 2.0,
+    "unit_name": "條"
+  },
+  {
+    "step_ingredient_id": 560,
+    "step_id": 407,
+    "ingredient_id": 333,
+    "step_ingredient_amount": 40.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 561,
+    "step_id": 407,
+    "ingredient_id": 58,
+    "step_ingredient_amount": 50.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 562,
+    "step_id": 408,
+    "ingredient_id": 180,
+    "step_ingredient_amount": 400.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 563,
+    "step_id": 409,
+    "ingredient_id": 331,
+    "step_ingredient_amount": 80.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 564,
+    "step_id": 409,
+    "ingredient_id": 414,
+    "step_ingredient_amount": 30.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 565,
+    "step_id": 410,
+    "ingredient_id": 444,
+    "step_ingredient_amount": 50.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 566,
+    "step_id": 410,
+    "ingredient_id": 427,
+    "step_ingredient_amount": 2.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 567,
+    "step_id": 411,
+    "ingredient_id": 230,
+    "step_ingredient_amount": 4.0,
+    "unit_name": "顆"
+  },
+  {
+    "step_ingredient_id": 568,
+    "step_id": 411,
+    "ingredient_id": 496,
+    "step_ingredient_amount": 800.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 569,
+    "step_id": 413,
+    "ingredient_id": 272,
+    "step_ingredient_amount": 1.0,
+    "unit_name": "碗"
+  },
+  {
+    "step_ingredient_id": 570,
+    "step_id": 413,
+    "ingredient_id": 490,
+    "step_ingredient_amount": 1.0,
+    "unit_name": "片"
+  },
+  {
+    "step_ingredient_id": 571,
+    "step_id": 414,
+    "ingredient_id": 397,
+    "step_ingredient_amount": 40.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 572,
+    "step_id": 414,
+    "ingredient_id": 395,
+    "step_ingredient_amount": 20.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 573,
+    "step_id": 415,
+    "ingredient_id": 216,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 574,
+    "step_id": 417,
+    "ingredient_id": 230,
+    "step_ingredient_amount": 1.0,
+    "unit_name": "顆"
+  },
+  {
+    "step_ingredient_id": 575,
+    "step_id": 417,
+    "ingredient_id": 526,
+    "step_ingredient_amount": 2.0,
+    "unit_name": "株"
+  },
+  {
+    "step_ingredient_id": 576,
+    "step_id": 419,
+    "ingredient_id": 364,
+    "step_ingredient_amount": 30.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 577,
+    "step_id": 419,
+    "ingredient_id": 365,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 578,
+    "step_id": 420,
+    "ingredient_id": 345,
+    "step_ingredient_amount": 30.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 579,
+    "step_id": 420,
+    "ingredient_id": 2,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 580,
+    "step_id": 421,
+    "ingredient_id": 390,
+    "step_ingredient_amount": 250.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 581,
+    "step_id": 422,
+    "ingredient_id": 367,
+    "step_ingredient_amount": 50.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 582,
+    "step_id": 423,
+    "ingredient_id": 242,
+    "step_ingredient_amount": 125.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 583,
+    "step_id": 424,
+    "ingredient_id": 23,
+    "step_ingredient_amount": 10.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 584,
+    "step_id": 424,
+    "ingredient_id": 387,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 585,
+    "step_id": 425,
+    "ingredient_id": 390,
+    "step_ingredient_amount": 250.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 586,
+    "step_id": 426,
+    "ingredient_id": 367,
+    "step_ingredient_amount": 50.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 587,
+    "step_id": 426,
+    "ingredient_id": 501,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 588,
+    "step_id": 428,
+    "ingredient_id": 242,
+    "step_ingredient_amount": 125.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 589,
+    "step_id": 429,
+    "ingredient_id": 23,
+    "step_ingredient_amount": 10.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 590,
+    "step_id": 430,
+    "ingredient_id": 347,
+    "step_ingredient_amount": 10.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 591,
+    "step_id": 431,
+    "ingredient_id": 367,
+    "step_ingredient_amount": 50.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 592,
+    "step_id": 431,
+    "ingredient_id": 243,
+    "step_ingredient_amount": 125.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 593,
+    "step_id": 432,
+    "ingredient_id": 193,
+    "step_ingredient_amount": 60.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 594,
+    "step_id": 432,
+    "ingredient_id": 489,
+    "step_ingredient_amount": 20.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 595,
+    "step_id": 434,
+    "ingredient_id": 23,
+    "step_ingredient_amount": 10.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 596,
+    "step_id": 434,
+    "ingredient_id": 347,
+    "step_ingredient_amount": 5.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 597,
+    "step_id": 435,
+    "ingredient_id": 236,
+    "step_ingredient_amount": 1.0,
+    "unit_name": "顆"
+  },
+  {
+    "step_ingredient_id": 598,
+    "step_id": 435,
+    "ingredient_id": 239,
+    "step_ingredient_amount": 10.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 599,
+    "step_id": 436,
+    "ingredient_id": 498,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 600,
+    "step_id": 436,
+    "ingredient_id": 499,
+    "step_ingredient_amount": 60.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 601,
+    "step_id": 437,
+    "ingredient_id": 392,
+    "step_ingredient_amount": 40.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 602,
+    "step_id": 437,
+    "ingredient_id": 405,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 603,
+    "step_id": 440,
+    "ingredient_id": 245,
+    "step_ingredient_amount": 50.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 604,
+    "step_id": 440,
+    "ingredient_id": 144,
+    "step_ingredient_amount": 10.0,
+    "unit_name": "顆"
+  },
+  {
+    "step_ingredient_id": 605,
+    "step_id": 441,
+    "ingredient_id": 498,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 606,
+    "step_id": 441,
+    "ingredient_id": 499,
+    "step_ingredient_amount": 50.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 607,
+    "step_id": 442,
+    "ingredient_id": 392,
+    "step_ingredient_amount": 40.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 608,
+    "step_id": 442,
+    "ingredient_id": 405,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 609,
+    "step_id": 445,
+    "ingredient_id": 385,
+    "step_ingredient_amount": 60.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 610,
+    "step_id": 445,
+    "ingredient_id": 343,
+    "step_ingredient_amount": 5.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 611,
+    "step_id": 446,
+    "ingredient_id": 498,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 612,
+    "step_id": 446,
+    "ingredient_id": 499,
+    "step_ingredient_amount": 50.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 613,
+    "step_id": 447,
+    "ingredient_id": 392,
+    "step_ingredient_amount": 40.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 614,
+    "step_id": 447,
+    "ingredient_id": 405,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 615,
+    "step_id": 447,
+    "ingredient_id": 410,
+    "step_ingredient_amount": 20.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 616,
+    "step_id": 450,
+    "ingredient_id": 164,
+    "step_ingredient_amount": 300.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 617,
+    "step_id": 451,
+    "ingredient_id": 105,
+    "step_ingredient_amount": 100.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 618,
+    "step_id": 452,
+    "ingredient_id": 500,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 619,
+    "step_id": 452,
+    "ingredient_id": 437,
+    "step_ingredient_amount": 5.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 620,
+    "step_id": 454,
+    "ingredient_id": 454,
+    "step_ingredient_amount": 40.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 621,
+    "step_id": 454,
+    "ingredient_id": 331,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 622,
+    "step_id": 455,
+    "ingredient_id": 397,
+    "step_ingredient_amount": 80.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 623,
+    "step_id": 457,
+    "ingredient_id": 387,
+    "step_ingredient_amount": 40.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 624,
+    "step_id": 457,
+    "ingredient_id": 503,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 625,
+    "step_id": 457,
+    "ingredient_id": 500,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 626,
+    "step_id": 459,
+    "ingredient_id": 451,
+    "step_ingredient_amount": 30.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 627,
+    "step_id": 460,
+    "ingredient_id": 256,
+    "step_ingredient_amount": 2.0,
+    "unit_name": "盒"
+  },
+  {
+    "step_ingredient_id": 628,
+    "step_id": 462,
+    "ingredient_id": 500,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 629,
+    "step_id": 462,
+    "ingredient_id": 437,
+    "step_ingredient_amount": 5.0,
+    "unit_name": "克"
+  },
+  {
+    "step_ingredient_id": 630,
+    "step_id": 463,
+    "ingredient_id": 331,
+    "step_ingredient_amount": 30.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 631,
+    "step_id": 463,
+    "ingredient_id": 337,
+    "step_ingredient_amount": 15.0,
+    "unit_name": "毫升"
+  },
+  {
+    "step_ingredient_id": 632,
+    "step_id": 464,
+    "ingredient_id": 449,
+    "step_ingredient_amount": 30.0,
+    "unit_name": "克"
   }
 ]
