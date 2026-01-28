@@ -528,3 +528,19 @@ INSERT INTO recipe_ingredients (
   (510, 62, 231, 1, '個', FALSE, NULL),
   (511, 62, 345, 45, '毫升', FALSE, NULL),
   (512, 62, 503, 15, '毫升', FALSE, NULL);
+
+
+
+  -- 1. 建立連向食譜表 (recipes) 的外來鍵
+ALTER TABLE recipe_ingredients
+  ADD CONSTRAINT fk_recipe_ing_recipe 
+  FOREIGN KEY (recipe_id) REFERENCES recipes (recipe_id) 
+  ON UPDATE CASCADE;
+
+-- 2. 建立連向食材表 (ingredients) 的外來鍵
+ALTER TABLE recipe_ingredients
+  ADD CONSTRAINT fk_recipe_ing_ingredient 
+  FOREIGN KEY (ingredient_id) REFERENCES ingredients (ingredient_id) 
+  ON UPDATE CASCADE;
+
+COMMIT;
