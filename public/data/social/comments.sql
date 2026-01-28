@@ -75,3 +75,14 @@ INSERT INTO recipe_comments (comment_id, recipe_id, user_id, comment_text, comme
 (60, 20, 3, '照燒醬汁甜甜鹹鹹的，鮭魚非常入味。', '2024-04-05 13:00:00', 1, 21),
 (61, 20, 4, '簡單煎一下就很好吃，魚皮酥脆是關鍵。', '2024-04-06 12:30:00', 1, 15),
 (62, 20, 6, '這道配白飯真的可以吃兩碗。', '2024-04-07 19:15:00', 1, 28);
+
+
+-- 第一個：連結到食譜表 (RECIPE)
+ALTER TABLE recipe_comments
+  ADD CONSTRAINT fk_comments_recipe FOREIGN KEY (recipe_id) REFERENCES recipes (recipe_id) ON UPDATE CASCADE;
+
+-- 第二個：連結到使用者表 (USER)
+ALTER TABLE recipe_comments
+  ADD CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON UPDATE CASCADE;
+
+COMMIT;

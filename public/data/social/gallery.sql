@@ -1,16 +1,18 @@
+-- 1. 建立表格
 CREATE TABLE IF NOT EXISTS recipe_gallery (
-    gallery_id INT PRIMARY KEY AUTO_INCREMENT,
+    gallery_id INT NOT NULL AUTO_INCREMENT,
     recipe_id INT NOT NULL,
     user_id INT NOT NULL,
-    gallery_text TEXT,
+    gallery_text TEXT, 
     upload_at DATETIME NOT NULL,
-    gallery_url VARCHAR(255) NOT NULL
-);
+    gallery_url VARCHAR(255) NOT NULL,
+    PRIMARY KEY (gallery_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
+-- 2. 清空資料
 TRUNCATE TABLE recipe_gallery;
 
-
+-- 3. 插入資料 (依據你的範例)
 INSERT INTO recipe_gallery (
     gallery_id, recipe_id, user_id, gallery_text, upload_at, gallery_url
 ) VALUES
@@ -80,3 +82,14 @@ INSERT INTO recipe_gallery (
 (64, 19, 2, '日式家庭餐桌必備，味噌薑汁燒肉完美示範。', '2026-01-19 18:30:00', 'img/social/32/gallery/19/3.png'),
 (65, 20, 8, '照燒鮭魚排，照燒醬汁收得乾乾亮亮的，色澤滿分。', '2026-01-19 19:00:00', 'img/social/32/gallery/20/1.jpg'),
 (66, 20, 5, '魚肉中心剛好熟透，照燒風味帶點甜感非常好吃。', '2026-01-19 19:15:00', 'img/social/32/gallery/20/2.jpg');
+
+-- 4. 建立外來鍵指令 (對應規格書要求)
+-- 第一個：連結到食譜表 (recipe)
+ALTER TABLE recipe_gallery
+  ADD CONSTRAINT fk_gallery_recipe FOREIGN KEY (recipe_id) REFERENCES recipes (recipe_id) ON UPDATE CASCADE;
+
+-- 第二個：連結到使用者表 (users)
+ALTER TABLE recipe_gallery
+  ADD CONSTRAINT fk_gallery_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON UPDATE CASCADE;
+
+COMMIT;
