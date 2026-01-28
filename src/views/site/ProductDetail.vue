@@ -249,27 +249,27 @@ onUnmounted(() => {
                 </tr>
                 <tr class="p-p1">
                   <td>熱量</td>
-                  <td>{{ productInfo.product_kal }}</td>
+                  <td>{{ productInfo.product_kcal }}kcal</td>
                   <td>碳水化合物</td>
-                  <td>{{ productInfo.product_carbs }}</td>
+                  <td>{{ productInfo.product_carbs }}g</td>
                 </tr>
                 <tr class="p-p1">
                   <td>總脂肪</td>
-                  <td>{{ productInfo.product_fat }}</td>
+                  <td>{{ productInfo.product_fat }}g</td>
                   <td>飽和脂肪</td>
-                  <td>{{ productInfo.product_staturated_fat }}</td>
+                  <td>{{ productInfo.product_staturated_fat }}g</td>
                 </tr>
                 <tr class="p-p1">
                   <td>蛋白質</td>
-                  <td>{{ productInfo.product_protein }}</td>
+                  <td>{{ productInfo.product_protein }}g</td>
                   <td>膳食纖維</td>
-                  <td>{{ productInfo.product_fiber }}</td>
+                  <td>{{ productInfo.product_fiber }}g</td>
                 </tr>
                 <tr class="p-p1">
                   <td>鈉</td>
-                  <td>{{ productInfo.product_sodium }}</td>
+                  <td>{{ productInfo.product_sodium }}mg</td>
                   <td>糖</td>
-                  <td>{{ productInfo.product_sugar }}</td>
+                  <td>{{ productInfo.product_sugar }}g</td>
                 </tr>
               </tbody>
             </table>

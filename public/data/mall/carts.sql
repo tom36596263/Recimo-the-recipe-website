@@ -9,9 +9,9 @@ CREATE TABLE `carts` (
 );
 
 -- 匯入測試資料
-INSERT INTO `carts` (`user_id`, `product_id`, `quantity`) VALUES 
-(1, 1, 2),
-(1, 10, 1),
-(3, 5, 3),
-(5, 20, 1),
-(7, 15, 5);
+INSERT INTO `carts` (`carts_id`, `user_id`, `product_id`, `quantity`) VALUES 
+(1, 1, 1, 2),
+(2, 1, 10, 1),
+(3, 3, 5, 3),
+(4, 5, 20, 1),
+(5, 7, 15, 5);
