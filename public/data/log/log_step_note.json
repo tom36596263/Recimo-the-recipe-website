@@ -1,0 +1,817 @@
+[
+  {
+    "log_step_note_id": 1,
+    "cooking_log_id": 1,
+    "step_id": 1,
+    "step_note": "麵粉有先過篩，混合得很均勻。",
+    "step_image_url": "img/logs/u5/log_1/steps/1.png"
+  },
+  {
+    "log_step_note_id": 2,
+    "cooking_log_id": 1,
+    "step_id": 2,
+    "step_note": "手揉了大約15分鐘才達到光滑不黏手的狀態，下次想試試攪拌機。",
+    "step_image_url": "img/logs/u5/log_1/steps/2.png"
+  },
+  {
+    "log_step_note_id": 3,
+    "cooking_log_id": 1,
+    "step_id": 3,
+    "step_note": "今天天氣冷，放在微波爐裡放一杯熱水幫忙發酵，效果很好。",
+    "step_image_url": "img/logs/u5/log_1/steps/3.png"
+  },
+  {
+    "log_step_note_id": 4,
+    "cooking_log_id": 1,
+    "step_id": 4,
+    "step_note": "桿麵皮的時候麵糰一直縮，稍微讓它靜置5分鐘後就好桿多了。",
+    "step_image_url": "img/logs/u5/log_1/steps/4.png"
+  },
+  {
+    "log_step_note_id": 5,
+    "cooking_log_id": 1,
+    "step_id": 5,
+    "step_note": "起司撕成小塊分散鋪放，看起來比較美觀。",
+    "step_image_url": "img/logs/u5/log_1/steps/5.png"
+  },
+  {
+    "log_step_note_id": 6,
+    "cooking_log_id": 1,
+    "step_id": 6,
+    "step_note": "烤箱預熱一定要足夠，邊緣烤到微微焦黃最香。",
+    "step_image_url": "img/logs/u5/log_1/steps/6.png"
+  },
+  {
+    "log_step_note_id": 7,
+    "cooking_log_id": 1,
+    "step_id": 7,
+    "step_note": "羅勒葉一定要出爐後再放，顏色才會綠，不會變黑。",
+    "step_image_url": "img/logs/u5/log_1/steps/7.png"
+  },
+  {
+    "log_step_note_id": 8,
+    "cooking_log_id": 2,
+    "step_id": 1,
+    "step_note": "乾性食材混合均勻，沒有結塊。",
+    "step_image_url": "img/logs/u2/log_2/steps/1.png"
+  },
+  {
+    "log_step_note_id": 9,
+    "cooking_log_id": 2,
+    "step_id": 2,
+    "step_note": "揉麵團大約花了12分鐘，手感變得很Q彈。",
+    "step_image_url": "img/logs/u2/log_2/steps/2.png"
+  },
+  {
+    "log_step_note_id": 10,
+    "cooking_log_id": 2,
+    "step_id": 3,
+    "step_note": "發酵得很成功，麵糰真的膨脹兩倍大。",
+    "step_image_url": "img/logs/u2/log_2/steps/3.png"
+  },
+  {
+    "log_step_note_id": 11,
+    "cooking_log_id": 2,
+    "step_id": 4,
+    "step_note": "桿平時要注意中間不要太薄，否則醬汁會滲透。",
+    "step_image_url": "img/logs/u2/log_2/steps/4.png"
+  },
+  {
+    "log_step_note_id": 12,
+    "cooking_log_id": 2,
+    "step_id": 5,
+    "step_note": "用了新鮮的莫札瑞拉，水分比較多，我有稍微吸乾。",
+    "step_image_url": "img/logs/u2/log_2/steps/5.png"
+  },
+  {
+    "log_step_note_id": 13,
+    "cooking_log_id": 2,
+    "step_id": 6,
+    "step_note": "烤箱溫度設到最高，底層烤得很脆。",
+    "step_image_url": "img/logs/u2/log_2/steps/6.png"
+  },
+  {
+    "log_step_note_id": 14,
+    "cooking_log_id": 2,
+    "step_id": 7,
+    "step_note": "最後淋上橄欖油簡直畫龍點睛！",
+    "step_image_url": "img/logs/u2/log_2/steps/7.png"
+  },
+  {
+    "log_step_note_id": 15,
+    "cooking_log_id": 3,
+    "step_id": 1,
+    "step_note": "乾粉混合時不小心灑了一些出來，比例可能微偏。",
+    "step_image_url": "img/logs/u3/log_3/steps/1.png"
+  },
+  {
+    "log_step_note_id": 16,
+    "cooking_log_id": 3,
+    "step_id": 2,
+    "step_note": "揉得有點久，手感還是很黏，最後補了一點點麵粉。",
+    "step_image_url": "img/logs/u3/log_3/steps/2.png"
+  },
+  {
+    "log_step_note_id": 17,
+    "cooking_log_id": 3,
+    "step_id": 3,
+    "step_note": "趕時間只發酵了40分鐘，大小看起來還可以。",
+    "step_image_url": "img/logs/u3/log_3/steps/3.png"
+  },
+  {
+    "log_step_note_id": 18,
+    "cooking_log_id": 3,
+    "step_id": 4,
+    "step_note": "桿麵皮桿不出完美的圓形，變成了橢圓形。",
+    "step_image_url": "img/logs/u3/log_3/steps/4.png"
+  },
+  {
+    "log_step_note_id": 19,
+    "cooking_log_id": 3,
+    "step_id": 5,
+    "step_note": "起司放得比食譜建議的多，因為我愛吃起司。",
+    "step_image_url": "img/logs/u3/log_3/steps/5.png"
+  },
+  {
+    "log_step_note_id": 20,
+    "cooking_log_id": 3,
+    "step_id": 6,
+    "step_note": "烤箱溫度好像不太夠，烤了18分鐘才上色。",
+    "step_image_url": "img/logs/u3/log_3/steps/6.png"
+  },
+  {
+    "log_step_note_id": 21,
+    "cooking_log_id": 3,
+    "step_id": 7,
+    "step_note": "羅勒葉稍微被烤箱餘溫弄黃了，下次要等冷一點再放。",
+    "step_image_url": "img/logs/u3/log_3/steps/7.png"
+  },
+  {
+    "log_step_note_id": 22,
+    "cooking_log_id": 4,
+    "step_id": 1,
+    "step_note": "依照食譜比例混合，攪拌盆要保持乾燥才好操作。",
+    "step_image_url": "img/logs/u4/log_4/steps/1.png"
+  },
+  {
+    "log_step_note_id": 23,
+    "cooking_log_id": 4,
+    "step_id": 2,
+    "step_note": "這次揉麵比較順手，大約10分鐘就出筋了。",
+    "step_image_url": "img/logs/u4/log_4/steps/2.png"
+  },
+  {
+    "log_step_note_id": 24,
+    "cooking_log_id": 4,
+    "step_id": 3,
+    "step_note": "放在烤箱旁利用餘溫發酵，剛好一小時變兩倍大。",
+    "step_image_url": "img/logs/u4/log_4/steps/3.png"
+  },
+  {
+    "log_step_note_id": 25,
+    "cooking_log_id": 4,
+    "step_id": 4,
+    "step_note": "桿麵皮時發現中間太厚，邊緣太薄，下次要再調整力道。",
+    "step_image_url": "img/logs/u4/log_4/steps/4.png"
+  },
+  {
+    "log_step_note_id": 26,
+    "cooking_log_id": 4,
+    "step_id": 5,
+    "step_note": "莫札瑞拉起司我有先用廚房紙巾壓乾水分，避免烤完濕噠噠。",
+    "step_image_url": "img/logs/u4/log_4/steps/5.png"
+  },
+  {
+    "log_step_note_id": 27,
+    "cooking_log_id": 4,
+    "step_id": 6,
+    "step_note": "烤了13分鐘，餅皮邊緣出現豹紋斑點，非常漂亮！",
+    "step_image_url": "img/logs/u4/log_4/steps/6.png"
+  },
+  {
+    "log_step_note_id": 28,
+    "cooking_log_id": 4,
+    "step_id": 7,
+    "step_note": "新鮮羅勒一定要撕碎後再灑，香氣釋放更完全。",
+    "step_image_url": "img/logs/u4/log_4/steps/7.png"
+  },
+  {
+    "log_step_note_id": 29,
+    "cooking_log_id": 5,
+    "step_id": 1,
+    "step_note": "混合乾料時有先把鹽跟酵母分開放，避免直接接觸影響活性。",
+    "step_image_url": "img/logs/u6/log_5/steps/1.png"
+  },
+  {
+    "log_step_note_id": 30,
+    "cooking_log_id": 5,
+    "step_id": 2,
+    "step_note": "揉麵時的水溫控制在30度左右，手感非常柔軟。",
+    "step_image_url": "img/logs/u6/log_5/steps/2.png"
+  },
+  {
+    "log_step_note_id": 31,
+    "cooking_log_id": 5,
+    "step_id": 3,
+    "step_note": "發酵一小時後的香氣很迷人，麵糰彈性極佳。",
+    "step_image_url": "img/logs/u6/log_5/steps/3.png"
+  },
+  {
+    "log_step_note_id": 32,
+    "cooking_log_id": 5,
+    "step_id": 4,
+    "step_note": "用手推開麵糰而不是用桿麵棍，保留了邊緣的氣泡感。",
+    "step_image_url": "img/logs/u6/log_5/steps/4.png"
+  },
+  {
+    "log_step_note_id": 33,
+    "cooking_log_id": 5,
+    "step_id": 5,
+    "step_note": "起司鋪得比較散，這樣融化後才不會整片都是白的。",
+    "step_image_url": "img/logs/u6/log_5/steps/5.png"
+  },
+  {
+    "log_step_note_id": 34,
+    "cooking_log_id": 5,
+    "step_id": 6,
+    "step_note": "烘烤時廚房全是起司香，12分鐘準時出爐。",
+    "step_image_url": "img/logs/u6/log_5/steps/6.png"
+  },
+  {
+    "log_step_note_id": 35,
+    "cooking_log_id": 5,
+    "step_id": 7,
+    "step_note": "羅勒葉在出爐後微溫時放上去，顏色最翠綠。",
+    "step_image_url": "img/logs/u6/log_5/steps/7.png"
+  },
+  {
+    "log_step_note_id": 36,
+    "cooking_log_id": 6,
+    "step_id": 1,
+    "step_note": "混合乾料時有確實過篩，顆粒感很少。",
+    "step_image_url": "img/logs/u7/log_6/steps/1.png"
+  },
+  {
+    "log_step_note_id": 37,
+    "cooking_log_id": 6,
+    "step_id": 2,
+    "step_note": "揉麵揉了大約 15 分鐘，手臂有點痠，但麵糰變得很光滑。",
+    "step_image_url": "img/logs/u7/log_6/steps/2.png"
+  },
+  {
+    "log_step_note_id": 38,
+    "cooking_log_id": 6,
+    "step_id": 3,
+    "step_note": "發酵環境大約 28 度，剛好一小時就發到兩倍大了。",
+    "step_image_url": "img/logs/u7/log_6/steps/3.png"
+  },
+  {
+    "log_step_note_id": 39,
+    "cooking_log_id": 6,
+    "step_id": 4,
+    "step_note": "用手慢慢推開麵糰，餅皮邊緣留了一點厚度，希望能烤出酥脆感。",
+    "step_image_url": "img/logs/u7/log_6/steps/4.png"
+  },
+  {
+    "log_step_note_id": 40,
+    "cooking_log_id": 6,
+    "step_id": 5,
+    "step_note": "莫札瑞拉起司切得比較大塊，口感應該會更濃郁。",
+    "step_image_url": "img/logs/u7/log_6/steps/5.png"
+  },
+  {
+    "log_step_note_id": 41,
+    "cooking_log_id": 6,
+    "step_id": 6,
+    "step_note": "烤箱預熱很久，烤到 10 分鐘時邊緣就開始金黃了。",
+    "step_image_url": "img/logs/u7/log_6/steps/6.png"
+  },
+  {
+    "log_step_note_id": 42,
+    "cooking_log_id": 6,
+    "step_id": 7,
+    "step_note": "出爐的熱氣讓羅勒葉香氣瞬間爆發，非常誘人。",
+    "step_image_url": "img/logs/u7/log_6/steps/7.png"
+  },
+  {
+    "log_step_note_id": 43,
+    "cooking_log_id": 7,
+    "step_id": 1,
+    "step_note": "乾性食材混合得很均勻，鹽巴我有稍微減量一點點。",
+    "step_image_url": "img/logs/u8/log_7/steps/1.png"
+  },
+  {
+    "log_step_note_id": 44,
+    "cooking_log_id": 7,
+    "step_id": 2,
+    "step_note": "揉麵揉到手有點痠，但看到麵糰變光滑很有成就感。",
+    "step_image_url": "img/logs/u8/log_7/steps/2.png"
+  },
+  {
+    "log_step_note_id": 45,
+    "cooking_log_id": 7,
+    "step_id": 3,
+    "step_note": "發酵箱設定 30 度，麵糰膨脹得很漂亮。",
+    "step_image_url": "img/logs/u8/log_7/steps/3.png"
+  },
+  {
+    "log_step_note_id": 46,
+    "cooking_log_id": 7,
+    "step_id": 4,
+    "step_note": "桿麵皮時儘量保持厚薄一致，番茄糊抹得剛好。",
+    "step_image_url": "img/logs/u8/log_7/steps/4.png"
+  },
+  {
+    "log_step_note_id": 47,
+    "cooking_log_id": 7,
+    "step_id": 5,
+    "step_note": "新鮮莫札瑞拉起司真的不一樣，奶香味超濃。",
+    "step_image_url": "img/logs/u8/log_7/steps/5.png"
+  },
+  {
+    "log_step_note_id": 48,
+    "cooking_log_id": 7,
+    "step_id": 6,
+    "step_note": "石板預熱了 40 分鐘，餅皮放上去瞬間就蓬起來了。",
+    "step_image_url": "img/logs/u8/log_7/steps/6.png"
+  },
+  {
+    "log_step_note_id": 49,
+    "cooking_log_id": 7,
+    "step_id": 7,
+    "step_note": "最後淋上初榨橄欖油，那種油亮的色澤非常完美。",
+    "step_image_url": "img/logs/u8/log_7/steps/7.png"
+  },
+  {
+    "log_step_note_id": 50,
+    "cooking_log_id": 8,
+    "step_id": 15,
+    "step_note": "確實醃漬了20分鐘，雞肉丁看起來吸收了醬汁，變得很有彈性。",
+    "step_image_url": "img/logs/u2/log_8/steps/15.png"
+  },
+  {
+    "log_step_note_id": 51,
+    "cooking_log_id": 8,
+    "step_id": 16,
+    "step_note": "滑油的速度要快，表面一變色就撈起來，這樣最後口感才不會乾柴。",
+    "step_image_url": "img/logs/u2/log_8/steps/16.png"
+  },
+  {
+    "log_step_note_id": 52,
+    "cooking_log_id": 8,
+    "step_id": 17,
+    "step_note": "小火煸炒乾辣椒時香氣超迷人，顏色變深但不能焦掉。",
+    "step_image_url": "img/logs/u2/log_8/steps/17.png"
+  },
+  {
+    "log_step_note_id": 53,
+    "cooking_log_id": 8,
+    "step_id": 18,
+    "step_note": "薑片跟蒜末一入鍋，川菜那種濃郁的辛香味就出來了。",
+    "step_image_url": "img/logs/u2/log_8/steps/18.png"
+  },
+  {
+    "log_step_note_id": 54,
+    "cooking_log_id": 8,
+    "step_id": 19,
+    "step_note": "大火翻炒時動作要快，讓糖跟醬油均勻包裹住雞丁。",
+    "step_image_url": "img/logs/u2/log_8/steps/19.png"
+  },
+  {
+    "log_step_note_id": 55,
+    "cooking_log_id": 8,
+    "step_id": 20,
+    "step_note": "芡汁不能太多，只要讓醬汁呈現透亮的掛糊狀就好。",
+    "step_image_url": "img/logs/u2/log_8/steps/20.png"
+  },
+  {
+    "log_step_note_id": 56,
+    "cooking_log_id": 8,
+    "step_id": 21,
+    "step_note": "花生最後一刻才撒入，確實保持了極致的酥脆口感！",
+    "step_image_url": "img/logs/u2/log_8/steps/21.png"
+  },
+  {
+    "log_step_note_id": 57,
+    "cooking_log_id": 9,
+    "step_id": 8,
+    "step_note": "隔水加熱時要注意碗底不要碰到水，以免巧克力過熱變質。",
+    "step_image_url": "img/logs/u2/log_9/steps/8.png"
+  },
+  {
+    "log_step_note_id": 58,
+    "cooking_log_id": 9,
+    "step_id": 9,
+    "step_note": "打發到體積明顯變大且顏色泛白，這樣蛋糕口感才會輕盈。",
+    "step_image_url": "img/logs/u2/log_9/steps/9.png"
+  },
+  {
+    "log_step_note_id": 59,
+    "cooking_log_id": 9,
+    "step_id": 10,
+    "step_note": "抹茶粉容易結塊，過篩這個步驟絕對不能省。",
+    "step_image_url": "img/logs/u2/log_9/steps/10.png"
+  },
+  {
+    "log_step_note_id": 60,
+    "cooking_log_id": 9,
+    "step_id": 11,
+    "step_note": "混合時動作要輕，避免消泡，麵糊顏色呈現非常漂亮的深綠色。",
+    "step_image_url": "img/logs/u2/log_9/steps/11.png"
+  },
+  {
+    "log_step_note_id": 61,
+    "cooking_log_id": 9,
+    "step_id": 12,
+    "step_note": "模具內壁塗完奶油後，我還灑了一點點薄麵粉確保脫模順利。",
+    "step_image_url": "img/logs/u2/log_9/steps/12.png"
+  },
+  {
+    "log_step_note_id": 62,
+    "cooking_log_id": 9,
+    "step_id": 13,
+    "step_note": "我的烤箱火力較強，烤到第8分鐘邊緣固定、中心微晃就趕快出爐了。",
+    "step_image_url": "img/logs/u2/log_9/steps/13.png"
+  },
+  {
+    "log_step_note_id": 63,
+    "cooking_log_id": 9,
+    "step_id": 14,
+    "step_note": "稍微放涼再脫模，蛋糕形狀很完整，灑上抹茶粉裝飾後質感滿分。",
+    "step_image_url": "img/logs/u2/log_9/steps/14.png"
+  },
+  {
+    "log_step_note_id": 64,
+    "cooking_log_id": 10,
+    "step_id": 28,
+    "step_note": "雞腿肉切得大小均勻，茄子切完後先泡水防止變黑。",
+    "step_image_url": "img/logs/u2/log_10/steps/28.png"
+  },
+  {
+    "log_step_note_id": 65,
+    "cooking_log_id": 10,
+    "step_id": 29,
+    "step_note": "炒咖哩醬時火不能太大，看到綠色的油脂冒出來就表示香氣開了。",
+    "step_image_url": "img/logs/u2/log_10/steps/29.png"
+  },
+  {
+    "log_step_note_id": 66,
+    "cooking_log_id": 10,
+    "step_id": 30,
+    "step_note": "分次加椰奶真的有差，醬汁完全沒有分離，非常乳化。",
+    "step_image_url": "img/logs/u2/log_10/steps/30.png"
+  },
+  {
+    "log_step_note_id": 67,
+    "cooking_log_id": 10,
+    "step_id": 31,
+    "step_note": "檸檬葉撕開後香氣更濃，雞肉煮到剛好轉白保持嫩度。",
+    "step_image_url": "img/logs/u2/log_10/steps/31.png"
+  },
+  {
+    "log_step_note_id": 68,
+    "cooking_log_id": 10,
+    "step_id": 32,
+    "step_note": "小火燉煮15分鐘後茄子完全入味，魚露跟椰糖比例抓得剛好。",
+    "step_image_url": "img/logs/u2/log_10/steps/32.png"
+  },
+  {
+    "log_step_note_id": 69,
+    "cooking_log_id": 10,
+    "step_id": 33,
+    "step_note": "最後撒入的泰式羅勒是靈魂，拌勻馬上起鍋，香氣最清新。",
+    "step_image_url": "img/logs/u2/log_10/steps/33.png"
+  },
+  {
+    "log_step_note_id": 70,
+    "cooking_log_id": 11,
+    "step_id": 22,
+    "step_note": "寬麵真的要提前一分鐘撈起來，因為後面還要進鍋煮。",
+    "step_image_url": "img/logs/u2/log_11/steps/22.png"
+  },
+  {
+    "log_step_note_id": 71,
+    "cooking_log_id": 11,
+    "step_id": 23,
+    "step_note": "奶油融化得很快，蒜末要小心不要炒焦。",
+    "step_image_url": "img/logs/u2/log_11/steps/23.png"
+  },
+  {
+    "log_step_note_id": 72,
+    "cooking_log_id": 11,
+    "step_id": 24,
+    "step_note": "菇類縮水很多，要炒到邊緣微焦才有那種香氣。",
+    "step_image_url": "img/logs/u2/log_11/steps/24.png"
+  },
+  {
+    "log_step_note_id": 73,
+    "cooking_log_id": 11,
+    "step_id": 25,
+    "step_note": "加入煮麵水後醬汁變得很亮，乳化效果很好。",
+    "step_image_url": "img/logs/u2/log_11/steps/25.png"
+  },
+  {
+    "log_step_note_id": 74,
+    "cooking_log_id": 11,
+    "step_id": 26,
+    "step_note": "松露醬一放進去，整個廚房都是香的！",
+    "step_image_url": "img/logs/u2/log_11/steps/26.png"
+  },
+  {
+    "log_step_note_id": 75,
+    "cooking_log_id": 11,
+    "step_id": 27,
+    "step_note": "起司粉撒下去後醬汁瞬間變濃稠，效果驚人。",
+    "step_image_url": "img/logs/u2/log_11/steps/27.png"
+  },
+  {
+    "log_step_note_id": 76,
+    "cooking_log_id": 12,
+    "step_id": 22,
+    "step_note": "這次準時8分鐘撈起，麵芯的口感剛好。",
+    "step_image_url": "img/logs/u2/log_12/steps/22.png"
+  },
+  {
+    "log_step_note_id": 77,
+    "cooking_log_id": 12,
+    "step_id": 23,
+    "step_note": "熟練了，同時開兩爐作業也沒問題。",
+    "step_image_url": "img/logs/u2/log_12/steps/23.png"
+  },
+  {
+    "log_step_note_id": 78,
+    "cooking_log_id": 12,
+    "step_id": 24,
+    "step_note": "這次菇類炒得更焦一點，風味更集中。",
+    "step_image_url": "img/logs/u2/log_12/steps/24.png"
+  },
+  {
+    "log_step_note_id": 79,
+    "cooking_log_id": 12,
+    "step_id": 25,
+    "step_note": "鮮奶油與水的比例抓得很準。",
+    "step_image_url": "img/logs/u2/log_12/steps/25.png"
+  },
+  {
+    "log_step_note_id": 80,
+    "cooking_log_id": 12,
+    "step_id": 26,
+    "step_note": "這款黑松露醬真的很超值，掛糊效果極佳。",
+    "step_image_url": "img/logs/u2/log_12/steps/26.png"
+  },
+  {
+    "log_step_note_id": 81,
+    "cooking_log_id": 12,
+    "step_id": 27,
+    "step_note": "黑胡椒多撒了一點，層次感更棒。",
+    "step_image_url": "img/logs/u2/log_12/steps/27.png"
+  },
+  {
+    "log_step_note_id": 82,
+    "cooking_log_id": 13,
+    "step_id": 58,
+    "step_note": "腸泥有點難挑，要很有耐心。",
+    "step_image_url": "img/logs/u2/log_13/steps/58.png"
+  },
+  {
+    "log_step_note_id": 83,
+    "cooking_log_id": 13,
+    "step_id": 59,
+    "step_note": "蒜末要確實抹進蝦背裡。",
+    "step_image_url": "img/logs/u2/log_13/steps/59.png"
+  },
+  {
+    "log_step_note_id": 84,
+    "cooking_log_id": 13,
+    "step_id": 60,
+    "step_note": "擺盤時檸檬片放上去後顏色很好看。",
+    "step_image_url": "img/logs/u2/log_13/steps/60.png"
+  },
+  {
+    "log_step_note_id": 85,
+    "cooking_log_id": 13,
+    "step_id": 61,
+    "step_note": "守在烤箱前看著蝦子變紅很有趣。",
+    "step_image_url": "img/logs/u2/log_13/steps/61.png"
+  },
+  {
+    "log_step_note_id": 86,
+    "cooking_log_id": 13,
+    "step_id": 62,
+    "step_note": "新鮮巴西里碎末讓香味提升不少。",
+    "step_image_url": "img/logs/u2/log_13/steps/62.png"
+  },
+
+  {
+    "log_step_note_id": 87,
+    "cooking_log_id": 14,
+    "step_id": 58,
+    "step_note": "這次用牙籤處理得比上次順手多了。",
+    "step_image_url": "img/logs/u2/log_14/steps/58.png"
+  },
+  {
+    "log_step_note_id": 88,
+    "cooking_log_id": 14,
+    "step_id": 59,
+    "step_note": "多放了兩顆大蒜，味道更香。",
+    "step_image_url": "img/logs/u2/log_14/steps/59.png"
+  },
+  {
+    "log_step_note_id": 89,
+    "cooking_log_id": 14,
+    "step_id": 60,
+    "step_note": "奶油塊放多一點點，烤出來的湯汁很鮮。",
+    "step_image_url": "img/logs/u2/log_14/steps/60.png"
+  },
+  {
+    "log_step_note_id": 90,
+    "cooking_log_id": 14,
+    "step_id": 61,
+    "step_note": "烤了15分鐘，熟度剛好。",
+    "step_image_url": "img/logs/u2/log_14/steps/61.png"
+  },
+  {
+    "log_step_note_id": 91,
+    "cooking_log_id": 14,
+    "step_id": 62,
+    "step_note": "檸檬汁要在趁熱時淋上去。",
+    "step_image_url": "img/logs/u2/log_14/steps/62.png"
+  },
+
+  {
+    "log_step_note_id": 92,
+    "cooking_log_id": 15,
+    "step_id": 58,
+    "step_note": "備料工作進度飛快。",
+    "step_image_url": "img/logs/u2/log_15/steps/58.png"
+  },
+  {
+    "log_step_note_id": 93,
+    "cooking_log_id": 15,
+    "step_id": 59,
+    "step_note": "醃漬時間控制在剛好15分鐘。",
+    "step_image_url": "img/logs/u2/log_15/steps/59.png"
+  },
+  {
+    "log_step_note_id": 94,
+    "cooking_log_id": 15,
+    "step_id": 60,
+    "step_note": "擺放整齊後拍照很漂亮。",
+    "step_image_url": "img/logs/u2/log_15/steps/60.png"
+  },
+  {
+    "log_step_note_id": 95,
+    "cooking_log_id": 15,
+    "step_id": 61,
+    "step_note": "改用180度烤13分鐘，口感更脆彈。",
+    "step_image_url": "img/logs/u2/log_15/steps/61.png"
+  },
+  {
+    "log_step_note_id": 96,
+    "cooking_log_id": 15,
+    "step_id": 62,
+    "step_note": "這次巴西里切得很細，層次感很好。",
+    "step_image_url": "img/logs/u2/log_15/steps/62.png"
+  },
+
+  {
+    "log_step_note_id": 97,
+    "cooking_log_id": 16,
+    "step_id": 58,
+    "step_note": "一次處理十幾隻蝦也很輕鬆。",
+    "step_image_url": "img/logs/u2/log_16/steps/58.png"
+  },
+  {
+    "log_step_note_id": 98,
+    "cooking_log_id": 16,
+    "step_id": 59,
+    "step_note": "胡椒粉我多加了一些，帶點辛香。",
+    "step_image_url": "img/logs/u2/log_16/steps/59.png"
+  },
+  {
+    "log_step_note_id": 99,
+    "cooking_log_id": 16,
+    "step_id": 60,
+    "step_note": "準備入烤箱，視覺滿分。",
+    "step_image_url": "img/logs/u2/log_16/steps/60.png"
+  },
+  {
+    "log_step_note_id": 100,
+    "cooking_log_id": 16,
+    "step_id": 61,
+    "step_note": "時間掌控爐火純青。",
+    "step_image_url": "img/logs/u2/log_16/steps/61.png"
+  },
+  {
+    "log_step_note_id": 101,
+    "cooking_log_id": 16,
+    "step_id": 62,
+    "step_note": "完美收尾，上桌秒殺。",
+    "step_image_url": "img/logs/u2/log_16/steps/62.png"
+  },
+  {
+    "log_step_note_id": 102,
+    "cooking_log_id": 17,
+    "step_id": 151,
+    "step_note": "冷水下鍋確實煮出很多浮沫，洗乾淨後肉塊看起來乾淨很多。",
+    "step_image_url": "img/logs/u2/log_17/steps/151.png"
+  },
+  {
+    "log_step_note_id": 103,
+    "cooking_log_id": 17,
+    "step_id": 152,
+    "step_note": "乾煸的時候要小心噴油，豬油釋出的香氣很重。",
+    "step_image_url": "img/logs/u2/log_17/steps/152.png"
+  },
+  {
+    "log_step_note_id": 104,
+    "cooking_log_id": 17,
+    "step_id": 153,
+    "step_note": "糖色炒得有點淡，下次火可以稍微再大一點點點。",
+    "step_image_url": "img/logs/u2/log_17/steps/153.png"
+  },
+  {
+    "log_step_note_id": 105,
+    "cooking_log_id": 17,
+    "step_id": 154,
+    "step_note": "小火燉煮了50分鐘，肉塊已經軟了。",
+    "step_image_url": "img/logs/u2/log_17/steps/154.png"
+  },
+  {
+    "log_step_note_id": 106,
+    "cooking_log_id": 17,
+    "step_id": 155,
+    "step_note": "收汁的時候不敢開太大火，結果花了不少時間才變黏稠。",
+    "step_image_url": "img/logs/u2/log_17/steps/155.png"
+  },
+  {
+    "log_step_note_id": 107,
+    "cooking_log_id": 18,
+    "step_id": 151,
+    "step_note": "這次薑片放多了一點點去腥。",
+    "step_image_url": "img/logs/u2/log_18/steps/151.png"
+  },
+  {
+    "log_step_note_id": 108,
+    "cooking_log_id": 18,
+    "step_id": 152,
+    "step_note": "肉塊煸到微焦金黃，味道層次比較多。",
+    "step_image_url": "img/logs/u2/log_18/steps/152.png"
+  },
+  {
+    "log_step_note_id": 109,
+    "cooking_log_id": 18,
+    "step_id": 153,
+    "step_note": "糖色成功！琥珀色的光澤很誘人。",
+    "step_image_url": "img/logs/u2/log_18/steps/153.png"
+  },
+  {
+    "log_step_note_id": 110,
+    "cooking_log_id": 18,
+    "step_id": 154,
+    "step_note": "這次蓋鍋蓋燜得很徹底，肉質更入味。",
+    "step_image_url": "img/logs/u2/log_18/steps/154.png"
+  },
+  {
+    "log_step_note_id": 111,
+    "cooking_log_id": 18,
+    "step_id": 155,
+    "step_note": "大火收汁後的亮澤度比起上次好太多了。",
+    "step_image_url": "img/logs/u2/log_18/steps/155.png"
+  },
+  {
+    "log_step_note_id": 112,
+    "cooking_log_id": 19,
+    "step_id": 151,
+    "step_note": "動作熟練，備料時間縮短不少。",
+    "step_image_url": "img/logs/u2/log_19/steps/151.png"
+  },
+  {
+    "log_step_note_id": 113,
+    "cooking_log_id": 19,
+    "step_id": 152,
+    "step_note": "煸出的豬油倒出來一點，避免整體太油膩。",
+    "step_image_url": "img/logs/u2/log_19/steps/152.png"
+  },
+  {
+    "log_step_note_id": 114,
+    "cooking_log_id": 19,
+    "step_id": 153,
+    "step_note": "精準掌控上色時機，辛香料爆得很香。",
+    "step_image_url": "img/logs/u2/log_19/steps/153.png"
+  },
+  {
+    "log_step_note_id": 115,
+    "cooking_log_id": 19,
+    "step_id": 154,
+    "step_note": "燉煮時間剛好60分鐘，入口即化。",
+    "step_image_url": "img/logs/u2/log_19/steps/154.png"
+  },
+  {
+    "log_step_note_id": 116,
+    "cooking_log_id": 19,
+    "step_id": 155,
+    "step_note": "完美收官，醬汁緊緊裹住每塊肉。",
+    "step_image_url": "img/logs/u2/log_19/steps/155.png"
+  }
+]
