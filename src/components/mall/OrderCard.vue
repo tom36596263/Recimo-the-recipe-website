@@ -8,9 +8,17 @@ const props = defineProps({
   }
 });
 
-// 取得 ID
+// 取得 ID (若無則隨機 6 碼)
 const orderId = computed(() => {
-  return props.order.ORDER_ID || props.order.id || '';
+  // 嘗試取得真實資料
+  const realId = props.order.ORDER_ID || props.order.id;
+
+  // 如果有真實 ID，就用真實的
+  if (realId) return realId;
+
+  // 否則：隨機產生 6 碼數字 (100000 ~ 999999)
+  // 加上 .toString() 確保格式統一為字串
+  return Math.floor(100000 + Math.random() * 900000).toString();
 });
 
 // 取得日期
@@ -18,22 +26,28 @@ const orderDate = computed(() => {
   return props.order.CREATED || props.order.date || '剛剛';
 });
 
-// 取得物流 ID
+// 取得物流 ID (若無或為"1"則隨機 7 碼)
 const logisticsId = computed(() => {
-  return props.order.LOGISTICS_ID || props.order.trackingNo || null;
+  const dbVal = props.order.LOGISTICS_ID || props.order.trackingNo;
+  const strVal = String(dbVal || '');
+
+  // 判斷邏輯：
+  // 如果資料庫有值，且長度大於 5 (排除掉 "1" 這種測試數據)
+  // -> 直接回傳資料庫的值
+  if (dbVal && strVal.length > 5) {
+    return dbVal;
+  }
+
+  // 否則：隨機產生 7 碼數字 (1000000 ~ 9999999)
+  return Math.floor(1000000 + Math.random() * 9000000).toString();
 });
 
 // 取得收件人
 const receiverName = computed(() => {
-  // 資料庫欄位
   if (props.order.RECIPIENT_NAME) return props.order.RECIPIENT_NAME;
-
-  //結帳頁常見格式
   if (props.order.purchaser_info) {
     return props.order.purchaser_info.name || props.order.purchaser_info.receiver;
   }
-
-  // 一般扁平格式
   return props.order.receiver || props.order.name || '未知';
 });
 
@@ -44,8 +58,7 @@ const receiverPhone = computed(() => {
   return props.order.phone || '未知';
 });
 
-// 取得訂單狀態
-// 預設為 0 (訂購成功)
+// 取得訂單狀態 (預設 0)
 const orderStatus = computed(() => {
   if (props.order.ORDER_STATUS !== undefined) return props.order.ORDER_STATUS;
   if (props.order.status !== undefined) return props.order.status;
@@ -53,21 +66,13 @@ const orderStatus = computed(() => {
 });
 
 // 取得商品列表並標準化
-// 不管來源是 cart 還是 order_product，都轉成統一格式給 template 用
 const displayItems = computed(() => {
-  // 嘗試取得陣列來源
   const items = props.order.products || props.order.items || [];
-
   if (!Array.isArray(items)) return [];
 
   return items.map(item => ({
-    // 優先找資料庫的 PRODUCT_NAME
     name: item.PRODUCT_NAME || item.name || item.product_name || '未知商品',
-
-    // 優先找資料庫 QUANTITY，沒有就找 qty, count
     qty: item.QUANTITY || item.qty || item.count || item.quantity || 0,
-
-    // 優先找資料庫 SNAPSHOT_PRICE，沒有就找 price
     price: item.SNAPSHOT_PRICE || item.product_price || item.price || 0
   }));
 });
@@ -76,7 +81,6 @@ const displayItems = computed(() => {
 const totalAmount = computed(() => {
   if (props.order.TOTAL_AMOUNT !== undefined) return props.order.TOTAL_AMOUNT;
   if (props.order.totalAmount !== undefined) return props.order.totalAmount;
-
   return displayItems.value.reduce((sum, item) => sum + (item.price * item.qty), 0);
 });
 
@@ -94,14 +98,16 @@ const paymentText = computed(() => {
   const map = {
     'cod': '貨到付款',
     'card': '信用卡付款', 'credit': '信用卡付款', 'visa': '信用卡付款', 'master': '信用卡付款',
-    'transfer': '銀行轉帳', 'atm': '銀行轉帳', 'bank': '銀行轉帳'
+    'transfer': '銀行轉帳', 'atm': '銀行轉帳', 'bank': '銀行轉帳',
+    '0': '貨到付款',
+    '1': '信用卡付款'
   };
   return map[method] || methodRaw;
 });
 
-
 const emit = defineEmits(['cancel-order']);
 
+// 格式化 ID (超過 8 碼才截斷，現在隨機產生的 6/7 碼不會被截斷)
 const formatShortId = (value) => {
   if (!value) return '';
   const str = String(value);
@@ -119,7 +125,6 @@ const buttonText = computed(() => {
 });
 
 const statusSteps = ['訂購成功', '訂單確認', '出貨', '送達'];
-
 const showCancelModal = ref(false);
 
 const onCancel = () => {
@@ -142,7 +147,7 @@ const handleConfirmCancel = (data) => {
           <span>訂購日期：{{ orderDate }}</span>
           <div class="flex">
             <span>訂單編號：{{ formatShortId(orderId) }}</span>
-            <span>物流編號：{{ logisticsId ? formatShortId(logisticsId) : '處理中' }}</span>
+            <span>物流編號：{{ formatShortId(logisticsId) }}</span>
           </div>
         </div>
         <div class="info-row p-p1">
@@ -190,7 +195,7 @@ const handleConfirmCancel = (data) => {
 </template>
 
 <style lang="scss" scoped>
-/* 樣式部分完全不用動，維持你原本的即可 */
+/* 樣式保持不變 */
 .order-card {
   background-color: $neutral-color-100;
   border-radius: $radius-base;
