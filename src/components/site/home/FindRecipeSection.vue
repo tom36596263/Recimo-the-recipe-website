@@ -1,6 +1,6 @@
 <script setup>
     import CircleBtn from '@/components/common/CircleBtn.vue'
-
+    import { phpApi } from '@/utils/publicApi'
     import { ref, onMounted } from 'vue'
 
     const recipesData = ref([])
@@ -24,19 +24,23 @@
             isRotating.value = false
         }, 500)
     }
-    const base = import.meta.env.BASE_URL;
+    // const base = import.meta.env.BASE_URL;
     const fetchData = async () => {
         try {
-            const response = await fetch(`${import.meta.env.BASE_URL}data/others/remove-bg-ingredients.json`) 
-            const data = await response.json()
-            
-            recipesData.value = data
-            initRandomIngredients()
+            // const response = await fetch(`${import.meta.env.BASE_URL}data/others/remove-bg-ingredients.json`) 
+            const res = await phpApi.get('get_remove_bg_ingredients.php');
+            const result = res.data;
+            // const data = await response.json()
+            if (result.status === 'success'){
+                recipesData.value = result.data
+                initRandomIngredients()
 
-            if (displayIngredients.value.length > 0) {
-                const firstItem = displayIngredients.value[0]
-                toggleRecipe(firstItem.recipe_image_url, firstItem.id)
+                if (displayIngredients.value.length > 0) {
+                    const firstItem = displayIngredients.value[0]
+                    toggleRecipe(firstItem.recipe_image_url, firstItem.id)
+                }
             }
+            
         } catch (error) {
             console.error('抓取資料失敗:', error)
         }
