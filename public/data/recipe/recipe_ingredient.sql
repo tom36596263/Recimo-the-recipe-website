@@ -340,7 +340,7 @@ INSERT INTO recipe_ingredients (
   (322, 41, 389, 1, '茶匙', FALSE, NULL),
   (323, 41, 410, 200, '克', FALSE, NULL),
   (324, 41, 392, 125, '克', FALSE, NULL),
-  (231, 41, 231, 2, '個', FALSE, NULL),
+  (325, 41, 231, 2, '個', FALSE, NULL),
   (326, 41, 343, 40, '毫升', FALSE, NULL),
   (327, 42, 392, 150, '克', FALSE, NULL),
   (328, 42, 499, 175, '克', FALSE, NULL),
