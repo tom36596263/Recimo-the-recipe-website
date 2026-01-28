@@ -9,7 +9,7 @@ CREATE TABLE meal_plan_template_items (
     CONSTRAINT fk_item_template FOREIGN KEY (template_id) 
         REFERENCES meal_plan_templates(template_id),
     CONSTRAINT fk_item_recipe FOREIGN KEY (recipe_id) 
-        REFERENCES recipe(recipe_id)
+        REFERENCES recipes(recipe_id)
 );
 
 -- 匯入 49 筆明細資料

@@ -8,7 +8,7 @@ CREATE TABLE meal_plan_items (
     sort_order INT NOT NULL,
     PRIMARY KEY (item_id),
     CONSTRAINT fk_meal_plan_items_plan_id FOREIGN KEY (plan_id) REFERENCES meal_plans (plan_id),
-    CONSTRAINT fk_meal_plan_items_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe (recipe_id)
+    CONSTRAINT fk_meal_plan_items_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipes (recipe_id)
 );
 
 -- 2. 匯入 98 筆資料
