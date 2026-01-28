@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： localhost:8889
--- 產生時間： 2026-01-27 13:26:51
+-- 產生時間： 2026-01-28 07:44:58
 -- 伺服器版本： 5.7.24
 -- PHP 版本： 8.3.1
 
@@ -60,7 +60,18 @@ INSERT INTO `orders` (`ORDER_ID`, `USER_ID`, `LOGISTICS_ID`, `SUBTOTAL`, `DISCOU
 -- 資料表索引 `orders`
 --
 ALTER TABLE `orders`
-  ADD PRIMARY KEY (`ORDER_ID`);
+  ADD PRIMARY KEY (`ORDER_ID`),
+  ADD KEY `fk_orders_user` (`USER_ID`);
+
+--
+-- 已傾印資料表的限制式
+--
+
+--
+-- 資料表的限制式 `orders`
+--
+ALTER TABLE `orders`
+  ADD CONSTRAINT `fk_orders_user` FOREIGN KEY (`USER_ID`) REFERENCES `users` (`USER_ID`) ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
