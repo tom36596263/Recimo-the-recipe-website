@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： localhost:8889
--- 產生時間： 2026-01-27 13:27:00
+-- 產生時間： 2026-01-28 07:42:01
 -- 伺服器版本： 5.7.24
 -- PHP 版本： 8.3.1
 
@@ -55,7 +55,9 @@ INSERT INTO `order_product` (`ORDER_PRODUCT_ID`, `ORDER_ID`, `PRODUCT_ID`, `PROD
 -- 資料表索引 `order_product`
 --
 ALTER TABLE `order_product`
-  ADD PRIMARY KEY (`ORDER_PRODUCT_ID`);
+  ADD PRIMARY KEY (`ORDER_PRODUCT_ID`),
+  ADD KEY `fk_order` (`ORDER_ID`),
+  ADD KEY `fk_product` (`PRODUCT_ID`);
 
 --
 -- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
@@ -66,6 +68,17 @@ ALTER TABLE `order_product`
 --
 ALTER TABLE `order_product`
   MODIFY `ORDER_PRODUCT_ID` int(11) NOT NULL AUTO_INCREMENT COMMENT '明細ID (主鍵)', AUTO_INCREMENT=5;
+
+--
+-- 已傾印資料表的限制式
+--
+
+--
+-- 資料表的限制式 `order_product`
+--
+ALTER TABLE `order_product`
+  ADD CONSTRAINT `fk_order` FOREIGN KEY (`ORDER_ID`) REFERENCES `orders` (`ORDER_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_product` FOREIGN KEY (`PRODUCT_ID`) REFERENCES `products` (`PRODUCT_ID`) ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
