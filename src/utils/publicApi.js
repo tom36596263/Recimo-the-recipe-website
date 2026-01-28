@@ -18,7 +18,7 @@ export const publicApi = axios.create({
     timeout: 5000
 })
 
-export const getRemoveBgIngredientsApi = axios.create({
+export const phpApi = axios.create({
     baseURL: apiBase, // 確保結尾有斜線
     timeout: 5000,
     headers: { 'Content-Type': 'application/json' }

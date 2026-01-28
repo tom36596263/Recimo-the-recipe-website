@@ -1,6 +1,6 @@
 <script setup>
     import CircleBtn from '@/components/common/CircleBtn.vue'
-    import { getRemoveBgIngredientsApi } from '@/utils/publicApi'
+    import { phpApi } from '@/utils/publicApi'
     import { ref, onMounted } from 'vue'
 
     const recipesData = ref([])
@@ -28,7 +28,7 @@
     const fetchData = async () => {
         try {
             // const response = await fetch(`${import.meta.env.BASE_URL}data/others/remove-bg-ingredients.json`) 
-            const res = await getRemoveBgIngredientsApi.get('get_remove_bg_ingredients.php');
+            const res = await phpApi.get('get_remove_bg_ingredients.php');
             const result = res.data;
             // const data = await response.json()
             if (result.status === 'success'){
