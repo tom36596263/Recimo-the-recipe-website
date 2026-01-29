@@ -8,18 +8,17 @@ const props = defineProps({
 
 const emit = defineEmits(["change-servings"]);
 
-// --- 1. 核心計算邏輯 ---
+// --- 修改後的核心計算邏輯 ---
 const calculateTotal = (fieldName) => {
   if (!props.ingredients.length) return 0;
+
   const oneServingTotal = props.ingredients.reduce((sum, item) => {
-    // 確保數值有效，避免計算出 NaN
-    const amount = parseFloat(item.amount) || 0;
-    const weight = amount * (item.unit_weight || 1);
-    const nutrientValue = (weight / 100) * (item[fieldName] || 0);
+    // 現在我們假設傳進來的 item[fieldName] 已經是「該食材在食譜中的總營養量」
+    const nutrientValue = parseFloat(item[fieldName]) || 0;
     return sum + nutrientValue;
   }, 0);
 
-  // 計算總量並取整數，避免出現過長的小數點
+  // 只負責乘上人份數 (servings)
   return Math.round(oneServingTotal * props.servings);
 };
 
