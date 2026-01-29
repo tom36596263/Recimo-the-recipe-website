@@ -258,30 +258,42 @@ const stepsData = computed(() => {
     });
 });
 
-const snapsData = computed(() => rawGallery.value.map(g => {
-    // 1. 處理圖片路徑
-    let rawUrl = g.GALLERY_URL || g.url || g.gallery_url || '';
-    let finalUrl = '';
-    if (rawUrl.startsWith('http') || rawUrl.startsWith('data:') || rawUrl.startsWith('blob:')) {
-        finalUrl = rawUrl;
-    } else if (rawUrl) {
-        finalUrl = `${baseUrl}/${rawUrl.replace(/^\//, '')}`.replace(/\/+/g, '/');
+const snapsData = computed(() => {
+    // 🔍 偵錯：看看 rawUsers 現在有沒有東西
+    if (rawUsers.value.length === 0) {
+        console.warn('⚠️ snapsData 計算時 rawUsers 還是空的，請檢查 fetchData 是否完成');
     }
 
-    // 🏆 2. 獲取用戶資訊
-    // 從 g.USER_ID 找到對應的用戶物件
-    const userId = Number(g.USER_ID || g.user_id);
-    const user = rawUsers.value.find(u => Number(u.USER_ID || u.user_id) === userId);
+    return rawGallery.value.map(g => {
+        let rawUrl = g.GALLERY_URL || g.url || g.gallery_url || '';
+        let finalUrl = '';
+        if (rawUrl.startsWith('http') || rawUrl.startsWith('data:') || rawUrl.startsWith('blob:')) {
+            finalUrl = rawUrl;
+        } else if (rawUrl) {
+            finalUrl = `${baseUrl}/${rawUrl.replace(/^\//, '')}`.replace(/\/+/g, '/');
+        }
 
-    return {
-        url: finalUrl,
-        comment: g.GALLERY_TEXT || g.comment || g.gallery_text || '',
-        // 🏆 3. 新增這些欄位，確保 handleReport 抓得到
-        userId: userId,
-        userName: user?.USER_NAME || 'Recimo 用戶',
-        time: g.UPLOAD_AT || g.time || '剛剛'
-    };
-}));
+        const userId = Number(g.USER_ID || g.user_id);
+
+        const user = rawUsers.value.find(u => {
+            const uId = Number(u.USER_ID || u.user_id || u.id);
+            return uId === userId;
+        });
+
+        if (!user && rawUsers.value.length > 0) {
+            console.log(`❌ 在 rawUsers 中找不到 USER_ID: ${userId}`);
+        }
+
+        return {
+            url: finalUrl,
+            comment: g.GALLERY_TEXT || g.comment || g.gallery_text || '',
+            userId: userId,
+            // 🏆 修正這裡：抓不到時顯示 ID 方便除錯
+            userName: user?.USER_NAME || user?.user_name || user?.name || `用戶ID:${userId}`,
+            time: g.UPLOAD_AT || g.time || '剛剛'
+        };
+    });
+});
 
 const formatTime = (timeVal) => {
     if (!timeVal || timeVal === '00:00' || timeVal === 0) return '0 分鐘';
@@ -333,16 +345,31 @@ const nutritionWrapper = computed(() => {
 });
 
 const commentList = computed(() => {
+
+    if (!rawUsers.value || rawUsers.value.length === 0) return [];
+
     return rawComments.value.map(c => {
         const userId = Number(c.USER_ID || c.user_id);
-        const user = rawUsers.value.find(u => Number(u.USER_ID || u.user_id) === userId);
+
+        // 🏆 強化比對邏輯：同時支援 USER_ID 與 user_id
+        const user = rawUsers.value.find(u => {
+            const uId = Number(u.USER_ID || u.user_id || u.id);
+            return uId === userId;
+        });
+
+        // 處理頭像路徑
+        const rawAvatar = user?.USER_URL || user?.user_url || '';
+        const finalAvatar = rawAvatar
+            ? `${baseUrl}/${rawAvatar.replace(/^\//, '')}`.replace(/\/+/g, '/')
+            : `https://i.pravatar.cc/150?u=${userId}`;
+
         return {
-            userName: user?.USER_NAME || 'Recimo 用戶',
+            userName: user?.USER_NAME || user?.user_name || user?.name || `用戶ID:${userId}`,
             handle: `user_${userId}`,
-            time: c.COMMENT_AT || '剛剛',
-            content: c.COMMENT_TEXT || '',
-            avatar: user?.USER_URL ? `${baseUrl}/${user.USER_URL.replace(/^\//, '')}`.replace(/\/+/g, '/') : `https://i.pravatar.cc/150?u=${userId}`,
-            likes: c.LIKE_COUNT || 0
+            time: c.COMMENT_AT || c.comment_at || '剛剛',
+            content: c.COMMENT_TEXT || c.comment_text || '',
+            avatar: finalAvatar,
+            likes: Number(c.LIKE_COUNT || c.like_count || 0)
         };
     });
 });
