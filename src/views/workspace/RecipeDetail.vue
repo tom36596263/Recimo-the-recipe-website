@@ -279,11 +279,17 @@ const formatTime = (timeVal) => {
 };
 
 const ingredientsData = computed(() => {
+    // 取得縮放比例
+    const originalServings = Number(rawRecipe.value?.recipe_servings || 1);
+    const scale = (servings.value || 1) / originalServings;
+
     return rawIngredients.value.map(item => ({
         INGREDIENT_NAME: item.ingredient_name || '未知食材',
-        amount: item.amount || 0,
+        // 🏆 數量要乘上縮放比例
+        amount: (Number(item.amount) * scale).toFixed(1),
         unit_name: item.unit_name || '份',
         note: item.remark || item.note || '',
+        // 營養素保持原始資料，由組件決定是否顯示
         calories_per_100g: item.kcal_per_100g || 0,
         protein_per_100g: item.protein_per_100g || 0,
         fat_per_100g: item.fat_per_100g || 0,
@@ -294,6 +300,14 @@ const ingredientsData = computed(() => {
 
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value) return [];
+
+    // 1. 取得資料庫原始定義的份數 (例如：12)
+    const originalServings = Number(rawRecipe.value.recipe_servings || rawRecipe.value.RECIPE_SERVINGS || 1);
+    // 2. 取得現在使用者點選的份數 (例如：變成了 24)
+    const currentServings = servings.value || 1;
+    // 3. 計算縮放比例 (24 / 12 = 2 倍)
+    const scale = currentServings / originalServings;
+
     let totalKcal = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
 
     rawIngredients.value.forEach(ing => {
@@ -307,15 +321,12 @@ const nutritionWrapper = computed(() => {
         totalCarbs += (Number(ing.carbs_per_100g) || 0) * ratio;
     });
 
-    // 🏆 修正：除以份數，算出「每一份」的平均熱量
-    // 這樣當 servings 改變時，NutritionCard 才會顯示單份熱量
-    const currentServings = servings.value || 1;
-
     return [{
-        calories_per_100g: totalKcal / currentServings,
-        protein_per_100g: totalProtein / currentServings,
-        fat_per_100g: totalFat / currentServings,
-        carbs_per_100g: totalCarbs / currentServings,
+        // 🏆 這裡回傳「縮放後」的總量
+        calories_per_100g: totalKcal * scale,
+        protein_per_100g: totalProtein * scale,
+        fat_per_100g: totalFat * scale,
+        carbs_per_100g: totalCarbs * scale,
         amount: 1,
         unit_weight: 1
     }];
