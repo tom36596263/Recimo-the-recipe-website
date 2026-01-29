@@ -2,6 +2,8 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import OrderCard from '@/components/mall/OrderCard.vue';
 import { publicApi } from '@/utils/publicApi';
+import BaseModal from '@/components/BaseModal.vue';
+
 
 // 資料容器
 const ordersData = ref([]);
@@ -127,29 +129,34 @@ const openCalender = () => {
 }
 
 //取消訂單邏輯
+const showSuccessModal = ref(false);
 const onCancel = (orderId) => {
-
-
-  // 在陣列中尋找
   const targetIndex = ordersData.value.findIndex(order => {
     const currentId = order.ORDER_ID || order.id;
     return currentId === orderId;
   });
 
   if (targetIndex !== -1) {
-
+    // 執行取消邏輯
     if (ordersData.value[targetIndex].ORDER_STATUS !== undefined) {
       ordersData.value[targetIndex].ORDER_STATUS = -1;
     } else {
       ordersData.value[targetIndex].status = -1;
     }
 
-
+    // 更新本地存儲
     if (!ordersData.value[targetIndex].ORDER_ID) {
-      localStorage.setItem('mall_orders', JSON.stringify(ordersData.value.filter(o => !o.ORDER_ID)));
+      const localOnly = ordersData.value.filter(o => !o.ORDER_ID);
+      localStorage.setItem('mall_orders', JSON.stringify(localOnly));
     }
+
+    // --- 重點：原本是 alert('訂單已成功取消')，現在改為開啟彈窗 ---
+    showSuccessModal.value = true;
   }
 }
+
+
+
 </script>
 
 <template>
@@ -188,6 +195,14 @@ const onCancel = (orderId) => {
         {{ page }}
       </button>
     </div>
+  </div>
+
+  <div class="container">
+    <BaseModal :is-open="showSuccessModal" type="success" icon-class="fa-solid fa-circle-check" title="訂單已成功取消"
+      description="您的退款申請已在處理中，請留意後續通知。" @close="showSuccessModal = false">
+      <template #actions>
+      </template>
+    </BaseModal>
   </div>
 </template>
 
