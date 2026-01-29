@@ -25,10 +25,19 @@ const getAvatarStyle = (name) => {
     return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
 };
 
+// 1. 宣告要傳出去的事件
+const emit = defineEmits(['post-comment']);
+
+// 2. 修改原本的發送邏輯
 const handleSend = () => {
+    // A. 防呆：若輸入內容為空或全是空白字元則不執行
     if (!userInput.value.trim()) return;
+
+    // B. 把資料傳給父組件，由父組件處理 rawComments 的 push 動作
+    emit('post-comment', userInput.value);
+
+    // C. 成功發送後清空輸入框
     userInput.value = "";
-    alert("感謝你的分享！為了維護社群品質，你的留言正在進行審核，通過後將會立即顯示在食譜頁面上。");
 };
 
 const openReport = (item, index) => {
@@ -53,9 +62,9 @@ const openReport = (item, index) => {
         </div>
 
         <div class="comment-list">
-            <div v-for="(item, index) in list" :key="index" class="comment-item">
+            <div v-for="(item, index) in list" :key="item.time + item.content" class="comment-item">
                 <div class="user-avatar-text" :style="getAvatarStyle(item.userName)">
-                    {{ item.userName.charAt(0).toUpperCase() }}
+                    {{ item.userName ? item.userName.charAt(0).toUpperCase() : '?' }}
                 </div>
 
                 <div class="comment-body">
@@ -88,7 +97,7 @@ const openReport = (item, index) => {
 </template>
 
 <style lang="scss" scoped>
-/* 此處保留你原始的所有 CSS 樣式 */
+/* 此處完全保留你原始的 SCSS 樣式 */
 @import '@/assets/scss/abstracts/_color.scss';
 
 .comment-section {
