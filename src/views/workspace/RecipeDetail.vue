@@ -90,19 +90,28 @@ const fetchData = async () => {
                         m.ingredient_name === (ing.name || ing.ingredient_name)
                     );
 
-                    const unitWeight = Number(master?.gram_conversion || master?.unit_weight || ing.gram_conversion || 1);
+                    // 1. 先抓出原始的單位重（轉換率）
+                    let unitWeight = Number(master?.gram_conversion || master?.unit_weight || ing.gram_conversion || 1);
+
+                    // 🏆 核心修正：檢查預覽模式的單位
+                    // 如果單位是克或毫升，強行將單位重設為 1，避免重複計算
+                    const unitName = ing.unit || ing.unit_name || master?.unit_name || '';
+                    if (['克', 'g', 'G', '毫升', 'ml', 'ML'].includes(unitName)) {
+                        unitWeight = 1;
+                    }
+
                     const kcal = Number(master?.kcal_per_100g || ing.kcal_per_100g || 0);
                     const amount = Number(ing.amount || 0);
 
                     return {
                         ...ing,
                         ingredient_name: ing.name || ing.ingredient_name || master?.ingredient_name || '未知食材',
-                        gram_conversion: unitWeight,
+                        gram_conversion: unitWeight, // 現在這會是正確的 1 或 轉換率
                         kcal_per_100g: kcal,
                         protein_per_100g: Number(master?.protein_per_100g || ing.protein_per_100g || 0),
                         fat_per_100g: Number(master?.fat_per_100g || ing.fat_per_100g || 0),
                         carbs_per_100g: Number(master?.carbs_per_100g || ing.carbs_per_100g || 0),
-                        unit_name: ing.unit || ing.unit_name || master?.unit_name || '份',
+                        unit_name: unitName || '份',
                         // 額外記錄計算結果供偵錯
                         debug_total_kcal: ((amount * unitWeight) / 100 * kcal).toFixed(2)
                     };

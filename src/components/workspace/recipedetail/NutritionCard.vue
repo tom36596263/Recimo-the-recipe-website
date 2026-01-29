@@ -64,21 +64,21 @@ const formatDisplayValue = (val) => {
 
     <div class="total-calories-box">
       <i-material-symbols-mode-heat-outline-rounded class="heat-icon" />
-      <span class="calories-value zh-h4">{{ formatDisplayValue(totalCalories) }}</span>
+      <span :key="servings"  class="calories-value zh-h4 bump-animation">{{ formatDisplayValue(totalCalories) }}</span>
       <span class="unit zh-h4">kcal</span>
     </div>
 
     <div class="nutrients-content">
       <div class="nutrient-item">
-        <p class="value p-p1">{{ formatDisplayValue(totalProtein) }}g</p>
+        <p :key="servings"  class="value p-p1 bump-animation">{{ formatDisplayValue(totalProtein) }}g</p>
         <p class="label p-p2">蛋白質</p>
       </div>
       <div class="nutrient-item">
-        <p class="value p-p1">{{ formatDisplayValue(totalFat) }}g</p>
+        <p :key="servings"  class="value p-p1 bump-animation">{{ formatDisplayValue(totalFat) }}g</p>
         <p class="label p-p2">脂質</p>
       </div>
       <div class="nutrient-item">
-        <p class="value p-p1">{{ formatDisplayValue(totalCarbs) }}g</p>
+        <p :key="servings"  class="value p-p1 bump-animation">{{ formatDisplayValue(totalCarbs) }}g</p>
         <p class="label p-p2">碳水</p>
       </div>
     </div>
@@ -95,7 +95,6 @@ const formatDisplayValue = (val) => {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  // ✨ 防禦性設定：防止整張卡片被長字串撐開
   max-width: 100%;
   box-sizing: border-box;
 
@@ -135,7 +134,7 @@ const formatDisplayValue = (val) => {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-shrink: 0; // 防止按鈕被擠壓
+    flex-shrink: 0; 
     transition: all 0.2s ease;
 
     &:hover:not(:disabled) {
@@ -214,6 +213,27 @@ const formatDisplayValue = (val) => {
   .label {
     color: $neutral-color-700;
     white-space: nowrap; // 標籤不換行，維持整齊
+  }
+}
+
+// 在 style 區塊最後面加入
+.bump-animation {
+  display: inline-block; // 確保 transform 有效
+  animation: bump 0.3s ease-out;
+}
+
+@keyframes bump {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15); // 變大的幅度，可以自己調整
+    color: $primary-color-700; // 變大時稍微變色，視覺感更強
+  }
+
+  100% {
+    transform: scale(1);
   }
 }
 </style>
