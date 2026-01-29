@@ -3,7 +3,6 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { publicApi } from '@/utils/publicApi';
 import { useRecipeStore } from '@/stores/recipeEditor';
-import { authApi } from '@/utils/authApi'; // 🏆 引入 AuthStore 抓登入資訊
 
 // 引用元件 
 import RecipeSteps from '../../components/workspace/recipedetail/RecipeSteps.vue';
@@ -18,7 +17,6 @@ import RelatedRecipes from '@/components/workspace/recipedetail/RelatedRecipes.v
 const route = useRoute();
 const router = useRouter();
 const recipeStore = useRecipeStore();
-const authStore = useAuthStore(); // 🏆 初始化 AuthStore
 
 const baseUrl = import.meta.env.BASE_URL;
 
@@ -35,6 +33,9 @@ const isLoading = ref(true);
 const isLiked = ref(false);
 const localLikesOffset = ref(0);
 
+// 當前用戶假資料 (渲染測試用)
+const currentUser = ref({ id: 999, name: '渲染測試', avatar: '' });
+
 const isPreviewMode = computed(() => route.query.mode === 'preview');
 
 // --- 2. 功能函式 ---
@@ -42,6 +43,38 @@ const toggleRecipeLike = () => {
     if (isPreviewMode.value) return;
     isLiked.value = !isLiked.value;
     localLikesOffset.value = isLiked.value ? 1 : 0;
+};
+
+// --- 🏆 核心：成品照即時渲染處理 ---
+const handlePostSnap = (uploadPayload) => {
+    if (isPreviewMode.value) return;
+
+    const now = new Date();
+    const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    // 1. 構建新物件
+    const newSnap = {
+        GALLERY_ID: Date.now(),
+        RECIPE_ID: Number(route.params.id),
+        USER_ID: currentUser.value.id,
+        GALLERY_URL: uploadPayload.image, // 這裡接收子組件傳來的圖片路徑
+        GALLERY_TEXT: uploadPayload.content,
+        UPLOAD_AT: formattedDate
+    };
+
+    // 2. 確保用戶資料存在於本地用戶池中
+    const userExists = rawUsers.value.find(u => Number(u.USER_ID || u.id) === Number(currentUser.value.id));
+    if (!userExists) {
+        rawUsers.value.push({
+            USER_ID: currentUser.value.id,
+            USER_NAME: currentUser.value.name,
+            USER_URL: currentUser.value.avatar || ''
+        });
+    }
+
+    // 3. 渲染到畫面最前端
+    rawGallery.value.unshift(newSnap);
+    console.log('成品照已同步渲染:', newSnap);
 };
 
 const handleGoToEdit = () => {
@@ -95,7 +128,6 @@ const fetchData = async () => {
         }
 
         servings.value = 1;
-
         const masterIng = resIngMaster.data || [];
         const recipeIng = resRecipeIng.data || [];
         const filteredLinks = recipeIng.filter(i => Number(i.recipe_id || i.RECIPE_ID) === recipeId);
@@ -105,9 +137,7 @@ const fetchData = async () => {
             let unitWeight = Number(link.gram_conversion || master?.gram_conversion || master?.unit_weight || 1);
             const unitName = link.unit_name || master?.unit_name || '';
 
-            if (['克', 'g', 'G', '毫升', 'ml', 'ML'].includes(unitName)) {
-                unitWeight = 1;
-            }
+            if (['克', 'g', 'G', '毫升', 'ml', 'ML'].includes(unitName)) { unitWeight = 1; }
 
             const kcal = Number(master?.kcal_per_100g || link.kcal_per_100g || 0);
             const amount = Number(link.amount || 0);
@@ -204,8 +234,13 @@ const stepsData = computed(() => {
 const snapsData = computed(() => {
     return rawGallery.value.map(g => {
         let rawUrl = g.GALLERY_URL || g.url || g.gallery_url || '';
-        let finalUrl = (rawUrl.startsWith('http') || rawUrl.startsWith('data:') || rawUrl.startsWith('blob:'))
-            ? rawUrl : `${baseUrl}/${rawUrl.replace(/^\//, '')}`.replace(/\/+/g, '/');
+
+        // 判斷是否為絕對路徑或預覽路徑
+        let finalUrl = (
+            rawUrl.startsWith('http') ||
+            rawUrl.startsWith('data:') ||
+            rawUrl.startsWith('blob:') // 👈 支援即時預覽
+        ) ? rawUrl : `${baseUrl}/${rawUrl.replace(/^\//, '')}`.replace(/\/+/g, '/');
 
         const userId = Number(g.USER_ID || g.user_id);
         const user = rawUsers.value.find(u => Number(u.USER_ID || u.user_id || u.id) === userId);
@@ -248,7 +283,7 @@ const ingredientsData = computed(() => {
 
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value) return [];
-    const originalServings = Number(rawRecipe.value.recipe_servings || rawRecipe.value.RECIPE_SERVINGS || 1);
+    const originalServings = Number(rawRecipe.value.recipe_servings || 1);
     const scale = (servings.value || 1) / originalServings;
     let totalKcal = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
 
@@ -271,11 +306,9 @@ const nutritionWrapper = computed(() => {
 });
 
 const commentList = computed(() => {
-    // 這裡我們不再 return [] 如果 users 為空，而是嘗試顯示
     return rawComments.value.map(c => {
         const userId = Number(c.USER_ID || c.user_id);
         const user = rawUsers.value.find(u => Number(u.USER_ID || u.user_id || u.id) === userId);
-
         const rawAvatar = user?.USER_URL || user?.user_url || '';
         const finalAvatar = rawAvatar
             ? `${baseUrl}/${rawAvatar.replace(/^\//, '')}`.replace(/\/+/g, '/')
@@ -289,37 +322,30 @@ const commentList = computed(() => {
             avatar: finalAvatar,
             likes: Number(c.LIKE_COUNT || c.like_count || 0)
         };
-    }).reverse(); // 🏆 讓最新留言排在上面
+    }).reverse();
 });
 
 const handlePostComment = async (text) => {
-    if (isPreviewMode.value || !text.trim()) return;
-
-    const currentUser = authStore.user;
-    const now = new Date().toLocaleString(); // 產生真實時間避免 key 重複
-
+    if (isPreviewMode.value || !text || !text.trim()) return;
+    const now = new Date().toLocaleString();
     const newCommentFake = {
         RECIPE_ID: route.params.id,
-        USER_ID: currentUser?.id || 999,
-        COMMENT_TEXT: text,
-        COMMENT_AT: now, // 使用真實時間
+        USER_ID: currentUser.value.id,
+        COMMENT_TEXT: text.trim(),
+        COMMENT_AT: now,
         LIKE_COUNT: 0
     };
 
-    // 確保自己一定在 rawUsers 裡面，否則 computed 會找不到人
-    if (currentUser) {
-        const exists = rawUsers.value.find(u => Number(u.USER_ID || u.id) === Number(currentUser.id));
-        if (!exists) {
-            rawUsers.value.push({
-                USER_ID: currentUser.id,
-                USER_NAME: currentUser.name || '我',
-                USER_URL: currentUser.avatar || ''
-            });
-        }
+    const exists = rawUsers.value.find(u => Number(u.USER_ID || u.id) === Number(currentUser.value.id));
+    if (!exists) {
+        rawUsers.value.push({
+            USER_ID: currentUser.value.id,
+            USER_NAME: currentUser.value.name,
+            USER_URL: currentUser.value.avatar || ''
+        });
     }
-
-    // 🚀 執行 push
     rawComments.value.push(newCommentFake);
+    alert("留言成功！感謝您的評論 ~");
 };
 
 const baseRecipeLikes = ref(0);
@@ -432,7 +458,7 @@ const onReportSubmit = (data) => { isReportModalOpen.value = false; };
 
                 <div v-if="!isPreviewMode" class="col-12 cook-snap-full fade-up" style="--delay: 7">
                     <section class="mb-10 content-wrapper">
-                        <CookSnap :list="snapsData" />
+                        <CookSnap :list="snapsData" @post-snap="handlePostSnap" />
                     </section>
                 </div>
             </div>

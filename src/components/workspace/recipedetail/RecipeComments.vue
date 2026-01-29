@@ -62,32 +62,39 @@ const openReport = (item, index) => {
         </div>
 
         <div class="comment-list">
-            <div v-for="(item, index) in list" :key="item.time + item.content" class="comment-item">
-                <div class="user-avatar-text" :style="getAvatarStyle(item.userName)">
-                    {{ item.userName ? item.userName.charAt(0).toUpperCase() : '?' }}
-                </div>
-
-                <div class="comment-body">
-                    <div class="comment-header">
-                        <span class="user-name p-p1">{{ item.userName }}</span>
-                        <span class="user-meta p-p3">@{{ item.handle }} • {{ item.time }}</span>
+            <template v-if="list && list.length > 0">
+                <div v-for="(item, index) in list" :key="item.time + item.content" class="comment-item">
+                    <div class="user-avatar-text" :style="getAvatarStyle(item.userName)">
+                        {{ item.userName ? item.userName.charAt(0).toUpperCase() : '?' }}
                     </div>
-                    <p class="comment-text p-p2">{{ item.content }}</p>
 
-                    <div class="comment-footer">
-                        <button class="action-btn like-btn" :class="{ 'active': localLikes[index] }"
-                            @click="toggleLike(index)">
-                            <i-material-symbols-thumb-up-rounded v-if="localLikes[index]" class="action-icon" />
-                            <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
-                            <span class="count">{{ (item.likes || 0) + (localLikes[index] ? 1 : 0) }}</span>
-                        </button>
+                    <div class="comment-body">
+                        <div class="comment-header">
+                            <span class="user-name p-p1">{{ item.userName }}</span>
+                            <span class="user-meta p-p3">@{{ item.handle }} • {{ item.time }}</span>
+                        </div>
+                        <p class="comment-text p-p2">{{ item.content }}</p>
 
-                        <button class="action-btn report-btn" :class="{ 'active': reportingIndex === index }"
-                            @click="openReport(item, index)">
-                            <i-material-symbols:error-outline-rounded class="action-icon" />
-                        </button>
+                        <div class="comment-footer">
+                            <button class="action-btn like-btn" :class="{ 'active': localLikes[index] }"
+                                @click="toggleLike(index)">
+                                <i-material-symbols-thumb-up-rounded v-if="localLikes[index]" class="action-icon" />
+                                <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
+                                <span class="count">{{ (item.likes || 0) + (localLikes[index] ? 1 : 0) }}</span>
+                            </button>
+
+                            <button class="action-btn report-btn" :class="{ 'active': reportingIndex === index }"
+                                @click="openReport(item, index)">
+                                <i-material-symbols:error-outline-rounded class="action-icon" />
+                            </button>
+                        </div>
                     </div>
                 </div>
+            </template>
+
+            <div v-else class="empty-comment-state">
+                <i-material-symbols-chat-bubble-outline-rounded class="empty-icon" />
+                <p class="p-p2">目前還沒有留言，快來當第一個分享的人吧！</p>
             </div>
         </div>
 
@@ -97,14 +104,12 @@ const openReport = (item, index) => {
 </template>
 
 <style lang="scss" scoped>
-/* 此處完全保留你原始的 SCSS 樣式 */
 @import '@/assets/scss/abstracts/_color.scss';
 
 .comment-section {
     max-width: 1400px;
     margin: 0 auto;
     padding: 24px 20px;
-    font-family: "PingFang TC", sans-serif;
 }
 
 .section-title {
@@ -116,7 +121,7 @@ const openReport = (item, index) => {
     position: relative;
     display: flex;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
 
     .styled-input {
         width: 100%;
@@ -126,10 +131,6 @@ const openReport = (item, index) => {
         font-size: 15px;
         outline: none;
         transition: all 0.2s;
-
-        &::placeholder {
-            color: $neutral-color-400;
-        }
 
         &:focus {
             border-color: $primary-color-800;
@@ -142,12 +143,8 @@ const openReport = (item, index) => {
         right: 15px;
         background: none;
         border: none;
-        padding: 5px;
         cursor: pointer;
         color: $neutral-color-400;
-        display: flex;
-        align-items: center;
-        transition: color 0.2s;
 
         &.active {
             color: $primary-color-700;
@@ -158,48 +155,43 @@ const openReport = (item, index) => {
 .comment-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 }
 
 .comment-item {
     display: flex;
-    gap: 12px;
-    padding-bottom: 12px;
+    gap: 16px;
+    padding-bottom: 16px;
     border-bottom: 1px solid $neutral-color-100;
 
-    &:last-child {
-        border-bottom: none;
-    }
-
     .user-avatar-text {
-        width: 40px;
-        height: 40px;
+        width: 44px; // 稍微放大一點點，視覺更平衡
+        height: 44px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 600;
-        font-size: 14px;
+        font-size: 16px;
         flex-shrink: 0;
         user-select: none;
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05); // 增加一點質感邊框
     }
 
     .comment-body {
         flex: 1;
 
         .comment-header {
-            margin-bottom: 4px;
+            margin-bottom: 6px;
 
             .user-name {
                 font-weight: 600;
-                margin-right: 6px;
+                margin-right: 8px;
                 color: $neutral-color-800;
             }
 
             .user-meta {
                 color: $neutral-color-400;
-                font-size: 12px;
             }
         }
 
@@ -207,49 +199,58 @@ const openReport = (item, index) => {
             line-height: 1.6;
             color: $neutral-color-800;
             margin-bottom: 8px;
-            white-space: pre-line;
-            font-size: 14px;
+            font-size: 15px;
+        }
+    }
+}
+
+// 空白狀態樣式
+.empty-comment-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+    color: $neutral-color-400;
+    text-align: center;
+
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        opacity: 0.3;
+    }
+}
+
+// 按鈕樣式 (點讚、檢舉)
+.comment-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+
+    .action-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        color: $neutral-color-700;
+        transition: all 0.2s;
+
+        .action-icon {
+            font-size: 18px;
         }
 
-        .comment-footer {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 16px;
+        &.like-btn:hover,
+        &.like-btn.active {
+            color: $primary-color-700;
 
-            .action-btn {
-                background: none;
-                border: none;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                color: $neutral-color-700;
-                padding: 4px;
-                transition: all 0.2s ease;
-
-                .action-icon {
-                    font-size: 18px;
-                }
-
-                .count {
-                    margin-left: 4px;
-                    font-size: 13px;
-                }
-
-                &.like-btn:hover,
-                &.like-btn.active {
-                    color: $primary-color-700;
-
-                    .action-icon {
-                        fill: currentColor;
-                    }
-                }
-
-                &.report-btn:hover,
-                &.report-btn.active {
-                    color: $secondary-color-danger-700;
-                }
+            .action-icon {
+                fill: currentColor;
             }
+        }
+
+        &.report-btn:hover {
+            color: $secondary-color-danger-700;
         }
     }
 }

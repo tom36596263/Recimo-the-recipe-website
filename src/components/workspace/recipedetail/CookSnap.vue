@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue'
 import PostReportModal from '@/components/workspace/recipedetail/modals/PostReportModal.vue'
-// 導入上傳燈箱
 import CookSnapUploadModal from '@/components/workspace/recipedetail/modals/CookSnapUploadModal.vue'
 
 const props = defineProps({
@@ -11,6 +10,9 @@ const props = defineProps({
     default: () => []
   }
 })
+
+// 🏆 1. 定義 emit 事件，讓父組件能收到資料
+const emit = defineEmits(['post-snap'])
 
 const wallViewport = ref(null)
 
@@ -24,7 +26,6 @@ const selectedPhotoData = ref({
 })
 
 const handleReport = (photo) => {
-
   console.log('點擊的成品照資料:', photo);
   selectedPhotoData.value = {
     content: photo.comment,
@@ -47,8 +48,20 @@ const handleUploadClick = () => {
   isUploadModalOpen.value = true
 }
 
+// 在 CookSnap.vue 中修改
 const onUploadSubmit = (data) => {
-  console.log('上傳成功:', data)
+  console.log('子組件接收:', data) // 你可以在這裡看 data 裡面是不是只有 note
+
+  let previewUrl = data.image
+  if (data.image instanceof File) {
+    previewUrl = URL.createObjectURL(data.image)
+  }
+
+  emit('post-snap', {
+    content: data.note || '',
+    image: previewUrl
+  })
+
   isUploadModalOpen.value = false
 }
 
