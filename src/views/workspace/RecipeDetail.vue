@@ -94,20 +94,22 @@ const fetchData = async () => {
         rawRecipe.value = recipes.find(r => Number(r.recipe_id || r.RECIPE_ID) === recipeId);
 
         if (!rawRecipe.value) {
-            console.warn(`找不到食譜 ID: ${recipeId}`);
+            // console.warn(`找不到食譜 ID: ${recipeId}`);
             isLoading.value = false;
             return;
         }
 
         // 🏆 修正 1：正確設定初始份數，不要死栓在 1
-        const defaultServings = Number(rawRecipe.value.recipe_servings || rawRecipe.value.RECIPE_SERVINGS || 1);
-        servings.value = defaultServings;
+        const defaultServings = Number(rawRecipe.value.recipe_servings || rawRecipe.value.RECIPE_SERVINGS || 12);
+        servings.value = 1;
+
+        // console.log(`%c🏠 正式模式：載入食譜，原始總份數: ${defaultServings}，UI 預設顯示: 1`, 'color: #fff; background: #4CAF50; padding: 2px 4px;');
 
         const masterIng = resIngMaster.data || [];
         const recipeIng = resRecipeIng.data || [];
         const filteredLinks = recipeIng.filter(i => Number(i.recipe_id || i.RECIPE_ID) === recipeId);
 
-        console.log(`%c🏠 正式模式：載入食譜 ID [${recipeId}]，預設份數: ${defaultServings}`, 'color: #fff; background: #4CAF50; padding: 2px 4px;');
+        // console.log(`%c🏠 正式模式：載入食譜 ID [${recipeId}]，預設份數: ${defaultServings}`, 'color: #fff; background: #4CAF50; padding: 2px 4px;');
 
         rawIngredients.value = filteredLinks.map(link => {
             const master = masterIng.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
@@ -301,11 +303,9 @@ const ingredientsData = computed(() => {
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value) return [];
 
-    // 1. 取得資料庫原始定義的份數 (例如：12)
     const originalServings = Number(rawRecipe.value.recipe_servings || rawRecipe.value.RECIPE_SERVINGS || 1);
-    // 2. 取得現在使用者點選的份數 (例如：變成了 24)
     const currentServings = servings.value || 1;
-    // 3. 計算縮放比例 (24 / 12 = 2 倍)
+    // 這裡算出正確的縮放比 (例如 1/12 或 2/12)
     const scale = currentServings / originalServings;
 
     let totalKcal = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
@@ -322,11 +322,13 @@ const nutritionWrapper = computed(() => {
     });
 
     return [{
-        // 🏆 這裡回傳「縮放後」的總量
+        // 🏆 這裡已經算好「當前顯示份數」的總量
         calories_per_100g: totalKcal * scale,
         protein_per_100g: totalProtein * scale,
         fat_per_100g: totalFat * scale,
         carbs_per_100g: totalCarbs * scale,
+
+        // 關鍵：強制讓子組件的乘法乘上 1，不要再加乘
         amount: 1,
         unit_weight: 1
     }];

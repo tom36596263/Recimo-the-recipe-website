@@ -16,9 +16,65 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'delete-recipe']);
 
-// 🏆 關鍵：同步燈箱內的人份數
+// 1. 取得原始份數 (防呆至少為 1)
+const originalServings = computed(() => {
+    return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
+});
+
+// 在 AdaptationDetailModal.vue 內部
+const displayedNutrition = computed(() => {
+    if (!props.nutrition) return null;
+    const s = currentServings.value; // 使用者在燈箱選的人份
+    return {
+        calories: props.nutrition.calories * s,
+        protein: props.nutrition.protein * s,
+        fat: props.nutrition.fat * s,
+        carbs: props.nutrition.carbs * s,
+    };
+});
+
+// 2. 當前的 UI 顯示人份數 (預設設為 1)
 const currentServings = ref(1);
 
+// 當燈箱開啟或食譜切換時，初始化 currentServings
+watch(() => props.modelValue, (isOpen) => {
+    if (isOpen) {
+        // 你可以選擇預設顯示 1 份，或是預設顯示食譜原始份數
+        // 這裡建議預設 1，讓 NutritionCard 從 1 人份開始算比較直覺
+        currentServings.value = 1;
+    }
+});
+
+// 3. 核心：計算「每一份量」的基礎營養素 (供 NutritionCard 內部乘法使用)
+const baseNutritionPerServing = computed(() => {
+    if (!props.nutrition) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
+
+    const total = props.nutrition;
+    const s = originalServings.value;
+
+    return {
+        calories: Number(total.calories || 0) / s,
+        protein: Number(total.protein || 0) / s,
+        fat: Number(total.fat || 0) / s,
+        carbs: Number(total.carbs || 0) / s,
+    };
+});
+
+// 4. 食材數據也要跟著 currentServings 連動
+const ingredientsData = computed(() => {
+    const list = props.recipe?.ingredients || [];
+    // 計算縮放比例：(燈箱選擇的人份 / 原始食譜總人份)
+    const scale = currentServings.value / originalServings.value;
+
+    return list.map(item => ({
+        INGREDIENT_NAME: item.name || item.ingredient_name || '未知食材',
+        amount: item.amount ? (Number(item.amount) * scale).toFixed(1) : '',
+        unit_name: item.unit || item.unit_name || 'g',
+        note: item.note || ''
+    }));
+});
+
+// --- 其他輔助邏輯 ---
 const closeModal = () => emit('update:modelValue', false);
 
 const getAvatarStyle = (name) => {
@@ -28,21 +84,12 @@ const getAvatarStyle = (name) => {
     return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
 };
 
-// 當開啟新的食譜時，重置人份數
-watch(() => props.recipe, (newVal) => {
-    if (newVal) {
-        currentServings.value = Number(newVal.servings) || 1;
-    }
-}, { immediate: true });
-
-// --- 下方 computed 邏輯保持不變 ---
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
     const loginUser = JSON.parse(localStorage.getItem('user') || '{}');
     const today = new Date().toISOString().split('T')[0];
 
-    // ... (保留你原本的 introData 邏輯)
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
     return {
@@ -57,23 +104,6 @@ const introData = computed(() => {
         publishTime: r.created_at || today,
         isOwner: !!(r.is_mine)
     };
-});
-
-const handleDelete = () => {
-    if (confirm("確定要刪除這份食譜紀錄嗎？")) {
-        emit('delete-recipe', introData.value.id);
-        closeModal();
-    }
-};
-
-const ingredientsData = computed(() => {
-    const list = props.recipe?.ingredients || [];
-    return list.map(item => ({
-        INGREDIENT_NAME: item.name || item.ingredient_name || '未知食材',
-        amount: item.amount,
-        unit_name: item.unit || item.unit_name || 'g',
-        note: item.note || ''
-    }));
 });
 
 const stepsData = computed(() => {
@@ -126,8 +156,8 @@ const stepsData = computed(() => {
 
                             <div class="col-5 col-md-12 sidebar-right">
                                 <div class="sticky-sidebar">
-                                    <NutritionCard v-if="nutrition" :nutrition="nutrition" :servings="currentServings"
-                                        @change-servings="val => currentServings = val" />
+                                    <NutritionCard v-if="nutrition" :nutrition="displayedNutrition"
+                                        :servings="currentServings" @change-servings="val => currentServings = val" />
 
                                     <RecipeIngredients :list="ingredientsData" :readonly="true" />
                                 </div>

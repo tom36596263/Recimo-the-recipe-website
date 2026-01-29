@@ -10,15 +10,16 @@ const props = defineProps({
 
 const emit = defineEmits(["change-servings"]);
 
-// --- 優化後的核心計算邏輯 (自動切換模式) ---
+// --- 在 NutritionCard.vue 裡 ---
 const getDisplayTotal = (fieldName, nutritionKey) => {
-  // 模式 A：如果父組件直接給了算好的 nutrition 物件 (用於改編燈箱)
+  // 模式 A：如果父組件直接給了算好的 nutrition 物件
   if (props.nutrition) {
     const val = parseFloat(props.nutrition[nutritionKey] || props.nutrition[fieldName]) || 0;
-    return Math.round(val * props.servings);
+    // 這裡原本有 * props.servings，請刪掉，因為父組件已經算好了
+    return Math.round(val);
   }
 
-  // 模式 B：如果只有食材陣列 (用於原食譜詳情頁)
+  // 模式 B：如果只有食材陣列
   if (!props.ingredients || !props.ingredients.length) return 0;
 
   const oneServingTotal = props.ingredients.reduce((sum, item) => {
@@ -26,7 +27,9 @@ const getDisplayTotal = (fieldName, nutritionKey) => {
     return sum + nutrientValue;
   }, 0);
 
-  return Math.round(oneServingTotal * props.servings);
+  // 🏆 重要修正：這裡原本有 * props.servings，請刪掉！
+  // 因為父組件傳進來的 ingredients 已經是 nutritionWrapper 算好「當前份數」的結果了
+  return Math.round(oneServingTotal);
 };
 
 // 保持與原本變數名稱一致，Template 完全不需要改動
