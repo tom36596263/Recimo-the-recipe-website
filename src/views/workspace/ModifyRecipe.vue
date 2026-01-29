@@ -21,6 +21,9 @@ const selectedRecipe = ref(null);
 const currentNutrition = ref(null);
 
 async function openAdaptDetail(item) {
+    // 🛑 唯讀邏輯：如果是來自 JSON 的資料（id 以 json- 開頭），直接中斷，不執行任何計算與彈窗
+    if (String(item.id).startsWith('json-')) return;
+
     console.log('--- 🛡️ 熱量校正啟動 ---');
 
     // 1. 確保 Store 資料已加載
@@ -30,7 +33,7 @@ async function openAdaptDetail(item) {
 
     const ingredients = item.ingredients || [];
 
-    // 2. 份數抓取邏輯：如果子食譜沒設份數，就用母食譜的，再不然就預設 2
+    // 2. 份數抓取邏輯
     let finalServings = Number(
         item.recipe_servings ||
         item.servings ||
@@ -39,16 +42,14 @@ async function openAdaptDetail(item) {
     );
 
     try {
-        // 3. 計算這鍋食譜的「總熱量」
+        // 3. 計算總熱量
         const totalResult = nutritionStore.calculateRecipeNutrition(ingredients);
 
-        // 🏆 簡單粗暴法：如果總熱量 > 1000 且份數是 1，代表這肯定是「整鍋」沒除過，強制設為 2 份
+        // 🏆 異常高熱量修正
         if (totalResult.kcal > 1000 && finalServings === 1) {
             console.warn('偵測到異常高熱量且份數為 1，自動修正為 2 份計算');
             finalServings = 2;
         }
-
-        console.log(`[食譜份數檢查]: ${finalServings} 份`);
 
         // 4. 計算單份比例
         const scale = 1 / finalServings;
@@ -60,8 +61,6 @@ async function openAdaptDetail(item) {
             carbs: (totalResult.carbs * scale).toFixed(1),
             calories: totalResult.kcal * scale
         };
-
-        console.log(`[計算結果] 總計: ${totalResult.kcal} kcal | 比例: ${scale.toFixed(3)} | 單份: ${currentNutrition.value.kcal} kcal`);
 
     } catch (err) {
         console.error('計算失敗:', err);
@@ -130,7 +129,6 @@ async function loadRecipeData(recipeId) {
                 const childInfo = allRecipes.find(r => Number(r.recipe_id || r.RECIPE_ID) === childId);
                 if (!childInfo) return null;
 
-                // 同步食材並確保有 id
                 const childIngredients = resIngredients.data
                     .filter(i => Number(i.recipe_id || i.RECIPE_ID) === childId)
                     .map(ing => ({
@@ -145,7 +143,6 @@ async function loadRecipeData(recipeId) {
                     coverImg: fixPath(adapt.adaptation_image_url || childInfo.recipe_image_url),
                     is_mine: false,
                     recipe_descreption: childInfo.recipe_description || childInfo.RECIPE_DESCRIPTION || '暫無詳細內容',
-                    // 🏆 直接嘗試抓取，抓不到就繼承母食譜的份數
                     recipe_servings: Number(childInfo.recipe_servings || childInfo.RECIPE_SERVINGS || parentServings),
                     ingredients: childIngredients
                 };
@@ -170,18 +167,6 @@ async function loadRecipeData(recipeId) {
         console.error('載入失敗:', err);
     }
 }
-
-// 輔助函式：處理時間顯示 (保留)
-const formatTime = (timeValue) => {
-    if (!timeValue) return '30 分鐘';
-    if (typeof timeValue === 'string' && timeValue.includes(':')) {
-        const parts = timeValue.split(':');
-        const h = parseInt(parts[0], 10);
-        const m = parseInt(parts[1], 10);
-        return h > 0 ? `${h} 小時 ${m} 分鐘` : `${m} 分鐘`;
-    }
-    return String(timeValue).includes('分') ? timeValue : `${timeValue} 分鐘`;
-};
 
 function deleteLocalRecipe(targetId) {
     if (!confirm('確定要刪除這個本地改編版本嗎？')) return;
@@ -261,7 +246,7 @@ function goBack() {
                     }" @click="openAdaptDetail(item)">
 
                     <div class="card-wrapper" style="position: relative; height: 100%;">
-                        <AdaptRecipeCard :recipe="{
+                        <AdaptRecipeCard class="demo-readonly-card" :recipe="{
                             title: item.title,
                             summary: item.summary,
                             coverImg: item.coverImg
@@ -281,7 +266,7 @@ function goBack() {
 </template>
 
 <style lang="scss" scoped>
-/* 此部分完全保留，不做任何修改 */
+/* 🔴 以下 CSS 與你提供的完全一致，未做任何刪減或改動 */
 @import '@/assets/scss/abstracts/_color.scss';
 
 .mobile-only-btn {
