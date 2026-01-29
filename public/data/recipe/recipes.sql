@@ -32,11 +32,11 @@ CREATE TABLE IF NOT EXISTS RECIPES (
 
 -- 2. 匯入資料 (對應 JSON 格式與欄位)
 INSERT INTO RECIPES (
-    RECIPE_ID, AUTHOR_ID, LINKED_PRODUCT_ID, PARENT_RECIPE_ID, PERSONAL_FOLDER_ID, 
-    ADAPTATION_TITLE, ADAPTATION_NOTE, RECIPE_TITLE, RECIPE_IMAGE_URL, 
-    RECIPE_DESCREPTION, RECIPE_SERVINGS, RECIPE_TOTAL_TIME, RECIPE_DIFFICULTY, 
-    RECIPE_LIKE_COUNT, RECIPE_KCAL_PER_100G, RECIPE_PROTEIN_PER_100G, 
-    RECIPE_FAT_PER_100G, RECIPE_CARBS_PER_100G, STATUS, RECIPE_CREATED_AT, RECIPE_LAST_UPDATED
+    recipe_id, author_id, linked_product_id, parent_recipe_id, personal_folder_id, 
+    adaptation_title, adaptation_note, recipe_title, recipe_image_url, 
+    recipe_descreption, recipe_servings, recipe_total_time, recipe_difficulty, 
+    recipe_like_count, recipe_kcal_per_100g, recipe_protein_per_100g, 
+    recipe_fat_per_100g, recipe_carbs_per_100g, status, recipe_created_at, recipe_last_updated
 ) VALUES 
 (1, 1, NULL, NULL, NULL, NULL, NULL, '經典瑪格麗特披薩', 'img/recipes/1/cover.png', '義大利最經典的披薩，以新鮮羅勒、莫札瑞拉起司與番茄糊組成，完美呈現紅白綠三色。', 2, '01:30:00', 3, 0, 245.5, 10.3, 7.9, 33.1, 0, '2026-01-15 20:00:00', '2026-01-15 20:00:00'),
 (2, 1, NULL, NULL, NULL, NULL, NULL, '抹茶熔岩蛋糕', 'img/recipes/2/cover.png', '口感濃郁的抹茶蛋糕，切開時有如岩漿般的抹茶巧克力流出，是抹茶控絕不能錯過的甜點。', 2, '00:40:00', 3.5, 0, 412.5, 7.9, 27.2, 34.6, 0, '2026-01-15 20:10:00', '2026-01-15 20:10:00'),
