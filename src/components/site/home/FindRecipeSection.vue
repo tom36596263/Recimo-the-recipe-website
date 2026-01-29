@@ -35,9 +35,9 @@
                 recipesData.value = result.data.map(item => ({
                     ...item,
                     // 解析食材圖路徑
-                    fullUrl: parsePublicFile(item.url),
+                    url:item.url,
                     // 解析大圖路徑
-                    fullRecipeImg: parsePublicFile(item.recipe_image_url)
+                    recipeImg: item.recipe_image_url
                 }));
                 // recipesData.value = result.data
                 initRandomIngredients()
@@ -112,9 +112,9 @@
             <img 
                 v-for="item in displayIngredients" 
                 :key="item.id" 
-                :src="item.fullUrl" 
+                :src="$parsePublicFile(item.url)" 
                 :alt="item.recipe_title"
-                @click="toggleRecipe(item.fullRecipeImg, item.id)"
+                @click="toggleRecipe($parsePublicFile(item.recipeImg), item.id)"
                 :class="['ingredient-item', { 'active': item.id === activeId }]"
             >
         </transition-group>
