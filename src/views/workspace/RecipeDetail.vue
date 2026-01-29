@@ -259,6 +259,7 @@ const stepsData = computed(() => {
 });
 
 const snapsData = computed(() => rawGallery.value.map(g => {
+    // 1. 處理圖片路徑
     let rawUrl = g.GALLERY_URL || g.url || g.gallery_url || '';
     let finalUrl = '';
     if (rawUrl.startsWith('http') || rawUrl.startsWith('data:') || rawUrl.startsWith('blob:')) {
@@ -266,7 +267,20 @@ const snapsData = computed(() => rawGallery.value.map(g => {
     } else if (rawUrl) {
         finalUrl = `${baseUrl}/${rawUrl.replace(/^\//, '')}`.replace(/\/+/g, '/');
     }
-    return { url: finalUrl, comment: g.GALLERY_TEXT || g.comment || g.gallery_text || '' };
+
+    // 🏆 2. 獲取用戶資訊
+    // 從 g.USER_ID 找到對應的用戶物件
+    const userId = Number(g.USER_ID || g.user_id);
+    const user = rawUsers.value.find(u => Number(u.USER_ID || u.user_id) === userId);
+
+    return {
+        url: finalUrl,
+        comment: g.GALLERY_TEXT || g.comment || g.gallery_text || '',
+        // 🏆 3. 新增這些欄位，確保 handleReport 抓得到
+        userId: userId,
+        userName: user?.USER_NAME || 'Recimo 用戶',
+        time: g.UPLOAD_AT || g.time || '剛剛'
+    };
 }));
 
 const formatTime = (timeVal) => {

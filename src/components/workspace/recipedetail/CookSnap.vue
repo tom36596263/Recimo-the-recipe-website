@@ -24,11 +24,14 @@ const selectedPhotoData = ref({
 })
 
 const handleReport = (photo) => {
+
+  console.log('點擊的成品照資料:', photo);
   selectedPhotoData.value = {
     content: photo.comment,
     userName: photo.userName || '匿名用戶',
     time: photo.time || '剛剛',
-    image: photo.url
+    image: photo.url,
+    userId: photo.userId
   }
   isReportModalOpen.value = true
 }
