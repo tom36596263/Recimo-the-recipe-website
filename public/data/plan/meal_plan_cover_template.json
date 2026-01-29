@@ -1,0 +1,32 @@
+[
+  {
+    "cover_template_id": 1,
+    "template_url": "/img/covers/camping_landscape.png",
+    "template_name": "山林露營風景"
+  },
+  {
+    "cover_template_id": 2,
+    "template_url": "/img/covers/bonfire_icon.png",
+    "template_name": "野炊時光"
+  },
+  {
+    "cover_template_id": 3,
+    "template_url": "/img/covers/tent_icon.png",
+    "template_name": "露營趣"
+  },
+  {
+    "cover_template_id": 4,
+    "template_url": "/img/covers/picnic_icon.png",
+    "template_name": "戶外野餐"
+  },
+  {
+    "cover_template_id": 5,
+    "template_url": "/img/covers/bbq_icon.png",
+    "template_name": "燒烤派對"
+  },
+  {
+    "cover_template_id": 6,
+    "template_url": "/img/covers/burger_icon.png",
+    "template_name": "美式速食"
+  }
+]

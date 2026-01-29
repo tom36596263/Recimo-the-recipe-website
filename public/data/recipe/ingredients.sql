@@ -540,4 +540,8 @@ INSERT INTO ingredients (
   (519, '豬肉絲', 'meat-poultry', 'pork', 'img/ingredients/meat-poultry/pork/pork-shredds.png', 155, 18.5, 8.5, 0, '克', 1),
   (520, '罐裝剝皮辣椒', 'pantry-spices-nuts', 'pickles-preserves', 'img/ingredients/pantry-spices-nuts/pickles-preserves/peeled-chili-canned.png', 85, 1.5, 3.8, 11.2, '罐', 450),
   (521, '牛絞肉', 'meat-poultry', 'beef', 'img/ingredients/meat-poultry/beef/ground-beef.png', 250, 18.2, 19.4, 0, '克', 1),
-  (522, '鯷魚 (油浸)', 'pantry-spices-nuts', 'pickles-preserves', 'img/ingredients/pantry-spices-nuts/pickles-preserves/anchovies-oil.png', 210, 20.4, 14.2, 0, '克', 1);
+  (522, '鯷魚 (油浸)', 'pantry-spices-nuts', 'pickles-preserves', 'img/ingredients/pantry-spices-nuts/pickles-preserves/anchovies-oil.png', 210, 20.4, 14.2, 0, '克', 1),
+  (523, '醬瓜 (花瓜)', 'pantry-spices-nuts', 'pickles-preserves', 'img/ingredients/pantry-spices-nuts/pickles-preserves/pickled-cucumber-canned.png', 78.0, 1.2, 0.2, 18.0, '罐', 180.0),
+(524, '月桂葉', 'pantry-spices-nuts', 'whole-spices', 'img/ingredients/pantry-spices-nuts/whole-spices/bay-leaves.png', 313.0, 7.6, 8.4, 75.0, '片', 0.5),
+(525, '青椒', 'fresh-produce', 'nightshades', 'img/ingredients/fresh-produce/nightshades/green-bell-pepper.png', 20.0, 0.9, 0.2, 4.6, '顆', 40.0),
+(526, '小白菜', 'fresh-produce', 'leafy-greens', 'img/ingredients/fresh-produce/leafy-greens/bok-choy-small.png', 13.0, 1.5, 0.2, 2.2, '株', 40.0);

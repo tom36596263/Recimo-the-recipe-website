@@ -1,0 +1,65 @@
+[
+  {
+    "admin_id": 1,
+    "admin_level": 2,
+    "admin_account": "recimo@gmail.com",
+    "admin_password": "G2Recimo",
+    "admin_name": "Recimo"
+  },
+  {
+    "admin_id": 2,
+    "admin_level": 1,
+    "admin_account": "admin@test.com",
+    "admin_password": "123456",
+    "admin_name": "小R(測試人員)"
+  },
+  {
+    "admin_id": 3,
+    "admin_level": 1,
+    "admin_account": "tom@gmail.com",
+    "admin_password": "123456",
+    "admin_name": "tom"
+  },
+  {
+    "admin_id": 4,
+    "admin_level": 1,
+    "admin_account": "wei@gmail.com",
+    "admin_password": "123456",
+    "admin_name": "wei"
+  },
+  {
+    "admin_id": 5,
+    "admin_level": 1,
+    "admin_account": "helenKuo@gmail.com",
+    "admin_password": "888888",
+    "admin_name": "HelenKuo"
+  },
+  {
+    "admin_id": 6,
+    "admin_level": 1,
+    "admin_account": "pei@gmail.com",
+    "admin_password": "Aa111111",
+    "admin_name": "pei"
+  },
+  {
+    "admin_id": 7,
+    "admin_level": 1,
+    "admin_account": "yutung@gmail.com",
+    "admin_password": "yutung123",
+    "admin_name": "yutung"
+  },
+  {
+    "admin_id": 8,
+    "admin_level": 1,
+    "admin_account": "hsu@test.com",
+    "admin_password": "123456",
+    "admin_name": "Hsu"
+  },
+  {
+    "admin_id": 9,
+    "admin_level": 0,
+    "admin_account": "123@test.com",
+    "admin_password": "123456",
+    "admin_name": "小小R(測試停用)"
+  }
+]
