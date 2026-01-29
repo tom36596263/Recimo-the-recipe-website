@@ -1,12 +1,15 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { publicApi } from '@/utils/publicApi';
 import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard.vue';
 import AdaptationDetailModal from '@/components/workspace/modifyrecipe/modals/AdaptationDetailModal.vue';
+// 🏆 引入我們剛寫好的 Pinia Store
+import { useNutritionStore } from '@/stores/nutritionStore.js';
 
 const router = useRouter();
 const route = useRoute();
+const nutritionStore = useNutritionStore();
 
 // --- 狀態定義 ---
 const originalRecipe = ref({ id: null, title: '', coverImg: '', description: '' });
@@ -15,18 +18,47 @@ const variantItems = ref([]);
 // --- 燈箱控制 ---
 const isModalOpen = ref(false);
 const selectedRecipe = ref(null);
+const currentNutrition = ref(null); // 🏆 儲存當前算好的營養數據
 
-function openAdaptDetail(item) {
-    // ✨ 邏輯攔截：判斷如果是 json- 開頭的假資料就不執行後續開啟燈箱的動作
+async function openAdaptDetail(item) {
+    console.log('--- 準備開啟改編詳情 ---');
+    console.log('原始傳入項目資料 (item):', item);
+
+    // 邏輯攔截
     if (String(item.id).startsWith('json-')) {
+        console.warn('此為靜態 JSON 資料，不提供詳細營養計算');
         return;
     }
-    // 這裡傳入的 item 已經過 loadRecipeData 標準化處理
+
+    // 檢查是否有食材資料
+    const ingredients = item.ingredients || [];
+    console.log('準備計算營養的食材列表:', ingredients);
+
+    if (ingredients.length === 0) {
+        console.error('錯誤：該食譜沒有 ingredients 數據，無法計算熱量！');
+    }
+
+    // 🏆 計算營養
+    try {
+        const result = nutritionStore.calculateRecipeNutrition(ingredients);
+
+        // 🏆 在這裡做轉換：把 kcal 的值同時給 calories
+        const formattedNutrition = {
+            ...result,
+            calories: result.kcal // 這樣 NutritionCard 就能抓到 calories 了
+        };
+
+        console.log('轉換後的營養數據:', formattedNutrition);
+        currentNutrition.value = formattedNutrition;
+    } catch (err) {
+        console.error('營養計算過程出錯:', err);
+    }
+
     selectedRecipe.value = item;
     isModalOpen.value = true;
 }
 
-// 輔助函式：處理時間顯示 (將 00:25:00 轉為 25 分鐘)
+// 輔助函式：處理時間顯示
 const formatTime = (timeValue) => {
     if (!timeValue) return '30 分鐘';
     if (typeof timeValue === 'string' && timeValue.includes(':')) {
@@ -35,9 +67,13 @@ const formatTime = (timeValue) => {
         const m = parseInt(parts[1], 10);
         return h > 0 ? `${h} 小時 ${m} 分鐘` : `${m} 分鐘`;
     }
-    // 如果已經是數字或純文字，確保帶有「分鐘」單位
     return String(timeValue).includes('分') ? timeValue : `${timeValue} 分鐘`;
 };
+
+// 🏆 頁面掛載時預先載入食材庫
+onMounted(async () => {
+    await nutritionStore.fetchMasterData();
+});
 
 // 監聽路由變化載入資料
 watch(
@@ -84,7 +120,7 @@ async function loadRecipeData(recipeId) {
             coverImg: fixPath(found.recipe_image_url || found.recipe_cover_image || found.coverImg)
         };
 
-        // 2. 處理改編食譜 (對接資料庫欄位名稱)
+        // 2. 處理改編食譜
         const jsonAdaptations = allAdaptations
             .filter(a => Number(a.parent_recipe_id) === targetParentId)
             .map(adapt => {
@@ -95,11 +131,9 @@ async function loadRecipeData(recipeId) {
                 return {
                     id: `json-${childId}`,
                     title: adapt.adaptation_title || childInfo.recipe_title,
-                    // ✨ 統一欄位名稱為 summary
                     summary: adapt.adaptation_note || '暫無改編心得',
                     coverImg: fixPath(adapt.adaptation_image_url || childInfo.recipe_image_url),
                     is_mine: false,
-                    // 燈箱需要的詳細內容
                     recipe_descreption: childInfo.recipe_description || '暫無詳細內容'
                 };
             }).filter(Boolean);
@@ -112,15 +146,12 @@ async function loadRecipeData(recipeId) {
                 ...r,
                 id: r.id || `local-${Date.now()}-${Math.random()}`,
                 title: r.title || '未命名改編',
-                // ✨ 強制對接：將你截圖看到的 description 塞進 summary
                 summary: r.description || '暫無改編心得',
                 coverImg: r.coverImg || '',
                 is_mine: true
             }));
 
-        // 合併並更新狀態
         variantItems.value = [...localAdaptations, ...jsonAdaptations];
-
 
     } catch (err) {
         console.error('載入失敗:', err);
@@ -220,7 +251,7 @@ function goBack() {
             </TransitionGroup>
         </div>
 
-        <AdaptationDetailModal v-model="isModalOpen" :recipe="selectedRecipe" />
+        <AdaptationDetailModal v-model="isModalOpen" :recipe="selectedRecipe" :nutrition="currentNutrition" />
     </div>
 </template>
 

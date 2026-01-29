@@ -4,28 +4,36 @@ import { computed } from "vue";
 const props = defineProps({
   servings: { type: Number, default: 1 },
   ingredients: { type: Array, default: () => [] },
+  // 🏆 關鍵：新增支援直接傳入算好的營養數據物件
+  nutrition: { type: Object, default: null }
 });
 
 const emit = defineEmits(["change-servings"]);
 
-// --- 修改後的核心計算邏輯 ---
-const calculateTotal = (fieldName) => {
-  if (!props.ingredients.length) return 0;
+// --- 優化後的核心計算邏輯 (自動切換模式) ---
+const getDisplayTotal = (fieldName, nutritionKey) => {
+  // 模式 A：如果父組件直接給了算好的 nutrition 物件 (用於改編燈箱)
+  if (props.nutrition) {
+    const val = parseFloat(props.nutrition[nutritionKey] || props.nutrition[fieldName]) || 0;
+    return Math.round(val * props.servings);
+  }
+
+  // 模式 B：如果只有食材陣列 (用於原食譜詳情頁)
+  if (!props.ingredients || !props.ingredients.length) return 0;
 
   const oneServingTotal = props.ingredients.reduce((sum, item) => {
-    // 現在我們假設傳進來的 item[fieldName] 已經是「該食材在食譜中的總營養量」
     const nutrientValue = parseFloat(item[fieldName]) || 0;
     return sum + nutrientValue;
   }, 0);
 
-  // 只負責乘上人份數 (servings)
   return Math.round(oneServingTotal * props.servings);
 };
 
-const totalCalories = computed(() => calculateTotal("calories_per_100g"));
-const totalProtein = computed(() => calculateTotal("protein_per_100g"));
-const totalFat = computed(() => calculateTotal("fat_per_100g"));
-const totalCarbs = computed(() => calculateTotal("carbs_per_100g"));
+// 保持與原本變數名稱一致，Template 完全不需要改動
+const totalCalories = computed(() => getDisplayTotal("calories_per_100g", "calories"));
+const totalProtein = computed(() => getDisplayTotal("protein_per_100g", "protein"));
+const totalFat = computed(() => getDisplayTotal("fat_per_100g", "fat"));
+const totalCarbs = computed(() => getDisplayTotal("carbs_per_100g", "carbs"));
 
 // --- 2. 功能函式 ---
 const updateServings = (delta) => {
@@ -33,11 +41,6 @@ const updateServings = (delta) => {
   if (next >= 1 && next <= 20) emit("change-servings", next);
 };
 
-/**
- * 💡 數字格式化邏輯
- * 當數字超過 100 萬時，轉換為 "1M+" 或以 "k" 結尾
- * 避免長數字溢出容器
- */
 const formatDisplayValue = (val) => {
   if (val > 999999) return (val / 1000).toFixed(0) + 'k';
   return val;
