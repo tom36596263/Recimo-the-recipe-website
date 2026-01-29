@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import SearchBar from '@/components/common/SearchBar.vue';
 import NotificationPanel from '@/components/common/NotificationPanel.vue';
 import { useCartStore } from '@/stores/cartStore';
+import { base } from '@/utils/publicApi';
 const route = useRoute();
 
 // 通知相關狀態
@@ -31,7 +32,7 @@ const handleClickOutside = (event) => {
 // 1. 定義使用者資訊狀態 (給予初始預設值)
 const userInfo = ref({
     user_name: 'Recimo',
-    user_url: '/img/site/None_avatar.svg'
+    user_url: `${base}img/site/None_avatar.svg`
 });
 
 onMounted(() => {
@@ -46,7 +47,12 @@ onMounted(() => {
 
             // 只有當 parseData.avatar 有值時才更新，否則維持初始預設圖
             if (parseData.user_url) {
-                userInfo.value.user_url = parseData.user_url;
+                // 如果 parseData.user_url 已經是 http 開頭，就不補 base
+                const isExternal = parseData.user_url.startsWith('http');
+                userInfo.value.user_url = isExternal
+                    ? parseData.user_url
+                    : `${base}${parseData.user_url.replace(/^\//, '')}`;
+                // replace(/^\//, '') 是為了防止出現雙斜線 // 的情況
             }
         } catch (error) {
             console.error("解析使用者資料失敗", error);

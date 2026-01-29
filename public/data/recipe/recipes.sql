@@ -35,13 +35,13 @@ ADD CONSTRAINT fk_recipes_parent
 FOREIGN KEY (parent_recipe_id) REFERENCES recipes(recipe_id);
 
 -- 2. 匯入資料 (對應 JSON 格式與欄位)
-INSERT INTO recipes (
+INSERT INTO RECIPES (
     recipe_id, author_id, linked_product_id, parent_recipe_id, personal_folder_id, 
     adaptation_title, adaptation_note, recipe_title, recipe_image_url, 
-    recipe_description, recipe_servings, recipe_total_time, recipe_difficulty, 
+    recipe_descreption, recipe_servings, recipe_total_time, recipe_difficulty, 
     recipe_like_count, recipe_kcal_per_100g, recipe_protein_per_100g, 
     recipe_fat_per_100g, recipe_carbs_per_100g, status, recipe_created_at, recipe_last_updated
-) VALUES
+) VALUES 
 (1, 1, NULL, NULL, NULL, NULL, NULL, '經典瑪格麗特披薩', 'img/recipes/1/cover.png', '義大利最經典的披薩，以新鮮羅勒、莫札瑞拉起司與番茄糊組成，完美呈現紅白綠三色。', 2, '01:30:00', 3, 0, 245.5, 10.3, 7.9, 33.1, 0, '2026-01-15 20:00:00', '2026-01-15 20:00:00'),
 (2, 1, NULL, NULL, NULL, NULL, NULL, '抹茶熔岩蛋糕', 'img/recipes/2/cover.png', '口感濃郁的抹茶蛋糕，切開時有如岩漿般的抹茶巧克力流出，是抹茶控絕不能錯過的甜點。', 2, '00:40:00', 3.5, 0, 412.5, 7.9, 27.2, 34.6, 0, '2026-01-15 20:10:00', '2026-01-15 20:10:00'),
 (3, 1, NULL, NULL, NULL, NULL, NULL, '四川宮保雞丁', 'img/recipes/3/cover.png', '川菜精髓之一，講究「糊辣荔枝味」，口感酸甜微麻，搭配酥脆花生與滑嫩雞丁，非常下飯。', 2, '00:35:00', 3, 0, 208.6, 15.8, 12.8, 7.4, 0, '2026-01-15 20:30:00', '2026-01-15 20:30:00'),

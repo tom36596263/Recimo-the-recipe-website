@@ -32,7 +32,14 @@
             const result = res.data;
             // const data = await response.json()
             if (result.status === 'success'){
-                recipesData.value = result.data
+                recipesData.value = result.data.map(item => ({
+                    ...item,
+                    // 解析食材圖路徑
+                    url:item.url,
+                    // 解析大圖路徑
+                    recipeImg: item.recipe_image_url
+                }));
+                // recipesData.value = result.data
                 initRandomIngredients()
 
                 if (displayIngredients.value.length > 0) {
@@ -107,7 +114,7 @@
                 :key="item.id" 
                 :src="$parsePublicFile(item.url)" 
                 :alt="item.recipe_title"
-                @click="toggleRecipe(item.recipe_image_url, item.id)"
+                @click="toggleRecipe($parsePublicFile(item.recipeImg), item.id)"
                 :class="['ingredient-item', { 'active': item.id === activeId }]"
             >
         </transition-group>
