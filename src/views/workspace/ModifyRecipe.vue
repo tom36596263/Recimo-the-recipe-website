@@ -11,6 +11,9 @@ const router = useRouter();
 const route = useRoute();
 const nutritionStore = useNutritionStore();
 
+// --- 🏆 核心修正：抓取 MAMP 的檔案位址 ---
+const fileUrl = import.meta.env.VITE_FILE_URL || 'http://localhost:8888/recimo_api/';
+
 // --- 狀態定義 ---
 const originalRecipe = ref({ id: null, title: '', coverImg: '', description: '', servings: 1 });
 const variantItems = ref([]);
@@ -100,11 +103,15 @@ async function loadRecipeData(recipeId) {
         const allRecipes = resRecipes.data;
         const allAdaptations = resAdaptations.data;
         const targetParentId = Number(recipeId);
-        const baseUrl = import.meta.env.BASE_URL;
 
+        // --- 🏆 核心修正：優化路徑對接邏輯 ---
         const fixPath = (url) => {
-            if (!url || url.startsWith('http') || url.startsWith('data:')) return url;
-            return `${baseUrl}/${url.replace(/^\//, '')}`.replace(/\/+/g, '/');
+            if (!url) return 'https://placehold.co/800x600?text=No+Image';
+            if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
+
+            const base = fileUrl.endsWith('/') ? fileUrl : `${fileUrl}/`;
+            const cleanPath = url.replace(/^\//, '');
+            return `${base}${cleanPath}`;
         };
 
         // 1. 處理母食譜
@@ -157,6 +164,7 @@ async function loadRecipeData(recipeId) {
                 id: r.id || `local-${Date.now()}-${Math.random()}`,
                 title: r.title || '未命名改編',
                 summary: r.description || '暫無改編心得',
+                coverImg: fixPath(r.coverImg || r.image), // 🏆 確保本地改編圖片路徑也經過處理
                 is_mine: true,
                 recipe_servings: Number(r.servings || r.recipe_servings || 1)
             }));

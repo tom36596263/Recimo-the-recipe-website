@@ -19,8 +19,24 @@ const relatedList = ref([]);
 const isLoading = ref(true);
 const isReady = ref(false);
 
-// --- 讀取 Vite 的 Base 路徑 ---
-const baseUrl = import.meta.env.BASE_URL;
+// --- 🏆 核心修正：改用環境變數中的檔案路徑 (8888 埠口) ---
+const fileUrl = import.meta.env.VITE_FILE_URL || 'http://localhost:8888/recimo_api/';
+
+// 建立一個安全的圖片處理函式
+const formatImg = (rawPath) => {
+    if (!rawPath) return 'https://placehold.co/300x200?text=No+Image';
+
+    // 如果是完整網址、base64，直接回傳
+    if (rawPath.startsWith('http') || rawPath.startsWith('data:')) {
+        return rawPath;
+    }
+
+    // 確保 base 結尾有斜線，且 path 開頭沒斜線
+    const base = fileUrl.endsWith('/') ? fileUrl : `${fileUrl}/`;
+    const cleanPath = rawPath.replace(/^\//, '');
+
+    return `${base}${cleanPath}`;
+};
 
 const fetchRelated = async () => {
     isLoading.value = true;
@@ -30,21 +46,10 @@ const fetchRelated = async () => {
         const res = await publicApi.get('data/recipe/recipes.json');
 
         const cleanedData = res.data.map(r => {
-            let rawImg = r.recipe_image_url || r.recipe_cover_image || '';
-            let finalImg = '';
+            const rawImg = r.recipe_image_url || r.recipe_cover_image || '';
 
-            if (rawImg) {
-                // 如果是 http 開頭或 data: 圖片，直接使用
-                if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
-                    finalImg = rawImg;
-                } else {
-                    // ✅ 核心修正：移除開頭斜線，並加上 baseUrl 進行拼接
-                    const cleanPath = rawImg.replace(/^\//, '');
-                    finalImg = `${baseUrl}/${cleanPath}`.replace(/\/+/g, '/');
-                }
-            } else {
-                finalImg = 'https://placehold.co/300x200?text=No+Image';
-            }
+            // 🏆 使用 formatImg 處理圖片路徑
+            const finalImg = formatImg(rawImg);
 
             return {
                 ...r,
