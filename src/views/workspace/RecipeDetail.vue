@@ -492,7 +492,10 @@ const onReportSubmit = (data) => { isReportModalOpen.value = false; };
     <RecipeReportModal v-model="isReportModalOpen" :targetData="{
         title: recipeIntroData?.title,
         content: recipeIntroData?.description,
+        // 🏆 這裡確保傳入作者名稱
         userName: rawRecipe?.author_name || '未知作者',
+        // 🏆 關鍵：新增傳入 author_id，這樣 Modal 才能判斷是否為官方
+        author_id: rawRecipe?.author_id || rawRecipe?.AUTHOR_ID,
         image: recipeIntroData?.image
     }" @submit="onReportSubmit" />
 

@@ -1,21 +1,31 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue'; // 引入 computed
 
 const props = defineProps({
     modelValue: Boolean,
-    // 名稱與 DetailView.vue 傳入的 :targetData 一致
     targetData: {
         type: Object,
         default: () => ({
             title: '載入中...',
             userName: '未知作者',
             time: '',
-            image: ''
+            image: '',
+            author_id: null // 確保有接收 id
         })
     }
 });
 
 const emit = defineEmits(['update:modelValue', 'submit']);
+
+// 🏆 新增：判斷作者名稱的計算屬性
+const displayAuthor = computed(() => {
+    // 如果 author_id 為 1，或者是資料中明確標記為官方
+    if (props.targetData.author_id === 1 || props.targetData.author_id === "1") {
+        return 'Recimo 官方';
+    }
+    // 否則顯示傳入的 userName，若無則顯示預設值
+    return props.targetData.userName || '未知作者';
+});
 
 const reasons = [
     '內容侵權 (盜圖或盜文)',
@@ -35,19 +45,17 @@ const handleSubmit = () => {
     emit('submit', {
         reason: selectedReason.value,
         note: reportNote.value,
-        targetTitle: props.targetData.title
+        targetTitle: props.targetData.title,
+        author: displayAuthor.value // 傳送檢舉時也帶上正確的作者名
     });
     alert('已送出檢舉，我們會盡快審核。');
     handleClose();
 };
 
-// 處理圖片路徑，避免碎圖
 const getImageUrl = (url) => {
     if (!url) return 'https://via.placeholder.com/150?text=No+Image';
     return url;
 };
-
-
 </script>
 
 <template>
@@ -74,7 +82,7 @@ const getImageUrl = (url) => {
                         </div>
 
                         <div class="user-meta p-p3">
-                            作者：@{{ targetData.userName }} <span v-if="targetData.time">· {{ targetData.time }}</span>
+                            作者：@{{ displayAuthor }} <span v-if="targetData.time">· {{ targetData.time }}</span>
                         </div>
                     </div>
 
@@ -104,8 +112,10 @@ const getImageUrl = (url) => {
     </Teleport>
 </template>
 
+
+
 <style scoped lang="scss">
-/* 此處完全保留你原本提供的所有 SCSS 樣式 */
+
 @import '@/assets/scss/abstracts/_color.scss';
 
 .black-mask {
