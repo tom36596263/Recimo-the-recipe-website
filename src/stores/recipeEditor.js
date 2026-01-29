@@ -9,6 +9,7 @@ export const useRecipeStore = defineStore('recipeEditor', {
     }),
     actions: {
         setPreviewFromEditor(form) {
+            console.log('🚀 編輯器傳進來的原始資料:', JSON.parse(JSON.stringify(form.ingredients)));
             // --- 0. 核心修正：路徑清洗函式 ---
             // 取得 Vite 的 Base URL (例如: /cjd102/g2/recimo/)
             const baseUrl = import.meta.env.BASE_URL;
@@ -47,7 +48,14 @@ export const useRecipeStore = defineStore('recipeEditor', {
 
             const mappedIngredients = (form.ingredients || []).map(i => {
                 const amountNum = parseFloat(i.amount) || 0;
-                const ratio = amountNum / 100;
+
+                // ✨ 關鍵：先定義好 gWeight，去抓編輯器裡面的轉換率
+                // 這裡通常會對應你編輯器選單中帶出來的 gram_conversion
+                const gWeight = parseFloat(i.gram_conversion || i.unit_weight || 1);
+
+                // 計算該食材在 100g 基準下的比例
+                const ratio = (amountNum * gWeight) / 100;
+
                 totalKcal += (i.kcal_per_100g || 0) * ratio;
                 totalProtein += (i.protein_per_100g || 0) * ratio;
                 totalFat += (i.fat_per_100g || 0) * ratio;
@@ -56,9 +64,11 @@ export const useRecipeStore = defineStore('recipeEditor', {
                 return {
                     id: i.id,
                     ingredient_name: i.name || '',
-                    amount: i.amount || 0,
+                    amount: amountNum,
                     unit_name: i.unit || '',
                     note: i.note || '',
+                    // 🏆 把這個關鍵欄位帶過去詳情頁！
+                    gram_conversion: gWeight,
                     kcal_per_100g: i.kcal_per_100g || 0,
                     protein_per_100g: i.protein_per_100g || 0,
                     fat_per_100g: i.fat_per_100g || 0,

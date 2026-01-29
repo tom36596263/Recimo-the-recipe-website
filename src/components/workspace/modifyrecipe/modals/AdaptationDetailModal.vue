@@ -3,15 +3,78 @@ import { ref, computed, watch } from 'vue';
 import RecipeIntro from '@/components/workspace/recipedetail/RecipeIntro.vue';
 import RecipeIngredients from '@/components/workspace/recipedetail/RecipeIngredients.vue';
 import RecipeSteps from '@/components/workspace/recipedetail/RecipeSteps.vue';
+import NutritionCard from '@/components/workspace/recipedetail/NutritionCard.vue';
 
 const props = defineProps({
     modelValue: Boolean,
-    recipe: Object
+    recipe: Object,
+    nutrition: {
+        type: Object,
+        default: () => ({ calories: 0, protein: 0, fat: 0, carbs: 0 })
+    }
 });
 
 const emit = defineEmits(['update:modelValue', 'delete-recipe']);
 
+// 1. 取得原始份數 (防呆至少為 1)
+const originalServings = computed(() => {
+    return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
+});
+
+// 在 AdaptationDetailModal.vue 內部
+const displayedNutrition = computed(() => {
+    if (!props.nutrition) return null;
+    const s = currentServings.value; // 使用者在燈箱選的人份
+    return {
+        calories: props.nutrition.calories * s,
+        protein: props.nutrition.protein * s,
+        fat: props.nutrition.fat * s,
+        carbs: props.nutrition.carbs * s,
+    };
+});
+
+// 2. 當前的 UI 顯示人份數 (預設設為 1)
 const currentServings = ref(1);
+
+// 當燈箱開啟或食譜切換時，初始化 currentServings
+watch(() => props.modelValue, (isOpen) => {
+    if (isOpen) {
+        // 你可以選擇預設顯示 1 份，或是預設顯示食譜原始份數
+        // 這裡建議預設 1，讓 NutritionCard 從 1 人份開始算比較直覺
+        currentServings.value = 1;
+    }
+});
+
+// 3. 核心：計算「每一份量」的基礎營養素 (供 NutritionCard 內部乘法使用)
+const baseNutritionPerServing = computed(() => {
+    if (!props.nutrition) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
+
+    const total = props.nutrition;
+    const s = originalServings.value;
+
+    return {
+        calories: Number(total.calories || 0) / s,
+        protein: Number(total.protein || 0) / s,
+        fat: Number(total.fat || 0) / s,
+        carbs: Number(total.carbs || 0) / s,
+    };
+});
+
+// 4. 食材數據也要跟著 currentServings 連動
+const ingredientsData = computed(() => {
+    const list = props.recipe?.ingredients || [];
+    // 計算縮放比例：(燈箱選擇的人份 / 原始食譜總人份)
+    const scale = currentServings.value / originalServings.value;
+
+    return list.map(item => ({
+        INGREDIENT_NAME: item.name || item.ingredient_name || '未知食材',
+        amount: item.amount ? (Number(item.amount) * scale).toFixed(1) : '',
+        unit_name: item.unit || item.unit_name || 'g',
+        note: item.note || ''
+    }));
+});
+
+// --- 其他輔助邏輯 ---
 const closeModal = () => emit('update:modelValue', false);
 
 const getAvatarStyle = (name) => {
@@ -21,89 +84,26 @@ const getAvatarStyle = (name) => {
     return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
 };
 
-watch(() => props.recipe, (newVal) => {
-    if (newVal) {
-        currentServings.value = Number(newVal.servings) || 1;
-    }
-}, { immediate: true });
-
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
-
-    // 1. 處理登入者與日期資訊 (保持原樣)
     const loginUser = JSON.parse(localStorage.getItem('user') || '{}');
     const today = new Date().toISOString().split('T')[0];
-    const isExistingRecord = !!(r.id || r.recipe_id);
 
-    let displayName = "";
-    let displayHandle = "";
-    let displayDate = "";
-    let isOwner = false;
-
-    if (isExistingRecord) {
-        displayName = r.user_name || r.author_name || r.userName || "未知作者";
-        const rawEmail = r.user_email || r.email || r.author_email || "guest@mail.com";
-        displayHandle = rawEmail.split('@')[0];
-        const rawDate = r.created_at || r.user_startdate || r.publish_date || today;
-        displayDate = rawDate.split(' ')[0];
-
-        const recordAuthorId = String(r.user_id || r.author_id || "");
-        const currentLoginId = String(loginUser.user_id || "");
-        isOwner = (recordAuthorId === currentLoginId) && currentLoginId !== "";
-    } else {
-        displayName = loginUser.user_name || "新創作者";
-        displayHandle = (loginUser.user_email || "guest@mail.com").split('@')[0];
-        displayDate = today;
-        isOwner = true;
-    }
-
-    // 2. 格式化時間與標題
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
-
-    // 燈箱大標題：改編標題優先
-    const finalTitle = r.adapt_title || r.title || '新改編食譜';
-
-    // 3. ✨【絕不動搖的修正重點】✨
-    // 我們強制「只」抓 description。
-    // 即使 r.adapt_description (心得框) 有內容，這裡也絕對不准去抓它。
-    // 這樣就能保證燈箱顯示的是你大框框裡那段「口感濃郁的抹茶蛋糕...」
-    const finalDescription = r.clean_description || r.description || '暫無詳細說明';
-
     return {
         id: r.id || r.recipe_id,
         title: r.adapt_title || r.title || '新改編食譜',
         image: r.adaptation_image_url || r.coverImg || 'https://placehold.co/800x600?text=No+Image',
-        description: finalDescription,
+        description: r.clean_description || r.description || '暫無詳細說明',
         time: formattedTime,
         difficulty: r.difficulty || 1,
-        userName: displayName,
-        handle: displayHandle,
-        publishTime: displayDate,
-        isOwner: isOwner
+        userName: r.user_name || r.author_name || loginUser.user_name || "未知作者",
+        handle: (r.user_email || loginUser.user_email || "guest@mail.com").split('@')[0],
+        publishTime: r.created_at || today,
+        isOwner: !!(r.is_mine)
     };
-});
-
-const handleDelete = () => {
-    if (!introData.value.id) {
-        alert("尚未儲存的內容，關閉視窗即可。");
-        return;
-    }
-    if (confirm("確定要刪除這份食譜紀錄嗎？")) {
-        emit('delete-recipe', introData.value.id);
-        closeModal();
-    }
-};
-
-const ingredientsData = computed(() => {
-    const list = props.recipe?.ingredients || [];
-    return list.map(item => ({
-        INGREDIENT_NAME: item.name || item.ingredient_name || '未知食材',
-        amount: item.amount,
-        unit_name: item.unit || item.unit_name || 'g',
-        note: item.note || ''
-    }));
 });
 
 const stepsData = computed(() => {
@@ -134,10 +134,7 @@ const stepsData = computed(() => {
                                 </h2>
                                 <span class="badge">改編版本</span>
 
-                                <button v-if="introData?.isOwner" @click="handleDelete" class="delete-btn">
-                                    <i-material-symbols-delete-outline-rounded />
-                                    刪除此版本
-                                </button>
+                                
                             </div>
 
                             <div class="user-info-box">
@@ -159,10 +156,10 @@ const stepsData = computed(() => {
 
                             <div class="col-5 col-md-12 sidebar-right">
                                 <div class="sticky-sidebar">
-                                    <div class="ingredients-wrapper">
-                                        <h3 class="zh-h3 mb-16 sidebar-title">所需食材</h3>
-                                        <RecipeIngredients :list="ingredientsData" :readonly="true" />
-                                    </div>
+                                    <NutritionCard v-if="nutrition" :nutrition="displayedNutrition"
+                                        :servings="currentServings" @change-servings="val => currentServings = val" />
+
+                                    <RecipeIngredients :list="ingredientsData" :readonly="true" />
                                 </div>
                             </div>
                         </div>
@@ -171,33 +168,12 @@ const stepsData = computed(() => {
             </div>
         </div>
     </Transition>
-
-    
 </template>
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-// 刪除按鈕樣式
-.delete-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: #FFF0F0;
-    color: #FF4D4D;
-    border: 1px solid #FFD6D6;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
 
-    &:hover {
-        background: #FF4D4D;
-        color: white;
-    }
-}
 
 .adaptation-modal-overlay {
     position: fixed;
@@ -335,22 +311,6 @@ const stepsData = computed(() => {
         align-items: center;
         gap: 12px;
 
-        .user-text-meta {
-            text-align: right;
-
-            .user-name {
-                font-weight: 600;
-                margin-bottom: 7px;
-                color: $neutral-color-800;
-                font-size: 15px;
-            }
-
-            .user-sub {
-                font-size: 12px;
-                color: $neutral-color-400;
-            }
-        }
-
         .user-avatar-circle {
             width: 40px;
             height: 40px;
@@ -366,7 +326,20 @@ const stepsData = computed(() => {
         }
 
         .user-text-meta {
+            text-align: right;
             order: 1;
+
+            .user-name {
+                font-weight: 600;
+                margin-bottom: 7px;
+                color: $neutral-color-800;
+                font-size: 15px;
+            }
+
+            .user-sub {
+                font-size: 12px;
+                color: $neutral-color-400;
+            }
         }
     }
 
@@ -397,10 +370,11 @@ const stepsData = computed(() => {
     top: 0;
 
     .ingredients-wrapper {
-        background: $primary-color-100;
+        margin-top: 30px;
+        // background: $primary-color-100;
         padding: 24px;
         border-radius: 20px;
-        border: 1px solid rgba($primary-color-400, 0.2);
+        // border: 1px solid rgba($primary-color-400, 0.2);
     }
 
     .sidebar-title {
@@ -408,8 +382,28 @@ const stepsData = computed(() => {
     }
 }
 
+.nutrition-section {
+    background: white;
+    padding: 24px;
+    border-radius: 20px;
+    border: 1px solid $neutral-color-100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
 .content-left {
     padding-right: 32px;
+}
+
+.color-p4 {
+    color: $neutral-color-400;
+}
+
+.mt-12 {
+    margin-top: 12px;
+}
+
+.text-center {
+    text-align: center;
 }
 
 .mr-8 {
@@ -418,6 +412,10 @@ const stepsData = computed(() => {
 
 .mb-16 {
     margin-bottom: 16px;
+}
+
+.mb-24 {
+    margin-bottom: 24px;
 }
 
 .mb-32 {
@@ -436,5 +434,21 @@ const stepsData = computed(() => {
 .modal-fade-leave-to {
     opacity: 0;
     transform: translateY(20px);
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style>

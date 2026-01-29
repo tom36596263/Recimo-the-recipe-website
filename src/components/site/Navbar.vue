@@ -100,7 +100,7 @@ const cartTotal = computed(() => cartStore.totalCount);
                                     <template v-if="authStore.isLoggedIn">
                                         <span class="btn-text p-p1">我的廚房</span>
                                         <div class="user-avatar-min">
-                                            <img :src="authStore.user?.user_url || '/img/site/None_avatar.svg'"
+                                            <img :src="authStore.user?.user_url || $parsePublicFile('/img/site/None_avatar.svg')"
                                                 alt="avatar">
                                         </div>
                                     </template>

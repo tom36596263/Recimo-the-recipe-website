@@ -31,18 +31,19 @@ const recipeForm = ref({
   adapt_description: ''
 });
 
-// 父組件的 watch 改成這樣比較安全
+// 父組件的 watch
 watch(
   () => recipeForm.value.steps,
   (newSteps) => {
-    if (!newSteps) return;
+    if (!newSteps || !isEditing.value) return;
 
-    // 計算總時間
-    const newSum = newSteps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
+    // 計算步驟的純加總
+    const autoSum = newSteps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
 
-    // 只有在時間真的不一樣時才更新，避免觸發不必要的父組件重新渲染
-    if (recipeForm.value.totalTime !== newSum) {
-      recipeForm.value.totalTime = newSum;
+    // 只有當「目前總時間是 0」或者「目前總時間根本還沒設」時，才自動填入加總
+    // 這樣使用者如果手動改了 45 分鐘，就不會被 autoSum 強制蓋掉
+    if (!recipeForm.value.totalTime || recipeForm.value.totalTime === 0) {
+      recipeForm.value.totalTime = autoSum;
     }
   },
   { deep: true }
@@ -231,7 +232,8 @@ provide('isEditing', isEditing);
             <IngredientEditor :ingredients="recipeForm.ingredients" :is-editing="isEditing" />
           </aside>
           <section class="step-content col-7 col-md-12">
-            <StepEditor :steps="recipeForm.steps" :ingredients="recipeForm.ingredients" :is-editing="isEditing" />
+            <StepEditor v-model:steps="recipeForm.steps" :ingredients="recipeForm.ingredients"
+              :is-editing="isEditing" />
           </section>
         </div>
       </div>

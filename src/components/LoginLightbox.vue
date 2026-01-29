@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { publicApi } from '@/utils/publicApi';
+import { base } from '@/utils/publicApi';
 
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
@@ -155,10 +157,11 @@ const handleLogin = async () => {
 
   try {
     // 這裡 fetch 路徑請確保檔案存在於 public/data/users.json
-    const response = await fetch('/data/user/users.json');
-    if (!response.ok) throw new Error('無法讀取使用者資料');
+    const response = await publicApi.get('data/user/users.json');
+    // if (!response.ok) throw new Error('無法讀取使用者資料');
 
-    const users = await response.json();
+    // const users = await response.json();
+    const users = response.data;
     const { email, password } = loginData.value;
 
     // 2. 比對資料
@@ -444,7 +447,7 @@ const passwordRules = computed(() => {
                         前往會員註冊
                     ========================================== -->
               <div class="registration-invite">
-                <img src="/img/site/Recimo-logo-black.svg" />
+                <img :src="`${base}img/site/Recimo-logo-black.svg`" />
                 <div class="registration-invite__content">
                   <h3 class="zh-h3">還不是會員嗎？</h3>
                   <h4 class="zh-h4">快來一起加入Recimo吧~</h4>

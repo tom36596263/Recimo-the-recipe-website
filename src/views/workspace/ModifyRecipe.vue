@@ -1,43 +1,79 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { publicApi } from '@/utils/publicApi';
 import AdaptRecipeCard from '@/components/workspace/modifyrecipe/AdaptRecipeCard.vue';
 import AdaptationDetailModal from '@/components/workspace/modifyrecipe/modals/AdaptationDetailModal.vue';
+// 🏆 引入 Pinia Store
+import { useNutritionStore } from '@/stores/nutritionStore.js';
 
 const router = useRouter();
 const route = useRoute();
+const nutritionStore = useNutritionStore();
 
 // --- 狀態定義 ---
-const originalRecipe = ref({ id: null, title: '', coverImg: '', description: '' });
+const originalRecipe = ref({ id: null, title: '', coverImg: '', description: '', servings: 1 });
 const variantItems = ref([]);
 
 // --- 燈箱控制 ---
 const isModalOpen = ref(false);
 const selectedRecipe = ref(null);
+const currentNutrition = ref(null);
 
-function openAdaptDetail(item) {
-    // ✨ 邏輯攔截：判斷如果是 json- 開頭的假資料就不執行後續開啟燈箱的動作
-    if (String(item.id).startsWith('json-')) {
-        return;
+async function openAdaptDetail(item) {
+    // 🛑 唯讀邏輯：如果是來自 JSON 的資料（id 以 json- 開頭），直接中斷，不執行任何計算與彈窗
+    if (String(item.id).startsWith('json-')) return;
+
+    console.log('--- 🛡️ 熱量校正啟動 ---');
+
+    // 1. 確保 Store 資料已加載
+    if (!nutritionStore.isLoaded) {
+        await nutritionStore.fetchMasterData();
     }
-    // 這裡傳入的 item 已經過 loadRecipeData 標準化處理
+
+    const ingredients = item.ingredients || [];
+
+    // 2. 份數抓取邏輯
+    let finalServings = Number(
+        item.recipe_servings ||
+        item.servings ||
+        originalRecipe.value.servings ||
+        2
+    );
+
+    try {
+        // 3. 計算總熱量
+        const totalResult = nutritionStore.calculateRecipeNutrition(ingredients);
+
+        // 🏆 異常高熱量修正
+        if (totalResult.kcal > 1000 && finalServings === 1) {
+            console.warn('偵測到異常高熱量且份數為 1，自動修正為 2 份計算');
+            finalServings = 2;
+        }
+
+        // 4. 計算單份比例
+        const scale = 1 / finalServings;
+
+        currentNutrition.value = {
+            kcal: Math.round(totalResult.kcal * scale),
+            protein: (totalResult.protein * scale).toFixed(1),
+            fat: (totalResult.fat * scale).toFixed(1),
+            carbs: (totalResult.carbs * scale).toFixed(1),
+            calories: totalResult.kcal * scale
+        };
+
+    } catch (err) {
+        console.error('計算失敗:', err);
+    }
+
     selectedRecipe.value = item;
     isModalOpen.value = true;
 }
 
-// 輔助函式：處理時間顯示 (將 00:25:00 轉為 25 分鐘)
-const formatTime = (timeValue) => {
-    if (!timeValue) return '30 分鐘';
-    if (typeof timeValue === 'string' && timeValue.includes(':')) {
-        const parts = timeValue.split(':');
-        const h = parseInt(parts[0], 10);
-        const m = parseInt(parts[1], 10);
-        return h > 0 ? `${h} 小時 ${m} 分鐘` : `${m} 分鐘`;
-    }
-    // 如果已經是數字或純文字，確保帶有「分鐘」單位
-    return String(timeValue).includes('分') ? timeValue : `${timeValue} 分鐘`;
-};
+// 🏆 頁面掛載時預先載入食材庫
+onMounted(async () => {
+    await nutritionStore.fetchMasterData();
+});
 
 // 監聽路由變化載入資料
 watch(
@@ -55,12 +91,10 @@ watch(
 
 async function loadRecipeData(recipeId) {
     try {
-        const [resRecipes, resAdaptations, resSteps, resIngredients, resIngMaster] = await Promise.all([
+        const [resRecipes, resAdaptations, resIngredients] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_adaptations.json'),
-            publicApi.get('data/recipe/steps.json'),
-            publicApi.get('data/recipe/recipe_ingredient.json'),
-            publicApi.get('data/recipe/ingredients.json')
+            publicApi.get('data/recipe/recipe_ingredient.json')
         ]);
 
         const allRecipes = resRecipes.data;
@@ -74,37 +108,47 @@ async function loadRecipeData(recipeId) {
         };
 
         // 1. 處理母食譜
-        const found = allRecipes.find(r => Number(r.recipe_id) === targetParentId);
+        const found = allRecipes.find(r => Number(r.recipe_id || r.RECIPE_ID) === targetParentId);
         if (!found) return;
 
+        const parentServings = Number(found.recipe_servings || found.RECIPE_SERVINGS || found.servings || 2);
+
         originalRecipe.value = {
-            id: found.recipe_id,
-            title: found.recipe_title || found.title,
-            description: found.recipe_description || found.recipe_descreption || found.description || '暫無簡介',
-            coverImg: fixPath(found.recipe_image_url || found.recipe_cover_image || found.coverImg)
+            id: found.recipe_id || found.RECIPE_ID,
+            title: found.recipe_title || found.title || found.RECIPE_TITLE,
+            description: found.recipe_description || found.recipe_descreption || found.RECIPE_DESCRIPTION || '暫無簡介',
+            coverImg: fixPath(found.recipe_image_url || found.recipe_cover_image || found.coverImg),
+            servings: parentServings
         };
 
-        // 2. 處理改編食譜 (對接資料庫欄位名稱)
+        // 2. 處理改編食譜
         const jsonAdaptations = allAdaptations
-            .filter(a => Number(a.parent_recipe_id) === targetParentId)
+            .filter(a => Number(a.parent_recipe_id || a.PARENT_RECIPE_ID) === targetParentId)
             .map(adapt => {
-                const childId = Number(adapt.child_recipe_id);
-                const childInfo = allRecipes.find(r => Number(r.recipe_id) === childId);
+                const childId = Number(adapt.child_recipe_id || adapt.CHILD_RECIPE_ID);
+                const childInfo = allRecipes.find(r => Number(r.recipe_id || r.RECIPE_ID) === childId);
                 if (!childInfo) return null;
+
+                const childIngredients = resIngredients.data
+                    .filter(i => Number(i.recipe_id || i.RECIPE_ID) === childId)
+                    .map(ing => ({
+                        ...ing,
+                        id: ing.ingredient_id || ing.INGREDIENT_ID || ing.id
+                    }));
 
                 return {
                     id: `json-${childId}`,
-                    title: adapt.adaptation_title || childInfo.recipe_title,
-                    // ✨ 統一欄位名稱為 summary
+                    title: adapt.adaptation_title || childInfo.recipe_title || childInfo.RECIPE_TITLE,
                     summary: adapt.adaptation_note || '暫無改編心得',
                     coverImg: fixPath(adapt.adaptation_image_url || childInfo.recipe_image_url),
                     is_mine: false,
-                    // 燈箱需要的詳細內容
-                    recipe_descreption: childInfo.recipe_description || '暫無詳細內容'
+                    recipe_descreption: childInfo.recipe_description || childInfo.RECIPE_DESCRIPTION || '暫無詳細內容',
+                    recipe_servings: Number(childInfo.recipe_servings || childInfo.RECIPE_SERVINGS || parentServings),
+                    ingredients: childIngredients
                 };
             }).filter(Boolean);
 
-        // 3. 處理本地資料
+        // 3. 處理本地改編
         const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
         const localAdaptations = localRevisions
             .filter(r => Number(r.parent_recipe_id) === targetParentId)
@@ -112,15 +156,12 @@ async function loadRecipeData(recipeId) {
                 ...r,
                 id: r.id || `local-${Date.now()}-${Math.random()}`,
                 title: r.title || '未命名改編',
-                // ✨ 強制對接：將你截圖看到的 description 塞進 summary
                 summary: r.description || '暫無改編心得',
-                coverImg: r.coverImg || '',
-                is_mine: true
+                is_mine: true,
+                recipe_servings: Number(r.servings || r.recipe_servings || 1)
             }));
 
-        // 合併並更新狀態
         variantItems.value = [...localAdaptations, ...jsonAdaptations];
-
 
     } catch (err) {
         console.error('載入失敗:', err);
@@ -136,7 +177,7 @@ function deleteLocalRecipe(targetId) {
 }
 
 function initEmptyRecipe() {
-    originalRecipe.value = { id: null, title: '新食譜', coverImg: '', description: '' };
+    originalRecipe.value = { id: null, title: '新食譜', coverImg: '', description: '', servings: 1 };
     variantItems.value = [];
 }
 
@@ -205,7 +246,7 @@ function goBack() {
                     }" @click="openAdaptDetail(item)">
 
                     <div class="card-wrapper" style="position: relative; height: 100%;">
-                        <AdaptRecipeCard :recipe="{
+                        <AdaptRecipeCard class="demo-readonly-card" :recipe="{
                             title: item.title,
                             summary: item.summary,
                             coverImg: item.coverImg
@@ -220,12 +261,12 @@ function goBack() {
             </TransitionGroup>
         </div>
 
-        <AdaptationDetailModal v-model="isModalOpen" :recipe="selectedRecipe" />
+        <AdaptationDetailModal v-model="isModalOpen" :recipe="selectedRecipe" :nutrition="currentNutrition" />
     </div>
 </template>
 
 <style lang="scss" scoped>
-/* 此部分完全保留，不做任何修改 */
+/* 🔴 以下 CSS 與你提供的完全一致，未做任何刪減或改動 */
 @import '@/assets/scss/abstracts/_color.scss';
 
 .mobile-only-btn {

@@ -4,29 +4,39 @@ import { computed } from "vue";
 const props = defineProps({
   servings: { type: Number, default: 1 },
   ingredients: { type: Array, default: () => [] },
+  // 🏆 關鍵：新增支援直接傳入算好的營養數據物件
+  nutrition: { type: Object, default: null }
 });
 
 const emit = defineEmits(["change-servings"]);
 
-// --- 1. 核心計算邏輯 ---
-const calculateTotal = (fieldName) => {
-  if (!props.ingredients.length) return 0;
+// --- 在 NutritionCard.vue 裡 ---
+const getDisplayTotal = (fieldName, nutritionKey) => {
+  // 模式 A：如果父組件直接給了算好的 nutrition 物件
+  if (props.nutrition) {
+    const val = parseFloat(props.nutrition[nutritionKey] || props.nutrition[fieldName]) || 0;
+    // 這裡原本有 * props.servings，請刪掉，因為父組件已經算好了
+    return Math.round(val);
+  }
+
+  // 模式 B：如果只有食材陣列
+  if (!props.ingredients || !props.ingredients.length) return 0;
+
   const oneServingTotal = props.ingredients.reduce((sum, item) => {
-    // 確保數值有效，避免計算出 NaN
-    const amount = parseFloat(item.amount) || 0;
-    const weight = amount * (item.unit_weight || 1);
-    const nutrientValue = (weight / 100) * (item[fieldName] || 0);
+    const nutrientValue = parseFloat(item[fieldName]) || 0;
     return sum + nutrientValue;
   }, 0);
 
-  // 計算總量並取整數，避免出現過長的小數點
-  return Math.round(oneServingTotal * props.servings);
+  // 🏆 重要修正：這裡原本有 * props.servings，請刪掉！
+  // 因為父組件傳進來的 ingredients 已經是 nutritionWrapper 算好「當前份數」的結果了
+  return Math.round(oneServingTotal);
 };
 
-const totalCalories = computed(() => calculateTotal("calories_per_100g"));
-const totalProtein = computed(() => calculateTotal("protein_per_100g"));
-const totalFat = computed(() => calculateTotal("fat_per_100g"));
-const totalCarbs = computed(() => calculateTotal("carbs_per_100g"));
+// 保持與原本變數名稱一致，Template 完全不需要改動
+const totalCalories = computed(() => getDisplayTotal("calories_per_100g", "calories"));
+const totalProtein = computed(() => getDisplayTotal("protein_per_100g", "protein"));
+const totalFat = computed(() => getDisplayTotal("fat_per_100g", "fat"));
+const totalCarbs = computed(() => getDisplayTotal("carbs_per_100g", "carbs"));
 
 // --- 2. 功能函式 ---
 const updateServings = (delta) => {
@@ -34,11 +44,6 @@ const updateServings = (delta) => {
   if (next >= 1 && next <= 20) emit("change-servings", next);
 };
 
-/**
- * 💡 數字格式化邏輯
- * 當數字超過 100 萬時，轉換為 "1M+" 或以 "k" 結尾
- * 避免長數字溢出容器
- */
 const formatDisplayValue = (val) => {
   if (val > 999999) return (val / 1000).toFixed(0) + 'k';
   return val;
@@ -62,21 +67,21 @@ const formatDisplayValue = (val) => {
 
     <div class="total-calories-box">
       <i-material-symbols-mode-heat-outline-rounded class="heat-icon" />
-      <span class="calories-value zh-h4">{{ formatDisplayValue(totalCalories) }}</span>
+      <span :key="servings"  class="calories-value zh-h4 bump-animation">{{ formatDisplayValue(totalCalories) }}</span>
       <span class="unit zh-h4">kcal</span>
     </div>
 
     <div class="nutrients-content">
       <div class="nutrient-item">
-        <p class="value p-p1">{{ formatDisplayValue(totalProtein) }}g</p>
+        <p :key="servings"  class="value p-p1 bump-animation">{{ formatDisplayValue(totalProtein) }}g</p>
         <p class="label p-p2">蛋白質</p>
       </div>
       <div class="nutrient-item">
-        <p class="value p-p1">{{ formatDisplayValue(totalFat) }}g</p>
+        <p :key="servings"  class="value p-p1 bump-animation">{{ formatDisplayValue(totalFat) }}g</p>
         <p class="label p-p2">脂質</p>
       </div>
       <div class="nutrient-item">
-        <p class="value p-p1">{{ formatDisplayValue(totalCarbs) }}g</p>
+        <p :key="servings"  class="value p-p1 bump-animation">{{ formatDisplayValue(totalCarbs) }}g</p>
         <p class="label p-p2">碳水</p>
       </div>
     </div>
@@ -93,7 +98,6 @@ const formatDisplayValue = (val) => {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  // ✨ 防禦性設定：防止整張卡片被長字串撐開
   max-width: 100%;
   box-sizing: border-box;
 
@@ -133,7 +137,7 @@ const formatDisplayValue = (val) => {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-shrink: 0; // 防止按鈕被擠壓
+    flex-shrink: 0; 
     transition: all 0.2s ease;
 
     &:hover:not(:disabled) {
@@ -212,6 +216,27 @@ const formatDisplayValue = (val) => {
   .label {
     color: $neutral-color-700;
     white-space: nowrap; // 標籤不換行，維持整齊
+  }
+}
+
+// 在 style 區塊最後面加入
+.bump-animation {
+  display: inline-block; // 確保 transform 有效
+  animation: bump 0.3s ease-out;
+}
+
+@keyframes bump {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15); // 變大的幅度，可以自己調整
+    color: $primary-color-700; // 變大時稍微變色，視覺感更強
+  }
+
+  100% {
+    transform: scale(1);
   }
 }
 </style>

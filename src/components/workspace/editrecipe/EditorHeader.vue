@@ -182,10 +182,10 @@ const handleCoverUpload = (e) => {
           <span class="label">製作時間：</span>
           <template v-if="isEditing">
             <input type="number" class="inline-input" :value="modelValue.totalTime"
-              @input="updateField('totalTime', $event.target.value)" :placeholder="autoTotalTime" />
+              @input="updateField('totalTime', Number($event.target.value))" :placeholder="autoTotalTime" />
             <span class="unit">分鐘</span>
           </template>
-          <span v-else class="value">{{ displayTime }} 分鐘</span>
+          <span v-else class="value">{{ modelValue.totalTime || autoTotalTime }} 分鐘</span>
         </div>
 
         <div class="meta-item">
