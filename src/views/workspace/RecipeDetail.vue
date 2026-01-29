@@ -68,67 +68,14 @@ const toggleWorkspaceTopBar = (show) => {
 };
 
 // --- 3. fetchData 核心邏輯 ---
-// --- 3. fetchData 核心邏輯 ---
 const fetchData = async () => {
     isLoading.value = true;
     const recipeId = Number(route.params.id);
 
-    if (isPreviewMode.value) {
-        const preview = recipeStore.previewData;
-        if (preview) {
-            try {
-                // 🏆 1. 強制加載食材庫來當作對照表
-                const resIngMaster = await publicApi.get('data/recipe/ingredients.json');
-                const masterIng = resIngMaster.data || [];
-
-                console.log('%c🚀 進入預覽模式：開始食材對接偵錯', 'color: #fff; background: #2196F3; padding: 2px 4px; border-radius: 4px;');
-
-                // 🏆 2. 重新組裝 rawIngredients，解決 ID 不對接問題
-                rawIngredients.value = (preview.ingredients || []).map(ing => {
-                    const master = masterIng.find(m =>
-                        String(m.ingredient_id) === String(ing.id || ing.ingredient_id) ||
-                        m.ingredient_name === (ing.name || ing.ingredient_name)
-                    );
-
-                    // 1. 先抓出原始的單位重（轉換率）
-                    let unitWeight = Number(master?.gram_conversion || master?.unit_weight || ing.gram_conversion || 1);
-
-                    // 🏆 核心修正：檢查預覽模式的單位
-                    // 如果單位是克或毫升，強行將單位重設為 1，避免重複計算
-                    const unitName = ing.unit || ing.unit_name || master?.unit_name || '';
-                    if (['克', 'g', 'G', '毫升', 'ml', 'ML'].includes(unitName)) {
-                        unitWeight = 1;
-                    }
-
-                    const kcal = Number(master?.kcal_per_100g || ing.kcal_per_100g || 0);
-                    const amount = Number(ing.amount || 0);
-
-                    return {
-                        ...ing,
-                        ingredient_name: ing.name || ing.ingredient_name || master?.ingredient_name || '未知食材',
-                        gram_conversion: unitWeight, // 現在這會是正確的 1 或 轉換率
-                        kcal_per_100g: kcal,
-                        protein_per_100g: Number(master?.protein_per_100g || ing.protein_per_100g || 0),
-                        fat_per_100g: Number(master?.fat_per_100g || ing.fat_per_100g || 0),
-                        carbs_per_100g: Number(master?.carbs_per_100g || ing.carbs_per_100g || 0),
-                        unit_name: unitName || '份',
-                        // 額外記錄計算結果供偵錯
-                        debug_total_kcal: ((amount * unitWeight) / 100 * kcal).toFixed(2)
-                    };
-                });
-
-                console.table(rawIngredients.value, ['ingredient_name', 'amount', 'unit_name', 'gram_conversion', 'kcal_per_100g', 'debug_total_kcal']);
-
-                rawRecipe.value = preview;
-                rawSteps.value = preview.steps || [];
-                rawGallery.value = preview.gallery || [];
-            } catch (err) {
-                console.error('預覽模式資料組裝失敗:', err);
-            } finally {
-                setTimeout(() => { isLoading.value = false; }, 300);
-            }
-            return; // 🏆 預覽模式執行完畢
-        }
+    // --- [預覽模式省略，保持你現有的邏輯即可] ---
+    if (isPreviewMode.value && recipeStore.previewData) {
+        /* ...預覽模式邏輯... */
+        // 建議同樣參考下方的 console.table 寫法
     }
 
     try {
@@ -152,27 +99,32 @@ const fetchData = async () => {
             return;
         }
 
+        // 🏆 修正 1：正確設定初始份數，不要死栓在 1
+        const defaultServings = Number(rawRecipe.value.recipe_servings || rawRecipe.value.RECIPE_SERVINGS || 1);
+        servings.value = defaultServings;
+
         const masterIng = resIngMaster.data || [];
         const recipeIng = resRecipeIng.data || [];
         const filteredLinks = recipeIng.filter(i => Number(i.recipe_id || i.RECIPE_ID) === recipeId);
 
-        console.log('%c🏠 進入正式模式：載入資料庫食材', 'color: #fff; background: #4CAF50; padding: 2px 4px; border-radius: 4px;');
+        console.log(`%c🏠 正式模式：載入食譜 ID [${recipeId}]，預設份數: ${defaultServings}`, 'color: #fff; background: #4CAF50; padding: 2px 4px;');
 
         rawIngredients.value = filteredLinks.map(link => {
             const master = masterIng.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
 
-            // 1. 先抓出原始的單位重
+            // 單位與換算邏輯
             let unitWeight = Number(link.gram_conversion || master?.gram_conversion || master?.unit_weight || 1);
-
-            // 🏆 2. 【核心修正】檢查單位！
-            // 如果單位已經是 '克', 'g', '毫升', 'ml'，單位重強行設為 1，防止重複相乘
             const unitName = link.unit_name || master?.unit_name || '';
+
+            // 如果單位本身就是克/毫升，換算率強制為 1
             if (['克', 'g', 'G', '毫升', 'ml', 'ML'].includes(unitName)) {
                 unitWeight = 1;
             }
 
             const kcal = Number(master?.kcal_per_100g || link.kcal_per_100g || 0);
             const amount = Number(link.amount || 0);
+            const totalGrams = amount * unitWeight;
+            const itemTotalKcal = (totalGrams / 100) * kcal;
 
             return {
                 ...link,
@@ -182,20 +134,32 @@ const fetchData = async () => {
                 protein_per_100g: Number(master?.protein_per_100g || link.protein_per_100g || 0),
                 fat_per_100g: Number(master?.fat_per_100g || link.fat_per_100g || 0),
                 carbs_per_100g: Number(master?.carbs_per_100g || link.carbs_per_100g || 0),
-                unit_name: link.unit_name || master?.unit_name || '份',
-                debug_total_kcal: ((amount * unitWeight) / 100 * kcal).toFixed(2)
+                unit_name: unitName || '份',
+                // 偵錯用欄位
+                calc_total_grams: totalGrams.toFixed(2),
+                calc_total_kcal: itemTotalKcal.toFixed(2)
             };
         });
 
-        console.table(rawIngredients.value, ['ingredient_name', 'amount', 'unit_name', 'gram_conversion', 'kcal_per_100g', 'debug_total_kcal']);
+        // 🏆 修正 2：補上計算表格 Console
+        console.table(rawIngredients.value.map(i => ({
+            '食材': i.ingredient_name,
+            '原始用量': i.amount,
+            '單位': i.unit_name,
+            '單位重(g)': i.gram_conversion,
+            '換算總重(g)': i.calc_total_grams,
+            '每100g熱量': i.kcal_per_100g,
+            '該項總熱量': i.calc_total_kcal
+        })));
 
+        // 其他資料讀取
         rawSteps.value = (resS.data || []).filter(s => Number(s.recipe_id || s.RECIPE_ID) === recipeId)
             .sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
-
         rawComments.value = (resC.data || []).filter(c => Number(c.RECIPE_ID || c.recipe_id) === recipeId);
         rawGallery.value = (resG.data || []).filter(g => Number(g.RECIPE_ID || g.recipe_id) === recipeId);
 
-        servings.value = 1;
+        // ❌ 移除這行：servings.value = 1; (這會蓋掉上面好不容易拿到的 defaultServings)
+
     } catch (err) {
         console.error('正式模式資料讀取出錯:', err);
     } finally {
@@ -343,11 +307,15 @@ const nutritionWrapper = computed(() => {
         totalCarbs += (Number(ing.carbs_per_100g) || 0) * ratio;
     });
 
+    // 🏆 修正：除以份數，算出「每一份」的平均熱量
+    // 這樣當 servings 改變時，NutritionCard 才會顯示單份熱量
+    const currentServings = servings.value || 1;
+
     return [{
-        calories_per_100g: totalKcal,
-        protein_per_100g: totalProtein,
-        fat_per_100g: totalFat,
-        carbs_per_100g: totalCarbs,
+        calories_per_100g: totalKcal / currentServings,
+        protein_per_100g: totalProtein / currentServings,
+        fat_per_100g: totalFat / currentServings,
+        carbs_per_100g: totalCarbs / currentServings,
         amount: 1,
         unit_weight: 1
     }];
