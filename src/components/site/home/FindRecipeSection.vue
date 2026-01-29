@@ -32,7 +32,14 @@
             const result = res.data;
             // const data = await response.json()
             if (result.status === 'success'){
-                recipesData.value = result.data
+                recipesData.value = result.data.map(item => ({
+                    ...item,
+                    // 解析食材圖路徑
+                    fullUrl: parsePublicFile(item.url),
+                    // 解析大圖路徑
+                    fullRecipeImg: parsePublicFile(item.recipe_image_url)
+                }));
+                // recipesData.value = result.data
                 initRandomIngredients()
 
                 if (displayIngredients.value.length > 0) {
@@ -105,9 +112,9 @@
             <img 
                 v-for="item in displayIngredients" 
                 :key="item.id" 
-                :src="$parsePublicFile(item.url)" 
+                :src="item.fullUrl" 
                 :alt="item.recipe_title"
-                @click="toggleRecipe(item.recipe_image_url, item.id)"
+                @click="toggleRecipe(item.fullRecipeImg, item.id)"
                 :class="['ingredient-item', { 'active': item.id === activeId }]"
             >
         </transition-group>
