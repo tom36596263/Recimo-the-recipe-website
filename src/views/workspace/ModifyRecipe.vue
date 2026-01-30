@@ -28,7 +28,7 @@ const currentNutrition = ref(null);
  */
 async function openAdaptDetail(item) {
     // 🛑 唯讀邏輯：如果是來自 JSON 的資料（id 以 json- 開頭），不執行計算與彈窗
-    if (String(item.id).startsWith('json-')) return;
+    // if (String(item.id).startsWith('json-')) return;
 
     console.log('--- 🛡️ 熱量校正啟動 ---');
 
@@ -95,77 +95,89 @@ watch(
     { immediate: true }
 );
 
-/**
- * 載入食譜資料：整合靜態 JSON 與 LocalStorage
- */
 async function loadRecipeData(recipeId) {
     try {
-        const [resRecipes, resAdaptations, resIngredients] = await Promise.all([
+        // 🏆 1. 多抓一個 ingredients.json 總表
+        const [resRecipes, resRelIngredients, resSteps, resIngMaster] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/recipe/recipe_adaptations.json'),
-            publicApi.get('data/recipe/recipe_ingredient.json')
+            publicApi.get('data/recipe/recipe_ingredient.json'),
+            publicApi.get('data/recipe/steps.json'),
+            publicApi.get('data/recipe/ingredients.json') // 👈 食材總表
         ]);
 
         const allRecipes = resRecipes.data;
-        const allAdaptations = resAdaptations.data;
+        const allRelIngredients = resRelIngredients.data; // 關聯表
+        const allSteps = resSteps.data;
+        const ingMaster = resIngMaster.data; // 總表
         const targetParentId = Number(recipeId);
 
-        // 1. 處理母食譜
-        const found = allRecipes.find(r => Number(r.recipe_id || r.RECIPE_ID) === targetParentId);
+        // --- 處理母食譜 ---
+        const found = allRecipes.find(r => Number(r.recipe_id) === targetParentId);
         if (!found) return;
 
-        const parentServings = Number(found.recipe_servings || found.RECIPE_SERVINGS || found.servings || 2);
-
         originalRecipe.value = {
-            id: found.recipe_id || found.RECIPE_ID,
-            title: found.recipe_title || found.title || found.RECIPE_TITLE,
-            description: found.recipe_description || found.recipe_descreption || found.RECIPE_DESCRIPTION || '暫無簡介',
-            // 🏆 使用規範函式處理圖片
-            coverImg: parsePublicFile(found.recipe_image_url || found.recipe_cover_image || found.coverImg),
-            servings: parentServings
+            id: found.recipe_id,
+            title: found.recipe_title,
+            description: found.recipe_descreption || '暫無簡介',
+            coverImg: parsePublicFile(found.recipe_image_url),
+            servings: Number(found.recipe_servings || 2)
         };
 
-        // 2. 處理改編食譜 (來自 JSON 資料)
-        const jsonAdaptations = allAdaptations
-            .filter(a => Number(a.parent_recipe_id || a.PARENT_RECIPE_ID) === targetParentId)
-            .map(adapt => {
-                const childId = Number(adapt.child_recipe_id || adapt.CHILD_RECIPE_ID);
-                const childInfo = allRecipes.find(r => Number(r.recipe_id || r.RECIPE_ID) === childId);
-                if (!childInfo) return null;
+        // --- 🏆 2. 處理改編食譜 ---
+        const jsonAdaptations = allRecipes
+            .filter(r => Number(r.parent_recipe_id) === targetParentId)
+            .map(childInfo => {
+                const childId = Number(childInfo.recipe_id);
 
-                const childIngredients = resIngredients.data
-                    .filter(i => Number(i.recipe_id || i.RECIPE_ID) === childId)
-                    .map(ing => ({
-                        ...ing,
-                        id: ing.ingredient_id || ing.INGREDIENT_ID || ing.id
+                // A. 關聯該改編食譜的「食材」並注入「名稱」
+                const childIngredients = allRelIngredients
+                    .filter(i => Number(i.recipe_id) === childId)
+                    .map(rel => {
+                        // 🔍 從總表找出對應的名字
+                        const masterInfo = ingMaster.find(m => Number(m.ingredient_id) === Number(rel.ingredient_id));
+                        return {
+                            ...rel,
+                            id: rel.ingredient_id,
+                            ingredient_name: masterInfo ? masterInfo.ingredient_name : '未知食材',
+                            name: masterInfo ? masterInfo.ingredient_name : '未知食材'
+                        };
+                    });
+
+                // B. 步驟處理
+                const childSteps = allSteps
+                    .filter(s => Number(s.recipe_id) === childId)
+                    .sort((a, b) => a.step_order - b.step_order)
+                    .map(step => ({
+                        ...step,
+                        step_image_url: parsePublicFile(step.step_image_url)
                     }));
 
                 return {
                     id: `json-${childId}`,
-                    title: adapt.adaptation_title || childInfo.recipe_title || childInfo.RECIPE_TITLE,
-                    summary: adapt.adaptation_note || '暫無改編心得',
-                    // 🏆 使用規範函式處理圖片
-                    coverImg: parsePublicFile(adapt.adaptation_image_url || childInfo.recipe_image_url),
+                    title: childInfo.adaptation_title || childInfo.recipe_title,
+                    summary: childInfo.adaptation_note || '暫無改編心得',
+                    coverImg: parsePublicFile(`img/recipes/${childId}/cover.png`),
                     is_mine: false,
-                    recipe_descreption: childInfo.recipe_description || childInfo.RECIPE_DESCRIPTION || '暫無詳細內容',
-                    recipe_servings: Number(childInfo.recipe_servings || childInfo.RECIPE_SERVINGS || parentServings),
-                    ingredients: childIngredients
+                    recipe_descreption: childInfo.recipe_descreption,
+                    recipe_servings: Number(childInfo.recipe_servings),
+                    ingredients: childIngredients,
+                    steps: childSteps
                 };
-            }).filter(Boolean);
+            });
 
-        // 3. 處理本地改編 (來自 LocalStorage)
+        // --- 3. 處理本地改編 (不變) ---
         const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
         const localAdaptations = localRevisions
             .filter(r => Number(r.parent_recipe_id) === targetParentId)
             .map(r => ({
                 ...r,
-                id: r.id || `local-${Date.now()}-${Math.random()}`,
+                id: r.id || `local-${Date.now()}`,
                 title: r.title || '未命名改編',
                 summary: r.description || '暫無改編心得',
-                // 🏆 本地圖片路徑也經過 parsePublicFile 確保相容性
                 coverImg: parsePublicFile(r.coverImg || r.image),
                 is_mine: true,
-                recipe_servings: Number(r.servings || r.recipe_servings || 1)
+                recipe_servings: Number(r.servings || 1),
+                steps: r.steps || []
             }));
 
         variantItems.value = [...localAdaptations, ...jsonAdaptations];
