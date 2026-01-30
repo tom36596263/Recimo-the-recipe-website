@@ -1,5 +1,8 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
+// 🏆 1. 引入團隊規範工具，取代手寫的 fileUrl 和 formatImg
+import { parsePublicFile } from '@/utils/parseFile';
+
 import RecipeIntro from '@/components/workspace/recipedetail/RecipeIntro.vue';
 import RecipeIngredients from '@/components/workspace/recipedetail/RecipeIngredients.vue';
 import RecipeSteps from '@/components/workspace/recipedetail/RecipeSteps.vue';
@@ -16,25 +19,14 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'delete-recipe']);
 
-// --- 🏆 核心修正：加入圖片位址邏輯 ---
-const fileUrl = import.meta.env.VITE_FILE_URL || 'http://localhost:8888/recimo_api/';
-
-const formatImg = (rawPath) => {
-    if (!rawPath) return 'https://placehold.co/800x600?text=No+Image';
-    if (rawPath.startsWith('http') || rawPath.startsWith('data:') || rawPath.startsWith('blob:')) {
-        return rawPath;
-    }
-    const base = fileUrl.endsWith('/') ? fileUrl : `${fileUrl}/`;
-    const cleanPath = rawPath.replace(/^\//, '');
-    return `${base}${cleanPath}`;
-};
+// --- 🗑️ 移除原本手寫的 fileUrl 與 formatImg 函式 ---
 
 // 1. 取得原始份數 (防呆至少為 1)
 const originalServings = computed(() => {
     return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
 });
 
-// 在 AdaptationDetailModal.vue 內部
+// 在燈箱內計算顯示的營養素
 const displayedNutrition = computed(() => {
     if (!props.nutrition) return null;
     const s = currentServings.value; // 使用者在燈箱選的人份
@@ -103,13 +95,13 @@ const introData = computed(() => {
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
 
-    // 🏆 修正封面圖路徑
+    // 🏆 修正封面圖：改用 parsePublicFile
     const rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
 
     return {
         id: r.id || r.recipe_id,
         title: r.adapt_title || r.title || '新改編食譜',
-        image: formatImg(rawImg),
+        image: parsePublicFile(rawImg),
         description: r.clean_description || r.description || '暫無詳細說明',
         time: formattedTime,
         difficulty: r.difficulty || 1,
@@ -126,8 +118,8 @@ const stepsData = computed(() => {
         id: s.id || idx,
         title: s.step_title || s.title || `步驟 ${idx + 1}`,
         content: s.content || s.step_content || '',
-        // 🏆 修正步驟圖路徑
-        image: formatImg(s.image || s.step_image_url || ''),
+        // 🏆 修正步驟圖：改用 parsePublicFile
+        image: parsePublicFile(s.image || s.step_image_url || ''),
         time: s.time || ''
     }));
 });
