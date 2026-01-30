@@ -9,7 +9,7 @@ CREATE TABLE recipes (
     adaptation_note VARCHAR(255),
     recipe_title VARCHAR(100) NOT NULL,
     recipe_image_url VARCHAR(255) NOT NULL,
-    recipe_description VARCHAR(255), -- 修正了原語句中的拼字 descreption
+    recipe_description VARCHAR(255), 
     recipe_servings INT NOT NULL,
     recipe_total_time TIME,
     recipe_difficulty DECIMAL(2,1) NOT NULL,
@@ -38,7 +38,7 @@ FOREIGN KEY (parent_recipe_id) REFERENCES recipes(recipe_id);
 INSERT INTO RECIPES (
     recipe_id, author_id, linked_product_id, parent_recipe_id, personal_folder_id, 
     adaptation_title, adaptation_note, recipe_title, recipe_image_url, 
-    recipe_descreption, recipe_servings, recipe_total_time, recipe_difficulty, 
+    recipe_description, recipe_servings, recipe_total_time, recipe_difficulty, 
     recipe_like_count, recipe_kcal_per_100g, recipe_protein_per_100g, 
     recipe_fat_per_100g, recipe_carbs_per_100g, status, recipe_created_at, recipe_last_updated
 ) VALUES 
