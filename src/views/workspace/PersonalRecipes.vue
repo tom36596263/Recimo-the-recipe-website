@@ -1,17 +1,8 @@
-/**
-* 個人食譜頁面
-* 功能：
-* 1. 顯示用戶創建的個人食譜列表
-* 2. 支持按標籤篩選食譜
-* 3. 雙欄佈局：左側為食譜卡片網格，右側為選中食譜的預覽詳情
-* 4. 分頁功能：每頁顯示 6 個食譜（加上創建卡片）
-* 5. 創建新食譜功能：點擊創建卡片跳轉到編輯頁面
-* 6. 空狀態處理：無食譜時顯示引導信息
-*/
 <script setup>
 import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { publicApi } from '@/utils/publicApi';
+import { phpApi } from '@/utils/publicApi';
+import { parsePublicFile } from '@/utils/parseFile'; // 圖片路徑處理
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import RecipePreviewCard from '@/components/common/RecipePreviewCard.vue';
 import BaseTag from '@/components/common/BaseTag.vue';
@@ -36,11 +27,9 @@ const modalRecipe = ref(null);
 // 螢幕寬度（用於模板中判斷）
 const windowWidth = ref(window.innerWidth);
 
-// ========== 標籤篩選 ==========
-// 可用的標籤列表
-const tags = ref([]);
-// 當前選中的標籤
-const selectedTag = ref(null);
+const userId = ref(null);
+
+// 標籤功能暫不處理
 
 // ========== 分頁設置 ==========
 // 當前頁碼
@@ -49,33 +38,14 @@ const currentPage = ref(1);
 const pageSize = 5;
 
 // ========== 計算屬性 ==========
-/**
- * 計算總頁數
- * 根據篩選後的食譜數量和每頁大小計算總頁數
- */
+// 只做分頁，不做標籤篩選
 const totalPages = computed(() => {
-    return Math.ceil(filteredRecipes.value.length / pageSize);
+    return Math.ceil(allRecipes.value.length / pageSize);
 });
-
-/**
- * 根據選中的標籤篩選食譜
- * 若選擇「全部」或未選擇，則返回所有食譜
- */
-const filteredRecipes = computed(() => {
-    if (!selectedTag.value || selectedTag.value === '全部') {
-        return allRecipes.value;
-    }
-    return allRecipes.value.filter(recipe => recipe.tags.includes(selectedTag.value));
-});
-
-/**
- * 計算當前頁面要顯示的食譜
- * 根據當前頁碼進行數據切片
- */
 const currentPageRecipes = computed(() => {
     const start = (currentPage.value - 1) * pageSize;
     const end = start + pageSize;
-    return filteredRecipes.value.slice(start, end);
+    return allRecipes.value.slice(start, end);
 });
 
 // ========== 事件處理 ==========
@@ -108,13 +78,7 @@ const closeModal = () => {
     isModalOpen.value = false;
 };
 
-/**
- * 選擇標籤（點擊標籤時觸發）
- * @param {String} tag - 選中的標籤名稱
- */
-const selectTag = (tag) => {
-    selectedTag.value = tag;
-};
+// 標籤功能暫不處理
 
 /**
  * 創建新食譜
@@ -127,7 +91,7 @@ const createNewRecipe = () => {
 // ========== 監聽器 ==========
 /**
  * 監聽頁面切換
- * 當用戶切換頁碼時，自動選中該頁第一筆食譜（僅在大螢幕）
+ * 當用戶切換頁碼時，自動選中該頁第一筆食譜（僅在大卡片）
  */
 watch(currentPage, () => {
     if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
@@ -135,25 +99,9 @@ watch(currentPage, () => {
     }
 });
 
-/**
- * 監聽標籤切換
- * 當用戶切換標籤時，重置到第一頁並選中第一筆食譜（僅在大螢幕）
- */
-watch(selectedTag, () => {
-    currentPage.value = 1;
-    if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
-        selectedRecipe.value = currentPageRecipes.value[0];
-    }
-});
+// 標籤功能暫不處理
 
-// ========== 生命週期 ==========
-/**
- * 組件掛載時初始化數據
- * 1. 使用 publicApi 從後端獲取 JSON 數據
- * 2. 處理食譜與標籤的關聯關係
- * 3. 建立標籤篩選列表
- * 4. 預設選中第一頁第一筆食譜
- */
+
 onMounted(async () => {
     // 監聽視窗大小變化
     const handleResize = () => {
@@ -166,85 +114,61 @@ onMounted(async () => {
         window.removeEventListener('resize', handleResize);
     });
 
-    try {
-        // 並行載入所有需要的 JSON 檔案
-        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
-            publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/recipe/recipe_tag.json'),
-            publicApi.get('data/recipe/tags.json')
-        ]);
 
-        const recipesData = resRecipes.data;
-        const recipeTagData = resRecipeTags.data;
-        const tagsData = resTags.data;
-
-        // 建立標籤 ID 對應名稱的映射表
-        const tagMap = {};
-        tagsData.forEach(tag => {
-            tagMap[tag.tag_id] = tag.tag_name;
-        });
-
-        // 獲取 base 路徑用於圖片 URL 補全
-        const base = import.meta.env.BASE_URL;
-
-        // 載入個人食譜數據（取 recipe_id 7-26，共20筆）
-        const selectedRecipes = recipesData.slice(6, 26);
-
-        // 使用 Set 收集所有不重複的標籤ID
-        const allTagIds = new Set();
-
-        // 將原始食譜數據轉換為組件所需的格式
-        allRecipes.value = selectedRecipes.map(recipe => {
-            // 通過關聯表查找該食譜的所有標籤
-            const recipeTags = recipeTagData
-                .filter(rt => rt.recipe_id === recipe.recipe_id)
-                .map(rt => {
-                    if (tagMap[rt.tag_id]) {
-                        allTagIds.add(rt.tag_id);
-                        return tagMap[rt.tag_id];
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+        try {
+            const userObj = JSON.parse(userStr);
+            userId.value = userObj.user_id;
+            if (userId.value) {
+                try {
+                    const resMyRecipes = await phpApi.get(`personal/myrecipe_get.php`, { params: { user_id: userId.value } });
+                    const myRecipesData = Array.isArray(resMyRecipes.data) ? resMyRecipes.data : [];
+                    allRecipes.value = myRecipesData.map(recipe => ({
+                        ...recipe,
+                        id: recipe.recipe_id,
+                        recipe_name: recipe.recipe_title || '未命名食譜',
+                        image_url: recipe.recipe_image_url && recipe.recipe_image_url.startsWith('http')
+                            ? recipe.recipe_image_url
+                            : recipe.recipe_image_url
+                                ? parsePublicFile(recipe.recipe_image_url)
+                                : '',
+                        author: {
+                            name: recipe.user_name || 'Recimo',
+                            likes: recipe.recipe_like_count || 0
+                        }
+                    }));
+                    // 載入後自動 focus 第一個（大卡片）
+                    if (allRecipes.value.length > 0 && window.innerWidth > 1024) {
+                        selectedRecipe.value = allRecipes.value[0];
                     }
-                    return null;
-                })
-                .filter(Boolean);
-
-            // 返回格式化的食譜對象
-            return {
-                id: recipe.recipe_id,
-                recipe_id: recipe.recipe_id,
-                recipe_name: recipe.recipe_title,
-                image_url: recipe.recipe_image_url.startsWith('http')
-                    ? recipe.recipe_image_url
-                    : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
-                tags: recipeTags.length > 0 ? recipeTags : ['未分類'],
-                difficulty: recipe.recipe_difficulty,
-                nutritional_info: {
-                    calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
-                    serving_size: recipe.recipe_servings,
-                    cooking_time: `${recipe.recipe_total_time.split(':')[1]}分鐘`
-                },
-                author: {
-                    name: 'Recimo',
-                    likes: recipe.recipe_like_count || 0
+                } catch (e) {
+                    allRecipes.value = [];
                 }
-            };
-        });
+            } else {
+                allRecipes.value = [];
+            }
 
-        // 建立標籤篩選列表
-        tags.value = ['全部', ...Array.from(allTagIds)
-            .map(tagId => tagMap[tagId])
-            .filter(Boolean)
-            .slice(0, 6)];
+            // 建立標籤篩選列表
+            // tags.value = ['全部', ...Array.from(allTagIds)
+            //     .map(tagId => tagMap[tagId])
+            //     .filter(Boolean)
+            //     .slice(0, 6)];
 
-        // 預設選擇「全部」標籤
-        selectedTag.value = '全部';
+            // 預設選擇「全部」標籤
+            // selectedTag.value = '全部';
 
-        // 預設自動選中第一頁的第一筆食譜（僅在大螢幕）
-        if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
-            selectedRecipe.value = currentPageRecipes.value[0];
+            // 預設自動選中第一頁的第一筆食譜（僅在大螢幕）
+            if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
+                selectedRecipe.value = currentPageRecipes.value[0];
+            }
+        } catch (error) {
+            console.error('載入資料失敗:', error);
         }
-    } catch (error) {
-        console.error('載入資料失敗:', error);
     }
+
+    console.log(selectedRecipe.value);
+
 });
 </script>
 
@@ -259,9 +183,9 @@ onMounted(async () => {
             <div class="row">
                 <div class="col-12">
                     <div class="tag-filter">
-                        <BaseTag v-for="tag in tags" :key="tag" :text="tag"
+                        <!-- <BaseTag v-for="tag in tags" :key="tag" :text="tag"
                             :variant="selectedTag === tag ? 'primary' : 'action'" :show-icon="false"
-                            @click="selectTag(tag)" />
+                            @click="selectTag(tag)" /> -->
                         <!-- 新增分類功能暫未實現 -->
                         <!-- <BaseTag
                             text="新增分類"

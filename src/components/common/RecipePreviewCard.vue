@@ -1,16 +1,3 @@
-/**
-* 食譜預覽卡片組件
-*
-* 功能說明：
-* - 顯示選中食譜的詳細預覽信息
-* - 包含作者資訊、食譜圖片、標題、烹飪時間、熱量、難度、份量
-* - 展示前 5 個食材的圖示預覽（從資料庫關聯查詢）
-* - 提供「加入收藏」、「食譜詳情」、「開始烹飪」操作按鈕
-* - 桌面版會使用 sticky 定位固定在視窗上方
-*
-* Props:
-* @param {Object} recipe - 食譜資料物件，包含 id, recipe_name, image_url, difficulty, nutritional_info, author 等屬性
-*/
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
@@ -37,11 +24,23 @@ const props = defineProps({
 const router = useRouter();
 
 // ==================== 響應式數據 ====================
-const recipeIngredients = ref([]); // 食譜關聯的食材列表
-const ingredientsData = ref([]); // 所有食材資料
-const recipeIngredientsRelation = ref([]); // 食譜-食材關聯表
+const recipeIngredients = computed(() => Array.isArray(props.recipe.ingredients) ? props.recipe.ingredients : []);
+
 
 // ==================== 方法定義 ====================
+
+/**
+ * 將 xx:xx:xx 轉為 xx小時xx分鐘xx秒
+ */
+const formatTime = (hhmmss) => {
+    if (!hhmmss || typeof hhmmss !== 'string') return '未知';
+    const [h, m, s] = hhmmss.split(':').map(Number);
+    let result = '';
+    if (h) result += `${h}小時`;
+    if (m) result += `${m}分鐘`;
+    if (s || (!h && !m)) result += `${s}秒`;
+    return result;
+};
 
 /**
  * 跳轉到食譜詳細頁面
@@ -53,11 +52,12 @@ const goToRecipeDetail = () => {
 
 /**
  * 開始烹飪功能
- * 目前僅記錄日誌，未來可擴展跳轉到烹飪模式頁面
+ * 跳轉到 /workspace/guide 並帶上食譜 id
  */
 const startCooking = () => {
-    console.log('開始烹飪:', props.recipe.recipe_name);
-    // TODO: 可以跳轉到烹飪模式頁面
+    // const recipeId = props.recipe.recipe_id || props.recipe.id;
+    // router.push({ path: '/workspace/guide', query: { id: recipeId } });
+    router.push({ name: 'recipe-guide', params: { id: props.recipe.recipe_id || props.recipe.id } });
 };
 
 /**
@@ -69,52 +69,7 @@ const getDifficultyStars = (difficulty) => {
     return Array(5).fill(0).map((_, index) => index < difficulty);
 };
 
-/**
- * 載入食材資料
- * 從 JSON 文件中讀取食材列表和關聯表
- */
-const loadIngredients = async () => {
-    try {
-        // 並行載入所有食材資料
-        const [ingredientsResponse, relationResponse] = await Promise.all([
-            publicApi.get('data/recipe/ingredients.json'),
-            publicApi.get('data/recipe/recipe_ingredient.json')
-        ]);
-
-        ingredientsData.value = ingredientsResponse.data;
-        recipeIngredientsRelation.value = relationResponse.data;
-
-        // 篩選出當前食譜的食材
-        loadRecipeIngredients();
-    } catch (error) {
-        console.error('載入食材資料失敗:', error);
-    }
-};
-
-/**
- * 載入當前食譜的食材
- * 根據 recipe_id 從關聯表中查詢食材，並從食材表中獲取完整信息
- */
-const loadRecipeIngredients = () => {
-    // 找出當前食譜的所有食材ID
-    const currentRecipeIngredients = recipeIngredientsRelation.value.filter(
-        relation => relation.recipe_id === (props.recipe.recipe_id || props.recipe.id)
-    );
-
-    // 根據食材ID獲取完整的食材資料
-    recipeIngredients.value = currentRecipeIngredients
-        .map(relation => {
-            const ingredient = ingredientsData.value.find(
-                ing => ing.ingredient_id === relation.ingredient_id
-            );
-            return ingredient ? {
-                ...ingredient,
-                amount: relation.amount,
-                unit_name: relation.unit_name
-            } : null;
-        })
-        .filter(item => item !== null);
-};
+// 不再需要載入食材資料，直接從 props.recipe.ingredients 取得
 
 /**
  * 取得食材圖片 URL
@@ -123,12 +78,12 @@ const loadRecipeIngredients = () => {
  */
 const getIngredientImageUrl = (imageUrl) => {
     if (!imageUrl) return '';
-    
+
     // 如果是完整 URL，直接返回
     if (imageUrl.startsWith('http')) {
         return imageUrl;
     }
-    
+
     // 使用 parseFile.js 處理路徑
     return parsePublicFile(imageUrl);
 };
@@ -164,21 +119,7 @@ const getIngredientIcon = (mainCategory, subCategory) => {
     return iconMap[mainCategory] || 'fa-solid fa-utensils';
 };
 
-// ==================== 監聽器 ====================
-/**
- * 監聽 recipe prop 的變化
- * 當選擇不同食譜時重新載入食材
- */
-watch(() => props.recipe, () => {
-    if (ingredientsData.value.length > 0 && recipeIngredientsRelation.value.length > 0) {
-        loadRecipeIngredients();
-    }
-}, { deep: true });
-
-// ==================== 生命週期 ====================
-onMounted(() => {
-    loadIngredients();
-});
+// 不需監聽與載入，直接用 props.recipe.ingredients
 </script>
 
 <template>
@@ -190,7 +131,7 @@ onMounted(() => {
             <div class="author-info">
                 <div class="author-avatar">
                     <!-- 自動生成大頭照 -->
-                    <img :src="`https://ui-avatars.com/api/?name=${recipe.author?.name || 'RE'}&background=3E8D60&color=fff`"
+                    <img :src="parsePublicFile(recipe.user_url)||`https://ui-avatars.com/api/?name=${recipe.author?.name || 'RE'}&background=3E8D60&color=fff`"
                         alt="Recimo">
                 </div>
                 <!--  -->
@@ -213,12 +154,12 @@ onMounted(() => {
             <!-- 製作時間 -->
             <div class="info-item">
                 <i class="fa-regular fa-clock"></i>
-                <span>製作時間：{{ recipe.nutritional_info?.cooking_time || '45分鐘' }}</span>
+                <span>製作時間：{{ formatTime(recipe?.recipe_total_time) || '無設定' }}</span>
             </div>
             <!-- 熱量 -->
             <div class="info-item">
                 <i class="fa-solid fa-fire"></i>
-                <span>熱量：{{ recipe.nutritional_info?.calories || '320kcal' }}</span>
+                <span>熱量：{{ recipe?.recipe_kcal_per_100g || '無設定' }} kcal</span>
             </div>
         </div>
 
@@ -228,30 +169,29 @@ onMounted(() => {
             <div class="difficulty">
                 <span class="label">難易度：</span>
                 <div class="stars">
-                    <i v-for="(filled, index) in getDifficultyStars(recipe.difficulty || 2)" :key="index"
+                    <i v-for="(filled, index) in getDifficultyStars(recipe.recipe_difficulty || 2)" :key="index"
                         class="fa-star" :class="filled ? 'fa-solid' : 'fa-regular'"></i>
                 </div>
             </div>
             <!-- 份量 -->
             <div class="servings">
                 <span class="label">份量：</span>
-                <span>{{ recipe.nutritional_info?.serving_size || 1 }}人份</span>
+                <span>{{ recipe.recipe_servings || 1 }}人份</span>
             </div>
         </div>
 
-        <!-- ==================== 食材預覽區（前5個） ==================== -->
+        <!-- ==================== 食材預覽區 ==================== -->
         <div class="ingredients-preview">
             <Swiper :modules="modules" :slides-per-view="'auto'" :space-between="12" :free-mode="true"
                 class="ingredients-swiper">
-                <SwiperSlide v-for="ingredient in recipeIngredients" :key="ingredient.ingredient_id"
+                <SwiperSlide v-for="ingredient in recipeIngredients" :key="ingredient.ingredient_id || ingredient.id"
                     class="ingredient-slide">
                     <div class="ingredient-tag">
                         <!-- 食材圖片 -->
                         <div class="ingredient-icon">
-                            <img v-if="ingredient.ingredient_image_url" 
-                                :src="getIngredientImageUrl(ingredient.ingredient_image_url)" 
-                                :alt="ingredient.ingredient_name"
-                                class="ingredient-image" />
+                            <img v-if="ingredient.ingredient_image_url"
+                                :src="getIngredientImageUrl(ingredient.ingredient_image_url)"
+                                :alt="ingredient.ingredient_name" class="ingredient-image" />
                             <i v-else :class="getIngredientIcon(ingredient.main_category, ingredient.sub_category)"></i>
                         </div>
                         <!-- 食材名稱 -->
@@ -261,12 +201,7 @@ onMounted(() => {
             </Swiper>
         </div>
 
-        <!-- ==================== 喜歡數統計 ==================== -->
-        <div class="like-count">
-            <i class="fa-solid fa-heart"></i>
-            <span>{{ recipe.author?.likes || 100 }}</span>
-            <span class="like-text">個人覺得好吃</span>
-        </div>
+
 
         <!-- ==================== 操作按鈕區 ==================== -->
         <div class="action-buttons">

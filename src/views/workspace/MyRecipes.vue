@@ -1,21 +1,15 @@
-/**
-* 我的食譜總覽頁面（Dashboard）
-* 功能：
-* 1. 顯示最近觀看食譜、我的收藏、個人食譜三個區塊
-* 2. 每個區塊顯示 4 筆預覽數據
-* 3. 提供「查看更多」按鈕跳轉到對應的完整列表頁
-* 4. 空狀態處理：無數據時顯示引導信息
-* 5. 使用 4欄網格佈局，響應式設計支持平板和手機
-*/
 <script setup>
 import { ref, onMounted } from 'vue';
+// ========== 取得 localStorage user_id ==========
+const userId = ref(null);
 import { useRouter } from 'vue-router';
-import { publicApi } from '@/utils/publicApi';
+import { phpApi, publicApi } from '@/utils/publicApi';
+import { parsePublicFile } from '@/utils/parseFile'
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
 
-const router = useRouter();
 
+const router = useRouter();
 // ========== 狀態管理 ==========
 // 最近觀看食譜列表（顯示 4 筆）
 const recentRecipes = ref([]);
@@ -41,13 +35,13 @@ const totalPersonalCount = ref(0);
  * @param {Object} tagMap - 標籤 ID 對應名稱的映射表
  * @returns {Array} 標籤名稱數組
  */
-const getRecipeTags = (recipeId, recipeTagData, tagMap) => {
-    const recipeTags = recipeTagData
-        .filter(rt => rt.recipe_id === recipeId)
-        .map(rt => tagMap[rt.tag_id])
-        .filter(Boolean);
-    return recipeTags.length > 0 ? recipeTags : ['未分類'];
-};
+// const getRecipeTags = (recipeId, recipeTagData, tagMap) => {
+//     const recipeTags = recipeTagData
+//         .filter(rt => rt.recipe_id === recipeId)
+//         .map(rt => tagMap[rt.tag_id])
+//         .filter(Boolean);
+//     return recipeTags.length > 0 ? recipeTags : ['未分類'];
+// };
 
 // ========== 路由跳轉 ==========
 /**
@@ -80,76 +74,55 @@ const goToPersonalRecipes = () => {
  * 4. 載入個人食譜（第 9-12 筆）
  */
 onMounted(async () => {
-    try {
-        // 並行載入所有需要的 JSON 檔案
-        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
-            publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/recipe/recipe_tag.json'),
-            publicApi.get('data/recipe/tags.json')
-        ]);
+    // 取得 localStorage 裡的 user 物件，並解析 user_id
 
-        const recipesData = resRecipes.data;
-        const recipeTagData = resRecipeTags.data;
-        const tagsData = resTags.data;
 
-        // 建立標籤 ID 對應名稱的映射表，提高查詢效率
-        const tagMap = {};
-        tagsData.forEach(tag => {
-            tagMap[tag.tag_id] = tag.tag_name;
-        });
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+        try {
+            const userObj = JSON.parse(userStr);
+            userId.value = userObj.user_id;
+            // console.log(userId.value);
 
-        // 獲取 base 路徑用於圖片 URL 補全
-        const base = import.meta.env.BASE_URL;
+            // 個人食譜：改為串接 myreipe_get.php，使用 userId 當參數，最多顯示四個
+            if (userId.value) {
+                try {
+                    const resMyRecipes = await phpApi.get(`personal/myrecipe_get.php`, { params: { user_id: userId.value } });
+                    // 假設回傳為陣列
+                    const myRecipesData = Array.isArray(resMyRecipes.data) ? resMyRecipes.data : [];
+                    personalRecipes.value = myRecipesData.slice(0, 4).map(recipe => ({
+                        id: recipe.recipe_id,
+                        recipe_name: recipe.recipe_title,
+                        image_url: recipe.recipe_image_url && recipe.recipe_image_url.startsWith('http')
+                            ? recipe.recipe_image_url
+                            : recipe.recipe_image_url
+                                ? parsePublicFile(recipe.recipe_image_url)
+                                : '',
+                        // 若有標籤資料可用 getRecipeTags，否則可略過
+                        // tags: recipe.tags || ['未分類'],
+                        author: {
+                            name: recipe.user_name || 'Recimo',
+                            likes: recipe.recipe_like_count || 0
+                        }
+                    }));
+                    totalPersonalCount.value = myRecipesData.length;
+                } catch (e) {
+                    console.log(e);
 
-        // 設置統計總數（模擬數據，實際應用中應從後端 API 獲取）
-        totalRecentCount.value = 15;
-        totalFavoriteCount.value = 23;
-        totalPersonalCount.value = 8;
-
-        // 最近觀看：載入前 4 筆食譜
-        recentRecipes.value = recipesData.slice(0, 4).map(recipe => ({
-            id: recipe.recipe_id,
-            recipe_name: recipe.recipe_title,
-            image_url: recipe.recipe_image_url.startsWith('http')
-                ? recipe.recipe_image_url
-                : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
-            tags: getRecipeTags(recipe.recipe_id, recipeTagData, tagMap),
-            author: {
-                name: 'Recimo',
-                likes: recipe.recipe_like_count || 0
+                    personalRecipes.value = [];
+                    totalPersonalCount.value = 0;
+                }
+            } else {
+                personalRecipes.value = [];
+                totalPersonalCount.value = 0;
             }
-        }));
 
-        // 我的收藏：載入第 5-8 筆食譜
-        favoriteRecipes.value = recipesData.slice(4, 8).map(recipe => ({
-            id: recipe.recipe_id,
-            recipe_name: recipe.recipe_title,
-            image_url: recipe.recipe_image_url.startsWith('http')
-                ? recipe.recipe_image_url
-                : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
-            tags: getRecipeTags(recipe.recipe_id, recipeTagData, tagMap),
-            author: {
-                name: 'Recimo',
-                likes: recipe.recipe_like_count || 0
-            }
-        }));
-
-        // 個人食譜：載入第 9-12 筆食譜
-        personalRecipes.value = recipesData.slice(8, 12).map(recipe => ({
-            id: recipe.recipe_id,
-            recipe_name: recipe.recipe_title,
-            image_url: recipe.recipe_image_url.startsWith('http')
-                ? recipe.recipe_image_url
-                : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
-            tags: getRecipeTags(recipe.recipe_id, recipeTagData, tagMap),
-            author: {
-                name: 'Recimo',
-                likes: recipe.recipe_like_count || 0
-            }
-        }));
-    } catch (error) {
-        console.error('載入資料失敗:', error);
+        } catch (e) {
+            console.error('解析 user 資料失敗:', e);
+            userId.value = null;
+        }
     }
+
 });
 </script>
 
@@ -280,7 +253,7 @@ onMounted(async () => {
 
 /* ==================== 區塊樣式 ==================== */
 .recipe-section {
-    // margin-bottom: 48px;
+    margin-bottom: 48px;
     position: relative;
 
     &:last-child {
