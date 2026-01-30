@@ -16,6 +16,19 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'delete-recipe']);
 
+// --- 🏆 核心修正：加入圖片位址邏輯 ---
+const fileUrl = import.meta.env.VITE_FILE_URL || 'http://localhost:8888/recimo_api/';
+
+const formatImg = (rawPath) => {
+    if (!rawPath) return 'https://placehold.co/800x600?text=No+Image';
+    if (rawPath.startsWith('http') || rawPath.startsWith('data:') || rawPath.startsWith('blob:')) {
+        return rawPath;
+    }
+    const base = fileUrl.endsWith('/') ? fileUrl : `${fileUrl}/`;
+    const cleanPath = rawPath.replace(/^\//, '');
+    return `${base}${cleanPath}`;
+};
+
 // 1. 取得原始份數 (防呆至少為 1)
 const originalServings = computed(() => {
     return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
@@ -39,13 +52,11 @@ const currentServings = ref(1);
 // 當燈箱開啟或食譜切換時，初始化 currentServings
 watch(() => props.modelValue, (isOpen) => {
     if (isOpen) {
-        // 你可以選擇預設顯示 1 份，或是預設顯示食譜原始份數
-        // 這裡建議預設 1，讓 NutritionCard 從 1 人份開始算比較直覺
         currentServings.value = 1;
     }
 });
 
-// 3. 核心：計算「每一份量」的基礎營養素 (供 NutritionCard 內部乘法使用)
+// 3. 核心：計算「每一份量」的基礎營養素
 const baseNutritionPerServing = computed(() => {
     if (!props.nutrition) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
 
@@ -63,7 +74,6 @@ const baseNutritionPerServing = computed(() => {
 // 4. 食材數據也要跟著 currentServings 連動
 const ingredientsData = computed(() => {
     const list = props.recipe?.ingredients || [];
-    // 計算縮放比例：(燈箱選擇的人份 / 原始食譜總人份)
     const scale = currentServings.value / originalServings.value;
 
     return list.map(item => ({
@@ -92,10 +102,14 @@ const introData = computed(() => {
 
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
+
+    // 🏆 修正封面圖路徑
+    const rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
+
     return {
         id: r.id || r.recipe_id,
         title: r.adapt_title || r.title || '新改編食譜',
-        image: r.adaptation_image_url || r.coverImg || 'https://placehold.co/800x600?text=No+Image',
+        image: formatImg(rawImg),
         description: r.clean_description || r.description || '暫無詳細說明',
         time: formattedTime,
         difficulty: r.difficulty || 1,
@@ -112,7 +126,8 @@ const stepsData = computed(() => {
         id: s.id || idx,
         title: s.step_title || s.title || `步驟 ${idx + 1}`,
         content: s.content || s.step_content || '',
-        image: s.image || s.step_image_url || '',
+        // 🏆 修正步驟圖路徑
+        image: formatImg(s.image || s.step_image_url || ''),
         time: s.time || ''
     }));
 });

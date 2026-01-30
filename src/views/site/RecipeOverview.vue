@@ -82,9 +82,7 @@ onMounted(async () => {
                 id: recipe.recipe_id,
                 recipe_name: recipe.recipe_title,
                 difficulty: recipe.recipe_difficulty,
-                image_url: recipe.recipe_image_url.startsWith('http')
-                    ? recipe.recipe_image_url
-                    : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
+                image_url: recipe.recipe_image_url,
                 tags: recipeTagsNames,
                 ingredient_ids: matchedIngredients,
                 nutritional_info: {

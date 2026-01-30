@@ -1,23 +1,52 @@
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, onMounted, watch, nextTick } from "vue"; // 🏆 加入 nextTick
+import { useRoute } from "vue-router";
+import { useAuthStore } from '@/stores/authStore';
 import CommentReportModal from './modals/CommentReportModal.vue';
 
 const props = defineProps({
-    // 這裡接收的是你 computed 處理過的 list (小寫 key)
     list: { type: Array, default: () => [] }
 });
 
+const emit = defineEmits(['post-comment', 'like-comment', 'delete-comment']);
+const route = useRoute();
+const authStore = useAuthStore();
+
 const userInput = ref("");
+const inputRef = ref(null); // 🏆 用於操控高度
 const isReportModalOpen = ref(false);
 const activeComment = ref({ content: '', userName: '', time: '' });
 const reportingIndex = ref(null);
 
-// --- 簡單的點讚邏輯 ---
-const localLikes = reactive({});
-
-const toggleLike = (index) => {
-    localLikes[index] = !localLikes[index];
+// 🚀 權限判斷
+const isOwner = (handle) => {
+    if (!handle) return false;
+    const userIdFromComment = Number(handle.replace('user_', ''));
+    const currentUserId = Number(authStore.user?.user_id || authStore.user?.id);
+    return userIdFromComment === currentUserId;
 };
+
+// 🚀 自動調整高度邏輯
+const autoResize = () => {
+    const el = inputRef.value;
+    if (!el) return;
+    el.style.height = '46px'; // 重設基準高度
+    el.style.height = el.scrollHeight + 'px'; // 撐開高度
+};
+
+// 點讚紀錄與持久化
+const clickedLikes = ref(new Set());
+const getStorageKey = () => `liked_comments_recipe_${route.params.id || 'common'}`;
+const loadLikedStatus = () => {
+    const saved = localStorage.getItem(getStorageKey());
+    if (saved) {
+        const likedArray = JSON.parse(saved);
+        clickedLikes.value = new Set(likedArray);
+    }
+};
+
+onMounted(() => { loadLikedStatus(); });
+watch(() => route.params.id, () => { loadLikedStatus(); });
 
 const getAvatarStyle = (name) => {
     const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
@@ -25,19 +54,27 @@ const getAvatarStyle = (name) => {
     return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
 };
 
-// 1. 宣告要傳出去的事件
-const emit = defineEmits(['post-comment']);
-
-// 2. 修改原本的發送邏輯
 const handleSend = () => {
-    // A. 防呆：若輸入內容為空或全是空白字元則不執行
     if (!userInput.value.trim()) return;
-
-    // B. 把資料傳給父組件，由父組件處理 rawComments 的 push 動作
     emit('post-comment', userInput.value);
-
-    // C. 成功發送後清空輸入框
     userInput.value = "";
+    // 🏆 送出後重設高度
+    nextTick(() => {
+        if (inputRef.value) inputRef.value.style.height = '46px';
+    });
+};
+
+const handleLikeClick = (commentId) => {
+    const id = Number(commentId);
+    if (clickedLikes.value.has(id)) {
+        clickedLikes.value.delete(id);
+        localStorage.setItem(getStorageKey(), JSON.stringify([...clickedLikes.value]));
+        emit('like-comment', id, 'dislike');
+    } else {
+        clickedLikes.value.add(id);
+        localStorage.setItem(getStorageKey(), JSON.stringify([...clickedLikes.value]));
+        emit('like-comment', id, 'like');
+    }
 };
 
 const openReport = (item, index) => {
@@ -52,8 +89,13 @@ const openReport = (item, index) => {
         <h2 class="section-title zh-h3">美味悄悄話</h2>
 
         <div class="input-container">
-            <input v-model="userInput" type="text" placeholder="分享你的想法..." class="styled-input"
-                @keyup.enter="handleSend" />
+            <textarea ref="inputRef" v-model="userInput" placeholder="分享你的想法..." class="styled-input" maxlength="200"
+                rows="1" @input="autoResize" @keydown.enter.exact.prevent="handleSend"></textarea>
+
+            <span class="char-counter" :class="{ 'limit': userInput.length >= 200 }">
+                {{ userInput.length }}/200
+            </span>
+
             <button class="send-icon-btn" :class="{ 'active': userInput.trim() }" @click="handleSend">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
@@ -63,7 +105,7 @@ const openReport = (item, index) => {
 
         <div class="comment-list">
             <template v-if="list && list.length > 0">
-                <div v-for="(item, index) in list" :key="item.time + item.content" class="comment-item">
+                <div v-for="(item, index) in list" :key="item.comment_id || index" class="comment-item">
                     <div class="user-avatar-text" :style="getAvatarStyle(item.userName)">
                         {{ item.userName ? item.userName.charAt(0).toUpperCase() : '?' }}
                     </div>
@@ -76,16 +118,23 @@ const openReport = (item, index) => {
                         <p class="comment-text p-p2">{{ item.content }}</p>
 
                         <div class="comment-footer">
-                            <button class="action-btn like-btn" :class="{ 'active': localLikes[index] }"
-                                @click="toggleLike(index)">
-                                <i-material-symbols-thumb-up-rounded v-if="localLikes[index]" class="action-icon" />
+                            <button class="action-btn like-btn"
+                                :class="{ 'active': clickedLikes.has(Number(item.comment_id)) }"
+                                @click="handleLikeClick(item.comment_id)">
+                                <i-material-symbols-thumb-up-rounded v-if="clickedLikes.has(Number(item.comment_id))"
+                                    class="action-icon" />
                                 <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
-                                <span class="count">{{ (item.likes || 0) + (localLikes[index] ? 1 : 0) }}</span>
+                                <span class="count">{{ item.likes || 0 }}</span>
                             </button>
 
-                            <button class="action-btn report-btn" :class="{ 'active': reportingIndex === index }"
-                                @click="openReport(item, index)">
-                                <i-material-symbols:error-outline-rounded class="action-icon" />
+                            <button v-if="!isOwner(item.handle)" class="action-btn report-btn"
+                                :class="{ 'active': reportingIndex === index }" @click="openReport(item, index)">
+                                <i-material-symbols-error-outline-rounded class="action-icon" />
+                            </button>
+
+                            <button v-if="isOwner(item.handle)" class="action-btn delete-btn"
+                                @click="emit('delete-comment', item.comment_id)">
+                                <i-material-symbols-delete-outline-rounded class="action-icon" />
                             </button>
                         </div>
                     </div>
@@ -120,31 +169,61 @@ const openReport = (item, index) => {
 .input-container {
     position: relative;
     display: flex;
-    align-items: center;
+    align-items: flex-end; // 🏆 讓按鈕靠底部
     margin-bottom: 32px;
 
     .styled-input {
-        width: 100%;
-        padding: 12px 50px 12px 16px;
-        border: 1.5px solid $primary-color-700;
-        border-radius: 12px;
-        font-size: 15px;
-        outline: none;
-        transition: all 0.2s;
-
-        &:focus {
-            border-color: $primary-color-800;
-            box-shadow: 0 0 0 3px rgba(74, 131, 96, 0.1);
+            width: 100%;
+            min-height: 46px;
+            max-height: 200px;
+            padding: 12px 95px 12px 16px; // 🏆 稍微增加右側內距，給計數器更多空間
+            border: 1.5px solid $primary-color-700;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+            resize: none;
+            line-height: 1.5;
+            font-family: inherit;
+    
+            /* 🏆 隱藏捲軸但保留捲動功能 (針對不同瀏覽器) */
+            scrollbar-width: none; // Firefox
+    
+            &::-webkit-scrollbar {
+                display: none; // Chrome, Safari, Edge
+            }
+    
+            &:focus {
+                border-color: $primary-color-800;
+                box-shadow: 0 0 0 3px rgba(74, 131, 96, 0.1);
+            }
         }
-    }
+    
+        /* 🏆 微調計數器位置，讓它跟發送按鈕保持一點距離 */
+        .char-counter {
+            position: absolute;
+            right: 52px; // 從 48px 微調到 52px
+            bottom: 12px;
+            font-size: 12px;
+            color: $neutral-color-400;
+            user-select: none; // 防止計數器文字被選取
+            background: $neutral-color-white; // 避免文字疊在捲軸位置時透過去
+    
+            &.limit {
+                color: $secondary-color-danger-700;
+            }
+        }
 
     .send-icon-btn {
         position: absolute;
         right: 15px;
+        bottom: 12px;
         background: none;
         border: none;
         cursor: pointer;
         color: $neutral-color-400;
+        display: flex;
+        align-items: center;
 
         &.active {
             color: $primary-color-700;
@@ -165,7 +244,7 @@ const openReport = (item, index) => {
     border-bottom: 1px solid $neutral-color-100;
 
     .user-avatar-text {
-        width: 44px; // 稍微放大一點點，視覺更平衡
+        width: 44px;
         height: 44px;
         border-radius: 50%;
         display: flex;
@@ -175,7 +254,6 @@ const openReport = (item, index) => {
         font-size: 16px;
         flex-shrink: 0;
         user-select: none;
-        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05); // 增加一點質感邊框
     }
 
     .comment-body {
@@ -200,11 +278,13 @@ const openReport = (item, index) => {
             color: $neutral-color-800;
             margin-bottom: 8px;
             font-size: 15px;
+            // 🏆 關鍵：讓留言能顯示換行並強制斷詞
+            white-space: pre-wrap;
+            word-break: break-all;
         }
     }
 }
 
-// 空白狀態樣式
 .empty-comment-state {
     display: flex;
     flex-direction: column;
@@ -221,23 +301,40 @@ const openReport = (item, index) => {
     }
 }
 
-// 按鈕樣式 (點讚、檢舉)
 .comment-footer {
     display: flex;
     justify-content: flex-end;
-    gap: 16px;
+    align-items: center;
+    gap: 8px;
 
     .action-btn {
         background: none;
         border: none;
         cursor: pointer;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         color: $neutral-color-700;
         transition: all 0.2s;
+        padding: 4px 8px;
+        height: 32px;
 
         .action-icon {
-            font-size: 18px;
+            font-size: 20px;
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .count {
+            margin-left: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            position: relative;
+            top: 1px;
         }
 
         &.like-btn:hover,
@@ -249,8 +346,14 @@ const openReport = (item, index) => {
             }
         }
 
-        &.report-btn:hover {
+        &.report-btn:hover,
+        &.active {
+            color: $accent-color-700;
+        }
+
+        &.delete-btn:hover {
             color: $secondary-color-danger-700;
+            transform: scale(1.1);
         }
     }
 }

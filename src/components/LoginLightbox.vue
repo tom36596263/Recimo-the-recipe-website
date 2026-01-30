@@ -20,6 +20,8 @@ import CaptchaInput from '@/components/login/CaptchaInput.vue'
 // 定義控制彈窗的變數
 const showLoginSuccess = ref(false);
 const showLoginFail = ref(false);
+const showRegisterSuccess = ref(false);
+const showRegisterFail = ref(false);
 
 // ==========================================
 // 登入.註冊前端驗證
@@ -178,12 +180,17 @@ const handleLogin = async () => {
       // 3. 登入成功
       authStore.login(foundUser);
 
+      // 立刻隱藏書本燈箱
+      isVisible.value = false;
       showLoginSuccess.value = true;
+
+      // 延遲後跳轉
       setTimeout(() => {
         showLoginSuccess.value = false;
+        emit('close');
         handleClose();
 
-        // --- 新增跳轉邏輯 ---
+        // 跳轉邏輯 ---
         // 檢查網址列有沒有存 redirect 參數，沒有的話就回首頁 '/'
         if (!authStore.pendingAction) {
           router.push('/');
@@ -237,7 +244,8 @@ const handleRegister = () => {
   const allRulesMet = Object.values(passwordRules.value).every(val => val === true);
 
   if (!allRulesMet) {
-    alert('密碼不符合規定，請重新檢查');
+    // alert('密碼不符合規定，請重新檢查');
+    showRegisterFail.value = true;
     return;
   }
 
@@ -245,16 +253,21 @@ const handleRegister = () => {
   const hasError = Object.values(registerMessage.value).some(msg => msg !== '');
 
   if (hasError) {
-    alert('請檢查輸入欄位是否正確');
+    // alert('請檢查輸入欄位是否正確');
+    showRegisterFail.value = true;
     return;
   }
 
   // 3. 執行註冊邏輯 (API 呼叫等)
   // console.log('註冊資料:', registerData.value);
-  alert('註冊成功!可請前往登入');
+  // alert('註冊成功!可請前往登入');
+  showRegisterSuccess.value = true;
 
   // 註冊完通常會直接幫使用者登入或跳轉到登入頁
-  goToLogin();
+  setTimeout(() => {
+    showRegisterSuccess.value = false;
+    goToLogin(); // 翻回登入頁
+  }, 2000);
 };
 
 // 補上重置註冊表單的函式
@@ -359,7 +372,8 @@ const passwordRules = computed(() => {
                           <a href="#" class="forgot-password-link">忘記密碼</a>
                         </template> -->
                   <template #suffix>
-                    <button type="button" @click="showLoginPassword = !showLoginPassword" class="icon-btn">
+                    <button type="button" @click="showLoginPassword = !showLoginPassword" class="icon-btn"
+                      tabindex="-1">
                       <IconEyeClose v-if="showLoginPassword" />
                       <IconEyeOpen v-else />
                     </button>
@@ -402,7 +416,8 @@ const passwordRules = computed(() => {
                   :message="registerMessage.password" @blur="touched.register.password = true"
                   @enter-press="focusInput(regConfirmPasswordRef)" class="tight-gap">
                   <template #suffix>
-                    <button type="button" @click="showRegisterPassword = !showRegisterPassword" class="icon-btn">
+                    <button type="button" @click="showRegisterPassword = !showRegisterPassword" class="icon-btn"
+                      tabindex="-1">
                       <IconEyeClose v-if="showRegisterPassword" />
                       <IconEyeOpen v-else />
                     </button>
@@ -478,17 +493,29 @@ const passwordRules = computed(() => {
         </div>
       </div>
     </div>
-    <BaseModal :isOpen="showLoginSuccess" type="success" iconClass="fa-solid fa-check" title="登入成功"
-      @close="showLoginSuccess = false" />
 
-    <BaseModal :isOpen="showLoginFail" type="danger" iconClass="fa-solid fa-exclamation" title="登入失敗"
-      @close="showLoginFail = false">
-      <template #actions>
-        <button class="btn-solid" @click="showLoginFail = false; resetLoginForm()">重新登入</button>
-        <!-- <button class="btn-outline" @click="/* 導向忘記密碼邏輯 */">忘記密碼</button> -->
-      </template>
-    </BaseModal>
   </div>
+  <BaseModal :isOpen="showLoginSuccess" type="success" iconClass="fa-solid fa-check" title="登入成功"
+    @close="showLoginSuccess = false" />
+
+  <BaseModal :isOpen="showLoginFail" type="danger" iconClass="fa-solid fa-exclamation" title="登入失敗"
+    @close="showLoginFail = false">
+    <template #actions>
+      <button class="btn-solid" @click="showLoginFail = false; resetLoginForm()">重新登入</button>
+      <!-- <button class="btn-outline" @click="/* 導向忘記密碼邏輯 */">忘記密碼</button> -->
+    </template>
+  </BaseModal>
+
+  <BaseModal :isOpen="showRegisterSuccess" type="success" iconClass="fa-solid fa-user-plus" title="註冊成功"
+    description="歡迎加入~將為您跳轉至登入畫面" @close="showRegisterSuccess = false">
+  </BaseModal>
+
+  <BaseModal :isOpen="showRegisterFail" type="danger" title="註冊資訊有誤" iconClass="fa-solid fa-exclamation"
+    description="請檢查欄位是否填寫正確，並符合密碼規定" @close="showRegisterFail = false">
+    <template #actions>
+      <button class="btn-solid" @click="showRegisterFail = false">返回檢查</button>
+    </template>
+  </BaseModal>
 </template>
 
 <style lang="scss" scoped>
