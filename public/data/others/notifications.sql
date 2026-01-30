@@ -1,5 +1,5 @@
 CREATE TABLE notifications (
-    notification_id INT NOT NULL PRIMARY KEY,
+    notification_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     notification_type VARCHAR(50) NOT NULL,
     notification_title VARCHAR(255) NOT NULL,
     notification_content VARCHAR(1000) NOT NULL,

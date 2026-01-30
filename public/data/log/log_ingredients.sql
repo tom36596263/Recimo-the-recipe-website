@@ -1,5 +1,5 @@
 CREATE TABLE log_ingredients (
-    log_ingredient_id INT NOT NULL PRIMARY KEY,
+    log_ingredient_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     cooking_log_id INT NOT NULL,
     ingredient_id INT NOT NULL,
     CONSTRAINT fk_log_ingredients_log FOREIGN KEY (cooking_log_id) REFERENCES cooking_logs(cooking_log_id),

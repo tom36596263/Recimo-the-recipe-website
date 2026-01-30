@@ -1,7 +1,7 @@
 -- 創建資料表
 CREATE TABLE meal_plan_template_items (
     item_id INT NOT NULL PRIMARY KEY,
-    template_id INT NOT NULL,
+    template_id INT NOT NULL AUTO_INCREMENT,
     recipe_id INT NOT NULL,
     day_number INT NOT NULL,
     meal_type TINYINT NOT NULL COMMENT '0:早餐, 1:午餐, 2:晚餐',

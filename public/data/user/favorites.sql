@@ -1,5 +1,5 @@
 CREATE TABLE favorites (
-    favorite_id INT NOT NULL PRIMARY KEY,
+    favorite_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     recipe_id INT NOT NULL,
     folder_id INT,
