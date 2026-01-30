@@ -2,6 +2,7 @@
 import { ref, defineProps, computed, defineEmits } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
 import BaseModal from '@/components/BaseModal.vue';
+import { publicApi, base } from '@/utils/publicApi';
 
 // 接收父元件傳過來的商品資料，item是資料傳送的「對口名稱」取的 (父子必須一致)，整段的意思是「各位父組件請注意！我是商品卡片，如果你要用我，請務必 (required) 給我一個物件型態 (Object) 的資料，並且請貼上 item 這個標籤交給我。」
 const props = defineProps({
@@ -67,17 +68,17 @@ const productImage = computed(() => {
         const coverImage = images.find(img => img.is_cover) || images[0];
 
         // 統一交給 getImageUrl 處理
-        return getImageUrl(coverImage.image_url);
+        return parsePublicFile(coverImage.image_url);
     }
 
     // 備用圖路徑同樣需經過 getImageUrl 或確保 base 拼接正確
-    return `${baseURL}images/default-placeholder.png`;
+    return `${base}images/default-placeholder.png`;
 });
 
 </script>
 <template>
     <router-link :to="`/mall/${item.product_id}`" class="product-card card-content">
-        <img :src="productImage" :alt="item.product_name">
+        <img :src="$parsePublicFile(item.product_image[0].image_url)" :alt="item.product_name">
 
         <div class="product-card__content">
             <h4 class="p-p1 product-card__title">{{ item.product_name }}</h4>

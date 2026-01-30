@@ -1,10 +1,12 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted, getCurrentInstance } from 'vue';
 import BaseBtn from '@/components/common/BaseBtn.vue'
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
+
+const { proxy } = getCurrentInstance(); // 取得全域方法代理
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -56,9 +58,23 @@ const handleLogout = () => {
     router.push('/');     // 跳轉回首頁
 };
 
-//購物車數量圓點
+// 購物車數量圓點
 const cartStore = useCartStore();
 const cartTotal = computed(() => cartStore.totalCount);
+
+// 暫時解決user img前多/的問題
+const userAvatar = computed(() => {
+    const url = authStore.user?.user_url;
+
+    // 1. 如果沒資料，顯示預設圖 (一樣要透過 proxy 呼叫全域函式)
+    if (!url) return proxy.$parsePublicFile('img/site/None_avatar.svg');
+
+    // 2. 處理路徑：如果 url 開頭有斜線，去掉它
+    const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+
+    // 3. 透過 proxy 呼叫全域方法
+    return proxy.$parsePublicFile(cleanUrl);
+});
 </script>
 <template>
     <nav class="site-nav" :class="{ 'nav--hidden': !isVisible }">
@@ -100,8 +116,8 @@ const cartTotal = computed(() => cartStore.totalCount);
                                     <template v-if="authStore.isLoggedIn">
                                         <span class="btn-text p-p1">我的廚房</span>
                                         <div class="user-avatar-min">
-                                            <img :src="authStore.user?.user_url || $parsePublicFile('/img/site/None_avatar.svg')"
-                                                alt="avatar">
+                                            <img :src="userAvatar" :alt="`${authStore.user?.user_name || 'User'}.img`"
+                                                @error="(e) => e.target.src = $parsePublicFile('img/site/None_avatar.svg')">
                                         </div>
                                     </template>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
+import { ref, onMounted, computed, watch, onUnmounted, getCurrentInstance } from 'vue';
 // import axios from 'axios';
 import { publicApi, base } from '@/utils/publicApi.js';
 import { defineStore } from 'pinia';
@@ -13,23 +13,14 @@ const { runWithAuth } = useAuthGuard();
 
 import { useRouter } from 'vue-router';
 const router = useRouter();
-// ==========================================
-// vue上課教：以後部屬比較不會有問題(資料放public的話)
-// ==========================================
-// const baseurl = import.meta.env.BASE_URL
 
+const { proxy } = getCurrentInstance();
 // ==========================================
 // 點小圖秀大圖
 // ==========================================
-const productImages = [
-  `${base}img/mall/PROD-001_01.jpg`,
-  `${base}img/mall/PROD-001_02.jpg`,
-  `${base}img/mall/PROD-001_03.jpg`
-];
-
 // 預設顯示第一張
-const mainImage = ref(productImages[0]);
-const activeImage = ref(productImages[0]);
+const mainImage = ref('');
+const activeImage = ref('');
 
 const changeImage = (imgSrc) => {
   mainImage.value = imgSrc;
@@ -44,8 +35,6 @@ const count = ref(1); // 預設數量是 1
 // ==========================================
 // 加入購物車
 // ==========================================
-// 按鈕動作定義 (避免 Template 報錯)
-
 const cartStore = useCartStore()
 
 //定義控制 Modal 顯示的變數
@@ -86,6 +75,13 @@ const productInfo = ref(null); // 儲存當前商品的所有資訊
 const isNotFound = ref(false); // 用來記錄是否找不到商品
 const { setDetailName } = useRouteName()
 
+// 定義一個 Script 內部可用的轉換函式
+const parseFile = (url) => {
+  if (!url) return '';
+  const cleanPath = url.replace(/^public\//, '').replace(/^\//, '');
+  return `${base}${cleanPath}`;
+};
+
 const fetchData = async () => {
   try {
     isNotFound.value = false; // 每次重新抓取前先重設
@@ -107,7 +103,7 @@ const fetchData = async () => {
       // 確保使用 item.product_image 並透過 getImageUrl 處理路徑
       if (item.product_image && item.product_image.length > 0) {
         // 取得第一張圖的路徑
-        const firstImg = getImageUrl(item.product_image[0].image_url);
+        const firstImg = proxy.$parsePublicFile(item.product_image[0].image_url);
         mainImage.value = firstImg;
         activeImage.value = firstImg;
       }
@@ -119,10 +115,10 @@ const fetchData = async () => {
 
       // console.log("成功找到商品：", item.product_name);
     } else {
-      productInfo.value = null; // 確保清空舊資料
+      // productInfo.value = null; // 確保清空舊資料
       isNotFound.value = true;
       document.title = `無此商品 | Recimo`;
-      console.warn("找不到該 ID 的商品資料");
+      // console.warn("找不到該 ID 的商品資料");
     }
   } catch (error) {
     isNotFound.value = true;
@@ -145,21 +141,6 @@ watch(
 onMounted(() => {
   fetchData();
 });
-
-// 新增一個處理路徑的 function
-// const getImageUrl = (url) => {
-//   if (!url) return '';
-//   const cleanPath = url.replace(/^public\//, '');
-//   // return `${base}${cleanPath}`;
-//   return `publicApi${cleanPath}`;
-// };
-const getImageUrl = (url) => {
-  if (!url) return '';
-  // 假設 JSON 裡的路徑是 "public/img/prod.jpg"
-  const cleanPath = url.replace(/^public\//, '');
-  // 修正：直接回傳相對路徑或加上基礎路徑
-  return `${base}${cleanPath}`;
-};
 
 // ==========================================
 // nav淡出商品圖往上滑一點 nav出現商品圖回復
@@ -198,16 +179,16 @@ onUnmounted(() => {
       <div class="col-7 col-md-12">
         <div class="product-gallery" :class="{ 'is-nav-hidden': isScrollingDown }">
           <div class="product-gallery__viewport">
-            <img :src="mainImage">
+            <img v-if="mainImage" :src="mainImage" :alt="productInfo.product_name">
           </div>
 
           <div class="row product-gallery__thumbs">
             <div v-for="(imgObj, index) in productInfo.product_image" :key="index"
               class="product-gallery__item col-3 col-sm-4">
               <div class="product-gallery__thumb"
-                :class="{ 'is-active': activeImage === getImageUrl(imgObj.image_url) }"
-                @click="changeImage(getImageUrl(imgObj.image_url))">
-                <img :src="getImageUrl(imgObj.image_url)" :alt="productInfo.product_name">
+                :class="{ 'is-active': activeImage === $parsePublicFile(imgObj.image_url) }"
+                @click="changeImage($parsePublicFile(imgObj.image_url))">
+                <img :src="$parsePublicFile(imgObj.image_url)" :alt="productInfo.product_name">
               </div>
             </div>
           </div>
