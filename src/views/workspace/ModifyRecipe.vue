@@ -174,20 +174,41 @@ async function loadRecipeData(recipeId) {
                 };
             });
 
-        // --- 3. 處理本地改編 (不變) ---
+        // --- 3. 處理本地改編 (修正破圖與詳細說明抓取) ---
         const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
         const localAdaptations = localRevisions
             .filter(r => Number(r.parent_recipe_id) === targetParentId)
-            .map(r => ({
-                ...r,
-                id: r.id || `local-${Date.now()}`,
-                title: r.title || '未命名改編',
-                summary: r.description || '暫無改編心得',
-                coverImg: parsePublicFile(r.coverImg || r.image),
-                is_mine: true,
-                recipe_servings: Number(r.servings || 1),
-                steps: r.steps || []
-            }));
+            .map(r => {
+                // 🚀 關鍵修正：判斷圖片是否為 Base64 (data: 開頭)
+                const rawImg = r.coverImg || r.image;
+                const isBase64 = rawImg && rawImg.startsWith('data:');
+
+                // 如果是 Base64 就直接回傳，不是才進 parsePublicFile
+                const safeCover = isBase64 ? rawImg : parsePublicFile(rawImg);
+
+                // 步驟圖片也要同步檢查
+                const safeSteps = (r.steps || []).map(step => ({
+                    ...step,
+                    step_image_url: (step.step_image_url && step.step_image_url.startsWith('data:'))
+                        ? step.step_image_url
+                        : parsePublicFile(step.step_image_url)
+                }));
+
+                return {
+                    ...r,
+                    id: r.id || `local-${Date.now()}`,
+                    title: r.title || '未命名改編',
+
+                    // 🎯 讓本地資料的心得與燈箱內容一致
+                    summary: r.description || '暫無改編心得',
+                    description: r.description || '暫無詳細說明',
+
+                    coverImg: safeCover,
+                    is_mine: true,
+                    recipe_servings: Number(r.servings || 1),
+                    steps: safeSteps
+                };
+            });
 
         variantItems.value = [...localAdaptations, ...jsonAdaptations];
 

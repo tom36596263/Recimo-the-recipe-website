@@ -95,13 +95,15 @@ const introData = computed(() => {
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
 
-    // 🏆 修正封面圖：改用 parsePublicFile
+    // 🚀 關鍵修正：判斷封面圖是否為 Base64
     const rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
+    const isBase64 = rawImg && rawImg.startsWith('data:');
+    const finalImage = isBase64 ? rawImg : parsePublicFile(rawImg);
 
     return {
         id: r.id || r.recipe_id,
         title: r.adapt_title || r.title || '新改編食譜',
-        image: parsePublicFile(rawImg),
+        image: finalImage, // 使用判斷後的安全路徑
         description: r.clean_description || r.description || '暫無詳細說明',
         time: formattedTime,
         difficulty: r.difficulty || 1,
@@ -114,15 +116,22 @@ const introData = computed(() => {
 
 const stepsData = computed(() => {
     const steps = props.recipe?.steps || [];
-    return steps.map((s, idx) => ({
-        id: s.id || idx,
-        title: s.step_title || s.title || `步驟 ${idx + 1}`,
-        content: s.content || s.step_content || '',
-        // 🏆 修正步驟圖：改用 parsePublicFile
-        image: parsePublicFile(s.image || s.step_image_url || ''),
-        time: s.time || ''
-    }));
+    return steps.map((s, idx) => {
+        // 🚀 關鍵修正：判斷步驟圖是否為 Base64
+        const stepImg = s.image || s.step_image_url || '';
+        const isStepBase64 = stepImg && stepImg.startsWith('data:');
+        const finalStepImage = isStepBase64 ? stepImg : parsePublicFile(stepImg);
+
+        return {
+            id: s.id || idx,
+            title: s.step_title || s.title || `步驟 ${idx + 1}`,
+            content: s.content || s.step_content || '',
+            image: finalStepImage, // 使用判斷後的安全路徑
+            time: s.time || ''
+        };
+    });
 });
+
 </script>
 
 <template>

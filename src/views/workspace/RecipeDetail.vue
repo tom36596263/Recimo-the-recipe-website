@@ -25,8 +25,6 @@ const router = useRouter();
 const recipeStore = useRecipeStore();
 const authStore = useAuthStore();
 
-// 🏆 2. 移除原本手寫的 formatImg 邏輯，改由 parsePublicFile 統一處理
-
 // --- 1. 響應式資料狀態 ---
 const rawRecipe = ref(null);
 const rawIngredients = ref([]);
@@ -34,7 +32,7 @@ const rawSteps = ref([]);
 const rawComments = ref([]);
 const rawGallery = ref([]);
 const rawUsers = ref([]);
-const servings = ref(1);
+const servings = ref(1); // 這裡預設 1，fetchData 後會更新
 const isLoading = ref(true);
 
 const isLiked = ref(false);
@@ -55,7 +53,7 @@ const fetchData = async () => {
     const recipeId = Number(route.params.id);
 
     try {
-        // 抓取 JSON 靜態資料 (使用 publicApi)
+        // 抓取 JSON 靜態資料
         const [resR, resRecipeIng, resIngMaster, resS, resG, resU] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_ingredient.json'),
@@ -75,7 +73,11 @@ const fetchData = async () => {
             return;
         }
 
-        // 🏆 3. 抓取 PHP 留言資料 (符合規範使用 phpApi)
+        // ✨ 修正：顯示份數初始化為食譜原始份數
+        const defaultServings = Number(rawRecipe.value.recipe_servings || rawRecipe.value.RECIPE_SERVINGS || 1);
+        servings.value = defaultServings;
+
+        // 🏆 3. 抓取 PHP 留言資料
         try {
             const resC = await phpApi.get(`${COMMENT_PHP_URL}?recipe_id=${recipeId}`);
             rawComments.value = Array.isArray(resC.data) ? resC.data : [];
@@ -121,7 +123,7 @@ const fetchData = async () => {
     }
 };
 
-// --- 3. 計算屬性 (4. 這裡將 formatImg 全面替換為 parsePublicFile) ---
+// --- 3. 計算屬性 ---
 const recipeIntroData = computed(() => {
     if (!rawRecipe.value) return null;
     const rawImg = rawRecipe.value.recipe_image_url || rawRecipe.value.coverImg || rawRecipe.value.recipe_cover_image || '';
@@ -141,7 +143,7 @@ const stepsData = computed(() => {
         id: s.step_id || s.id || s.STEP_ID || `s-${index}`,
         title: s.step_title || s.title || s.STEP_TITLE || `步驟 ${index + 1}`,
         content: s.step_content || s.content || s.text || s.STEP_CONTENT || '',
-        image: parsePublicFile(s.step_image_url || s.image || s.img || s.STEP_IMAGE_URL || ''), // 🏆 替換
+        image: parsePublicFile(s.step_image_url || s.image || s.img || s.STEP_IMAGE_URL || ''),
         time: s.step_total_time || s.time || s.STEP_TOTAL_TIME || '',
         tags: s.tags || []
     }));
@@ -158,7 +160,6 @@ const commentList = computed(() => {
             handle: `user_${userId}`,
             time: c.COMMENT_AT || c.comment_at || '剛剛',
             content: c.COMMENT_TEXT || c.comment_text || '',
-            // 🏆 替換，並保留預設頭像邏輯
             avatar: rawAvatar ? parsePublicFile(rawAvatar) : `https://i.pravatar.cc/150?u=${userId}`,
             likes: Number(c.LIKE_COUNT || c.like_count || 0)
         };
@@ -170,7 +171,7 @@ const snapsData = computed(() => {
         const userId = Number(g.USER_ID || g.user_id);
         const user = rawUsers.value.find(u => Number(u.USER_ID || u.user_id || u.id) === userId);
         return {
-            url: parsePublicFile(g.GALLERY_URL || g.url || g.gallery_url || ''), // 🏆 替換
+            url: parsePublicFile(g.GALLERY_URL || g.url || g.gallery_url || ''),
             comment: g.GALLERY_TEXT || g.comment || g.gallery_text || '',
             userId,
             userName: user?.USER_NAME || user?.user_name || user?.name || `用戶ID:${userId}`,
@@ -215,8 +216,7 @@ const nutritionWrapper = computed(() => {
     }];
 });
 
-// --- 4. 互動函式 (符合規範使用 phpApi) ---
-
+// --- 4. 互動函式 ---
 const handlePostComment = async (text) => {
     if (!text.trim()) return;
     const payload = {
@@ -225,7 +225,6 @@ const handlePostComment = async (text) => {
         user_id: authStore.user?.user_id || authStore.user?.id || 1,
         content: text.trim()
     };
-
     try {
         const res = await phpApi.post(COMMENT_PHP_URL, payload);
         if (res.data.success) {
