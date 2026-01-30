@@ -96,12 +96,18 @@ const fetchData = async () => {
         rawIngredients.value = filteredLinks.map(link => {
             const master = masterIng.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
 
-            // --- 強制轉型關鍵區塊 ---
-            // 確保連 amount 也要轉數字，這是最常出錯的地方
+            // 1. 取得數量與單位名稱
             const amount = parseFloat(link.amount || 0);
-            const unitWeight = parseFloat(link.gram_conversion || master?.gram_conversion || master?.unit_weight || 1);
+            const unitName = link.unit_name || master?.unit_name || '';
 
-            // 營養數值：如果 master 沒資料就給 0，並確保絕對是 Number
+            // 2. 判斷邏輯：如果單位是「克」，轉換率就當作 1，否則才去抓 master 的換算值
+            // 這樣如果是 "125 克" 會變成 125 * 1；如果是 "1 顆" 會變成 1 * 125
+            const isGram = unitName === '克' || unitName === 'g';
+            const unitWeight = isGram
+                ? 1
+                : parseFloat(link.gram_conversion || master?.gram_conversion || master?.unit_weight || 1);
+
+            // 營養數值
             const kcal = parseFloat(master?.kcal_per_100g || link.kcal_per_100g || 0);
             const protein = parseFloat(master?.protein_per_100g || link.protein_per_100g || 0);
             const fat = parseFloat(master?.fat_per_100g || link.fat_per_100g || 0);
@@ -109,14 +115,14 @@ const fetchData = async () => {
 
             return {
                 ...link,
-                amount: amount, // 重要：轉為數字
+                amount: amount,
                 ingredient_name: master?.ingredient_name || link.ingredient_name || '未知食材',
-                gram_conversion: unitWeight,
+                gram_conversion: unitWeight, // 🏆 這裡會根據單位自動修正
                 kcal_per_100g: kcal,
                 protein_per_100g: protein,
                 fat_per_100g: fat,
                 carbs_per_100g: carbs,
-                unit_name: link.unit_name || master?.unit_name || '份'
+                unit_name: unitName || '份'
             };
         });
 
