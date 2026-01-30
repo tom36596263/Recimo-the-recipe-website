@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, computed } from 'vue';
+import { ref, defineProps, computed, getCurrentInstance } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
 import BaseModal from '@/components/BaseModal.vue';
 
@@ -16,6 +16,7 @@ const props = defineProps({
 });
 
 const baseURL = import.meta.env.BASE_URL;
+const { proxy } = getCurrentInstance();
 const cartStore = useCartStore();
 
 
@@ -44,14 +45,6 @@ const handleDecrement = () => {
     }
 };
 
-// 刪除商品
-// const handleRemove = () => {
-//     const id = props.item.id || props.item.product_id;
-//     const name = props.item.product_name || props.item.name;
-//     if (confirm(`確定要從購物車中移除「${name}」嗎？`)) {
-//         cartStore.removeItem(id);
-//     }
-// };
 const handleRemove = () => {
     // 不再使用 confirm()，改為打開自定義 Modal
     showDeleteModal.value = true;
@@ -74,35 +67,34 @@ const subtotal = computed(() => {
 // ==========================================
 // 圖片路徑處理
 // ==========================================
+const parseFile = (url) => {
+    if (!url) return '';
+    // 移除 public/ 前綴並結合 baseURL (或是您的 base)
+    const cleanPath = url.replace(/^public\//, '').replace(/^\//, '');
+    return `${import.meta.env.BASE_URL}${cleanPath}`;
+};
+
 const productImage = computed(() => {
     const images = props.item.product_image;
 
+    // 如果是陣列，找封面圖或第一張
     if (Array.isArray(images) && images.length > 0) {
         const coverImage = images.find(img => img.is_cover) || images[0];
-        let path = coverImage.image_url;
-
-        if (path.startsWith('public/')) {
-            path = path.replace('public/', '');
-        }
-
-        const cleanBaseURL = baseURL.endsWith('/') ? baseURL : `${baseURL}/`;
-        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-        return `${cleanBaseURL}${cleanPath}`;
+        return proxy.$parsePublicFile(coverImage.image_url);
     }
 
-    // 如果傳進來的是單一字串路徑 (相容舊格式)
-    if (typeof props.item.product_image === 'string') {
-        return props.item.product_image;
+    if (typeof images === 'string') {
+        return proxy.$parsePublicFile(images);
     }
 
-    return `${baseURL}images/default-placeholder.png`;
+    return `${import.meta.env.BASE_URL}images/default-placeholder.png`;
 });
 </script>
 
 <template>
     <div class="product-card">
         <router-link :to="`/mall/${item.id || item.product_id}`" class="image-wrapper">
-            <img :src="productImage" :alt="item.product_name || item.name" />
+            <img :src="productImage" :alt="item.product_name || item.name || '商品圖片'" />
         </router-link>
 
         <div class="content">
