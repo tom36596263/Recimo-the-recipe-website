@@ -313,10 +313,12 @@ const openReport = (item, index) => {
         cursor: pointer;
         display: inline-flex;
         align-items: center;
+        justify-content: flex-start;
         color: $neutral-color-700;
         transition: all 0.2s;
         padding: 4px 8px;
         height: 32px;
+        min-width: 48px;
 
         .action-icon {
             font-size: 20px;
@@ -324,17 +326,17 @@ const openReport = (item, index) => {
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
+            flex-shrink: 0; 
+            margin-right: 4px; 
         }
 
         .count {
-            margin-left: 4px;
             font-size: 14px;
             font-weight: 500;
             font-variant-numeric: tabular-nums;
             line-height: 1;
-            position: relative;
-            top: 1px;
+            text-align: left;
+            min-width: 14px;
         }
 
         &.like-btn:hover,
