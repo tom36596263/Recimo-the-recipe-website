@@ -192,7 +192,7 @@ const recipeIntroData = computed(() => {
         image: getSmartImageUrl(r.recipe_image_url),
         time: formatTime(r.recipe_total_time),
         difficulty: r.recipe_difficulty || 1,
-        description: r.recipe_description || '暫無簡介'
+        description: r.recipe_descreption || r.recipe_description || '暫無簡介'
     };
 });
 
