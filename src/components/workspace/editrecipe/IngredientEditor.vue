@@ -66,13 +66,11 @@ const removeItem = (id) => {
                 <div class="input-row main-row">
                     <input v-model="ing.name" type="text" class="custom-input name-field p-p1" placeholder="食材名稱"
                         :readonly="!isEditing || ing.fromDB" />
-                </div>
 
-                <div class="input-row split-row">
-                    <div class="amount-group p-p2">
+                    <div class="amount-group p-p3">
                         <div class="amount-input-wrapper">
                             <input v-model="ing.amount" type="text" inputmode="decimal"
-                                class="custom-input amount-field p-p2" :class="{ 'error-shake': ing.isInvalid }"
+                                class="custom-input amount-field p-p3" :class="{ 'error-shake': ing.isInvalid }"
                                 placeholder="分量" :readonly="!isEditing" @input="validateAmount(ing)" />
                             <span v-if="ing.isInvalid" class="number-hint">僅限數字</span>
                         </div>
@@ -102,6 +100,7 @@ const removeItem = (id) => {
 </template>
 
 <style lang="scss" scoped>
+@import "@/assets/scss/abstracts/_color.scss";
 
 .ingredient-editor-container {
     width: 100%;
@@ -114,7 +113,7 @@ const removeItem = (id) => {
     .header-title {
         color: $primary-color-800;
         padding-bottom: 12px;
-        border-bottom: 1.5px solid $primary-color-400;
+        border-bottom: 2px solid $primary-color-400;
         margin: 0;
     }
 }
@@ -122,32 +121,45 @@ const removeItem = (id) => {
 .ingredient-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-}
-
-.name-field {
-    pointer-events: none;
+    gap: 16px;
 }
 
 .ingredient-item {
     position: relative;
     background: $neutral-color-white;
-    border: 0.5px solid $neutral-color-400;
+    border: 1px solid $neutral-color-400;
     border-radius: 12px;
-    padding: 12px 16px;
-    transition: all 0.2s ease;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+
+    // ✨ 左側裝飾條：增加專業感
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+        background: $primary-color-700;
+        opacity: 0.7;
+    }
 
     &:hover {
-        border-color: $primary-color-400;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        border-color: $primary-color-700;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     &.is-view {
-        border-color: transparent;
         background: $primary-color-100;
-        padding: 8px 12px;
+        border-color: transparent;
+
+        &::before {
+            background: $neutral-color-400;
+        }
     }
 
+    // ❌ 叉叉按鈕：維持妳原本的純粹設計
     .remove-btn {
         position: absolute;
         top: 10px;
@@ -157,6 +169,7 @@ const removeItem = (id) => {
         color: $secondary-color-danger-400;
         cursor: pointer;
         z-index: 2;
+        font-size: 16px; // 稍微調整大小方便點擊
 
         &:hover {
             color: $secondary-color-danger-700;
@@ -165,14 +178,9 @@ const removeItem = (id) => {
 }
 
 .input-row {
-    border-bottom: 1px solid $neutral-color-100;
-    padding: 6px 0;
+    padding: 4px 0;
     display: flex;
     align-items: center;
-
-    &:last-child {
-        border-bottom: none;
-    }
 
     .custom-input {
         border: none;
@@ -180,83 +188,96 @@ const removeItem = (id) => {
         background: transparent;
         color: $neutral-color-800;
         width: 100%;
-        padding: 4px 0;
 
         &::placeholder {
             color: $neutral-color-400;
         }
-
-        &:read-only {
-            color: $neutral-color-black;
-            cursor: default;
-            pointer-events: none; // 讓 readonly 無法點擊
-        }
     }
 }
 
-.note-row {
-    align-items: flex-start;
-    padding-top: 8px;
-
-    .note-field {
-        color: $neutral-color-700 !important;
-        resize: none;
-        height: 52px;
-        line-height: 1.4;
-        font-family: inherit;
-        overflow: hidden;
-        word-break: break-all;
-    }
+// 食材標題
+.name-field {
+    font-weight: bold;
+    font-size: 1.1rem !important;
+    color: $neutral-color-800 !important;
 }
 
 .amount-group {
     display: flex;
     align-items: center;
-    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 8px 0;
 
     .amount-input-wrapper {
         flex: 1;
-        position: relative;
+        max-width: 300px;
+        width: auto;
 
         .amount-field {
-            border-bottom: 1px solid transparent;
+            font-weight: 500;
+            font-size: 0.8rem;
+            border-bottom: 1.5px solid $neutral-color-100;
+
+            &::placeholder {
+                font-size: 0.9rem;
+                color: $neutral-color-400;
+            }
 
             &:focus {
                 border-bottom-color: $primary-color-400;
             }
         }
-
-        .number-hint {
-            position: absolute;
-            left: 0;
-            bottom: -12px;
-            font-size: 10px;
-            color: $secondary-color-danger-400;
-            pointer-events: none;
-        }
     }
 
+
     .unit-box {
+        padding: 4px 12px;
         display: flex;
         align-items: center;
-        white-space: nowrap;
         color: $neutral-color-700;
-        margin-left: 12px;
+        font-size: 14px;
+        white-space: nowrap;
+
+        .label {
+            margin-right: 2px;
+        }
 
         .unit-field {
-            width: 50px;
-            text-align: left;
-            border-bottom: 1px dashed $neutral-color-100;
-
-            &:read-only {
-                border-bottom: none !important;
-            }
+            width: 40px;
+            font-weight: 600;
+            color: $neutral-color-800;
         }
     }
 }
 
+// 備註區域
+.note-row {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: $neutral-color-100;
+    border-radius: 8px;
+    border-top: none;
+
+    .note-field {
+        color: $neutral-color-700 !important;
+        font-size: 14px !important;
+        line-height: 1.5;
+        resize: none;
+        min-height: 40px;
+        padding: 0;
+
+        &::placeholder {
+            color: $neutral-color-400;
+        }
+    }
+}
+
+
+
+// 錯誤動畫
 .error-shake {
-    color: $secondary-color-danger-400 !important;
+    color: $secondary-color-danger-700 !important;
     animation: shake 0.4s ease-in-out;
 }
 
@@ -276,22 +297,24 @@ const removeItem = (id) => {
     }
 }
 
+// 新增按鈕 
 .add-action-wrapper {
-    margin-top: 20px;
+    margin-top: 24px;
 
     .add-ingredient-btn {
         width: 100%;
-        height: 44px;
+        height: 48px;
         background: $neutral-color-white;
-        border: 1.5px solid $primary-color-400;
-        border-radius: 10px;
-        color: $primary-color-800;
+        border: 1px solid $primary-color-400;
+        border-radius: 12px;
+        color: $primary-color-700;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
 
         &:hover {
             background: $primary-color-100;
-            transform: translateY(-1px);
+            color: $primary-color-800;
+            border-color: $primary-color-700;
         }
     }
 }

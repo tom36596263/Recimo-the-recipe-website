@@ -189,8 +189,7 @@ const stepsData = computed(() => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-
-
+// --- 原有 Modal 核心樣式保持不變 ---
 .adaptation-modal-overlay {
     position: fixed;
     top: 0;
@@ -268,13 +267,16 @@ const stepsData = computed(() => {
     }
 }
 
+// --- 調整 RWD 佈局邏輯 ---
 .main-content-row {
     @media (max-width: 768px) {
         display: flex;
         flex-direction: column;
 
         .content-left {
-            display: contents;
+            display: flex;
+            flex-direction: column;
+            padding-right: 0; // 行動版取消右邊距
         }
 
         .intro-section {
@@ -284,15 +286,32 @@ const stepsData = computed(() => {
 
         .sidebar-right {
             order: 2;
-            margin-bottom: 32px;
+            margin-bottom: 40px;
         }
 
         .steps-section {
             order: 3;
+
+            // 🚀 關鍵優化：強制內部的 Step 項目在行動版寬度全滿
+            :deep(.step-item) {
+                flex-direction: column !important;
+                gap: 16px;
+
+                .step-image {
+                    width: 100% !important;
+                    height: 200px !important;
+                    margin: 0 0 16px 0 !important;
+                }
+
+                .step-content {
+                    width: 100% !important;
+                }
+            }
         }
     }
 }
 
+// --- 標題與用戶資訊 ---
 .modal-title-bar {
     display: flex;
     align-items: center;
@@ -384,48 +403,13 @@ const stepsData = computed(() => {
 .sticky-sidebar {
     position: sticky;
     top: 0;
-
-    .ingredients-wrapper {
-        margin-top: 30px;
-        // background: $primary-color-100;
-        padding: 24px;
-        border-radius: 20px;
-        // border: 1px solid rgba($primary-color-400, 0.2);
-    }
-
-    .sidebar-title {
-        padding-left: 10px;
-    }
-}
-
-.nutrition-section {
-    background: white;
-    padding: 24px;
-    border-radius: 20px;
-    border: 1px solid $neutral-color-100;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .content-left {
     padding-right: 32px;
 }
 
-.color-p4 {
-    color: $neutral-color-400;
-}
-
-.mt-12 {
-    margin-top: 12px;
-}
-
-.text-center {
-    text-align: center;
-}
-
-.mr-8 {
-    margin-right: 8px;
-}
-
+// --- 通用間距與動畫 ---
 .mb-16 {
     margin-bottom: 16px;
 }
@@ -436,6 +420,10 @@ const stepsData = computed(() => {
 
 .mb-32 {
     margin-bottom: 32px;
+}
+
+.mr-8 {
+    margin-right: 8px;
 }
 
 .modal-fade-enter-active {
@@ -450,21 +438,5 @@ const stepsData = computed(() => {
 .modal-fade-leave-to {
     opacity: 0;
     transform: translateY(20px);
-}
-
-.fade-in {
-    animation: fadeIn 0.6s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 </style>

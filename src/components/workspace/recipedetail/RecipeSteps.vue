@@ -57,9 +57,8 @@ const props = defineProps({
 <style lang="scss" scoped>
 @import "@/assets/scss/abstracts/_color.scss";
 
-
 .zh-h3 {
-  padding-top: 20px; 
+  padding-top: 20px;
   padding-bottom: 20px;
 }
 
@@ -74,9 +73,15 @@ const props = defineProps({
   display: flex;
   gap: 20px;
   height: auto;
-  align-items: flex-start; 
-}
+  align-items: flex-start;
 
+  // 🚀 加入 RWD 邏輯
+  @media screen and (max-width: 768px) {
+    flex-direction: column; // 寬度不夠時，改為垂直排列 (圖上文下)
+    align-items: stretch; // 讓內容填滿寬度
+    gap: 16px;
+  }
+}
 
 .step-image {
   width: 140px;
@@ -84,6 +89,12 @@ const props = defineProps({
   flex-shrink: 0;
   overflow: hidden;
   border-radius: 10px;
+
+  // 🚀 加入 RWD 邏輯：手機版圖片改為滿寬，高度固定或自適應
+  @media screen and (max-width: 768px) {
+    width: 100%; // 寬度變 100%
+    height: 200px; // 手機版給它大一點的展示空間
+  }
 
   img {
     width: 100%;
@@ -94,9 +105,9 @@ const props = defineProps({
     display: block;
 
     &:hover {
-        transform: scale(1.15);
-        cursor: zoom-in; 
-      }
+      transform: scale(1.15);
+      cursor: zoom-in;
+    }
   }
 }
 
@@ -104,7 +115,7 @@ const props = defineProps({
   width: 100%;
   height: 100%;
   border-radius: 10px;
-  border: 2px dashed $neutral-color-400; 
+  border: 2px dashed $neutral-color-400;
   background-color: $neutral-color-100;
   display: flex;
   justify-content: center;
@@ -120,15 +131,15 @@ const props = defineProps({
   flex: 1;
   display: flex;
   flex-direction: column;
-  
+
   p {
     margin-top: 12px;
     line-height: 1.8;
     margin-bottom: 0;
 
-    white-space: pre-wrap; 
-    word-break: break-all; 
-    overflow-wrap: break-word; 
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
   }
 }
 
@@ -155,6 +166,7 @@ const props = defineProps({
     line-height: 1;
     text-transform: uppercase;
   }
+
   .index {
     font-weight: bold;
     line-height: 1.1;

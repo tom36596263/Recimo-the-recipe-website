@@ -63,14 +63,18 @@ const setDifficulty = (val) => {
   if (props.isEditing) updateField('difficulty', val);
 };
 
-// 自動計算步驟總時間
+// --- EditorHeader.vue ---
+
+// 1. 修改自動計算屬性 (確保它是即時的)
 const autoTotalTime = computed(() => {
-  if (!props.modelValue.steps) return 0;
+  if (!props.modelValue.steps || props.modelValue.steps.length === 0) return 0;
   return props.modelValue.steps.reduce((sum, step) => sum + (Number(step.time) || 0), 0);
 });
 
+// 2. 修改顯示邏輯：如果是在編輯模式且使用者還沒手動輸入(或是0)，就顯示自動加總
 const displayTime = computed(() => {
   const manualTime = Number(props.modelValue.totalTime);
+  // 如果 manualTime 為 0 且有步驟時間，則顯示 autoTotalTime
   return manualTime > 0 ? manualTime : autoTotalTime.value;
 });
 
@@ -102,16 +106,16 @@ const adaptRecipeData = computed(() => {
   };
 });
 
-watch(
-  () => props.modelValue.steps,
-  (newSteps) => {
-    const newSum = newSteps?.reduce((sum, s) => sum + (Number(s.time) || 0), 0) || 0;
-    if (!props.modelValue.totalTime || props.modelValue.totalTime == 0) {
-      updateField('totalTime', newSum);
-    }
-  },
-  { deep: true }
-);
+// watch(
+//   () => props.modelValue.steps,
+//   (newSteps) => {
+//     const newSum = newSteps?.reduce((sum, s) => sum + (Number(s.time) || 0), 0) || 0;
+//     if (!props.modelValue.totalTime || props.modelValue.totalTime == 0) {
+//       updateField('totalTime', newSum);
+//     }
+//   },
+//   { deep: true }
+// );
 
 const handleCoverUpload = (e) => {
   const file = e.target.files[0];
@@ -184,8 +188,11 @@ const handleCoverUpload = (e) => {
             <input type="number" class="inline-input" :value="modelValue.totalTime"
               @input="updateField('totalTime', Number($event.target.value))" :placeholder="autoTotalTime" />
             <span class="unit">分鐘</span>
+            <small v-if="modelValue.totalTime == 0 && autoTotalTime > 0" style="color: #999; margin-left: 4px;">
+              (自動加總: {{ autoTotalTime }})
+            </small>
           </template>
-          <span v-else class="value">{{ modelValue.totalTime || autoTotalTime }} 分鐘</span>
+          <span v-else class="value">{{ displayTime }} 分鐘</span>
         </div>
 
         <div class="meta-item">
