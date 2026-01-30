@@ -493,9 +493,7 @@ const backcart = () => {
             <div class="order-list">
               <CheckCard v-for="item in orderItems" :key="item.id || item.product_id"
                 :product-name="item.product_name || item.name" :quantity="item.count || item.quantity"
-                :price="item.product_price || item.price" :image="item.product_image?.[0]?.image_url
-                  ? item.product_image[0].image_url.replace('public', '')
-                  : '/default.png'" />
+                :price="item.product_price || item.price" :image="item.image_url || item.PRODUCT_IMAGE || ''" />
             </div>
           </div>
         </div>
