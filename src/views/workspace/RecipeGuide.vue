@@ -2,10 +2,10 @@
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { publicApi } from '@/utils/publicApi';
-import GuideStepCard from '../../components/workspace/recipeguide/GuideStepCard.vue';
-import StepContentCard from '../../components/workspace/recipeguide/StepContentCard.vue';
-import AllIngredientsModal from '../../components/workspace/recipeguide/modals/AllIngredientsModal.vue';
-import CompleteStepCard from '../../components/workspace/recipeguide/CompleteStepCard.vue';
+import GuideStepCard from '@/components/workspace/recipeguide/GuideStepCard.vue';
+import StepContentCard from '@/components/workspace/recipeguide/StepContentCard.vue';
+import AllIngredientsModal from '@/components/workspace/recipeguide/modals/AllIngredientsModal.vue';
+import CompleteStepCard from '@/components/workspace/recipeguide/CompleteStepCard.vue';
 
 const route = useRoute();
 const recipeId = computed(() => Number(route.params.id));
