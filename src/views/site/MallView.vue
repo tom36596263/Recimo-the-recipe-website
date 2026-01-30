@@ -2,8 +2,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import card from '@/components/mall/ProductCard.vue';
 import axios from 'axios';
-// import { publicApi } from '@/utils/publicApi';
-import { phpApi } from '@/utils/publicApi';
+import { publicApi } from '@/utils/publicApi';
 import { useRouter, useRoute } from 'vue-router';
 import PageBtn from '@/components/common/PageBtn.vue'
 import { useAuthStore } from '@/stores/authStore';
@@ -53,7 +52,6 @@ const currentPage = ref(1); // 目前在第幾頁
 const pageSize = 8; // 一頁顯示幾筆 (4欄 x 2排 = 8筆)
 const router = useRouter();
 const route = useRoute();
-const isLoading = ref(false);
 
 //進入商品詳情
 const goToDetail = (id) => {
@@ -107,18 +105,21 @@ const randomProducts = computed(() => {
 });
 
 // --- 事件處理 ---
-const fetchData = async () => {
-  isLoading.value = true;
-  try {
-    // 2. 使用 phpApi，它會自動對接 http://localhost:8888/recimo_api/
-    const response = await phpApi.get('mall/user_products.php');
-    productList.value = response.data;
-  } catch (error) {
-    console.error("抓取失敗，請檢查 PHP 是否有啟動且路徑正確", error);
-  } finally {
-    isLoading.value = false;
-  }
+const fetchData = () => {
+  // 直接指向你的 PHP 路徑
+  // 或者使用 import.meta.env.VITE_API_BASE + 'user_shop.php'
+  axios.get('http://localhost:8888/recimo/user_shop.php')
+    .then((response) => {
+      // 這裡 response.data 就是 PHP echo 出來的 JSON 陣列
+      productList.value = response.data;
+      console.log('成功連線 PHP！資料量：', productList.value.length);
+    })
+    .catch((error) => {
+      console.error('連線 PHP 失敗，請檢查路徑或 MAMP/XAMPP 是否開啟', error);
+    });
 };
+
+
 const handlePageChange = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
