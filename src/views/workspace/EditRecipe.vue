@@ -3,7 +3,6 @@ import { ref, provide, onMounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useRecipeStore } from '@/stores/recipeEditor';
 import { publicApi } from '@/utils/publicApi';
-// 🏆 1. 引入團隊規範的圖片解析函式
 import { parsePublicFile } from '@/utils/parseFile';
 
 import EditorHeader from '@/components/workspace/editrecipe/EditorHeader.vue';
@@ -52,13 +51,28 @@ const isAdaptModeActive = computed(() => {
   return hasParentId || hasAdaptQuery;
 });
 
+// 🚀 1. 圖片轉 Base64 工具 (放在這裡，並加入安全判斷)
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    if (!file) return resolve(null);
+    if (typeof file === 'string') return resolve(file);
+    if (file instanceof File) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    } else {
+      resolve(null);
+    }
+  });
+};
+
 // --- 2. 核心邏輯 (資料載入) ---
 onMounted(async () => {
   const rawId = route.query.editId || route.params.id;
   const editIdFromUrl = rawId ? Number(rawId) : null;
   const isAdapt = route.query.action === 'adapt';
 
-  // 如果 Store 已經有暫存資料（例如從預覽跳回），優先使用
   if (recipeStore.rawEditorData) {
     recipeForm.value = { ...recipeStore.rawEditorData };
     recipeStore.rawEditorData = null;
@@ -79,7 +93,6 @@ onMounted(async () => {
     const found = resR.data.find(r => Number(r.recipe_id) === editIdFromUrl);
     if (!found) return;
 
-    // 設定基礎資訊與改編邏輯
     if (isAdapt) {
       recipeForm.value.recipe_id = null;
       recipeForm.value.parent_recipe_id = editIdFromUrl;
@@ -94,11 +107,9 @@ onMounted(async () => {
     recipeForm.value.description = found.recipe_description || found.recipe_descreption || '';
     recipeForm.value.difficulty = found.recipe_difficulty || 1;
 
-    // 🏆 2. 統一使用 parsePublicFile 處理封面圖
     const rawCover = found.recipe_image_url || found.recipe_cover_image || '';
     recipeForm.value.coverImg = parsePublicFile(rawCover);
 
-    // 時間格式化 (HH:mm 轉分鐘)
     const totalTimeStr = String(found.recipe_total_time || '30');
     if (totalTimeStr.includes(':')) {
       const p = totalTimeStr.split(':');
@@ -107,7 +118,6 @@ onMounted(async () => {
       recipeForm.value.totalTime = parseInt(totalTimeStr, 10) || 30;
     }
 
-    // 食材資料組裝
     const links = resRecipeIng.data.filter(i => Number(i.recipe_id) === editIdFromUrl);
     recipeForm.value.ingredients = links.map(link => {
       const master = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
@@ -121,7 +131,6 @@ onMounted(async () => {
       };
     });
 
-    // 步驟資料組裝
     const stepsData = resS.data
       .filter(s => Number(s.recipe_id) === editIdFromUrl)
       .sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
@@ -136,7 +145,6 @@ onMounted(async () => {
         parsedTime = parseInt(rawStepTime, 10) || 0;
       }
 
-      // 🏆 3. 統一使用 parsePublicFile 處理步驟圖，不再手寫 replace 邏輯
       const rawImg = s.step_image_url || s.image || '';
 
       return {
@@ -154,16 +162,14 @@ onMounted(async () => {
   }
 });
 
-// --- 3. 預覽 (處理 File 物件轉 Blob) ---
+// --- 3. 預覽 ---
 const handlePreview = () => {
   const previewForm = JSON.parse(JSON.stringify(recipeForm.value));
 
-  // 處理封面圖如果是剛上傳的檔案
   if (recipeForm.value.coverImg instanceof File) {
     previewForm.coverImg = URL.createObjectURL(recipeForm.value.coverImg);
   }
 
-  // 處理步驟圖如果是剛上傳的檔案
   recipeForm.value.steps.forEach((step, index) => {
     if (step.image instanceof File) {
       previewForm.steps[index].image = URL.createObjectURL(step.image);
@@ -180,35 +186,51 @@ const handlePreview = () => {
   router.push({ path: `/workspace/recipe-detail/${currentId}`, query });
 };
 
-// --- 4. 儲存 ---
-const handleSave = () => {
+// --- 4. 儲存 (包含圖片轉檔) ---
+const handleSave = async () => {
   const finalTitle = isAdaptModeActive.value
     ? (recipeForm.value.adapt_title || `${recipeForm.value.original_title} (改編版)`)
     : recipeForm.value.title;
 
   if (isPublished.value) {
-    const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
+    try {
+      const coverBase64 = await fileToBase64(recipeForm.value.coverImg);
+      const processedSteps = await Promise.all(
+        recipeForm.value.steps.map(async (s) => ({
+          ...s,
+          image: await fileToBase64(s.image)
+        }))
+      );
 
-    const saveData = {
-      ...recipeForm.value,
-      id: Date.now(),
-      title: finalTitle,
-      description: isAdaptModeActive.value ? recipeForm.value.adapt_description : recipeForm.value.description,
-      adaptation_note: isAdaptModeActive.value ? recipeForm.value.adapt_description : '',
-      publishDate: new Date().toLocaleDateString(),
-      is_local: true,
-      is_adaptation: isAdaptModeActive.value,
-      is_mine: true
-    };
+      const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
 
-    localRevisions.unshift(saveData);
-    localStorage.setItem('user_revisions', JSON.stringify(localRevisions));
-    alert(`🎉「${finalTitle}」已公開發布！`);
+      const saveData = {
+        ...recipeForm.value,
+        id: Date.now(),
+        title: finalTitle,
+        coverImg: coverBase64,
+        steps: processedSteps,
+        description: isAdaptModeActive.value ? recipeForm.value.adapt_description : recipeForm.value.description,
+        adaptation_note: isAdaptModeActive.value ? recipeForm.value.adapt_description : '',
+        publishDate: new Date().toLocaleDateString(),
+        is_local: true,
+        is_adaptation: isAdaptModeActive.value,
+        is_mine: true
+      };
 
-    if (isAdaptModeActive.value && recipeForm.value.parent_recipe_id) {
-      router.push(`/workspace/modify-recipe/${recipeForm.value.parent_recipe_id}`);
-    } else {
-      router.push('/workspace');
+      localRevisions.unshift(saveData);
+      localStorage.setItem('user_revisions', JSON.stringify(localRevisions));
+
+      alert(`🎉「${finalTitle}」已公開發布！`);
+
+      if (isAdaptModeActive.value && recipeForm.value.parent_recipe_id) {
+        router.push(`/workspace/modify-recipe/${recipeForm.value.parent_recipe_id}`);
+      } else {
+        router.push('/workspace');
+      }
+    } catch (err) {
+      console.error("儲存失敗:", err);
+      alert("儲存失敗：圖片處理過程發生錯誤。");
     }
   } else {
     alert('草稿儲存成功！');

@@ -138,7 +138,8 @@ async function loadRecipeData(recipeId) {
                             ...rel,
                             id: rel.ingredient_id,
                             ingredient_name: masterInfo ? masterInfo.ingredient_name : '未知食材',
-                            name: masterInfo ? masterInfo.ingredient_name : '未知食材'
+                            name: masterInfo ? masterInfo.ingredient_name : '未知食材',
+                            note: rel.remark || ''
                         };
                     });
 
