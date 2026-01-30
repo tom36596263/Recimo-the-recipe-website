@@ -133,7 +133,6 @@ async function loadRecipeData(recipeId) {
                 const childIngredients = allRelIngredients
                     .filter(i => Number(i.recipe_id) === childId)
                     .map(rel => {
-                        // 🔍 從總表找出對應的名字
                         const masterInfo = ingMaster.find(m => Number(m.ingredient_id) === Number(rel.ingredient_id));
                         return {
                             ...rel,
@@ -149,15 +148,25 @@ async function loadRecipeData(recipeId) {
                     .sort((a, b) => a.step_order - b.step_order)
                     .map(step => ({
                         ...step,
+                        // 確保燈箱有圖片欄位可讀
+                        image: parsePublicFile(step.step_image_url),
                         step_image_url: parsePublicFile(step.step_image_url)
                     }));
 
                 return {
                     id: `json-${childId}`,
                     title: childInfo.adaptation_title || childInfo.recipe_title,
+
+                    // 🎯 外面小卡抓的心得 (bbb)
                     summary: childInfo.adaptation_note || '暫無改編心得',
+
+                    // 🎯 燈箱內抓的詳細說明 (aaa) -> 指向 clean_description
+                    description: childInfo.clean_description || childInfo.recipe_descreption || '暫無詳細說明',
+
                     coverImg: parsePublicFile(`img/recipes/${childId}/cover.png`),
                     is_mine: false,
+
+                    // 保留原始欄位供備查或熱量計算使用
                     recipe_descreption: childInfo.recipe_descreption,
                     recipe_servings: Number(childInfo.recipe_servings),
                     ingredients: childIngredients,
