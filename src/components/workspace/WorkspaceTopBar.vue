@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, getCurrentInstance } from 'vue';
 import { useRoute } from 'vue-router';
 import SearchBar from '@/components/common/SearchBar.vue';
 import NotificationPanel from '@/components/common/NotificationPanel.vue';
@@ -29,33 +29,38 @@ const handleClickOutside = (event) => {
     }
 };
 
+const { proxy } = getCurrentInstance(); // 取得實例代理，這樣才能在 script 裡用 $parsePublicFile
+
+// 暫時解決user img前多/的問題
+const getAvatarUrl = (path) => {
+    if (!path) return proxy.$parsePublicFile('img/site/None_avatar.svg');
+    // 如果是外部連結或 base64 就直接回傳
+    if (/^https?:\/\/|^data:image/.test(path)) return path;
+
+    // 處理內部路徑：去掉開頭斜線並交給全域函式
+    const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    return proxy.$parsePublicFile(cleanPath);
+};
+
 // 1. 定義使用者資訊狀態 (給予初始預設值)
 const userInfo = ref({
     user_name: 'Recimo',
-    user_url: `${base}img/site/None_avatar.svg`
+    user_url: proxy.$parsePublicFile('img/site/None_avatar.svg')
 });
 
 onMounted(() => {
-    // 2. 從 localStorage 取得登入時存入的資料
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
         try {
             const parseData = JSON.parse(savedUser);
-            // 更新狀態
-            // 只有當 parseData.name 有值時才更新，否則維持初始值 "Recimo"
             if (parseData.user_name) userInfo.value.user_name = parseData.user_name;
 
-            // 只有當 parseData.avatar 有值時才更新，否則維持初始預設圖
-            if (parseData.user_url) {
-                // 如果 parseData.user_url 已經是 http 開頭，就不補 base
-                const isExternal = parseData.user_url.startsWith('http');
-                userInfo.value.user_url = isExternal
-                    ? parseData.user_url
-                    : `${base}${parseData.user_url.replace(/^\//, '')}`;
-                // replace(/^\//, '') 是為了防止出現雙斜線 // 的情況
-            }
+            // 2. 更新時直接呼叫封裝好的函式
+            userInfo.value.user_url = getAvatarUrl(parseData.user_url);
+
         } catch (error) {
             console.error("解析使用者資料失敗", error);
+            userInfo.value.user_url = getAvatarUrl('img/site/None_avatar.svg');
         }
     }
     document.addEventListener('click', handleClickOutside);
@@ -74,7 +79,8 @@ const cartTotal = computed(() => cartStore.totalCount);
     <div class="workspace-top-bar">
         <div class="col-6 col-md-12 personal-info">
             <div class="personal-img">
-                <img :src="userInfo.user_url" :alt="userInfo.user_name">
+                <img :src="userInfo.user_url" :alt="`${userInfo.user_name}.img`"
+                    @error="(e) => e.target.src = getAvatarUrl('img/site/None_avatar.svg')">
             </div>
 
             <div class="title">
