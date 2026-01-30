@@ -1,6 +1,6 @@
 -- 1. 創建資料表
 CREATE TABLE meal_plan_items (
-    item_id INT NOT NULL,
+    item_id INT NOT NULL AUTO_INCREMENT,
     plan_id INT NOT NULL,
     recipe_id INT NOT NULL,
     planned_date DATETIME NOT NULL,

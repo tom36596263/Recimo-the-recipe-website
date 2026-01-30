@@ -1,5 +1,5 @@
 CREATE TABLE cooking_logs (
-    cooking_log_id INT PRIMARY KEY,
+    cooking_log_id INT PRIMARY KEY AUTO_INCREMENT,
     recipe_id INT NOT NULL,
     user_id INT NOT NULL,
     actual_time TIME,

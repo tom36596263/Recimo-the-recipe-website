@@ -1,6 +1,6 @@
 -- 創建資料表
 CREATE TABLE meal_plans (
-    plan_id INT NOT NULL PRIMARY KEY,
+    plan_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     source_template_id INT,
     title VARCHAR(100) NOT NULL,

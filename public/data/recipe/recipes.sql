@@ -1,6 +1,6 @@
 -- 1. 建立資料表
 CREATE TABLE recipes (
-    recipe_id INT NOT NULL,
+    recipe_id INT NOT NULL AUTO_INCREMENT,
     author_id INT NOT NULL,
     linked_product_id INT,
     parent_recipe_id INT,

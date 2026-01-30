@@ -1,5 +1,5 @@
 CREATE TABLE steps (
-    step_id INT NOT NULL,
+    step_id INT NOT NULL AUTO_INCREMENT,
     recipe_id INT NOT NULL,
     step_order INT,
     step_title VARCHAR(100),

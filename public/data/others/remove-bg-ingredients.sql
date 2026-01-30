@@ -1,5 +1,5 @@
 CREATE TABLE remove_bg_ingredients (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY AUTO_INCREMENT,
     url VARCHAR(255),
     recipe_name VARCHAR(255),
     recipe_image_url VARCHAR(255)

@@ -1,5 +1,5 @@
 CREATE TABLE admins (
-    admin_id INT NOT NULL,
+    admin_id INT NOT NULL AUTO_INCREMENT,
     admin_level TINYINT NOT NULL,
     admin_account VARCHAR(100) NOT NULL,
     admin_password VARCHAR(10) NOT NULL,

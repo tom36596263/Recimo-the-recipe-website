@@ -1,5 +1,5 @@
 CREATE TABLE log_step_note (
-    log_step_note_id INT NOT NULL PRIMARY KEY,
+    log_step_note_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     cooking_log_id INT NOT NULL,
     step_id INT NOT NULL,
     step_note TEXT,

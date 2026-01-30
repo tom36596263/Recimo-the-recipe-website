@@ -1,5 +1,5 @@
 CREATE TABLE `carts` (
-  `carts_id` INT PRIMARY KEY NOT NULL ,
+  `carts_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
   `product_id` INT NOT NULL,
   `quantity` INT NOT NULL,

@@ -1,5 +1,5 @@
 CREATE TABLE support_tickets (
-    ticket_id INT NOT NULL PRIMARY KEY,
+    ticket_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     user_id INT,
     user_name VARCHAR(50) NOT NULL,
     user_email VARCHAR(50) NOT NULL,

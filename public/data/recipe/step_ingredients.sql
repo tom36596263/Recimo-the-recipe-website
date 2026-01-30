@@ -1,5 +1,5 @@
 CREATE TABLE step_ingredients (
-    step_ingredient_id INT NOT NULL PRIMARY KEY,
+    step_ingredient_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     step_id INT NOT NULL,
     ingredient_id INT NOT NULL,
     step_ingredient_amount DECIMAL(10,2) NOT NULL,

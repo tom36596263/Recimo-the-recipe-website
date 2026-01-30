@@ -1,6 +1,6 @@
 -- 1. 創建資料表
 CREATE TABLE meal_plan_templates (
-    template_id INT NOT NULL,
+    template_id INT NOT NULL AUTO_INCREMENT,
     title VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
     cover_template_id INT NOT NULL,

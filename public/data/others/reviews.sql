@@ -1,5 +1,5 @@
 CREATE TABLE reviews (
-    review_id INT NOT NULL,
+    review_id INT NOT NULL AUTO_INCREMENT,
     reviewer_name VARCHAR(50) NOT NULL,
     reviewer_avatar_url VARCHAR(255) NOT NULL,
     review_comment VARCHAR(255) NOT NULL,

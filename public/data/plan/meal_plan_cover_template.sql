@@ -1,6 +1,6 @@
 -- 創建資料表
 CREATE TABLE meal_plan_cover_template (
-    cover_template_id INT NOT NULL PRIMARY KEY,
+    cover_template_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     template_url VARCHAR(255) NOT NULL,
     template_name VARCHAR(50) NOT NULL
 );

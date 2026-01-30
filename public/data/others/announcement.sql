@@ -1,5 +1,5 @@
 CREATE TABLE announcement (
-    announcement_id INT NOT NULL,
+    announcement_id INT NOT NULL AUTO_INCREMENT,
     announcement_type VARCHAR(50) NOT NULL,
     announcement_title VARCHAR(255) NOT NULL,
     announcement_content VARCHAR(1000) NOT NULL,

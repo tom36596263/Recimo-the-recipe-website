@@ -1,5 +1,5 @@
 CREATE TABLE favorites_folders (
-    favorites_folder_id INT NOT NULL PRIMARY KEY,
+    favorites_folder_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     creator_id INT NOT NULL,
     folder_name VARCHAR(50) NOT NULL,
     created_at DATETIME NOT NULL,
