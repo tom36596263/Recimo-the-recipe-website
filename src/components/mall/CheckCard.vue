@@ -29,10 +29,23 @@ const subtotal = computed(() => {
 
 
 const cleanImage = computed(() => {
-  if (props.image && props.image.startsWith('public/')) {
-    return props.image.replace('public/', '/');
+  if (!props.image) return '/default.png';
+
+  // 關鍵判斷：如果 PHP 已經給了完整網址 (http:// 或 https://)，直接回傳
+  if (props.image.startsWith('http')) {
+    return props.image;
   }
-  return props.image;
+
+  // 以下是針對「非網址」格式（如本地開發手寫的路徑）的處理
+  let path = props.image.replace(/^public\//, '');
+  if (path.startsWith('/')) {
+    path = path.substring(1);
+  }
+
+  const base = import.meta.env.BASE_URL;
+  const safeBase = base.endsWith('/') ? base : `${base}/`;
+
+  return `${safeBase}${path}`;
 });
 
 </script>

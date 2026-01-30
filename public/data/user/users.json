@@ -7,7 +7,7 @@
     "user_address": "桃園市中壢區復興路46號8樓",
     "user_password": "G2Recimo",
     "user_startdate": "2025-12-09 00:00:00",
-    "user_url": "/img/site/Recimo_avatar.svg",
+    "user_url": "img/site/Recimo_avatar.svg",
     "is_verified": true,
     "is_active": true
   },
@@ -31,7 +31,7 @@
     "user_address": "桃園市中壢區復興路46號8樓",
     "user_password": "123456",
     "user_startdate": "2026-01-27 19:30:00",
-    "user_url": "/img/site/T_avatar.svg",
+    "user_url": "img/site/T_avatar.svg",
     "is_verified": true,
     "is_active": true
   },
@@ -43,7 +43,7 @@
     "user_address": "桃園市中壢區復興路46號8樓",
     "user_password": "123456",
     "user_startdate": "2026-01-27 19:30:00",
-    "user_url": "/img/site/W_avatar.svg",
+    "user_url": "img/site/W_avatar.svg",
     "is_verified": false,
     "is_active": true
   },
@@ -55,7 +55,7 @@
     "user_address": "桃園市中壢區復興路46號8樓",
     "user_password": "888888",
     "user_startdate": "2026-01-27 19:30:00",
-    "user_url": "/img/site/H_avatar.svg",
+    "user_url": "img/site/H_avatar.svg",
     "is_verified": true,
     "is_active": true
   },
@@ -67,7 +67,7 @@
     "user_address": "桃園市中壢區復興路46號8樓",
     "user_password": "Aa111111",
     "user_startdate": "2026-01-23 16:20:00",
-    "user_url": "/img/site/P_avatar.svg",
+    "user_url": "img/site/P_avatar.svg",
     "is_verified": true,
     "is_active": true
   },
@@ -79,7 +79,7 @@
     "user_address": "桃園市中壢區復興路46號8樓",
     "user_password": "yutung123",
     "user_startdate": "2026-01-27 19:30:00",
-    "user_url": "/img/site/yutung_avatar.svg",
+    "user_url": "img/site/yutung_avatar.svg",
     "is_verified": true,
     "is_active": true
   },
@@ -91,7 +91,7 @@
     "user_address": "桃園市中壢區復興路46號8樓",
     "user_password": "123456",
     "user_startdate": "2026-01-27 19:30:00",
-    "user_url": "/img/site/H_avatar.svg",
+    "user_url": "img/site/H_avatar.svg",
     "is_verified": true,
     "is_active": true
   },

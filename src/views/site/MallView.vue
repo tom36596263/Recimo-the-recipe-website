@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import card from '@/components/mall/ProductCard.vue';
-import axios from 'axios';
+// import axios from 'axios';
 // import { publicApi } from '@/utils/publicApi';
 import { phpApi } from '@/utils/publicApi';
 import { useRouter, useRoute } from 'vue-router';
@@ -53,16 +53,8 @@ const currentPage = ref(1); // 目前在第幾頁
 const pageSize = 8; // 一頁顯示幾筆 (4欄 x 2排 = 8筆)
 const router = useRouter();
 const route = useRoute();
-const isLoading = ref(false);
 
-//進入商品詳情
-const goToDetail = (id) => {
-  router.push({
-    //放進瀏覽器裡的陣列(瀏覽器的歷史紀錄)
-    name: 'product-detail',
-    params: { id: id } //左邊id:目標欄位,右邊id:實際內容
-  });
-};
+
 
 // --- 標籤設定 ---
 const tags = [
@@ -108,17 +100,23 @@ const randomProducts = computed(() => {
 
 // --- 事件處理 ---
 const fetchData = async () => {
-  isLoading.value = true;
   try {
-    // 2. 使用 phpApi，它會自動對接 http://localhost:8888/recimo_api/
+    // 使用 phpApi 時，只需要寫「相對路徑」
+    // 假設你的 PHP 檔案路徑是 /recimo_api/mall/get_products.php
     const response = await phpApi.get('mall/user_products.php');
+
     productList.value = response.data;
+    console.log('成功透過 phpApi 抓取資料！', productList.value);
   } catch (error) {
-    console.error("抓取失敗，請檢查 PHP 是否有啟動且路徑正確", error);
-  } finally {
-    isLoading.value = false;
+    console.error('API 連線失敗:', error);
+    // 偵錯小技巧：印出伺服器回傳的錯誤訊息
+    if (error.response) {
+      console.log('錯誤狀態碼:', error.response.status);
+      console.log('錯誤內容:', error.response.data);
+    }
   }
 };
+
 const handlePageChange = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
@@ -177,7 +175,7 @@ const columns = ref([
         </div>
         <div class="container">
           <div class="row desktop-view">
-            <div v-for="item in randomProducts" :key="item.id" class="col-3 col-md-12" @click="goToDetail(item.id)">
+            <div v-for="item in randomProducts" :key="item.id" class="col-3 col-md-12">
               <card :item="item" />
             </div>
           </div>
@@ -220,7 +218,7 @@ const columns = ref([
           <div v-if="displayedProducts.length === 0" class="col-12 col-lg-6" style="text-align: center; padding: 40px">
             目前沒有此分類的商品
           </div>
-          <div v-for="item in displayedProducts" :key="item.id" class="col-3 col-lg-6" @click="goToDetail(item.id)">
+          <div v-for="item in displayedProducts" :key="item.id" class="col-3 col-lg-6">
             <card :item="item" />
           </div>
         </div>

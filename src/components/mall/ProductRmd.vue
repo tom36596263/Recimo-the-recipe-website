@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import ProductCard from '@/components/mall/ProductCard.vue';
+import { phpApi } from '@/utils/publicApi';
 
 // ==========================================
 // 引用swiper
@@ -38,7 +39,7 @@ const fetchData = async () => {
     isLoading.value = true;
     try {
         // 修正路徑：務必加上 baseURL
-        const response = await axios.get(`${baseURL}data/mall/products.json`);
+        const response = await phpApi.get('mall/user_products.php');
         productList.value = response.data;
     } catch (error) {
         console.error("讀取 JSON 失敗", error);
