@@ -41,18 +41,21 @@ const getSmartImageUrl = (url) => {
     return parsePublicFile(urlStr);
 };
 
-// --- 2. 核心資料抓取 ---
-// --- 2. 核心資料抓取 ---
+const snapsData = ref([]); // 新增這個變數
+
+
+
+// 核心抓取
 const fetchData = async () => {
     isLoading.value = true;
     const recipeId = Number(route.params.id);
 
     try {
-        // 同時抓取所有必要的資料，包含食材主表 (resIngMaster)
+        // 同時抓取所有必要的資料
         const [resR, resRecipeIng, resIngMaster, resS, resG, resU] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_ingredient.json'),
-            publicApi.get('data/recipe/ingredients.json'), // 食材主表
+            publicApi.get('data/recipe/ingredients.json'),
             publicApi.get('data/recipe/steps.json'),
             publicApi.get('data/social/gallery.json'),
             publicApi.get('data/user/users.json')
@@ -60,6 +63,38 @@ const fetchData = async () => {
 
         const dbRecipe = resR.data.find(r => Number(r.recipe_id) === recipeId);
         const masterIng = resIngMaster.data || [];
+
+        // --- 修正：Gallery (CookSnap) 處理邏輯 ---
+        if (resG.data) {
+            const API_BASE_URL = 'http://localhost:8888/recimo_api/';
+
+            snapsData.value = resG.data
+                .filter(item => Number(item.RECIPE_ID) === recipeId)
+                .map(item => {
+                    let finalImg = '';
+                    const rawUrl = item.GALLERY_URL || '';
+
+                    // 處理圖片路徑邏輯，優先判斷是否為後端實體路徑
+                    if (rawUrl.includes(':\\')) {
+                        const parts = rawUrl.split('recimo_api\\');
+                        const relativePath = parts[1] ? parts[1].replace(/\\/g, '/') : '';
+                        finalImg = `${API_BASE_URL}${relativePath}`;
+                    } else {
+                        finalImg = getSmartImageUrl(rawUrl);
+                    }
+
+                    return {
+                        id: item.GALLERY_ID,
+                        // 🏆 必須改為 url，因為 CookSnap.vue 樣版裡寫的是 :src="photo.url"
+                        url: finalImg,
+                        // 🏆 必須改為 comment，因為 CookSnap.vue 樣版裡寫的是 {{ photo.comment }}
+                        comment: item.GALLERY_TEXT,
+                        createdAt: item.UPLOAD_AT,
+                        userId: item.USER_ID,
+                        userName: resU.data?.find(u => u.user_id === item.USER_ID)?.user_name || '熱心用戶'
+                    };
+                });
+        }
 
         // --- 預覽模式處理邏輯 ---
         if (isPreviewMode.value && recipeStore.previewData) {
@@ -78,10 +113,8 @@ const fetchData = async () => {
                 author_name: authStore.user?.user_name || '您的預覽'
             };
 
-            // 🔥 關鍵修正：將編輯器傳來的食材與主表比對，抓取缺失的營養資訊
             rawIngredients.value = (preview.ingredients || []).map(ing => {
                 const name = ing.name || ing.ingredient_name || "";
-                // 在主表中找尋名稱相同的食材 (去空格比對)
                 const master = masterIng.find(m => m.ingredient_name.trim() === name.trim());
 
                 return {
@@ -89,7 +122,6 @@ const fetchData = async () => {
                     ingredient_name: name,
                     amount: Number(ing.amount || 0),
                     unit_name: ing.unit || ing.unit_name || master?.unit_name || '份',
-                    // 如果主表有資料就用主表的，否則用傳入的，最後保底為 0/1
                     gram_conversion: Number(master?.gram_conversion || ing.gram_conversion || 1),
                     kcal_per_100g: Number(master?.kcal_per_100g || ing.kcal_per_100g || 0),
                     protein_per_100g: Number(master?.protein_per_100g || ing.protein_per_100g || 0),
