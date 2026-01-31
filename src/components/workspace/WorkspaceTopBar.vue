@@ -53,11 +53,14 @@ onMounted(() => {
     if (savedUser) {
         try {
             const parseData = JSON.parse(savedUser);
-            if (parseData.user_name) userInfo.value.user_name = parseData.user_name;
+            if (parseData.name) {
+                userInfo.value.user_name = parseData.name;
+            }
 
             // 2. 更新時直接呼叫封裝好的函式
-            userInfo.value.user_url = getAvatarUrl(parseData.user_url);
-
+            if (parseData.image) {
+                userInfo.value.user_url = getAvatarUrl(parseData.image);
+            }
         } catch (error) {
             console.error("解析使用者資料失敗", error);
             userInfo.value.user_url = getAvatarUrl('img/site/None_avatar.svg');

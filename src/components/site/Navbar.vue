@@ -64,7 +64,7 @@ const cartTotal = computed(() => cartStore.totalCount);
 
 // 暫時解決user img前多/的問題
 const userAvatar = computed(() => {
-    const url = authStore.user?.user_url;
+    const url = authStore.user?.image;
 
     // 1. 如果沒資料，顯示預設圖 (一樣要透過 proxy 呼叫全域函式)
     if (!url) return proxy.$parsePublicFile('img/site/None_avatar.svg');
@@ -116,7 +116,7 @@ const userAvatar = computed(() => {
                                     <template v-if="authStore.isLoggedIn">
                                         <span class="btn-text p-p1">我的廚房</span>
                                         <div class="user-avatar-min">
-                                            <img :src="userAvatar" :alt="`${authStore.user?.user_name || 'User'}.img`"
+                                            <img :src="userAvatar" :alt="`${authStore.user?.name || 'User'}.img`"
                                                 @error="(e) => e.target.src = $parsePublicFile('img/site/None_avatar.svg')">
                                         </div>
                                     </template>
