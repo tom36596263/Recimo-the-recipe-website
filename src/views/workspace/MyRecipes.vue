@@ -81,7 +81,7 @@ onMounted(async () => {
     if (userStr) {
         try {
             const userObj = JSON.parse(userStr);
-            userId.value = userObj.user_id;
+            userId.value = userObj.id;
             // console.log(userId.value);
 
             // 個人食譜：改為串接 myreipe_get.php，使用 userId 當參數，最多顯示四個
@@ -115,6 +115,40 @@ onMounted(async () => {
             } else {
                 personalRecipes.value = [];
                 totalPersonalCount.value = 0;
+            }
+
+            // 我的收藏：串接 favorites.php，使用 userId 當參數，最多顯示四個
+            if (userId.value) {
+                try {
+                    const resFavorites = await phpApi.get(`social/favorites.php`, { params: { user_id: userId.value } });
+                    // 假設回傳格式 { success: true, favorites: [...] }
+                    const favoritesData = Array.isArray(resFavorites.data.favorites) ? resFavorites.data.favorites : [];
+                    // 如果 API 已直接回傳完整食譜資訊，優先直接用 API 回傳資料
+                    favoriteRecipes.value = favoritesData.slice(0, 4).map(fav => ({
+                        id: fav.recipe_id,
+                        recipe_name: fav.recipe_title || fav.recipe_name || fav.title || '',
+                        image_url: fav.recipe_image_url
+                            ? (fav.recipe_image_url.startsWith('http')
+                                ? fav.recipe_image_url
+                                : parsePublicFile(fav.recipe_image_url))
+                            : (fav.image_url && fav.image_url.startsWith('http')
+                                ? fav.image_url
+                                : fav.image_url
+                                    ? parsePublicFile(fav.image_url)
+                                    : ''),
+                        author: {
+                            name: fav.user_name || fav.author_name || 'Recimo',
+                            likes: fav.recipe_like_count || fav.likes || fav.like_count || 0
+                        }
+                    }));
+                    totalFavoriteCount.value = favoritesData.length;
+                } catch (e) {
+                    favoriteRecipes.value = [];
+                    totalFavoriteCount.value = 0;
+                }
+            } else {
+                favoriteRecipes.value = [];
+                totalFavoriteCount.value = 0;
             }
 
         } catch (e) {

@@ -8,8 +8,26 @@
 * 5. 空狀態處理：無收藏時引導用戶探索食譜
 */
 <script setup>
+// ...existing code...
+// ...existing code...
+// ...existing code...
+// 關閉手機版預覽模態框
+function closeModal() {
+    isModalOpen.value = false;
+    modalRecipe.value = null;
+}
+// 點擊卡片切換預覽
+function selectRecipe(recipe) {
+    if (window.innerWidth <= 1024) {
+        modalRecipe.value = recipe;
+        isModalOpen.value = true;
+    } else {
+        selectedRecipe.value = recipe;
+    }
+}
 import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
-import { publicApi } from '@/utils/publicApi';
+import { phpApi, publicApi } from '@/utils/publicApi';
+import { parsePublicFile } from '@/utils/parseFile'
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import RecipePreviewCard from '@/components/common/RecipePreviewCard.vue';
 import BaseTag from '@/components/common/BaseTag.vue';
@@ -19,6 +37,7 @@ import BaseBtn from '@/components/common/BaseBtn.vue';
 // ========== 狀態管理 ==========
 // 所有收藏食譜列表（完整數據）
 const allRecipes = ref([]);
+const userId = ref(null);
 
 // 當前選中的食譜（用於右側預覽卡片）
 const selectedRecipe = ref(null);
@@ -33,10 +52,9 @@ const modalRecipe = ref(null);
 const windowWidth = ref(window.innerWidth);
 
 // ========== 標籤篩選 ==========
-// 可用的標籤列表
-const tags = ref([]);
-// 當前選中的標籤
-const selectedTag = ref(null);
+// 只顯示「全部」
+const tags = ref(['全部']);
+const selectedTag = ref('全部');
 
 // ========== 分頁設置 ==========
 // 當前頁碼
@@ -83,65 +101,7 @@ const handlePageChange = (page) => {
     currentPage.value = page;
 };
 
-/**
- * 選擇食譜（點擊卡片時觸發）
- * @param {Object} recipe - 選中的食譜對象
- */
-const selectRecipe = (recipe) => {
-    // 在小螢幕上打開彈窗，不設置激活狀態
-    if (window.innerWidth <= 1024) {
-        modalRecipe.value = recipe;
-        isModalOpen.value = true;
-    } else {
-        selectedRecipe.value = recipe;
-    }
-};
-
-/**
- * 關閉彈窗
- */
-const closeModal = () => {
-    isModalOpen.value = false;
-};
-
-/**
- * 選擇標籤（點擊標籤時觸發）
- * @param {String} tag - 選中的標籤名稱
- */
-const selectTag = (tag) => {
-    selectedTag.value = tag;
-};
-
-// ========== 監聽器 ==========
-/**
- * 監聽頁面切換
- * 當用戶切換頁碼時，自動選中該頁第一筆食譜（僅在大螢幕）
- */
-watch(currentPage, () => {
-    if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
-        selectedRecipe.value = currentPageRecipes.value[0];
-    }
-});
-
-/**
- * 監聽標籤切換
- * 當用戶切換標籤時，重置到第一頁並選中第一筆食譜（僅在大螢幕）
- */
-watch(selectedTag, () => {
-    currentPage.value = 1;
-    if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
-        selectedRecipe.value = currentPageRecipes.value[0];
-    }
-});
-
-// ========== 生命週期 ==========
-/**
- * 組件掛載時初始化數據
- * 1. 使用 publicApi 從後端獲取 JSON 數據
- * 2. 處理食譜與標籤的關聯關係
- * 3. 建立標籤篩選列表
- * 4. 預設選中第一頁第一筆食譜
- */
+// 選擇食譜（點擊卡片時觸發）
 onMounted(async () => {
     // 監聽視窗大小變化
     const handleResize = () => {
@@ -153,84 +113,51 @@ onMounted(async () => {
         window.removeEventListener('resize', handleResize);
     });
 
+    // 取得 localStorage 裡的 user 物件，並解析 user_id
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return;
     try {
-        // 並行載入所有需要的 JSON 檔案
-        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
-            publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/recipe/recipe_tag.json'),
-            publicApi.get('data/recipe/tags.json')
-        ]);
+        const userObj = JSON.parse(userStr);
+        userId.value = userObj.id;
+    } catch (e) {
+        userId.value = null;
+        return;
+    }
+    if (!userId.value) return;
 
-        const recipesData = resRecipes.data;
-        const recipeTagData = resRecipeTags.data;
-        const tagsData = resTags.data;
-
-        // 建立標籤 ID 對應名稱的映射表
-        const tagMap = {};
-        tagsData.forEach(tag => {
-            tagMap[tag.tag_id] = tag.tag_name;
-        });
-
-        // 獲取 base 路徑用於圖片 URL 補全
-        const base = import.meta.env.BASE_URL;
-
-        // 載入收藏食譜數據（取前 20 筆）
-        const selectedRecipes = recipesData.slice(0, 20);
-
-        // 使用 Set 收集所有不重複的標籤ID
-        const allTagIds = new Set();
-
-        // 將原始食譜數據轉換為組件所需的格式
-        allRecipes.value = selectedRecipes.map(recipe => {
-            // 通過關聯表查找該食譜的所有標籤
-            const recipeTags = recipeTagData
-                .filter(rt => rt.recipe_id === recipe.recipe_id)
-                .map(rt => {
-                    if (tagMap[rt.tag_id]) {
-                        allTagIds.add(rt.tag_id);
-                        return tagMap[rt.tag_id];
-                    }
-                    return null;
-                })
-                .filter(Boolean);
-
-            // 返回格式化的食譜對象
-            return {
-                id: recipe.recipe_id,
-                recipe_id: recipe.recipe_id,
-                recipe_name: recipe.recipe_title,
-                image_url: recipe.recipe_image_url.startsWith('http')
-                    ? recipe.recipe_image_url
-                    : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
-                tags: recipeTags.length > 0 ? recipeTags : ['未分類'],
-                difficulty: recipe.recipe_difficulty,
-                nutritional_info: {
-                    calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
-                    serving_size: recipe.recipe_servings,
-                    cooking_time: `${recipe.recipe_total_time.split(':')[1]}分鐘`
-                },
-                author: {
-                    name: 'Recimo',
-                    likes: recipe.recipe_like_count || 0
-                }
-            };
-        });
-
-        // 建立標籤篩選列表
-        tags.value = ['全部', ...Array.from(allTagIds)
-            .map(tagId => tagMap[tagId])
-            .filter(Boolean)
-            .slice(0, 6)];
-
-        // 預設選擇「全部」標籤
-        selectedTag.value = '全部';
-
+    try {
+        // 取得收藏清單
+        const resFavorites = await phpApi.get('social/favorites.php', { params: { user_id: userId.value } });
+        const favoritesData = Array.isArray(resFavorites.data.favorites) ? resFavorites.data.favorites : [];
+        // 直接用 API 回傳資料，不再 enrich public 資料
+        allRecipes.value = favoritesData.map(fav => ({
+            ...fav,
+            id: fav.recipe_id,
+            recipe_name: fav.recipe_title || fav.recipe_name || fav.title || '未命名食譜',
+            image_url: fav.recipe_image_url && fav.recipe_image_url.startsWith('http')
+                ? fav.recipe_image_url
+                : fav.recipe_image_url
+                    ? parsePublicFile(fav.recipe_image_url)
+                    : '',
+            author: {
+                name: fav.user_name || fav.author_name || 'Recimo',
+                likes: fav.recipe_like_count || fav.likes || fav.like_count || 0
+            }
+        }));
         // 預設自動選中第一頁的第一筆食譜（僅在大螢幕）
         if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
             selectedRecipe.value = currentPageRecipes.value[0];
         }
     } catch (error) {
-        console.error('載入資料失敗:', error);
+        allRecipes.value = [];
+        console.error('載入收藏資料失敗:', error);
+    }
+});
+// ...已移除標籤相關程式碼，保留前方收藏卡片 enrich 處理...
+// 分頁換頁時自動 focus 分頁中的第一個食譜卡片（大螢幕）
+watch(currentPage, () => {
+    if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
+        selectedRecipe.value = currentPageRecipes.value[0];
     }
 });
 </script>
@@ -244,18 +171,7 @@ onMounted(async () => {
                 </div>
             </div>
 
-            <!-- 標籤篩選 -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="tag-filter">
-                        <BaseTag v-for="tag in tags" :key="tag" :text="tag"
-                            :variant="selectedTag === tag ? 'primary' : 'action'" :show-icon="false"
-                            @click="selectTag(tag)" />
-                        <!-- 新增分類功能暫未實現 -->
-                        <!-- <BaseTag text="新增分類" variant="action" :show-icon="true" @click="addNewCategory" /> -->
-                    </div>
-                </div>
-            </div>
+            <!-- 標籤篩選已移除 -->
 
             <!-- 有食譜時顯示列表 -->
             <div v-if="allRecipes.length > 0" class="row">
