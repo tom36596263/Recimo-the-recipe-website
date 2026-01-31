@@ -41,40 +41,89 @@ const getSmartImageUrl = (url) => {
     return parsePublicFile(urlStr);
 };
 
-const snapsData = ref([]); // 新增這個變數
+const snapsData = ref([]);
+const commentList = ref([]);
 
-
-
+// 核心抓取
 // 核心抓取
 const fetchData = async () => {
     isLoading.value = true;
     const recipeId = Number(route.params.id);
 
+    // ✨ 關鍵修復：如果是預覽模式且沒有 ID（全新創建），直接處理 Store 資料並返回，避免請求後續 JSON 報錯
+    if (isPreviewMode.value && !recipeId && recipeStore.previewData) {
+        try {
+            const preview = recipeStore.previewData;
+            const resIngMaster = await publicApi.get('data/recipe/ingredients.json');
+            const masterIng = resIngMaster.data || [];
+
+            const previewServings = Math.max(1, Number(preview.recipe_servings || preview.servings || 1));
+
+            rawRecipe.value = {
+                recipe_id: 0,
+                recipe_title: preview.title || preview.recipe_title || '未命名食譜',
+                recipe_description: preview.description || preview.recipe_description || '',
+                recipe_image_url: preview.coverImg || preview.recipe_cover_image,
+                recipe_difficulty: preview.difficulty || 1,
+                recipe_total_time: preview.totalTime || 30,
+                recipe_servings: previewServings,
+                recipe_likes: 0,
+                author_name: authStore.user?.user_name || '您的預覽'
+            };
+
+            rawIngredients.value = (preview.ingredients || []).map(ing => {
+                const name = ing.name || ing.ingredient_name || "";
+                const master = masterIng.find(m => m.ingredient_name.trim() === name.trim());
+
+                // 排除克、ML重複計算邏輯
+                const unit = ing.unit || ing.unit_name || master?.unit_name || '份';
+                const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(unit.toLowerCase());
+
+                return {
+                    ...ing,
+                    ingredient_name: name,
+                    amount: Number(ing.amount || 0),
+                    unit_name: unit,
+                    gram_conversion: isWeightUnit ? 1 : Number(master?.gram_conversion || ing.gram_conversion || 1),
+                    kcal_per_100g: Number(master?.kcal_per_100g || ing.kcal_per_100g || 0),
+                    protein_per_100g: Number(master?.protein_per_100g || ing.protein_per_100g || 0),
+                    fat_per_100g: Number(master?.fat_per_100g || ing.fat_per_100g || 0),
+                    carbs_per_100g: Number(master?.carbs_per_100g || ing.carbs_per_100g || 0)
+                };
+            });
+
+            rawSteps.value = (preview.steps || []).sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
+            servings.value = previewServings;
+            isLoading.value = false;
+            return; // 🛑 提早結束
+        } catch (err) {
+            console.error('預覽資料處理失敗:', err);
+        }
+    }
+
     try {
-        // 同時抓取所有必要的資料
-        const [resR, resRecipeIng, resIngMaster, resS, resG, resU] = await Promise.all([
+        // 同時抓取所有必要的資料 (含 PHP 留言)
+        const [resR, resRecipeIng, resIngMaster, resS, resG, resU, resC] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_ingredient.json'),
             publicApi.get('data/recipe/ingredients.json'),
             publicApi.get('data/recipe/steps.json'),
             publicApi.get('data/social/gallery.json'),
-            publicApi.get('data/user/users.json')
+            publicApi.get('data/user/users.json'),
+            recipeId ? phpApi.get(`social/comment.php?recipe_id=${recipeId}`) : Promise.resolve({ data: [] })
         ]);
 
         const dbRecipe = resR.data.find(r => Number(r.recipe_id) === recipeId);
         const masterIng = resIngMaster.data || [];
 
-        // --- 修正：Gallery (CookSnap) 處理邏輯 ---
+        // --- 1. Gallery (CookSnap) 處理邏輯 ---
         if (resG.data) {
             const API_BASE_URL = 'http://localhost:8888/recimo_api/';
-
             snapsData.value = resG.data
                 .filter(item => Number(item.RECIPE_ID) === recipeId)
                 .map(item => {
                     let finalImg = '';
                     const rawUrl = item.GALLERY_URL || '';
-
-                    // 處理圖片路徑邏輯，優先判斷是否為後端實體路徑
                     if (rawUrl.includes(':\\')) {
                         const parts = rawUrl.split('recimo_api\\');
                         const relativePath = parts[1] ? parts[1].replace(/\\/g, '/') : '';
@@ -82,12 +131,9 @@ const fetchData = async () => {
                     } else {
                         finalImg = getSmartImageUrl(rawUrl);
                     }
-
                     return {
                         id: item.GALLERY_ID,
-                        // 🏆 必須改為 url，因為 CookSnap.vue 樣版裡寫的是 :src="photo.url"
                         url: finalImg,
-                        // 🏆 必須改為 comment，因為 CookSnap.vue 樣版裡寫的是 {{ photo.comment }}
                         comment: item.GALLERY_TEXT,
                         createdAt: item.UPLOAD_AT,
                         userId: item.USER_ID,
@@ -96,7 +142,24 @@ const fetchData = async () => {
                 });
         }
 
-        // --- 預覽模式處理邏輯 ---
+        // --- 2. 留言區處理邏輯 ---
+        if (resC.data && Array.isArray(resC.data)) {
+            commentList.value = resC.data.map(c => {
+                const userData = resU.data?.find(u => u.user_id === c.user_id);
+                return {
+                    comment_id: c.comment_id,
+                    userId: c.user_id,
+                    userName: userData?.user_name || 'Recimo用戶',
+                    handle: `user_${c.user_id}`,
+                    userAvatar: getSmartImageUrl(userData?.user_image),
+                    content: c.comment_text,
+                    time: c.comment_at,
+                    likes: Number(c.like_count || 0),
+                };
+            });
+        }
+
+        // --- 3. 預覽模式處理邏輯 (針對有 ID 的改編預覽) ---
         if (isPreviewMode.value && recipeStore.previewData) {
             const preview = recipeStore.previewData;
             const previewServings = Math.max(1, Number(preview.recipe_servings || preview.servings || (dbRecipe?.recipe_servings) || 1));
@@ -117,12 +180,16 @@ const fetchData = async () => {
                 const name = ing.name || ing.ingredient_name || "";
                 const master = masterIng.find(m => m.ingredient_name.trim() === name.trim());
 
+                // 排除克、ML重複計算邏輯
+                const unit = ing.unit || ing.unit_name || master?.unit_name || '份';
+                const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(unit.toLowerCase());
+
                 return {
                     ...ing,
                     ingredient_name: name,
                     amount: Number(ing.amount || 0),
-                    unit_name: ing.unit || ing.unit_name || master?.unit_name || '份',
-                    gram_conversion: Number(master?.gram_conversion || ing.gram_conversion || 1),
+                    unit_name: unit,
+                    gram_conversion: isWeightUnit ? 1 : Number(master?.gram_conversion || ing.gram_conversion || 1),
                     kcal_per_100g: Number(master?.kcal_per_100g || ing.kcal_per_100g || 0),
                     protein_per_100g: Number(master?.protein_per_100g || ing.protein_per_100g || 0),
                     fat_per_100g: Number(master?.fat_per_100g || ing.fat_per_100g || 0),
@@ -136,7 +203,7 @@ const fetchData = async () => {
             return;
         }
 
-        // --- 非預覽模式 (一般查看) ---
+        // --- 4. 非預覽模式 (一般查看) ---
         rawRecipe.value = dbRecipe;
         if (!rawRecipe.value) return;
 
@@ -145,15 +212,20 @@ const fetchData = async () => {
         const recipeIng = resRecipeIng.data || [];
         rawIngredients.value = recipeIng.filter(i => Number(i.recipe_id) === recipeId).map(link => {
             const master = masterIng.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
+
+            // 排除克、ML重複計算邏輯
+            const unit = link.unit_name || master?.unit_name || '份';
+            const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(unit.toLowerCase());
+
             return {
                 ...link,
                 ingredient_name: master?.ingredient_name || link.ingredient_name,
-                gram_conversion: Number(master?.gram_conversion || 1),
+                gram_conversion: isWeightUnit ? 1 : Number(master?.gram_conversion || 1),
                 kcal_per_100g: Number(master?.kcal_per_100g || 0),
                 protein_per_100g: Number(master?.protein_per_100g || 0),
                 fat_per_100g: Number(master?.fat_per_100g || 0),
                 carbs_per_100g: Number(master?.carbs_per_100g || 0),
-                unit_name: link.unit_name || master?.unit_name || '份'
+                unit_name: unit
             };
         });
 
@@ -166,8 +238,6 @@ const fetchData = async () => {
 };
 
 // --- 3. 計算屬性 ---
-
-// 補齊：計算顯示的按讚總數
 const displayRecipeLikes = computed(() => {
     const baseLikes = Number(rawRecipe.value?.recipe_likes || 0);
     return baseLikes + localLikesOffset.value;
@@ -239,16 +309,12 @@ const stepsData = computed(() => {
 });
 
 // --- 4. 互動函式 ---
-
-// 補齊：檢舉提交處理
 const onReportSubmit = (reportForm) => {
     console.log('收到檢舉內容:', reportForm);
-    // 這裡通常會打 API 傳送檢舉內容
     isReportModalOpen.value = false;
     alert('感謝您的回饋，我們已收到檢舉。');
 };
 
-// 補齊：分享功能處理
 const handleShare = () => {
     if (isPreviewMode.value) return;
     const shareData = {
@@ -307,6 +373,66 @@ const handleGoToEdit = () => {
 const toggleWorkspaceTopBar = (show) => {
     const topBar = document.querySelector('.workspace-top-bar');
     if (topBar) topBar.style.display = show ? '' : 'none';
+};
+
+// 新增留言
+const handlePostComment = async (content) => {
+    if (!authStore.user) return alert('請先登入');
+    if (!content.trim()) return;
+
+    try {
+        await phpApi.post('social/comment.php', {
+            action: 'post',
+            recipe_id: Number(route.params.id),
+            user_id: authStore.user.user_id,
+            content: content
+        });
+        fetchData(); // 重新整理列表
+    } catch (err) {
+        console.error(err);
+        alert('發佈失敗');
+    }
+};
+
+// 點讚留言 (配合 PHP action: 'like')
+const handleLikeComment = async (commentId, type) => {
+    if (!authStore.user) return alert('登入後即可點讚');
+
+    try {
+        // type 由子組件傳回 'like' 或 'dislike'
+        await phpApi.post('social/comment.php', {
+            action: 'like',
+            comment_id: commentId,
+            type: type
+        });
+
+        // 本地立即更新 UI 數字 (選用，或直接 fetchData)
+        const target = commentList.value.find(c => c.comment_id === commentId);
+        if (target) {
+            target.likes = type === 'like' ? target.likes + 1 : Math.max(0, target.likes - 1);
+        }
+    } catch (err) {
+        console.error('點讚失敗:', err);
+    }
+};
+
+// 刪除留言
+const handleDeleteComment = async (commentId) => {
+    if (!authStore.user) return;
+    if (!confirm('確定要刪除嗎？')) return;
+
+    try {
+        // 使用 delete 方法，並透過 URL 傳遞參數
+        const userId = authStore.user.user_id;
+        await phpApi.delete(`social/comment.php?comment_id=${commentId}&user_id=${userId}`);
+
+        // 成功後重新整理
+        fetchData();
+        alert('留言已刪除');
+    } catch (err) {
+        console.error('刪除失敗原因:', err.response?.data || err);
+        alert('刪除失敗：' + (err.response?.data?.message || '權限不足'));
+    }
 };
 
 onMounted(() => {
@@ -399,7 +525,7 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
                     <section v-if="!isPreviewMode" class="mb-10 fade-up" style="--delay: 6">
                         <section v-if="!isPreviewMode" class="mb-10 fade-up" style="--delay: 6">
                             <RecipeComments :list="commentList" @post-comment="handlePostComment"
-                            @like-comment="handleLikeComment" @delete-comment="handleDeleteComment" />
+                                @like-comment="handleLikeComment" @delete-comment="handleDeleteComment" />
                         </section>
                     </section>
                 </div>
