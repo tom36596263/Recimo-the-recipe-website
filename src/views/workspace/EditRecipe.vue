@@ -101,8 +101,12 @@ onMounted(async () => {
 
   try {
     // 💡 無論是否為新食譜，都先載入食材 Master Data
-    const resIngMaster = await publicApi.get('data/recipe/ingredients.json');
+    const [resIngMaster, resTagsMaster] = await Promise.all([
+      publicApi.get('data/recipe/ingredients.json'),
+      publicApi.get('data/recipe/tags.json') // 抓取標籤名稱庫
+    ]);
     ingredientsMasterList.value = resIngMaster.data || [];
+    const allTagsMaster = resTagsMaster.data || [];
 
     // 優先檢查 Store 是否已有暫存數據
     if (recipeStore.rawEditorData) {
@@ -118,7 +122,8 @@ onMounted(async () => {
       publicApi.get('data/recipe/recipes.json'),
       publicApi.get('data/recipe/recipe_ingredient.json'),
       publicApi.get('data/recipe/steps.json'),
-      publicApi.get('data/recipe/step_ingredients.json')
+      publicApi.get('data/recipe/step_ingredients.json'),
+      publicApi.get('data/recipe/recipe_tags.json')
     ]);
 
     const found = resR.data.find(r => Number(r.recipe_id) === editIdFromUrl);
@@ -131,10 +136,12 @@ onMounted(async () => {
       recipeForm.value.original_title = found.recipe_title;
       recipeForm.value.adapt_title = `${found.recipe_title} (改編版)`;
       recipeForm.value.title = found.recipe_title;
+      recipeForm.value.adapt_description = ''; //<=新加的
     } else {
       recipeForm.value.recipe_id = editIdFromUrl;
       recipeForm.value.title = found.recipe_title;
     }
+    
 
     recipeForm.value.description = found.recipe_description || found.recipe_descreption || '';
     recipeForm.value.difficulty = found.recipe_difficulty || 1;
@@ -146,6 +153,9 @@ onMounted(async () => {
     recipeForm.value.totalTime = totalTimeStr.includes(':')
       ? (p => parseInt(p[0], 10) * 60 + parseInt(p[1], 10))(totalTimeStr.split(':'))
       : parseInt(totalTimeStr, 10) || 30;
+
+
+      
 
     // 混合食材數據
     const links = resRecipeIng.data.filter(i => Number(i.recipe_id) === editIdFromUrl);
