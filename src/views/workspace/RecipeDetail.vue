@@ -45,7 +45,7 @@ const snapsData = ref([]);
 const commentList = ref([]);
 
 // 核心抓取
-// 核心抓取
+
 const fetchData = async () => {
     isLoading.value = true;
     const recipeId = Number(route.params.id);
@@ -68,7 +68,8 @@ const fetchData = async () => {
                 recipe_total_time: preview.totalTime || 30,
                 recipe_servings: previewServings,
                 recipe_likes: 0,
-                author_name: authStore.user?.user_name || '您的預覽'
+                author_name: authStore.user?.user_name || '您的預覽',
+                tags: recipeStore.previewData?.tags || []
             };
 
             rawIngredients.value = (preview.ingredients || []).map(ing => {
@@ -103,14 +104,16 @@ const fetchData = async () => {
 
     try {
         // 同時抓取所有必要的資料 (含 PHP 留言)
-        const [resR, resRecipeIng, resIngMaster, resS, resG, resU, resC] = await Promise.all([
+        const [resR, resRecipeIng, resIngMaster, resS, resG, resU, resC, resRecipeTag, resTagMaster] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_ingredient.json'),
             publicApi.get('data/recipe/ingredients.json'),
             publicApi.get('data/recipe/steps.json'),
             publicApi.get('data/social/gallery.json'),
             publicApi.get('data/user/users.json'),
-            recipeId ? phpApi.get(`social/comment.php?recipe_id=${recipeId}`) : Promise.resolve({ data: [] })
+            recipeId ? phpApi.get(`social/comment.php?recipe_id=${recipeId}`) : Promise.resolve({ data: [] }),
+            publicApi.get('data/recipe/recipe_tag.json'),
+            publicApi.get('data/recipe/tags.json')
         ]);
 
         const dbRecipe = resR.data.find(r => Number(r.recipe_id) === recipeId);
@@ -207,6 +210,23 @@ const fetchData = async () => {
         rawRecipe.value = dbRecipe;
         if (!rawRecipe.value) return;
 
+        // 🛡️ 安全處理標籤 (用獨立的 try-catch，避免標籤報錯影響整個食譜)
+        try {
+            const recipeTagsRaw = resRecipeTag?.data || [];
+            const tagMaster = resTagMaster?.data || [];
+            const currentRecipeTagIds = recipeTagsRaw
+                .filter(rt => Number(rt.recipe_id) === recipeId)
+                .map(rt => Number(rt.tag_id));
+
+            rawRecipe.value.tags = tagMaster.filter(t =>
+                currentRecipeTagIds.includes(Number(t.tag_id))
+            );
+        } catch (tagErr) {
+            console.warn("標籤處理發生錯誤:", tagErr);
+            rawRecipe.value.tags = [];
+        }
+        
+
         servings.value = Number(rawRecipe.value.recipe_servings || 1);
 
         const recipeIng = resRecipeIng.data || [];
@@ -229,7 +249,12 @@ const fetchData = async () => {
             };
         });
 
-        rawSteps.value = resS.data.filter(s => Number(s.recipe_id) === recipeId).sort((a, b) => a.step_order - b.step_order);
+        if (resS && resS.data) {
+            rawSteps.value = resS.data
+                .filter(s => Number(s.recipe_id) === recipeId)
+                .sort((a, b) => (Number(a.step_order) || 0) - (Number(b.step_order) || 0));
+        }
+
     } catch (err) {
         console.error('抓取失敗:', err);
     } finally {
@@ -294,7 +319,8 @@ const recipeIntroData = computed(() => {
         image: getSmartImageUrl(r.recipe_image_url),
         time: formatTime(r.recipe_total_time),
         difficulty: r.recipe_difficulty || 1,
-        description: r.recipe_descreption || r.recipe_description || '暫無簡介'
+        description: r.recipe_descreption || r.recipe_description || '暫無簡介',
+        tags: r.tags || []
     };
 });
 
