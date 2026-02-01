@@ -179,6 +179,13 @@ onMounted(async () => {
         tags: s.step_ingredients ? s.step_ingredients.map(id => Number(id)) : []
       }));
 
+      const actualSum = recipeForm.value.steps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
+
+      // 如果加總出來的時間跟資料庫抓到的時間不一樣，強制修正它
+      if (actualSum > 0) {
+        recipeForm.value.totalTime = actualSum;
+      }
+
       console.log('✅ 資料同步載入完成', recipeForm.value);
     }
   } catch (err) {
