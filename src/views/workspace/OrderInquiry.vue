@@ -1,37 +1,59 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import OrderCard from '@/components/mall/OrderCard.vue';
-import { publicApi } from '@/utils/publicApi';
+// import { publicApi } from '@/utils/publicApi';
+import { phpApi } from '@/utils/publicApi';
 import BaseModal from '@/components/BaseModal.vue';
 
 
 // 資料容器
 const ordersData = ref([]);
 const currentPage = ref(1);
-const pageSize = 2;
+const pageSize = 5;
 
 const activeTag = ref('全部訂單');
 const selectedDate = ref('');
-
+const userId = JSON.parse(localStorage.getItem('user_info'))?.id || 1;
 // 讀取資料
-onMounted(async () => {
+const fetchOrders = async () => {
   try {
-    //讀取剛結帳的訂單 (前端格式: id, date, status)
-    const localOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
+    // 1. 抓取訂單清單 (補上 /mall/ 路徑)
+    const resList = await phpApi.get('mall/user_order_list.php', {
+      params: { user_id: userId }
+    });
 
-    //讀取歷史訂單 (資料庫格式: ORDER_ID, CREATED, ORDER_STATUS)
-    // 假設你的 json 檔案內容已經改成資料庫欄位名稱了
-    const res = await publicApi.get('data/mall/orders.json');
-    const jsonOrders = res.data || [];
+    const list = Array.isArray(resList.data) ? resList.data : [];
 
-    //合併資料
-    ordersData.value = [...localOrders, ...jsonOrders];
+    // 2. 併發抓取每一筆的明細 (包含 items)
+    const detailedOrders = await Promise.all(
+      list.map(async (basicOrder) => {
+        try {
+          // 注意：你的網址參數是 id=...，所以這裡帶 id
+          const oid = basicOrder.order_id || basicOrder.ORDER_ID;
+          const resDetail = await phpApi.get('mall/user_order.php', {
+            params: {
+              id: oid,
+              user_id: userId
+            }
+          });
+          // PHP 回傳的結構通常是 { ..., items: [...] }
+          return resDetail.data;
+        } catch (e) {
+          console.error(`訂單 ${basicOrder.order_id} 詳情讀取失敗`, e);
+          return basicOrder;
+        }
+      })
+    );
+
+    ordersData.value = detailedOrders;
 
   } catch (err) {
     console.error('讀取訂單失敗', err);
-    const localOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
-    ordersData.value = localOrders;
   }
+};
+
+onMounted(() => {
+  fetchOrders();
 });
 
 const tags = [
@@ -67,16 +89,11 @@ const filteredProducts = computed(() => {
   }
 
   //過濾日期
+
   if (selectedDate.value) {
     result = result.filter(item => {
-      // 取得日期字串
-      const rawDate = item.CREATED || item.date || '';
-
-      // 格式處理：資料庫可能是 "2026-01-24 14:00:00"，我們只取前 10 碼 "2026-01-24"
-      // 如果是前端存的 "2026-01-24" 也不會受影響
-      const itemDate = String(rawDate).substring(0, 10);
-
-      return itemDate === selectedDate.value;
+      const rawDate = item.created || item.CREATED || '';
+      return String(rawDate).substring(0, 10) === selectedDate.value;
     });
   }
 

@@ -258,6 +258,17 @@ const shippingFee = computed(() => {
 const totalAmount = computed(() => {
   return subtotal.value + shippingFee.value;
 });
+// 1. 先建立一個清空資料庫的輔助函式
+const clearDatabaseCart = async () => {
+  try {
+    const response = await phpApi.get('/mall/clear_cart.php'); // 確保路徑對應你的檔案
+    console.log('後端購物車清空結果:', response.data);
+    return response.data.status === 'success';
+  } catch (error) {
+    console.error('清空後端購物車失敗:', error);
+    return false;
+  }
+};
 
 const handleSubmit = async () => {
   // 1. 驗證邏輯 (保持不變)
@@ -323,17 +334,21 @@ const handleSubmit = async () => {
   let realOrderId = null;
 
   try {
+    // A. 呼叫原本的 add_order.php 送出訂單
     const response = await phpApi.post('/mall/add_order.php', orderPayload);
-    // 這裡我們只看 HTTP 狀態碼有沒有成功，具體錯誤訊息我們印出來就好
     console.log('API 回傳:', response.data);
+
     if (response.data.success) {
       apiSuccess = true;
       realOrderId = response.data.order_id;
+
+      // B. 🌟 關鍵：訂單成功後，立即呼叫清空購物車 API
+      await clearDatabaseCart();
     }
   } catch (error) {
-    console.error('API 連線失敗 (500)，切換至本地模擬模式:', error);
-    // 🌟 關鍵：這裡不 return，也不 alert 錯誤，讓它繼續往下執行燈箱邏輯
+    console.error('API 連線失敗，走本地模擬模式:', error);
   }
+
 
   // 4. 🌟 無論 API 成功或失敗，都執行原本的 LocalStorage 與燈箱邏輯 🌟
 
@@ -365,7 +380,8 @@ const handleSubmit = async () => {
   localStorage.setItem('mall_orders', JSON.stringify(existingOrders));
 
   // 清空購物車狀態
-  cartStore.items = [];
+  cartStore.items = [];         // 清空 Pinia
+  cartItemsFromDB.value = [];   // 清空原本從 PHP 抓回來的暫存
 
   // 顯示成功燈箱
   showSuccessModal.value = true;

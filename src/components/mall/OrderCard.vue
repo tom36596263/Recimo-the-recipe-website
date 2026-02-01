@@ -23,7 +23,7 @@ const orderId = computed(() => {
 
 // 取得日期
 const orderDate = computed(() => {
-  return props.order.CREATED || props.order.date || '剛剛';
+  return props.order.created || props.order.CREATED || props.order.date || '剛剛';
 });
 
 // 取得物流 ID (若無或為"1"則隨機 7 碼)
@@ -44,43 +44,54 @@ const logisticsId = computed(() => {
 
 // 取得收件人
 const receiverName = computed(() => {
-  if (props.order.RECIPIENT_NAME) return props.order.RECIPIENT_NAME;
-  if (props.order.purchaser_info) {
-    return props.order.purchaser_info.name || props.order.purchaser_info.receiver;
-  }
-  return props.order.receiver || props.order.name || '未知';
+  // 增加對小寫 recipient_name 的判斷
+  return props.order.recipient_name ||
+    props.order.RECIPIENT_NAME ||
+    props.order.receiver ||
+    props.order.name ||
+    '未知';
 });
 
 // 取得電話
 const receiverPhone = computed(() => {
-  if (props.order.RECIPIENT_PHONE) return props.order.RECIPIENT_PHONE;
-  if (props.order.purchaser_info) return props.order.purchaser_info.phone;
-  return props.order.phone || '未知';
+  // 增加對小寫 recipient_phone 的判斷
+  return props.order.recipient_phone ||
+    props.order.RECIPIENT_PHONE ||
+    props.order.phone ||
+    '未知';
 });
 
-// 取得訂單狀態 (預設 0)
 const orderStatus = computed(() => {
-  if (props.order.ORDER_STATUS !== undefined) return props.order.ORDER_STATUS;
-  if (props.order.status !== undefined) return props.order.status;
-  return 0;
+  const s = (props.order.order_status !== undefined && props.order.order_status !== null)
+    ? props.order.order_status
+    : (props.order.ORDER_STATUS !== undefined ? props.order.ORDER_STATUS : props.order.status);
+
+  return s !== undefined ? Number(s) : 0;
 });
 
 // 取得商品列表並標準化
 const displayItems = computed(() => {
-  const items = props.order.products || props.order.items || [];
+  const items = props.order.items || props.order.products || [];
   if (!Array.isArray(items)) return [];
 
   return items.map(item => ({
-    name: item.PRODUCT_NAME || item.name || item.product_name || '未知商品',
-    qty: item.QUANTITY || item.qty || item.count || item.quantity || 0,
-    price: item.SNAPSHOT_PRICE || item.product_price || item.price || 0
+    // 這裡要對應 PHP 回傳的 snapshot_price 與 product_name
+    name: item.product_name || item.PRODUCT_NAME || item.name || '未知商品',
+    qty: item.quantity || item.QUANTITY || item.qty || 0,
+    price: item.snapshot_price || item.SNAPSHOT_PRICE || item.price || 0
   }));
 });
 
 // 計算總金額
 const totalAmount = computed(() => {
-  if (props.order.TOTAL_AMOUNT !== undefined) return props.order.TOTAL_AMOUNT;
-  if (props.order.totalAmount !== undefined) return props.order.totalAmount;
+  // 優先讀取後端回傳的 total_amount，接著是其他可能的變數名
+  const amount = props.order.total_amount ??
+    props.order.TOTAL_AMOUNT ??
+    props.order.totalAmount;
+
+  if (amount !== undefined && amount !== null) return amount;
+
+  // 如果後端沒給總金額，才用商品列表累加
   return displayItems.value.reduce((sum, item) => sum + (item.price * item.qty), 0);
 });
 
@@ -91,20 +102,32 @@ const totalQuantity = computed(() => {
 
 // 取得付款方式 
 const paymentText = computed(() => {
-  const methodRaw = props.order.PAYMENT_METHOD || props.order.paymentMethod || props.order.payment;
-  if (!methodRaw) return '未付款';
+  // 1. 根據你 PHP 的輸出，優先抓取小寫底線的 key
+  const methodRaw = props.order.payment_method ??
+    props.order.PAYMENT_METHOD ??
+    props.order.payment;
 
-  const method = String(methodRaw).toLowerCase().trim();
+  // 2. 處理空值
+  if (methodRaw === null || methodRaw === undefined || methodRaw === '') {
+    return '未付款';
+  }
+
+  // 3. 轉為字串並移除空白，確保比對正確
+  const method = String(methodRaw).trim().toLowerCase();
+
+  // 4. 定義對應表 (請根據你資料庫定義的數字來調整)
+  // 如果你的系統定義 2 是貨到付款，請改這裡：
   const map = {
-    'cod': '貨到付款',
-    'card': '信用卡付款', 'credit': '信用卡付款', 'visa': '信用卡付款', 'master': '信用卡付款',
-    'transfer': '銀行轉帳', 'atm': '銀行轉帳', 'bank': '銀行轉帳',
-    '0': '貨到付款',
-    '1': '信用卡付款'
+    '2': '貨到付款', // 根據你目前的 JSON 數值修正
+    '1': '信用卡付款',
+    // '0': '銀行轉帳',   // 或是其他對應
+    // 'cod': '貨到付款',
+    // 'card': '信用卡付款'
   };
-  return map[method] || methodRaw;
-});
 
+  return map[method] || `未知方式(${method})`;
+});
+console.log('收到訂單資料:', props.order);
 const emit = defineEmits(['cancel-order']);
 
 // 格式化 ID (超過 8 碼才截斷，現在隨機產生的 6/7 碼不會被截斷)
