@@ -69,7 +69,8 @@ const fetchData = async () => {
                 recipe_servings: previewServings,
                 recipe_likes: 0,
                 author_name: authStore.user?.user_name || '您的預覽',
-                tags: recipeStore.previewData?.tags || []
+                // tags: recipeStore.previewData?.tags || []
+                tags: preview.recipe_tags || preview.tags || []
             };
 
             rawIngredients.value = (preview.ingredients || []).map(ing => {
@@ -176,7 +177,8 @@ const fetchData = async () => {
                 recipe_total_time: preview.totalTime || 30,
                 recipe_servings: previewServings,
                 recipe_likes: 0,
-                author_name: authStore.user?.user_name || '您的預覽'
+                author_name: authStore.user?.user_name || '您的預覽',
+                tags: preview.recipe_tags || preview.tags || [] // 補上這行
             };
 
             rawIngredients.value = (preview.ingredients || []).map(ing => {
@@ -521,7 +523,7 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
             <div class="row">
                 <div class="col-7 col-lg-12">
                     <RecipeIntro :info="recipeIntroData" :is-preview="isPreviewMode" class="fade-up"
-                        style="--delay: 2" />
+                    style="--delay: 2" />
 
                     <div class="d-lg-none">
                         <section class="mb-10 fade-up" style="--delay: 3">
