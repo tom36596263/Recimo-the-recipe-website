@@ -1,23 +1,18 @@
 <script setup>
-import { ref, defineProps, computed, defineEmits, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+// 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
 const authStore = useAuthStore();
 import { useCartStore } from '@/stores/cartStore'
+const cartStore = useCartStore()
 import ProductRmd from '@/components/mall/ProductRmd.vue';
 import CartCard from '@/components/mall/CartCard.vue';
 // 門禁守衛
 import { useAuthGuard } from '@/composables/useAuthGuard';
-import { useRouter } from 'vue-router';
 const { runWithAuth } = useAuthGuard();
-const cartStore = useCartStore()
+// 用來執行動作
+import { useRouter } from 'vue-router';
 const router = useRouter();
-
-// // 計算總額
-// const totalAmount = computed(() => {
-//   return cartStore.items.reduce((total, item) => {
-//     return total + (item.product_price * (item.count || 0));
-//   }, 0);
-// });
 
 // 前往結帳
 const handleGoToCheckout = () => {

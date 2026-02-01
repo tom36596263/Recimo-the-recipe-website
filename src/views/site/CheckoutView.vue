@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { phpApi } from '@/utils/publicApi';
 import card from '@/components/mall/CheckCard.vue';
 import { useCartStore } from '@/stores/cartStore';
 import Modal from '@/components/BaseModal.vue';
@@ -9,12 +10,102 @@ import Modal from '@/components/BaseModal.vue';
 const showSuccessModal = ref(false);
 const cartStore = useCartStore();
 const router = useRouter();
-const orderItems = computed(() => cartStore.items);
+const orderItems = computed(() => {
+  const source = cartItemsFromDB.value.length > 0 ? cartItemsFromDB.value : cartStore.items;
+  return source.map(item => ({
+    ...item,
+    // 確保這裡欄位名稱一致，PHP 回傳是 product_image
+    product_image: formatImageUrl(item.product_image || item.image)
+  }));
+});
+const formatImageUrl = (rawImage) => {
+  const PHP_BASE_URL = 'http://localhost:8888/recimo_api';
+  if (!rawImage) return '';
+  if (rawImage.startsWith('http')) return rawImage;
 
+  let relativePath = rawImage;
+  // 處理 JSON 格式
+  if (typeof rawImage === 'string' && (rawImage.startsWith('[') || rawImage.startsWith('{'))) {
+    try {
+      const parsed = JSON.parse(rawImage);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const cover = parsed.find(img => img.is_cover) || parsed[0];
+        relativePath = cover.image_url;
+      }
+    } catch (e) { console.warn('JSON parse error', e); }
+  }
+
+  const cleanPath = relativePath.replace(/^public\//, '').replace(/^\/+/, '');
+  return `${PHP_BASE_URL}/${cleanPath}`;
+};
+
+const cartItemsFromDB = ref([]); // 新增：存儲從 PHP 抓回來的購物車資料
+const isLoading = ref(true);
 //DOM Refs(用於信用卡輸入跳轉)
 const cardInput2 = ref(null);
 const cardInput3 = ref(null);
 const cardInput4 = ref(null);
+
+
+// CheckoutView.vue 裡的 fetchCartData
+// CheckoutView.vue
+const fetchCartData = async () => {
+  try {
+    isLoading.value = true;
+    // 1. 確保 URL 是正確的 get_cart.php
+    const response = await phpApi.get('/mall/get_cart.php');
+
+    // 2. 自動相容兩種格式：如果是物件就拿 .data，如果是陣列就直接用
+    const result = response.data;
+    const rawData = result.status === 'success' ? result.data : result;
+
+    if (Array.isArray(rawData)) {
+      const PHP_BASE_URL = 'http://localhost:8888/recimo_api';
+
+      cartItemsFromDB.value = rawData.map(item => {
+        let finalImageUrl = '';
+        let rawImage = item.product_image;
+
+        // 處理圖片路徑（處理 JSON 或 字串路徑）
+        if (rawImage) {
+          if (rawImage.startsWith('http')) {
+            finalImageUrl = rawImage;
+          } else {
+            // 如果是 JSON 格式 ["img1.jpg"] 則取第一張
+            if (rawImage.startsWith('[') || rawImage.startsWith('{')) {
+              try {
+                const parsed = JSON.parse(rawImage);
+                rawImage = Array.isArray(parsed) ? (parsed[0].image_url || parsed[0]) : rawImage;
+              } catch (e) { }
+            }
+            // 去除多餘路徑，拼接成完整網址
+            const cleanPath = rawImage.replace(/^public\//, '').replace(/^\/+/, '');
+            finalImageUrl = `${PHP_BASE_URL}/${cleanPath}`;
+          }
+        }
+
+        return {
+          ...item,
+          product_image: finalImageUrl,
+          // 確保欄位名稱跟子組件 props 一致 (quantity vs count)
+          quantity: Number(item.quantity || item.count || 1),
+          product_price: Number(item.product_price || item.price)
+        };
+      });
+
+      console.log('購物車資料加載成功:', cartItemsFromDB.value);
+    }
+  } catch (error) {
+    console.error('抓取購物車失敗:', error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchCartData();
+});
+
 
 // 表單資料 (前端使用 snake_case，送出時會轉成 DB 格式)
 const form = ref({
@@ -167,10 +258,20 @@ const shippingFee = computed(() => {
 const totalAmount = computed(() => {
   return subtotal.value + shippingFee.value;
 });
+// 1. 先建立一個清空資料庫的輔助函式
+const clearDatabaseCart = async () => {
+  try {
+    const response = await phpApi.get('/mall/clear_cart.php'); // 確保路徑對應你的檔案
+    console.log('後端購物車清空結果:', response.data);
+    return response.data.status === 'success';
+  } catch (error) {
+    console.error('清空後端購物車失敗:', error);
+    return false;
+  }
+};
 
-//送出訂單 (handleSubmit)
-const handleSubmit = () => {
-  // 執行驗證
+const handleSubmit = async () => {
+  // 1. 驗證邏輯 (保持不變)
   validateField('user_name');
   validateField('user_phone');
   validateField('user_email');
@@ -195,91 +296,100 @@ const handleSubmit = () => {
 
   if (hasError) {
     alert('資料填寫有誤，請檢查紅色欄位');
-  } else if (!form.value.shipping_type) {
-    alert('請選擇宅配地址方式');
-  } else if (!form.value.payment_method) {
-    alert('請選擇付款方式');
-  } else {
-    // === 準備送給後端的資料 ===
-
-    //商品明細
-    const orderDetailsPayload = orderItems.value.map(item => {
-      const price = Number(item.product_price || item.price || 0);
-      const qty = Number(item.count || item.quantity || 1);
-
-      return {
-        //資料庫欄位
-        PRODUCT_ID: item.id || item.product_id,
-        SNAPSHOT_PRICE: price,
-        QUANTITY: qty,
-        SUBTOTAL: price * qty,
-
-        //前端模擬顯示用
-        PRODUCT_NAME: item.product_name || item.name,
-        PRODUCT_IMAGE: item.product_image?.[0]?.image_url || item.image || ''
-      };
-    });
-
-    // 訂單主檔
-    // 產生一個模擬的 ID (用當下時間戳記)
-    const fakeOrderId = Number(Date.now().toString().slice(-8));
-
-    const orderMasterPayload = {
-      //加入模擬 ID
-      ORDER_ID: fakeOrderId,
-
-      USER_ID: 1,
-      LOGISTICS_ID: form.value.logistics_id,
-      SUBTOTAL: subtotal.value,
-      DISCOUNT_AMOUNT: 0,
-      SHIPPING_FEE: shippingFee.value,
-      TOTAL_AMOUNT: totalAmount.value,
-      CREATED: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      RECIPIENT_NAME: form.value.shipping_type === 'same' ? form.value.user_name : form.value.recipient_name,
-      RECIPIENT_PHONE: form.value.shipping_type === 'same' ? form.value.user_phone : form.value.recipient_phone,
-      SHIPPING_ADDRESS: form.value.shipping_type === 'same' ? form.value.user_address : form.value.shipping_address,
-      ORDER_STATUS: 0,
-      PAYMENT_METHOD: form.value.payment_method,
-      PAYMENT_STATUS: form.value.payment_method === 'card' ? 1 : 0,
-
-      // 將商品明細夾帶在 items
-      items: orderDetailsPayload,
-
-      //為了相容OrderCard，也可以多存 products
-      products: orderDetailsPayload
-    };
-
-    console.log('準備寫入的訂單資料：', orderMasterPayload);
-
-
-    // 寫入 LocalStorage (模擬資料庫)
-
-    try {
-      // 讀取舊資料
-      const existingOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
-
-      // 把新訂單加到最前面
-      existingOrders.unshift(orderMasterPayload);
-
-      // 存回去
-      localStorage.setItem('mall_orders', JSON.stringify(existingOrders));
-
-      console.log('寫入 LocalStorage 成功！');
-    } catch (e) {
-      console.error('寫入失敗', e);
-    }
-    // ==========================================
-
-    // TODO: 這裡接 axios.post API (等後端好了再打開)
-    // axios.post('/api/orders', orderMasterPayload).then(...)
-
-    // 清空購物車並顯示成功
-    cartStore.items = [];
-    showSuccessModal.value = true;
-    setTimeout(() => {
-      handleModalCloseAndRedirect();
-    }, 3000);
+    return;
   }
+
+  if (!form.value.shipping_type) {
+    alert('請選擇宅配地址方式');
+    return;
+  }
+
+  if (!form.value.payment_method) {
+    alert('請選擇付款方式');
+    return;
+  }
+
+  // 2. 準備 Payload
+  const orderPayload = {
+    user_id: 1,
+    logistics_id: form.value.logistics_id,
+    subtotal: subtotal.value,
+    discount_amount: 0,
+    shipping_fee: shippingFee.value,
+    total_amount: totalAmount.value,
+    recipient_name: form.value.shipping_type === 'same' ? form.value.user_name : form.value.recipient_name,
+    recipient_phone: form.value.shipping_type === 'same' ? form.value.user_phone : form.value.recipient_phone,
+    shipping_address: form.value.shipping_type === 'same' ? form.value.user_address : form.value.shipping_address,
+    payment_method: form.value.payment_method,
+    items: orderItems.value.map(item => ({
+      product_id: item.product_id,
+      product_name: item.product_name,
+      price: Number(item.product_price),
+      quantity: Number(item.quantity)
+    }))
+  };
+
+  // 3. 嘗試呼叫 API (如果不通也沒關係，繼續往下走)
+  let apiSuccess = false;
+  let realOrderId = null;
+
+  try {
+    // A. 呼叫原本的 add_order.php 送出訂單
+    const response = await phpApi.post('/mall/add_order.php', orderPayload);
+    console.log('API 回傳:', response.data);
+
+    if (response.data.success) {
+      apiSuccess = true;
+      realOrderId = response.data.order_id;
+
+      // B. 🌟 關鍵：訂單成功後，立即呼叫清空購物車 API
+      await clearDatabaseCart();
+    }
+  } catch (error) {
+    console.error('API 連線失敗，走本地模擬模式:', error);
+  }
+
+
+  // 4. 🌟 無論 API 成功或失敗，都執行原本的 LocalStorage 與燈箱邏輯 🌟
+
+  // 使用 API 回傳的 ID 或是 生成假 ID
+  const finalOrderId = realOrderId || Number(Date.now().toString().slice(-8));
+
+  const orderMasterPayload = {
+    ORDER_ID: finalOrderId,
+    USER_ID: 1,
+    LOGISTICS_ID: form.value.logistics_id,
+    SUBTOTAL: subtotal.value,
+    DISCOUNT_AMOUNT: 0,
+    SHIPPING_FEE: shippingFee.value,
+    TOTAL_AMOUNT: totalAmount.value,
+    CREATED: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    RECIPIENT_NAME: orderPayload.recipient_name,
+    RECIPIENT_PHONE: orderPayload.recipient_phone,
+    SHIPPING_ADDRESS: orderPayload.shipping_address,
+    ORDER_STATUS: 0,
+    PAYMENT_METHOD: form.value.payment_method,
+    PAYMENT_STATUS: form.value.payment_method === 'card' ? 1 : 0,
+    items: orderPayload.items,
+    products: orderPayload.items
+  };
+
+  // 存入 LocalStorage
+  const existingOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
+  existingOrders.unshift(orderMasterPayload);
+  localStorage.setItem('mall_orders', JSON.stringify(existingOrders));
+
+  // 清空購物車狀態
+  cartStore.items = [];         // 清空 Pinia
+  cartItemsFromDB.value = [];   // 清空原本從 PHP 抓回來的暫存
+
+  // 顯示成功燈箱
+  showSuccessModal.value = true;
+
+  // 3秒後跳轉
+  setTimeout(() => {
+    handleModalCloseAndRedirect();
+  }, 3000);
 };
 
 const handleModalCloseAndRedirect = () => {
@@ -288,8 +398,9 @@ const handleModalCloseAndRedirect = () => {
 };
 
 const backcart = () => {
-  router.push('./CartView.vue');
-}
+  // 假設你在 router/index.js 設定的購物車路徑是 /cart
+  router.push('/cart');
+};
 </script>
 
 <template>
@@ -489,13 +600,11 @@ const backcart = () => {
 
       <div class="col-6 col-lg-12">
         <div class="card-container">
-          <div class="order-list">
-            <div class="order-list">
-              <CheckCard v-for="item in orderItems" :key="item.id || item.product_id"
-                :product-name="item.product_name || item.name" :quantity="item.count || item.quantity"
-                :price="item.product_price || item.price" :image="item.image_url || item.PRODUCT_IMAGE || ''" />
-            </div>
+          <div class="order-list" v-if="!isLoading">
+            <CheckCard v-for="(item, index) in orderItems" :key="item.product_id" :product-name="item.product_name"
+              :quantity="Number(item.quantity)" :price="Number(item.product_price)" :image="item.product_image" />
           </div>
+          <div v-else style="text-align: center; padding: 20px;">資料加載中...</div>
         </div>
         <hr>
         <div class="total-sum">

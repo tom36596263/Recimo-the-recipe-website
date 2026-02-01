@@ -1,12 +1,9 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
-import { publicApi } from '@/utils/publicApi';
-import { base } from '@/utils/publicApi';
-
+import { ref, computed, nextTick, watch } from 'vue';
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
-import { useCartStore } from '@/stores/cartStore';
 const authStore = useAuthStore();
+import { useCartStore } from '@/stores/cartStore';
 const cartStore = useCartStore();
 // 引用彈窗
 import BaseModal from '@/components/BaseModal.vue';
@@ -18,8 +15,8 @@ import IconEyeClose from '~icons/material-symbols/visibility-off-outline-rounded
 // 引用驗證碼
 import CaptchaInput from '@/components/login/CaptchaInput.vue'
 // 呼叫Api
-import { phpApi } from '@/utils/publicApi.js';
-
+import { phpApi, base } from '@/utils/publicApi.js';
+// 用來執行動作
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
@@ -53,7 +50,7 @@ const touched = ref({
 });
 
 // ==========================================
-// 登入前端驗證訊息內容
+// 登入：前端驗證訊息內容
 // ==========================================
 const loginMessage = computed(() => {
   const t = touched.value.login;
@@ -89,13 +86,8 @@ const captchaError = computed(() => {
   return '';
 });
 
-const captchaStatus = computed(() => {
-  if (!touched.value.login.captcha) return '';
-  return captchaError.value ? 'error' : 'success';
-});
-
 // ==========================================
-// 註冊前端驗證訊息內容
+// 註冊：前端驗證訊息內容
 // ==========================================
 const registerMessage = computed(() => {
   const t = touched.value.register;
@@ -151,7 +143,6 @@ const regPasswordRef = ref(null);
 const regConfirmPasswordRef = ref(null);
 
 // 建立一個通用跳轉函式
-
 const focusInput = async (targetRef) => {
   await nextTick();
 
@@ -181,7 +172,7 @@ const onCaptchaVerified = (success) => {
 }
 
 // ==========================================
-// 登入按鈕邏輯
+// 登入：送出邏輯
 // ==========================================
 const handleLogin = async () => {
   // 觸發所有欄位的 touched 狀態，錯誤由紅字顯示
@@ -256,7 +247,7 @@ const resetLoginForm = () => {
     password: ''
   };
 
-  // 2. 清空驗證碼輸入 (如果有需要)
+  // 2. 清空驗證碼輸入
   loginForm.value.captchaInput = '';
 
   // 3. 重置「已觸碰」狀態，這樣錯誤訊息（紅字）才會消失
@@ -271,7 +262,7 @@ const resetLoginForm = () => {
 };
 
 // ==========================================
-// 註冊按鈕邏輯
+// 註冊：送出邏輯
 // ==========================================
 const handleRegister = async () => {
   // 觸發所有欄位的 touched 狀態，錯誤由紅字顯示
@@ -338,13 +329,14 @@ const passwordRules = computed(() => {
     hasLower: /[a-z]/.test(pwd),                  // 含一小寫字母
   };
 });
+
 // ==========================================
 // 翻頁效果與自動清空
 // ==========================================
 const isRegister = ref(false);
 const isVisible = ref(true);
 
-// 核心監聽：只要頁面一切換，就清空「對方」的資料
+// 只要頁面一切換，就清空「對方」的資料
 watch(isRegister, (newVal) => {
   if (newVal) {
     // 切換到註冊 -> 清空登入表單
@@ -597,7 +589,7 @@ const currentUserName = computed(() => {
   // margin: 20px 0;
   display: flex;
   flex-direction: column; // 讓內容由上往下排
-  align-items: center; // **關鍵：讓所有子元素水平置中**
+  align-items: center; // 讓所有子元素水平置中**
   width: 100%; // 確保容器撐滿寬度
 }
 
@@ -791,7 +783,6 @@ const currentUserName = computed(() => {
   background-color: rgba(0, 0, 0, 0.5);
 
   // 賦予整個空間 3D 深度感，數值越大透視越平緩
-
   perspective: 2000px;
 
   &__overlay {
@@ -813,8 +804,8 @@ const currentUserName = computed(() => {
   // 確保子元素能在 3D 空間中運動
   transform-style: preserve-3d;
   transition: transform 0.6s ease;
-  // 3. 底層固定頁面 (Left & Right)
 
+  // 3. 底層固定頁面 (Left & Right)
   &__base {
     flex: 1;
     background-color: #fff;
@@ -846,7 +837,7 @@ const currentUserName = computed(() => {
     width: 50%;
     height: 100%;
 
-    // 設定旋轉軸心在左側（即書脊位置）
+    // 設定旋轉軸心在左側（書脊位置）
     transform-origin: left center;
     transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     transform-style: preserve-3d;

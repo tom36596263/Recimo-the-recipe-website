@@ -1,59 +1,29 @@
 <script setup>
 import { computed } from 'vue';
 
-// 1. 接收父層傳來的資料
 const props = defineProps({
-  productName: {
-    type: String,
-    default: ''
-  },
-  quantity: {
-    type: Number,
-    default: 0
-  },
-  price: {
-    type: Number,
-    default: 0
-  },
-  image: {
-    type: String,
-    default: ''
-  }
+  productName: { type: String, default: '' },
+  quantity: { type: Number, default: 0 },
+  price: { type: Number, default: 0 },
+  image: { type: String, default: '' }
 });
 
-// 2. 計算小計 (單價 * 數量)
-// 直接使用 props.price 和 props.quantity 計算
 const subtotal = computed(() => {
   return props.price * props.quantity;
 });
 
-
+// ★ 因為父層已經把完整網址傳進來了，這裡直接顯示即可
 const cleanImage = computed(() => {
   if (!props.image) return '/default.png';
-
-  // 關鍵判斷：如果 PHP 已經給了完整網址 (http:// 或 https://)，直接回傳
-  if (props.image.startsWith('http')) {
-    return props.image;
-  }
-
-  // 以下是針對「非網址」格式（如本地開發手寫的路徑）的處理
-  let path = props.image.replace(/^public\//, '');
-  if (path.startsWith('/')) {
-    path = path.substring(1);
-  }
-
-  const base = import.meta.env.BASE_URL;
-  const safeBase = base.endsWith('/') ? base : `${base}/`;
-
-  return `${safeBase}${path}`;
+  return props.image;
 });
-
 </script>
 
 <template>
   <div class="product-card">
     <div class="image-wrapper">
-      <img :src="cleanImage" :alt="productName" />
+      <img v-if="image" :src="cleanImage" :alt="productName" />
+      <div v-else class="loading-placeholder">圖片載入中...</div>
     </div>
 
     <div class="content">
