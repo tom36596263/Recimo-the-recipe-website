@@ -350,22 +350,35 @@ const toggleWorkspaceTopBar = (show) => {
     if (topBar) topBar.style.display = show ? '' : 'none';
 };
 
-// 新增留言
+
 const handlePostComment = async (content) => {
+    // 檢查登入狀態與內容
     if (!authStore.user) return alert('請先登入');
-    if (!content.trim()) return;
+    if (!content || !content.trim()) return;
+
+    // 取得正確的 user_id (相容不同 store 結構)
+    const userId = authStore.user.user_id || authStore.user.id;
 
     try {
-        await phpApi.post('social/comment.php', {
+        const payload = {
             action: 'post',
             recipe_id: Number(route.params.id),
-            user_id: authStore.user.user_id,
+            user_id: userId,
             content: content
-        });
-        fetchData(); // 重新整理列表
+        };
+
+        console.log("前端送出的資料:", payload); // 除錯用
+
+        const response = await phpApi.post('social/comment.php', payload);
+
+        if (response.data.success) {
+            fetchData(); // 成功後重新整理列表
+        } else {
+            alert('失敗：' + response.data.message);
+        }
     } catch (err) {
-        console.error(err);
-        alert('發佈失敗');
+        console.error('API 錯誤:', err.response?.data || err);
+        alert('發佈失敗，請稍後再試');
     }
 };
 
@@ -391,22 +404,32 @@ const handleLikeComment = async (commentId, type) => {
     }
 };
 
-// 刪除留言
 const handleDeleteComment = async (commentId) => {
-    if (!authStore.user) return;
-    if (!confirm('確定要刪除嗎？')) return;
+    if (!authStore.user) return alert('請先登入');
+    if (!confirm('確定要刪除這則留言嗎？')) return;
+
+    // 確保抓到正確的 ID 欄位
+    const userId = authStore.user.user_id || authStore.user.id;
 
     try {
-        // 使用 delete 方法，並透過 URL 傳遞參數
-        const userId = authStore.user.user_id;
-        await phpApi.delete(`social/comment.php?comment_id=${commentId}&user_id=${userId}`);
+        // 建議 URL 參數加上 timestamp 避免快取，並明確指定 comment_id
+        const response = await phpApi.delete(`social/comment.php`, {
+            params: {
+                comment_id: commentId,
+                user_id: userId
+            }
+        });
 
-        // 成功後重新整理
-        fetchData();
-        alert('留言已刪除');
+        if (response.data.success) {
+            alert('留言已刪除');
+            fetchData(); // 重新整理列表
+        } else {
+            alert('刪除失敗：' + (response.data.message || '未知錯誤'));
+        }
     } catch (err) {
-        console.error('刪除失敗原因:', err.response?.data || err);
-        alert('刪除失敗：' + (err.response?.data?.message || '權限不足'));
+        console.error('刪除請求出錯:', err);
+        // 檢查是否為 405 Method Not Allowed 或 403 Forbidden
+        alert('刪除失敗，請檢查網路或權限');
     }
 };
 
