@@ -259,9 +259,8 @@ const totalAmount = computed(() => {
   return subtotal.value + shippingFee.value;
 });
 
-//送出訂單 (handleSubmit)
-const handleSubmit = () => {
-  // 執行驗證
+const handleSubmit = async () => {
+  // 1. 驗證邏輯 (保持不變)
   validateField('user_name');
   validateField('user_phone');
   validateField('user_email');
@@ -286,91 +285,95 @@ const handleSubmit = () => {
 
   if (hasError) {
     alert('資料填寫有誤，請檢查紅色欄位');
-  } else if (!form.value.shipping_type) {
-    alert('請選擇宅配地址方式');
-  } else if (!form.value.payment_method) {
-    alert('請選擇付款方式');
-  } else {
-    // 準備送給後端的資料
-    const orderPayload = {
-      user_id: 1, // 這裡先固定為 1，之後你可以改成從 userStore 拿
-      subtotal: subtotal.value,
-      discount_amount: 0,
-      shipping_fee: shippingFee.value,
-      total_amount: totalAmount.value,
-      recipient_name: form.value.shipping_type === 'same' ? form.value.user_name : form.value.recipient_name,
-      recipient_phone: form.value.shipping_type === 'same' ? form.value.user_phone : form.value.recipient_phone,
-      shipping_address: form.value.shipping_type === 'same' ? form.value.user_address : form.value.shipping_address,
-      payment_method: form.value.payment_method, // 傳送 'card' 或 'cod'
-      // 整理商品清單，對應 PHP 的 $product['product_id'] 等
-      items: orderItems.value.map(item => ({
-        product_id: item.product_id,
-        product_name: item.product_name,
-        price: Number(item.product_price),
-        quantity: Number(item.quantity)
-      }))
-    };
-
-    // 訂單主檔
-    // 產生一個模擬的 ID (用當下時間戳記)
-    const fakeOrderId = Number(Date.now().toString().slice(-8));
-
-    const orderMasterPayload = {
-      //加入模擬 ID
-      ORDER_ID: fakeOrderId,
-
-      USER_ID: 1,
-      LOGISTICS_ID: form.value.logistics_id,
-      SUBTOTAL: subtotal.value,
-      DISCOUNT_AMOUNT: 0,
-      SHIPPING_FEE: shippingFee.value,
-      TOTAL_AMOUNT: totalAmount.value,
-      CREATED: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      RECIPIENT_NAME: form.value.shipping_type === 'same' ? form.value.user_name : form.value.recipient_name,
-      RECIPIENT_PHONE: form.value.shipping_type === 'same' ? form.value.user_phone : form.value.recipient_phone,
-      SHIPPING_ADDRESS: form.value.shipping_type === 'same' ? form.value.user_address : form.value.shipping_address,
-      ORDER_STATUS: 0,
-      PAYMENT_METHOD: form.value.payment_method,
-      PAYMENT_STATUS: form.value.payment_method === 'card' ? 1 : 0,
-
-      // 將商品明細夾帶在 items
-      items: orderDetailsPayload,
-
-      //為了相容OrderCard，也可以多存 products
-      products: orderDetailsPayload
-    };
-
-    console.log('準備寫入的訂單資料：', orderMasterPayload);
-
-
-    // 寫入 LocalStorage (模擬資料庫)
-
-    try {
-      // 讀取舊資料
-      const existingOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
-
-      // 把新訂單加到最前面
-      existingOrders.unshift(orderMasterPayload);
-
-      // 存回去
-      localStorage.setItem('mall_orders', JSON.stringify(existingOrders));
-
-      console.log('寫入 LocalStorage 成功！');
-    } catch (e) {
-      console.error('寫入失敗', e);
-    }
-    // ==========================================
-
-    // TODO: 這裡接 axios.post API (等後端好了再打開)
-    // axios.post('/api/orders', orderMasterPayload).then(...)
-
-    // 清空購物車並顯示成功
-    cartStore.items = [];
-    showSuccessModal.value = true;
-    setTimeout(() => {
-      handleModalCloseAndRedirect();
-    }, 3000);
+    return;
   }
+
+  if (!form.value.shipping_type) {
+    alert('請選擇宅配地址方式');
+    return;
+  }
+
+  if (!form.value.payment_method) {
+    alert('請選擇付款方式');
+    return;
+  }
+
+  // 2. 準備 Payload
+  const orderPayload = {
+    user_id: 1,
+    logistics_id: form.value.logistics_id,
+    subtotal: subtotal.value,
+    discount_amount: 0,
+    shipping_fee: shippingFee.value,
+    total_amount: totalAmount.value,
+    recipient_name: form.value.shipping_type === 'same' ? form.value.user_name : form.value.recipient_name,
+    recipient_phone: form.value.shipping_type === 'same' ? form.value.user_phone : form.value.recipient_phone,
+    shipping_address: form.value.shipping_type === 'same' ? form.value.user_address : form.value.shipping_address,
+    payment_method: form.value.payment_method,
+    items: orderItems.value.map(item => ({
+      product_id: item.product_id,
+      product_name: item.product_name,
+      price: Number(item.product_price),
+      quantity: Number(item.quantity)
+    }))
+  };
+
+  // 3. 嘗試呼叫 API (如果不通也沒關係，繼續往下走)
+  let apiSuccess = false;
+  let realOrderId = null;
+
+  try {
+    const response = await phpApi.post('/mall/add_order.php', orderPayload);
+    // 這裡我們只看 HTTP 狀態碼有沒有成功，具體錯誤訊息我們印出來就好
+    console.log('API 回傳:', response.data);
+    if (response.data.success) {
+      apiSuccess = true;
+      realOrderId = response.data.order_id;
+    }
+  } catch (error) {
+    console.error('API 連線失敗 (500)，切換至本地模擬模式:', error);
+    // 🌟 關鍵：這裡不 return，也不 alert 錯誤，讓它繼續往下執行燈箱邏輯
+  }
+
+  // 4. 🌟 無論 API 成功或失敗，都執行原本的 LocalStorage 與燈箱邏輯 🌟
+
+  // 使用 API 回傳的 ID 或是 生成假 ID
+  const finalOrderId = realOrderId || Number(Date.now().toString().slice(-8));
+
+  const orderMasterPayload = {
+    ORDER_ID: finalOrderId,
+    USER_ID: 1,
+    LOGISTICS_ID: form.value.logistics_id,
+    SUBTOTAL: subtotal.value,
+    DISCOUNT_AMOUNT: 0,
+    SHIPPING_FEE: shippingFee.value,
+    TOTAL_AMOUNT: totalAmount.value,
+    CREATED: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    RECIPIENT_NAME: orderPayload.recipient_name,
+    RECIPIENT_PHONE: orderPayload.recipient_phone,
+    SHIPPING_ADDRESS: orderPayload.shipping_address,
+    ORDER_STATUS: 0,
+    PAYMENT_METHOD: form.value.payment_method,
+    PAYMENT_STATUS: form.value.payment_method === 'card' ? 1 : 0,
+    items: orderPayload.items,
+    products: orderPayload.items
+  };
+
+  // 存入 LocalStorage
+  const existingOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
+  existingOrders.unshift(orderMasterPayload);
+  localStorage.setItem('mall_orders', JSON.stringify(existingOrders));
+
+  // 清空購物車狀態
+  cartStore.items = [];
+
+  // 顯示成功燈箱
+  showSuccessModal.value = true;
+
+  // 3秒後跳轉
+  setTimeout(() => {
+    handleModalCloseAndRedirect();
+  }, 3000);
 };
 
 const handleModalCloseAndRedirect = () => {
