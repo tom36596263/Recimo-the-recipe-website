@@ -360,11 +360,27 @@ const handleShare = () => {
 };
 
 const backToEdit = () => {
-    const editId = route.query.editId || route.params.id;
-    router.push({
-        path: '/workspace/edit-recipe',
-        query: { editId, action: route.query.action }
-    });
+    // 1. 優先從 URL query 抓取，如果沒有則嘗試從 Store 抓
+    const editId = route.query.editId || recipeStore.previewData?.recipe_id;
+    const action = route.query.action; // 'adapt' 或 undefined (創建)
+
+    // 2. 判斷跳轉路徑
+    if (action === 'adapt' && editId) {
+        // 🚀 改編模式：返回原本的改編編輯頁
+        router.push({
+            path: '/workspace/edit-recipe',
+            query: { editId: editId, action: 'adapt' }
+        });
+    } else if (editId && editId !== '0') {
+        // 📝 一般編輯模式：返回該食譜編輯頁
+        router.push({
+            path: '/workspace/edit-recipe',
+            query: { editId: editId }
+        });
+    } else {
+        // ✨ 全新創建模式：返回空白編輯頁
+        router.push('/workspace/edit-recipe');
+    }
 };
 
 const handleServingsChange = (newVal) => {

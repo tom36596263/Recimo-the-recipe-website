@@ -97,18 +97,28 @@ watch(
 
 async function loadRecipeData(recipeId) {
     try {
-        // 🏆 1. 多抓一個 ingredients.json 總表
-        const [resRecipes, resRelIngredients, resSteps, resIngMaster] = await Promise.all([
+        const [
+            resRecipes,
+            resRelIngredients,
+            resSteps,
+            resIngMaster,
+            resTagsRel,    // 這裡原本漏掉了
+            resTagsMaster  // 這裡原本也漏掉了
+        ] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_ingredient.json'),
             publicApi.get('data/recipe/steps.json'),
-            publicApi.get('data/recipe/ingredients.json') // 👈 食材總表
+            publicApi.get('data/recipe/ingredients.json'),
+            publicApi.get('data/recipe/recipe_tag.json'), 
+            publicApi.get('data/recipe/tags.json')
         ]);
 
         const allRecipes = resRecipes.data;
         const allRelIngredients = resRelIngredients.data; // 關聯表
         const allSteps = resSteps.data;
         const ingMaster = resIngMaster.data; // 總表
+        const allTagsRel = resTagsRel.data;     // 標籤關聯數據
+        const tagsMaster = resTagsMaster.data;   // 標籤定義數據
         const targetParentId = Number(recipeId);
 
         // --- 處理母食譜 ---
@@ -128,6 +138,17 @@ async function loadRecipeData(recipeId) {
             .filter(r => Number(r.parent_recipe_id) === targetParentId)
             .map(childInfo => {
                 const childId = Number(childInfo.recipe_id);
+
+                // --- 新增：處理標籤關聯 ---
+                const childTags = allTagsRel
+                    .filter(tr => Number(tr.recipe_id) === childId)
+                    .map(rel => {
+                        const masterTag = tagsMaster.find(t => Number(t.tag_id) === Number(rel.tag_id));
+                        return {
+                            tag_id: rel.tag_id,
+                            tag_name: masterTag ? masterTag.tag_name : '未知標籤'
+                        };
+                    });
 
                 // A. 關聯該改編食譜的「食材」並注入「名稱」
                 const childIngredients = allRelIngredients
@@ -171,7 +192,8 @@ async function loadRecipeData(recipeId) {
                     recipe_descreption: childInfo.recipe_descreption,
                     recipe_servings: Number(childInfo.recipe_servings),
                     ingredients: childIngredients,
-                    steps: childSteps
+                    steps: childSteps,
+                    tags: childTags
                 };
             });
 

@@ -110,9 +110,20 @@ onMounted(async () => {
 
     if (recipeStore.rawEditorData) {
       recipeForm.value = { ...recipeStore.rawEditorData };
+      // ✨ [關鍵修正]：確保「改編模式」的狀態被正確維持
+      if (isAdapt) {
+        // 如果是改編，必須確保 parent_recipe_id 是網址上的那個 ID
+        // 這樣 handleSave 的 isAdaptModeActive 判斷才不會失效
+        recipeForm.value.parent_recipe_id = editIdFromUrl;
+        recipeForm.value.recipe_id = null; // 改編不應該有自己的舊 ID
+      }
+
+      // 清空暫存，避免污染下次開啟
       recipeStore.rawEditorData = null;
-      return;
+      console.log('🔄 已從暫存恢復資料，並同步改編狀態');
+      return; // 這裡可以結束，因為內容已經恢復，不需要再讀取 JSON
     }
+    
 
     if (!editIdFromUrl) return;
 
@@ -205,13 +216,20 @@ onMounted(async () => {
 });
 
 const handleSave = async () => {
-  const finalTitle = isAdaptModeActive.value ? (recipeForm.value.adapt_title || `${recipeForm.value.original_title} (改編版)`) : recipeForm.value.title;
-  const currentOriginId = route.query.editId || route.params.id;
+  const finalTitle = isAdaptModeActive.value
+    ? (recipeForm.value.adapt_title || `${recipeForm.value.original_title} (改編版)`)
+    : recipeForm.value.title;
+
+  // 取得來源 ID (如果是改編，這就是原食譜 ID)
+  const sourceId = route.query.editId || route.params.id;
 
   if (isPublished.value) {
     try {
       const coverBase64 = await fileToBase64(recipeForm.value.coverImg);
-      const processedSteps = await Promise.all(recipeForm.value.steps.map(async (s) => ({ ...s, image: await fileToBase64(s.image) })));
+      const processedSteps = await Promise.all(
+        recipeForm.value.steps.map(async (s) => ({ ...s, image: await fileToBase64(s.image) }))
+      );
+
       const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
 
       const saveData = {
@@ -228,21 +246,43 @@ const handleSave = async () => {
 
       localRevisions.unshift(saveData);
       localStorage.setItem('user_revisions', JSON.stringify(localRevisions));
+
       alert(`🎉「${finalTitle}」已發布！`);
-      router.push('/workspace');
-    } catch (err) { console.error("儲存失敗:", err); }
+
+      // ✨✨✨ 關鍵跳轉邏輯 ✨✨✨
+      if (isAdaptModeActive.value && sourceId) {
+        // 🚀 如果是改編模式：回到原本食譜的「改編一覽」頁面
+        router.push(`/workspace/modify-recipe/${sourceId}`);
+      } else {
+        // 📝 如果是全新創建：回到「我的食譜」
+        router.push('/workspace/my-recipes');
+      }
+
+    } catch (err) {
+      console.error("儲存失敗:", err);
+    }
   } else {
+    // 儲存草稿的情況 (非公開發布)
     alert('草稿儲存成功！');
-    router.push('/workspace');
+    router.push('/workspace/my-recipes');
   }
+
   recipeStore.rawEditorData = null;
 };
 
-// 預覽功能保留
 const handlePreview = () => {
   recipeStore.rawEditorData = { ...recipeForm.value };
   recipeStore.setPreviewFromEditor(JSON.parse(JSON.stringify(recipeForm.value)));
-  router.push({ path: `/workspace/recipe-detail/${route.params.id || 0}`, query: { mode: 'preview' } });
+
+  // 🚀 加上 query 參數，這樣預覽頁返回時才會知道自己還在 'adapt' 模式
+  router.push({
+    path: `/workspace/recipe-detail/${route.params.id || 0}`,
+    query: {
+      mode: 'preview',
+      editId: route.query.editId || route.params.id,
+      action: route.query.action
+    }
+  });
 };
 
 // 處理 Modal 傳回來的標籤
