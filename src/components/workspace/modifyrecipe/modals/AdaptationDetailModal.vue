@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-// 🏆 1. 引入團隊規範工具，取代手寫的 fileUrl 和 formatImg
+// 🏆 1. 引入團隊規範工具
 import { parsePublicFile } from '@/utils/parseFile';
 
 import RecipeIntro from '@/components/workspace/recipedetail/RecipeIntro.vue';
@@ -19,72 +19,63 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'delete-recipe']);
 
-// --- 🗑️ 移除原本手寫的 fileUrl 與 formatImg 函式 ---
-
-// 1. 取得原始份數 (防呆至少為 1)
+// 1. 取得食譜原始設定的份數 (例如 2)
 const originalServings = computed(() => {
     return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
 });
 
-// 在燈箱內計算顯示的營養素
-const displayedNutrition = computed(() => {
-    if (!props.nutrition) return null;
-    const s = currentServings.value; // 使用者在燈箱選的人份
-    return {
-        calories: props.nutrition.calories * s,
-        protein: props.nutrition.protein * s,
-        fat: props.nutrition.fat * s,
-        carbs: props.nutrition.carbs * s,
-    };
-});
-
-// 2. 當前的 UI 顯示人份數 (預設設為 1)
+// 2. 當前 UI 選擇的份數
 const currentServings = ref(1);
 
-// 當燈箱開啟或食譜切換時，初始化 currentServings
-watch(() => props.modelValue, (isOpen) => {
-    if (isOpen) {
-        currentServings.value = 1;
-    }
-});
-
-// 3. 核心：計算「每一份量」的基礎營養素
+// 3. 核心修正：基準營養值
 const baseNutritionPerServing = computed(() => {
-    if (!props.nutrition) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
-
-    const total = props.nutrition;
-    const s = originalServings.value;
-
+    const n = props.nutrition;
     return {
-        calories: Number(total.calories || 0) / s,
-        protein: Number(total.protein || 0) / s,
-        fat: Number(total.fat || 0) / s,
-        carbs: Number(total.carbs || 0) / s,
+        calories: Number(n?.calories || 0),
+        protein: Number(n?.protein || 0),
+        fat: Number(n?.fat || 0),
+        carbs: Number(n?.carbs || 0),
     };
 });
 
-// 4. 食材數據也要跟著 currentServings 連動
+// 4. 顯示營養數值
+const displayedNutrition = computed(() => {
+    const base = baseNutritionPerServing.value;
+    const s = currentServings.value;
+
+    return {
+        calories: Math.round(base.calories * s),
+        protein: (base.protein * s).toFixed(1),
+        fat: (base.fat * s).toFixed(1),
+        carbs: (base.carbs * s).toFixed(1),
+    };
+});
+
+// 🏆 修正重點：配合 RecipeIngredients.vue 的欄位名稱
 const ingredientsData = computed(() => {
     const list = props.recipe?.ingredients || [];
-    const scale = currentServings.value / originalServings.value;
+    // 這裡的 scale 設為 1，是因為 RecipeIngredients 內部已經會乘上 props.servings 了
+    // 為了避免重複計算，我們傳入原始比例
+    const scale = 1 / originalServings.value;
 
     return list.map(item => ({
-        INGREDIENT_NAME: item.name || item.ingredient_name || '未知食材',
-        amount: item.amount ? (Number(item.amount) * scale).toFixed(1) : '',
-        unit_name: item.unit || item.unit_name || 'g',
-        note: item.note || ''
+        INGREDIENT_NAME: item.ingredient_name || item.name || '未知食材',
+        // 傳入「單份份量」給子組件，讓它自己去乘 currentServings
+        amount: item.amount ? (Number(item.amount) * scale) : 0,
+        unit_name: item.unit_name || item.unit || 'g',
+        // 🚩 重點：子組件顯示的是 item.note，所以我們要把資料塞進 note 欄位
+        note: item.remark || item.note || ''
     }));
 });
 
-// --- 其他輔助邏輯 ---
-const closeModal = () => emit('update:modelValue', false);
+// 監聽燈箱開啟
+watch(() => props.modelValue, (isOpen) => {
+    if (isOpen) {
+        currentServings.value = originalServings.value;
+    }
+}, { immediate: true });
 
-const getAvatarStyle = (name) => {
-    if (!name) return { backgroundColor: '#74D09C' };
-    const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
-    const charCodeSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-    return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
-};
+// --- 資料轉換邏輯 (Intro & Steps) ---
 
 const introData = computed(() => {
     if (!props.recipe) return null;
@@ -94,17 +85,15 @@ const introData = computed(() => {
 
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
-
-    // 🚀 關鍵修正：判斷封面圖是否為 Base64
     const rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
     const isBase64 = rawImg && rawImg.startsWith('data:');
     const finalImage = isBase64 ? rawImg : parsePublicFile(rawImg);
 
     return {
         id: r.id || r.recipe_id,
-        title: r.adapt_title || r.title || '新改編食譜',
-        image: finalImage, // 使用判斷後的安全路徑
-        description: r.clean_description || r.description || '暫無詳細說明',
+        title: r.title || r.recipe_title || '未命名食譜',
+        image: finalImage,
+        description: r.description || r.recipe_description || '暫無詳細說明',
         time: formattedTime,
         difficulty: r.difficulty || 1,
         userName: r.user_name || r.author_name || loginUser.user_name || "未知作者",
@@ -118,21 +107,27 @@ const introData = computed(() => {
 const stepsData = computed(() => {
     const steps = props.recipe?.steps || [];
     return steps.map((s, idx) => {
-        // 🚀 關鍵修正：判斷步驟圖是否為 Base64
         const stepImg = s.image || s.step_image_url || '';
         const isStepBase64 = stepImg && stepImg.startsWith('data:');
         const finalStepImage = isStepBase64 ? stepImg : parsePublicFile(stepImg);
-
         return {
             id: s.id || idx,
             title: s.step_title || s.title || `步驟 ${idx + 1}`,
-            content: s.content || s.step_content || '',
-            image: finalStepImage, // 使用判斷後的安全路徑
+            content: s.content || s.step_content || s.description || '',
+            image: finalStepImage,
             time: s.time || ''
         };
     });
 });
 
+const closeModal = () => emit('update:modelValue', false);
+
+const getAvatarStyle = (name) => {
+    if (!name) return { backgroundColor: '#74D09C' };
+    const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
+    const charCodeSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
+};
 </script>
 
 <template>
