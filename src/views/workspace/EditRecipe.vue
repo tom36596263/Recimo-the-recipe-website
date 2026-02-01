@@ -155,23 +155,38 @@ onMounted(async () => {
     }
 
     // 3. 載入標籤 (Tags) - 加強匹配邏輯
+    // 3. 載入標籤 (Tags) - 加強匹配邏輯與過濾
     try {
       const resRTags = await publicApi.get('data/recipe/recipe_tag.json');
       const allTagLinks = Array.isArray(resRTags.data) ? resRTags.data : [];
 
-      // ✨ 使用 Number() 強制轉型確保匹配成功
+      // 1. 先過濾出屬於這個食譜的關聯
       const myLinks = allTagLinks.filter(rt => Number(rt.recipe_id) === Number(editIdFromUrl));
 
-      recipeForm.value.tags = myLinks.map(link => {
+      console.log('原始關聯資料 (myLinks):', myLinks);
+      console.log('目前標籤定義表 (tagsMasterList):', tagsMasterList.value);
+
+      // 2. 進行匹配
+      const matchedTags = myLinks.map(link => {
+        // 🏆 強制兩邊都轉為數字進行比較，避免 "1" !== 1 的問題
         const tagDetail = tagsMasterList.value.find(t => Number(t.tag_id) === Number(link.tag_id));
-        return {
-          tag_id: link.tag_id,
-          tag_name: tagDetail ? tagDetail.tag_name : '未知標籤'
-        };
-      });
-      console.log('✅ 成功匹配到的 Tags:', recipeForm.value.tags);
+
+        if (tagDetail) {
+          return {
+            tag_id: tagDetail.tag_id,
+            tag_name: tagDetail.tag_name
+          };
+        }
+        return null;
+      }).filter(t => t !== null);
+
+      // 3. 賦值
+      recipeForm.value.tags = matchedTags;
+
+      console.log('✅ 最後生成的標籤陣列:', recipeForm.value.tags);
+
     } catch (e) {
-      console.warn('標籤讀取失敗', e);
+      console.error('標籤讀取或匹配失敗', e);
     }
 
     // 4. 載入食材
