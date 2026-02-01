@@ -216,22 +216,51 @@ const ingredientsData = computed(() => {
 
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value || rawIngredients.value.length === 0) return [];
+
     const originalServings = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
+    const scale = servings.value / originalServings;
+
     let totalKcal = 0, totalP = 0, totalF = 0, totalC = 0;
+
+    // 建立一個陣列來存儲各項食材的計算過程，方便 console.table 顯示
+    const calculationLog = [];
 
     rawIngredients.value.forEach(ing => {
         const amount = Number(ing.amount || 0);
         const unitWeight = Number(ing.gram_conversion || 1);
-        const totalGram = amount * unitWeight;
-        const ratio = totalGram / 100;
+        const totalGram = amount * unitWeight; // 換算成公克
+        const ratio = totalGram / 100; // 因為營養標示通常是每 100g
 
-        totalKcal += (Number(ing.kcal_per_100g) || 0) * ratio;
-        totalP += (Number(ing.protein_per_100g) || 0) * ratio;
-        totalF += (Number(ing.fat_per_100g) || 0) * ratio;
-        totalC += (Number(ing.carbs_per_100g) || 0) * ratio;
+        // 計算該食材貢獻的數值
+        const itemKcal = (Number(ing.kcal_per_100g) || 0) * ratio;
+        const itemP = (Number(ing.protein_per_100g) || 0) * ratio;
+        const itemF = (Number(ing.fat_per_100g) || 0) * ratio;
+        const itemC = (Number(ing.carbs_per_100g) || 0) * ratio;
+
+        // 累加到總和
+        totalKcal += itemKcal;
+        totalP += itemP;
+        totalF += itemF;
+        totalC += itemC;
+
+        // 存入 Log
+        calculationLog.push({
+            "食材名稱": ing.ingredient_name,
+            "原始份量": `${amount} ${ing.unit_name}`,
+            "轉換係數": unitWeight,
+            "總重量(g)": totalGram.toFixed(1),
+            "熱量貢獻": itemKcal.toFixed(1) + " kcal",
+            "蛋白質貢獻": itemP.toFixed(1) + " g",
+            "脂質貢獻": itemF.toFixed(1) + " g",
+            "碳水貢獻": itemC.toFixed(1) + " g"
+        });
     });
 
-    const scale = servings.value / originalServings;
+    // 印出漂亮的表格
+    console.group(`🥗 營養成分計算明細 (人數倍率: ${scale.toFixed(2)})`);
+    console.table(calculationLog);
+    console.log(`總計 (1人份): Kcal: ${totalKcal.toFixed(1)}, P: ${totalP.toFixed(1)}, F: ${totalF.toFixed(1)}, C: ${totalC.toFixed(1)}`);
+    console.groupEnd();
 
     return [{
         calories_per_100g: Math.round(totalKcal * scale),
