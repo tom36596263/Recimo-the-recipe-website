@@ -1,5 +1,4 @@
 [
-  { "tag_id": 1, "tag_name": "披薩", "tag_type": "料理種類" },
   { "tag_id": 2, "tag_name": "義式料理", "tag_type": "異國風味" },
   { "tag_id": 3, "tag_name": "主食", "tag_type": "餐點分類" },
   { "tag_id": 4, "tag_name": "甜點", "tag_type": "餐點分類" },

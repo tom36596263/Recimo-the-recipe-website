@@ -80,7 +80,7 @@ const displayTime = computed(() => {
 });
 
 // EditorHeader.vue 內的 adaptRecipeData
-const adaptRecipeData = computed(() => {
+const adaptRecipeData = computed(() => {1
   const m = props.modelValue;
 
   return {
@@ -187,9 +187,9 @@ const handleCoverUpload = (e) => {
       <div class="row-tags">
         <div class="tags-wrapper">
           <div class="tag-item" v-for="tag in modelValue.tags" :key="tag.tag_id">
-            <span class="tag-text p-p3">#{{ tag.tag_name }}</span>
+            <span class="tag-text p-p3">#  {{ tag.tag_name }}</span>
             <button v-if="isEditing" class="tag-delete-btn" @click="removeTag(tag.tag_id)">
-              <i class="bi bi-x"></i>
+              <span>×</span>
             </button>
           </div>
           <button v-if="isEditing" class="add-tag-btn p-p3" @click="$emit('open-tag-modal')">
@@ -236,19 +236,49 @@ const handleCoverUpload = (e) => {
     border-radius: 100px;
 
     .tag-delete-btn {
-      background: none;
-      border: none;
-      padding: 0;
-      margin-left: 4px;
-      color: $primary-color-400;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
 
-      &:hover {
-        color: $secondary-color-danger-400;
+        /* 1. 徹底消除按鈕預設樣式 */
+        appearance: none;
+        background: transparent !important; // 強制透明，殺掉那個灰色圓形
+        border: none;
+        padding: 0;
+        margin: 0 0 0 6px;
+        outline: none;
+        box-shadow: none;
+    
+        /* 2. 完美置中佈局 */
+        display: inline-flex;
+        align-items: center; // 垂直置中
+        justify-content: center; // 水平置中
+        width: 16px;
+        height: 16px;
+    
+        /* 3. 叉叉樣式 */
+        color: #ff8e8e;
+        cursor: pointer;
+        font-size: 18px; // 控制叉叉大小
+        font-weight: 200; // 讓叉叉細一點，更簡約
+        line-height: 1; // 避免行高撐開導致不置中
+    
+        transition: color 0.2s, transform 0.2s;
+    
+        span {
+          display: block;
+          line-height: 1;
+          // 有時候乘號字體偏下，可以用這行微調 (視你的字體而定)
+          // transform: translateY(1px);
+        }
+    
+        &:hover {
+          color: red;
+          background: transparent !important;
+          // transform: scale(1.2); // 滑過稍微放大，增加回饋感
+        }
+    
+        &:active {
+          transform: scale(0.9); // 點擊縮小感
+        }
       }
-    }
   }
 
   .add-tag-btn {
