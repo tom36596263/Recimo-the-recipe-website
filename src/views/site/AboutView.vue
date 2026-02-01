@@ -24,9 +24,6 @@ import IconCart from '~icons/material-symbols/Shopping-Cart-outline';
 
 import AboutBanner from '@/components/site/about/AboutBanner.vue'
 
-// 在組件中定義 modules 方便 template 使用
-const swiperModules = [Pagination, Autoplay];
-
 const activeIndex = ref(0);
 
 const headerList = [
@@ -261,7 +258,7 @@ const shuffleArray = (array) => {
     return newArr;
 };
 
-// 3. 定義供 Template 呼叫的函式 (這個就是你在 HTML 裡用的那個名字)
+// 3. 定義供 Template 呼叫的函式 (在 HTML 裡用的名字)
 const getUniqueFoodImg = (index) => {
     if (shuffledFoods.value.length === 0) return '';
     // 使用餘數運算確保如果 index 超過陣列長度也能循環取圖
@@ -274,7 +271,7 @@ onMounted(() => {
     // 這裡會將 foods 洗牌後存入 shuffledFoods
     shuffledFoods.value = shuffleArray(foods);
 
-    // 檢查路由 (如果有定義 checkRoute 函式的話)
+    // 檢查路由 (有定義 checkRoute 函式)
     if (typeof checkRoute === 'function') {
         checkRoute();
     }
