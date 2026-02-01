@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import ProductCard from '@/components/mall/ProductCard.vue';
+// 呼叫Api
 import { phpApi } from '@/utils/publicApi';
 
 // ==========================================
@@ -25,14 +26,8 @@ const swiperBreakpoints = {
 };
 
 // ==========================================
-// vue上課教：以後部屬比較不會有問題(資料放public的話)
-// ==========================================
-const baseURL = import.meta.env.BASE_URL
-
-// ==========================================
 // axios：先把商品卡片引入json檔
 // ==========================================
-import axios from 'axios'
 const productList = ref([])
 const isLoading = ref(true); // 新增讀取狀態
 const fetchData = async () => {
@@ -75,7 +70,6 @@ onMounted(() => {
             <div class="row">
                 <div v-for="product in randomProducts" :key="product.product_id" class="col-3  pc-grid">
                     <ProductCard :item="product" />
-                    <!--「把『當下的這份資料』塞進『卡片預留的插槽』裡。」item是在 ProductCard.vue 裡面透過 defineProps 定義的名字。它就像是卡片上的一個「專用收件口」。 product是在 ProductRmd.vue 裡面 v-for="product in randomProducts" 定義的那個變數。它代表「目前這一輪迴圈抓到的那一筆商品資料」。-->
                 </div>
                 <!-- ==========================================
                     swiper圖片

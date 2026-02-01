@@ -1,12 +1,14 @@
 <script setup>
 import { ref, defineProps, computed, getCurrentInstance } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
+// 引用彈窗
 import BaseModal from '@/components/BaseModal.vue';
-
 // icon
 import IconDelete from '~icons/material-symbols/delete-outline';
 
+// ==========================================
 // 接收父元件傳過來的商品資料
+// ==========================================
 const props = defineProps({
     item: {
         type: Object,
@@ -18,9 +20,6 @@ const props = defineProps({
 const { proxy } = getCurrentInstance();
 const cartStore = useCartStore();
 
-
-// 控制 Modal 顯示狀態的變數
-const showDeleteModal = ref(false);
 // ==========================================
 // 邏輯處理：串接 Pinia Store
 // ==========================================
@@ -51,7 +50,7 @@ const handleIncrement = () => {
 const handleDecrement = async () => {
     const currentQty = Number(props.item.quantity || 0);
     if (currentQty > 1) {
-        // 同樣，這裡會自動處理同步邏輯
+        // 自動處理同步邏輯
         await cartStore.decrementQty(productId.value);
     } else {
         // 數量為 1 再點減號，觸發刪除彈窗
@@ -59,13 +58,15 @@ const handleDecrement = async () => {
     }
 };
 
+// 刪除商品
+const showDeleteModal = ref(false);
 const handleRemove = () => {
     showDeleteModal.value = true;
 };
 
 // 當在 Modal 點擊「確定刪除」時執行的函式
 const confirmDelete = async () => {
-    // 這裡會執行 removeItem，內含 API (delete_item.php) 或 LocalStorage 同步
+    // 這裡會執行 removeItem，內含 API (delete_cartitem.php) 或 LocalStorage 同步
     await cartStore.removeItem(productId.value);
     showDeleteModal.value = false;
 };
@@ -85,7 +86,7 @@ const productImage = computed(() => {
     const imgUrl = props.item.product_image || props.item.image_url;
 
     if (imgUrl) {
-        // 使用你在 main.js 定義的全域解析函式
+        // 使用你 main.js 定義的全域解析函式
         return proxy.$parsePublicFile(imgUrl);
     }
     return `${import.meta.env.BASE_URL}images/default-placeholder.png`;

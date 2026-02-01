@@ -1,20 +1,16 @@
 <script setup>
 import { ref, onMounted, computed, watch, onUnmounted, getCurrentInstance } from 'vue';
-// import axios from 'axios';
-import { publicApi, phpApi, base } from '@/utils/publicApi.js';
-import { defineStore } from 'pinia';
+// 呼叫Api
+import { phpApi, base } from '@/utils/publicApi.js';
 import { useRouteName } from '@/composables/useRouteName';
 import { useCartStore } from '@/stores/cartStore';
 import ProductRmd from '@/components/mall/ProductRmd.vue';
-import BaseModal from '@/components/BaseModal.vue';
-// 門禁守衛
-import { useAuthGuard } from '@/composables/useAuthGuard';
-const { runWithAuth } = useAuthGuard();
-
+// 用來執行動作
 import { useRouter } from 'vue-router';
 const router = useRouter();
+// 引用彈窗
+import BaseModal from '@/components/BaseModal.vue';
 
-const { proxy } = getCurrentInstance();
 // ==========================================
 // 點小圖秀大圖
 // ==========================================
@@ -42,37 +38,39 @@ const showSuccess = ref(false);
 const addToCart = async () => {
   if (productInfo.value) {
     try {
-      // 移除 runWithAuth，直接執行
       await cartStore.add(productInfo.value, count.value);
-      showSuccess.value = true;
+      showSuccess.value = true; // 開啟彈窗
+
       setTimeout(() => { showSuccess.value = false; }, 1500);
+
     } catch (error) {
       console.error("加入購物車出錯", error);
     }
   }
 };
 
+// ==========================================
+// 直接購買
+// ==========================================
 const buynowshowSuccess = ref(false);
 const buyNow = async () => {
   if (productInfo.value) {
     try {
       // 先執行 API 加入購物車
       await cartStore.add(productInfo.value, count.value);
+      buynowshowSuccess.value = true; // 開啟彈窗
 
-      // 顯示「直接購買」專用的彈窗
-      buynowshowSuccess.value = true;
-
-      // 使用 setTimeout 延遲跳轉，讓老師想給學生/使用者看的資訊停久一點
       setTimeout(() => {
         buynowshowSuccess.value = false; // 關閉彈窗
         router.push('/cart');            // 執行跳轉
       }, 2000);
 
     } catch (error) {
-      console.error("購買跳轉出錯", error);
+      // console.error("購買跳轉出錯", error);
     }
   }
 };
+
 // ==========================================
 // 引入 useRoute 獲取網址 ID
 // ==========================================
@@ -87,8 +85,21 @@ const { setDetailName } = useRouteName()
 // 定義一個 Script 內部可用的轉換函式
 const parseFile = (url) => {
   if (!url) return '';
-  const cleanPath = url.replace(/^public\//, '').replace(/^\//, '');
-  return `${base}${cleanPath}`;
+
+  // 1. 清理傳入的 url
+  const cleanPath = url.replace(/^public\//, '').replace(/^\/+/, '');
+
+  // 2. 處理 base，確保它是純粹的域名+路徑，不帶結尾斜線
+  let baseUrl = base.replace(/\/+$/, '');
+
+  // 3. 手動拼接，確保中間只有一個斜線
+  const finalUrl = `${baseUrl}/${cleanPath}`.trim();
+
+  // 4. 強制檢查結果，如果開頭還是有 /http，就把它切掉
+  // 有時候 Vue 綁定會因為 baseUrl 的格式自動加上斜線
+  return finalUrl.startsWith('/') && finalUrl.includes('http')
+    ? finalUrl.substring(1)
+    : finalUrl;
 };
 
 const fetchData = async () => {
@@ -98,8 +109,6 @@ const fetchData = async () => {
     // const response = await axios.get(`${base}data/mall/products.json`);
     const response = await phpApi.get('mall/user_products.php');
 
-    // 1. 修改這裡：將 p.id 改為 p.product_id
-    // 並使用 String() 確保兩邊型別一致（字串對字串）
     const item = response.data.find(p => String(p.product_id) === String(productId.value));
 
     // document.title = `${item.product_name} | Recimo`;
@@ -108,11 +117,12 @@ const fetchData = async () => {
       productInfo.value = item;
       document.title = `${item.product_name} | Recimo`;
 
-      // 2. 修正圖片初始化：
-      // 確保使用 item.product_image 並透過 getImageUrl 處理路徑
+      // 圖片初始化：
+      // 對應後端 JOIN 出來的陣列
       if (item.images && item.images.length > 0) {
-        mainImage.value = item.images[0];
-        activeImage.value = item.images[0];
+        // 預設大圖顯示第一張，記得過濾路徑
+        mainImage.value = parseFile(item.images[0]);
+        activeImage.value = parseFile(item.images[0]);
       }
 
       // 數量重置
@@ -130,7 +140,7 @@ const fetchData = async () => {
   } catch (error) {
     isNotFound.value = true;
     document.title = `載入失敗 | Recimo`;
-    console.error("抓取失敗", error);
+    // console.error("抓取失敗", error);
   }
 };
 
@@ -190,12 +200,15 @@ onUnmounted(() => {
             </div>
 
             <div class="row product-gallery__thumbs">
-              <div v-for="(imgUrl, index) in productInfo.image" :key="index"
+              <div v-for="(imgUrl, index) in productInfo.images" :key="index"
                 class="product-gallery__item col-3 col-sm-4">
-                <div class="product-gallery__thumb" :class="{ 'is-active': activeImage === imgUrl }"
-                  @click="changeImage(imgUrl)">
-                  <img :src="imgUrl" :alt="productInfo.product_name">
+
+                <div class="product-gallery__thumb" :class="{ 'is-active': activeImage === parseFile(imgUrl) }"
+                  @click="changeImage(parseFile(imgUrl))">
+
+                  <img :src="parseFile(imgUrl)" :alt="productInfo.product_name">
                 </div>
+
               </div>
             </div>
           </div>

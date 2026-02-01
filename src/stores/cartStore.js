@@ -1,9 +1,14 @@
 import { ref, computed, watch } from 'vue'
 import { defineStore } from 'pinia'
+// 呼叫Api
 import { phpApi } from '@/utils/publicApi.js';
 // 引入權限檢查
 import { useAuthStore } from '@/stores/authStore';
 
+
+// ==========================================
+// 加入購物車前置作業
+// ==========================================
 export const useCartStore = defineStore('cart', () => {
   const authStore = useAuthStore();
   const items = ref([]); // 預設空陣列，改由 API 載入
@@ -21,7 +26,7 @@ export const useCartStore = defineStore('cart', () => {
 
   // 監聽登入狀態
   // 當 authStore.isLoggedIn 從 true 變 false 時，自動清空本地購物車
-  // ✨ 關鍵核心：合併訪客購物車到資料庫
+  // 合併訪客購物車到資料庫
   const mergeCart = async () => {
     const localData = localStorage.getItem('guest_cart');
     if (!localData) return;
@@ -41,7 +46,7 @@ export const useCartStore = defineStore('cart', () => {
     await fetchCart();
   };
 
-  // --- 然後才執行監聽 ---
+  // 然後才執行監聽
   watch(() => authStore.isLoggedIn, async (newVal) => {
     if (!newVal) {
       items.value = [];
@@ -65,8 +70,9 @@ export const useCartStore = defineStore('cart', () => {
     }, 0);
   });
 
-  // --- Actions ---
-
+  // ==========================================
+  // 獲取購物車內容
+  // ==========================================
   // 初始化：從 API 獲取購物車
   const fetchCart = async () => {
     if (!authStore.isLoggedIn) return;
@@ -92,7 +98,6 @@ export const useCartStore = defineStore('cart', () => {
           return {
             ...item,
             // 3. 把處理好的路徑覆蓋回去，並確保加上伺服器基礎路徑 (base)
-            // 假設您的 base 是 http://localhost/recimo_api/
             product_image: imageUrl
           };
         });
@@ -102,7 +107,9 @@ export const useCartStore = defineStore('cart', () => {
     }
   };
 
-  // 1. 加入購物車
+  // ==========================================
+  // 加入購物車
+  // ==========================================
   const add = async (item, qty = 1) => {
     const productId = item.product_id || item.id;
     const index = items.value.findIndex(p => (p.product_id || p.id) === productId);
@@ -125,7 +132,9 @@ export const useCartStore = defineStore('cart', () => {
   };
 
 
-  // 2.更新商品數量
+  // ==========================================
+  // 更新商品數量
+  // ==========================================
   const updateQty = async (id, newQty) => {
     if (newQty < 1) return removeItem(id);
 
@@ -144,22 +153,23 @@ export const useCartStore = defineStore('cart', () => {
       } else {
         localStorage.setItem('guest_cart', JSON.stringify(items.value));
       }
-      // 大招：確保 UI 刷新
       items.value = [...items.value];
     }
   };
 
+  // 增加
   const incrementQty = (id) => {
     const target = items.value.find(i => (i.product_id === id || i.id === id));
     if (target) updateQty(id, Number(target.quantity || 0) + 1);
   };
 
+  // 減少
   const decrementQty = (id) => {
     const target = items.value.find(i => (i.product_id === id || i.id === id));
     if (target) updateQty(id, Number(target.quantity || 0) - 1);
   };
 
-  // 3.移除商品
+  // 移除商品
   const removeItem = async (id) => {
     items.value = items.value.filter(i => (i.product_id !== id && i.id !== id));
     if (authStore.isLoggedIn) {
@@ -169,12 +179,14 @@ export const useCartStore = defineStore('cart', () => {
         console.error("伺服器刪除失敗", error);
       }
     } else {
-      // ✨ 訪客同步到 localStorage
+      //  訪客同步到 localStorage
       localStorage.setItem('guest_cart', JSON.stringify(items.value));
     }
   };
 
-  // 4.清空購物車
+  // ==========================================
+  // 清空購物車
+  // ==========================================
   const clear = (syncWithServer = true) => {
     items.value = []; // 本地先歸零
 
