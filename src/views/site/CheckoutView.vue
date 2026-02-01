@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { phpApi } from '@/utils/publicApi';
 import card from '@/components/mall/CheckCard.vue';
 import { useCartStore } from '@/stores/cartStore';
 import Modal from '@/components/BaseModal.vue';
@@ -9,12 +10,102 @@ import Modal from '@/components/BaseModal.vue';
 const showSuccessModal = ref(false);
 const cartStore = useCartStore();
 const router = useRouter();
-const orderItems = computed(() => cartStore.items);
+const orderItems = computed(() => {
+  const source = cartItemsFromDB.value.length > 0 ? cartItemsFromDB.value : cartStore.items;
+  return source.map(item => ({
+    ...item,
+    // 確保這裡欄位名稱一致，PHP 回傳是 product_image
+    product_image: formatImageUrl(item.product_image || item.image)
+  }));
+});
+const formatImageUrl = (rawImage) => {
+  const PHP_BASE_URL = 'http://localhost:8888/recimo_api';
+  if (!rawImage) return '';
+  if (rawImage.startsWith('http')) return rawImage;
 
+  let relativePath = rawImage;
+  // 處理 JSON 格式
+  if (typeof rawImage === 'string' && (rawImage.startsWith('[') || rawImage.startsWith('{'))) {
+    try {
+      const parsed = JSON.parse(rawImage);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const cover = parsed.find(img => img.is_cover) || parsed[0];
+        relativePath = cover.image_url;
+      }
+    } catch (e) { console.warn('JSON parse error', e); }
+  }
+
+  const cleanPath = relativePath.replace(/^public\//, '').replace(/^\/+/, '');
+  return `${PHP_BASE_URL}/${cleanPath}`;
+};
+
+const cartItemsFromDB = ref([]); // 新增：存儲從 PHP 抓回來的購物車資料
+const isLoading = ref(true);
 //DOM Refs(用於信用卡輸入跳轉)
 const cardInput2 = ref(null);
 const cardInput3 = ref(null);
 const cardInput4 = ref(null);
+
+
+// CheckoutView.vue 裡的 fetchCartData
+// CheckoutView.vue
+const fetchCartData = async () => {
+  try {
+    isLoading.value = true;
+    // 1. 確保 URL 是正確的 get_cart.php
+    const response = await phpApi.get('/mall/get_cart.php');
+
+    // 2. 自動相容兩種格式：如果是物件就拿 .data，如果是陣列就直接用
+    const result = response.data;
+    const rawData = result.status === 'success' ? result.data : result;
+
+    if (Array.isArray(rawData)) {
+      const PHP_BASE_URL = 'http://localhost:8888/recimo_api';
+
+      cartItemsFromDB.value = rawData.map(item => {
+        let finalImageUrl = '';
+        let rawImage = item.product_image;
+
+        // 處理圖片路徑（處理 JSON 或 字串路徑）
+        if (rawImage) {
+          if (rawImage.startsWith('http')) {
+            finalImageUrl = rawImage;
+          } else {
+            // 如果是 JSON 格式 ["img1.jpg"] 則取第一張
+            if (rawImage.startsWith('[') || rawImage.startsWith('{')) {
+              try {
+                const parsed = JSON.parse(rawImage);
+                rawImage = Array.isArray(parsed) ? (parsed[0].image_url || parsed[0]) : rawImage;
+              } catch (e) { }
+            }
+            // 去除多餘路徑，拼接成完整網址
+            const cleanPath = rawImage.replace(/^public\//, '').replace(/^\/+/, '');
+            finalImageUrl = `${PHP_BASE_URL}/${cleanPath}`;
+          }
+        }
+
+        return {
+          ...item,
+          product_image: finalImageUrl,
+          // 確保欄位名稱跟子組件 props 一致 (quantity vs count)
+          quantity: Number(item.quantity || item.count || 1),
+          product_price: Number(item.product_price || item.price)
+        };
+      });
+
+      console.log('購物車資料加載成功:', cartItemsFromDB.value);
+    }
+  } catch (error) {
+    console.error('抓取購物車失敗:', error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchCartData();
+});
+
 
 // 表單資料 (前端使用 snake_case，送出時會轉成 DB 格式)
 const form = ref({
@@ -200,25 +291,25 @@ const handleSubmit = () => {
   } else if (!form.value.payment_method) {
     alert('請選擇付款方式');
   } else {
-    // === 準備送給後端的資料 ===
-
-    //商品明細
-    const orderDetailsPayload = orderItems.value.map(item => {
-      const price = Number(item.product_price || item.price || 0);
-      const qty = Number(item.count || item.quantity || 1);
-
-      return {
-        //資料庫欄位
-        PRODUCT_ID: item.id || item.product_id,
-        SNAPSHOT_PRICE: price,
-        QUANTITY: qty,
-        SUBTOTAL: price * qty,
-
-        //前端模擬顯示用
-        PRODUCT_NAME: item.product_name || item.name,
-        PRODUCT_IMAGE: item.product_image?.[0]?.image_url || item.image || ''
-      };
-    });
+    // 準備送給後端的資料
+    const orderPayload = {
+      user_id: 1, // 這裡先固定為 1，之後你可以改成從 userStore 拿
+      subtotal: subtotal.value,
+      discount_amount: 0,
+      shipping_fee: shippingFee.value,
+      total_amount: totalAmount.value,
+      recipient_name: form.value.shipping_type === 'same' ? form.value.user_name : form.value.recipient_name,
+      recipient_phone: form.value.shipping_type === 'same' ? form.value.user_phone : form.value.recipient_phone,
+      shipping_address: form.value.shipping_type === 'same' ? form.value.user_address : form.value.shipping_address,
+      payment_method: form.value.payment_method, // 傳送 'card' 或 'cod'
+      // 整理商品清單，對應 PHP 的 $product['product_id'] 等
+      items: orderItems.value.map(item => ({
+        product_id: item.product_id,
+        product_name: item.product_name,
+        price: Number(item.product_price),
+        quantity: Number(item.quantity)
+      }))
+    };
 
     // 訂單主檔
     // 產生一個模擬的 ID (用當下時間戳記)
@@ -288,8 +379,9 @@ const handleModalCloseAndRedirect = () => {
 };
 
 const backcart = () => {
-  router.push('./CartView.vue');
-}
+  // 假設你在 router/index.js 設定的購物車路徑是 /cart
+  router.push('/cart');
+};
 </script>
 
 <template>
@@ -489,13 +581,11 @@ const backcart = () => {
 
       <div class="col-6 col-lg-12">
         <div class="card-container">
-          <div class="order-list">
-            <div class="order-list">
-              <CheckCard v-for="item in orderItems" :key="item.id || item.product_id"
-                :product-name="item.product_name || item.name" :quantity="item.count || item.quantity"
-                :price="item.product_price || item.price" :image="item.image_url || item.PRODUCT_IMAGE || ''" />
-            </div>
+          <div class="order-list" v-if="!isLoading">
+            <CheckCard v-for="(item, index) in orderItems" :key="item.product_id" :product-name="item.product_name"
+              :quantity="Number(item.quantity)" :price="Number(item.product_price)" :image="item.product_image" />
           </div>
+          <div v-else style="text-align: center; padding: 20px;">資料加載中...</div>
         </div>
         <hr>
         <div class="total-sum">
