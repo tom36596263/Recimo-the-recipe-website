@@ -11,7 +11,7 @@ const props = defineProps({
 // 取得 ID (若無則隨機 6 碼)
 const orderId = computed(() => {
   // 嘗試取得真實資料
-  const realId = props.order.ORDER_ID || props.order.id;
+  return props.order.order_id || props.order.ORDER_ID || props.order.id;
 
   // 如果有真實 ID，就用真實的
   if (realId) return realId;
@@ -28,17 +28,17 @@ const orderDate = computed(() => {
 
 // 取得物流 ID (若無或為"1"則隨機 7 碼)
 const logisticsId = computed(() => {
-  const dbVal = props.order.LOGISTICS_ID || props.order.trackingNo;
-  const strVal = String(dbVal || '');
+  // 1. 優先找 PHP 給的小寫 logistics_id
+  const dbVal = props.order.logistics_id ||
+    props.order.LOGISTICS_ID ||
+    props.order.trackingNo;
 
-  // 判斷邏輯：
-  // 如果資料庫有值，且長度大於 5 (排除掉 "1" 這種測試數據)
-  // -> 直接回傳資料庫的值
-  if (dbVal && strVal.length > 5) {
+  //只要有值就顯示，不論長度（除非你真的想排除掉測試用的 "1"）
+  if (dbVal !== undefined && dbVal !== null && dbVal !== '') {
     return dbVal;
   }
 
-  // 否則：隨機產生 7 碼數字 (1000000 ~ 9999999)
+  //真的沒資料才隨機產生
   return Math.floor(1000000 + Math.random() * 9000000).toString();
 });
 
@@ -74,12 +74,19 @@ const displayItems = computed(() => {
   const items = props.order.items || props.order.products || [];
   if (!Array.isArray(items)) return [];
 
-  return items.map(item => ({
-    // 這裡要對應 PHP 回傳的 snapshot_price 與 product_name
-    name: item.product_name || item.PRODUCT_NAME || item.name || '未知商品',
-    qty: item.quantity || item.QUANTITY || item.qty || 0,
-    price: item.snapshot_price || item.SNAPSHOT_PRICE || item.price || 0
-  }));
+  return items.map(item => {
+    // 1. 取得單價
+    const price = item.snapshot_price || item.SNAPSHOT_PRICE || item.product_price || item.price || 0;
+    // 2. 取得數量
+    const qty = item.quantity || item.QUANTITY || item.qty || 0;
+
+    return {
+      name: item.product_name || item.PRODUCT_NAME || item.name || '未知商品',
+      qty: qty,
+      //這裡修正：將單價乘以數量，得到該品項的總計
+      price: price * qty
+    };
+  });
 });
 
 // 計算總金額
@@ -102,20 +109,20 @@ const totalQuantity = computed(() => {
 
 // 取得付款方式 
 const paymentText = computed(() => {
-  // 1. 根據你 PHP 的輸出，優先抓取小寫底線的 key
+  //根據你 PHP 的輸出，優先抓取小寫底線的 key
   const methodRaw = props.order.payment_method ??
     props.order.PAYMENT_METHOD ??
     props.order.payment;
 
-  // 2. 處理空值
+  //處理空值
   if (methodRaw === null || methodRaw === undefined || methodRaw === '') {
     return '未付款';
   }
 
-  // 3. 轉為字串並移除空白，確保比對正確
+  //轉為字串並移除空白，確保比對正確
   const method = String(methodRaw).trim().toLowerCase();
 
-  // 4. 定義對應表 (請根據你資料庫定義的數字來調整)
+  // 定義對應表 (請根據你資料庫定義的數字來調整)
   // 如果你的系統定義 2 是貨到付款，請改這裡：
   const map = {
     '2': '貨到付款', // 根據你目前的 JSON 數值修正
@@ -155,10 +162,11 @@ const onCancel = () => {
   showCancelModal.value = true;
 };
 
+// 子層：確認取消按鈕動作
 const handleConfirmCancel = (data) => {
-  console.log('取消訂單 ID:', orderId.value);
-  showCancelModal.value = false;
+  // 確保這裡傳出去的是真實的 orderId
   emit('cancel-order', orderId.value);
+  showCancelModal.value = false;
 };
 </script>
 

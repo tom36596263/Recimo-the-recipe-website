@@ -17,14 +17,14 @@ const userId = JSON.parse(localStorage.getItem('user_info'))?.id || 1;
 // 讀取資料
 const fetchOrders = async () => {
   try {
-    // 1. 抓取訂單清單 (補上 /mall/ 路徑)
+    //抓取訂單清單 (補上 /mall/ 路徑)
     const resList = await phpApi.get('mall/user_order_list.php', {
       params: { user_id: userId }
     });
 
     const list = Array.isArray(resList.data) ? resList.data : [];
 
-    // 2. 併發抓取每一筆的明細 (包含 items)
+    // 併發抓取每一筆的明細 (包含 items)
     const detailedOrders = await Promise.all(
       list.map(async (basicOrder) => {
         try {
@@ -147,31 +147,40 @@ const openCalender = () => {
 
 //取消訂單邏輯
 const showSuccessModal = ref(false);
-const onCancel = (orderId) => {
-  const targetIndex = ordersData.value.findIndex(order => {
-    const currentId = order.ORDER_ID || order.id;
-    return currentId === orderId;
-  });
+const onCancel = async (orderId) => {
+  console.log("發送取消請求 - UserID:", userId, "OrderID:", orderId); // 檢查這裡的值
+  try {
+    const res = await phpApi.post('mall/cancel_order.php', {
+      user_id: userId,
+      order_id: orderId
+    });
 
-  if (targetIndex !== -1) {
-    // 執行取消邏輯
-    if (ordersData.value[targetIndex].ORDER_STATUS !== undefined) {
-      ordersData.value[targetIndex].ORDER_STATUS = -1;
-    } else {
-      ordersData.value[targetIndex].status = -1;
+    if (res.data.success) {
+      //後端成功後，更新本地資料狀態，讓畫面即時變化
+      const targetIndex = ordersData.value.findIndex(order => {
+        const currentId = order.order_id || order.ORDER_ID || order.id;
+        return currentId === orderId;
+      });
+
+      if (targetIndex !== -1) {
+        // 統一更新為 -1 (取消狀態)
+        if (ordersData.value[targetIndex].order_status !== undefined) {
+          ordersData.value[targetIndex].order_status = -1;
+        } else if (ordersData.value[targetIndex].ORDER_STATUS !== undefined) {
+          ordersData.value[targetIndex].ORDER_STATUS = -1;
+        } else {
+          ordersData.value[targetIndex].status = -1;
+        }
+      }
+
+      //顯示成功彈窗
+      showSuccessModal.value = true;
     }
-
-    // 更新本地存儲
-    if (!ordersData.value[targetIndex].ORDER_ID) {
-      const localOnly = ordersData.value.filter(o => !o.ORDER_ID);
-      localStorage.setItem('mall_orders', JSON.stringify(localOnly));
-    }
-
-    // --- 重點：原本是 alert('訂單已成功取消')，現在改為開啟彈窗 ---
-    showSuccessModal.value = true;
+  } catch (err) {
+    // 這裡可以幫你抓出 PHP 噴出的真正錯誤訊息
+    console.error('取消失敗回應:', err.response?.data);
   }
-}
-
+};
 
 
 </script>
