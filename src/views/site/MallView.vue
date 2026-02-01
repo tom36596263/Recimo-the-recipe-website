@@ -158,6 +158,11 @@ const columns = ref([
   // 第四欄
   [getImg('food10.png'), getImg('food11.png'), getImg('food3.png')]
 ]);
+
+const goToDetail = (productId) => {
+  // 導向詳情頁，路徑通常是 /mall/:id
+  router.push(`/mall/${productId}`);
+};
 </script>
 
 <template>

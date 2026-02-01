@@ -54,8 +54,9 @@ const navItems = computed(() => {
 // 登出邏輯
 const handleLogout = () => {
     authStore.logout();   // 執行清除狀態
-    closeMenu();          // 關閉手機版選單
-    router.push('/');     // 跳轉回首頁
+    cartStore.clear(false);    // 傳入 false，代表「只清空前端畫面，不要去打 API 刪除資料庫」
+    closeMenu();        // 關閉手機版選單
+    router.push('/');
 };
 
 // 購物車數量圓點

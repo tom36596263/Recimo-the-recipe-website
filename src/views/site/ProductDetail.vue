@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch, onUnmounted, getCurrentInstance } from 'vue';
 // import axios from 'axios';
-import { publicApi, base } from '@/utils/publicApi.js';
+import { publicApi, phpApi, base } from '@/utils/publicApi.js';
 import { defineStore } from 'pinia';
 import { useRouteName } from '@/composables/useRouteName';
 import { useCartStore } from '@/stores/cartStore';
@@ -39,31 +39,40 @@ const cartStore = useCartStore()
 
 //定義控制 Modal 顯示的變數
 const showSuccess = ref(false);
-const addToCart = () => {
+const addToCart = async () => {
   if (productInfo.value) {
-    // console.log("把商品", productInfo.value.product_name, "數量", count.value, "加入購物車");
-    // 呼叫 Store 的 add 方法
-
-    const cartItem = {
-      ...productInfo.value,
-      count: count.value // 傳入畫面上選擇的數量
-    };
-
-    cartStore.add(productInfo.value, count.value);
-
-    // alert(`「${count.value}件${productInfo.value.product_name}」已加入購物車~`);
-    showSuccess.value = true;
+    try {
+      // 移除 runWithAuth，直接執行
+      await cartStore.add(productInfo.value, count.value);
+      showSuccess.value = true;
+      setTimeout(() => { showSuccess.value = false; }, 1500);
+    } catch (error) {
+      console.error("加入購物車出錯", error);
+    }
   }
 };
 
-const buyNow = () => {
+const buynowshowSuccess = ref(false);
+const buyNow = async () => {
   if (productInfo.value) {
-    // 呼叫 Store 的 add，把當前選擇的數量 count.value 傳進去
-    cartStore.add(productInfo.value, count.value);
-    router.push('/cart');
+    try {
+      // 先執行 API 加入購物車
+      await cartStore.add(productInfo.value, count.value);
+
+      // 顯示「直接購買」專用的彈窗
+      buynowshowSuccess.value = true;
+
+      // 使用 setTimeout 延遲跳轉，讓老師想給學生/使用者看的資訊停久一點
+      setTimeout(() => {
+        buynowshowSuccess.value = false; // 關閉彈窗
+        router.push('/cart');            // 執行跳轉
+      }, 2000);
+
+    } catch (error) {
+      console.error("購買跳轉出錯", error);
+    }
   }
 };
-
 // ==========================================
 // 引入 useRoute 獲取網址 ID
 // ==========================================
@@ -87,13 +96,13 @@ const fetchData = async () => {
     isNotFound.value = false; // 每次重新抓取前先重設
     productInfo.value = null; // 確保每次切換時先清空
     // const response = await axios.get(`${base}data/mall/products.json`);
-    const response = await publicApi.get(`data/mall/products.json`);
+    const response = await phpApi.get('mall/user_products.php');
 
     // 1. 修改這裡：將 p.id 改為 p.product_id
     // 並使用 String() 確保兩邊型別一致（字串對字串）
     const item = response.data.find(p => String(p.product_id) === String(productId.value));
 
-    document.title = `${item.product_name} | Recimo`;
+    // document.title = `${item.product_name} | Recimo`;
 
     if (item) {
       productInfo.value = item;
@@ -101,11 +110,9 @@ const fetchData = async () => {
 
       // 2. 修正圖片初始化：
       // 確保使用 item.product_image 並透過 getImageUrl 處理路徑
-      if (item.product_image && item.product_image.length > 0) {
-        // 取得第一張圖的路徑
-        const firstImg = proxy.$parsePublicFile(item.product_image[0].image_url);
-        mainImage.value = firstImg;
-        activeImage.value = firstImg;
+      if (item.images && item.images.length > 0) {
+        mainImage.value = item.images[0];
+        activeImage.value = item.images[0];
       }
 
       // 數量重置
@@ -170,144 +177,148 @@ onUnmounted(() => {
 </script>
 
 <template>
-
-  <section v-if="productInfo" class="product-detail-page container">
-    <div class="product-detail__main-content row">
-      <!-- ==========================================
+  <div class="product-detail-wrapper">
+    <section v-if="productInfo" class="product-detail-page container">
+      <div class="product-detail__main-content row">
+        <!-- ==========================================
             商品圖
       ========================================= -->
-      <div class="col-7 col-md-12">
-        <div class="product-gallery" :class="{ 'is-nav-hidden': isScrollingDown }">
-          <div class="product-gallery__viewport">
-            <img v-if="mainImage" :src="mainImage" :alt="productInfo.product_name">
-          </div>
+        <div class="col-7 col-md-12">
+          <div class="product-gallery" :class="{ 'is-nav-hidden': isScrollingDown }">
+            <div class="product-gallery__viewport">
+              <img v-if="mainImage" :src="mainImage" :alt="productInfo.product_name">
+            </div>
 
-          <div class="row product-gallery__thumbs">
-            <div v-for="(imgObj, index) in productInfo.product_image" :key="index"
-              class="product-gallery__item col-3 col-sm-4">
-              <div class="product-gallery__thumb"
-                :class="{ 'is-active': activeImage === $parsePublicFile(imgObj.image_url) }"
-                @click="changeImage($parsePublicFile(imgObj.image_url))">
-                <img :src="$parsePublicFile(imgObj.image_url)" :alt="productInfo.product_name">
+            <div class="row product-gallery__thumbs">
+              <div v-for="(imgUrl, index) in productInfo.image" :key="index"
+                class="product-gallery__item col-3 col-sm-4">
+                <div class="product-gallery__thumb" :class="{ 'is-active': activeImage === imgUrl }"
+                  @click="changeImage(imgUrl)">
+                  <img :src="imgUrl" :alt="productInfo.product_name">
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <!-- ==========================================
+        <!-- ==========================================
             商品介紹
       ========================================= -->
-      <div class="col-5 col-md-12">
-        <div class="product-detail__info">
-          <h1 class="zh-h2">{{ productInfo.product_name }}</h1>
-          <hr />
-          <p class="p-p1 product-detail__description">
-            {{ productInfo.product_description }}
-          </p>
-          <div class="product-detail__purchase">
-            <p class="zh-h2-bold product-detail__price">${{ productInfo.product_price }}</p>
-            <div class="quantity-selector-box">
-              <p class="p-p1">數量</p>
-              <div class="quantity-selector-control">
-                <button @click="count--" :disabled="count <= 1">−</button>
-                <input v-model="count" readonly />
-                <button @click="count++">+</button>
+        <div class="col-5 col-md-12">
+          <div class="product-detail__info">
+            <h1 class="zh-h2">{{ productInfo.product_name }}</h1>
+            <hr />
+            <p class="p-p1 product-detail__description">
+              {{ productInfo.product_description }}
+            </p>
+            <div class="product-detail__purchase">
+              <p class="zh-h2-bold product-detail__price">${{ productInfo.product_price }}</p>
+              <div class="quantity-selector-box">
+                <p class="p-p1">數量</p>
+                <div class="quantity-selector-control">
+                  <button @click="count--" :disabled="count <= 1">−</button>
+                  <input v-model="count" readonly />
+                  <button @click="count++">+</button>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="product-detail__actions">
-            <BaseBtn title="加入購物車" variant="solid" @click="addToCart" :width="260" :height="50" />
-            <BaseBtn title="直接購買" variant="outline" @click="buyNow" :width="260" :height="50" />
-          </div>
-          <div class="table-wrap">
-            <table>
-              <tbody>
-                <tr class="p-p1-bold">
-                  <th class="col-3">項目</th>
-                  <th class="col-3">每份含量</th>
-                  <th class="col-3">項目</th>
-                  <th class="col-3">每份含量</th>
-                </tr>
-                <tr class="p-p1">
-                  <td>熱量</td>
-                  <td>{{ productInfo.product_kcal }}kcal</td>
-                  <td>碳水化合物</td>
-                  <td>{{ productInfo.product_carbs }}g</td>
-                </tr>
-                <tr class="p-p1">
-                  <td>總脂肪</td>
-                  <td>{{ productInfo.product_fat }}g</td>
-                  <td>飽和脂肪</td>
-                  <td>{{ productInfo.product_staturated_fat }}g</td>
-                </tr>
-                <tr class="p-p1">
-                  <td>蛋白質</td>
-                  <td>{{ productInfo.product_protein }}g</td>
-                  <td>膳食纖維</td>
-                  <td>{{ productInfo.product_fiber }}g</td>
-                </tr>
-                <tr class="p-p1">
-                  <td>鈉</td>
-                  <td>{{ productInfo.product_sodium }}mg</td>
-                  <td>糖</td>
-                  <td>{{ productInfo.product_sugar }}g</td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="p-p2 nutrition-table__note">一人份的營養成分表示/一份250g</p>
-          </div>
-          <div class="product-detail__extra">
-            <div class="product-detail__section">
-              <h3 class="zh-h5-bold">食材內容：</h3>
-              <p class="p-p1">{{ productInfo.product_ingredients }}
-              </p>
+            <div class="product-detail__actions">
+              <BaseBtn title="加入購物車" variant="solid" @click="addToCart" :width="260" :height="50" />
+              <BaseBtn title="直接購買" variant="outline" @click="buyNow" :width="260" :height="50" />
             </div>
-            <div class="product-detail__section">
-              <hr>
-              <h3 class="zh-h5-bold">使用方法：</h3>
-              <p class="p-p1">
-                {{ productInfo.product_cooking_method }}
-              </p>
-              <hr>
+            <div class="table-wrap">
+              <table>
+                <tbody>
+                  <tr class="p-p1-bold">
+                    <th class="col-3">項目</th>
+                    <th class="col-3">每份含量</th>
+                    <th class="col-3">項目</th>
+                    <th class="col-3">每份含量</th>
+                  </tr>
+                  <tr class="p-p1">
+                    <td>熱量</td>
+                    <td>{{ productInfo.tags.product_kcal }}kcal</td>
+                    <td>碳水化合物</td>
+                    <td>{{ productInfo.tags.product_carbs }}g</td>
+                  </tr>
+                  <tr class="p-p1">
+                    <td>總脂肪</td>
+                    <td>{{ productInfo.tags.product_fat }}g</td>
+                    <td>飽和脂肪</td>
+                    <td>{{ productInfo.tags.product_saturated_fat }}g</td>
+                  </tr>
+                  <tr class="p-p1">
+                    <td>蛋白質</td>
+                    <td>{{ productInfo.tags.product_protein }}g</td>
+                    <td>膳食纖維</td>
+                    <td>{{ productInfo.tags.product_fiber }}g</td>
+                  </tr>
+                  <tr class="p-p1">
+                    <td>鈉</td>
+                    <td>{{ productInfo.tags.product_sodium }}mg</td>
+                    <td>糖</td>
+                    <td>{{ productInfo.tags.product_sugar }}g</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="p-p2 nutrition-table__note">一人份的營養成分表示/一份250g</p>
             </div>
-            <div class="product-detail__section">
-              <h3 class="zh-h5-bold">保存期限：</h3>
-              <p class="p-p1"> {{ productInfo.product_storage_method }}</p>
-              <hr>
-            </div>
-            <div class="product-detail__section">
-              <h3 class="zh-h5-bold">貼心提醒：</h3>
-              <p class="p-p1"> {{ productInfo.product_reminder }}</p>
+            <div class="product-detail__extra">
+              <div class="product-detail__section">
+                <h3 class="zh-h5-bold">食材內容：</h3>
+                <p class="p-p1">{{ productInfo.tags.product_ingredients }}
+                </p>
+              </div>
+              <div class="product-detail__section">
+                <hr>
+                <h3 class="zh-h5-bold">使用方法：</h3>
+                <p class="p-p1">
+                  {{ productInfo.tags.product_cooking_method }}
+                </p>
+                <hr>
+              </div>
+              <div class="product-detail__section">
+                <h3 class="zh-h5-bold">保存期限：</h3>
+                <p class="p-p1"> {{ productInfo.tags.product_storage_method }}</p>
+                <hr>
+              </div>
+              <div class="product-detail__section">
+                <h3 class="zh-h5-bold">貼心提醒：</h3>
+                <p class="p-p1"> {{ productInfo.tags.product_reminder }}</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <BaseModal :isOpen="showSuccess" type="success" iconClass="fa-solid fa-check"
-      :title="`${count} 件【${productInfo.product_name}】\n已加入至購物車`" @close="showSuccess = false">
-    </BaseModal>
-    <ProductRmd class="detail-recommend-section" />
-  </section>
+      <BaseModal :isOpen="showSuccess" type="success" iconClass="fa-solid fa-check"
+        :title="`${count} 件【${productInfo.product_name}】\n已加入至購物車`" @close="showSuccess = false">
+      </BaseModal>
+      <BaseModal :isOpen="buynowshowSuccess" type="success" iconClass="fa-solid fa-check"
+        :title="`${count} 件【${productInfo.product_name}】\n已加入購物車`" description="將為您跳轉至購物車頁面"
+        @close="showSuccess = false">
+      </BaseModal>
+      <ProductRmd class="detail-recommend-section" />
+    </section>
 
-  <!-- ==========================================
+    <!-- ==========================================
             找不到商品
       ========================================= -->
-  <section v-if="productInfo && !isNotFound" class="product-detail-page container">
-  </section>
+    <section v-if="productInfo && !isNotFound" class="product-detail-page container">
+    </section>
 
-  <section v-else-if="isNotFound" class="not-found-section container">
-    <div class="not-found-content">
-      <h2 class="zh-h2">哎呀！找不到這項商品</h2>
-      <p class="p-p1">這份好料可能已經下架，或者網址輸入錯誤了。</p>
-      <BaseBtn title="回商城逛逛" variant="outline" @click="router.push('/mall')" :width="210" />
-    </div>
-  </section>
+    <section v-else-if="isNotFound" class="not-found-section container">
+      <div class="not-found-content">
+        <h2 class="zh-h2">哎呀！找不到這項商品</h2>
+        <p class="p-p1">這份好料可能已經下架，或者網址輸入錯誤了。</p>
+        <BaseBtn title="回商城逛逛" variant="outline" @click="router.push('/mall')" :width="210" />
+      </div>
+    </section>
 
-  <section v-else class="loading-section container">
-    <div style="text-align: center; padding: 100px 0;">
-      <p class="zh-h5">美味載入中...</p>
-    </div>
-  </section>
+    <section v-else class="loading-section container">
+      <div style="text-align: center; padding: 100px 0;">
+        <p class="zh-h5">美味載入中...</p>
+      </div>
+    </section>
+  </div>
 </template>
 
 <style lang="scss" scoped>

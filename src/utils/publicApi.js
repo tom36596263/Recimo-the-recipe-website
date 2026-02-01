@@ -21,7 +21,8 @@ export const publicApi = axios.create({
 export const phpApi = axios.create({
     baseURL: apiBase, // 確保結尾有斜線
     timeout: 5000,
-    // headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json' },
+    withCredentials: true, // 這行沒加，PHP 永遠拿不到 Session
 })
 
 console.log('目前的 API 基準路徑為:', base); // 打開控制台可以看到目前抓到的路徑

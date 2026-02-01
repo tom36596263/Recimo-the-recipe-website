@@ -3,6 +3,7 @@ import { ref, defineProps, computed, defineEmits } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
 import BaseModal from '@/components/BaseModal.vue';
 import { publicApi, base } from '@/utils/publicApi';
+import { useAuthStore } from '@/stores/authStore';
 
 // 接收父元件傳過來的商品資料，item是資料傳送的「對口名稱」取的 (父子必須一致)，整段的意思是「各位父組件請注意！我是商品卡片，如果你要用我，請務必 (required) 給我一個物件型態 (Object) 的資料，並且請貼上 item 這個標籤交給我。」
 const props = defineProps({
@@ -12,11 +13,6 @@ const props = defineProps({
         default: () => ({}) // 增加預設空物件保護
     }
 });
-
-// ==========================================
-// vue上課教：以後部屬比較不會有問題
-// ==========================================
-const baseURL = import.meta.env.BASE_URL
 
 // ==========================================
 // 加入購物車
@@ -34,6 +30,7 @@ const addToCart = () => {
 
     // alert(`「${props.item.product_name}」已加入購物車~`);
     showSuccess.value = true;
+    setTimeout(() => { showSuccess.value = false; }, 1500);
 };
 
 // ==========================================
@@ -95,9 +92,12 @@ const productImage = computed(() => {
         </div>
 
     </router-link>
-    <BaseModal :isOpen="showSuccess" type="success" iconClass="fa-solid fa-check"
-        :title="`已將【${item.product_name}】\n加入購物車`" @close="showSuccess = false">
-    </BaseModal>
+    <!-- 解決CSS 層級 (z-index) 與 容器溢出 (overflow) 的問題，利用 Vue 的 <Teleport> 功能，將 Modal 抽離到 <body> 層級 -->
+    <Teleport to="body">
+        <BaseModal :isOpen="showSuccess" type="success" iconClass="fa-solid fa-check"
+            :title="`已將【${item.product_name}】\n加入購物車`" @close="showSuccess = false">
+        </BaseModal>
+    </Teleport>
 </template>
 <style lang="scss" scoped>
 @use "sass:map";

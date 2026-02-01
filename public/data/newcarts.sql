@@ -1,0 +1,1 @@
+ALTER TABLE carts ADD UNIQUE KEY `user_product_unique` (user_id, product_id);
