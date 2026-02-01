@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { phpApi } from '@/utils/phpApi';
 import { publicApi } from '@/utils/publicApi';
 // 🏆 1. 引入團隊規範工具，取代原本手寫的 fixPath
 import { parsePublicFile } from '@/utils/parseFile';
@@ -27,222 +28,131 @@ const currentNutrition = ref(null);
  * 包含熱量計算與異常數值校正
  */
 async function openAdaptDetail(item) {
-    // 🛑 唯讀邏輯：如果是來自 JSON 的資料（id 以 json- 開頭），不執行計算與彈窗
-    // if (String(item.id).startsWith('json-')) return;
+    selectedRecipe.value = item;
 
-    console.log('--- 🛡️ 熱量校正啟動 ---');
-
-    // 1. 確保營養資料庫已加載
     if (!nutritionStore.isLoaded) {
         await nutritionStore.fetchMasterData();
     }
 
-    const ingredients = item.ingredients || [];
+    if (item.ingredients && item.ingredients.length > 0) {
+        // 1. 執行計算 (計算出該份食譜的「總量」)
+        const total = nutritionStore.calculateRecipeNutrition(item.ingredients);
 
-    // 2. 份數抓取邏輯：優先序為 改編版份數 > 母食譜份數 > 預設 2 份
-    let finalServings = Number(
-        item.recipe_servings ||
-        item.servings ||
-        originalRecipe.value.servings ||
-        2
-    );
+        // 2. 份數抓取：統一檢查 recipe_servings 與 servings
+        // 優先順序：item 內的設定 > 預設值 1
+        const servings = Number(item.recipe_servings || item.servings || 0);
 
-    try {
-        // 3. 計算總熱量
-        const totalResult = nutritionStore.calculateRecipeNutrition(ingredients);
+        // 3. 🔍 [偵錯工具]
+        console.group(`📊 食譜計算詳情: ${item.title}`);
+        console.log(`📌 原始食材總量:`, total);
+        console.log(`📌 最終使用的份數: ${servings}`);
 
-        // 🏆 異常高熱量修正：若熱量過高且份數僅為 1，自動以 2 份計算
-        if (totalResult.kcal > 1000 && finalServings === 1) {
-            console.warn('偵測到異常高熱量且份數為 1，自動修正為 2 份計算');
-            finalServings = 2;
-        }
+        // 模擬計算過程表格
+        const debugTable = item.ingredients.map(ing => {
+            const master = nutritionStore.ingredientMaster.find(m =>
+                String(m.ingredient_id) === String(ing.id || ing.ingredient_id)
+            );
+            return {
+                "食材": ing.name || ing.ingredient_name,
+                "數量": ing.amount,
+                "單位": ing.unit || ing.unit_name,
+                "每100g熱量": master?.kcal_per_100g || "未匹配",
+                "轉換克數": ing.gram_conversion || "1"
+            };
+        });
+        console.table(debugTable);
+        console.groupEnd();
 
-        // 4. 計算單份比例
-        const scale = 1 / finalServings;
-
+        // 4. 更新畫面數值 (總量 / 份數 = 每份營養)
         currentNutrition.value = {
-            kcal: Math.round(totalResult.kcal * scale),
-            protein: (totalResult.protein * scale).toFixed(1),
-            fat: (totalResult.fat * scale).toFixed(1),
-            carbs: (totalResult.carbs * scale).toFixed(1),
-            calories: totalResult.kcal * scale
+            calories: Math.round(total.kcal / servings),
+            protein: (total.protein / servings).toFixed(1),
+            fat: (total.fat / servings).toFixed(1),
+            carbs: (total.carbs / servings).toFixed(1)
         };
-
-    } catch (err) {
-        console.error('計算失敗:', err);
+    } else {
+        currentNutrition.value = { calories: 0, protein: 0, fat: 0, carbs: 0 };
     }
 
-    selectedRecipe.value = item;
     isModalOpen.value = true;
 }
 
-// 頁面掛載時預先載入食材庫
-onMounted(async () => {
-    await nutritionStore.fetchMasterData();
-});
-
-// 監聽路由變化載入資料
-watch(
-    () => [route.params.id, route.query.editId],
-    async ([id, editId]) => {
-        const targetId = id || editId;
-        if (targetId) {
-            await loadRecipeData(targetId);
-        } else {
-            initEmptyRecipe();
-        }
-    },
-    { immediate: true }
-);
-
+/**
+ * 從後端載入食譜完整資料
+ */
 async function loadRecipeData(recipeId) {
     try {
-        const [
-            resRecipes,
-            resRelIngredients,
-            resSteps,
-            resIngMaster,
-            resTagsRel,    // 這裡原本漏掉了
-            resTagsMaster  // 這裡原本也漏掉了
-        ] = await Promise.all([
-            publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/recipe/recipe_ingredient.json'),
-            publicApi.get('data/recipe/steps.json'),
-            publicApi.get('data/recipe/ingredients.json'),
-            publicApi.get('data/recipe/recipe_tag.json'), 
-            publicApi.get('data/recipe/tags.json')
-        ]);
+        console.log(`🚀 開始從 PHP 載入食譜 ID: ${recipeId}`);
 
-        const allRecipes = resRecipes.data;
-        const allRelIngredients = resRelIngredients.data; // 關聯表
-        const allSteps = resSteps.data;
-        const ingMaster = resIngMaster.data; // 總表
-        const allTagsRel = resTagsRel.data;     // 標籤關聯數據
-        const tagsMaster = resTagsMaster.data;   // 標籤定義數據
-        const targetParentId = Number(recipeId);
+        const res = await phpApi.get('recipes/recipe_detail_get.php', {
+            params: { recipe_id: recipeId }
+        });
 
-        // --- 處理母食譜 ---
-        const found = allRecipes.find(r => Number(r.recipe_id) === targetParentId);
-        if (!found) return;
+        const apiResponse = res.data;
 
+        if (!apiResponse.success || !apiResponse.data) {
+            console.error('後端回傳失敗或資料格式錯誤', apiResponse);
+            return;
+        }
+
+        const { main, ingredients, steps, tags, adaptations } = apiResponse.data;
+
+        if (!main) {
+            console.error('找不到主食譜資訊(main)');
+            return;
+        }
+
+        // 1. 處理母食譜資料
         originalRecipe.value = {
-            id: found.recipe_id,
-            title: found.recipe_title,
-            description: found.recipe_descreption || '暫無簡介',
-            coverImg: parsePublicFile(found.recipe_image_url),
-            servings: Number(found.recipe_servings || 2)
+            id: main.recipe_id,
+            title: main.recipe_title,
+            description: main.recipe_description || main.recipe_descreption || '暫無簡介',
+            coverImg: parsePublicFile(main.recipe_image_url),
+            servings: Number(main.recipe_servings || 2)
         };
 
-        // --- 🏆 2. 處理改編食譜 ---
-        const jsonAdaptations = allRecipes
-            .filter(r => Number(r.parent_recipe_id) === targetParentId)
-            .map(childInfo => {
-                const childId = Number(childInfo.recipe_id);
+        // 2. 處理資料庫回傳的改編版本 (DB)
+        const formattedDbAdaptations = (adaptations || []).map(child => ({
+            ...child, // 🏆 展開所有欄位，確保原本的 recipe_servings 存在
+            id: `db-${child.recipe_id}`,
+            title: child.recipe_title,
+            summary: child.recipe_description || '來自資料庫的改編版本',
+            coverImg: parsePublicFile(child.recipe_image_url),
+            is_mine: false,
+            ingredients: child.ingredients || [],
+            steps: child.steps || [],
+            // 🏆 統一寫入 servings 欄位，確保 openAdaptDetail 能抓到
+            servings: Number(child.recipe_servings || 2)
+        }));
 
-                // --- 新增：處理標籤關聯 ---
-                const childTags = allTagsRel
-                    .filter(tr => Number(tr.recipe_id) === childId)
-                    .map(rel => {
-                        const masterTag = tagsMaster.find(t => Number(t.tag_id) === Number(rel.tag_id));
-                        return {
-                            tag_id: rel.tag_id,
-                            tag_name: masterTag ? masterTag.tag_name : '未知標籤'
-                        };
-                    });
-
-                // A. 關聯該改編食譜的「食材」並注入「名稱」
-                const childIngredients = allRelIngredients
-                    .filter(i => Number(i.recipe_id) === childId)
-                    .map(rel => {
-                        const masterInfo = ingMaster.find(m => Number(m.ingredient_id) === Number(rel.ingredient_id));
-                        return {
-                            ...rel,
-                            id: rel.ingredient_id,
-                            ingredient_name: masterInfo ? masterInfo.ingredient_name : '未知食材',
-                            name: masterInfo ? masterInfo.ingredient_name : '未知食材',
-                            note: rel.remark || ''
-                        };
-                    });
-
-                // B. 步驟處理
-                const childSteps = allSteps
-                    .filter(s => Number(s.recipe_id) === childId)
-                    .sort((a, b) => a.step_order - b.step_order)
-                    .map(step => ({
-                        ...step,
-                        // 確保燈箱有圖片欄位可讀
-                        image: parsePublicFile(step.step_image_url),
-                        step_image_url: parsePublicFile(step.step_image_url)
-                    }));
-
-                return {
-                    id: `json-${childId}`,
-                    title: childInfo.adaptation_title || childInfo.recipe_title,
-
-                    // 🎯 外面小卡抓的心得 (bbb)
-                    summary: childInfo.adaptation_note || '暫無改編心得',
-
-                    // 🎯 燈箱內抓的詳細說明 (aaa) -> 指向 clean_description
-                    description: childInfo.clean_description || childInfo.recipe_descreption || '暫無詳細說明',
-
-                    coverImg: parsePublicFile(`img/recipes/${childId}/cover.png`),
-                    is_mine: false,
-
-                    // 保留原始欄位供備查或熱量計算使用
-                    recipe_descreption: childInfo.recipe_descreption,
-                    recipe_servings: Number(childInfo.recipe_servings),
-                    ingredients: childIngredients,
-                    steps: childSteps,
-                    tags: childTags
-                };
-            });
-
-        // --- 3. 處理本地改編 (修正破圖與詳細說明抓取) ---
+        // 3. 處理本地改編 (LocalStorage)
+        const targetParentId = Number(recipeId);
         const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
         const localAdaptations = localRevisions
             .filter(r => Number(r.parent_recipe_id) === targetParentId)
             .map(r => {
-                // 🚀 關鍵修正：判斷圖片是否為 Base64 (data: 開頭)
-                const rawImg = r.coverImg || r.image;
-                const isBase64 = rawImg && rawImg.startsWith('data:');
-
-                // 如果是 Base64 就直接回傳，不是才進 parsePublicFile
-                const safeCover = isBase64 ? rawImg : parsePublicFile(rawImg);
-
-                // 步驟圖片也要同步檢查
-                const safeSteps = (r.steps || []).map(step => ({
-                    ...step,
-                    step_image_url: (step.step_image_url && step.step_image_url.startsWith('data:'))
-                        ? step.step_image_url
-                        : parsePublicFile(step.step_image_url)
-                }));
-
+                const s = Number(r.servings || r.recipe_servings || 1);
                 return {
                     ...r,
-                    id: r.id || `local-${Date.now()}`,
+                    id: r.id,
                     title: r.title || '未命名改編',
-
-                    // 🎯 讓本地資料的心得與燈箱內容一致
-                    summary: r.description || '暫無改編心得',
-                    description: r.description || '暫無詳細說明',
-
-                    coverImg: safeCover,
-                    is_mine: true,
-                    recipe_servings: Number(r.servings || 1),
-                    steps: safeSteps
+                    ingredients: r.ingredients || [],
+                    steps: r.steps || [],
+                    servings: s,
+                    recipe_servings: s, // 雙重保險
+                    is_mine: true
                 };
             });
 
-        variantItems.value = [...localAdaptations, ...jsonAdaptations];
+        // 4. 合併並更新畫面
+        variantItems.value = [...localAdaptations, ...formattedDbAdaptations];
+        console.log('✅ 資料載入成功，總數:', variantItems.value.length);
 
     } catch (err) {
-        console.error('載入失敗:', err);
+        console.error('❌ 載入失敗:', err.message);
     }
 }
 
-/**
- * 刪除本地儲存的改編食譜
- */
 function deleteLocalRecipe(targetId) {
     if (!confirm('確定要刪除這個本地改編版本嗎？')) return;
     const localData = JSON.parse(localStorage.getItem('user_revisions') || '[]');
@@ -268,6 +178,25 @@ function goBack() {
     if (!originalRecipe.value.id) return;
     router.push(`/workspace/recipe-detail/${originalRecipe.value.id}`);
 }
+
+// 生命週期 Hook
+onMounted(async () => {
+    // 預載營養資料庫
+    await nutritionStore.fetchMasterData();
+
+    const recipeId = route.params.id || route.query.editId;
+    if (recipeId) {
+        loadRecipeData(recipeId);
+    } else {
+        console.warn("⚠️ 找不到食譜 ID，初始化空資料");
+        initEmptyRecipe();
+    }
+});
+
+watch(() => route.params.id, (newId) => {
+    if (newId) loadRecipeData(newId);
+});
+
 </script>
 
 <template>

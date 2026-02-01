@@ -9,6 +9,7 @@ import EditorHeader from '@/components/workspace/editrecipe/EditorHeader.vue';
 import IngredientEditor from '@/components/workspace/editrecipe/IngredientEditor.vue';
 import StepEditor from '@/components/workspace/editrecipe/StepEditor.vue';
 import TagModal from '@/components/workspace/editrecipe/modals/TagModal.vue';
+import { phpApi } from '@/utils/phpApi'; // ✨ 確保有這行
 
 const router = useRouter();
 const route = useRoute();
@@ -108,128 +109,78 @@ onMounted(async () => {
     ingredientsMasterList.value = resIng.data || [];
     tagsMasterList.value = resTag.data || [];
 
+    // 2. 處理暫存恢復
     if (recipeStore.rawEditorData) {
       recipeForm.value = { ...recipeStore.rawEditorData };
-      // ✨ [關鍵修正]：確保「改編模式」的狀態被正確維持
       if (isAdapt) {
-        // 如果是改編，必須確保 parent_recipe_id 是網址上的那個 ID
-        // 這樣 handleSave 的 isAdaptModeActive 判斷才不會失效
         recipeForm.value.parent_recipe_id = editIdFromUrl;
-        recipeForm.value.recipe_id = null; // 改編不應該有自己的舊 ID
+        recipeForm.value.recipe_id = null;
       }
-
-      // 清空暫存，避免污染下次開啟
       recipeStore.rawEditorData = null;
-      console.log('🔄 已從暫存恢復資料，並同步改編狀態');
-      return; // 這裡可以結束，因為內容已經恢復，不需要再讀取 JSON
+      return;
     }
-    
 
     if (!editIdFromUrl) return;
 
-    // 2. 載入食譜主資訊
-    const resR = await publicApi.get('data/recipe/recipes.json');
-    const found = resR.data.find(r => Number(r.recipe_id) === editIdFromUrl);
+    // 3. 🚀 呼叫 PHP 取得食譜
+    const response = await phpApi.get(`recipes/recipe_detail_get.php?recipe_id=${editIdFromUrl}`);
 
-    if (found) {
+    if (response.data && response.data.success) {
+      const { main, ingredients, steps, tags } = response.data.data;
+
+      // --- 填充主資訊 ---
       if (isAdapt) {
         recipeForm.value.recipe_id = null;
         recipeForm.value.parent_recipe_id = editIdFromUrl;
-        recipeForm.value.original_title = found.recipe_title;
-        recipeForm.value.adapt_title = found.recipe_title + ' (改編版)';
-        recipeForm.value.title = found.recipe_title;
-        // 🏆 關鍵修正：如果是改編模式，將原食譜說明直接塞進「改編說明」預設值
-        const baseDescription = found.recipe_description || found.recipe_descreption || '';
-        recipeForm.value.adapt_description = baseDescription;
-
-        // 這樣在 handleSave 判斷時，就算使用者沒改，也會有這份預設內容
-        recipeForm.value.description = baseDescription;
+        recipeForm.value.original_title = main.recipe_title;
+        recipeForm.value.adapt_title = main.recipe_title + ' (改編版)';
+        recipeForm.value.title = main.recipe_title;
+        const baseDesc = main.recipe_description || main.recipe_descreption || '';
+        recipeForm.value.adapt_description = baseDesc;
+        recipeForm.value.description = baseDesc;
       } else {
         recipeForm.value.recipe_id = editIdFromUrl;
-        recipeForm.value.title = found.recipe_title;
+        recipeForm.value.title = main.recipe_title;
+        recipeForm.value.description = main.recipe_description || main.recipe_descreption || '';
       }
-      recipeForm.value.description = found.recipe_description || found.recipe_descreption || '';
-      recipeForm.value.difficulty = found.recipe_difficulty || 1;
-      recipeForm.value.recipe_servings = found.recipe_servings || 1;
-      recipeForm.value.coverImg = parsePublicFile(found.recipe_image_url || found.recipe_cover_image || '');
 
-      const tTime = String(found.recipe_total_time || '30');
-      recipeForm.value.totalTime = tTime.includes(':')
-        ? (p => parseInt(p[0], 10) * 60 + parseInt(p[1], 10))(tTime.split(':'))
-        : parseInt(tTime, 10) || 30;
+      recipeForm.value.difficulty = Number(main.recipe_difficulty) || 1;
+      recipeForm.value.recipe_servings = Number(main.recipe_servings) || 1;
+      recipeForm.value.coverImg = parsePublicFile(main.recipe_image_url || '');
+      recipeForm.value.totalTime = parseInt(main.recipe_total_time, 10) || 0;
+
+      // --- 填充標籤 ---
+      recipeForm.value.tags = tags.map(t => ({
+        tag_id: t.tag_id,
+        tag_name: t.tag_name
+      }));
+
+      // --- 填充食材 ---
+      recipeForm.value.ingredients = ingredients.map(ing => ({
+        id: Number(ing.ingredient_id),
+        name: ing.ingredient_name,
+        amount: ing.amount,
+        unit: ing.unit_name || '份',
+        note: ing.remark || '',
+        kcal_per_100g: Number(ing.kcal_per_100g) || 0,
+        protein_per_100g: Number(ing.protein_per_100g) || 0,
+        fat_per_100g: Number(ing.fat_per_100g) || 0,
+        carbs_per_100g: Number(ing.carbs_per_100g) || 0,
+        gram_conversion: Number(ing.gram_conversion) || 1.0
+      }));
+
+      // --- 填充步驟 
+      recipeForm.value.steps = steps.map((s, idx) => ({
+        id: isAdapt ? `adapt-s-${idx}` : (s.step_id || `s-${idx}`),
+        title: s.step_title || `步驟 ${idx + 1}`,
+        content: s.step_content || '',
+        image: parsePublicFile(s.step_image_url || ''),
+        time: s.total_seconds ? Math.floor(Number(s.total_seconds) / 60) : 0,
+        tags: s.step_ingredients ? s.step_ingredients.map(id => Number(id)) : []
+      }));
+
+      console.log('✅ 資料同步載入完成', recipeForm.value);
     }
-
-    // 3. 載入標籤 (Tags) - 加強匹配邏輯
-    // 3. 載入標籤 (Tags) - 加強匹配邏輯與過濾
-    try {
-      const resRTags = await publicApi.get('data/recipe/recipe_tag.json');
-      const allTagLinks = Array.isArray(resRTags.data) ? resRTags.data : [];
-
-      // 1. 先過濾出屬於這個食譜的關聯
-      const myLinks = allTagLinks.filter(rt => Number(rt.recipe_id) === Number(editIdFromUrl));
-
-      console.log('原始關聯資料 (myLinks):', myLinks);
-      console.log('目前標籤定義表 (tagsMasterList):', tagsMasterList.value);
-
-      // 2. 進行匹配
-      const matchedTags = myLinks.map(link => {
-        // 🏆 強制兩邊都轉為數字進行比較，避免 "1" !== 1 的問題
-        const tagDetail = tagsMasterList.value.find(t => Number(t.tag_id) === Number(link.tag_id));
-
-        if (tagDetail) {
-          return {
-            tag_id: tagDetail.tag_id,
-            tag_name: tagDetail.tag_name
-          };
-        }
-        return null;
-      }).filter(t => t !== null);
-
-      // 3. 賦值
-      recipeForm.value.tags = matchedTags;
-
-      console.log('✅ 最後生成的標籤陣列:', recipeForm.value.tags);
-
-    } catch (e) {
-      console.error('標籤讀取或匹配失敗', e);
-    }
-
-    // 4. 載入食材
-    const resRIng = await publicApi.get('data/recipe/recipe_ingredient.json');
-    const ingLinks = (resRIng.data || []).filter(i => Number(i.recipe_id) === Number(editIdFromUrl));
-    recipeForm.value.ingredients = ingLinks.map(link => {
-      const master = ingredientsMasterList.value.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
-      return {
-        id: link.ingredient_id,
-        name: master?.ingredient_name || '',
-        amount: link.amount,
-        unit: link.unit_name || master?.unit_name || '份',
-        note: link.remark || '',
-        kcal_per_100g: master?.kcal_per_100g || 0,
-        protein_per_100g: master?.protein_per_100g || 0,
-        fat_per_100g: master?.fat_per_100g || 0,
-        carbs_per_100g: master?.carbs_per_100g || 0,
-        gram_conversion: master?.gram_conversion || 1.0
-      };
-    });
-
-    // 5. 載入步驟
-    const [resS, resSIng] = await Promise.all([
-      publicApi.get('data/recipe/steps.json'),
-      publicApi.get('data/recipe/step_ingredients.json')
-    ]);
-    const sData = (resS.data || []).filter(s => Number(s.recipe_id) === Number(editIdFromUrl)).sort((a, b) => a.step_order - b.step_order);
-    recipeForm.value.steps = sData.map((s, idx) => ({
-      id: isAdapt ? `adapt-s-${idx}` : (s.step_id || `s-${idx}`),
-      title: s.step_title || `步驟 ${idx + 1}`,
-      content: s.step_content || '',
-      image: parsePublicFile(s.step_image_url || s.image || ''),
-      time: s.step_total_time?.toString().includes(':')
-        ? (p => parseInt(p[0], 10) * 60 + parseInt(p[1], 10))(s.step_total_time.split(':'))
-        : parseInt(s.step_total_time, 10) || 0,
-      tags: (resSIng.data || []).filter(si => Number(si.step_id) === Number(s.step_id)).map(si => si.ingredient_id)
-    }));
-
   } catch (err) {
     console.error('❌ 載入失敗:', err);
   }
