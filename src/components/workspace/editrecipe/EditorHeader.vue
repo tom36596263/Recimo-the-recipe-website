@@ -12,7 +12,7 @@ const props = defineProps({
   isAdaptMode: { type: Boolean, default: false }
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'open-tag-modal']);
 
 // 1. 宣告 ref 來對應 template 中的 input
 const fileInput = ref(null);
@@ -44,19 +44,21 @@ const updateField = (field, value) => {
   nextData[field] = value;
 
   // 3. ✨ 核心修正：實名制隔離
-  // 當我們在改「心得」時，絕對不准動到「說明」
   if (field === 'adapt_description') {
     nextData.description = props.modelValue.description;
-    // 額外存一個「燈箱專用」的乾淨說明欄位
     nextData.clean_description = props.modelValue.description;
   }
 
-  // 當我們在改「大框框說明」時，更新說明，並同步更新乾淨欄位
   if (field === 'description') {
     nextData.clean_description = value;
   }
 
   emit('update:modelValue', nextData);
+};
+
+const removeTag = (tagId) => {
+  const updatedTags = props.modelValue.tags.filter(t => t.tag_id !== tagId);
+  updateField('tags', updatedTags);
 };
 
 const setDifficulty = (val) => {
@@ -71,51 +73,28 @@ const autoTotalTime = computed(() => {
   return props.modelValue.steps.reduce((sum, step) => sum + (Number(step.time) || 0), 0);
 });
 
-// 2. 修改顯示邏輯：如果是在編輯模式且使用者還沒手動輸入(或是0)，就顯示自動加總
+// 2. 修改顯示邏輯
 const displayTime = computed(() => {
   const manualTime = Number(props.modelValue.totalTime);
-  // 如果 manualTime 為 0 且有步驟時間，則顯示 autoTotalTime
   return manualTime > 0 ? manualTime : autoTotalTime.value;
 });
 
-// EditorHeader.vue 內的 adaptRecipeData (修正預覽顯示)
-// EditorHeader.vue 內的 adaptRecipeData (修正預覽顯示)
-const adaptRecipeData = computed(() => {
+// EditorHeader.vue 內的 adaptRecipeData
+const adaptRecipeData = computed(() => {1
   const m = props.modelValue;
 
   return {
     ...m,
-    // 1. 小卡標題：顯示「改編標題」(例如：低脂版)
     title: m.adapt_title || m.title || '未命名改編',
-
-    // 2. 小卡第二列 (關鍵更改)：顯示「改編心得」
-    // ✨ 這裡是為了讓 AdaptRecipeCard 的 input 顯示心得
     summary: m.adapt_description || '',
     description: m.adapt_description || '',
-
-    // 3. ✨ 這是最重要的！為了讓「燈箱」能抓到說明：
-    // 我們必須保留一個乾淨的欄位給燈箱的 introData 使用
-    // 這裡把灰框框下面的那個「詳細說明」欄位存進 recipe_descreption
     recipe_descreption: m.description || '暫無詳細說明',
-
-    // 基礎資訊
     recipe_id: m.parent_recipe_id || m.recipe_id,
     coverImg: m.adaptation_image_url || m.coverImg,
     adaptation_title: m.adapt_title,
     adaptation_note: m.adapt_description
   };
 });
-
-// watch(
-//   () => props.modelValue.steps,
-//   (newSteps) => {
-//     const newSum = newSteps?.reduce((sum, s) => sum + (Number(s.time) || 0), 0) || 0;
-//     if (!props.modelValue.totalTime || props.modelValue.totalTime == 0) {
-//       updateField('totalTime', newSum);
-//     }
-//   },
-//   { deep: true }
-// );
 
 const handleCoverUpload = (e) => {
   const file = e.target.files[0];
@@ -205,6 +184,24 @@ const handleCoverUpload = (e) => {
         </div>
       </div>
 
+      <div class="row-tags">
+        <div class="tags-wrapper">
+          <div class="tag-item" v-for="tag in modelValue.tags" :key="tag.tag_id">
+            <span class="tag-text p-p3">#  {{ tag.tag_name }}</span>
+            <button v-if="isEditing" class="tag-delete-btn" @click="removeTag(tag.tag_id)">
+              <span>×</span>
+            </button>
+          </div>
+          <button v-if="isEditing" class="add-tag-btn p-p3" @click="$emit('open-tag-modal')">
+            <i class="bi bi-plus-lg"></i>
+            <span>新增標籤</span>
+          </button>
+          <span v-if="!isEditing && (!modelValue.tags || modelValue.tags.length === 0)" class="no-tag-hint p-p3">
+            尚未設定標籤
+          </span>
+        </div>
+      </div>
+
       <div class="row-description" :class="{ 'editing-border': isEditing, 'is-adapt': isAdaptMode }">
         <textarea v-if="isEditing" :value="modelValue.description"
           @input="updateField('description', $event.target.value)" class="desc-textarea p-p2" placeholder="請輸入說明..."
@@ -218,15 +215,104 @@ const handleCoverUpload = (e) => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
+// 新增標籤樣式
+.row-tags {
+  padding: 0 16px;
+  margin: 4px 0 8px 0;
+
+  .tags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .tag-item {
+    display: flex;
+    align-items: center;
+    background-color: $primary-color-100;
+    color: $primary-color-800;
+    padding: 4px 10px;
+    border-radius: 100px;
+
+    .tag-delete-btn {
+
+        /* 1. 徹底消除按鈕預設樣式 */
+        appearance: none;
+        background: transparent !important; // 強制透明，殺掉那個灰色圓形
+        border: none;
+        padding: 0;
+        margin: 0 0 0 6px;
+        outline: none;
+        box-shadow: none;
+    
+        /* 2. 完美置中佈局 */
+        display: inline-flex;
+        align-items: center; // 垂直置中
+        justify-content: center; // 水平置中
+        width: 16px;
+        height: 16px;
+    
+        /* 3. 叉叉樣式 */
+        color: #ff8e8e;
+        cursor: pointer;
+        font-size: 18px; // 控制叉叉大小
+        font-weight: 200; // 讓叉叉細一點，更簡約
+        line-height: 1; // 避免行高撐開導致不置中
+    
+        transition: color 0.2s, transform 0.2s;
+    
+        span {
+          display: block;
+          line-height: 1;
+          // 有時候乘號字體偏下，可以用這行微調 (視你的字體而定)
+          // transform: translateY(1px);
+        }
+    
+        &:hover {
+          color: red;
+          background: transparent !important;
+          // transform: scale(1.2); // 滑過稍微放大，增加回饋感
+        }
+    
+        &:active {
+          transform: scale(0.9); // 點擊縮小感
+        }
+      }
+  }
+
+  .add-tag-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    color: $primary-color-700;
+    border: 1px dashed $primary-color-400;
+    padding: 4px 12px;
+    border-radius: 100px;
+    cursor: pointer;
+
+    &:hover {
+      background: $primary-color-100;
+    }
+  }
+
+  .no-tag-hint {
+    color: $neutral-color-400;
+    font-style: italic;
+  }
+}
+
 .adapt-card-section {
   display: flex;
   flex-direction: column;
-  gap: 16px;
   align-items: center;
   width: 100%;
 
   @media (min-width: 768px) {
     width: 320px;
+    align-self: stretch; // 確保容器高度與右側 info-section 同步
+    justify-content: space-between; // 標籤變多時，自動把按鈕推向底部
   }
 }
 
@@ -236,7 +322,7 @@ const handleCoverUpload = (e) => {
 
   @media (min-width: 768px) {
     width: 320px;
-    margin-top: 60px;
+    margin-top: 0; // 改由 space-between 控制對齊
   }
 }
 
@@ -251,6 +337,7 @@ const handleCoverUpload = (e) => {
 
   @media (min-width: 768px) {
     flex-direction: row;
+    align-items: stretch; // 關鍵：確保左右兩邊等高
   }
 }
 
@@ -410,33 +497,47 @@ const handleCoverUpload = (e) => {
   margin: 0;
 }
 
+/* ✨ 關鍵修改位置 */
 .row-meta {
   display: flex;
-  gap: 30px;
+  flex-wrap: wrap; // 防止手機版塞不下
+  gap: 24px;
   align-items: center;
   color: $neutral-color-800;
   padding: 0 16px;
   margin-top: 4px;
 
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px; // 文字與內容的間距
+  }
+
   .inline-input {
     border: none;
     border-bottom: 1px solid $neutral-color-400;
-    width: 60px;
+    width: 50px;
     text-align: center;
     outline: none;
+    padding: 0 4px;
   }
 
   .stars-group {
     display: flex;
-    gap: 4px;
+    gap: 6px; // 星號之間的間距
 
     .star {
-      font-size: 20px;
+      font-size: 22px; // 稍微放大的星星更好按
       color: $neutral-color-400;
+      line-height: 1;
     }
 
     &.is-editing .star {
       cursor: pointer;
+
+      &:hover {
+        transform: scale(1.1);
+      }
     }
 
     .star.active {

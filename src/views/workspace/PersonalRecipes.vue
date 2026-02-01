@@ -119,7 +119,7 @@ onMounted(async () => {
     if (userStr) {
         try {
             const userObj = JSON.parse(userStr);
-            userId.value = userObj.user_id;
+            userId.value = userObj.id;
             if (userId.value) {
                 try {
                     const resMyRecipes = await phpApi.get(`personal/myrecipe_get.php`, { params: { user_id: userId.value } });

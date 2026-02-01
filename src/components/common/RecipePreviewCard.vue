@@ -11,6 +11,41 @@ import 'swiper/css/free-mode';
 
 // Swiper 模組
 const modules = [FreeMode];
+import { useAuthStore } from '@/stores/authStore';
+import { useFavoritesStore } from '@/stores/favoritesStore';
+const authStore = useAuthStore();
+const favoritesStore = useFavoritesStore();
+const userId = computed(() => authStore.user?.id ?? 0);
+const recipeId = computed(() => props.recipe.recipe_id || props.recipe.id);
+const isFavorited = computed(() => favoritesStore.isFavorited(recipeId.value));
+const loadingFavorite = ref(false);
+const heartAnimate = ref(false);
+
+const router = useRouter();
+
+const fetchFavoriteStatus = async () => {
+    await favoritesStore.fetchFavorites(userId.value);
+};
+
+const toggleFavorite = async (e) => {
+    e.stopPropagation();
+    if (!userId.value || !recipeId.value) {
+        authStore.isLoginLightboxOpen = true;
+        return;
+    }
+    loadingFavorite.value = true;
+    heartAnimate.value = true;
+    setTimeout(() => heartAnimate.value = false, 400);
+    let res;
+    if (isFavorited.value) {
+        res = await favoritesStore.removeFavorite(userId.value, recipeId.value);
+    } else {
+        res = await favoritesStore.addFavorite(userId.value, recipeId.value);
+    }
+    loadingFavorite.value = false;
+};
+
+onMounted(fetchFavoriteStatus);
 
 // ==================== Props 定義 ====================
 const props = defineProps({
@@ -20,10 +55,7 @@ const props = defineProps({
     }
 });
 
-// ==================== 路由實例 ====================
-const router = useRouter();
-
-// ==================== 響應式數據 ====================
+// ==================== 韺應式數據 ====================
 const recipeIngredients = computed(() => Array.isArray(props.recipe.ingredients) ? props.recipe.ingredients : []);
 
 
@@ -131,14 +163,19 @@ const getIngredientIcon = (mainCategory, subCategory) => {
             <div class="author-info">
                 <div class="author-avatar">
                     <!-- 自動生成大頭照 -->
-                    <img :src="parsePublicFile(recipe.user_url)||`https://ui-avatars.com/api/?name=${recipe.author?.name || 'RE'}&background=3E8D60&color=fff`"
+                    <img :src="parsePublicFile(recipe.user_url) || `https://ui-avatars.com/api/?name=${recipe.author?.name || 'RE'}&background=3E8D60&color=fff`"
                         alt="Recimo">
                 </div>
                 <!--  -->
                 <span class="author-name">{{ recipe.author?.name || 'Recimo' }}</span>
             </div>
             <!-- 加入收藏按鈕 -->
-            <BaseBtn title="加入收藏" variant="outline" :height="30" />
+            <div class="favorite-btn" @click.stop="toggleFavorite"
+                :style="{ cursor: loadingFavorite ? 'not-allowed' : 'pointer' }">
+                <i-material-symbols-Favorite v-if="isFavorited" style="color: #e74c3c"
+                    :class="{ 'favorite-animate': heartAnimate }" />
+                <i-material-symbols-Favorite-outline v-else :class="{ 'favorite-animate': heartAnimate }" />
+            </div>
         </div>
 
         <!-- ==================== 食譜主圖 ==================== -->
@@ -230,6 +267,41 @@ const getIngredientIcon = (mainCategory, subCategory) => {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+
+    .favorite-btn {
+        display: flex;
+        align-items: center;
+
+        svg {
+            width: 1.5em !important;
+            height: 1.5em !important;
+            min-width: 1.5em;
+            min-height: 1.5em;
+            display: inline-block;
+        }
+
+        .favorite-animate {
+            animation: heart-bounce 0.4s;
+        }
+    }
+}
+
+@keyframes heart-bounce {
+    0% {
+        transform: scale(1);
+    }
+
+    30% {
+        transform: scale(1.3);
+    }
+
+    60% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 /* 作者信息區 */

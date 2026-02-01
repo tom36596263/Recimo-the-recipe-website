@@ -101,6 +101,12 @@ export const useRecipeStore = defineStore('recipeEditor', {
                     step_image_url: cleanImgPath(s.img || s.image || s.step_image_url) || null,
                     step_total_time: s.time ? `00:${s.time.toString().padStart(2, '0')}:00` : '00:00:00',
                     tags: s.tags || []
+                })),
+
+                recipe_tags: (form.tags || []).map(t => ({
+                    tag_id: t.tag_id,
+                    tag_name: t.tag_name,
+                    tag_type: t.tag_type
                 }))
             };
 

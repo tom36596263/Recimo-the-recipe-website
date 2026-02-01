@@ -110,7 +110,8 @@ const introData = computed(() => {
         userName: r.user_name || r.author_name || loginUser.user_name || "未知作者",
         handle: (r.user_email || loginUser.user_email || "guest@mail.com").split('@')[0],
         publishTime: r.created_at || today,
-        isOwner: !!(r.is_mine)
+        isOwner: !!(r.is_mine),
+        tags: r.tags || []
     };
 });
 
