@@ -5,7 +5,9 @@ import { base } from '@/utils/publicApi';
 
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
+import { useCartStore } from '@/stores/cartStore';
 const authStore = useAuthStore();
+const cartStore = useCartStore();
 // 引用彈窗
 import BaseModal from '@/components/BaseModal.vue';
 // 引用input
@@ -211,6 +213,10 @@ const handleLogin = async () => {
     if (result.status === 'success') {
       // 登入成功：使用 PHP 回傳的真實資料 (result.user)
       authStore.login(result.user);
+
+      // 立刻去後端抓該使用者的購物車
+      // 用 await，確保購物車資料抓完後再進行後續動作
+      await cartStore.fetchCart();
 
       // 先叫出成功小彈窗再關掉登入大書本
       showLoginSuccess.value = true;
