@@ -138,7 +138,12 @@ onMounted(async () => {
         recipeForm.value.original_title = found.recipe_title;
         recipeForm.value.adapt_title = found.recipe_title + ' (改編版)';
         recipeForm.value.title = found.recipe_title;
-        recipeForm.value.adapt_description = '';
+        // 🏆 關鍵修正：如果是改編模式，將原食譜說明直接塞進「改編說明」預設值
+        const baseDescription = found.recipe_description || found.recipe_descreption || '';
+        recipeForm.value.adapt_description = baseDescription;
+
+        // 這樣在 handleSave 判斷時，就算使用者沒改，也會有這份預設內容
+        recipeForm.value.description = baseDescription;
       } else {
         recipeForm.value.recipe_id = editIdFromUrl;
         recipeForm.value.title = found.recipe_title;
