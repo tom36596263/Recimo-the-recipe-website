@@ -13,13 +13,43 @@ const pageSize = 5;
 
 const activeTag = ref('全部訂單');
 const selectedDate = ref('');
-const userId = JSON.parse(localStorage.getItem('user_info'))?.id || 1;
+// const userInfo = JSON.parse(localStorage.getItem('user_info'));
+// const userId = userInfo?.id || userInfo?.user_id || null;
+
+// console.log("從 localStorage 抓到的原始資料:", userInfo);
+// console.log("最終解析出的 userId:", userId);
+
+// if (!userId) {
+//   console.error("錯誤：抓不到使用者 ID，請重新登入！");
+//   // 可以導向登入頁面
+// }
+
 // 讀取資料
 const fetchOrders = async () => {
+  // 1. 修改 Key 名稱為 'user' (與你儲存的一致)
+  const userData = localStorage.getItem('user');
+
+  if (!userData) {
+    console.error("找不到使用者登入資訊 (Key: 'user')");
+    return;
+  }
+
+  const userInfo = JSON.parse(userData);
+
+  // 2. 確保抓到 id (根據內容是小寫 id)
+  const userId = userInfo?.id;
+
+  if (!userId) {
+    console.error("解析不出 userId，請檢查內容:", userInfo);
+    return;
+  }
+
+  console.log("成功抓到當前登入者 ID:", userId);
   try {
     //抓取訂單清單 (補上 /mall/ 路徑)
     const resList = await phpApi.get('mall/user_order_list.php', {
       params: { user_id: userId }
+
     });
 
     const list = Array.isArray(resList.data) ? resList.data : [];
@@ -148,10 +178,20 @@ const openCalender = () => {
 //取消訂單邏輯
 const showSuccessModal = ref(false);
 const onCancel = async (orderId) => {
-  console.log("發送取消請求 - UserID:", userId, "OrderID:", orderId); // 檢查這裡的值
+  // 【新增】在這裡定義 userId，否則第 181 行會報錯
+  const userInfo = JSON.parse(localStorage.getItem('user'));
+  const currentUserId = userInfo?.id || userInfo?.user_id;
+
+  if (!currentUserId) {
+    alert("無法取得使用者資訊，請重新登入");
+    return;
+  }
+
+  console.log("發送取消請求 - UserID:", currentUserId, "OrderID:", orderId);
+
   try {
     const res = await phpApi.post('mall/cancel_order.php', {
-      user_id: userId,
+      user_id: currentUserId, // 🌟 使用剛剛定義的變數
       order_id: orderId
     });
 

@@ -82,7 +82,7 @@ const goToProductDetail = () => {
                         :text="tag.tag_name"
                         class="tag-item"/>
                 </div>
-                <p class="p-p2">{{ recipe.recipe_descreption }}</p>
+                <p class="p-p2">{{ recipe.recipe_description }}</p>
             </div>
             <div class="btn-group">
                 <BaseBtn 
