@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-// 🏆 1. 引入團隊規範工具
+import { useRouter } from 'vue-router';
 import { parsePublicFile } from '@/utils/parseFile';
 
 import RecipeIntro from '@/components/workspace/recipedetail/RecipeIntro.vue';
@@ -18,16 +18,34 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'delete-recipe']);
+const router = useRouter();
 
-// 1. 取得食譜原始設定的份數 (例如 2)
+// --- 邏輯處理 ---
+
+/**
+ * 核心修正：統一清洗 ID 的函式
+ */
+const getCleanId = (id) => {
+    if (!id) return '';
+    // 將 "db-71" 轉換為 "71"，只保留數字部分
+    return String(id).replace(/[^\d]/g, '');
+};
+
+const handleStartCooking = () => {
+    const cleanId = getCleanId(props.recipe?.id || props.recipe?.recipe_id);
+    if (cleanId) {
+        router.push(`/workspace/guide/${cleanId}`);
+    } else {
+        console.error('無法解析有效的 ID');
+    }
+};
+
 const originalServings = computed(() => {
     return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
 });
 
-// 2. 當前 UI 選擇的份數
 const currentServings = ref(1);
 
-// 3. 核心修正：基準營養值
 const baseNutritionPerServing = computed(() => {
     const n = props.nutrition;
     return {
@@ -38,11 +56,9 @@ const baseNutritionPerServing = computed(() => {
     };
 });
 
-// 4. 顯示營養數值
 const displayedNutrition = computed(() => {
     const base = baseNutritionPerServing.value;
     const s = currentServings.value;
-
     return {
         calories: Math.round(base.calories * s),
         protein: (base.protein * s).toFixed(1),
@@ -51,38 +67,28 @@ const displayedNutrition = computed(() => {
     };
 });
 
-// 🏆 修正重點：配合 RecipeIngredients.vue 的欄位名稱
 const ingredientsData = computed(() => {
     const list = props.recipe?.ingredients || [];
-    // 這裡的 scale 設為 1，是因為 RecipeIngredients 內部已經會乘上 props.servings 了
-    // 為了避免重複計算，我們傳入原始比例
     const scale = 1 / originalServings.value;
-
     return list.map(item => ({
         INGREDIENT_NAME: item.ingredient_name || item.name || '未知食材',
-        // 傳入「單份份量」給子組件，讓它自己去乘 currentServings
         amount: item.amount ? (Number(item.amount) * scale) : 0,
         unit_name: item.unit_name || item.unit || 'g',
-        // 🚩 重點：子組件顯示的是 item.note，所以我們要把資料塞進 note 欄位
         note: item.remark || item.note || ''
     }));
 });
 
-// 監聽燈箱開啟
 watch(() => props.modelValue, (isOpen) => {
     if (isOpen) {
         currentServings.value = originalServings.value;
     }
 }, { immediate: true });
 
-// --- 資料轉換邏輯 (Intro & Steps) ---
-
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
     const loginUser = JSON.parse(localStorage.getItem('user') || '{}');
     const today = new Date().toISOString().split('T')[0];
-
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
     const rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
@@ -90,7 +96,8 @@ const introData = computed(() => {
     const finalImage = isBase64 ? rawImg : parsePublicFile(rawImg);
 
     return {
-        id: r.id || r.recipe_id,
+        // ✨ 重點：在這裡就先把 ID 洗乾淨，傳給子組件時就不會帶 db-
+        id: getCleanId(r.id || r.recipe_id),
         title: r.title || r.recipe_title || '未命名食譜',
         image: finalImage,
         description: r.description || r.recipe_description || '暫無詳細說明',
@@ -145,24 +152,26 @@ const getAvatarStyle = (name) => {
                                     {{ introData?.title }}
                                 </h2>
                                 <span class="badge">改編版本</span>
-
-                                
                             </div>
 
-                            <div class="user-info-box">
-                                <div class="user-avatar-circle" :style="getAvatarStyle(introData?.userName || '')">
-                                    {{ introData?.userName?.charAt(0).toUpperCase() }}
-                                </div>
-                                <div class="user-text-meta">
-                                    <div class="user-name">{{ introData?.userName }}</div>
-                                    <div class="user-sub">@{{ introData?.handle }} • {{ introData?.publishTime }}</div>
+                            <div class="action-group">
+
+                                <div class="user-info-box">
+                                    <div class="user-avatar-circle" :style="getAvatarStyle(introData?.userName || '')">
+                                        {{ introData?.userName?.charAt(0).toUpperCase() }}
+                                    </div>
+                                    <div class="user-text-meta">
+                                        <div class="user-name">{{ introData?.userName }}</div>
+                                        <div class="user-sub">@{{ introData?.handle }} • {{ introData?.publishTime }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="row main-content-row">
                             <div class="col-7 col-md-12 content-left">
-                                <RecipeIntro :info="introData" :hide-actions="true" class="intro-section" />
+                                <RecipeIntro :info="introData" :hide-actions="false" class="intro-section" />
                                 <RecipeSteps :steps="stepsData" class="steps-section" />
                             </div>
 
@@ -170,7 +179,6 @@ const getAvatarStyle = (name) => {
                                 <div class="sticky-sidebar">
                                     <NutritionCard v-if="nutrition" :nutrition="displayedNutrition"
                                         :servings="currentServings" @change-servings="val => currentServings = val" />
-
                                     <RecipeIngredients :list="ingredientsData" :readonly="true" />
                                 </div>
                             </div>
@@ -185,7 +193,6 @@ const getAvatarStyle = (name) => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-// --- 原有 Modal 核心樣式保持不變 ---
 .adaptation-modal-overlay {
     position: fixed;
     top: 0;
@@ -222,9 +229,6 @@ const getAvatarStyle = (name) => {
         font-size: 26px;
         color: $neutral-color-700;
         cursor: pointer;
-        line-height: 1;
-        padding: 5px;
-        transition: color 0.2s;
         z-index: 10;
 
         &:hover {
@@ -242,72 +246,27 @@ const getAvatarStyle = (name) => {
         width: 6px;
     }
 
-    &::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
     &::-webkit-scrollbar-thumb {
         background: $neutral-color-100;
         border-radius: 10px;
-
-        &:hover {
-            background: $neutral-color-400;
-        }
     }
-
-    scrollbar-width: thin;
-    scrollbar-color: $neutral-color-100 transparent;
 
     @media (max-width: 768px) {
         padding: 24px;
     }
 }
 
-// --- 調整 RWD 佈局邏輯 ---
-.main-content-row {
-    @media (max-width: 768px) {
-        display: flex;
-        flex-direction: column;
+.action-group {
+    display: flex;
+    align-items: center;
+    gap: 24px;
 
-        .content-left {
-            display: flex;
-            flex-direction: column;
-            padding-right: 0; // 行動版取消右邊距
-        }
-
-        .intro-section {
-            order: 1;
-            margin-bottom: 32px;
-        }
-
-        .sidebar-right {
-            order: 2;
-            margin-bottom: 40px;
-        }
-
-        .steps-section {
-            order: 3;
-
-            // 🚀 關鍵優化：強制內部的 Step 項目在行動版寬度全滿
-            :deep(.step-item) {
-                flex-direction: column !important;
-                gap: 16px;
-
-                .step-image {
-                    width: 100% !important;
-                    height: 200px !important;
-                    margin: 0 0 16px 0 !important;
-                }
-
-                .step-content {
-                    width: 100% !important;
-                }
-            }
-        }
+    .cook-btn-modal {
+        width: 160px;
+        height: 48px;
     }
 }
 
-// --- 標題與用戶資訊 ---
 .modal-title-bar {
     display: flex;
     align-items: center;
@@ -362,7 +321,7 @@ const getAvatarStyle = (name) => {
 
             .user-name {
                 font-weight: 600;
-                margin-bottom: 7px;
+                margin-bottom: 4px;
                 color: $neutral-color-800;
                 font-size: 15px;
             }
@@ -380,6 +339,16 @@ const getAvatarStyle = (name) => {
         gap: 16px;
         padding-right: 30px;
 
+        .action-group {
+            width: 100%;
+            flex-direction: column-reverse;
+            gap: 16px;
+
+            .cook-btn-modal {
+                width: 100% !important;
+            }
+        }
+
         .user-info-box {
             width: 100%;
             justify-content: flex-start;
@@ -396,6 +365,41 @@ const getAvatarStyle = (name) => {
     }
 }
 
+.main-content-row {
+    @media (max-width: 768px) {
+        display: flex;
+        flex-direction: column;
+
+        .intro-section {
+            order: 1;
+            margin-bottom: 32px;
+        }
+
+        .sidebar-right {
+            order: 2;
+            margin-bottom: 40px;
+        }
+
+        .steps-section {
+            order: 3;
+        }
+
+        :deep(.step-item) {
+            flex-direction: column !important;
+
+            .step-image {
+                width: 100% !important;
+                height: 200px !important;
+                margin-bottom: 16px !important;
+            }
+
+            .step-content {
+                width: 100% !important;
+            }
+        }
+    }
+}
+
 .sticky-sidebar {
     position: sticky;
     top: 0;
@@ -403,15 +407,10 @@ const getAvatarStyle = (name) => {
 
 .content-left {
     padding-right: 32px;
-}
 
-// --- 通用間距與動畫 ---
-.mb-16 {
-    margin-bottom: 16px;
-}
-
-.mb-24 {
-    margin-bottom: 24px;
+    @media (max-width: 768px) {
+        padding-right: 0;
+    }
 }
 
 .mb-32 {
