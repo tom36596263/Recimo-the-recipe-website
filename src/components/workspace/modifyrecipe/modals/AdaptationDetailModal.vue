@@ -68,11 +68,17 @@ const displayedNutrition = computed(() => {
 });
 
 const ingredientsData = computed(() => {
+    // 1. 獲取原始清單
     const list = props.recipe?.ingredients || [];
-    const scale = 1 / originalServings.value;
+
+    // 2. 核心修正：計算「當前份數」相對於「原始份數」的倍率
+    // 公式：(1 / 原始份數) * 當前份數
+    const ratio = (1 / originalServings.value) * currentServings.value;
+
     return list.map(item => ({
         INGREDIENT_NAME: item.ingredient_name || item.name || '未知食材',
-        amount: item.amount ? (Number(item.amount) * scale) : 0,
+        // 3. 套用倍率
+        amount: item.amount ? (Number(item.amount) * ratio) : 0,
         unit_name: item.unit_name || item.unit || 'g',
         note: item.remark || item.note || ''
     }));
@@ -155,6 +161,7 @@ const getAvatarStyle = (name) => {
                             </div>
 
                             <div class="action-group">
+                                <!-- <BaseBtn title="開始烹飪" class="cook-btn-modal" @click="handleStartCooking" /> -->
 
                                 <div class="user-info-box">
                                     <div class="user-avatar-circle" :style="getAvatarStyle(introData?.userName || '')">

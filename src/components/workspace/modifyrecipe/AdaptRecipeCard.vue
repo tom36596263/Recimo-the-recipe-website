@@ -15,7 +15,6 @@ const props = defineProps({
 
 const router = useRouter();
 
-// ✨ 修正重點：在 readonly 模式下不執行跳轉，交由父組件決定行為
 const goToDetail = () => {
     if (!props.readonly) {
         const targetId = props.recipe.id || props.recipe.recipe_id;
@@ -34,7 +33,6 @@ const emit = defineEmits(['upload-image']);
 const handleUploadImage = () => {
     emit('upload-image');
 };
-
 </script>
 
 <template>
@@ -57,6 +55,9 @@ const handleUploadImage = () => {
         <div class="card-body">
             <div class="input-group title-input">
                 <input type="text" :value="recipe.title" placeholder="改編版本標題..." readonly>
+            </div>
+
+            <div v-if="recipe.ingredients" class="ingredients-section">
             </div>
 
             <div class="input-group content-input" :class="{ 'has-tag': recipe.keyChangeTag }">
@@ -93,7 +94,7 @@ const handleUploadImage = () => {
     border-radius: 12px;
     overflow: hidden;
     background-color: $neutral-color-white;
-    min-height: 320px; // 給予最小高度確保卡片比例
+    min-height: 320px;
     display: flex;
     flex-direction: column;
     transition: all 0.3s ease;
@@ -176,6 +177,28 @@ const handleUploadImage = () => {
         display: flex;
         flex-direction: column;
 
+        /* ✨ 手機版排序核心 ✨ */
+        @media (max-width: 768px) {
+            display: grid; // 改用 grid 更好控制
+            grid-template-columns: 1fr;
+
+            .title-input {
+                order: 1;
+            }
+
+            .ingredients-section,
+            .nutrition-list {
+                order: 2;
+            }
+
+            // 食材營養往前
+            .content-input {
+                order: 3;
+            }
+
+            // 步驟/筆記最後
+        }
+
         .input-group {
             display: flex;
             margin-bottom: 8px;
@@ -196,7 +219,7 @@ const handleUploadImage = () => {
         }
 
         .content-input {
-            align-items: flex-start; // 讓箭頭對齊第一行文字
+            align-items: flex-start;
 
             .arrow-icon {
                 font-size: 20px;
@@ -206,7 +229,6 @@ const handleUploadImage = () => {
                 flex-shrink: 0;
             }
 
-            /* ✨ 讓內容可以換行的關鍵樣式 */
             .adaptation-textarea {
                 width: 100%;
                 border: none;
@@ -217,10 +239,9 @@ const handleUploadImage = () => {
                 line-height: 1.5;
                 resize: none;
                 padding: 0;
-                height: 4.5em; // 大約顯示三行的高度
+                height: 4.5em;
                 font-family: inherit;
                 cursor: default;
-                /* 隱藏捲軸但允許內容顯示 */
                 scrollbar-width: none;
 
                 &::-webkit-scrollbar {

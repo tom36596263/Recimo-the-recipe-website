@@ -255,11 +255,17 @@ const handlePreview = async () => {
   // 1. 先處理圖片轉換（如果有 File 物件則轉為 Base64，避免預覽頁讀不到）
   const coverBase64 = await fileToBase64(recipeForm.value.coverImg);
 
-  // 2. 處理步驟圖片轉換
+  // Editor.vue 的 handlePreview 內
   const processedSteps = await Promise.all(
-    recipeForm.value.steps.map(async (s) => ({
-      ...s,
-      image: await fileToBase64(s.image)
+    recipeForm.value.steps.map(async (s, idx) => ({
+      step_id: s.id,
+      step_title: s.title,
+      step_content: s.content,
+      // 確保時間欄位能被詳細頁讀到
+      step_total_time: s.time ? `${s.time} 分鐘` : '0 分鐘',
+      step_order: idx,
+      image: await fileToBase64(s.image), // 這裡是 image
+      step_image_url: await fileToBase64(s.image) // 增加這個備援欄位給詳細頁用
     }))
   );
 
@@ -284,7 +290,7 @@ const handlePreview = async () => {
   // 設定預覽專用資料
   recipeStore.setPreviewFromEditor(previewData);
 
-  console.log('🚀 準備送出的預覽資料:', previewData);
+  console.log('第一站 - 編輯頁送出的資料:', previewData);
 
   // 5. 跳轉預覽頁
   router.push({
