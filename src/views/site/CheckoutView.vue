@@ -271,6 +271,16 @@ const clearDatabaseCart = async () => {
 };
 
 const handleSubmit = async () => {
+  // --- 1. 先抓取目前登入者的 ID (這行最重要) ---
+  const userInfo = JSON.parse(localStorage.getItem('user'));
+  // 這裡我們定義了 currentUserId
+  const currentUserId = userInfo?.id || userInfo?.user_id;
+
+  if (!currentUserId) {
+    alert('偵測不到登入資訊，請重新登入後再結帳');
+    // router.push('/login'); // 視情況導向登入頁
+    return;
+  }
   // 1. 驗證邏輯 (保持不變)
   validateField('user_name');
   validateField('user_phone');
@@ -311,7 +321,7 @@ const handleSubmit = async () => {
 
   // 2. 準備 Payload
   const orderPayload = {
-    user_id: 1,
+    user_id: currentUserId,
     logistics_id: form.value.logistics_id,
     subtotal: subtotal.value,
     discount_amount: 0,
