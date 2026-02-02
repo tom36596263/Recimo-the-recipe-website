@@ -2,6 +2,8 @@
 import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { parsePublicFile } from '@/utils/parseFile';
+import { useAuthStore } from '@/stores/authStore';
+import { phpApi } from '@/utils/phpApi';
 
 import RecipeIntro from '@/components/workspace/recipedetail/RecipeIntro.vue';
 import RecipeIngredients from '@/components/workspace/recipedetail/RecipeIngredients.vue';
@@ -19,27 +21,59 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'delete-recipe']);
 const router = useRouter();
+const authStore = useAuthStore();
 
-// --- 邏輯處理 ---
-
-/**
- * 核心修正：統一清洗 ID 的函式
- */
+// 統一清理 ID 的小工具
 const getCleanId = (id) => {
     if (!id) return '';
-    // 將 "db-71" 轉換為 "71"，只保留數字部分
     return String(id).replace(/[^\d]/g, '');
 };
 
-const handleStartCooking = () => {
-    const cleanId = getCleanId(props.recipe?.id || props.recipe?.recipe_id);
-    if (cleanId) {
-        router.push(`/workspace/guide/${cleanId}`);
+/**
+ * 權限判斷：是否為食譜擁有者
+ */
+const isOwner = computed(() => {
+    const currentUserId = authStore.user?.id || authStore.user?.user_id;
+    const recipeAuthorId = props.recipe?.author_id || props.recipe?.user_id;
+    if (!currentUserId || !recipeAuthorId) return false;
+    return Number(currentUserId) === Number(recipeAuthorId);
+});
+
+/**
+ * 處理刪除改編食譜
+ */
+const handleDelete = async () => {
+    if (!confirm('確定要刪除您的改編版本嗎？此操作將無法復原。')) return;
+
+    const rawId = props.recipe?.id || props.recipe?.recipe_id;
+    const cleanId = getCleanId(rawId);
+    const isDbData = String(rawId).startsWith('db-') || props.recipe?.recipe_id;
+
+    if (isDbData) {
+        try {
+            const res = await phpApi.post('recipes/recipe_adaptation_delete.php', {
+                recipe_id: cleanId,
+                user_id: authStore.user?.id || authStore.user?.user_id
+            });
+
+            if (res.data.success) {
+                alert('刪除成功！');
+                emit('delete-recipe', cleanId);
+                closeModal();
+            } else {
+                alert('刪除失敗：' + (res.data.message || '未知錯誤'));
+            }
+        } catch (err) {
+            console.error('刪除 API 請求出錯:', err);
+            alert('連線伺服器失敗，請檢查網路狀態');
+        }
     } else {
-        console.error('無法解析有效的 ID');
+        emit('delete-recipe', cleanId);
+        closeModal();
     }
 };
 
+// --- 份量與營養計算邏輯 ---
 const originalServings = computed(() => {
     return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
 });
@@ -68,16 +102,10 @@ const displayedNutrition = computed(() => {
 });
 
 const ingredientsData = computed(() => {
-    // 1. 獲取原始清單
     const list = props.recipe?.ingredients || [];
-
-    // 2. 核心修正：計算「當前份數」相對於「原始份數」的倍率
-    // 公式：(1 / 原始份數) * 當前份數
     const ratio = (1 / originalServings.value) * currentServings.value;
-
     return list.map(item => ({
         INGREDIENT_NAME: item.ingredient_name || item.name || '未知食材',
-        // 3. 套用倍率
         amount: item.amount ? (Number(item.amount) * ratio) : 0,
         unit_name: item.unit_name || item.unit || 'g',
         note: item.remark || item.note || ''
@@ -90,44 +118,60 @@ watch(() => props.modelValue, (isOpen) => {
     }
 }, { immediate: true });
 
+/**
+ * 整合介紹區域所需的資料
+ */
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
-    const loginUser = JSON.parse(localStorage.getItem('user') || '{}');
     const today = new Date().toISOString().split('T')[0];
+
+    // --- 修正邏輯：找不到作者名稱就設為 null ---
+    const resolvedUserName = (isOwner.value
+        ? (authStore.user?.user_name || authStore.user?.name)
+        : (r.user_name || r.author_name)
+    ) || null;
+
+    // Handle 解析
+    const emailBase = (isOwner.value
+        ? (authStore.user?.user_email || authStore.user?.email)
+        : (r.user_email || r.author_email)
+    ) || '';
+    const resolvedHandle = emailBase ? emailBase.split('@')[0] : '';
+
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
+
     const rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
-    const isBase64 = rawImg && rawImg.startsWith('data:');
-    const finalImage = isBase64 ? rawImg : parsePublicFile(rawImg);
+    const finalImage = (rawImg && rawImg.startsWith('data:')) ? rawImg : parsePublicFile(rawImg);
 
     return {
-        // ✨ 重點：在這裡就先把 ID 洗乾淨，傳給子組件時就不會帶 db-
         id: getCleanId(r.id || r.recipe_id),
         title: r.title || r.recipe_title || '未命名食譜',
         image: finalImage,
         description: r.description || r.recipe_description || '暫無詳細說明',
         time: formattedTime,
         difficulty: r.difficulty || 1,
-        userName: r.user_name || r.author_name || loginUser.user_name || "未知作者",
-        handle: (r.user_email || loginUser.user_email || "guest@mail.com").split('@')[0],
+        userName: resolvedUserName,
+        handle: resolvedHandle,
         publishTime: r.created_at || today,
-        isOwner: !!(r.is_mine),
+        isOwner: isOwner.value,
         tags: r.tags || []
     };
 });
 
+/**
+ * 整合步驟資料
+ */
 const stepsData = computed(() => {
     const steps = props.recipe?.steps || [];
     return steps.map((s, idx) => {
         const stepImg = s.image || s.step_image_url || '';
-        const isStepBase64 = stepImg && stepImg.startsWith('data:');
-        const finalStepImage = isStepBase64 ? stepImg : parsePublicFile(stepImg);
         return {
             id: s.id || idx,
             title: s.step_title || s.title || `步驟 ${idx + 1}`,
             content: s.content || s.step_content || s.description || '',
-            image: finalStepImage,
+            image: (stepImg && stepImg.startsWith('data:')) ? stepImg : parsePublicFile(stepImg),
             time: s.time || ''
         };
     });
@@ -136,7 +180,7 @@ const stepsData = computed(() => {
 const closeModal = () => emit('update:modelValue', false);
 
 const getAvatarStyle = (name) => {
-    if (!name) return { backgroundColor: '#74D09C' };
+    if (!name) return { backgroundColor: '#eee' };
     const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
     const charCodeSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
     return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
@@ -161,15 +205,20 @@ const getAvatarStyle = (name) => {
                             </div>
 
                             <div class="action-group">
-                                <!-- <BaseBtn title="開始烹飪" class="cook-btn-modal" @click="handleStartCooking" /> -->
+                                <button v-if="isOwner" class="btn-delete-adaptation" @click="handleDelete">
+                                    <i-material-symbols-delete-outline-rounded class="mr-4" />
+                                    刪除改編
+                                </button>
 
-                                <div class="user-info-box">
-                                    <div class="user-avatar-circle" :style="getAvatarStyle(introData?.userName || '')">
-                                        {{ introData?.userName?.charAt(0).toUpperCase() }}
+                                <div v-if="introData?.userName" class="user-info-box">
+                                    <div class="user-avatar-circle" :style="getAvatarStyle(introData.userName)">
+                                        {{ introData.userName.charAt(0).toUpperCase() }}
                                     </div>
                                     <div class="user-text-meta">
-                                        <div class="user-name">{{ introData?.userName }}</div>
-                                        <div class="user-sub">@{{ introData?.handle }} • {{ introData?.publishTime }}
+                                        <div class="user-name">{{ introData.userName }}</div>
+                                        <div class="user-sub">
+                                            <span v-if="introData.handle">@{{ introData.handle }} • </span>
+                                            {{ introData.publishTime }}
                                         </div>
                                     </div>
                                 </div>
@@ -199,6 +248,26 @@ const getAvatarStyle = (name) => {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
+
+.btn-delete-adaptation {
+    display: flex;
+    align-items: center;
+    background-color: #fff1f0;
+    color: #ff4d4f;
+    border: 1px solid #ffccc7;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #ff4d4f;
+        color: white;
+        border-color: #ff4d4f;
+    }
+}
 
 .adaptation-modal-overlay {
     position: fixed;
@@ -249,15 +318,6 @@ const getAvatarStyle = (name) => {
     overflow-y: auto;
     padding: 48px;
 
-    &::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: $neutral-color-100;
-        border-radius: 10px;
-    }
-
     @media (max-width: 768px) {
         padding: 24px;
     }
@@ -267,11 +327,6 @@ const getAvatarStyle = (name) => {
     display: flex;
     align-items: center;
     gap: 24px;
-
-    .cook-btn-modal {
-        width: 160px;
-        height: 48px;
-    }
 }
 
 .modal-title-bar {
@@ -286,12 +341,6 @@ const getAvatarStyle = (name) => {
         display: flex;
         align-items: center;
         gap: 16px;
-    }
-
-    .zh-h2 {
-        margin: 0;
-        display: flex;
-        align-items: center;
     }
 
     .badge {
@@ -316,9 +365,7 @@ const getAvatarStyle = (name) => {
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            font-size: 15px;
             border: 1px solid rgba(0, 0, 0, 0.05);
-            flex-shrink: 0;
             order: 2;
         }
 
@@ -328,7 +375,6 @@ const getAvatarStyle = (name) => {
 
             .user-name {
                 font-weight: 600;
-                margin-bottom: 4px;
                 color: $neutral-color-800;
                 font-size: 15px;
             }
@@ -343,66 +389,17 @@ const getAvatarStyle = (name) => {
     @media (max-width: 768px) {
         flex-direction: column;
         align-items: flex-start;
-        gap: 16px;
-        padding-right: 30px;
+        padding-right: 0;
 
         .action-group {
             width: 100%;
             flex-direction: column-reverse;
+            align-items: flex-end;
             gap: 16px;
-
-            .cook-btn-modal {
-                width: 100% !important;
-            }
         }
 
-        .user-info-box {
-            width: 100%;
-            justify-content: flex-start;
-
-            .user-avatar-circle {
-                order: 1;
-            }
-
-            .user-text-meta {
-                order: 2;
-                text-align: left;
-            }
-        }
-    }
-}
-
-.main-content-row {
-    @media (max-width: 768px) {
-        display: flex;
-        flex-direction: column;
-
-        .intro-section {
-            order: 1;
-            margin-bottom: 32px;
-        }
-
-        .sidebar-right {
-            order: 2;
-            margin-bottom: 40px;
-        }
-
-        .steps-section {
-            order: 3;
-        }
-
-        :deep(.step-item) {
-            flex-direction: column !important;
-
-            .step-image {
-                width: 100% !important;
-                height: 200px !important;
-                margin-bottom: 16px !important;
-            }
-
-            .step-content {
-                width: 100% !important;
-            }
+        .user-info-box .user-text-meta {
+            text-align: left;
         }
     }
 }
@@ -422,6 +419,10 @@ const getAvatarStyle = (name) => {
 
 .mb-32 {
     margin-bottom: 32px;
+}
+
+.mr-4 {
+    margin-right: 4px;
 }
 
 .mr-8 {

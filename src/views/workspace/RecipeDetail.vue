@@ -15,6 +15,7 @@ import CookSnap from '../../components/workspace/recipedetail/CookSnap.vue';
 import RecipeIntro from '../../components/workspace/recipedetail/RecipeIntro.vue';
 import RecipeReportModal from '@/components/workspace/recipedetail/modals/RecipeReportModal.vue';
 import RelatedRecipes from '@/components/workspace/recipedetail/RelatedRecipes.vue';
+import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -435,6 +436,12 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
                     <i-material-symbols-restaurant-rounded class="main-icon" />
                     {{ recipeIntroData.title }}
                 </div>
+
+                <!-- <AuthorInfo :name="rawRecipe?.author_name || 'Recimo用戶'" :handle="`user_${rawRecipe?.author_id || '0'}`" -->
+                    <!-- :time="rawRecipe?.created_at" class="mt-12" /> -->
+
+
+
                 <div class="icon-group" :class="{ 'is-preview': isPreviewMode }">
                     <div class="action-item" :class="{ 'active': isLiked }" @click="toggleRecipeLike">
                         <i-material-symbols-thumb-up-rounded v-if="isLiked" class="action-icon" />
