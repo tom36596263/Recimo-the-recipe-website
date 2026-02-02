@@ -15,6 +15,7 @@ import CookSnap from '../../components/workspace/recipedetail/CookSnap.vue';
 import RecipeIntro from '../../components/workspace/recipedetail/RecipeIntro.vue';
 import RecipeReportModal from '@/components/workspace/recipedetail/modals/RecipeReportModal.vue';
 import RelatedRecipes from '@/components/workspace/recipedetail/RelatedRecipes.vue';
+import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -44,62 +45,87 @@ const getSmartImageUrl = (url) => {
 const snapsData = ref([]);
 const commentList = ref([]);
 
-// 核心抓取
-
+// --- 核心抓取邏輯 ---
 const fetchData = async () => {
     isLoading.value = true;
     const recipeId = Number(route.params.id);
 
-    // --- 1. 預覽模式處理 (全新創建且無 ID) ---
-    if (isPreviewMode.value && !recipeId && recipeStore.previewData) {
-        try {
-            const preview = recipeStore.previewData;
-            const resIngMaster = await publicApi.get('data/recipe/ingredients.json');
-            const masterIng = resIngMaster.data || [];
-            const previewServings = Math.max(1, Number(preview.recipe_servings || preview.servings || 1));
+    // --- 1. 預覽模式優先處理 ---
+    if (isPreviewMode.value) {
+        console.log('🚀 [偵錯] 進入預覽模式，嘗試從 Store 讀取資料');
+        const preview = recipeStore.previewData;
 
-            rawRecipe.value = {
-                recipe_id: 0,
-                recipe_title: preview.title || preview.recipe_title || '未命名食譜',
-                recipe_description: preview.description || preview.recipe_description || '',
-                recipe_image_url: preview.coverImg || preview.recipe_cover_image,
-                recipe_difficulty: preview.difficulty || 1,
-                recipe_total_time: preview.totalTime || 30,
-                recipe_servings: previewServings,
-                recipe_likes: 0,
-                author_name: authStore.user?.user_name || '您的預覽',
-                tags: preview.recipe_tags || preview.tags || []
-            };
+        if (preview) {
+            try {
+                // 同步抓取食材母表以校正營養係數
+                const resIngMaster = await publicApi.get('data/recipe/ingredients.json');
+                const masterIng = resIngMaster.data || [];
 
-            rawIngredients.value = (preview.ingredients || []).map(ing => {
-                const name = ing.name || ing.ingredient_name || "";
-                const master = masterIng.find(m => m.ingredient_name.trim() === name.trim());
-                const unit = ing.unit || ing.unit_name || master?.unit_name || '份';
-                const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(unit.toLowerCase());
+                // 【份數捕獲】確保預覽模式能拿到正確的原始份數
+                const previewServings = Math.max(1, Number(
+                    preview.recipe_servings ||
+                    preview.servings ||
+                    preview.recipe_serving || 1
+                ));
 
-                return {
-                    ...ing,
-                    ingredient_name: name,
-                    amount: Number(ing.amount || 0),
-                    unit_name: unit,
-                    gram_conversion: isWeightUnit ? 1 : Number(master?.gram_conversion || ing.gram_conversion || 1),
-                    kcal_per_100g: Number(master?.kcal_per_100g || ing.kcal_per_100g || 0),
-                    protein_per_100g: Number(master?.protein_per_100g || ing.protein_per_100g || 0),
-                    fat_per_100g: Number(master?.fat_per_100g || ing.fat_per_100g || 0),
-                    carbs_per_100g: Number(master?.carbs_per_100g || ing.carbs_per_100g || 0)
+                console.log('📊 [預覽偵錯] 解析出的份數:', previewServings);
+
+                // 映射為前端統一格式 (rawRecipe)
+                rawRecipe.value = {
+                    recipe_id: 0,
+                    recipe_title: preview.title || preview.recipe_title || '未命名食譜',
+                    recipe_description: preview.description || preview.recipe_description || '',
+                    recipe_image_url: preview.coverImg || preview.recipe_cover_image,
+                    recipe_difficulty: Number(preview.difficulty || preview.recipe_difficulty || 1),
+                    recipe_total_time: preview.totalTime || preview.recipe_total_time || '0:30',
+                    recipe_servings: previewServings,
+                    recipe_likes: 0,
+                    author_name: authStore.user?.user_name || '您的預覽',
+                    tags: preview.recipe_tags || preview.tags || []
                 };
-            });
 
-            rawSteps.value = (preview.steps || []).sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
-            servings.value = previewServings;
-            isLoading.value = false;
-            return;
-        } catch (err) {
-            console.error('預覽資料處理失敗:', err);
+                servings.value = previewServings;
+
+                // 處理食材 (rawIngredients) - 確保欄位與正式模式一致以利 computed 計算
+                rawIngredients.value = (preview.ingredients || []).map(ing => {
+                    const name = (ing.ingredient_name || ing.name || "").trim();
+                    const master = masterIng.find(m => String(m.ingredient_name).trim() === name);
+                    const unit = ing.unit || ing.unit_name || master?.unit_name || '份';
+                    const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(unit.toLowerCase());
+
+                    return {
+                        ...ing,
+                        ingredient_name: name,
+                        amount: Number(ing.amount || 0),
+                        unit_name: unit,
+                        // 關鍵：確保計算營養所需的係數都存在
+                        gram_conversion: isWeightUnit ? 1 : Number(master?.gram_conversion || ing.gram_conversion || 1),
+                        kcal_per_100g: Number(master?.kcal_per_100g || ing.kcal_per_100g || 0),
+                        protein_per_100g: Number(master?.protein_per_100g || ing.protein_per_100g || 0),
+                        fat_per_100g: Number(master?.fat_per_100g || ing.fat_per_100g || 0),
+                        carbs_per_100g: Number(master?.carbs_per_100g || ing.carbs_per_100g || 0)
+                    };
+                });
+
+                // 處理步驟 (rawSteps)
+                rawSteps.value = (preview.steps || []).map((s, idx) => ({
+                    ...s,
+                    step_order: s.step_order || (idx + 1)
+                })).sort((a, b) => Number(a.step_order) - Number(b.step_order));
+
+                console.log('✅ [預覽成功] 資料已從 Store 渲染至畫面');
+                isLoading.value = false;
+                return;
+            } catch (err) {
+                console.error('預覽資料解析失敗:', err);
+            }
+        } else {
+            console.warn('⚠️ 網址為預覽模式但 Store 內無資料，切換回正式模式嘗試');
         }
     }
 
-    // --- 2. 正式模式：呼叫 PHP API 與 輔助 JSON ---
+    // --- 2. 正式模式：從伺服器抓取資料 ---
+    console.log('🏠 [偵錯] 進入正式模式，請求 API 中...');
     try {
         const [resDetail, resG, resU, resC] = await Promise.all([
             phpApi.get(`recipes/recipe_detail_get.php?recipe_id=${recipeId}`),
@@ -111,13 +137,12 @@ const fetchData = async () => {
         if (resDetail.data && resDetail.data.success) {
             const serverData = resDetail.data.data;
 
-            // A. 食譜主資訊 (整合 PHP 的 main 與 tags)
             rawRecipe.value = {
                 ...serverData.main,
+                recipe_description: serverData.main.recipe_descreption || serverData.main.recipe_description || '',
                 tags: serverData.tags || []
             };
 
-            // B. 食材處理 (確保計算屬性需要的欄位存在)
             rawIngredients.value = (serverData.ingredients || []).map(ing => {
                 const unit = ing.unit_name || '份';
                 const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(unit.toLowerCase());
@@ -133,17 +158,14 @@ const fetchData = async () => {
                 };
             });
 
-            // C. 步驟處理
             rawSteps.value = (serverData.steps || []).sort((a, b) =>
                 (Number(a.step_order) || 0) - (Number(b.step_order) || 0)
             );
 
             servings.value = Number(rawRecipe.value.recipe_servings || 1);
-        } else {
-            console.error('PHP 回傳失敗:', resDetail.data?.message);
         }
 
-        // --- 3. Gallery (CookSnap) 處理 ---
+        // --- 3. 處理成品照 ---
         if (resG.data) {
             const API_BASE_URL = 'http://localhost:8888/recimo_api/';
             snapsData.value = resG.data
@@ -169,7 +191,7 @@ const fetchData = async () => {
                 });
         }
 
-        // --- 4. 留言區處理 ---
+        // --- 4. 處理留言 ---
         if (resC.data && Array.isArray(resC.data)) {
             commentList.value = resC.data.map(c => {
                 const userData = resU.data?.find(u => u.user_id === c.user_id);
@@ -185,9 +207,9 @@ const fetchData = async () => {
                 };
             });
         }
-
+        console.log('✅ [正式模式] 資料加載完成');
     } catch (err) {
-        console.error('抓取失敗:', err);
+        console.error('正式資料抓取失敗:', err);
     } finally {
         isLoading.value = false;
     }
@@ -200,16 +222,15 @@ const displayRecipeLikes = computed(() => {
 });
 
 const ingredientsData = computed(() => {
-    if (!rawRecipe.value) return [];
+    if (!rawRecipe.value || !rawIngredients.value.length) return [];
     const originalServings = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
-    const scale = servings.value / originalServings;
+    const currentServings = Math.max(1, Number(servings.value || 1));
+    const scale = currentServings / originalServings;
 
     return rawIngredients.value.map(item => ({
         INGREDIENT_NAME: item.ingredient_name,
-        // 確保 amount 是數字，避免乘法失敗
         amount: (Number(item.amount || 0) * scale).toFixed(1),
         unit_name: item.unit_name,
-        // 🏆 關鍵修正：確保這裡能抓到後端的 remark 欄位
         note: item.remark || item.note || ''
     }));
 });
@@ -217,51 +238,24 @@ const ingredientsData = computed(() => {
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value || rawIngredients.value.length === 0) return [];
 
-    const originalServings = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
-    const scale = servings.value / originalServings;
+    // 這裡的 scale 計算是基於「當前選擇份數」相對於「食譜原始份數」
+    const original = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
+    const current = Math.max(1, Number(servings.value || 1));
+    const scale = current / original;
 
     let totalKcal = 0, totalP = 0, totalF = 0, totalC = 0;
 
-    // 建立一個陣列來存儲各項食材的計算過程，方便 console.table 顯示
-    const calculationLog = [];
-
     rawIngredients.value.forEach(ing => {
-        const amount = Number(ing.amount || 0);
-        const unitWeight = Number(ing.gram_conversion || 1);
-        const totalGram = amount * unitWeight; // 換算成公克
-        const ratio = totalGram / 100; // 因為營養標示通常是每 100g
-
-        // 計算該食材貢獻的數值
-        const itemKcal = (Number(ing.kcal_per_100g) || 0) * ratio;
-        const itemP = (Number(ing.protein_per_100g) || 0) * ratio;
-        const itemF = (Number(ing.fat_per_100g) || 0) * ratio;
-        const itemC = (Number(ing.carbs_per_100g) || 0) * ratio;
-
-        // 累加到總和
-        totalKcal += itemKcal;
-        totalP += itemP;
-        totalF += itemF;
-        totalC += itemC;
-
-        // 存入 Log
-        calculationLog.push({
-            "食材名稱": ing.ingredient_name,
-            "原始份量": `${amount} ${ing.unit_name}`,
-            "轉換係數": unitWeight,
-            "總重量(g)": totalGram.toFixed(1),
-            "熱量貢獻": itemKcal.toFixed(1) + " kcal",
-            "蛋白質貢獻": itemP.toFixed(1) + " g",
-            "脂質貢獻": itemF.toFixed(1) + " g",
-            "碳水貢獻": itemC.toFixed(1) + " g"
-        });
+        const amt = Number(ing.amount) || 0;
+        const conv = Number(ing.gram_conversion) || 1;
+        const weight = amt * conv;
+        totalKcal += (Number(ing.kcal_per_100g) || 0) * (weight / 100);
+        totalP += (Number(ing.protein_per_100g) || 0) * (weight / 100);
+        totalF += (Number(ing.fat_per_100g) || 0) * (weight / 100);
+        totalC += (Number(ing.carbs_per_100g) || 0) * (weight / 100);
     });
 
-    // 印出漂亮的表格
-    console.group(`🥗 營養成分計算明細 (人數倍率: ${scale.toFixed(2)})`);
-    console.table(calculationLog);
-    console.log(`總計 (1人份): Kcal: ${totalKcal.toFixed(1)}, P: ${totalP.toFixed(1)}, F: ${totalF.toFixed(1)}, C: ${totalC.toFixed(1)}`);
-    console.groupEnd();
-
+    // 返回陣列格式以符合 NutritionCard 的 Props
     return [{
         calories_per_100g: Math.round(totalKcal * scale),
         protein_per_100g: Number((totalP * scale).toFixed(1)),
@@ -281,7 +275,7 @@ const recipeIntroData = computed(() => {
         image: getSmartImageUrl(r.recipe_image_url),
         time: formatTime(r.recipe_total_time),
         difficulty: r.recipe_difficulty || 1,
-        description: r.recipe_descreption || r.recipe_description || '暫無簡介',
+        description: r.recipe_description || '暫無簡介',
         tags: r.tags || []
     };
 });
@@ -310,7 +304,6 @@ const handleShare = () => {
         text: rawRecipe.value?.recipe_description,
         url: window.location.href,
     };
-
     if (navigator.share) {
         navigator.share(shareData).catch((err) => console.log('分享失敗', err));
     } else {
@@ -320,25 +313,13 @@ const handleShare = () => {
 };
 
 const backToEdit = () => {
-    // 1. 優先從 URL query 抓取，如果沒有則嘗試從 Store 抓
     const editId = route.query.editId || recipeStore.previewData?.recipe_id;
-    const action = route.query.action; // 'adapt' 或 undefined (創建)
-
-    // 2. 判斷跳轉路徑
+    const action = route.query.action;
     if (action === 'adapt' && editId) {
-        // 🚀 改編模式：返回原本的改編編輯頁
-        router.push({
-            path: '/workspace/edit-recipe',
-            query: { editId: editId, action: 'adapt' }
-        });
+        router.push({ path: '/workspace/edit-recipe', query: { editId: editId, action: 'adapt' } });
     } else if (editId && editId !== '0') {
-        // 📝 一般編輯模式：返回該食譜編輯頁
-        router.push({
-            path: '/workspace/edit-recipe',
-            query: { editId: editId }
-        });
+        router.push({ path: '/workspace/edit-recipe', query: { editId: editId } });
     } else {
-        // ✨ 全新創建模式：返回空白編輯頁
         router.push('/workspace/edit-recipe');
     }
 };
@@ -379,51 +360,24 @@ const toggleWorkspaceTopBar = (show) => {
     if (topBar) topBar.style.display = show ? '' : 'none';
 };
 
-
 const handlePostComment = async (content) => {
-    // 檢查登入狀態與內容
     if (!authStore.user) return alert('請先登入');
     if (!content || !content.trim()) return;
-
-    // 取得正確的 user_id (相容不同 store 結構)
     const userId = authStore.user.user_id || authStore.user.id;
-
     try {
-        const payload = {
-            action: 'post',
-            recipe_id: Number(route.params.id),
-            user_id: userId,
-            content: content
-        };
-
-        console.log("前端送出的資料:", payload); // 除錯用
-
+        const payload = { action: 'post', recipe_id: Number(route.params.id), user_id: userId, content: content };
         const response = await phpApi.post('social/comment.php', payload);
-
-        if (response.data.success) {
-            fetchData(); // 成功後重新整理列表
-        } else {
-            alert('失敗：' + response.data.message);
-        }
+        if (response.data.success) fetchData();
+        else alert('失敗：' + response.data.message);
     } catch (err) {
-        console.error('API 錯誤:', err.response?.data || err);
         alert('發佈失敗，請稍後再試');
     }
 };
 
-// 點讚留言 (配合 PHP action: 'like')
 const handleLikeComment = async (commentId, type) => {
     if (!authStore.user) return alert('登入後即可點讚');
-
     try {
-        // type 由子組件傳回 'like' 或 'dislike'
-        await phpApi.post('social/comment.php', {
-            action: 'like',
-            comment_id: commentId,
-            type: type
-        });
-
-        // 本地立即更新 UI 數字 (選用，或直接 fetchData)
+        await phpApi.post('social/comment.php', { action: 'like', comment_id: commentId, type: type });
         const target = commentList.value.find(c => c.comment_id === commentId);
         if (target) {
             target.likes = type === 'like' ? target.likes + 1 : Math.max(0, target.likes - 1);
@@ -436,28 +390,18 @@ const handleLikeComment = async (commentId, type) => {
 const handleDeleteComment = async (commentId) => {
     if (!authStore.user) return alert('請先登入');
     if (!confirm('確定要刪除這則留言嗎？')) return;
-
-    // 確保抓到正確的 ID 欄位
     const userId = authStore.user.user_id || authStore.user.id;
-
     try {
-        // 建議 URL 參數加上 timestamp 避免快取，並明確指定 comment_id
         const response = await phpApi.delete(`social/comment.php`, {
-            params: {
-                comment_id: commentId,
-                user_id: userId
-            }
+            params: { comment_id: commentId, user_id: userId }
         });
-
         if (response.data.success) {
             alert('留言已刪除');
-            fetchData(); // 重新整理列表
+            fetchData();
         } else {
             alert('刪除失敗：' + (response.data.message || '未知錯誤'));
         }
     } catch (err) {
-        console.error('刪除請求出錯:', err);
-        // 檢查是否為 405 Method Not Allowed 或 403 Forbidden
         alert('刪除失敗，請檢查網路或權限');
     }
 };
@@ -492,6 +436,12 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
                     <i-material-symbols-restaurant-rounded class="main-icon" />
                     {{ recipeIntroData.title }}
                 </div>
+
+                <!-- <AuthorInfo :name="rawRecipe?.author_name || 'Recimo用戶'" :handle="`user_${rawRecipe?.author_id || '0'}`" -->
+                    <!-- :time="rawRecipe?.created_at" class="mt-12" /> -->
+
+
+
                 <div class="icon-group" :class="{ 'is-preview': isPreviewMode }">
                     <div class="action-item" :class="{ 'active': isLiked }" @click="toggleRecipeLike">
                         <i-material-symbols-thumb-up-rounded v-if="isLiked" class="action-icon" />
@@ -522,15 +472,16 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
             <div class="row">
                 <div class="col-7 col-lg-12">
                     <RecipeIntro :info="recipeIntroData" :is-preview="isPreviewMode" class="fade-up"
-                    style="--delay: 2" />
+                        style="--delay: 2" />
 
                     <div class="d-lg-none">
                         <section class="mb-10 fade-up" style="--delay: 3">
+                            <RecipeIngredients :servings="servings" :list="ingredientsData" />
+                        </section>
+
+                        <section class="mb-10 fade-up" style="--delay: 4">
                             <NutritionCard :servings="servings" :ingredients="nutritionWrapper"
                                 @change-servings="handleServingsChange" />
-                        </section>
-                        <section class="mb-10 fade-up" style="--delay: 4">
-                            <RecipeIngredients :servings="servings" :list="ingredientsData" />
                         </section>
                     </div>
 

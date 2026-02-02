@@ -1,7 +1,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-// 🏆 1. 引入團隊規範工具
+import { useRouter } from 'vue-router';
 import { parsePublicFile } from '@/utils/parseFile';
+import { useAuthStore } from '@/stores/authStore';
+import { phpApi } from '@/utils/phpApi';
 
 import RecipeIntro from '@/components/workspace/recipedetail/RecipeIntro.vue';
 import RecipeIngredients from '@/components/workspace/recipedetail/RecipeIngredients.vue';
@@ -18,16 +20,66 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'delete-recipe']);
+const router = useRouter();
+const authStore = useAuthStore();
 
-// 1. 取得食譜原始設定的份數 (例如 2)
+// 統一清理 ID 的小工具
+const getCleanId = (id) => {
+    if (!id) return '';
+    return String(id).replace(/[^\d]/g, '');
+};
+
+/**
+ * 權限判斷：是否為食譜擁有者
+ */
+const isOwner = computed(() => {
+    const currentUserId = authStore.user?.id || authStore.user?.user_id;
+    const recipeAuthorId = props.recipe?.author_id || props.recipe?.user_id;
+    if (!currentUserId || !recipeAuthorId) return false;
+    return Number(currentUserId) === Number(recipeAuthorId);
+});
+
+/**
+ * 處理刪除改編食譜
+ */
+const handleDelete = async () => {
+    if (!confirm('確定要刪除您的改編版本嗎？此操作將無法復原。')) return;
+
+    const rawId = props.recipe?.id || props.recipe?.recipe_id;
+    const cleanId = getCleanId(rawId);
+    const isDbData = String(rawId).startsWith('db-') || props.recipe?.recipe_id;
+
+    if (isDbData) {
+        try {
+            const res = await phpApi.post('recipes/recipe_adaptation_delete.php', {
+                recipe_id: cleanId,
+                user_id: authStore.user?.id || authStore.user?.user_id
+            });
+
+            if (res.data.success) {
+                alert('刪除成功！');
+                emit('delete-recipe', cleanId);
+                closeModal();
+            } else {
+                alert('刪除失敗：' + (res.data.message || '未知錯誤'));
+            }
+        } catch (err) {
+            console.error('刪除 API 請求出錯:', err);
+            alert('連線伺服器失敗，請檢查網路狀態');
+        }
+    } else {
+        emit('delete-recipe', cleanId);
+        closeModal();
+    }
+};
+
+// --- 份量與營養計算邏輯 ---
 const originalServings = computed(() => {
     return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
 });
 
-// 2. 當前 UI 選擇的份數
 const currentServings = ref(1);
 
-// 3. 核心修正：基準營養值
 const baseNutritionPerServing = computed(() => {
     const n = props.nutrition;
     return {
@@ -38,11 +90,9 @@ const baseNutritionPerServing = computed(() => {
     };
 });
 
-// 4. 顯示營養數值
 const displayedNutrition = computed(() => {
     const base = baseNutritionPerServing.value;
     const s = currentServings.value;
-
     return {
         calories: Math.round(base.calories * s),
         protein: (base.protein * s).toFixed(1),
@@ -51,70 +101,77 @@ const displayedNutrition = computed(() => {
     };
 });
 
-// 🏆 修正重點：配合 RecipeIngredients.vue 的欄位名稱
 const ingredientsData = computed(() => {
     const list = props.recipe?.ingredients || [];
-    // 這裡的 scale 設為 1，是因為 RecipeIngredients 內部已經會乘上 props.servings 了
-    // 為了避免重複計算，我們傳入原始比例
-    const scale = 1 / originalServings.value;
-
+    const ratio = (1 / originalServings.value) * currentServings.value;
     return list.map(item => ({
         INGREDIENT_NAME: item.ingredient_name || item.name || '未知食材',
-        // 傳入「單份份量」給子組件，讓它自己去乘 currentServings
-        amount: item.amount ? (Number(item.amount) * scale) : 0,
+        amount: item.amount ? (Number(item.amount) * ratio) : 0,
         unit_name: item.unit_name || item.unit || 'g',
-        // 🚩 重點：子組件顯示的是 item.note，所以我們要把資料塞進 note 欄位
         note: item.remark || item.note || ''
     }));
 });
 
-// 監聽燈箱開啟
 watch(() => props.modelValue, (isOpen) => {
     if (isOpen) {
         currentServings.value = originalServings.value;
     }
 }, { immediate: true });
 
-// --- 資料轉換邏輯 (Intro & Steps) ---
-
+/**
+ * 整合介紹區域所需的資料
+ */
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
-    const loginUser = JSON.parse(localStorage.getItem('user') || '{}');
     const today = new Date().toISOString().split('T')[0];
+
+    // --- 修正邏輯：找不到作者名稱就設為 null ---
+    const resolvedUserName = (isOwner.value
+        ? (authStore.user?.user_name || authStore.user?.name)
+        : (r.user_name || r.author_name)
+    ) || null;
+
+    // Handle 解析
+    const emailBase = (isOwner.value
+        ? (authStore.user?.user_email || authStore.user?.email)
+        : (r.user_email || r.author_email)
+    ) || '';
+    const resolvedHandle = emailBase ? emailBase.split('@')[0] : '';
 
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
+
     const rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
-    const isBase64 = rawImg && rawImg.startsWith('data:');
-    const finalImage = isBase64 ? rawImg : parsePublicFile(rawImg);
+    const finalImage = (rawImg && rawImg.startsWith('data:')) ? rawImg : parsePublicFile(rawImg);
 
     return {
-        id: r.id || r.recipe_id,
+        id: getCleanId(r.id || r.recipe_id),
         title: r.title || r.recipe_title || '未命名食譜',
         image: finalImage,
         description: r.description || r.recipe_description || '暫無詳細說明',
         time: formattedTime,
         difficulty: r.difficulty || 1,
-        userName: r.user_name || r.author_name || loginUser.user_name || "未知作者",
-        handle: (r.user_email || loginUser.user_email || "guest@mail.com").split('@')[0],
+        userName: resolvedUserName,
+        handle: resolvedHandle,
         publishTime: r.created_at || today,
-        isOwner: !!(r.is_mine),
+        isOwner: isOwner.value,
         tags: r.tags || []
     };
 });
 
+/**
+ * 整合步驟資料
+ */
 const stepsData = computed(() => {
     const steps = props.recipe?.steps || [];
     return steps.map((s, idx) => {
         const stepImg = s.image || s.step_image_url || '';
-        const isStepBase64 = stepImg && stepImg.startsWith('data:');
-        const finalStepImage = isStepBase64 ? stepImg : parsePublicFile(stepImg);
         return {
             id: s.id || idx,
             title: s.step_title || s.title || `步驟 ${idx + 1}`,
             content: s.content || s.step_content || s.description || '',
-            image: finalStepImage,
+            image: (stepImg && stepImg.startsWith('data:')) ? stepImg : parsePublicFile(stepImg),
             time: s.time || ''
         };
     });
@@ -123,7 +180,7 @@ const stepsData = computed(() => {
 const closeModal = () => emit('update:modelValue', false);
 
 const getAvatarStyle = (name) => {
-    if (!name) return { backgroundColor: '#74D09C' };
+    if (!name) return { backgroundColor: '#eee' };
     const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
     const charCodeSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
     return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
@@ -145,24 +202,32 @@ const getAvatarStyle = (name) => {
                                     {{ introData?.title }}
                                 </h2>
                                 <span class="badge">改編版本</span>
-
-                                
                             </div>
 
-                            <div class="user-info-box">
-                                <div class="user-avatar-circle" :style="getAvatarStyle(introData?.userName || '')">
-                                    {{ introData?.userName?.charAt(0).toUpperCase() }}
-                                </div>
-                                <div class="user-text-meta">
-                                    <div class="user-name">{{ introData?.userName }}</div>
-                                    <div class="user-sub">@{{ introData?.handle }} • {{ introData?.publishTime }}</div>
+                            <div class="action-group">
+                                <button v-if="isOwner" class="btn-delete-adaptation" @click="handleDelete">
+                                    <i-material-symbols-delete-outline-rounded class="mr-4" />
+                                    刪除改編
+                                </button>
+
+                                <div v-if="introData?.userName" class="user-info-box">
+                                    <div class="user-avatar-circle" :style="getAvatarStyle(introData.userName)">
+                                        {{ introData.userName.charAt(0).toUpperCase() }}
+                                    </div>
+                                    <div class="user-text-meta">
+                                        <div class="user-name">{{ introData.userName }}</div>
+                                        <div class="user-sub">
+                                            <span v-if="introData.handle">@{{ introData.handle }} • </span>
+                                            {{ introData.publishTime }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="row main-content-row">
                             <div class="col-7 col-md-12 content-left">
-                                <RecipeIntro :info="introData" :hide-actions="true" class="intro-section" />
+                                <RecipeIntro :info="introData" :hide-actions="false" class="intro-section" />
                                 <RecipeSteps :steps="stepsData" class="steps-section" />
                             </div>
 
@@ -170,7 +235,6 @@ const getAvatarStyle = (name) => {
                                 <div class="sticky-sidebar">
                                     <NutritionCard v-if="nutrition" :nutrition="displayedNutrition"
                                         :servings="currentServings" @change-servings="val => currentServings = val" />
-
                                     <RecipeIngredients :list="ingredientsData" :readonly="true" />
                                 </div>
                             </div>
@@ -185,7 +249,26 @@ const getAvatarStyle = (name) => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
-// --- 原有 Modal 核心樣式保持不變 ---
+.btn-delete-adaptation {
+    display: flex;
+    align-items: center;
+    background-color: #fff1f0;
+    color: #ff4d4f;
+    border: 1px solid #ffccc7;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #ff4d4f;
+        color: white;
+        border-color: #ff4d4f;
+    }
+}
+
 .adaptation-modal-overlay {
     position: fixed;
     top: 0;
@@ -222,9 +305,6 @@ const getAvatarStyle = (name) => {
         font-size: 26px;
         color: $neutral-color-700;
         cursor: pointer;
-        line-height: 1;
-        padding: 5px;
-        transition: color 0.2s;
         z-index: 10;
 
         &:hover {
@@ -238,76 +318,17 @@ const getAvatarStyle = (name) => {
     overflow-y: auto;
     padding: 48px;
 
-    &::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: $neutral-color-100;
-        border-radius: 10px;
-
-        &:hover {
-            background: $neutral-color-400;
-        }
-    }
-
-    scrollbar-width: thin;
-    scrollbar-color: $neutral-color-100 transparent;
-
     @media (max-width: 768px) {
         padding: 24px;
     }
 }
 
-// --- 調整 RWD 佈局邏輯 ---
-.main-content-row {
-    @media (max-width: 768px) {
-        display: flex;
-        flex-direction: column;
-
-        .content-left {
-            display: flex;
-            flex-direction: column;
-            padding-right: 0; // 行動版取消右邊距
-        }
-
-        .intro-section {
-            order: 1;
-            margin-bottom: 32px;
-        }
-
-        .sidebar-right {
-            order: 2;
-            margin-bottom: 40px;
-        }
-
-        .steps-section {
-            order: 3;
-
-            // 🚀 關鍵優化：強制內部的 Step 項目在行動版寬度全滿
-            :deep(.step-item) {
-                flex-direction: column !important;
-                gap: 16px;
-
-                .step-image {
-                    width: 100% !important;
-                    height: 200px !important;
-                    margin: 0 0 16px 0 !important;
-                }
-
-                .step-content {
-                    width: 100% !important;
-                }
-            }
-        }
-    }
+.action-group {
+    display: flex;
+    align-items: center;
+    gap: 24px;
 }
 
-// --- 標題與用戶資訊 ---
 .modal-title-bar {
     display: flex;
     align-items: center;
@@ -320,12 +341,6 @@ const getAvatarStyle = (name) => {
         display: flex;
         align-items: center;
         gap: 16px;
-    }
-
-    .zh-h2 {
-        margin: 0;
-        display: flex;
-        align-items: center;
     }
 
     .badge {
@@ -350,9 +365,7 @@ const getAvatarStyle = (name) => {
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            font-size: 15px;
             border: 1px solid rgba(0, 0, 0, 0.05);
-            flex-shrink: 0;
             order: 2;
         }
 
@@ -362,7 +375,6 @@ const getAvatarStyle = (name) => {
 
             .user-name {
                 font-weight: 600;
-                margin-bottom: 7px;
                 color: $neutral-color-800;
                 font-size: 15px;
             }
@@ -377,21 +389,17 @@ const getAvatarStyle = (name) => {
     @media (max-width: 768px) {
         flex-direction: column;
         align-items: flex-start;
-        gap: 16px;
-        padding-right: 30px;
+        padding-right: 0;
 
-        .user-info-box {
+        .action-group {
             width: 100%;
-            justify-content: flex-start;
+            flex-direction: column-reverse;
+            align-items: flex-end;
+            gap: 16px;
+        }
 
-            .user-avatar-circle {
-                order: 1;
-            }
-
-            .user-text-meta {
-                order: 2;
-                text-align: left;
-            }
+        .user-info-box .user-text-meta {
+            text-align: left;
         }
     }
 }
@@ -403,19 +411,18 @@ const getAvatarStyle = (name) => {
 
 .content-left {
     padding-right: 32px;
-}
 
-// --- 通用間距與動畫 ---
-.mb-16 {
-    margin-bottom: 16px;
-}
-
-.mb-24 {
-    margin-bottom: 24px;
+    @media (max-width: 768px) {
+        padding-right: 0;
+    }
 }
 
 .mb-32 {
     margin-bottom: 32px;
+}
+
+.mr-4 {
+    margin-right: 4px;
 }
 
 .mr-8 {
