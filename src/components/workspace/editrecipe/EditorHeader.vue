@@ -73,10 +73,16 @@ const autoTotalTime = computed(() => {
   return props.modelValue.steps.reduce((sum, step) => sum + (Number(step.time) || 0), 0);
 });
 
-// 2. 修改顯示邏輯
+// EditorHeader.vue
+
 const displayTime = computed(() => {
-  const manualTime = Number(props.modelValue.totalTime);
-  return manualTime > 0 ? manualTime : autoTotalTime.value;
+  // 如果自動加總有值，就優先顯示自動加總
+  // 這樣能確保即使資料庫裡有舊的、錯誤的時間數值，也會被目前的步驟時間覆蓋
+  if (autoTotalTime.value > 0) {
+    return autoTotalTime.value;
+  }
+  // 如果步驟都沒填時間，才看手動輸入的值
+  return Number(props.modelValue.totalTime) || 0;
 });
 
 // EditorHeader.vue 內的 adaptRecipeData

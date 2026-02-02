@@ -216,22 +216,51 @@ const ingredientsData = computed(() => {
 
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value || rawIngredients.value.length === 0) return [];
+
     const originalServings = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
+    const scale = servings.value / originalServings;
+
     let totalKcal = 0, totalP = 0, totalF = 0, totalC = 0;
+
+    // 建立一個陣列來存儲各項食材的計算過程，方便 console.table 顯示
+    const calculationLog = [];
 
     rawIngredients.value.forEach(ing => {
         const amount = Number(ing.amount || 0);
         const unitWeight = Number(ing.gram_conversion || 1);
-        const totalGram = amount * unitWeight;
-        const ratio = totalGram / 100;
+        const totalGram = amount * unitWeight; // 換算成公克
+        const ratio = totalGram / 100; // 因為營養標示通常是每 100g
 
-        totalKcal += (Number(ing.kcal_per_100g) || 0) * ratio;
-        totalP += (Number(ing.protein_per_100g) || 0) * ratio;
-        totalF += (Number(ing.fat_per_100g) || 0) * ratio;
-        totalC += (Number(ing.carbs_per_100g) || 0) * ratio;
+        // 計算該食材貢獻的數值
+        const itemKcal = (Number(ing.kcal_per_100g) || 0) * ratio;
+        const itemP = (Number(ing.protein_per_100g) || 0) * ratio;
+        const itemF = (Number(ing.fat_per_100g) || 0) * ratio;
+        const itemC = (Number(ing.carbs_per_100g) || 0) * ratio;
+
+        // 累加到總和
+        totalKcal += itemKcal;
+        totalP += itemP;
+        totalF += itemF;
+        totalC += itemC;
+
+        // 存入 Log
+        calculationLog.push({
+            "食材名稱": ing.ingredient_name,
+            "原始份量": `${amount} ${ing.unit_name}`,
+            "轉換係數": unitWeight,
+            "總重量(g)": totalGram.toFixed(1),
+            "熱量貢獻": itemKcal.toFixed(1) + " kcal",
+            "蛋白質貢獻": itemP.toFixed(1) + " g",
+            "脂質貢獻": itemF.toFixed(1) + " g",
+            "碳水貢獻": itemC.toFixed(1) + " g"
+        });
     });
 
-    const scale = servings.value / originalServings;
+    // 印出漂亮的表格
+    console.group(`🥗 營養成分計算明細 (人數倍率: ${scale.toFixed(2)})`);
+    console.table(calculationLog);
+    console.log(`總計 (1人份): Kcal: ${totalKcal.toFixed(1)}, P: ${totalP.toFixed(1)}, F: ${totalF.toFixed(1)}, C: ${totalC.toFixed(1)}`);
+    console.groupEnd();
 
     return [{
         calories_per_100g: Math.round(totalKcal * scale),
@@ -350,22 +379,35 @@ const toggleWorkspaceTopBar = (show) => {
     if (topBar) topBar.style.display = show ? '' : 'none';
 };
 
-// 新增留言
+
 const handlePostComment = async (content) => {
+    // 檢查登入狀態與內容
     if (!authStore.user) return alert('請先登入');
-    if (!content.trim()) return;
+    if (!content || !content.trim()) return;
+
+    // 取得正確的 user_id (相容不同 store 結構)
+    const userId = authStore.user.user_id || authStore.user.id;
 
     try {
-        await phpApi.post('social/comment.php', {
+        const payload = {
             action: 'post',
             recipe_id: Number(route.params.id),
-            user_id: authStore.user.user_id,
+            user_id: userId,
             content: content
-        });
-        fetchData(); // 重新整理列表
+        };
+
+        console.log("前端送出的資料:", payload); // 除錯用
+
+        const response = await phpApi.post('social/comment.php', payload);
+
+        if (response.data.success) {
+            fetchData(); // 成功後重新整理列表
+        } else {
+            alert('失敗：' + response.data.message);
+        }
     } catch (err) {
-        console.error(err);
-        alert('發佈失敗');
+        console.error('API 錯誤:', err.response?.data || err);
+        alert('發佈失敗，請稍後再試');
     }
 };
 
@@ -391,22 +433,32 @@ const handleLikeComment = async (commentId, type) => {
     }
 };
 
-// 刪除留言
 const handleDeleteComment = async (commentId) => {
-    if (!authStore.user) return;
-    if (!confirm('確定要刪除嗎？')) return;
+    if (!authStore.user) return alert('請先登入');
+    if (!confirm('確定要刪除這則留言嗎？')) return;
+
+    // 確保抓到正確的 ID 欄位
+    const userId = authStore.user.user_id || authStore.user.id;
 
     try {
-        // 使用 delete 方法，並透過 URL 傳遞參數
-        const userId = authStore.user.user_id;
-        await phpApi.delete(`social/comment.php?comment_id=${commentId}&user_id=${userId}`);
+        // 建議 URL 參數加上 timestamp 避免快取，並明確指定 comment_id
+        const response = await phpApi.delete(`social/comment.php`, {
+            params: {
+                comment_id: commentId,
+                user_id: userId
+            }
+        });
 
-        // 成功後重新整理
-        fetchData();
-        alert('留言已刪除');
+        if (response.data.success) {
+            alert('留言已刪除');
+            fetchData(); // 重新整理列表
+        } else {
+            alert('刪除失敗：' + (response.data.message || '未知錯誤'));
+        }
     } catch (err) {
-        console.error('刪除失敗原因:', err.response?.data || err);
-        alert('刪除失敗：' + (err.response?.data?.message || '權限不足'));
+        console.error('刪除請求出錯:', err);
+        // 檢查是否為 405 Method Not Allowed 或 403 Forbidden
+        alert('刪除失敗，請檢查網路或權限');
     }
 };
 

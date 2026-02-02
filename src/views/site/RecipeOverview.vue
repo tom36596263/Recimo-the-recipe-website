@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import { publicApi } from '@/utils/publicApi'
+import { phpApi } from '@/utils/publicApi'
 import { useRouter } from 'vue-router'
 import { useAuthGuard } from '@/composables/useAuthGuard'
 import BaseBtn from '@/components/common/BaseBtn.vue';
@@ -12,7 +12,7 @@ import PageBtn from '@/components/common/PageBtn.vue'
 import RecipesCtaGroup from '@/components/site/RecipeOverview/RecipesCtaGroup.vue'
 import Cook from '@/components/common/Cook.vue'
 
-
+const isShow = ref(false);
 const router = useRouter()
 const { runWithAuth } = useAuthGuard()
 const allRecipe = ref([])
@@ -42,59 +42,64 @@ const handlePageChange = (page) => {
     currentPage.value = page;
 };
 
-onMounted(async () => {
+const fetchRecipes = async () => {
     try {
-        const [resRecipes, resRecipeTags, resTags, resRecipeIngredients] = await Promise.all([
-            publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/recipe/recipe_tag.json'),
-            publicApi.get('data/recipe/tags.json'),
-            publicApi.get('data/recipe/recipe_ingredient.json')
-        ]);
-
-        const recipeData = resRecipes.data;
-        const recipeTagsData = resRecipeTags.data;
-        const tagsData = resTags.data;
-        //新增
-        const recipeIngredientsData = resRecipeIngredients.data;
-
-        const tagMap = {};
-        tagsData.forEach(tag => {
-            tagMap[tag.tag_id] = tag.tag_name;
+        // 1. 使用 phpApi 抓取資料
+        const response = await phpApi.get('recipes/recipe_filter_get.php', {
+            params: {
+                time: activeFilters.value.time,
+                difficulty: activeFilters.value.difficulty,
+                mealPortions: activeFilters.value.mealPortions,
+                kcal: activeFilters.value.kcal,
+                ingredients: searchIngredientIds.value.join(',') // 轉為 "1,2,3"
+            }
         });
+        
+        // 偵錯用：確認 API 回傳的原始資料
+        console.log('API 原始回應：', response.data);
 
-        const base = import.meta.env.BASE_URL;
+    if (response.data && response.data.status === 'success') {
+        const recipeData = response.data.data;
+        const apiBase = phpApi.defaults.baseURL;
+        // const imgBase = apiBase.replace('/api/', '/');
+
+        // 2. 處理資料格式轉換
         allRecipe.value = recipeData.map(recipe => {
+            // SQL 字串轉陣列處理
+            const recipeTagsNames = recipe.tag_names ? recipe.tag_names.split(',') : [];
+            const matchedIngredients = recipe.ingredient_ids 
+            ? recipe.ingredient_ids.split(',').map(Number) 
+            : [];
 
-            const matchedTagIds = recipeTagsData
-                .filter(rt => rt.recipe_id === recipe.recipe_id)
-                .map(rt => rt.tag_id);
-
-            // 透過 tagMap 轉換成 tag_name 陣列
-            const recipeTagsNames = matchedTagIds.map(id => tagMap[id]).filter(Boolean);
-
-
-            //新增
-            const matchedIngredients = recipeIngredientsData
-                .filter(ri => ri.recipe_id === recipe.recipe_id)
-                .map(ri => ri.ingredient_id);
-
+            // 圖片路徑校正
+            let finalImgUrl = recipe.recipe_image_url;
+                
+                if (finalImgUrl && !finalImgUrl.startsWith('http')) {
+                    // 1. 確保 base 結尾有斜線
+                    const safeBase = apiBase.endsWith('/') ? apiBase : `${apiBase}/`;
+                    // 2. 確保 path 開頭沒有斜線
+                    const safePath = finalImgUrl.startsWith('/') ? finalImgUrl.substring(1) : finalImgUrl;
+                    
+                    // 3. 組合：這會產生 http://localhost:8888/recimo_api/img/recipes/...
+                    finalImgUrl = `${safeBase}${safePath}`;
+                }
             return {
                 id: recipe.recipe_id,
                 recipe_name: recipe.recipe_title,
                 difficulty: recipe.recipe_difficulty,
-                image_url: recipe.recipe_image_url,
+                image_url: finalImgUrl,
                 tags: recipeTagsNames,
                 ingredient_ids: matchedIngredients,
                 nutritional_info: {
-                    calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
+                    calories: `${Math.round(recipe.recipe_kcal_per_100g || 0)}kcal`,
                     serving_size: recipe.recipe_servings,
                     cooking_time: (() => {
-                        const timeParts = recipe.recipe_total_time.split(':'); // [HH, mm, ss]
-                        const hours = parseInt(timeParts[0]) || 0;
-                        const minutes = parseInt(timeParts[1]) || 0;
-                        const totalMinutes = hours * 60 + minutes;
-                        return `${totalMinutes}分鐘`;
-                    })()
+                            const timeParts = recipe.recipe_total_time.split(':'); // [HH, mm, ss]
+                            const hours = parseInt(timeParts[0]) || 0;
+                            const minutes = parseInt(timeParts[1]) || 0;
+                            const totalMinutes = hours * 60 + minutes;
+                            return `${totalMinutes}分鐘`;
+                        })()
                 },
                 author: {
                     name: 'Recimo',
@@ -102,75 +107,103 @@ onMounted(async () => {
                 }
             };
         });
+        
+        console.log('成功轉換並存入 allRecipe！', allRecipe.value);
+
+        } else {
+        // 處理 PHP 回傳 status: "error" 的情況
+        console.error('PHP 邏輯錯誤:', response.data.message);
+        }
+
     } catch (error) {
-        console.error('載入資料失敗:', error);
+        // 3. API 連線失敗或伺服器錯誤 (如 404, 500)
+        console.error('API 連線失敗:', error);
+        if (error.response) {
+        console.log('錯誤狀態碼:', error.response.status);
+        console.log('錯誤內容:', error.response.data);
+        }
     }
+};
+
+// 在生命週期中呼叫它
+onMounted(() => {
+    fetchRecipes();
 });
 
+// 監聽篩選條件
+watch(activeFilters, () => {
+    currentPage.value = 1;
+    fetchRecipes(); // 💡 條件變了，重新去抓過濾後的資料
+}, { deep: true });
 
-const filteredRecipes = computed(() => {
-    return allRecipe.value.filter(recipe => {
-        const timeValue = parseInt(recipe.nutritional_info.cooking_time);
-        const timeMatch = activeFilters.value.time === "全部" || (
-            (activeFilters.value.time === "15分鐘內" && timeValue <= 15) ||
-            (activeFilters.value.time === "15-30分鐘" && timeValue > 15 && timeValue <= 30) ||
-            (activeFilters.value.time === "30-60分鐘" && timeValue > 30 && timeValue <= 60) ||
-            (activeFilters.value.time === "1小時以上" && timeValue > 60 && timeValue <= 180) ||
-            (activeFilters.value.time === "慢火長燉" && timeValue > 180)
-        );
-
-        const selectedDiff = activeFilters.value.difficulty;
-        const d = recipe.difficulty;
-
-        let difficultyMatch = false;
-        if (selectedDiff === "全部") {
-            difficultyMatch = true;
-        } else if (selectedDiff === "廚藝新手") {
-            difficultyMatch = (d >= 1 && d < 2);
-        } else if (selectedDiff === "基礎實作") {
-            difficultyMatch = (d >= 2 && d < 3);
-        } else if (selectedDiff === "進階挑戰") {
-            difficultyMatch = (d >= 3 && d < 4);
-        } else if (selectedDiff === "職人等級") {
-            difficultyMatch = (d >= 4 && d <= 5);
-        }
-
-        const portionMatch = activeFilters.value.mealPortions == "全部" || (
-            (activeFilters.value.mealPortions === "1人獨享" && recipe.nutritional_info.serving_size === 1) ||
-            (activeFilters.value.mealPortions === "2人世界" && recipe.nutritional_info.serving_size === 2) ||
-            (activeFilters.value.mealPortions === "3-4人家庭" && recipe.nutritional_info.serving_size >= 3 && recipe.nutritional_info.serving_size <= 4) ||
-            (activeFilters.value.mealPortions === "6人以上聚會" && recipe.nutritional_info.serving_size >= 6)
-        );
-
-        const kcalValue = parseInt(recipe.nutritional_info.calories);
-        const kcalMatch = activeFilters.value.kcal === "全部" || (
-            (activeFilters.value.kcal === "100kcal(輕食)" && kcalValue < 100) ||
-            (activeFilters.value.kcal === "150-300kcal(均衡)" && kcalValue > 150 && kcalValue <= 300) ||
-            (activeFilters.value.kcal === "300kcal以上(豐盛)" && kcalValue > 300)
-        );
-
-        //新增
-        let ingredientMatch = true;
-        if (searchIngredientIds.value.length > 0) {
-            // 使用 Array.prototype.some()：只要有一個符合就回傳 true
-            ingredientMatch = searchIngredientIds.value.some(searchId =>
-                recipe.ingredient_ids.includes(searchId)
-            );
-        }
-
-        return timeMatch && difficultyMatch && portionMatch && kcalMatch && ingredientMatch;
-    });
+// 監聽食材搜尋
+watch(searchIngredientIds, () => {
+    currentPage.value = 1;
+    fetchRecipes(); // 💡 食材變了，重新抓資料
 });
+// const filteredRecipes = computed(() => {
+//     return allRecipe.value.filter(recipe => {
+//         const timeValue = parseInt(recipe.nutritional_info.cooking_time);
+//         const timeMatch = activeFilters.value.time === "全部" || (
+//             (activeFilters.value.time === "15分鐘內" && timeValue <= 15) ||
+//             (activeFilters.value.time === "15-30分鐘" && timeValue > 15 && timeValue <= 30) ||
+//             (activeFilters.value.time === "30-60分鐘" && timeValue > 30 && timeValue <= 60) ||
+//             (activeFilters.value.time === "1小時以上" && timeValue > 60 && timeValue <= 180) ||
+//             (activeFilters.value.time === "慢火長燉" && timeValue > 180)
+//         );
+
+//         const selectedDiff = activeFilters.value.difficulty;
+//         const d = recipe.difficulty;
+
+//         let difficultyMatch = false;
+//         if (selectedDiff === "全部") {
+//             difficultyMatch = true;
+//         } else if (selectedDiff === "廚藝新手") {
+//             difficultyMatch = (d >= 1 && d < 2);
+//         } else if (selectedDiff === "基礎實作") {
+//             difficultyMatch = (d >= 2 && d < 3);
+//         } else if (selectedDiff === "進階挑戰") {
+//             difficultyMatch = (d >= 3 && d < 4);
+//         } else if (selectedDiff === "職人等級") {
+//             difficultyMatch = (d >= 4 && d <= 5);
+//         }
+
+//         const portionMatch = activeFilters.value.mealPortions == "全部" || (
+//             (activeFilters.value.mealPortions === "1人獨享" && recipe.nutritional_info.serving_size === 1) ||
+//             (activeFilters.value.mealPortions === "2人世界" && recipe.nutritional_info.serving_size === 2) ||
+//             (activeFilters.value.mealPortions === "3-4人家庭" && recipe.nutritional_info.serving_size >= 3 && recipe.nutritional_info.serving_size <= 4) ||
+//             (activeFilters.value.mealPortions === "6人以上聚會" && recipe.nutritional_info.serving_size >= 6)
+//         );
+
+//         const kcalValue = parseInt(recipe.nutritional_info.calories);
+//         const kcalMatch = activeFilters.value.kcal === "全部" || (
+//             (activeFilters.value.kcal === "100kcal(輕食)" && kcalValue < 100) ||
+//             (activeFilters.value.kcal === "150-300kcal(均衡)" && kcalValue > 150 && kcalValue <= 300) ||
+//             (activeFilters.value.kcal === "300kcal以上(豐盛)" && kcalValue > 300)
+//         );
+
+//         //新增
+//         let ingredientMatch = true;
+//         if (searchIngredientIds.value.length > 0) {
+//             // 使用 Array.prototype.some()：只要有一個符合就回傳 true
+//             ingredientMatch = searchIngredientIds.value.some(searchId =>
+//                 recipe.ingredient_ids.includes(searchId)
+//             );
+//         }
+
+//         return timeMatch && difficultyMatch && portionMatch && kcalMatch && ingredientMatch;
+//     });
+// });
 
 // 計算總頁數
 const totalPages = computed(() => {
-    return Math.ceil(filteredRecipes.value.length / pageSize);
+    return Math.ceil(allRecipe.value.length / pageSize);
 });
 
 // 根據當前頁碼計算應顯示的食譜
 const recipes = computed(() => {
     const start = (currentPage.value - 1) * pageSize;
-    return filteredRecipes.value.slice(start, start + pageSize);
+    return allRecipe.value.slice(start, start + pageSize);
 });
 
 const handleEmptyAction = (action) => {
