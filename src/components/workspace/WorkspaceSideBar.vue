@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
 import BaseBtn from '@/components/common/BaseBtn.vue'
-import LogoBlack from '/img/site/Recimo-logo-black.svg'
 import IconList from 'virtual:icons/material-symbols/List'
 import IconAdd from 'virtual:icons/material-symbols/Add'
 // 引用 Pinia Store (權限狀態管理)
