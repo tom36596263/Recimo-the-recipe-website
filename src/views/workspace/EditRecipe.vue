@@ -174,7 +174,7 @@ const publishToDb = async () => {
     const processedSteps = await Promise.all(
       recipeForm.value.steps.map(async (s) => ({
         step_title: s.title,
-        step_content: s.content,
+        step_content: s.content || s.step_content || '', // ✨ 容錯處理：確保內容不消失
         step_image_url: await handleImage(s.image),
         step_total_time: `00:${String(s.time || 0).padStart(2, '0')}:00`,
         step_ingredients: s.tags
@@ -183,22 +183,23 @@ const publishToDb = async () => {
 
     const payload = {
       parent_recipe_id: recipeForm.value.parent_recipe_id || null,
-
-      // ✨ 關鍵修正 1：將 user_id 改為 author_id，對應 PHP 的判斷
       author_id: authStore.user.id || authStore.user.user_id,
-
-      // ✨ 關鍵修正 2：將 recipe_cover_image 改為 recipe_image_url，對應 PHP 的 INSERT
-      recipe_title: isAdaptModeActive.value ? recipeForm.value.adapt_title : recipeForm.value.title,
-      recipe_description: isAdaptModeActive.value ? recipeForm.value.adapt_description : recipeForm.value.description,
+      recipe_title: isAdaptModeActive.value
+        ? (recipeForm.value.adapt_title || recipeForm.value.title)
+        : recipeForm.value.title,
+      // ✨ 修正描述抓取邏輯：優先抓改編描述，若無則抓取原始描述
+      recipe_description: isAdaptModeActive.value
+        ? (recipeForm.value.adapt_description || recipeForm.value.description)
+        : recipeForm.value.description,
       recipe_image_url: coverData,
-
       recipe_difficulty: recipeForm.value.difficulty,
-      total_time: recipeForm.value.totalTime, // 修正名稱與 PHP 一致
+      total_time: recipeForm.value.totalTime,
       recipe_servings: recipeForm.value.recipe_servings,
       ingredients: recipeForm.value.ingredients.map(ing => ({
         ingredient_id: ing.id,
-        quantity: ing.amount, // 注意：PHP 裡寫的是 quantity，前端傳的是 amount，要對齊
-        remark: ing.note
+        amount: ing.amount,
+        remark: ing.note,
+        unit_name: ing.unit || '份'
       })),
       steps: processedSteps,
       tags: recipeForm.value.tags.map(t => t.tag_id)
@@ -210,7 +211,6 @@ const publishToDb = async () => {
       alert('🎉 感謝分享！改編版本已正式發布。');
 
       if (isAdaptModeActive.value) {
-        // ✨ 修正跳轉：抓取原本食譜（Parent）的 ID 進行導向
         const parentId = recipeForm.value.parent_recipe_id;
         router.push(`/workspace/modify-recipe/${parentId}`);
       } else {
@@ -249,7 +249,7 @@ const handlePreview = async () => {
       ...s,
       step_id: s.id || `s-${idx}`,
       step_title: s.title || `步驟 ${idx + 1}`,
-      step_content: s.content || '',
+      step_content: s.content || s.step_content || '',
       step_total_time: s.time ? `${s.time} 分鐘` : '0 分鐘',
       step_order: idx + 1,
       step_image_url: await fileToBase64(s.image)
