@@ -16,6 +16,7 @@ const currentPage = ref(1)
 const pageSize = 8
 //新增
 const searchIngredientIds = ref([]);
+const searchIngredientNames = ref([]);
 
 const activeFilters = ref({
     time: "全部",
@@ -35,6 +36,7 @@ watch(searchIngredientIds, () => {
     currentPage.value = 1;
     fetchRecipes(); // 💡 食材變了，重新抓資料
 });
+
 const handlePageChange = (page) => {
     currentPage.value = page;
 };
@@ -51,73 +53,73 @@ const fetchRecipes = async () => {
                 ingredients: searchIngredientIds.value.join(',') // 把陣列 [1,2] 轉成字串 "1,2"
             }
         });
-        
+
         // 偵錯用：確認 API 回傳的原始資料
         console.log('API 原始回應：', response.data);
 
-    if (response.data && response.data.status === 'success') {
-        const recipeData = response.data.data;
-        const apiBase = phpApi.defaults.baseURL;
-        // const imgBase = apiBase.replace('/api/', '/');
+        if (response.data && response.data.status === 'success') {
+            const recipeData = response.data.data;
+            const apiBase = phpApi.defaults.baseURL;
+            // const imgBase = apiBase.replace('/api/', '/');
 
-        // 2. 處理資料格式轉換
-        allRecipe.value = recipeData.map(recipe => {
-            // SQL 字串轉陣列處理
-            const recipeTagsNames = recipe.tag_names ? recipe.tag_names.split(',') : [];
-            const matchedIngredients = recipe.ingredient_ids 
-            ? recipe.ingredient_ids.split(',').map(Number) 
-            : [];
+            // 2. 處理資料格式轉換
+            allRecipe.value = recipeData.map(recipe => {
+                // SQL 字串轉陣列處理
+                const recipeTagsNames = recipe.tag_names ? recipe.tag_names.split(',') : [];
+                const matchedIngredients = recipe.ingredient_ids
+                    ? recipe.ingredient_ids.split(',').map(Number)
+                    : [];
 
-            // 圖片路徑校正
-            let finalImgUrl = recipe.recipe_image_url;
-                
+                // 圖片路徑校正
+                let finalImgUrl = recipe.recipe_image_url;
+
                 if (finalImgUrl && !finalImgUrl.startsWith('http')) {
                     // 1. 確保 base 結尾有斜線
                     const safeBase = apiBase.endsWith('/') ? apiBase : `${apiBase}/`;
                     // 2. 確保 path 開頭沒有斜線
                     const safePath = finalImgUrl.startsWith('/') ? finalImgUrl.substring(1) : finalImgUrl;
-                    
+
                     // 3. 組合：這會產生 http://localhost:8888/recimo_api/img/recipes/...
                     finalImgUrl = `${safeBase}${safePath}`;
                 }
-            return {
-                id: recipe.recipe_id,
-                recipe_name: recipe.recipe_title,
-                difficulty: recipe.recipe_difficulty,
-                image_url: finalImgUrl,
-                tags: recipeTagsNames,
-                ingredient_ids: matchedIngredients,
-                nutritional_info: {
-                    calories: `${Math.round(recipe.recipe_kcal_per_100g || 0)}kcal`,
-                    serving_size: recipe.recipe_servings,
-                    cooking_time: (() => {
+                return {
+                    id: recipe.recipe_id,
+                    recipe_name: recipe.recipe_title,
+                    difficulty: recipe.recipe_difficulty,
+                    image_url: finalImgUrl,
+                    tags: recipeTagsNames,
+                    ingredient_ids: matchedIngredients,
+                    nutritional_info: {
+                        calories: `${Math.round(recipe.recipe_kcal_per_100g || 0)}kcal`,
+                        serving_size: recipe.recipe_servings,
+                        cooking_time: (() => {
                             const timeParts = recipe.recipe_total_time.split(':'); // [HH, mm, ss]
                             const hours = parseInt(timeParts[0]) || 0;
                             const minutes = parseInt(timeParts[1]) || 0;
                             const totalMinutes = hours * 60 + minutes;
                             return `${totalMinutes}分鐘`;
                         })()
-                },
-                author: {
-                    name: 'Recimo',
-                    likes: recipe.recipe_like_count
-                }
-            };
-        });
-        
-        console.log('成功轉換並存入 allRecipe！', allRecipe.value);
+                    },
+                    author: {
+                        name: 'Recimo',
+                        likes: recipe.recipe_like_count
+                    }
+                };
+            });
+
+            console.log('成功轉換並存入 allRecipe！', allRecipe.value);
 
         } else {
-        // 處理 PHP 回傳 status: "error" 的情況
-        console.error('PHP 邏輯錯誤:', response.data.message);
+            // 處理 PHP 回傳 status: "error" 的情況
+            console.error('PHP 邏輯錯誤:', response.data.message);
         }
 
     } catch (error) {
         // 3. API 連線失敗或伺服器錯誤 (如 404, 500)
         console.error('API 連線失敗:', error);
         if (error.response) {
-        console.log('錯誤狀態碼:', error.response.status);
-        console.log('錯誤內容:', error.response.data);
+            console.log('錯誤狀態碼:', error.response.status);
+            console.log('錯誤內容:', error.response.data);
         }
     }
 };
@@ -208,23 +210,76 @@ const handleEmptyAction = (action) => {
 const showCook = ref(false);
 const handleCookFinish = (ingredients) => {
     if (ingredients && ingredients.length > 0) {
+        // 設定篩選 ID
         searchIngredientIds.value = ingredients.map(item => item.ingredient_id);
+
+        // 存著名稱，方便 UI 顯示 "您選了：雞肉、洋蔥..."
+        searchIngredientNames.value = ingredients.map(item => item.ingredient_name || '未知食材');
+
+        //重置其他篩選器，避免條件衝突導致無結果
+        activeFilters.value = {
+            time: "全部",
+            difficulty: "全部",
+            mealPortions: "全部",
+            kcal: "全部"
+        };
+
+        //關閉燈箱
+        showCook.value = false;
+
+        //滾動到食譜列表頂部 
+        window.scrollTo({
+            top: document.querySelector('.recipe-cards-section')?.offsetTop - 100 || 0,
+            behavior: 'smooth'
+        });
+
     } else {
-        searchIngredientIds.value = [];
+        // 如果沒選食材就送出，視為取消
+        clearIngredientFilter();
+        showCook.value = false;
     }
-    showCook.value = false;
+};
+
+//新增：清除食材篩選 
+const clearIngredientFilter = () => {
+    searchIngredientIds.value = [];
+    searchIngredientNames.value = [];
+
 };
 const openKitchen = () => {
     console.log("父層收到訊號了！準備打開燈箱..."); // 加入這行
     showCook.value = true;
 }
 
+const handleCardClick = (id) => {
+    runWithAuth(() => {
+        router.push({
+            name: 'workspace-recipe-detail',
+            params: { id: id }
+        })
+    })
+}
 </script>
 
 <template>
     <section class="container filter-content">
         <div class="row">
             <FilterSection v-model="activeFilters" @open-kitchen="openKitchen" />
+        </div>
+
+        <div v-if="searchIngredientIds.length > 0" class="row ingredient-filter-tag">
+            <div class="col-12">
+                <div class="alert-box p-p2">
+                    <span>
+                        <i class="fa-solid fa-utensils"></i>
+                        正在搜尋包含以下食材的食譜：
+                        <span class="highlight">{{ searchIngredientNames.join('、') }}</span>
+                    </span>
+                    <BaseBtn title="清除篩選" class="clear-btn" width="100px " variant="outline" height="30"
+                        @click="clearIngredientFilter">
+                    </BaseBtn>
+                </div>
+            </div>
         </div>
         <Cook v-if="showCook" @close="showCook = false" @cook-finish="handleCookFinish" />
     </section>
@@ -291,6 +346,27 @@ const openKitchen = () => {
     .recipe-card {
         margin-bottom: 20px;
 
+    }
+}
+
+.alert-box {
+    margin-top: 30px;
+    margin-bottom: -10px;
+    // display: flex;
+    align-items: center;
+
+    @media screen and (max-width: 810px) {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+.clear-btn {
+    margin-left: 24px;
+
+    @media screen and (max-width: 810px) {
+        margin-top: 10px;
+        margin-bottom: -15px;
     }
 }
 </style>

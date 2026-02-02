@@ -33,9 +33,7 @@ const handleAddClick = () => {
 
 const normalizedImageSrc = computed(() => {
     if (!props.imageSrc) return '';
-    return props.imageSrc.startsWith('/')
-        ? props.imageSrc
-        : '/' + props.imageSrc;
+    return props.imageSrc;
 });
 </script>
 
@@ -45,7 +43,7 @@ const normalizedImageSrc = computed(() => {
             <h3 class="title p-p2">{{ name }}</h3>
             <p class="unit-label p-p3">每100g：</p>
             <div class="nutrition-data">
-                <p class="p-p3">熱量：{{ calories }}kcal</p>
+                <p class="p-p3">熱量：{{ parseInt(calories) }}kcal</p>
                 <p class="p-p3">脂肪：{{ fat }}g</p>
             </div>
         </div>
