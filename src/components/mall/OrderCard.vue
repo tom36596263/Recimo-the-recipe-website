@@ -108,32 +108,46 @@ const totalQuantity = computed(() => {
 });
 
 // 取得付款方式 
+// 取得付款方式 (修正版)
 const paymentText = computed(() => {
-  //根據你 PHP 的輸出，優先抓取小寫底線的 key
-  const methodRaw = props.order.payment_method ??
-    props.order.PAYMENT_METHOD ??
-    props.order.payment;
+  const methodRaw = props.order.payment_method ?? props.order.PAYMENT_METHOD;
+  const payStatusRaw = props.order.payment_status ?? props.order.PAYMENT_STATUS;
+  const currentStatus = orderStatus.value;
 
-  //處理空值
-  if (methodRaw === null || methodRaw === undefined || methodRaw === '') {
-    return '未付款';
-  }
+  if (methodRaw === undefined || methodRaw === null) return '未付款';
 
-  //轉為字串並移除空白，確保比對正確
-  const method = String(methodRaw).trim().toLowerCase();
+  const method = String(methodRaw); // '1' 信用卡, '2' 貨到付款
+  const payStatus = Number(payStatusRaw); // 0 待付, 1 已付, 2 已退款
 
-  // 定義對應表 (請根據你資料庫定義的數字來調整)
-  // 如果你的系統定義 2 是貨到付款，請改這裡：
   const map = {
-    '2': '貨到付款', // 根據你目前的 JSON 數值修正
     '1': '信用卡付款',
-    // '0': '銀行轉帳',   // 或是其他對應
-    // 'cod': '貨到付款',
-    // 'card': '信用卡付款'
+    '2': '貨到付款'
   };
 
-  return map[method] || `未知方式(${method})`;
+  const methodName = map[method] || `方式(${method})`;
+
+  // 1. 如果資料庫已經明確標記為「已退款 (2)」
+  if (payStatus === 2) {
+    return `${methodName} (已退款)`;
+  }
+
+  // 2. 如果訂單已取消 (-1)
+  if (currentStatus === -1) {
+    // 信用卡 (1)：因為通常是先付款，所以顯示已退款（或由後端邏輯確保 payStatus 變為 2）
+    if (method === '1') {
+      return `${methodName} (已退款)`;
+    }
+    // 貨到付款 (2)：使用者沒付錢，顯示「已取消」或「無需付款」更準確
+    return `${methodName} (已取消)`;
+  }
+
+  // 3. 正常流程判定
+  // 貨到付款在「已送達 (3)」之前都算待付款；信用卡則看 payStatus
+  const isPaid = (method === '1' && payStatus === 1) || (method === '2' && currentStatus >= 3);
+
+  return isPaid ? `${methodName} (已付)` : `${methodName} (待付款)`;
 });
+
 console.log('收到訂單資料:', props.order);
 const emit = defineEmits(['cancel-order']);
 

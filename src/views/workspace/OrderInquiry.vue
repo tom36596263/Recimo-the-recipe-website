@@ -4,7 +4,7 @@ import OrderCard from '@/components/mall/OrderCard.vue';
 // import { publicApi } from '@/utils/publicApi';
 import { phpApi } from '@/utils/publicApi';
 import BaseModal from '@/components/BaseModal.vue';
-
+import BaseTag from '@/components/common/BaseTag.vue';
 
 // 資料容器
 const ordersData = ref([]);
@@ -82,9 +82,9 @@ const filteredProducts = computed(() => {
     const targetStatus = statusMapping[activeTag.value];
 
     result = result.filter((item) => {
-      //優先抓 ORDER_STATUS，抓不到才抓 status
-      const itemStatus = item.ORDER_STATUS !== undefined ? item.ORDER_STATUS : item.status;
-      return itemStatus === targetStatus;
+      const rawStatus = item.ORDER_STATUS ?? item.order_status ?? item.status;
+      // 使用 == (雙等於) 或 Number() 強制轉型，確保 "1" 等於 1
+      return Number(rawStatus) === targetStatus;
     });
   }
 
