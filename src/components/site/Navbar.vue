@@ -5,6 +5,7 @@ import BaseBtn from '@/components/common/BaseBtn.vue'
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
+import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
 
 const { proxy } = getCurrentInstance(); // 取得全域方法代理
 
@@ -88,8 +89,7 @@ const userAvatar = computed(() => {
                         <span></span>
                     </div>
                     <div class="logo">
-                        <router-link to="/"><img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')"
-                                alt="logo"></router-link>
+                        <router-link to="/"><img :src="LogoBlack" alt="Recimo Logo"></router-link>
                     </div>
                     <div class="link-group">
                         <div class="page-link" :class="{ 'mobile-active': isMenuOpen }">
