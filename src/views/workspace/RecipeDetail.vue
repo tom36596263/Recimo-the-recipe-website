@@ -48,7 +48,11 @@ const commentList = ref([]);
 // --- 核心抓取邏輯 ---
 const fetchData = async () => {
     isLoading.value = true;
+    console.log('🔍 [路由偵錯] route.params:', route.params);
     const recipeId = Number(route.params.id);
+    console.log('🔍 [路由偵錯] 轉換後的 recipeId:', recipeId);
+
+
 
     // --- 1. 預覽模式優先處理 ---
     if (isPreviewMode.value) {
@@ -134,11 +138,18 @@ const fetchData = async () => {
             recipeId ? phpApi.get(`social/comment.php?recipe_id=${recipeId}`) : Promise.resolve({ data: [] })
         ]);
 
+        console.log('📥 [API 偵錯] PHP 回傳原始內容:', resDetail.data);
+
         if (resDetail.data && resDetail.data.success) {
             const serverData = resDetail.data.data;
 
             rawRecipe.value = {
                 ...serverData.main,
+                // 🏆 關鍵修正：確保作者名稱有被存入 rawRecipe
+                // 根據一般 API 慣例，嘗試從 main 裡面抓取可能的名字欄位
+                author_name: serverData.main.author_name || serverData.main.user_name || 'Recimo 用戶',
+                author_id: serverData.main.author_id || serverData.main.user_id,
+
                 recipe_description: serverData.main.recipe_descreption || serverData.main.recipe_description || '',
                 tags: serverData.tags || []
             };
@@ -526,14 +537,19 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
     </div>
 
     <RecipeReportModal v-model="isReportModalOpen" :targetData="{
+        recipe_id: rawRecipe?.recipe_id,
         title: recipeIntroData?.title,
         content: recipeIntroData?.description,
-        // 🏆 這裡確保傳入作者名稱
-        userName: rawRecipe?.author_name || '未知作者',
-        // 🏆 關鍵：新增傳入 author_id，這樣 Modal 才能判斷是否為官方
-        author_id: rawRecipe?.author_id || rawRecipe?.AUTHOR_ID,
+
+        // 🏆 多重保險：嘗試抓取所有可能的作者欄位名稱
+        userName: rawRecipe?.author_name || rawRecipe?.user_name || '未知作者',
+
+        // 🏆 這裡也一樣，相容大小寫與不同命名
+        author_id: rawRecipe?.author_id || rawRecipe?.AUTHOR_ID || rawRecipe?.user_id,
+
         image: recipeIntroData?.image
     }" @submit="onReportSubmit" />
+
 
     <div v-if="!isPreviewMode" class="col-12 fade-up" style="--delay: 8">
         <RelatedRecipes :currentId="route.params.id" />
