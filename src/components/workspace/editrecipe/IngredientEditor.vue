@@ -4,8 +4,22 @@ import IngredientSearchModal from './modals/IngredientSearchModal.vue';
 
 const props = defineProps({
     ingredients: { type: Array, required: true },
-    isEditing: { type: Boolean, default: false }
+    isEditing: { type: Boolean, default: false },
+    // 🎨 接收來自父組件的模式判斷
+    isAdaptMode: { type: Boolean, default: false }
 });
+
+// 定義顏色循環邏輯
+const toggleIngredientColor = (index) => {
+    // 只有在「編輯中」且「改編模式」下才能換顏色
+    if (!props.isEditing || !props.isAdaptMode) return;
+
+    const colors = [null, 'tag-green', 'tag-orange', 'tag-blue'];
+    const currentColor = props.ingredients[index].color_tag || null;
+    const nextIndex = (colors.indexOf(currentColor) + 1) % colors.length;
+
+    props.ingredients[index].color_tag = colors[nextIndex];
+};
 
 const showSearchModal = ref(false);
 
@@ -38,6 +52,7 @@ const handleAddMultiple = (items) => {
                 note: '',
                 fromDB: true,
                 isInvalid: false,
+                color_tag: null, // 初始化顏色標籤
                 kcal_per_100g: item.kcal_per_100g || 0,
                 protein_per_100g: item.protein_per_100g || 0,
                 fat_per_100g: item.fat_per_100g || 0,
@@ -57,10 +72,26 @@ const removeItem = (id) => {
     <section class="ingredient-editor-container">
         <div class="section-header">
             <h2 class="header-title zh-h4-bold">食材列表</h2>
+
+            <!-- <div v-if="isEditing && isAdaptMode" class="color-legend p-p3">
+                <span class="legend-item"><i class="dot green"></i>新增</span>
+                <span class="legend-item"><i class="dot orange"></i>調整</span>
+                <span class="legend-item"><i class="dot blue"></i>替換</span>
+                <span class="legend-hint">（點擊左側裝飾條切換標記）</span>
+            </div> -->
         </div>
 
         <div class="ingredient-list">
-            <div v-for="ing in ingredients" :key="ing.id" class="ingredient-item" :class="{ 'is-view': !isEditing }">
+            <div v-for="(ing, index) in ingredients" :key="ing.id" class="ingredient-item" :class="[
+                { 'is-view': !isEditing },
+                // 只有改編模式才套用 CSS 顏色類別
+                isAdaptMode ? ing.color_tag : ''
+            ]">
+                <div v-if="isEditing && isAdaptMode" class="color-tag-trigger" @click="toggleIngredientColor(index)"
+                    title="點擊切換標記顏色">
+                    <i-material-symbols-edit-outline-rounded class="edit-hint-icon" />
+                </div>
+
                 <button v-if="isEditing" class="remove-btn" @click="removeItem(ing.id)">✕</button>
 
                 <div class="input-row main-row">
@@ -118,6 +149,47 @@ const removeItem = (id) => {
     }
 }
 
+// 🎨 顏色圖例樣式
+.color-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: $neutral-color-700;
+    padding: 8px 0;
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+
+            &.green {
+                background-color: #74D09C;
+            }
+
+            &.orange {
+                background-color: #FFCB82;
+            }
+
+            &.blue {
+                background-color: #90C6FF;
+            }
+        }
+    }
+
+    .legend-hint {
+        font-size: 12px;
+        color: $neutral-color-400;
+        margin-left: 8px;
+    }
+}
+
 .ingredient-list {
     display: flex;
     flex-direction: column;
@@ -129,25 +201,54 @@ const removeItem = (id) => {
     background: $neutral-color-white;
     border: 1px solid $neutral-color-400;
     border-radius: 12px;
-    padding: 10px 20px;
+    padding: 10px 20px 10px 30px;
     transition: all 0.3s ease;
     overflow: hidden;
 
-    // ✨ 左側裝飾條：增加專業感
     &::before {
         content: '';
         position: absolute;
         left: 0;
         top: 0;
         bottom: 0;
-        width: 5px;
+        width: 6px;
         background: $primary-color-700;
         opacity: 0.7;
+        z-index: 1;
+    }
+
+    &.tag-green {
+        border-color: #74D09C;
+        background: rgba(116, 208, 156, 0.05);
+
+        &::before {
+            background: #74D09C;
+            opacity: 1;
+        }
+    }
+
+    &.tag-orange {
+        border-color: #FFCB82;
+        background: rgba(255, 203, 130, 0.05);
+
+        &::before {
+            background: #FFCB82;
+            opacity: 1;
+        }
+    }
+
+    &.tag-blue {
+        border-color: #90C6FF;
+        background: rgba(144, 198, 255, 0.05);
+
+        &::before {
+            background: #90C6FF;
+            opacity: 1;
+        }
     }
 
     &:hover {
         border-color: $primary-color-700;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     &.is-view {
@@ -159,7 +260,6 @@ const removeItem = (id) => {
         }
     }
 
-    // ❌ 叉叉按鈕：維持妳原本的純粹設計
     .remove-btn {
         position: absolute;
         top: 10px;
@@ -168,12 +268,36 @@ const removeItem = (id) => {
         border: none;
         color: $secondary-color-danger-400;
         cursor: pointer;
-        z-index: 2;
-        font-size: 16px; // 稍微調整大小方便點擊
+        z-index: 5;
+        font-size: 18px;
 
         &:hover {
             color: $secondary-color-danger-700;
         }
+    }
+}
+
+.color-tag-trigger {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+
+    .edit-hint-icon {
+        font-size: 14px;
+        color: $neutral-color-white;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    &:hover .edit-hint-icon {
+        opacity: 1;
     }
 }
 
@@ -195,11 +319,9 @@ const removeItem = (id) => {
     }
 }
 
-// 食材標題
 .name-field {
     font-weight: bold;
     font-size: 1.1rem !important;
-    color: $neutral-color-800 !important;
 }
 
 .amount-group {
@@ -212,17 +334,11 @@ const removeItem = (id) => {
     .amount-input-wrapper {
         flex: 1;
         max-width: 300px;
-        width: auto;
 
         .amount-field {
             font-weight: 500;
             font-size: 0.8rem;
             border-bottom: 1.5px solid $neutral-color-100;
-
-            &::placeholder {
-                font-size: 0.9rem;
-                color: $neutral-color-400;
-            }
 
             &:focus {
                 border-bottom-color: $primary-color-400;
@@ -230,18 +346,12 @@ const removeItem = (id) => {
         }
     }
 
-
     .unit-box {
         padding: 4px 12px;
         display: flex;
         align-items: center;
         color: $neutral-color-700;
         font-size: 14px;
-        white-space: nowrap;
-
-        .label {
-            margin-right: 2px;
-        }
 
         .unit-field {
             width: 40px;
@@ -251,53 +361,20 @@ const removeItem = (id) => {
     }
 }
 
-// 備註區域
 .note-row {
     margin-top: 12px;
     padding: 8px 12px;
     background: $neutral-color-100;
     border-radius: 8px;
-    border-top: none;
 
     .note-field {
         color: $neutral-color-700 !important;
         font-size: 14px !important;
-        line-height: 1.5;
         resize: none;
         min-height: 40px;
-        padding: 0;
-
-        &::placeholder {
-            color: $neutral-color-400;
-        }
     }
 }
 
-
-
-// 錯誤動畫
-.error-shake {
-    color: $secondary-color-danger-700 !important;
-    animation: shake 0.4s ease-in-out;
-}
-
-@keyframes shake {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-4px);
-    }
-
-    75% {
-        transform: translateX(4px);
-    }
-}
-
-// 新增按鈕 
 .add-action-wrapper {
     margin-top: 24px;
 
@@ -313,7 +390,6 @@ const removeItem = (id) => {
 
         &:hover {
             background: $primary-color-100;
-            color: $primary-color-800;
             border-color: $primary-color-700;
         }
     }

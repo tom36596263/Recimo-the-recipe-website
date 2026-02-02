@@ -44,36 +44,57 @@ const getSmartImageUrl = (url) => {
 const snapsData = ref([]);
 const commentList = ref([]);
 
-// 核心抓取
-
+//核心抓取
 const fetchData = async () => {
     isLoading.value = true;
     const recipeId = Number(route.params.id);
 
-    // --- 1. 預覽模式處理 (全新創建且無 ID) ---
+    // --- 1. 預覽模式處理 ---
+    // 判斷條件：模式為 preview 且無正式 ID，且 Store 中有草稿資料
     if (isPreviewMode.value && !recipeId && recipeStore.previewData) {
         try {
+            // 💡 為了確保資料抓取最準確，直接使用變數快取
             const preview = recipeStore.previewData;
+
+            // 同步抓取營養成分母表以計算營養價值
             const resIngMaster = await publicApi.get('data/recipe/ingredients.json');
             const masterIng = resIngMaster.data || [];
-            const previewServings = Math.max(1, Number(preview.recipe_servings || preview.servings || 1));
 
+            // 💡 終極捕獲邏輯：解決你截圖中明明有 2 卻顯示 1 的問題
+            // 按照權重順序抓取：recipe_servings (後端規範) > servings (編輯器規範) > 預設 1
+            const previewServings = Math.max(1, Number(
+                preview.recipe_servings ||
+                preview.servings ||
+                preview.recipe_serving ||
+                1
+            ));
+
+            console.log('【預覽除錯】Store 原始資料:', preview);
+            console.log('【預覽除錯】判定原始份數:', previewServings);
+
+            // 組裝食譜主資訊
             rawRecipe.value = {
                 recipe_id: 0,
                 recipe_title: preview.title || preview.recipe_title || '未命名食譜',
-                recipe_description: preview.description || preview.recipe_description || '',
+                recipe_description: preview.description || preview.recipe_description || preview.recipe_descreption || '',
                 recipe_image_url: preview.coverImg || preview.recipe_cover_image,
-                recipe_difficulty: preview.difficulty || 1,
-                recipe_total_time: preview.totalTime || 30,
-                recipe_servings: previewServings,
+                recipe_difficulty: Number(preview.difficulty || preview.recipe_difficulty || 1),
+                recipe_total_time: preview.totalTime || preview.recipe_total_time || '00:30:00',
+                recipe_servings: previewServings, // 存入 rawRecipe 供 nutritionWrapper 計算 original
                 recipe_likes: 0,
                 author_name: authStore.user?.user_name || '您的預覽',
                 tags: preview.recipe_tags || preview.tags || []
             };
 
+            // 💡 關鍵：同步 UI 顯示份數。預覽一開始應顯示「食譜預設份數」
+            servings.value = previewServings;
+
+            // 處理食材資料：合併母表中的營養係數
             rawIngredients.value = (preview.ingredients || []).map(ing => {
-                const name = ing.name || ing.ingredient_name || "";
-                const master = masterIng.find(m => m.ingredient_name.trim() === name.trim());
+                const name = (ing.ingredient_name || ing.name || "").trim();
+                const master = masterIng.find(m => String(m.ingredient_name).trim() === name);
+
+                // 單位判斷
                 const unit = ing.unit || ing.unit_name || master?.unit_name || '份';
                 const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(unit.toLowerCase());
 
@@ -82,6 +103,7 @@ const fetchData = async () => {
                     ingredient_name: name,
                     amount: Number(ing.amount || 0),
                     unit_name: unit,
+                    // 如果是重量單位則轉換率為 1，否則參考母表轉換率
                     gram_conversion: isWeightUnit ? 1 : Number(master?.gram_conversion || ing.gram_conversion || 1),
                     kcal_per_100g: Number(master?.kcal_per_100g || ing.kcal_per_100g || 0),
                     protein_per_100g: Number(master?.protein_per_100g || ing.protein_per_100g || 0),
@@ -90,16 +112,19 @@ const fetchData = async () => {
                 };
             });
 
-            rawSteps.value = (preview.steps || []).sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
-            servings.value = previewServings;
+            // 排序步驟
+            rawSteps.value = (preview.steps || []).sort((a, b) =>
+                (Number(a.step_order) || 0) - (Number(b.step_order) || 0)
+            );
+
             isLoading.value = false;
-            return;
+            return; // 預覽模式執行完畢，中斷後續正式 API 呼叫
         } catch (err) {
-            console.error('預覽資料處理失敗:', err);
+            console.error('預覽資料解析失敗:', err);
         }
     }
 
-    // --- 2. 正式模式：呼叫 PHP API 與 輔助 JSON ---
+    // --- 2. 正式模式：呼叫 PHP 與 JSON 資料 ---
     try {
         const [resDetail, resG, resU, resC] = await Promise.all([
             phpApi.get(`recipes/recipe_detail_get.php?recipe_id=${recipeId}`),
@@ -111,13 +136,14 @@ const fetchData = async () => {
         if (resDetail.data && resDetail.data.success) {
             const serverData = resDetail.data.data;
 
-            // A. 食譜主資訊 (整合 PHP 的 main 與 tags)
+            // 食譜主表資訊 (相容後端拼字錯誤 descreption)
             rawRecipe.value = {
                 ...serverData.main,
+                recipe_description: serverData.main.recipe_descreption || serverData.main.recipe_description || '',
                 tags: serverData.tags || []
             };
 
-            // B. 食材處理 (確保計算屬性需要的欄位存在)
+            // 食材資訊處理
             rawIngredients.value = (serverData.ingredients || []).map(ing => {
                 const unit = ing.unit_name || '份';
                 const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(unit.toLowerCase());
@@ -133,14 +159,14 @@ const fetchData = async () => {
                 };
             });
 
-            // C. 步驟處理
+            // 步驟資訊處理
             rawSteps.value = (serverData.steps || []).sort((a, b) =>
                 (Number(a.step_order) || 0) - (Number(b.step_order) || 0)
             );
 
+            // 💡 正式模式初始化 UI 份數
             servings.value = Number(rawRecipe.value.recipe_servings || 1);
-        } else {
-            console.error('PHP 回傳失敗:', resDetail.data?.message);
+            console.log('【正式模式】初始化份數:', servings.value);
         }
 
         // --- 3. Gallery (CookSnap) 處理 ---
@@ -187,7 +213,7 @@ const fetchData = async () => {
         }
 
     } catch (err) {
-        console.error('抓取失敗:', err);
+        console.error('正式資料抓取失敗:', err);
     } finally {
         isLoading.value = false;
     }
@@ -201,15 +227,18 @@ const displayRecipeLikes = computed(() => {
 
 const ingredientsData = computed(() => {
     if (!rawRecipe.value) return [];
+
+    // 💡 確保原始份數絕對不為 0 或 NaN
     const originalServings = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
-    const scale = servings.value / originalServings;
+    const currentServings = Math.max(1, Number(servings.value || 1));
+
+    const scale = currentServings / originalServings;
 
     return rawIngredients.value.map(item => ({
         INGREDIENT_NAME: item.ingredient_name,
-        // 確保 amount 是數字，避免乘法失敗
+        // 加上 Number 轉型確保計算安全
         amount: (Number(item.amount || 0) * scale).toFixed(1),
         unit_name: item.unit_name,
-        // 🏆 關鍵修正：確保這裡能抓到後端的 remark 欄位
         note: item.remark || item.note || ''
     }));
 });
@@ -217,51 +246,30 @@ const ingredientsData = computed(() => {
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value || rawIngredients.value.length === 0) return [];
 
-    const originalServings = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
-    const scale = servings.value / originalServings;
+    // 💡 關鍵點：強制取得原始份數與目前選擇份數
+    const original = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
+    const current = Math.max(1, Number(servings.value || 1));
+
+    // 計算縮放率
+    const scale = current / original;
 
     let totalKcal = 0, totalP = 0, totalF = 0, totalC = 0;
 
-    // 建立一個陣列來存儲各項食材的計算過程，方便 console.table 顯示
-    const calculationLog = [];
-
     rawIngredients.value.forEach(ing => {
-        const amount = Number(ing.amount || 0);
-        const unitWeight = Number(ing.gram_conversion || 1);
-        const totalGram = amount * unitWeight; // 換算成公克
-        const ratio = totalGram / 100; // 因為營養標示通常是每 100g
+        const amt = Number(ing.amount) || 0;
+        const conv = Number(ing.gram_conversion) || 1;
+        const weight = amt * conv; // 總重量 (g)
 
-        // 計算該食材貢獻的數值
-        const itemKcal = (Number(ing.kcal_per_100g) || 0) * ratio;
-        const itemP = (Number(ing.protein_per_100g) || 0) * ratio;
-        const itemF = (Number(ing.fat_per_100g) || 0) * ratio;
-        const itemC = (Number(ing.carbs_per_100g) || 0) * ratio;
-
-        // 累加到總和
-        totalKcal += itemKcal;
-        totalP += itemP;
-        totalF += itemF;
-        totalC += itemC;
-
-        // 存入 Log
-        calculationLog.push({
-            "食材名稱": ing.ingredient_name,
-            "原始份量": `${amount} ${ing.unit_name}`,
-            "轉換係數": unitWeight,
-            "總重量(g)": totalGram.toFixed(1),
-            "熱量貢獻": itemKcal.toFixed(1) + " kcal",
-            "蛋白質貢獻": itemP.toFixed(1) + " g",
-            "脂質貢獻": itemF.toFixed(1) + " g",
-            "碳水貢獻": itemC.toFixed(1) + " g"
-        });
+        // 計算該食材對應重量的營養價值
+        totalKcal += (Number(ing.kcal_per_100g) || 0) * (weight / 100);
+        totalP += (Number(ing.protein_per_100g) || 0) * (weight / 100);
+        totalF += (Number(ing.fat_per_100g) || 0) * (weight / 100);
+        totalC += (Number(ing.carbs_per_100g) || 0) * (weight / 100);
     });
 
-    // 印出漂亮的表格
-    console.group(`🥗 營養成分計算明細 (人數倍率: ${scale.toFixed(2)})`);
-    console.table(calculationLog);
-    console.log(`總計 (1人份): Kcal: ${totalKcal.toFixed(1)}, P: ${totalP.toFixed(1)}, F: ${totalF.toFixed(1)}, C: ${totalC.toFixed(1)}`);
-    console.groupEnd();
-
+    // 返回最終結果，這裡是重點：
+    // 如果你發現預覽模式顯示的是「整份」而非「一人份」，
+    // 這裡的 scale 就能幫你處理。
     return [{
         calories_per_100g: Math.round(totalKcal * scale),
         protein_per_100g: Number((totalP * scale).toFixed(1)),
@@ -522,7 +530,7 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
             <div class="row">
                 <div class="col-7 col-lg-12">
                     <RecipeIntro :info="recipeIntroData" :is-preview="isPreviewMode" class="fade-up"
-                    style="--delay: 2" />
+                        style="--delay: 2" />
 
                     <div class="d-lg-none">
                         <section class="mb-10 fade-up" style="--delay: 3">

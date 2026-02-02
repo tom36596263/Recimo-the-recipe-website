@@ -248,13 +248,45 @@ const handleSave = async () => {
   recipeStore.rawEditorData = null;
 };
 
-const handlePreview = () => {
-  recipeStore.rawEditorData = { ...recipeForm.value };
-  recipeStore.setPreviewFromEditor(JSON.parse(JSON.stringify(recipeForm.value)));
+// --- 修復後的 handlePreview 函式 ---
+const handlePreview = async () => {
+  // 1. 先處理圖片轉換（如果有 File 物件則轉為 Base64，避免預覽頁讀不到）
+  const coverBase64 = await fileToBase64(recipeForm.value.coverImg);
 
-  // 🚀 加上 query 參數，這樣預覽頁返回時才會知道自己還在 'adapt' 模式
+  // 2. 處理步驟圖片轉換
+  const processedSteps = await Promise.all(
+    recipeForm.value.steps.map(async (s) => ({
+      ...s,
+      image: await fileToBase64(s.image)
+    }))
+  );
+
+  // 3. 建立完整的預覽資料物件
+  // 💡 關鍵：確保 recipe_servings 與 servings 同時存在，相容 RecipeDetail 的抓取邏輯
+  const previewData = {
+    ...recipeForm.value, // 包含 title, description, difficulty 等
+    recipe_title: recipeForm.value.title, // 增加備援欄位
+    recipe_description: recipeForm.value.description,
+    recipe_cover_image: coverBase64,
+    coverImg: coverBase64,
+    recipe_servings: Number(recipeForm.value.recipe_servings || 1), // 👈 強制確保份數存在
+    servings: Number(recipeForm.value.recipe_servings || 1),        // 👈 雙重保險
+    steps: processedSteps,
+    recipe_tags: recipeForm.value.tags,
+    totalTime: recipeForm.value.totalTime
+  };
+
+  // 4. 存入 Store
+  // 暫存編輯器原始狀態，以便從預覽返回時恢復
+  recipeStore.rawEditorData = { ...recipeForm.value };
+  // 設定預覽專用資料
+  recipeStore.setPreviewFromEditor(previewData);
+
+  console.log('🚀 準備送出的預覽資料:', previewData);
+
+  // 5. 跳轉預覽頁
   router.push({
-    path: `/workspace/recipe-detail/${route.params.id || 0}`,
+    path: `/workspace/recipe-detail/${route.query.editId || route.params.id || 0}`,
     query: {
       mode: 'preview',
       editId: route.query.editId || route.params.id,
@@ -284,7 +316,8 @@ provide('isEditing', isEditing);
       <div class="recipe-main-content">
         <div class="row custom-row-fit">
           <aside class="ingredient-sidebar col-5 col-md-12">
-            <IngredientEditor :ingredients="recipeForm.ingredients" :is-editing="isEditing" />
+            <IngredientEditor :ingredients="recipeForm.ingredients" :is-editing="isEditing"
+              :is-adapt-mode="isAdaptModeActive" />
           </aside>
           <section class="step-content col-7 col-md-12">
             <StepEditor v-model:steps="recipeForm.steps" :ingredients="recipeForm.ingredients"
