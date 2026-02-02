@@ -9,7 +9,7 @@ import EditorHeader from '@/components/workspace/editrecipe/EditorHeader.vue';
 import IngredientEditor from '@/components/workspace/editrecipe/IngredientEditor.vue';
 import StepEditor from '@/components/workspace/editrecipe/StepEditor.vue';
 import TagModal from '@/components/workspace/editrecipe/modals/TagModal.vue';
-import { phpApi } from '@/utils/phpApi'; // ✨ 確保有這行
+import { phpApi } from '@/utils/phpApi';
 
 const router = useRouter();
 const route = useRoute();
@@ -20,9 +20,9 @@ const isPublished = ref(false);
 
 const ingredientsMasterList = ref([]);
 const tagsMasterList = ref([]);
-const isTagModalOpen = ref(false); // 在 <script setup> 頂部加入
+const isTagModalOpen = ref(false);
 
-// --- 1. 食譜表單資料 (確保 tags 初始存在) ---
+// --- 1. 食譜表單資料 ---
 const recipeForm = ref({
   recipe_id: null,
   parent_recipe_id: null,
@@ -33,11 +33,11 @@ const recipeForm = ref({
   totalTime: 0,
   ingredients: [],
   steps: [],
-  tags: [], // ✨ 必須在這裡預設，Vue 才能監聽變動
+  tags: [],
   original_title: '',
   adapt_title: '',
   adapt_description: '',
-  recipe_servings: 1
+  recipe_servings: 1 // 預設值為 1
 });
 
 // --- 2. 監聽步驟時間自動加總 ---
@@ -53,7 +53,7 @@ watch(
   { deep: true }
 );
 
-// ✨ 監聽食材變動補齊營養係數
+// --- 3. 監聽食材變動補齊營養係數 ---
 watch(
   () => recipeForm.value.ingredients,
   (newIngs) => {
@@ -101,7 +101,6 @@ onMounted(async () => {
   const isAdapt = route.query.action === 'adapt';
 
   try {
-    // 1. 載入 Master Data
     const [resIng, resTag] = await Promise.all([
       publicApi.get('data/recipe/ingredients.json'),
       publicApi.get('data/recipe/tags.json')
@@ -109,7 +108,6 @@ onMounted(async () => {
     ingredientsMasterList.value = resIng.data || [];
     tagsMasterList.value = resTag.data || [];
 
-    // 2. 處理暫存恢復
     if (recipeStore.rawEditorData) {
       recipeForm.value = { ...recipeStore.rawEditorData };
       if (isAdapt) {
@@ -122,42 +120,33 @@ onMounted(async () => {
 
     if (!editIdFromUrl) return;
 
-    // 3. 🚀 呼叫 PHP 取得食譜
     const response = await phpApi.get(`recipes/recipe_detail_get.php?recipe_id=${editIdFromUrl}`);
 
     if (response.data && response.data.success) {
       const { main, ingredients, steps, tags } = response.data.data;
 
-      // --- 填充主資訊 ---
       if (isAdapt) {
         recipeForm.value.recipe_id = null;
         recipeForm.value.parent_recipe_id = editIdFromUrl;
         recipeForm.value.original_title = main.recipe_title;
-
-        // 1. 標題：可以保留預設字
         recipeForm.value.adapt_title = main.recipe_title + ' (改編版)';
         recipeForm.value.title = main.recipe_title;
-
-        // 2. ✨ 關鍵修正：改編說明應該保持為空
-        recipeForm.value.adapt_description = ''; // 👈 改成空字串，不要等於 baseDesc
-
-        // 3. 保留原始說明，讓下方描述區可以參考（或也清空，看你的需求）
+        recipeForm.value.adapt_description = '';
         const baseDesc = main.recipe_description || main.recipe_descreption || '';
         recipeForm.value.description = baseDesc;
       }
 
       recipeForm.value.difficulty = Number(main.recipe_difficulty) || 1;
+      // 🏆 確保從後端讀取的份數正確填入
       recipeForm.value.recipe_servings = Number(main.recipe_servings) || 1;
       recipeForm.value.coverImg = parsePublicFile(main.recipe_image_url || '');
       recipeForm.value.totalTime = parseInt(main.recipe_total_time, 10) || 0;
 
-      // --- 填充標籤 ---
       recipeForm.value.tags = tags.map(t => ({
         tag_id: t.tag_id,
         tag_name: t.tag_name
       }));
 
-      // --- 填充食材 ---
       recipeForm.value.ingredients = ingredients.map(ing => ({
         id: Number(ing.ingredient_id),
         name: ing.ingredient_name,
@@ -168,10 +157,10 @@ onMounted(async () => {
         protein_per_100g: Number(ing.protein_per_100g) || 0,
         fat_per_100g: Number(ing.fat_per_100g) || 0,
         carbs_per_100g: Number(ing.carbs_per_100g) || 0,
-        gram_conversion: Number(ing.gram_conversion) || 1.0
+        gram_conversion: Number(ing.gram_conversion) || 1.0,
+        color_tag: ing.color_tag || ''
       }));
 
-      // --- 填充步驟 
       recipeForm.value.steps = steps.map((s, idx) => ({
         id: isAdapt ? `adapt-s-${idx}` : (s.step_id || `s-${idx}`),
         title: s.step_title || `步驟 ${idx + 1}`,
@@ -182,13 +171,9 @@ onMounted(async () => {
       }));
 
       const actualSum = recipeForm.value.steps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
-
-      // 如果加總出來的時間跟資料庫抓到的時間不一樣，強制修正它
       if (actualSum > 0) {
         recipeForm.value.totalTime = actualSum;
       }
-
-      console.log('✅ 資料同步載入完成', recipeForm.value);
     }
   } catch (err) {
     console.error('❌ 載入失敗:', err);
@@ -200,7 +185,6 @@ const handleSave = async () => {
     ? (recipeForm.value.adapt_title || `${recipeForm.value.original_title} (改編版)`)
     : recipeForm.value.title;
 
-  // 取得來源 ID (如果是改編，這就是原食譜 ID)
   const sourceId = route.query.editId || route.params.id;
 
   if (isPublished.value) {
@@ -226,73 +210,83 @@ const handleSave = async () => {
 
       localRevisions.unshift(saveData);
       localStorage.setItem('user_revisions', JSON.stringify(localRevisions));
-
       alert(`🎉「${finalTitle}」已發布！`);
 
-      // ✨✨✨ 關鍵跳轉邏輯 ✨✨✨
       if (isAdaptModeActive.value && sourceId) {
-        // 🚀 如果是改編模式：回到原本食譜的「改編一覽」頁面
         router.push(`/workspace/modify-recipe/${sourceId}`);
       } else {
-        // 📝 如果是全新創建：回到「我的食譜」
         router.push('/workspace/my-recipes');
       }
-
     } catch (err) {
       console.error("儲存失敗:", err);
     }
   } else {
-    // 儲存草稿的情況 (非公開發布)
     alert('草稿儲存成功！');
     router.push('/workspace/my-recipes');
   }
-
   recipeStore.rawEditorData = null;
 };
 
-// --- 修復後的 handlePreview 函式 ---
+// --- ✨ 核心修正：handlePreview ---
 const handlePreview = async () => {
-  // 1. 先處理圖片轉換（如果有 File 物件則轉為 Base64，避免預覽頁讀不到）
-  const coverBase64 = await fileToBase64(recipeForm.value.coverImg);
+  // 1. 確保拿到最新的份數並轉換為數字
+  const currentServings = Number(recipeForm.value.recipe_servings || 1);
 
-  // Editor.vue 的 handlePreview 內
+  // 2. 轉換圖片與步驟
+  const coverBase64 = await fileToBase64(recipeForm.value.coverImg);
   const processedSteps = await Promise.all(
     recipeForm.value.steps.map(async (s, idx) => ({
       step_id: s.id,
       step_title: s.title,
       step_content: s.content,
-      // 確保時間欄位能被詳細頁讀到
       step_total_time: s.time ? `${s.time} 分鐘` : '0 分鐘',
       step_order: idx,
-      image: await fileToBase64(s.image), // 這裡是 image
-      step_image_url: await fileToBase64(s.image) // 增加這個備援欄位給詳細頁用
+      image: await fileToBase64(s.image),
+      step_image_url: await fileToBase64(s.image)
     }))
   );
 
-  // 3. 建立完整的預覽資料物件
-  // 💡 關鍵：確保 recipe_servings 與 servings 同時存在，相容 RecipeDetail 的抓取邏輯
+  // 3. 食材欄位對齊與狀態轉換
+  const tagToStatus = {
+    'tag-green': 'add',
+    'tag-orange': 'mod',
+    'tag-blue': 'rep'
+  };
+
+  const processedIngredients = recipeForm.value.ingredients.map(ing => ({
+    ...ing,
+    ingredient_id: ing.id,
+    ingredient_name: ing.name,
+    unit_name: ing.unit,
+    status: tagToStatus[ing.color_tag] || '',
+    kcal_per_100g: Number(ing.kcal_per_100g) || 0,
+    protein_per_100g: Number(ing.protein_per_100g) || 0,
+    fat_per_100g: Number(ing.fat_per_100g) || 0,
+    carbs_per_100g: Number(ing.carbs_per_100g) || 0,
+    gram_conversion: Number(ing.gram_conversion) || 1.0
+  }));
+
+  // 4. 🏆 組裝預覽資料：同時塞入 recipe_servings 與 servings
   const previewData = {
-    ...recipeForm.value, // 包含 title, description, difficulty 等
-    recipe_title: recipeForm.value.title, // 增加備援欄位
+    ...recipeForm.value,
+    recipe_title: recipeForm.value.title,
     recipe_description: recipeForm.value.description,
     recipe_cover_image: coverBase64,
     coverImg: coverBase64,
-    recipe_servings: Number(recipeForm.value.recipe_servings || 1), // 👈 強制確保份數存在
-    servings: Number(recipeForm.value.recipe_servings || 1),        // 👈 雙重保險
+    recipe_servings: currentServings, // 用於後端欄位格式
+    servings: currentServings,        // 用於詳細頁 UI 計算格式
+    ingredients: processedIngredients,
     steps: processedSteps,
     recipe_tags: recipeForm.value.tags,
     totalTime: recipeForm.value.totalTime
   };
 
-  // 4. 存入 Store
-  // 暫存編輯器原始狀態，以便從預覽返回時恢復
+  // 5. 存入 Store 並跳轉
   recipeStore.rawEditorData = { ...recipeForm.value };
-  // 設定預覽專用資料
   recipeStore.setPreviewFromEditor(previewData);
 
-  console.log('第一站 - 編輯頁送出的資料:', previewData);
+  console.log('🚀 編輯頁發出的預覽份數:', currentServings);
 
-  // 5. 跳轉預覽頁
   router.push({
     path: `/workspace/recipe-detail/${route.query.editId || route.params.id || 0}`,
     query: {
@@ -303,10 +297,7 @@ const handlePreview = async () => {
   });
 };
 
-// 處理 Modal 傳回來的標籤
 const handleAddTags = (newTags) => {
-  // 使用解構賦值將新標籤塞進 recipeForm
-  // Modal 內部已經處理過「重複選取」的過濾，所以這裡可以直接 push
   recipeForm.value.tags.push(...newTags);
 };
 
