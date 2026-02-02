@@ -18,7 +18,12 @@ export const addFavorite = (user_id, recipe_id, folder_id = null) => {
     formData.append('recipe_id', recipe_id);
     if (folder_id) formData.append('folder_id', folder_id);
     // 預設 action 為 add
-    return phpApi.post(API_ENDPOINT, formData);
+    return phpApi.post(API_ENDPOINT, formData, {
+  headers: {
+    // 覆蓋掉全域的 application/json
+    'Content-Type': 'multipart/form-data'
+  }
+});
 };
 
 /**
@@ -32,7 +37,12 @@ export const removeFavorite = (user_id, recipe_id) => {
     formData.append('user_id', user_id);
     formData.append('recipe_id', recipe_id);
     formData.append('action', 'remove');
-    return phpApi.post(API_ENDPOINT, formData);
+    return phpApi.post(API_ENDPOINT, formData, {
+  headers: {
+    // 覆蓋掉全域的 application/json
+    'Content-Type': 'multipart/form-data'
+  }
+});
 };
 
 /**

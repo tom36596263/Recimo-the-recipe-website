@@ -108,6 +108,7 @@ const fetchData = async () => {
     productList.value = response.data;
     console.log('成功透過 phpApi 抓取資料！', productList.value);
   } catch (error) {
+    productList.value = []
     console.error('API 連線失敗:', error);
     // 偵錯小技巧：印出伺服器回傳的錯誤訊息
     if (error.response) {
@@ -131,7 +132,7 @@ const setPage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
     // 建議：換頁後通常會把視窗滾動到商品區上方，體驗較好
-    // window.scrollTo({ top: 500, behavior: 'smooth' });
+    window.scrollTo({ top: 500, behavior: 'smooth' });
   }
 };
 
