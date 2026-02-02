@@ -85,20 +85,26 @@ const displayTime = computed(() => {
   return Number(props.modelValue.totalTime) || 0;
 });
 
-// EditorHeader.vue 內的 adaptRecipeData
-const adaptRecipeData = computed(() => {1
+// EditorHeader.vue 內的 adaptRecipeData 修正版
+const adaptRecipeData = computed(() => {
   const m = props.modelValue;
 
   return {
     ...m,
+    // 標題：如果使用者還沒填改編標題，先顯示原食譜標題作為參考（或改為空）
     title: m.adapt_title || m.title || '未命名改編',
-    summary: m.adapt_description || '',
-    description: m.adapt_description || '',
-    recipe_descreption: m.description || '暫無詳細說明',
+    adaptation_title: m.adapt_title || '', // 👈 這裡不給保底，沒填就是空
+
+    // 關鍵內容：徹底移除對 m.description 的抓取
+    // 這樣在使用者填寫 adapt_description 之前，小卡會顯示預設的 placeholder
+    adaptation_note: m.adapt_description || '',
+
+    // 排除標籤干擾 
+    keyChangeTag: '',
+
+    // 圖片與 ID
     recipe_id: m.parent_recipe_id || m.recipe_id,
-    coverImg: m.adaptation_image_url || m.coverImg,
-    adaptation_title: m.adapt_title,
-    adaptation_note: m.adapt_description
+    coverImg: m.coverImg || m.adaptation_image_url
   };
 });
 
@@ -158,11 +164,16 @@ const handleCoverUpload = (e) => {
       <div v-if="isAdaptMode && isEditing" class="row-adapt-inputs">
         <div class="input-container full-width">
           <input :value="modelValue.adapt_title" @input="updateField('adapt_title', $event.target.value)"
-            class="form-input p-p1" :class="{ 'is-success': modelValue.adapt_title }" placeholder="請輸入改編版本標題 (例：低脂版)" />
+            class="form-input p-p1" :class="{ 'is-success': modelValue.adapt_title }" placeholder="請輸入改編版本標題 (例：低脂版)"
+            maxlength="20" />
+          <span class="char-counter p-p3">{{ modelValue.adapt_title?.length || 0 }}/20</span>
         </div>
+
         <div class="input-container full-width">
-          <input :value="modelValue.adapt_description" @input="updateField('adapt_description', $event.target.value)"
-            class="form-input p-p1" :class="{ 'is-success': modelValue.adapt_description }" placeholder="說明改編了什麼？" />
+          <textarea :value="modelValue.adapt_description" @input="updateField('adapt_description', $event.target.value)"
+            class="form-input p-p1 adaptation-textarea" :class="{ 'is-success': modelValue.adapt_description }"
+            placeholder="說明改編了什麼？" maxlength="60" rows="3"></textarea>
+          <span class="char-counter p-p3">{{ modelValue.adapt_description?.length || 0 }}/60</span>
         </div>
       </div>
 
@@ -193,7 +204,7 @@ const handleCoverUpload = (e) => {
       <div class="row-tags">
         <div class="tags-wrapper">
           <div class="tag-item" v-for="tag in modelValue.tags" :key="tag.tag_id">
-            <span class="tag-text p-p3">#  {{ tag.tag_name }}</span>
+            <span class="tag-text p-p3"># {{ tag.tag_name }}</span>
             <button v-if="isEditing" class="tag-delete-btn" @click="removeTag(tag.tag_id)">
               <span>×</span>
             </button>
@@ -242,49 +253,34 @@ const handleCoverUpload = (e) => {
     border-radius: 100px;
 
     .tag-delete-btn {
+      appearance: none;
+      background: transparent !important;
+      border: none;
+      padding: 0;
+      margin: 0 0 0 6px;
+      outline: none;
+      box-shadow: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      color: #ff8e8e;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 200;
+      line-height: 1;
+      transition: color 0.2s, transform 0.2s;
 
-        /* 1. 徹底消除按鈕預設樣式 */
-        appearance: none;
-        background: transparent !important; // 強制透明，殺掉那個灰色圓形
-        border: none;
-        padding: 0;
-        margin: 0 0 0 6px;
-        outline: none;
-        box-shadow: none;
-    
-        /* 2. 完美置中佈局 */
-        display: inline-flex;
-        align-items: center; // 垂直置中
-        justify-content: center; // 水平置中
-        width: 16px;
-        height: 16px;
-    
-        /* 3. 叉叉樣式 */
-        color: #ff8e8e;
-        cursor: pointer;
-        font-size: 18px; // 控制叉叉大小
-        font-weight: 200; // 讓叉叉細一點，更簡約
-        line-height: 1; // 避免行高撐開導致不置中
-    
-        transition: color 0.2s, transform 0.2s;
-    
-        span {
-          display: block;
-          line-height: 1;
-          // 有時候乘號字體偏下，可以用這行微調 (視你的字體而定)
-          // transform: translateY(1px);
-        }
-    
-        &:hover {
-          color: red;
-          background: transparent !important;
-          // transform: scale(1.2); // 滑過稍微放大，增加回饋感
-        }
-    
-        &:active {
-          transform: scale(0.9); // 點擊縮小感
-        }
+      &:hover {
+        color: red;
+        background: transparent !important;
       }
+
+      &:active {
+        transform: scale(0.9);
+      }
+    }
   }
 
   .add-tag-btn {
@@ -317,8 +313,8 @@ const handleCoverUpload = (e) => {
 
   @media (min-width: 768px) {
     width: 320px;
-    align-self: stretch; // 確保容器高度與右側 info-section 同步
-    justify-content: space-between; // 標籤變多時，自動把按鈕推向底部
+    align-self: stretch;
+    justify-content: space-between;
   }
 }
 
@@ -328,7 +324,7 @@ const handleCoverUpload = (e) => {
 
   @media (min-width: 768px) {
     width: 320px;
-    margin-top: 0; // 改由 space-between 控制對齊
+    margin-top: 0;
   }
 }
 
@@ -343,7 +339,7 @@ const handleCoverUpload = (e) => {
 
   @media (min-width: 768px) {
     flex-direction: row;
-    align-items: stretch; // 關鍵：確保左右兩邊等高
+    align-items: stretch;
   }
 }
 
@@ -375,6 +371,7 @@ const handleCoverUpload = (e) => {
   display: none;
 }
 
+// ✨ 改編輸入框樣式
 .row-adapt-inputs {
   display: flex;
   flex-direction: column;
@@ -387,10 +384,32 @@ const handleCoverUpload = (e) => {
 
   .input-container.full-width {
     width: 100%;
+    position: relative; // 為了右下角計數器
+
+    .char-counter {
+      position: absolute;
+      right: 12px;
+      bottom: 8px;
+      color: $neutral-color-400;
+      pointer-events: none;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 0 4px;
+      border-radius: 4px;
+    }
 
     .form-input {
       width: 100%;
       border-color: $neutral-color-400;
+      padding-right: 50px; // 避開計數器
+    }
+
+    .adaptation-textarea {
+      min-height: 100px; // 拉高框體
+      resize: none;
+      overflow: hidden; // 不要卷軸
+      display: block;
+      font-family: inherit;
+      line-height: 1.5;
     }
   }
 }
@@ -450,8 +469,6 @@ const handleCoverUpload = (e) => {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      text-align: center;
       color: $neutral-color-400;
 
       .plus-icon {
@@ -459,10 +476,6 @@ const handleCoverUpload = (e) => {
         line-height: 1;
         margin-bottom: 4px;
         display: block;
-      }
-
-      .label {
-        margin: 0;
       }
     }
   }
@@ -503,10 +516,9 @@ const handleCoverUpload = (e) => {
   margin: 0;
 }
 
-/* ✨ 關鍵修改位置 */
 .row-meta {
   display: flex;
-  flex-wrap: wrap; // 防止手機版塞不下
+  flex-wrap: wrap;
   gap: 24px;
   align-items: center;
   color: $neutral-color-800;
@@ -516,7 +528,7 @@ const handleCoverUpload = (e) => {
   .meta-item {
     display: flex;
     align-items: center;
-    gap: 8px; // 文字與內容的間距
+    gap: 8px;
   }
 
   .inline-input {
@@ -526,14 +538,15 @@ const handleCoverUpload = (e) => {
     text-align: center;
     outline: none;
     padding: 0 4px;
+    background: transparent;
   }
 
   .stars-group {
     display: flex;
-    gap: 6px; // 星號之間的間距
+    gap: 6px;
 
     .star {
-      font-size: 22px; // 稍微放大的星星更好按
+      font-size: 22px;
       color: $neutral-color-400;
       line-height: 1;
     }

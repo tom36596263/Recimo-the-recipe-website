@@ -111,19 +111,30 @@ async function loadRecipeData(recipeId) {
             servings: Number(main.recipe_servings || 2)
         };
 
-        // 2. 處理資料庫回傳的改編版本 (DB)
-        const formattedDbAdaptations = (adaptations || []).map(child => ({
-            ...child, // 🏆 展開所有欄位，確保原本的 recipe_servings 存在
-            id: `db-${child.recipe_id}`,
-            title: child.recipe_title,
-            summary: child.recipe_description || '來自資料庫的改編版本',
-            coverImg: parsePublicFile(child.recipe_image_url),
-            is_mine: false,
-            ingredients: child.ingredients || [],
-            steps: child.steps || [],
-            // 🏆 統一寫入 servings 欄位，確保 openAdaptDetail 能抓到
-            servings: Number(child.recipe_servings || 2)
-        }));
+        const formattedDbAdaptations = (adaptations || []).map(child => {
+            // 💡 這裡先定義「摘要」要抓哪個欄位
+            // 如果後端有傳 summary 或 adaptation_note 就用它，否則才從描述截斷
+            const shortNote = child.adaptation_note || child.summary ||
+                (child.recipe_description ? child.recipe_description.slice(0, 15) + '...' : '點擊查看改編重點');
+
+            return {
+                ...child,
+                id: `db-${child.recipe_id}`,
+                title: child.recipe_title,
+
+                // ✨ 修改這裡：傳給小卡的摘要
+                adaptation_note: shortNote,
+
+                // 💾 保留原本的完整描述，讓燈箱彈窗 (selectedRecipe) 還是能看到完整內容
+                recipe_description: child.recipe_description || '暫無詳細說明',
+
+                coverImg: parsePublicFile(child.recipe_image_url),
+                is_mine: false,
+                ingredients: child.ingredients || [],
+                steps: child.steps || [],
+                servings: Number(child.recipe_servings || 2)
+            };
+        });
 
         // 3. 處理本地改編 (LocalStorage)
         const targetParentId = Number(recipeId);
@@ -252,7 +263,8 @@ watch(() => route.params.id, (newId) => {
                     <div class="card-wrapper" style="position: relative; height: 100%;">
                         <AdaptRecipeCard class="demo-readonly-card" :recipe="{
                             title: item.title,
-                            summary: item.summary,
+                            // ✨ 改成傳遞 adaptation_note，因為小卡裡面現在只認這個
+                            adaptation_note: item.adaptation_note || item.summary,
                             coverImg: item.coverImg
                         }" :readonly="true" />
 

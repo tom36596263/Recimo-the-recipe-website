@@ -133,15 +133,17 @@ onMounted(async () => {
         recipeForm.value.recipe_id = null;
         recipeForm.value.parent_recipe_id = editIdFromUrl;
         recipeForm.value.original_title = main.recipe_title;
+
+        // 1. 標題：可以保留預設字
         recipeForm.value.adapt_title = main.recipe_title + ' (改編版)';
         recipeForm.value.title = main.recipe_title;
+
+        // 2. ✨ 關鍵修正：改編說明應該保持為空
+        recipeForm.value.adapt_description = ''; // 👈 改成空字串，不要等於 baseDesc
+
+        // 3. 保留原始說明，讓下方描述區可以參考（或也清空，看你的需求）
         const baseDesc = main.recipe_description || main.recipe_descreption || '';
-        recipeForm.value.adapt_description = baseDesc;
         recipeForm.value.description = baseDesc;
-      } else {
-        recipeForm.value.recipe_id = editIdFromUrl;
-        recipeForm.value.title = main.recipe_title;
-        recipeForm.value.description = main.recipe_description || main.recipe_descreption || '';
       }
 
       recipeForm.value.difficulty = Number(main.recipe_difficulty) || 1;
