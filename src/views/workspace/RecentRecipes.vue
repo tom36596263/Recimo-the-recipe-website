@@ -9,6 +9,8 @@
 <script setup>
 import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
 import { publicApi } from '@/utils/publicApi';
+import { phpApi } from '@/utils/publicApi';
+import { parsePublicFile } from '@/utils/parseFile';
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import RecipePreviewCard from '@/components/common/RecipePreviewCard.vue';
 import PageBtn from '@/components/common/PageBtn.vue';
@@ -21,10 +23,10 @@ const allRecipes = ref([]);
 // 當前選中的食譜（用於右側預覽卡片）
 const selectedRecipe = ref(null);
 
-// 彈窗狀態（用於手機版）
+// 彩窗狀態（用於手機版）
 const isModalOpen = ref(false);
 
-// 彈窗中顯示的食譜
+// 彩窗中顯示的食譜
 const modalRecipe = ref(null);
 
 // 螢幕寬度
@@ -114,63 +116,51 @@ onMounted(async () => {
         window.removeEventListener('resize', handleResize);
     });
 
+    // 取得 localStorage 裡的 user 物件，並解析 user_id
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return;
+    let userId;
     try {
-        // 並行載入所有需要的 JSON 檔案
-        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
-            publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/recipe/recipe_tag.json'),
-            publicApi.get('data/recipe/tags.json')
-        ]);
+        const userObj = JSON.parse(userStr);
+        userId = userObj.id;
+    } catch (e) {
+        userId = null;
+        return;
+    }
+    if (!userId) return;
 
-        const recipesData = resRecipes.data;
-        const recipeTagData = resRecipeTags.data;
-        const tagsData = resTags.data;
-
-        // 建立標籤 ID 對應名稱的映射表
-        const tagMap = {};
-        tagsData.forEach(tag => {
-            tagMap[tag.tag_id] = tag.tag_name;
-        });
-
-        // 獲取 base 路徑用於圖片 URL 補全
-        const base = import.meta.env.BASE_URL;
-
-        // 載入所有食譜數據（實際應用中可能需要按時間倒序排列）
-        allRecipes.value = recipesData.map(recipe => {
-            // 通過關聯表查找該食譜的所有標籤
-            const recipeTags = recipeTagData
-                .filter(rt => rt.recipe_id === recipe.recipe_id)
-                .map(rt => tagMap[rt.tag_id])
-                .filter(Boolean);
-
-            // 返回格式化的食譜對象
+    try {
+        // 串接 history.php 拿到最近瀏覽紀錄
+        const resHistory = await phpApi.get('personal/history.php', { params: { user_id: userId } });
+        const historyData = Array.isArray(resHistory.data.history) ? resHistory.data.history : [];
+        allRecipes.value = historyData.map(item => {
+            const recipe = item.recipe_detail || {};
             return {
+                ...recipe,
                 id: recipe.recipe_id,
-                recipe_id: recipe.recipe_id,
-                recipe_name: recipe.recipe_title,
-                image_url: recipe.recipe_image_url.startsWith('http')
-                    ? recipe.recipe_image_url
-                    : `${base}${recipe.recipe_image_url}`.replace(/\/+/g, '/'),
-                tags: recipeTags.length > 0 ? recipeTags : ['未分類'],
-                difficulty: recipe.recipe_difficulty,
-                nutritional_info: {
-                    calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
-                    serving_size: recipe.recipe_servings,
-                    cooking_time: `${recipe.recipe_total_time.split(':')[1]}分鐘`
-                },
+                recipe_name: recipe.recipe_title || recipe.recipe_name || recipe.title || '未命名食譜',
+                image_url: recipe.recipe_image_url
+                    ? (recipe.recipe_image_url.startsWith('http')
+                        ? recipe.recipe_image_url
+                        : parsePublicFile(recipe.recipe_image_url))
+                    : (recipe.image_url && recipe.image_url.startsWith('http')
+                        ? recipe.image_url
+                        : recipe.image_url
+                            ? parsePublicFile(recipe.image_url)
+                            : ''),
                 author: {
-                    name: 'Recimo',
-                    likes: recipe.recipe_like_count || 0
+                    name: recipe.user_name || recipe.author_name || 'Recimo',
+                    likes: recipe.recipe_like_count || recipe.likes || recipe.like_count || 0
                 }
-            };
+            }
         });
-
         // 預設自動選中第一頁的第一筆食譜（僅在大螢幕）
         if (currentPageRecipes.value.length > 0 && window.innerWidth > 1024) {
             selectedRecipe.value = currentPageRecipes.value[0];
         }
     } catch (error) {
-        console.error('載入資料失敗:', error);
+        allRecipes.value = [];
+        console.error('載入瀏覽紀錄失敗:', error);
     }
 });
 </script>
@@ -318,7 +308,7 @@ onMounted(async () => {
     }
 }
 
-/* ==================== 彈窗樣式 ==================== */
+/* ==================== 彩窗樣式 ==================== */
 .recipe-modal-overlay {
     position: fixed;
     top: 0;

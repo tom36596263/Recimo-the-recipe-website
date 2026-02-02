@@ -151,11 +151,49 @@ onMounted(async () => {
                 totalFavoriteCount.value = 0;
             }
 
+            // 最近觀看：串接 history.php，使用 userId 當參數，最多顯示四個
+            if (userId.value) {
+                try {
+                    const resHistory = await phpApi.get(`personal/history.php`, { params: { user_id: userId.value, limit: 4 } });
+                    // 回傳格式 { success: true, history: [...] }
+                    const historyData = Array.isArray(resHistory.data.history) ? resHistory.data.history : [];
+                    recentRecipes.value = historyData.slice(0, 4).map(item => {
+                        const recipe = item.recipe_detail || {};
+                        return {
+                            id: recipe.recipe_id,
+                            recipe_name: recipe.recipe_title || recipe.recipe_name || recipe.title || '',
+                            image_url: recipe.recipe_image_url
+                                ? (recipe.recipe_image_url.startsWith('http')
+                                    ? recipe.recipe_image_url
+                                    : parsePublicFile(recipe.recipe_image_url))
+                                : (recipe.image_url && recipe.image_url.startsWith('http')
+                                    ? recipe.image_url
+                                    : recipe.image_url
+                                        ? parsePublicFile(recipe.image_url)
+                                        : ''),
+                            author: {
+                                name: recipe.user_name || recipe.author_name || 'Recimo',
+                                likes: recipe.recipe_like_count || recipe.likes || recipe.like_count || 0
+                            }
+                        }
+                    });
+                    totalRecentCount.value = historyData.length;
+                } catch (e) {
+                    recentRecipes.value = [];
+                    totalRecentCount.value = 0;
+                }
+            } else {
+                recentRecipes.value = [];
+                totalRecentCount.value = 0;
+            }
+            
         } catch (e) {
             console.error('解析 user 資料失敗:', e);
             userId.value = null;
         }
     }
+
+
 
 });
 </script>
