@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { publicApi } from '@/utils/publicApi'
+import { phpApi } from '@/utils/publicApi'
 
 import SearchBanner from '@/components/site/search/SearchBanner.vue'
 import SearchResultCard from '@/components/site/search/SearchResultCard.vue'
@@ -19,17 +19,15 @@ const isLoading = ref(true);
 
 onMounted(async () => {
     try{
-        const [resRecipes,resProducts, resRecipeTags, resTags ] = await Promise.all([
-            publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/mall/products.json'),
-            publicApi.get('data/recipe/recipe_tag.json'),
-            publicApi.get('data/recipe/tags.json')
-        ]);
-        recipes.value = resRecipes.data;
-        products.value = resProducts.data;
-        recipeTags.value = resRecipeTags.data;
-        tags.value = resTags.data;
-        console.log(products.value)
+        const response = await phpApi.get('recipes/search_get.php');
+
+        if (response.data.status === 'success') {
+            const { data } = response.data;
+            recipes.value = data.recipes;
+            products.value = data.products;
+            recipeTags.value = data.recipe_tag;
+            tags.value = data.tags;
+        }
 
     }catch(err){
         console.error("載入失敗", err);
