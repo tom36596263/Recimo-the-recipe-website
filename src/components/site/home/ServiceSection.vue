@@ -3,6 +3,7 @@
     import { ref } from 'vue';
     import { Swiper, SwiperSlide } from 'swiper/vue';
     import { Mousewheel, FreeMode } from 'swiper/modules';
+    import { parsePublicFile } from '@/utils/parseFile';
 
     import 'swiper/css';
     import 'swiper/css/mousewheel';
@@ -67,7 +68,7 @@
             
             <div class="img-container">
                 <img 
-                    :src="$parsePublicFile(`img/site/${item.fileName}`)" 
+                    :src="parsePublicFile(`img/site/${item.fileName}`, true)" 
                     :alt="item.title" 
                     class="service-img" 
                 />

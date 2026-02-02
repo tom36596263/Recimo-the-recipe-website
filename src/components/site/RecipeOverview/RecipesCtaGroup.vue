@@ -1,5 +1,7 @@
 <script setup>
 const emit = defineEmits(['open-kitchen']);
+
+import OverviewCtaGroupBg from '@/assets/images/site/recipe-overview-cta-group-bg.png'
 </script>
 
 <template>
@@ -7,7 +9,7 @@ const emit = defineEmits(['open-kitchen']);
         <h3 class="zh-h3">沒有找到想要的食譜嗎?</h3>
         <h2 class="zh-h2-bold">靈感廚房幫你用食材找到好料理</h2>
         <div class="bg-layout">
-            <img :src="$parsePublicFile('img/site/recipe-overview-cta-group-bg.png')" alt="cta-bg">
+            <img :src="OverviewCtaGroupBg" alt="cta-bg">
         </div>
         <router-link to="/recipes">
             <CircleBtn title="靈感廚房" @click="emit('open-kitchen')" />
