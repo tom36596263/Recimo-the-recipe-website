@@ -5,17 +5,34 @@ import BaseTag from '@/components/common/BaseTag.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
 import CookCard from '@/components/common/CookCard.vue';
 import axios from 'axios';
-import { publicApi } from '@/utils/publicApi';
+// import { publicApi } from '@/utils/publicApi';
+import { phpApi } from '@/utils/publicApi';
 
 const ingredients = ref([]);
 
 onMounted(() => {
-    publicApi.get('data/recipe/ingredients.json')
+    phpApi.get('recipes/user_ingredients.php')
         .then(res => {
-            ingredients.value = res.data;
+            let responseData = res.data;
+
+            // --- 關鍵修正：如果是字串，手動轉成物件 ---
+            if (typeof responseData === 'string') {
+                try {
+                    responseData = JSON.parse(responseData);
+                } catch (e) {
+                    console.error("JSON 解析失敗，內容可能包含非 JSON 文字", responseData);
+                }
+            }
+
+            if (responseData && responseData.status === 'success') {
+                ingredients.value = responseData.data;
+                console.log('成功載入食材陣列:', ingredients.value);
+            } else {
+                console.error('API 回傳錯誤:', responseData ? responseData.message : '未知錯誤');
+            }
         })
         .catch(err => {
-            console.error('讀取 JSON 失敗', err);
+            console.error('連線失敗', err);
         });
 });
 
