@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 const authStore = useAuthStore();
 import { useCartStore } from '@/stores/cartStore';
 const cartStore = useCartStore();
+import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
 // 引用彈窗
 import BaseModal from '@/components/BaseModal.vue';
 // 引用input
@@ -503,7 +504,7 @@ const currentUserName = computed(() => {
                         前往會員註冊
                     ========================================== -->
               <div class="registration-invite">
-                <img :src="`${base}img/site/Recimo-logo-black.svg`" />
+                <img :src="LogoBlack" alt="Recimo Logo">
                 <div class="registration-invite__content">
                   <h3 class="zh-h3">還不是會員嗎？</h3>
                   <h4 class="zh-h4">快來一起加入Recimo吧~</h4>
@@ -517,7 +518,7 @@ const currentUserName = computed(() => {
                         前往會員登入
                     ========================================== -->
               <div class="login-invite">
-                <img src="/img/site/Recimo-logo-black.svg" />
+                <img :src="LogoBlack" alt="Recimo Logo">
                 <div class="login-invite__content">
                   <h3 class="zh-h3">歡迎回來Recimo</h3>
                   <h4 class="zh-h4">如果已經有會員就直接登入吧~</h4>
