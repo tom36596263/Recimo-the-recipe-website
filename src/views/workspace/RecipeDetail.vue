@@ -472,9 +472,12 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
     <div class="recipe-container-root" v-if="!isLoading && rawRecipe" :class="{ 'preview-padding': isPreviewMode }">
         <main class="container">
             <div class="title-content fade-up" style="--delay: 1">
-                <div class="zh-h2">
-                    <i-material-symbols-restaurant-rounded class="main-icon" />
-                    {{ recipeIntroData.title }}
+                <div class="title-group">
+                    <h2 class="zh-h2">
+                        <i-material-symbols-restaurant-rounded class="main-icon" />
+                        {{ recipeIntroData?.title }}
+                    </h2>
+                    <span v-if="isAdaptation" class="badge-adaptation">改編版本</span>
                 </div>
 
                 <div class="meta-wrapper">
@@ -953,6 +956,94 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
         .adapt-btn-wrapper {
             margin-left: 0;
         }
+    }
+}
+
+/* 1. 標題與標籤的容器 */
+.title-group {
+    display: flex;
+    align-items: center; // 確保垂直居中對齊
+    gap: 16px; // 標題與標籤之間的間距
+    flex-wrap: wrap; // 防止手機版標題太長時標籤被切掉
+}
+
+/* 2. 重寫改編標籤樣式 (移植自燈箱版本) */
+.badge-adaptation {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 26px; // 固定高度讓它看起來像膠囊
+    background: #E8F5E9; // 淺綠色背景 (對應 $primary-color-100)
+    color: #2E7D32; // 深綠色文字 (對應 $primary-color-700)
+    padding: 0 14px;
+    border-radius: 99px; // 圓角膠囊狀
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap; // 標籤文字不折行
+    line-height: 1;
+}
+
+/* 3. 微調標題內的圖示位置 */
+.zh-h2 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0; // 移除預設下邊距以精準對齊標籤
+
+    .main-icon {
+        margin-right: 8px;
+        font-size: 28px;
+        color: $neutral-color-800;
+        // 如果圖示看起來太高，可以用原本的 transform 微調
+        transform: translateY(2px);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .title-content {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 16px;
+        padding: 15px 0;
+
+        .title-group {
+            width: 100%;
+            flex-wrap: wrap;
+
+            .zh-h2 {
+                font-size: 1.5rem;
+                line-height: 1.4;
+            }
+        }
+
+                .meta-wrapper {
+                    margin-left: 0 !important;
+                    width: 100% !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: space-between !important;
+                    /* 確保左右撐開 */
+        
+                    /* 作者資訊區塊 */
+                    :deep(.author-info-container) {
+                        flex-shrink: 0;
+                    }
+        
+                    /* 針對按鈕群組（強制推到最右邊） */
+                    .adapt-btn-wrapper,
+                    .delete-btn-wrapper,
+                    :deep(.delete-adaptation-btn) {
+                        margin-left: auto !important;
+                        /* 核心：吃掉左邊空間 */
+                        display: flex !important;
+                        justify-content: flex-end;
+                        gap: 8px;
+                    }
+        
+                    :deep(button) {
+                        white-space: nowrap;
+                    }
+                }
     }
 }
 

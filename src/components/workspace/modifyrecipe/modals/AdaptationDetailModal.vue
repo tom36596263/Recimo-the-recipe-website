@@ -186,22 +186,21 @@ const closeModal = () => emit('update:modelValue', false);
                         <div class="modal-title-bar mb-32">
                             <div class="title-group">
                                 <h2 class="zh-h2">
-                                    <i-material-symbols-restaurant-rounded class="mr-8 icon-v-align"
-                                        style="color: #74D09C;" />
+                                    <i-material-symbols-restaurant-rounded class="mr-8 icon-v-align" />
                                     {{ introData?.title }}
                                 </h2>
                                 <span class="badge">改編版本</span>
                             </div>
 
                             <div class="action-group">
+                                <AuthorInfo
+                                    :name="isOwner ? (authStore.user?.user_name || authStore.user?.name) : (recipe.user_name || recipe.author_name || 'Recimo 用戶')"
+                                    :handle="`user_${recipe.author_id || recipe.user_id}`" :time="recipe.created_at" />
+
                                 <button v-if="isOwner" class="btn-delete-adaptation" @click="handleDelete">
                                     <i-material-symbols-delete-outline-rounded class="mr-4" />
                                     刪除改編
                                 </button>
-
-                                <AuthorInfo
-                                    :name="isOwner ? (authStore.user?.user_name || authStore.user?.name) : (recipe.user_name || recipe.author_name || 'Recimo 用戶')"
-                                    :handle="`user_${recipe.author_id || recipe.user_id}`" :time="recipe.created_at" />
                             </div>
                         </div>
 
@@ -232,6 +231,7 @@ const closeModal = () => emit('update:modelValue', false);
 .btn-delete-adaptation {
     display: flex;
     align-items: center;
+    white-space: nowrap; // 確保文字不會折行
     background-color: #fff1f0;
     color: #ff4d4f;
     border: 1px solid #ffccc7;
@@ -306,7 +306,24 @@ const closeModal = () => emit('update:modelValue', false);
 .action-group {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 20px; // 作者與按鈕之間的間距
+
+    :deep(.author-info-wrapper) {
+        margin-bottom: 0; // 移除組件內可能的下間距
+    }
+
+    @media (max-width: 768px) {
+        width: 100%;
+        flex-direction: row; // 手機版保持水平
+        justify-content: space-between; // 一左一右
+        align-items: center;
+        gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+        flex-direction: column; // 極窄螢幕才改垂直
+        align-items: flex-start;
+    }
 }
 
 .modal-title-bar {
@@ -315,7 +332,6 @@ const closeModal = () => emit('update:modelValue', false);
     justify-content: space-between;
     border-bottom: 2px solid $neutral-color-100;
     padding-bottom: 20px;
-    padding-right: 40px;
 
     .title-group {
         display: flex;
@@ -323,25 +339,35 @@ const closeModal = () => emit('update:modelValue', false);
         gap: 16px;
     }
 
-    .badge {
-        background: $primary-color-100;
-        color: $primary-color-700;
-        padding: 4px 14px;
-        border-radius: 99px;
-        font-weight: 600;
-        font-size: 14px;
+        .badge {
+            display: inline-flex;
+            /* 使用 flex 且保持行內塊特性 */
+            align-items: center;
+            justify-content: center;
+    
+            height: 25px;
+            background: $primary-color-100;
+            color: $primary-color-700;
+            padding: 0 14px;
+            border-radius: 99px;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            line-height: 1;
+        }
+
+    @media (max-width: 992px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
     }
 
     @media (max-width: 768px) {
-        flex-direction: column;
-        align-items: flex-start;
         padding-right: 0;
 
-        .action-group {
+        .title-group {
             width: 100%;
-            flex-direction: column-reverse;
-            align-items: flex-end;
-            gap: 16px;
+            flex-wrap: wrap;
         }
     }
 }
@@ -407,6 +433,14 @@ const closeModal = () => emit('update:modelValue', false);
     @media (max-width: 768px) {
         padding-right: 0;
     }
+}
+
+/* 調整圖示垂直位置 */
+.icon-v-align {
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+    color: $neutral-color-800;
 }
 
 .mb-32 {
