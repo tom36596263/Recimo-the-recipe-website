@@ -39,7 +39,6 @@ const isOwner = computed(() => {
     return Number(currentUserId) === Number(recipeAuthorId);
 });
 
-
 /**
  * 處理刪除改編食譜
  */
@@ -193,6 +192,18 @@ const getAvatarStyle = (name) => {
         <div v-if="modelValue" class="adaptation-modal-overlay" @click.self="closeModal">
             <div class="modal-window">
                 <button class="close-x" @click="closeModal">✕</button>
+
+                <div class="fixed-floating-bar">
+                    <button class="action-circle-btn">
+                        <i-material-symbols-thumb-up-outline-rounded />
+                    </button>
+                    <button class="action-circle-btn">
+                        <i-material-symbols-share-outline />
+                    </button>
+                    <button class="action-circle-btn report">
+                        <i-material-symbols-error-outline-rounded />
+                    </button>
+                </div>
 
                 <div class="modal-scroll-body">
                     <div class="container-fluid">
@@ -401,6 +412,59 @@ const getAvatarStyle = (name) => {
 
         .user-info-box .user-text-meta {
             text-align: left;
+        }
+    }
+}
+
+.fixed-floating-bar {
+    position: absolute;
+    bottom: 30px; // 距離底部距離
+    right: 40px; // 距離右側距離
+    display: flex;
+    gap: 12px;
+    z-index: 100;
+
+    /* 毛玻璃核心代碼 */
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    padding: 8px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+
+    @media (max-width: 768px) {
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .action-circle-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #74D09C; // 這裡可以用你的 $primary-color-700
+        font-size: 22px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        &:hover {
+            transform: translateY(-3px);
+            background: #f0fdf4;
+        }
+
+        &.report {
+            color: #ff7875;
+
+            &:hover {
+                background: #fff1f0;
+            }
         }
     }
 }
