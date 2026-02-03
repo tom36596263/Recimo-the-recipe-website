@@ -21,6 +21,9 @@ import { phpApi, base } from '@/utils/publicApi.js';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
+// 第三方登入(GOOGLE)
+import { useTokenClient } from "vue3-google-signin";
+
 // 定義控制彈窗的變數
 const showLoginSuccess = ref(false);
 const showLoginFail = ref(false);
@@ -235,7 +238,7 @@ const handleLogin = async () => {
     }
   } catch (error) {
     // console.error('API 連線失敗:', error);
-    alert('伺服器連線異常');
+    alert('伺服器連線異常，請稍後再試');
   }
 };
 
@@ -374,6 +377,62 @@ const handleClose = () => {
 const currentUserName = computed(() => {
   return authStore.user?.name;
 });
+
+// ==========================================
+// Google 登入成功後的處理函式
+// ==========================================
+// 初始化 Google 登入觸發器
+const { login } = useTokenClient({
+  onSuccess: (response) => {
+    handleGoogleSuccess(response);
+  },
+  onError: (error) => {
+    // console.error("Google Login Failed", error);
+  },
+  // 建議明確宣告 scope
+  scope: 'openid email profile',
+});
+
+// 接收 token
+const handleGoogleSuccess = async (response) => {
+  console.log('Google Response:', response); // 檢查有沒有 response.access_token
+  try {
+    // 發送 access_token 到後端
+    const res = await phpApi.post('auth/google-login.php', {
+      access_token: response.access_token
+    });
+
+    const result = res.data;
+
+    if (result.status === 'success') {
+      // 登入成功：更新 Pinia 狀態
+      authStore.login(result.user);
+
+      // 處理購物車同步
+      await cartStore.fetchCart();
+
+      // UI 反饋
+      showLoginSuccess.value = true;
+      isVisible.value = false;
+
+      setTimeout(() => {
+        showLoginSuccess.value = false;
+        emit('close');
+        handleClose();
+        if (authStore.pendingAction) {
+          router.push('/');
+        }
+      }, 1500);
+    } else {
+      // 登入失敗處理
+      loginErrorMessage.value = result.message || 'Google 登入失敗';
+      showLoginFail.value = true;
+    }
+  } catch (error) {
+    // console.error('Google API Error:', error);
+    alert('伺服器連線異常，請稍後再試');
+  }
+};
 </script>
 
 <template>
@@ -402,39 +461,44 @@ const currentUserName = computed(() => {
                   ========================================== -->
             <div class="login-section">
               <h1 class="zh-h3 auth-form__title">會員登入</h1>
-              <div class="auth-form">
-                <BaseInput ref="loginEmailRef" v-model="loginData.email" label="電子信箱" placeholder="請輸入電子信箱"
-                  :status="loginStatus.email" :message="loginMessage.email" @blur="touched.login.email = true"
-                  @enter-press="focusInput(loginPasswordRef)" class="tight-gap" />
-                <BaseInput ref="loginPasswordRef" v-model="loginData.password" label="密碼" placeholder="請輸入密碼"
-                  :type="showLoginPassword ? 'text' : 'password'" :status="loginStatus.password"
-                  :message="loginMessage.password" @blur="touched.login.password = true"
-                  @enter-press="focusInput(captchaRef)" class="tight-gap">
-                  <!-- <template #label-right>
-                          <a href="#" class="forgot-password-link">忘記密碼</a>
-                        </template> -->
-                  <template #suffix>
-                    <button type="button" @click="showLoginPassword = !showLoginPassword" class="icon-btn"
-                      tabindex="-1">
-                      <IconEyeClose v-if="showLoginPassword" />
-                      <IconEyeOpen v-else />
-                    </button>
-                  </template>
-                </BaseInput>
-                <CaptchaInput :key="captchaKey" ref="captchaRef" v-model="loginForm.captchaInput"
-                  @verified="onCaptchaVerified" @enter-press="handleLogin" class="tight-gap" />
-                <div class="login-options">
-                  <BaseBtn title=" 登入" variant="solid" @click="handleLogin" :width="244" :height="50"
-                    class="login-btn" />
-                  <p class="auth-form__divider">更多登入方式</p>
-                  <div class="social-login">
-                    <a href="#"><img src="@/assets/images/login/google.svg" /></a>
-                    <a href="#"><img src="@/assets/images/login/fb.svg" /></a>
-                    <a href="#"><img src="@/assets/images/login/line.svg" /></a>
+              <form @submit.prevent="handleLogin">
+                <div class="auth-form">
+                  <BaseInput ref="loginEmailRef" v-model="loginData.email" label="電子信箱" placeholder="請輸入電子信箱"
+                    autocomplete="email" :status="loginStatus.email" :message="loginMessage.email"
+                    @blur="touched.login.email = true" @enter-press="focusInput(loginPasswordRef)" class="tight-gap" />
+                  <BaseInput ref="loginPasswordRef" v-model="loginData.password" label="密碼" placeholder="請輸入密碼"
+                    autocomplete="current-password" :type="showLoginPassword ? 'text' : 'password'"
+                    :status="loginStatus.password" :message="loginMessage.password"
+                    @blur="touched.login.password = true" @enter-press="focusInput(captchaRef)" class="tight-gap">
+                    <!-- <template #label-right>
+                            <a href="#" class="forgot-password-link">忘記密碼</a>
+                          </template> -->
+                    <template #suffix>
+                      <button type="button" @click="showLoginPassword = !showLoginPassword" class="icon-btn"
+                        tabindex="-1">
+                        <IconEyeClose v-if="showLoginPassword" />
+                        <IconEyeOpen v-else />
+                      </button>
+                    </template>
+                  </BaseInput>
+                  <CaptchaInput :key="captchaKey" ref="captchaRef" v-model="loginForm.captchaInput"
+                    @verified="onCaptchaVerified" @enter-press="handleLogin" class="tight-gap" />
+                  <div class="login-options">
+                    <BaseBtn title=" 登入" variant="solid" @click="handleLogin" :width="244" :height="50"
+                      class="login-btn" />
+                    <p class="auth-form__divider">更多登入方式</p>
+                    <div class="social-login">
+                      <img src="@/assets/images/login/google.svg" @click="login" style="cursor: pointer"
+                        alt="Google Login" />
+                      <!-- <GoogleLogin :callback="handleGoogleSuccess" popup-type="CODE">
+                      </GoogleLogin> -->
+                      <a href="#"><img src="@/assets/images/login/fb.svg" /></a>
+                      <a href="#"><img src="@/assets/images/login/line.svg" /></a>
+                    </div>
+                    <p class="mobile-switch-text" @click="isRegister = true">還不是會員嗎？快前往註冊吧~</p>
                   </div>
-                  <p class="mobile-switch-text" @click="isRegister = true">還不是會員嗎？快前往註冊吧~</p>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
 
@@ -446,53 +510,56 @@ const currentUserName = computed(() => {
                   ========================================== -->
             <div class="register-section">
               <h1 class="zh-h3 auth-form__title">會員註冊</h1>
-              <div class="auth-form">
-                <BaseInput ref="regNameRef" v-model="registerData.name" label="姓名" placeholder="請輸入姓名"
-                  :status="registerStatus.name" :message="registerMessage.name" @blur="touched.register.name = true"
-                  @enter-press="focusInput(regEmailRef)" class="tight-gap" />
-                <BaseInput ref="regEmailRef" v-model="registerData.email" label="電子信箱" placeholder="請輸入電子信箱"
-                  :status="registerStatus.email" :message="registerMessage.email" @blur="touched.register.email = true"
-                  @enter-press="focusInput(regPasswordRef)" class="tight-gap" />
-                <BaseInput ref="regPasswordRef" v-model="registerData.password" label="密碼" placeholder="請輸入密碼"
-                  :type="showRegisterPassword ? 'text' : 'password'" :status="registerStatus.password"
-                  :message="registerMessage.password" @blur="touched.register.password = true"
-                  @enter-press="focusInput(regConfirmPasswordRef)" class="tight-gap">
-                  <template #suffix>
-                    <button type="button" @click="showRegisterPassword = !showRegisterPassword" class="icon-btn"
-                      tabindex="-1">
-                      <IconEyeClose v-if="showRegisterPassword" />
-                      <IconEyeOpen v-else />
-                    </button>
-                  </template>
-                </BaseInput>
-
-                <div class="password-requirements">
-                  <p class="requirements-title p-p3">密碼規定：</p>
-                  <ul>
-                    <li class="p-p3" :class="{ 'met': passwordRules.length }">
-                      <i
-                        :class="passwordRules.length ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
-                      至少含八個字元
-                    </li>
-                    <li class="p-p3" :class="{ 'met': passwordRules.hasUpper }">
-                      <i
-                        :class="passwordRules.hasUpper ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
-                      含一大寫英文字母
-                    </li>
-                    <li class="p-p3" :class="{ 'met': passwordRules.hasLower }">
-                      <i
-                        :class="passwordRules.hasLower ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
-                      含一小寫英文字母
-                    </li>
-                  </ul>
+              <form @submit.prevent="handleRegister">
+                <div class="auth-form">
+                  <BaseInput ref="regNameRef" v-model="registerData.name" label="姓名" placeholder="請輸入姓名"
+                    autocomplete="username" :status="registerStatus.name" :message="registerMessage.name"
+                    @blur="touched.register.name = true" @enter-press="focusInput(regEmailRef)" class="tight-gap" />
+                  <BaseInput ref="regEmailRef" v-model="registerData.email" label="電子信箱" placeholder="請輸入電子信箱"
+                    autocomplete="email" :status="registerStatus.email" :message="registerMessage.email"
+                    @blur="touched.register.email = true" @enter-press="focusInput(regPasswordRef)" class="tight-gap" />
+                  <BaseInput ref="regPasswordRef" v-model="registerData.password" label="密碼" placeholder="請輸入密碼"
+                    autocomplete="new-password" :type="showRegisterPassword ? 'text' : 'password'"
+                    :status="registerStatus.password" :message="registerMessage.password"
+                    @blur="touched.register.password = true" @enter-press="focusInput(regConfirmPasswordRef)"
+                    class="tight-gap">
+                    <template #suffix>
+                      <button type="button" @click="showRegisterPassword = !showRegisterPassword" class="icon-btn"
+                        tabindex="-1">
+                        <IconEyeClose v-if="showRegisterPassword" />
+                        <IconEyeOpen v-else />
+                      </button>
+                    </template>
+                  </BaseInput>
+                  <div class="password-requirements">
+                    <p class="requirements-title p-p3">密碼規定：</p>
+                    <ul>
+                      <li class="p-p3" :class="{ 'met': passwordRules.length }">
+                        <i
+                          :class="passwordRules.length ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
+                        至少含八個字元
+                      </li>
+                      <li class="p-p3" :class="{ 'met': passwordRules.hasUpper }">
+                        <i
+                          :class="passwordRules.hasUpper ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
+                        含一大寫英文字母
+                      </li>
+                      <li class="p-p3" :class="{ 'met': passwordRules.hasLower }">
+                        <i
+                          :class="passwordRules.hasLower ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
+                        含一小寫英文字母
+                      </li>
+                    </ul>
+                  </div>
+                  <BaseInput ref="regConfirmPasswordRef" v-model="registerData.confirmPassword" label="確認密碼"
+                    placeholder="請再輸入一次密碼" autocomplete="new-password"
+                    :type="showRegisterPassword ? 'text' : 'password'" :status="registerStatus.confirmPassword"
+                    :message="registerMessage.confirmPassword" @blur="touched.register.confirmPassword = true"
+                    @enter-press="handleRegister" class="tight-gap" />
+                  <BaseBtn title="註冊" variant="solid" @click="handleRegister" :width="244" :height="50" />
+                  <p class="mobile-switch-text" @click="isRegister = false">已有帳號嗎？前往登入吧~</p>
                 </div>
-                <BaseInput ref="regConfirmPasswordRef" v-model="registerData.confirmPassword" label="確認密碼"
-                  placeholder="請再輸入一次密碼" :type="showRegisterPassword ? 'text' : 'password'"
-                  :status="registerStatus.confirmPassword" :message="registerMessage.confirmPassword"
-                  @blur="touched.register.confirmPassword = true" @enter-press="handleRegister" class="tight-gap" />
-                <BaseBtn title="註冊" variant="solid" @click="handleRegister" :width="244" :height="50" />
-                <p class="mobile-switch-text" @click="isRegister = false">已有帳號嗎？前往登入吧~</p>
-              </div>
+              </form>
             </div>
           </div>
 
@@ -695,6 +762,11 @@ const currentUserName = computed(() => {
   align-items: center;
   justify-content: center;
 
+  // 針對 Google 登入元件的包裝層
+  // :deep(div[id^="google-login-button"]) {
+  //   margin-right: 10px; // 讓它跟後面的 FB 按鈕保持距離
+  // }
+
   a {
     display: inline-block; // 確保 transform 在連結上生效
     transition: transform 0.3s ease; // 設定動畫時間與曲線
@@ -785,6 +857,8 @@ const currentUserName = computed(() => {
 
   // 賦予整個空間 3D 深度感，數值越大透視越平緩
   perspective: 2000px;
+  // 告訴瀏覽器此處滾動不需等待 JS
+  touch-action: pan-y;
 
   &__overlay {
     position: absolute;

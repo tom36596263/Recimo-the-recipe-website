@@ -7,6 +7,12 @@ export const useAuthStore = defineStore('auth', () => {
     // ==========================================
     // 初始化時檢查 localStorage
     const user = ref(JSON.parse(localStorage.getItem('user')) || null);
+    // 統一的 userId 計算屬性
+    const userId = computed(() => {
+        if (!user.value) return null;
+        // 同時相容兩種命名方式
+        return user.value.id || user.value.user_id;
+    });
     const isLoggedIn = computed(() => !!user.value);
 
     // 彈窗控制狀態
@@ -57,6 +63,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     return {
         user,
+        userId,
         isLoggedIn,
         isLoginAlertOpen,
         isLoginLightboxOpen,
