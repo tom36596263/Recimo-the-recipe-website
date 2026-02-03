@@ -226,6 +226,15 @@ const fetchData = async () => {
     }
 };
 
+const isFromWorkspace = computed(() => {
+    return route.path.includes('/workspace/recipe-detail');
+});
+
+const isAdaptation = computed(() => {
+    // 根據你提供的 JSON，關鍵在於 parent_recipe_id 是否有值
+    return !!(rawRecipe.value?.parent_recipe_id);
+});
+
 // --- 3. 計算屬性 ---
 const displayRecipeLikes = computed(() => {
     const baseLikes = Number(rawRecipe.value?.recipe_likes || 0);
@@ -473,7 +482,11 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
                     </div>
 
                     <div v-if="!isPreviewMode" class="adapt-btn-wrapper">
-                        <router-link :to="`/workspace/modify-recipe/${rawRecipe.recipe_id}`">
+                        <router-link v-if="isAdaptation" :to="`/workspace/recipe-detail/${rawRecipe.parent_recipe_id}`">
+                            <BaseBtn title="查看原食譜" variant="outline" height="40" class="w-auto" />
+                        </router-link>
+
+                        <router-link v-else :to="`/workspace/modify-recipe/${rawRecipe.recipe_id}`">
                             <BaseBtn title="改編一覽" variant="outline" height="40" class="w-auto" />
                         </router-link>
                     </div>
@@ -512,14 +525,14 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
                         </section>
                     </div>
                     <section v-if="!isPreviewMode" class="mb-10 fade-up" style="--delay: 6">
-                        <section v-if="!isPreviewMode" class="mb-10 fade-up" style="--delay: 6">
+                        <section v-if="!isPreviewMode && !isAdaptation" class="mb-10 fade-up" style="--delay: 6">
                             <RecipeComments :list="commentList" @post-comment="handlePostComment"
                                 @like-comment="handleLikeComment" @delete-comment="handleDeleteComment" />
                         </section>
                     </section>
                 </div>
 
-                <div v-if="!isPreviewMode" class="col-12 cook-snap-full fade-up" style="--delay: 7">
+                <div v-if="!isPreviewMode && !isAdaptation" class="col-12 cook-snap-full fade-up" style="--delay: 7">
                     <section class="mb-10 content-wrapper">
                         <CookSnap :list="snapsData" @post-snap="handlePostSnap" />
                     </section>
@@ -551,7 +564,7 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
     }" @submit="onReportSubmit" />
 
 
-    <div v-if="!isPreviewMode" class="col-12 fade-up" style="--delay: 8">
+    <div v-if="!isPreviewMode && !isAdaptation" class="col-12 fade-up" style="--delay: 8">
         <RelatedRecipes :currentId="route.params.id" />
     </div>
 </template>
