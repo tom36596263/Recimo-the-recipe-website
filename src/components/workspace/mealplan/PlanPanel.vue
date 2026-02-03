@@ -1,17 +1,48 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue'; // 1. 務必匯入 onMounted
 import DefaultPlanAccordion from './DefaultPlanAccordion.vue';
 import DateTabs from './DateTabs.vue';
 import NutritionChart from './NutritionChart.vue';
+import PanelMiniRecipeCard from './PanelMiniRecipeCard.vue';
+import PlanCoverPanel from './PlanCoverPanel.vue';
 
 const props = defineProps({
   planData: { type: Object, required: true },
-  mealPlanItems: { type: Array, default: () => [] }, // 關鍵：接收完整配餐清單
-  allRecipes: { type: Array, default: () => [] }     // 關鍵：接收食譜資料庫
+  mealPlanItems: { type: Array, default: () => [] },
+  allRecipes: { type: Array, default: () => [] },
+  initialDate: { type: [Date, Object], default: null },
+  mealTemplates: { type: Array, default: () => [] },
+  targetCalories: { type: Number, default: 2000 },
+  coverTemplates: { type: Array, default: () => [] }
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'apply-template', 'update-plan-date', 'update-plan']);
+const onSelectTemplate = (id) => {
+  emit('apply-template', id); // 向上轉發
+};
 
+// ------封面圖選單------
+const showCoverPanel = ref(false);
+const openCoverPanel = () => {
+  showCoverPanel.value = true;
+}
+const closeCoverPanel = () => {
+  showCoverPanel.value = false;
+}
+// 封面選擇函式
+const handleCoverSelect = (payload) => {
+  emit('update-plan', {
+    ...props.planData, // 保留舊資料
+    cover_type: payload.type,
+    cover_template_id: payload.id
+  });
+  closeCoverPanel();
+  // 如果要存回後端，可以在這裡 emit 事件給最外層
+  // emit('update-cover', payload); 
+};
+
+
+// ------日誌頁籤------
 // --- 1. 根據計畫日期產生日誌頁籤 ---
 const dateTabsData = computed(() => {
   if (!props.planData.start_date) return [];
@@ -21,13 +52,17 @@ const dateTabsData = computed(() => {
   const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
 
   let idCounter = 1;
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+  // 使用備用變數跑迴圈，避免修改原始 start 物件
+  let current = new Date(start);
+  while (current <= end) {
     list.push({
       id: idCounter++,
-      day: weekDays[d.getDay()],
-      date: d.getDate().toString(),
-      fullDate: d.toISOString().split('T')[0] // 隱藏屬性，用於後續過濾配餐
+      day: weekDays[current.getDay()],
+      date: current.getDate().toString(),
+      // 建議使用更穩定的日期字串化方式
+      fullDate: `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`
     });
+    current.setDate(current.getDate() + 1);
   }
   return list;
 });
@@ -35,18 +70,15 @@ const dateTabsData = computed(() => {
 // --- 2. 狀態：當前選中的頁籤 ID ---
 const activeTabId = ref(1);
 
-// --- 3. 核心邏輯：計算「當前選中日期」的營養總和 ---
+// --- 3. 核心邏輯：計算「當前選中日期」的營養總和 (保持不變) ---
 const currentNutritionData = computed(() => {
-  // A. 找出目前 activeTabId 對應的完整日期字串
   const activeTab = dateTabsData.value.find(tab => tab.id === activeTabId.value);
   if (!activeTab) return { calories: 0, protein: 0, carbs: 0, starch: 0, fat: 0 };
 
-  // B. 從所有配餐清單中，篩選出符合該日期的項目
   const todaysItems = props.mealPlanItems.filter(item =>
     item.planned_date.includes(activeTab.fullDate)
   );
 
-  // C. 累加營養素：遍歷今日項目，根據 recipe_id 到食譜庫查詢數值
   return todaysItems.reduce((acc, item) => {
     const recipe = props.allRecipes.find(r => r.recipe_id === item.recipe_id);
     if (recipe) {
@@ -54,11 +86,49 @@ const currentNutritionData = computed(() => {
       acc.protein += recipe.recipe_protein_per_100g || 0;
       acc.carbs += recipe.recipe_carbs_per_100g || 0;
       acc.fat += recipe.recipe_fat_per_100g || 0;
-      acc.starch += (recipe.recipe_carbs_per_100g * 0.7) || 0; // 暫定澱粉佔碳水 70%
+      acc.starch += (recipe.recipe_carbs_per_100g * 0.7) || 0;
     }
     return acc;
   }, { calories: 0, protein: 0, carbs: 0, starch: 0, fat: 0 });
 });
+
+// --- 4. 核心邏輯：獲取「當前選中日期」的不重複食譜詳情 (保持不變) ---
+const currentRecipes = computed(() => {
+  const activeTab = dateTabsData.value.find(tab => tab.id === activeTabId.value);
+  if (!activeTab) return [];
+
+  const todaysItems = props.mealPlanItems.filter(item =>
+    item.planned_date.includes(activeTab.fullDate)
+  );
+
+  const uniqueRecipesMap = new Map();
+  todaysItems.forEach(item => {
+    const recipe = props.allRecipes.find(r => r.recipe_id === item.recipe_id);
+    if (recipe && !uniqueRecipesMap.has(recipe.recipe_id)) {
+      uniqueRecipesMap.set(recipe.recipe_id, recipe);
+    }
+  });
+  return Array.from(uniqueRecipesMap.values());
+});
+
+// --- 5. 同步日期邏輯修正 ---
+onMounted(() => {
+  if (props.initialDate) {
+    // 使用與 dateTabsData 相同的格式化邏輯進行比對
+    const d = props.initialDate;
+    const targetDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    const foundTab = dateTabsData.value.find(tab => tab.fullDate === targetDateStr);
+    if (foundTab) {
+      activeTabId.value = foundTab.id;
+    }
+  }
+});
+
+// 處理範圍更新，轉發給 EditMealPlan
+const onUpdateRange = (range) => {
+  emit('update-plan-date', range);
+};
 
 const closePanel = () => { emit('close'); };
 </script>
@@ -76,20 +146,49 @@ const closePanel = () => { emit('close'); };
     </div>
 
     <div class="plan-panel__accordion p-p1">
-      <DefaultPlanAccordion />
+      <DefaultPlanAccordion :templates="mealTemplates" @select="onSelectTemplate" />
     </div>
 
-    <div class="plan-panel__cover">
-      <i-material-symbols-camping-outline />
-      <span class="cover-hint">更換封面圖片</span>
+    <div class="plan-panel__cover" @click="openCoverPanel">
+      <template v-if="planData.cover_type === 1">
+        <img :src="`img/plan-covers/template/${planData.cover_template_id}.svg`" class="cover-img" />
+      </template>
+      <template v-else-if="planData.custom_cover_url">
+        <img :src="planData.custom_cover_url" class="cover-img" />
+      </template>
+      <template v-else>
+        <i-material-symbols-camping-outline />
+        <span class="cover-hint">更換封面圖片</span>
+      </template>
     </div>
+
+    <PlanCoverPanel v-if="showCoverPanel" :templates="props.coverTemplates" @select="handleCoverSelect"
+      @close="closeCoverPanel" />
 
     <div class="plan-panel__tabs">
-      <DateTabs v-model="activeTabId" :tabs="dateTabsData" />
+      <DateTabs v-if="planData.start_date" v-model="activeTabId" :tabs="dateTabsData" :start-date="planData.start_date"
+        :end-date="planData.end_date" @update-range="onUpdateRange" />
+      <div v-else class="loading-hint p-p1">
+        資料載入中...
+      </div>
     </div>
 
     <div class="plan-panel__chart">
-      <NutritionChart :data="currentNutritionData" />
+      <h3 class="plan-panel__chart-title p-p1">單日營養總計</h3>
+
+      <NutritionChart :data="currentNutritionData" :target="targetCalories" />
+    </div>
+
+    <div class="plan-panel__recipe-overview">
+      <h4 class="plan-panel__overview-title p-p1">單日食譜預覽</h4>
+
+      <div class="plan-panel__recipe-list">
+        <PanelMiniRecipeCard v-for="recipe in currentRecipes" :key="recipe.recipe_id" :recipe="recipe" />
+
+        <div v-if="currentRecipes.length === 0" class="plan-panel__empty-recipes p-p1">
+          今日尚未安排食譜
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -183,8 +282,40 @@ const closePanel = () => { emit('close'); };
     margin-top: 10px;
   }
 
+  .loading-hint {
+    text-align: center;
+    color: $neutral-color-400;
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
   &__chart {
     padding-bottom: 40px;
+  }
+
+  &__chart-title,
+  &__overview-title,
+  &__empty-recipes {
+    color: $primary-color-800;
+    font-weight: bold;
+  }
+
+  &__empty-recipes {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100px;
+    // background-color: $neutral-color-100;
+    border-radius: 10px;
+    border: 1px solid $neutral-color-100;
+  }
+
+  &__recipe-list {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+
   }
 
   &::-webkit-scrollbar {

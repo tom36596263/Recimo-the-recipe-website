@@ -6,7 +6,7 @@
     "title": "健康均衡三日自煮計畫",
     "cover_type": 1,
     "custom_cover_url": null,
-    "cover_template_id": 1,
+    "cover_template_id": 12,
     "start_date": "2026-01-19",
     "end_date": "2026-01-21",
     "created_at": "2026-01-18 20:30:00"
@@ -18,7 +18,7 @@
     "title": "活力輕食三日自煮計畫",
     "cover_type": 1,
     "custom_cover_url": null,
-    "cover_template_id": 2,
+    "cover_template_id": 11,
     "start_date": "2026-01-22",
     "end_date": "2026-01-24",
     "created_at": "2026-01-21 10:00:00"
@@ -30,7 +30,7 @@
     "title": "春節團圓年菜五日計畫",
     "cover_type": 1,
     "custom_cover_url": null,
-    "cover_template_id": 3,
+    "cover_template_id": 7,
     "start_date": "2026-02-16",
     "end_date": "2026-02-20",
     "created_at": "2026-01-22 08:30:00"
@@ -67,7 +67,7 @@
     "title": "春意盎然：三月山林露營三日計畫",
     "cover_type": 1,
     "custom_cover_url": null,
-    "cover_template_id": 6,
+    "cover_template_id": 1,
     "start_date": "2026-03-13",
     "end_date": "2026-03-15",
     "created_at": "2026-01-28 20:43:00"
@@ -79,7 +79,7 @@
     "title": "520 浪漫食光：情侶專屬奢華饗宴計畫",
     "cover_type": 1,
     "custom_cover_url": null,
-    "cover_template_id": 7,
+    "cover_template_id": 9,
     "start_date": "2026-05-19",
     "end_date": "2026-05-21",
     "created_at": "2026-01-28 20:50:00"

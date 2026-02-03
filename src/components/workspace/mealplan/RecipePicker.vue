@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { publicApi } from '@/utils/publicApi';
 import PlanRecipeCard from '@/components/workspace/mealplan/PlanRecipeCard.vue';
+import CalorieAdviceModal from './modals/CalorieAdviceModal.vue';
 
 /**
  * RecipePicker.vue 
@@ -16,11 +17,41 @@ const props = defineProps({
     // 該日期目前已有的配餐明細 (包含食譜 detail)
     currentItems: { type: Array, default: () => [] },
     // 全域食譜庫資料，用於搜尋瀏覽
-    allRecipes: { type: Array, default: () => [] }
+    allRecipes: { type: Array, default: () => [] },
+    // 接收目標熱量
+    targetCalories: { type: Number, default: 0 },
+    // 接收計畫開始日期 (YYYY-MM-DD)
+    startDate: { type: String, default: '' },
+    // 接收計畫結束日期 (YYYY-MM-DD)
+    endDate: { type: String, default: '' }
 });
 
 // 定義 Emit 事件，用於通知父組件行為
-const emit = defineEmits(['back', 'add', 'remove']);
+const emit = defineEmits(['back', 'add', 'remove', 'update-target', 'change-date']);
+
+
+// --- 切換日期與判斷邊界邏輯 ---
+// 將當前 Date 物件轉為 YYYY-MM-DD 字串方便比對
+const currentDateStr = computed(() => {
+    const d = props.date;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+});
+
+// 是否為第一天
+const isFirstDay = computed(() => currentDateStr.value === props.startDate);
+
+// 是否為最後一天
+const isLastDay = computed(() => currentDateStr.value === props.endDate);
+
+// 修改切換日期函式，增加保護機制
+const changeDate = (value) => {
+    // 如果是第一天還想按前一天，或是最後一天想按後一天，直接返回
+    if ((value === -1 && isFirstDay.value) || (value === 1 && isLastDay.value)) return;
+
+    const newDate = new Date(props.date);
+    newDate.setDate(newDate.getDate() + value);
+    emit('change-date', newDate);
+};
 
 // --- 響應式狀態管理 ---
 const recipes = ref([]);          // 存放顯示在瀏覽器中的食譜清單
@@ -28,7 +59,6 @@ const searchQuery = ref('');      // 搜尋框的雙向綁定字串
 const selectedMealType = ref(1);  // 目前選擇要操作的餐期 (0:早餐, 1:午餐, 2:晚餐)
 
 // --- 計算屬性 (Computed) ---
-
 // 1. 加總當前日期的總熱量：遍歷 currentItems 並加總所有食譜的熱量數值
 const currentTotalKcal = computed(() => {
     return Math.round(
@@ -53,7 +83,6 @@ const filteredRecipes = computed(() => {
 });
 
 // --- 方法 (Methods) ---
-
 // 根據 meal_type (0,1,2) 過濾出顯示在上方格子內的項目
 const getItemsByType = (type) => props.currentItems.filter(item => item.meal_type === type);
 
@@ -82,26 +111,67 @@ onMounted(async () => {
         recipes.value = res.data;
     }
 });
+
+// ------熱量計算彈窗------
+const showModal = ref(false);
+const openModal = () => { showModal.value = true; };
+// ------熱量資料傳遞----
+// 1. 綁定輸入框 (本地狀態)
+const localTarget = ref(props.targetCalories);
+
+// 2. 監聽輸入框變化 (User 輸入 -> 通知父層)
+watch(localTarget, (newVal) => {
+    if (newVal < 0) {
+        localTarget.value = 0;
+        return;
+    }
+    emit('update-target', Number(newVal));
+});
+
+// 3. [新增] 監聽 Props 變化 (父層資料變動 -> 更新本地輸入框)
+watch(() => props.targetCalories, (newVal) => {
+    if (newVal !== localTarget.value) {
+        localTarget.value = newVal;
+    }
+});
+
+// 4. 處理彈窗回傳的數值 (Modal -> 本地輸入框)
+const handleApplyAdvice = (kcal) => {
+    localTarget.value = kcal;
+    // 因為 localTarget 變了，上面的 watch(localTarget) 會自動觸發 emit，不用手動再 emit
+};
 </script>
 
 <template>
     <div class="recipe-picker container">
         <header class="recipe-picker__header row">
-            <div class="header-left col-6">
+            <div class="header-left">
                 <button class="back-btn" @click="emit('back')" title="返回週計畫視圖">
                     <i-material-symbols-arrow-back-ios-new />
                     返回週計畫
                 </button>
-                <h2 class="date-title">{{ displayDate }}</h2>
+                <div class="previous-date" :class="{ 'is-disabled': isFirstDay }" @click="changeDate(-1)">
+                    <i-material-symbols-arrow-left />
+                </div>
+                <h2 class="date-title">
+                    {{ displayDate }}
+                </h2>
+                <div class="next-date" :class="{ 'is-disabled': isLastDay }" @click="changeDate(1)">
+                    <i-material-symbols-arrow-right />
+                </div>
             </div>
 
             <div class="header-right">
                 <div class="kcal-status-box">
                     <div class="kcal-item">
-                        目前總熱量：<span class="value">{{ currentTotalKcal }}</span> kcal
+                        當日食譜總熱量：<span class="value p-p1">{{ currentTotalKcal }}</span> kcal
                     </div>
                     <div class="kcal-item target">
-                        目標熱量：<input type="number" class="kcal-input p-p1" /> kcal
+                        目標熱量：
+                        <input type="number" v-model="localTarget" class="kcal-input p-p1" /> kcal
+                    </div>
+                    <div class="kcal-advice-modal-btn" @click="openModal">
+                        <i-material-symbols-calculate />
                     </div>
                 </div>
             </div>
@@ -153,6 +223,8 @@ onMounted(async () => {
 
         </section>
     </div>
+
+    <CalorieAdviceModal v-model="showModal" @apply="handleApplyAdvice" />
 </template>
 
 <style lang="scss" scoped>
@@ -179,24 +251,47 @@ onMounted(async () => {
                 display: flex;
                 align-items: center;
                 gap: 6px;
-                background: $neutral-color-white;
-                border: 1px solid $neutral-color-100;
+                background: $neutral-color-100;
                 padding: 8px 16px;
                 border-radius: 8px;
                 color: $primary-color-800;
                 cursor: pointer;
-                font-weight: bold;
-                transition: 0.3s;
+                border: 1px solid transparent;
+                border-radius: 10px;
 
                 &:hover {
-                    background: $primary-color-100;
+                    background: $accent-color-100;
+                    color: $accent-color-800;
+                    border: 1px solid $accent-color-800;
+
                 }
             }
 
             .date-title {
                 font-size: 1.4rem;
                 color: $primary-color-800;
-                margin: 0;
+                margin: -25px;
+            }
+
+            .previous-date,
+            .next-date {
+                width: 30px;
+                height: 30px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 1.4rem;
+                color: $primary-color-800;
+                cursor: pointer;
+
+                &:hover {
+                    color: $accent-color-700;
+                }
+
+                &.is-disabled {
+                    color: $primary-color-100;
+                    cursor: default;
+                }
             }
         }
 
@@ -214,26 +309,41 @@ onMounted(async () => {
                     font-weight: bold;
                     font-size: 1.2rem;
                 }
-
-                &.target {
-                    color: $neutral-color-700;
-                }
             }
 
             .kcal-input {
                 border: none;
-                width: 50px;
+                width: 60px;
                 text-align: center;
                 outline: none;
                 color: $primary-color-800;
                 font-weight: bold;
                 background: transparent;
+                font-size: 1.2rem;
 
                 /* 隱藏 Chrome, Safari, Edge 的數字調節箭頭 */
                 &::-webkit-outer-spin-button,
                 &::-webkit-inner-spin-button {
                     -webkit-appearance: none;
                     margin: 0;
+                }
+            }
+
+            .kcal-advice-modal-btn {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-color: $primary-color-100;
+                color: $primary-color-800;
+                cursor: pointer;
+
+                &:hover {
+                    background-color: $accent-color-100;
+                    color: $accent-color-700;
+                    border: 1px solid $accent-color-800;
                 }
             }
         }
@@ -251,13 +361,57 @@ onMounted(async () => {
             border-radius: 12px;
             padding: 12px;
             cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
+            border: 1px solid transparent;
 
             &.is-active {
                 background: $primary-color-100;
-                border-color: $primary-color-400;
-                box-shadow: 0 4px 12px rgba($primary-color-800, 0.05);
+                border-color: transparent;
+                box-shadow: 0 4px 12px rgba($neutral-color-black, 0.1);
+
+                .meal-slot__header .label {
+                    color: $primary-color-800;
+                }
+
+                .meal-slot__header .count {
+                    font-size: 0.75rem;
+                    color: $primary-color-400;
+                }
+
+                .mini-list {
+
+                    .mini-item {
+                        color: $primary-color-800;
+                    }
+                }
+            }
+
+            &:hover {
+                background: $accent-color-100;
+                border: 1px solid $accent-color-800;
+
+                .meal-slot__header .label {
+                    color: $accent-color-700;
+                }
+
+                .meal-slot__header .count {
+                    font-size: 0.75rem;
+                    color: $accent-color-400;
+                }
+
+                .meal-slot__content {
+                    border-color: $accent-color-400;
+                }
+
+                .mini-list {
+
+                    .mini-item {
+                        color: $accent-color-400;
+                    }
+                }
+
+                .empty-hint {
+                    color: $accent-color-400;
+                }
             }
 
             &__header {
@@ -267,12 +421,12 @@ onMounted(async () => {
 
                 .label {
                     font-weight: bold;
-                    color: $primary-color-800;
+                    color: $neutral-color-700;
                 }
 
                 .count {
                     font-size: 0.75rem;
-                    color: $neutral-color-700;
+                    color: $neutral-color-400;
                 }
             }
 
@@ -298,7 +452,7 @@ onMounted(async () => {
                     .mini-item {
                         font-size: 16px;
                         font-weight: bold;
-                        color: $primary-color-800;
+                        color: $neutral-color-700;
                         background: $neutral-color-white;
                         padding: 4px 10px;
                         margin-bottom: 4px;
@@ -308,7 +462,6 @@ onMounted(async () => {
                         align-items: center;
                         justify-content: space-between;
                         position: relative;
-                        transition: all 0.2s ease;
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
@@ -328,7 +481,7 @@ onMounted(async () => {
                 }
 
                 .delete-btn {
-                    display: none; // 預設隱藏
+                    display: none;
                     background: none;
                     border: none;
                     color: $neutral-color-400;
@@ -337,11 +490,10 @@ onMounted(async () => {
                     margin-left: 8px;
                     display: flex;
                     align-items: center;
-                    opacity: 0; // 預設透明
-                    transition: color 0.2s, opacity 0.2s;
+                    opacity: 0;
 
                     &:hover {
-                        color: #ff4d4f; // 垃圾桶 hover 變紅色
+                        color: $secondary-color-danger-700;
                     }
 
                     svg {
@@ -352,7 +504,7 @@ onMounted(async () => {
 
                 // 當 mini-item 被 hover 時，顯示垃圾桶
                 &:hover {
-                    background: $neutral-color-100; // 稍微變色增加回饋感
+                    // background: $neutral-color-100;
 
                     .delete-btn {
                         display: flex;
@@ -398,20 +550,20 @@ onMounted(async () => {
         }
 
         .filter-btn {
-            background: $neutral-color-white;
-            border: 1px solid $neutral-color-100;
+            background: $primary-color-100;
+            border: 1px solid transparent;
             padding: 0 20px;
             border-radius: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
-            color: $neutral-color-800;
-            transition: 0.3s;
+            color: $primary-color-800;
 
             &:hover {
-                border-color: $primary-color-400;
-                color: $primary-color-700;
+                border-color: $accent-color-700;
+                color: $accent-color-700;
+                background-color: $accent-color-100;
             }
         }
     }
