@@ -12,7 +12,7 @@ const props = defineProps({
     type: String,
     default: 'label',
     // 1. 修改這裡：加入 'primary'
-    validator: (value) => ['action', 'label', 'primary'].includes(value)
+    validator: (value) => ['action', 'outline', 'label', 'primary'].includes(value)
   },
   // 控制 Action 模式下是否顯示圖示
   showIcon: {

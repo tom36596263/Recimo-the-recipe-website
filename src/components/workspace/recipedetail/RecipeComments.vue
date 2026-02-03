@@ -173,46 +173,46 @@ const openReport = (item, index) => {
     margin-bottom: 32px;
 
     .styled-input {
-            width: 100%;
-            min-height: 46px;
-            max-height: 200px;
-            padding: 12px 95px 12px 16px; // 🏆 稍微增加右側內距，給計數器更多空間
-            border: 1.5px solid $primary-color-700;
-            border-radius: 12px;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.2s;
-            resize: none;
-            line-height: 1.5;
-            font-family: inherit;
-    
-            /* 🏆 隱藏捲軸但保留捲動功能 (針對不同瀏覽器) */
-            scrollbar-width: none; // Firefox
-    
-            &::-webkit-scrollbar {
-                display: none; // Chrome, Safari, Edge
-            }
-    
-            &:focus {
-                border-color: $primary-color-800;
-                box-shadow: 0 0 0 3px rgba(74, 131, 96, 0.1);
-            }
+        width: 100%;
+        min-height: 46px;
+        max-height: 200px;
+        padding: 12px 95px 12px 16px; // 🏆 稍微增加右側內距，給計數器更多空間
+        border: 1.5px solid $primary-color-700;
+        border-radius: 12px;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s;
+        resize: none;
+        line-height: 1.5;
+        font-family: inherit;
+
+        /* 🏆 隱藏捲軸但保留捲動功能 (針對不同瀏覽器) */
+        scrollbar-width: none; // Firefox
+
+        &::-webkit-scrollbar {
+            display: none; // Chrome, Safari, Edge
         }
-    
-        /* 🏆 微調計數器位置，讓它跟發送按鈕保持一點距離 */
-        .char-counter {
-            position: absolute;
-            right: 52px; // 從 48px 微調到 52px
-            bottom: 12px;
-            font-size: 12px;
-            color: $neutral-color-400;
-            user-select: none; // 防止計數器文字被選取
-            background: $neutral-color-white; // 避免文字疊在捲軸位置時透過去
-    
-            &.limit {
-                color: $secondary-color-danger-700;
-            }
+
+        &:focus {
+            border-color: $primary-color-800;
+            box-shadow: 0 0 0 3px rgba(74, 131, 96, 0.1);
         }
+    }
+
+    /* 🏆 微調計數器位置，讓它跟發送按鈕保持一點距離 */
+    .char-counter {
+        position: absolute;
+        right: 52px; // 從 48px 微調到 52px
+        bottom: 12px;
+        font-size: 12px;
+        color: $neutral-color-400;
+        user-select: none; // 防止計數器文字被選取
+        background: $neutral-color-white; // 避免文字疊在捲軸位置時透過去
+
+        &.limit {
+            color: $secondary-color-danger-700;
+        }
+    }
 
     .send-icon-btn {
         position: absolute;
@@ -313,10 +313,12 @@ const openReport = (item, index) => {
         cursor: pointer;
         display: inline-flex;
         align-items: center;
+        justify-content: flex-start;
         color: $neutral-color-700;
         transition: all 0.2s;
         padding: 4px 8px;
         height: 32px;
+        min-width: 48px;
 
         .action-icon {
             font-size: 20px;
@@ -325,16 +327,16 @@ const openReport = (item, index) => {
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            margin-right: 4px;
         }
 
         .count {
-            margin-left: 4px;
             font-size: 14px;
             font-weight: 500;
             font-variant-numeric: tabular-nums;
             line-height: 1;
-            position: relative;
-            top: 1px;
+            text-align: left;
+            min-width: 14px;
         }
 
         &.like-btn:hover,

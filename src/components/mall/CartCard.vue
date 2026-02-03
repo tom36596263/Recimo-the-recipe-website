@@ -1,12 +1,14 @@
 <script setup>
 import { ref, defineProps, computed, getCurrentInstance } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
+// 引用彈窗
 import BaseModal from '@/components/BaseModal.vue';
-
 // icon
 import IconDelete from '~icons/material-symbols/delete-outline';
 
+// ==========================================
 // 接收父元件傳過來的商品資料
+// ==========================================
 const props = defineProps({
     item: {
         type: Object,
@@ -15,78 +17,78 @@ const props = defineProps({
     }
 });
 
-const baseURL = import.meta.env.BASE_URL;
 const { proxy } = getCurrentInstance();
 const cartStore = useCartStore();
 
-
-// 控制 Modal 顯示狀態的變數
-const showDeleteModal = ref(false);
 // ==========================================
 // 邏輯處理：串接 Pinia Store
 // ==========================================
+// 提取 ID (確保支援不同來源的資料結構)
+const productId = computed(() => props.item.product_id || props.item.id);
+
+// ==========================================
+// 商品邏輯
+// ==========================================
+// 建立一個格式化工具
+const formatPrice = (val) => {
+    const num = Number(val || 0);
+    return new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 }).format(num);
+};
+
+const displayQty = computed(() => {
+    return Number(props.item.quantity || 0);
+});
 
 // 增加數量
 const handleIncrement = () => {
-    // 優先取 item.id，若無則取 product_id
-    const id = props.item.id || props.item.product_id;
-    cartStore.incrementQty(id);
+    // 這裡 cartStore.incrementQty 會去呼叫 updateQty，
+    // updateQty 內部已經寫好了：登入就打 API，沒登入就存 LocalStorage
+    cartStore.incrementQty(productId.value);
 };
 
 // 減少數量
-const handleDecrement = () => {
-    const id = props.item.id || props.item.product_id;
-    const currentQty = props.item.count || props.item.qty || 1;
-
+const handleDecrement = async () => {
+    const currentQty = Number(props.item.quantity || 0);
     if (currentQty > 1) {
-        cartStore.decrementQty(id);
+        // 自動處理同步邏輯
+        await cartStore.decrementQty(productId.value);
     } else {
-        handleRemove(); // 數量為 1 時點減號觸發刪除
+        // 數量為 1 再點減號，觸發刪除彈窗
+        handleRemove();
     }
 };
 
+// 刪除商品
+const showDeleteModal = ref(false);
 const handleRemove = () => {
-    // 不再使用 confirm()，改為打開自定義 Modal
     showDeleteModal.value = true;
 };
 
 // 當在 Modal 點擊「確定刪除」時執行的函式
-const confirmDelete = () => {
-    const id = props.item.id || props.item.product_id;
-    cartStore.removeItem(id);
-    showDeleteModal.value = false; // 刪除後關閉視窗
+const confirmDelete = async () => {
+    // 這裡會執行 removeItem，內含 API (delete_cartitem.php) 或 LocalStorage 同步
+    await cartStore.removeItem(productId.value);
+    showDeleteModal.value = false;
 };
 
 // 計算小計
 const subtotal = computed(() => {
-    const price = Number(props.item.product_price || props.item.price || 0);
-    const qty = props.item.count || props.item.qty || 0;
-    return price * qty;
+    const price = Number(props.item.product_price || 0);
+    const qty = Number(props.item.quantity || 0);
+    return formatPrice(price * qty);
 });
 
 // ==========================================
 // 圖片路徑處理
 // ==========================================
-const parseFile = (url) => {
-    if (!url) return '';
-    // 移除 public/ 前綴並結合 baseURL (或是您的 base)
-    const cleanPath = url.replace(/^public\//, '').replace(/^\//, '');
-    return `${import.meta.env.BASE_URL}${cleanPath}`;
-};
-
 const productImage = computed(() => {
-    const images = props.item.product_image;
+    // 優先使用從資料庫抓到的單一字串路徑
+    const imgUrl = props.item.product_image || props.item.image_url;
 
-    // 如果是陣列，找封面圖或第一張
-    if (Array.isArray(images) && images.length > 0) {
-        const coverImage = images.find(img => img.is_cover) || images[0];
-        return proxy.$parsePublicFile(coverImage.image_url);
+    if (imgUrl) {
+        // 使用你 main.js 定義的全域解析函式
+        return proxy.$parsePublicFile(imgUrl);
     }
-
-    if (typeof images === 'string') {
-        return proxy.$parsePublicFile(images);
-    }
-
     return `${import.meta.env.BASE_URL}images/default-placeholder.png`;
 });
 </script>
@@ -101,13 +103,13 @@ const productImage = computed(() => {
             <div class="info-group">
                 <p class="title zh-h5-bold">{{ item.product_name || item.name }}</p>
                 <p class="price-unit p-p1">
-                    價格 : {{ item.product_price || item.price }} 元 / 包</p>
+                    價格 : {{ formatPrice(item.product_price) }} 元 / 包</p>
 
                 <div class="action-row">
                     <p class="qty-label p-p1">數量</p>
                     <div class="quantity-control">
                         <button @click.stop.prevent="handleDecrement">−</button>
-                        <input type="number p-p1" :value="item.count || item.qty" readonly />
+                        <input type="text" class="p-p1" :value="displayQty" readonly />
                         <button @click.stop.prevent="handleIncrement">+</button>
                     </div>
                     <button class="delete-btn" @click.stop.prevent="handleRemove">

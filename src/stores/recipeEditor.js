@@ -9,14 +9,14 @@ export const useRecipeStore = defineStore('recipeEditor', {
     }),
     actions: {
         setPreviewFromEditor(form) {
-            console.log('🚀 編輯器傳進來的原始資料:', JSON.parse(JSON.stringify(form.ingredients)));
+            console.log('🚀 編輯器傳進來的原始資料:', JSON.parse(JSON.stringify(form)));
+
             // --- 0. 核心修正：路徑清洗函式 ---
-            // 取得 Vite 的 Base URL (例如: /cjd102/g2/recimo/)
             const baseUrl = import.meta.env.BASE_URL;
 
             const cleanImgPath = (path) => {
                 if (!path || typeof path !== 'string') return path;
-                // 1. 如果是網址或 Base64 格式，直接回傳
+                // 1. 如果是網址、Base64 或 Blob，直接回傳
                 if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) {
                     return path;
                 }
@@ -24,7 +24,7 @@ export const useRecipeStore = defineStore('recipeEditor', {
                 if (path.startsWith(baseUrl)) {
                     return path.replace(baseUrl, '').replace(/^\//, '');
                 }
-                // 3. 統一移除開頭斜線，維持純淨格式 (如: img/recipes/...)
+                // 3. 統一移除開頭斜線
                 return path.replace(/^\//, '');
             };
 
@@ -48,12 +48,9 @@ export const useRecipeStore = defineStore('recipeEditor', {
 
             const mappedIngredients = (form.ingredients || []).map(i => {
                 const amountNum = parseFloat(i.amount) || 0;
-
-                // ✨ 關鍵：先定義好 gWeight，去抓編輯器裡面的轉換率
-                // 這裡通常會對應你編輯器選單中帶出來的 gram_conversion
+                // 取得轉換率
                 const gWeight = parseFloat(i.gram_conversion || i.unit_weight || 1);
-
-                // 計算該食材在 100g 基準下的比例
+                // 計算 100g 基準比
                 const ratio = (amountNum * gWeight) / 100;
 
                 totalKcal += (i.kcal_per_100g || 0) * ratio;
@@ -67,7 +64,6 @@ export const useRecipeStore = defineStore('recipeEditor', {
                     amount: amountNum,
                     unit_name: i.unit || '',
                     note: i.note || '',
-                    // 🏆 把這個關鍵欄位帶過去詳情頁！
                     gram_conversion: gWeight,
                     kcal_per_100g: i.kcal_per_100g || 0,
                     protein_per_100g: i.protein_per_100g || 0,
@@ -81,10 +77,13 @@ export const useRecipeStore = defineStore('recipeEditor', {
                 recipe_id: 0,
                 recipe_title: form.title || '未命名食譜',
                 recipe_description: form.description || '',
-                // ✨ 修正點 1: 清洗主圖路徑
                 recipe_cover_image: cleanImgPath(form.coverImg) || 'https://placehold.co/800x600?text=No+Cover',
-                recipe_difficulty: form.difficulty || 3,
+                recipe_difficulty: Number(form.difficulty || 3),
                 recipe_total_time: formattedTime,
+
+                // 🏆 關鍵補齊：詳情頁縮放功能必須依賴這個欄位
+                recipe_servings: Number(form.recipe_servings || form.servings || 1),
+
                 totalTime: totalMinutes,
                 recipe_kcal_per_100g: Math.round(totalKcal),
                 recipe_protein_per_100g: parseFloat(totalProtein.toFixed(1)),
@@ -92,7 +91,7 @@ export const useRecipeStore = defineStore('recipeEditor', {
                 recipe_carbs_per_100g: parseFloat(totalCarbs.toFixed(1)),
                 ingredients: mappedIngredients,
 
-                // ✨ 修正點 2: 清洗步驟圖片路徑
+                // ✨ 修正點：補上正確的逗號與結構
                 steps: (form.steps || []).map((s, index) => ({
                     step_id: s.id || s.step_id || `s${index + 1}`,
                     step_order: index + 1,
@@ -101,10 +100,17 @@ export const useRecipeStore = defineStore('recipeEditor', {
                     step_image_url: cleanImgPath(s.img || s.image || s.step_image_url) || null,
                     step_total_time: s.time ? `00:${s.time.toString().padStart(2, '0')}:00` : '00:00:00',
                     tags: s.tags || []
+                })), // <-- 這裡原本漏掉括號與逗號
+
+                recipe_tags: (form.tags || []).map(t => ({
+                    tag_id: t.tag_id,
+                    tag_name: t.tag_name,
+                    tag_type: t.tag_type
                 }))
             };
 
-            console.log('✅ 預覽資料轉換完成並清洗路徑:', this.previewData);
+            console.log('✅ 預覽資料轉換完成，份數：', this.previewData.recipe_servings);
+            console.log('✅ 完整預覽物件：', this.previewData);
         },
 
         clearStorage() {

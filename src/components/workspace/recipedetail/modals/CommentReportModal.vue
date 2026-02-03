@@ -1,12 +1,14 @@
 <script setup>
 import { ref } from 'vue';
-
+import { useAuthStore } from '@/stores/authStore'; // 🏆 獲取登入資訊
+import { phpApi } from '@/utils/phpApi.js';     // 🏆 使用封裝好的 Axios 實體
 
 const props = defineProps({
     modelValue: Boolean,
     commentData: {
         type: Object,
         default: () => ({
+            comment_id: null,
             content: '載入中...',
             userName: '未知用戶',
             time: ''
@@ -14,8 +16,9 @@ const props = defineProps({
     }
 });
 
+const emit = defineEmits(['update:modelValue']);
 
-const emit = defineEmits(['update:modelValue', 'submit']);
+const authStore = useAuthStore();
 
 const reasons = [
     '垃圾訊息 / 廣告',
@@ -27,17 +30,52 @@ const reasons = [
 const selectedReason = ref('垃圾訊息 / 廣告');
 const reportNote = ref('');
 
+// 關閉燈箱並重置
 const handleClose = () => {
+    reportNote.value = '';
+    selectedReason.value = '垃圾訊息 / 廣告';
     emit('update:modelValue', false);
-
 };
 
-const handleSubmit = () => {
-    emit('submit', {
+// 送出檢舉
+const handleSubmit = async () => {
+    // 1. 權限檢查：確保有登入 ID
+    const reporterId = authStore.user?.user_id || authStore.user?.id;
+    if (!reporterId) {
+        alert("請先登入才能進行檢舉");
+        return;
+    }
+
+    // 2. 檢查目標 ID 是否存在
+    if (!props.commentData.comment_id) {
+        alert("找不到檢舉目標，請稍後再試");
+        return;
+    }
+
+    // 3. 封裝資料 (對應 PHP 欄位)
+    const payload = {
+        reporter_id: reporterId,
+        target_type: 'comment',
+        target_id: props.commentData.comment_id,
         reason: selectedReason.value,
         note: reportNote.value
-    });
-    alert("感謝您的檢舉！為了維護優質的社群分享品質，我們將會盡快審核該內容。謝謝您與我們共同守護美食社群！");
+    };
+
+    try {
+        // 4. 使用 phpApi 發送 POST 請求 (路徑對應 social/submit_report.php)
+        const response = await phpApi.post('social/submit_report.php', payload);
+
+        // Axios 自動解析 JSON 資料在 response.data 中
+        if (response.data.status === 'success') {
+            alert("感謝您的檢舉！為了維護優質的社群分享品質，我們將會盡快審核該內容。謝謝您與我們共同守護美食社群！");
+            handleClose();
+        } else {
+            alert("檢舉失敗：" + (response.data.message || "伺服器忙碌中"));
+        }
+    } catch (error) {
+        console.error("API Error:", error);
+        alert("連線伺服器失敗，請確認網路或 PHP 環境。");
+    }
 };
 </script>
 
@@ -78,14 +116,8 @@ const handleSubmit = () => {
                     </div>
 
                     <div class="btn-group">
-
-
-                        <BaseBtn title="取消" variant="outline" height="40" width="100%" @click="handleClose">
-                        </BaseBtn>
-
+                        <BaseBtn title="取消" variant="outline" height="40" width="100%" @click="handleClose" />
                         <BaseBtn title="送出檢舉" width="100%" height="40" @click="handleSubmit" />
-
-
                     </div>
                 </div>
             </div>
@@ -94,6 +126,7 @@ const handleSubmit = () => {
 </template>
 
 <style scoped lang="scss">
+// ... 你原本的 SCSS 樣式程式碼 (保持不變)
 .black-mask {
     position: fixed;
     inset: 0;
@@ -211,32 +244,25 @@ const handleSubmit = () => {
     }
 }
 
-
 .btn-group {
     margin: 0;
     background-color: transparent;
-    /* 已將紅色改掉，如需偵錯可改回 red */
     width: 100%;
     height: 40px;
     flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     gap: 16px;
-    /* 稍微縮小間隙確保按鈕有足夠空間撐開 */
     margin-top: 16px;
 
     :deep(.base-btn) {
         flex: 1 !important;
-        /* 強制平分空間 */
         max-width: none !important;
-        /* 破除內置最大寬度限制 */
         width: 100% !important;
-        /* 強制撐滿 */
 
         button,
         a {
             width: 100% !important;
-            /* 確保內部原生標籤也撐滿 */
         }
     }
 
@@ -284,31 +310,23 @@ textarea {
     padding: 10px 12px;
     resize: none;
     box-sizing: border-box;
-
-    /* 1. 確保斷行，禁止底部卷軸 */
     white-space: pre-wrap;
     word-wrap: break-word;
     overflow-x: hidden;
     overflow-y: auto;
-
-    /* 2. 美化側邊卷軸 (Firefox) */
     scrollbar-width: thin;
     scrollbar-color: $primary-color-100 transparent;
 
-    /* 3. 美化側邊卷軸 (Chrome, Edge, Safari) */
     &::-webkit-scrollbar {
         width: 6px;
-        /* 卷軸寬度 */
     }
 
     &::-webkit-scrollbar-track {
         background: transparent;
-        /* 軌道顏色 */
     }
 
     &::-webkit-scrollbar-thumb {
         background-color: $primary-color-100;
-        /* 卷軸顏色 */
         border-radius: 10px;
 
         &:hover {

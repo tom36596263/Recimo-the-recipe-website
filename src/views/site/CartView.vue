@@ -1,21 +1,18 @@
 <script setup>
-import { ref, defineProps, computed, defineEmits, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+// 引用 Pinia Store (權限狀態管理)
+import { useAuthStore } from '@/stores/authStore';
+const authStore = useAuthStore();
 import { useCartStore } from '@/stores/cartStore'
+const cartStore = useCartStore()
 import ProductRmd from '@/components/mall/ProductRmd.vue';
 import CartCard from '@/components/mall/CartCard.vue';
 // 門禁守衛
 import { useAuthGuard } from '@/composables/useAuthGuard';
-import { useRouter } from 'vue-router';
 const { runWithAuth } = useAuthGuard();
-const cartStore = useCartStore()
+// 用來執行動作
+import { useRouter } from 'vue-router';
 const router = useRouter();
-
-// 計算總額
-const totalAmount = computed(() => {
-  return cartStore.items.reduce((total, item) => {
-    return total + (item.product_price * (item.count || 0));
-  }, 0);
-});
 
 // 前往結帳
 const handleGoToCheckout = () => {
@@ -37,15 +34,30 @@ const handleScroll = () => {
   isScrollingDown.value = currentY > lastScrollY;
   lastScrollY = currentY;
 };
-onMounted(() => {
+onMounted(async () => {
   // 監聽滾動
   window.addEventListener('scroll', handleScroll);
+  // 如果已經登入，直接抓資料
+  if (authStore.isLoggedIn) {
+    await cartStore.fetchCart();
+  }
 });
 
 onUnmounted(() => {
   // 清除監聽，避免 memory leak
   window.removeEventListener('scroll', handleScroll);
 });
+
+// 如果使用者是在這個頁面「剛登入成功」，也立即抓一次資料
+watch(
+  () => authStore.isLoggedIn,
+  async (newVal) => {
+    if (newVal) {
+      await cartStore.fetchCart();
+    }
+  },
+  { immediate: true } // 這行很重要，這讓監聽器在組件建立時就先跑一次
+);
 </script>
 
 <template>

@@ -6,7 +6,6 @@ const props = defineProps({
     list: { type: Array, default: () => [] }
 });
 
-
 watchEffect(() => {
     if (props.list.length === 0) {
         console.warn('偵錯：父組件傳入的食材陣列為空');
@@ -14,13 +13,19 @@ watchEffect(() => {
 });
 
 const computedIngredients = computed(() => {
-    return props.list.map(item => ({
-        ...item,
-        // 數字太大轉科學記號，避免破版
-        displayAmount: ((Number(item.amount) || 0) * props.servings) > 1e12
-            ? ((Number(item.amount) || 0) * props.servings).toExponential(2)
-            : parseFloat(((Number(item.amount) || 0) * props.servings).toFixed(1))
-    }));
+    return props.list.map(item => {
+        // 🏆 關鍵修正：直接使用 item.amount。
+        // 因為父組件 RecipeDetail 的 ingredientsData 已經根據份量算好該數值了。
+        const currentAmount = Number(item.amount) || 0;
+
+        return {
+            ...item,
+            // 數字太大轉科學記號，避免破版
+            displayAmount: currentAmount > 1e12
+                ? currentAmount.toExponential(2)
+                : parseFloat(currentAmount.toFixed(1))
+        };
+    });
 });
 </script>
 

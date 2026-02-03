@@ -108,6 +108,7 @@ const fetchData = async () => {
     productList.value = response.data;
     console.log('成功透過 phpApi 抓取資料！', productList.value);
   } catch (error) {
+    productList.value = []
     console.error('API 連線失敗:', error);
     // 偵錯小技巧：印出伺服器回傳的錯誤訊息
     if (error.response) {
@@ -131,7 +132,7 @@ const setPage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
     // 建議：換頁後通常會把視窗滾動到商品區上方，體驗較好
-    // window.scrollTo({ top: 500, behavior: 'smooth' });
+    window.scrollTo({ top: 500, behavior: 'smooth' });
   }
 };
 
@@ -158,6 +159,11 @@ const columns = ref([
   // 第四欄
   [getImg('food10.png'), getImg('food11.png'), getImg('food3.png')]
 ]);
+
+const goToDetail = (productId) => {
+  // 導向詳情頁，路徑通常是 /mall/:id
+  router.push(`/mall/${productId}`);
+};
 </script>
 
 <template>

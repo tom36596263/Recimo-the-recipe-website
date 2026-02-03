@@ -1,10 +1,13 @@
 <script setup>
-import { ref, defineProps, computed, defineEmits } from 'vue';
+import { ref, defineProps } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
+const cartStore = useCartStore()
+// 引用彈窗
 import BaseModal from '@/components/BaseModal.vue';
-import { publicApi, base } from '@/utils/publicApi';
 
-// 接收父元件傳過來的商品資料，item是資料傳送的「對口名稱」取的 (父子必須一致)，整段的意思是「各位父組件請注意！我是商品卡片，如果你要用我，請務必 (required) 給我一個物件型態 (Object) 的資料，並且請貼上 item 這個標籤交給我。」
+// ==========================================
+// 接收父元件傳過來的商品資料
+// ==========================================
 const props = defineProps({
     item: {
         type: Object,
@@ -14,67 +17,21 @@ const props = defineProps({
 });
 
 // ==========================================
-// vue上課教：以後部屬比較不會有問題
-// ==========================================
-const baseURL = import.meta.env.BASE_URL
-
-// ==========================================
 // 加入購物車
 // ==========================================
-const cartStore = useCartStore()
-
 // 定義控制 Modal 顯示的變數
 const showSuccess = ref(false);
 
 const addToCart = () => {
-    // 檢查點：先印出簡單的字串，確認按鈕有沒有被點到
+    // 確認按鈕有沒有被點到
     // console.log("把商品", props.item.product_name, "加入購物車");
 
     cartStore.add(props.item);
 
     // alert(`「${props.item.product_name}」已加入購物車~`);
     showSuccess.value = true;
+    setTimeout(() => { showSuccess.value = false; }, 1500);
 };
-
-// ==========================================
-// 計算圖片路徑 (修正版：確保對接子目錄)
-// ==========================================
-const getImageUrl = (url) => {
-    if (!url) return '';
-
-    // 1. 去除 JSON 裡可能帶有的 "public/" 字眼
-    let cleanPath = url.replace(/^public\//, '');
-
-    // 2. 確保 cleanPath 開頭沒有斜線 (避免跟 base 的結尾斜線重複產生 //)
-    if (cleanPath.startsWith('/')) {
-        cleanPath = cleanPath.substring(1);
-    }
-
-    // 3. 獲取當前環境的 Base URL
-    // 此時.env 應為 VITE_BASE=/cjd102/g2/recimo/
-    const base = import.meta.env.BASE_URL;
-
-    // 4. 確保 base 結尾有斜線後再拼接
-    const safeBase = base.endsWith('/') ? base : `${base}/`;
-
-    return `${safeBase}${cleanPath}`;
-};
-
-const productImage = computed(() => {
-    const images = props.item.product_image;
-
-    if (Array.isArray(images) && images.length > 0) {
-        // 找到封面圖或是取第一張
-        const coverImage = images.find(img => img.is_cover) || images[0];
-
-        // 統一交給 getImageUrl 處理
-        return parsePublicFile(coverImage.image_url);
-    }
-
-    // 備用圖路徑同樣需經過 getImageUrl 或確保 base 拼接正確
-    return `${base}images/default-placeholder.png`;
-});
-
 </script>
 <template>
     <router-link :to="`/mall/${item.product_id}`" class="product-card card-content">
@@ -95,9 +52,12 @@ const productImage = computed(() => {
         </div>
 
     </router-link>
-    <BaseModal :isOpen="showSuccess" type="success" iconClass="fa-solid fa-check"
-        :title="`已將【${item.product_name}】\n加入購物車`" @close="showSuccess = false">
-    </BaseModal>
+    <!-- 解決CSS 層級 (z-index) 與 容器溢出 (overflow) 的問題，利用 Vue 的 <Teleport> 功能，將 Modal 抽離到 <body> 層級 -->
+    <Teleport to="body">
+        <BaseModal :isOpen="showSuccess" type="success" iconClass="fa-solid fa-check"
+            :title="`已將【${item.product_name}】\n加入購物車`" @close="showSuccess = false">
+        </BaseModal>
+    </Teleport>
 </template>
 <style lang="scss" scoped>
 @use "sass:map";

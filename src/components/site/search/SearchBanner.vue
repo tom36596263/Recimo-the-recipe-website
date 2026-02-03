@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { publicApi } from '@/utils/publicApi'
 import SearchBar from '@/components/common/SearchBar.vue'
 import BaseTag from '@/components/common/BaseTag.vue'
-
+import SearchPageBanner from '@/assets/images/site/search-page-banner.png'
 
 const props = defineProps(['modelValue'])
 const emit = defineEmits(['update:modelValue'])
@@ -39,7 +39,7 @@ const handleTagClick = (tagName) => {
 <template>
     <div class="search-banner">
         <img 
-        :src="$parsePublicFile('img/site/search-page-banner.png')" 
+        :src="SearchPageBanner" 
         alt="search banner"
         class="banner-bg"
         />

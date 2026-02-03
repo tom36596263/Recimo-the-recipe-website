@@ -1,19 +1,21 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
 import BaseBtn from '@/components/common/BaseBtn.vue'
-import LogoBlack from '/img/site/Recimo-logo-black.svg'
 import IconList from 'virtual:icons/material-symbols/List'
 import IconAdd from 'virtual:icons/material-symbols/Add'
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
+// 引用彈窗
+import BaseModal from '@/components/BaseModal.vue';
 
 const isVisible = ref(true);
 let lastScrollPosition = 0;
 
 const handleScroll = (e) => {
     const currentScrollPosition = e.target.scrollTop;
-    if(Math.abs(currentScrollPosition - lastScrollPosition) < 10) return;
+    if (Math.abs(currentScrollPosition - lastScrollPosition) < 10) return;
     isVisible.value = currentScrollPosition < lastScrollPosition || currentScrollPosition <= 0;
     lastScrollPosition = currentScrollPosition;
 }
@@ -67,15 +69,24 @@ const mobileMoreItems = computed(() => menuItems.value.slice(3));
 const toggleMore = () => isMoreOpen.value = !isMoreOpen.value;
 const closeMore = () => isMoreOpen.value = false;
 
-// --- 登出邏輯 ---
+// ==========================================
+// 登出
+// ==========================================
+const isLogoutModalOpen = ref(false);
+
+const confirmLogout = () => {
+    isLogoutModalOpen.value = true; // 先打開彈窗，不直接登出
+};
+
 const handleLogout = () => {
-    console.log('正在登出...');
-    authStore.logout();   // 執行清除狀態
+    // console.log('正在登出...');
+    authStore.logout();   // 執行 Pinia 清除狀態
+    isLogoutModalOpen.value = false; // 關閉彈窗
 
     if (isMoreOpen.value) {
         closeMore();
     }
-    // closeMenu();          // 關閉手機版選單
+    // closeMenu();       // 關閉手機版選單
     router.push('/');     // 跳轉回首頁
 };
 
@@ -94,7 +105,7 @@ const handleLogout = () => {
                 </div>
             </router-link>
         </div>
-        <BaseBtn v-if="authStore.isLoggedIn" title="登出" height="30" @click="handleLogout" class="logout-btn" />
+        <BaseBtn v-if="authStore.isLoggedIn" title="登出" height="30" @click="confirmLogout" class="logout-btn" />
     </aside>
 
     <nav class="mobile-tabbar" :class="{ 'tabber-hidden': !isVisible }">
@@ -115,6 +126,13 @@ const handleLogout = () => {
         </div>
 
     </nav>
+    <BaseModal :isOpen="isLogoutModalOpen" type="info" iconClass="fa-solid fa-sign-out-alt" title="確定要登出嗎？"
+        @close="isLogoutModalOpen = false">
+        <template #actions>
+            <BaseBtn title="取消" class="btn-outline" @click="isLogoutModalOpen = false" />
+            <BaseBtn title="確定登出" class="btn-solid" @click="handleLogout" />
+        </template>
+    </BaseModal>
     <Transition name="slide">
         <div v-if="isMoreOpen" class="slide-up">
             <div class="overlay" @click="closeMore"></div>
@@ -123,7 +141,7 @@ const handleLogout = () => {
                     <router-link to="/">
                         <img :src="$parsePublicFile('img/site/Recimo-logo-white.svg')" alt="logo" class="logo">
                     </router-link>
-                    <BaseBtn v-if="authStore.isLoggedIn" title="登出" height="30" @click="handleLogout" />
+                    <BaseBtn v-if="authStore.isLoggedIn" title="登出" height="30" @click="confirmLogout" />
                 </div>
                 <div class="panel-items">
                     <router-link v-for="item in mobileMoreItems" :key="item.path" :to="item.path" class="panel-link"
@@ -135,7 +153,6 @@ const handleLogout = () => {
                     </router-link>
                 </div>
             </div>
-
         </div>
     </Transition>
 
@@ -228,7 +245,8 @@ const handleLogout = () => {
     transition: transform 0.3s ease, opacity 0.3s ease;
     transform: translateY(0);
     opacity: 1;
-    &.tabber-hidden{
+
+    &.tabber-hidden {
         transform: translateY(100%);
         opacity: 0;
         pointer-events: none;

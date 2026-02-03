@@ -1,11 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
-import { publicApi } from '@/utils/publicApi';
-import { base } from '@/utils/publicApi';
-
+import { ref, computed, nextTick, watch } from 'vue';
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
 const authStore = useAuthStore();
+import { useCartStore } from '@/stores/cartStore';
+const cartStore = useCartStore();
+import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
 // 引用彈窗
 import BaseModal from '@/components/BaseModal.vue';
 // 引用input
@@ -15,13 +15,19 @@ import IconEyeOpen from '~icons/material-symbols/visibility-outline-rounded';
 import IconEyeClose from '~icons/material-symbols/visibility-off-outline-rounded';
 // 引用驗證碼
 import CaptchaInput from '@/components/login/CaptchaInput.vue'
-
+// 呼叫Api
+import { phpApi, base } from '@/utils/publicApi.js';
+// 用來執行動作
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 // 定義控制彈窗的變數
 const showLoginSuccess = ref(false);
 const showLoginFail = ref(false);
 const showRegisterSuccess = ref(false);
 const showRegisterFail = ref(false);
+const loginErrorMessage = ref(''); // 用來存放後端回傳的錯誤原因
+const registerErrorMessage = ref(''); // 用來存放後端回傳的錯誤原因
 
 // ==========================================
 // 登入.註冊前端驗證
@@ -44,14 +50,26 @@ const touched = ref({
   register: { name: false, email: false, password: false, confirmPassword: false }
 });
 
-// 登入input前端驗證訊息內容
+// ==========================================
+// 登入：前端驗證訊息內容
+// ==========================================
 const loginMessage = computed(() => {
   const t = touched.value.login;
   const d = loginData.value;
-  return {
-    email: t.email && !d.email ? '* 此欄為必填' : (t.email && !/^\S+@\S+\.\S+$/.test(d.email) ? '* email 格式錯誤' : ''),
-    password: t.password && !d.password ? '* 此欄為必填' : ''
-  };
+  const errors = { email: '', password: '' };
+
+  // Email 驗證
+  if (t.email) {
+    if (!d.email) errors.email = '* 此欄為必填';
+    else if (!/^\S+@\S+\.\S+$/.test(d.email)) errors.email = '* email 格式錯誤';
+  }
+
+  // 密碼驗證
+  if (t.password && !d.password) {
+    errors.password = '* 此欄為必填';
+  }
+
+  return errors;
 });
 
 const loginStatus = computed(() => ({
@@ -59,7 +77,19 @@ const loginStatus = computed(() => ({
   password: touched.value.login.password ? (loginMessage.value.password ? 'error' : 'success') : ''
 }));
 
-// 註冊input前端驗證訊息內容
+const captchaError = computed(() => {
+  // 如果還沒碰過，不顯示錯誤
+  if (!touched.value.login.captcha) return '';
+  // 如果沒填
+  if (!loginForm.value.captchaInput) return '* 此欄為必填';
+  // 如果驗證沒通過
+  if (!captchaVerified.value) return '* 驗證碼錯誤';
+  return '';
+});
+
+// ==========================================
+// 註冊：前端驗證訊息內容
+// ==========================================
 const registerMessage = computed(() => {
   const t = touched.value.register;
   const d = registerData.value;
@@ -114,7 +144,6 @@ const regPasswordRef = ref(null);
 const regConfirmPasswordRef = ref(null);
 
 // 建立一個通用跳轉函式
-
 const focusInput = async (targetRef) => {
   await nextTick();
 
@@ -144,45 +173,47 @@ const onCaptchaVerified = (success) => {
 }
 
 // ==========================================
-// 登入及註冊按鈕邏輯
+// 登入：送出邏輯
 // ==========================================
-// 登入按鈕邏輯
 const handleLogin = async () => {
-  // 強制檢查：如果目前驗證碼輸入框的值跟圖形不符，直接攔截
-  // (雖然有 status 計算屬性，但直接在這裡擋下最安全)
-  if (!captchaVerified.value) {
-    showLoginFail.value = true;
+  // 觸發所有欄位的 touched 狀態，錯誤由紅字顯示
+  touched.value.login.email = true;
+  touched.value.login.password = true;
+  touched.value.login.captcha = true;
+
+  // 檢查所有前端驗證是否通過
+  const hasLoginError = loginMessage.value.email || loginMessage.value.password;
+
+  // 如果有帳密錯誤，或者驗證碼沒過，直接攔截（不跳彈窗）
+  if (hasLoginError || !captchaVerified.value) {
+    // console.log('前端驗證未通過，攔截登入');
     return;
   }
-  // 1. 強制觸發所有欄位驗證顯示
-  Object.keys(touched.value.login).forEach(key => touched.value.login[key] = true);
 
+  // 只有前端全過，才會跑到這裡執行 API
   try {
-    // 這裡 fetch 路徑請確保檔案存在於 public/data/users.json
-    const response = await publicApi.get('data/user/users.json');
-    // if (!response.ok) throw new Error('無法讀取使用者資料');
+    // 改用 POST 發送到 PHP
+    const response = await phpApi.post('auth/login.php', {
+      email: loginData.value.email,
+      password: loginData.value.password
+    });
 
-    // const users = await response.json();
-    const users = response.data;
-    const { email, password } = loginData.value;
+    const result = response.data;
+    // console.log('PHP 回傳：', result.user);
 
-    // 2. 比對資料
-    const foundUser = users.find(u =>
-      u.user_email === email && u.user_password === password
-    );
+    // 判斷 PHP 回傳的狀態 (對應PHP的 status)
+    if (result.status === 'success') {
+      // 登入成功：使用 PHP 回傳的真實資料 (result.user)
+      authStore.login(result.user);
 
-    if (foundUser) {
-      if (!foundUser.is_active) {
-        alert('此帳號已被停用，請聯絡官方人員');
-        return;
-      }
+      // 立刻去後端抓該使用者的購物車
+      // 用 await，確保購物車資料抓完後再進行後續動作
+      await cartStore.fetchCart();
 
-      // 3. 登入成功
-      authStore.login(foundUser);
-
-      // 立刻隱藏書本燈箱
-      isVisible.value = false;
+      // 先叫出成功小彈窗再關掉登入大書本
       showLoginSuccess.value = true;
+      isVisible.value = false;
+
 
       // 延遲後跳轉
       setTimeout(() => {
@@ -190,20 +221,21 @@ const handleLogin = async () => {
         emit('close');
         handleClose();
 
-        // 跳轉邏輯 ---
-        // 檢查網址列有沒有存 redirect 參數，沒有的話就回首頁 '/'
-        if (!authStore.pendingAction) {
+        if (authStore.pendingAction) {
           router.push('/');
         }
       }, 1500);
 
     } else {
-      // 4. 登入失敗
+      // 登入失敗：顯示失敗彈窗
+      // console.log('PHP 回傳的錯誤訊息：', result.message);
+      // 接收 PHP 回傳的 message (例如：帳號不存在、密碼錯誤)
+      loginErrorMessage.value = result.message;
       showLoginFail.value = true;
     }
   } catch (error) {
-    console.error('取得資料失敗:', error);
-    alert('伺服器連線異常，請稍後再試');
+    // console.error('API 連線失敗:', error);
+    alert('伺服器連線異常');
   }
 };
 
@@ -216,7 +248,7 @@ const resetLoginForm = () => {
     password: ''
   };
 
-  // 2. 清空驗證碼輸入 (如果有需要)
+  // 2. 清空驗證碼輸入
   loginForm.value.captchaInput = '';
 
   // 3. 重置「已觸碰」狀態，這樣錯誤訊息（紅字）才會消失
@@ -230,9 +262,11 @@ const resetLoginForm = () => {
   captchaKey.value += 1;
 };
 
-// 註冊按鈕邏輯
-const handleRegister = () => {
-  // 1. 觸發所有欄位的 touched 狀態 (強制顯示驗證錯誤)
+// ==========================================
+// 註冊：送出邏輯
+// ==========================================
+const handleRegister = async () => {
+  // 觸發所有欄位的 touched 狀態，錯誤由紅字顯示
   touched.value.register = {
     name: true,
     email: true,
@@ -240,37 +274,37 @@ const handleRegister = () => {
     confirmPassword: true
   };
 
-  // 新增規則檢查
+  // 檢查前端是否有錯誤 (密碼規則或格式)
   const allRulesMet = Object.values(passwordRules.value).every(val => val === true);
+  const hasError = Object.values(registerMessage.value).some(msg => msg !== '' && msg !== ' ');
 
-  if (!allRulesMet) {
-    // alert('密碼不符合規定，請重新檢查');
-    showRegisterFail.value = true;
-    return;
+  // 如果前端驗證沒過，直接 return (此時畫面上會有紅字提示，不需要額外彈窗)
+  if (!allRulesMet || hasError) return;
+
+  try {
+    // 改用 POST 發送到 PHP API
+    const response = await phpApi.post('auth/register.php', registerData.value);
+    const result = response.data;
+
+    if (result.status === 'success') {
+      showRegisterSuccess.value = true;
+      setTimeout(() => {
+        showRegisterSuccess.value = false;
+        goToLogin();
+      }, 1500);
+    } else {
+      // 註冊失敗：顯示失敗彈窗
+      // 接收 PHP 回傳的 message (例如：此電子信箱尚未註冊)
+      registerErrorMessage.value = result.message;
+      showRegisterFail.value = true;
+    }
+  } catch (error) {
+    // console.error('API 連線失敗:', error);
+    alert('伺服器連線異常');
   }
-
-  // 2. 檢查是否有錯誤訊息
-  const hasError = Object.values(registerMessage.value).some(msg => msg !== '');
-
-  if (hasError) {
-    // alert('請檢查輸入欄位是否正確');
-    showRegisterFail.value = true;
-    return;
-  }
-
-  // 3. 執行註冊邏輯 (API 呼叫等)
-  // console.log('註冊資料:', registerData.value);
-  // alert('註冊成功!可請前往登入');
-  showRegisterSuccess.value = true;
-
-  // 註冊完通常會直接幫使用者登入或跳轉到登入頁
-  setTimeout(() => {
-    showRegisterSuccess.value = false;
-    goToLogin(); // 翻回登入頁
-  }, 2000);
 };
 
-// 補上重置註冊表單的函式
+// 重置註冊表單的函式
 const resetRegisterForm = () => {
   registerData.value = {
     name: '',
@@ -286,13 +320,24 @@ const resetRegisterForm = () => {
     confirmPassword: false
   };
 };
+
+// 密碼規定檢查
+const passwordRules = computed(() => {
+  const pwd = registerData.value.password;
+  return {
+    length: pwd.length >= 8,                       // 至少 8 個字元
+    hasUpper: /[A-Z]/.test(pwd),                  // 含一大寫字母
+    hasLower: /[a-z]/.test(pwd),                  // 含一小寫字母
+  };
+});
+
 // ==========================================
 // 翻頁效果與自動清空
 // ==========================================
 const isRegister = ref(false);
 const isVisible = ref(true);
 
-// 核心監聽：只要頁面一切換，就清空「對方」的資料
+// 只要頁面一切換，就清空「對方」的資料
 watch(isRegister, (newVal) => {
   if (newVal) {
     // 切換到註冊 -> 清空登入表單
@@ -323,14 +368,11 @@ const handleClose = () => {
   emit('close'); // 通知 GlobalModalManager 把 Pinia 的狀態關掉
 };
 
-// 密碼規定檢查
-const passwordRules = computed(() => {
-  const pwd = registerData.value.password;
-  return {
-    length: pwd.length >= 8,                       // 至少 8 個字元
-    hasUpper: /[A-Z]/.test(pwd),                  // 含一大寫字母
-    hasLower: /[a-z]/.test(pwd),                  // 含一小寫字母
-  };
+// ==========================================
+// 登入成功彈窗
+// ==========================================
+const currentUserName = computed(() => {
+  return authStore.user?.name;
 });
 </script>
 
@@ -462,7 +504,7 @@ const passwordRules = computed(() => {
                         前往會員註冊
                     ========================================== -->
               <div class="registration-invite">
-                <img :src="`${base}img/site/Recimo-logo-black.svg`" />
+                <img :src="LogoBlack" alt="Recimo Logo">
                 <div class="registration-invite__content">
                   <h3 class="zh-h3">還不是會員嗎？</h3>
                   <h4 class="zh-h4">快來一起加入Recimo吧~</h4>
@@ -476,7 +518,7 @@ const passwordRules = computed(() => {
                         前往會員登入
                     ========================================== -->
               <div class="login-invite">
-                <img src="/img/site/Recimo-logo-black.svg" />
+                <img :src="LogoBlack" alt="Recimo Logo">
                 <div class="login-invite__content">
                   <h3 class="zh-h3">歡迎回來Recimo</h3>
                   <h4 class="zh-h4">如果已經有會員就直接登入吧~</h4>
@@ -496,10 +538,10 @@ const passwordRules = computed(() => {
 
   </div>
   <BaseModal :isOpen="showLoginSuccess" type="success" iconClass="fa-solid fa-check" title="登入成功"
-    @close="showLoginSuccess = false" />
+    :description="`${currentUserName}，歡迎回來Recimo~`" @close="showLoginSuccess = false" />
 
   <BaseModal :isOpen="showLoginFail" type="danger" iconClass="fa-solid fa-exclamation" title="登入失敗"
-    @close="showLoginFail = false">
+    :description="loginErrorMessage" @close="showLoginFail = false">
     <template #actions>
       <button class="btn-solid" @click="showLoginFail = false; resetLoginForm()">重新登入</button>
       <!-- <button class="btn-outline" @click="/* 導向忘記密碼邏輯 */">忘記密碼</button> -->
@@ -507,13 +549,13 @@ const passwordRules = computed(() => {
   </BaseModal>
 
   <BaseModal :isOpen="showRegisterSuccess" type="success" iconClass="fa-solid fa-user-plus" title="註冊成功"
-    description="歡迎加入~將為您跳轉至登入畫面" @close="showRegisterSuccess = false">
+    description="歡迎加入Recimo~將為您跳轉至登入畫面" @close="showRegisterSuccess = false">
   </BaseModal>
 
-  <BaseModal :isOpen="showRegisterFail" type="danger" title="註冊資訊有誤" iconClass="fa-solid fa-exclamation"
-    description="請檢查欄位是否填寫正確，並符合密碼規定" @close="showRegisterFail = false">
+  <BaseModal :isOpen="showRegisterFail" type="danger" title="註冊失敗" iconClass="fa-solid fa-exclamation"
+    :description="registerErrorMessage" @close="showRegisterFail = false">
     <template #actions>
-      <button class="btn-solid" @click="showRegisterFail = false">返回檢查</button>
+      <button class="btn-solid" @click="showRegisterFail = false">返回修改</button>
     </template>
   </BaseModal>
 </template>
@@ -548,7 +590,7 @@ const passwordRules = computed(() => {
   // margin: 20px 0;
   display: flex;
   flex-direction: column; // 讓內容由上往下排
-  align-items: center; // **關鍵：讓所有子元素水平置中**
+  align-items: center; // 讓所有子元素水平置中**
   width: 100%; // 確保容器撐滿寬度
 }
 
@@ -742,7 +784,6 @@ const passwordRules = computed(() => {
   background-color: rgba(0, 0, 0, 0.5);
 
   // 賦予整個空間 3D 深度感，數值越大透視越平緩
-
   perspective: 2000px;
 
   &__overlay {
@@ -764,8 +805,8 @@ const passwordRules = computed(() => {
   // 確保子元素能在 3D 空間中運動
   transform-style: preserve-3d;
   transition: transform 0.6s ease;
-  // 3. 底層固定頁面 (Left & Right)
 
+  // 3. 底層固定頁面 (Left & Right)
   &__base {
     flex: 1;
     background-color: #fff;
@@ -797,7 +838,7 @@ const passwordRules = computed(() => {
     width: 50%;
     height: 100%;
 
-    // 設定旋轉軸心在左側（即書脊位置）
+    // 設定旋轉軸心在左側（書脊位置）
     transform-origin: left center;
     transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     transform-style: preserve-3d;

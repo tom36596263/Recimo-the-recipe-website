@@ -1,115 +1,85 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { publicApi } from '@/utils/publicApi'
+import { ref, computed, onMounted, watch } from 'vue';
+import { phpApi } from '@/utils/publicApi';
 
-import SearchBanner from '@/components/site/search/SearchBanner.vue'
-import SearchResultCard from '@/components/site/search/SearchResultCard.vue'
-import EmptyState from '@/components/site/RecipeOverview/NoResult.vue'
-import PageBtn from '@/components/common/PageBtn.vue'
+import SearchBanner from '@/components/site/search/SearchBanner.vue';
+import SearchResultCard from '@/components/site/search/SearchResultCard.vue';
+import EmptyState from '@/components/site/RecipeOverview/NoResult.vue';
+import PageBtn from '@/components/common/PageBtn.vue';
 
+// 1. 定義響應式變數
 const recipes = ref([]);
-const products = ref([]);
-const recipeTags = ref([]);
-const tags = ref([]);
 const searchQuery = ref('');
-
 const currentPage = ref(1); 
 const pageSize = 5;
 const isLoading = ref(true);
 
-onMounted(async () => {
-    try{
-        const [resRecipes,resProducts, resRecipeTags, resTags ] = await Promise.all([
-            publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/mall/products.json'),
-            publicApi.get('data/recipe/recipe_tag.json'),
-            publicApi.get('data/recipe/tags.json')
-        ]);
-        recipes.value = resRecipes.data;
-        products.value = resProducts.data;
-        recipeTags.value = resRecipeTags.data;
-        tags.value = resTags.data;
-        console.log(products.value)
+// 2. 取得搜尋結果的函式 (整合後端)
+const fetchSearchResults = async (keyword = '') => {
+    isLoading.value = true;
+    try {
+        const response = await phpApi.get('recipes/search_get.php', {
+            params: { keyword: keyword }
+        });
 
-    }catch(err){
-        console.error("載入失敗", err);
-    }finally {
+        if (response.data.status === 'success') {
+            // PHP 已經 JOIN 好了所有資料，直接存入 recipes
+            recipes.value = response.data.data || [];
+        } else {
+            recipes.value = [];
+        }
+    } catch (err) {
+        console.error("搜尋載入失敗:", err);
+        recipes.value = [];
+    } finally {
         isLoading.value = false;
     }
-});
-
-const getProductForRecipe = (recipe) => {
-    if(!recipe.linked_product_id) return null;
-    return products.value.find(p => p.product_id === recipe.linked_product_id);
-}
-
-const getRecipeTags = (recipeId) => {
-    const targetTagIds = recipeTags.value
-        .filter(rt => rt.recipe_id === recipeId)
-        .map(rt => rt.tag_id);
-    return tags.value.filter(t => targetTagIds.includes(t.tag_id));
 };
 
-//篩選
-const filteredRecipes = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase();
-    if(!query) return recipes.value;
-
-    const matchTagIds = tags.value
-    .filter(t => t.tag_name.toLowerCase()
-    .includes(query))
-    .map(t => t.tag_id);
-
-    return recipes.value.filter(recipe => {
-        const titleMatch = recipe.recipe_title.toLowerCase().includes(query);
-
-        const product = getProductForRecipe(recipe);
-        const productMatch = product? product.product_name.toLowerCase().includes(query):false;
-        const productCategoryMatch = product? product.product_category.toLowerCase().includes(query):false;
-        const tagMatch = recipeTags.value.some(rt => 
-            rt.recipe_id === recipe.recipe_id && matchTagIds.includes(rt.tag_id)
-        );
-        return titleMatch || productMatch || productCategoryMatch || tagMatch;
-    });
+// 3. 生命週期
+onMounted(() => {
+    fetchSearchResults(); 
 });
-//計算食譜、料理包總數
-const displayCounts = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase();
-    if(!query){
-        return{
-            recipes: recipes.value.length,
-            products: products.value.length
-        };
-    }
-    const currentResults = filteredRecipes.value;
-    const recipeCount = currentResults.length;
-    const productCount = currentResults.filter(recipe => recipe.linked_product_id !== null).length;
-    return{
-        recipes: recipeCount,
-        products: productCount
-    }
-})
 
-//計算頁數
+// 4. 監聽搜尋關鍵字：當使用者輸入時，重新向後端要資料
+watch(searchQuery, (newVal) => {
+    currentPage.value = 1;
+    fetchSearchResults(newVal); 
+});
+
+// 5. 計算屬性
+const filteredRecipes = computed(() => recipes.value);
+
+const displayCounts = computed(() => {
+    return {
+        recipes: recipes.value.length,
+        // 只要 linked_product_id 不是 null，就代表有關聯料理包
+        products: recipes.value.filter(r => r.linked_product_id).length
+    };
+});
+
 const totalPages = computed(() => {
-    return Math.ceil(filteredRecipes.value.length/pageSize);
+    return Math.ceil(filteredRecipes.value.length / pageSize) || 1;
 });
 
 const paginateRecipes = computed(() => {
     const start = (currentPage.value - 1) * pageSize;
-    const end = start + pageSize;
-    return filteredRecipes.value.slice(start, end);
+    return filteredRecipes.value.slice(start, start + pageSize);
 });
 
+// 6. 互動函式
 const handlePageChange = (newPage) => {
     currentPage.value = newPage;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-import { watch } from 'vue';
-watch(searchQuery, () => {
-    currentPage.value = 1;
-});
+const handleEmptyAction = (action) => {
+    if (action === 'recipes') {
+        searchQuery.value = ''; // 這會觸發 watch 並執行 fetchSearchResults('')
+    } else if (action === 'go-kitchen') {
+        // 跳轉邏輯
+    }
+};
 </script>
 
 <template>
@@ -134,11 +104,12 @@ watch(searchQuery, () => {
             </div>
             <div class="col-12" v-if="!isLoading">
                 <SearchResultCard 
-                v-for="item in paginateRecipes" 
-                :key="item.recipe_id"
-                :recipe="item"
-                :product="getProductForRecipe(item)" 
-                :recipeTags="getRecipeTags(item.recipe_id)" />
+                    v-for="item in paginateRecipes" 
+                    :key="item.recipe_id"
+                    :recipe="item"
+                    :product="item.linked_product_id ? item : null" 
+                    :recipeTags="item.tag_names ? item.tag_names.split(',').map(n => ({tag_name: n})) : []" 
+                />
             </div>
         </div>
         <div v-else class="row">

@@ -1,30 +1,47 @@
 <script setup>
-import { ref, computed } from 'vue'; // 引入 computed
+import { ref, computed } from 'vue';
+import { useAuthStore } from '@/stores/authStore'; // 🏆 引入 Store 拿 user_id
+import { phpApi } from '@/utils/phpApi.js';     // 🏆 引入你的 axios 實體
 
 const props = defineProps({
     modelValue: Boolean,
     targetData: {
         type: Object,
         default: () => ({
+            recipe_id: null, // 🏆 確保食譜 ID 欄位正確
             title: '載入中...',
             userName: '未知作者',
             time: '',
             image: '',
-            author_id: null // 確保有接收 id
+            author_id: null
         })
     }
 });
 
-const emit = defineEmits(['update:modelValue', 'submit']);
+const emit = defineEmits(['update:modelValue']);
+const authStore = useAuthStore(); // 初始化 Store
 
-// 🏆 新增：判斷作者名稱的計算屬性
 const displayAuthor = computed(() => {
-    // 如果 author_id 為 1，或者是資料中明確標記為官方
+    // 診斷：看看現在 props 到底拿到了什麼
+    // console.log("Modal 接收到的 props:", props.targetData);
+
+    // 1. 判斷是否為官方 (ID 1)
     if (props.targetData.author_id === 1 || props.targetData.author_id === "1") {
         return 'Recimo 官方';
     }
-    // 否則顯示傳入的 userName，若無則顯示預設值
-    return props.targetData.userName || '未知作者';
+
+    // 2. 如果 props 有名字，且不是預設的「未知作者」，就顯示它
+    if (props.targetData.userName && props.targetData.userName !== '未知作者') {
+        return props.targetData.userName;
+    }
+
+    // 3. 【強力補救】如果 props 沒抓到，嘗試抓目前登入者 (authStore)
+    // 你的 authStore 結構是 authStore.user.user_name
+    if (authStore.user && authStore.user.user_name) {
+        return authStore.user.user_name;
+    }
+
+    return '未知作者';
 });
 
 const reasons = [
@@ -38,18 +55,57 @@ const selectedReason = ref('內容侵權 (盜圖或盜文)');
 const reportNote = ref('');
 
 const handleClose = () => {
+    reportNote.value = ''; // 關閉時清空
     emit('update:modelValue', false);
 };
 
-const handleSubmit = () => {
-    emit('submit', {
+const handleSubmit = async () => {
+    // 1. 取得檢舉人 ID
+    const reporterId = authStore.user?.user_id || authStore.user?.id;
+
+    // 2. 取得食譜 ID (注意：這裡要確保父組件傳進來的 key 是 recipe_id)
+    const targetId = props.targetData.recipe_id;
+
+    // 🏆 診斷點：如果報錯「欄位不足」，請看瀏覽器控制台 (F12) 的輸出
+    console.log("=== 檢舉發送檢查 ===");
+    console.log("reporter_id:", reporterId);
+    console.log("target_id:", targetId);
+    console.log("reason:", selectedReason.value);
+
+    if (!reporterId) {
+        alert("請先登入才能進行檢舉");
+        return;
+    }
+
+    if (!targetId) {
+        alert("程式錯誤：找不到食譜 ID，請聯繫管理員");
+        console.error("targetData 內容：", props.targetData);
+        return;
+    }
+
+    const payload = {
+        reporter_id: reporterId,
+        target_type: 'recipe',
+        target_id: targetId,
         reason: selectedReason.value,
-        note: reportNote.value,
-        targetTitle: props.targetData.title,
-        author: displayAuthor.value // 傳送檢舉時也帶上正確的作者名
-    });
-    alert('已送出檢舉，我們會盡快審核。');
-    handleClose();
+        note: reportNote.value
+    };
+
+    try {
+        const response = await phpApi.post('social/submit_report.php', payload);
+
+        if (response.data.status === 'success') {
+            alert('感謝您的檢舉，我們會盡快審核該食譜。');
+            handleClose();
+        } else {
+            // 如果後端回傳「欄位不足」，這裡會印出詳細原因
+            alert('檢舉失敗：' + (response.data.message || '請稍後再試'));
+            console.warn("後端回傳錯誤：", response.data);
+        }
+    } catch (error) {
+        console.error("API Error:", error);
+        alert('連線伺服器失敗，請檢查網路狀況。');
+    }
 };
 
 const getImageUrl = (url) => {
@@ -103,15 +159,14 @@ const getImageUrl = (url) => {
                     </div>
 
                     <div class="btn-group">
-                        <BaseBtn title="取消" variant="outline" height="40" class="w-auto" @click="handleClose" />
-                        <BaseBtn title="送出檢舉" height="40" @click="handleSubmit" class="w-auto" />
+                        <BaseBtn title="取消" variant="outline" height="40" width="100%" @click="handleClose" />
+                        <BaseBtn title="送出檢舉" height="40" width="100%" @click="handleSubmit" />
                     </div>
                 </div>
             </div>
         </div>
     </Teleport>
 </template>
-
 
 
 <style scoped lang="scss">

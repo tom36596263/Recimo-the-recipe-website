@@ -1,12 +1,15 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-// 🏆 1. 引入團隊規範工具，取代手寫的 fileUrl 和 formatImg
+import { useRouter } from 'vue-router';
 import { parsePublicFile } from '@/utils/parseFile';
+import { useAuthStore } from '@/stores/authStore';
+import { phpApi } from '@/utils/phpApi';
 
 import RecipeIntro from '@/components/workspace/recipedetail/RecipeIntro.vue';
 import RecipeIngredients from '@/components/workspace/recipedetail/RecipeIngredients.vue';
 import RecipeSteps from '@/components/workspace/recipedetail/RecipeSteps.vue';
 import NutritionCard from '@/components/workspace/recipedetail/NutritionCard.vue';
+import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
 
 const props = defineProps({
     modelValue: Boolean,
@@ -18,111 +21,146 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'delete-recipe']);
+const router = useRouter();
+const authStore = useAuthStore();
 
-// --- 🗑️ 移除原本手寫的 fileUrl 與 formatImg 函式 ---
+// 統一清理 ID 的小工具
+const getCleanId = (id) => {
+    if (!id) return '';
+    return String(id).replace(/[^\d]/g, '');
+};
 
-// 1. 取得原始份數 (防呆至少為 1)
+/**
+ * 權限判斷：是否為食譜擁有者
+ */
+const isOwner = computed(() => {
+    const currentUserId = authStore.user?.user_id || authStore.user?.id;
+    const authorId = props.recipe?.author_id || props.recipe?.user_id;
+    if (!currentUserId || !authorId) return false;
+    return Number(currentUserId) === Number(authorId);
+});
+
+/**
+ * 處理刪除改編食譜
+ */
+const handleDelete = async () => {
+    if (!confirm('確定要刪除您的改編版本嗎？此操作將無法復原。')) return;
+
+    const rawId = props.recipe?.id || props.recipe?.recipe_id;
+    const cleanId = getCleanId(rawId);
+    const isDbData = String(rawId).startsWith('db-') || props.recipe?.recipe_id;
+
+    if (isDbData) {
+        try {
+            const res = await phpApi.post('recipes/recipe_adaptation_delete.php', {
+                recipe_id: cleanId,
+                user_id: authStore.user?.user_id || authStore.user?.id
+            });
+
+            if (res.data.success) {
+                alert('刪除成功！');
+                emit('delete-recipe', cleanId);
+                closeModal();
+            } else {
+                alert('刪除失敗：' + (res.data.message || '未知錯誤'));
+            }
+        } catch (err) {
+            console.error('刪除 API 請求出錯:', err);
+            alert('連線伺服器失敗，請檢查網路狀態');
+        }
+    } else {
+        emit('delete-recipe', cleanId);
+        closeModal();
+    }
+};
+
+// --- 份量與營養計算邏輯 ---
 const originalServings = computed(() => {
     return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
 });
 
-// 在燈箱內計算顯示的營養素
-const displayedNutrition = computed(() => {
-    if (!props.nutrition) return null;
-    const s = currentServings.value; // 使用者在燈箱選的人份
-    return {
-        calories: props.nutrition.calories * s,
-        protein: props.nutrition.protein * s,
-        fat: props.nutrition.fat * s,
-        carbs: props.nutrition.carbs * s,
-    };
-});
-
-// 2. 當前的 UI 顯示人份數 (預設設為 1)
 const currentServings = ref(1);
 
-// 當燈箱開啟或食譜切換時，初始化 currentServings
-watch(() => props.modelValue, (isOpen) => {
-    if (isOpen) {
-        currentServings.value = 1;
-    }
-});
-
-// 3. 核心：計算「每一份量」的基礎營養素
 const baseNutritionPerServing = computed(() => {
-    if (!props.nutrition) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
-
-    const total = props.nutrition;
-    const s = originalServings.value;
-
+    const n = props.nutrition;
     return {
-        calories: Number(total.calories || 0) / s,
-        protein: Number(total.protein || 0) / s,
-        fat: Number(total.fat || 0) / s,
-        carbs: Number(total.carbs || 0) / s,
+        calories: Number(n?.calories || 0),
+        protein: Number(n?.protein || 0),
+        fat: Number(n?.fat || 0),
+        carbs: Number(n?.carbs || 0),
     };
 });
 
-// 4. 食材數據也要跟著 currentServings 連動
+const displayedNutrition = computed(() => {
+    const base = baseNutritionPerServing.value;
+    const s = currentServings.value;
+    return {
+        calories: Math.round(base.calories * s),
+        protein: (base.protein * s).toFixed(1),
+        fat: (base.fat * s).toFixed(1),
+        carbs: (base.carbs * s).toFixed(1),
+    };
+});
+
 const ingredientsData = computed(() => {
     const list = props.recipe?.ingredients || [];
-    const scale = currentServings.value / originalServings.value;
-
+    const ratio = (1 / originalServings.value) * currentServings.value;
     return list.map(item => ({
-        INGREDIENT_NAME: item.name || item.ingredient_name || '未知食材',
-        amount: item.amount ? (Number(item.amount) * scale).toFixed(1) : '',
-        unit_name: item.unit || item.unit_name || 'g',
-        note: item.note || ''
+        INGREDIENT_NAME: item.ingredient_name || item.name || '未知食材',
+        amount: item.amount ? (Number(item.amount) * ratio).toFixed(1) : 0,
+        unit_name: item.unit_name || item.unit || 'g',
+        note: item.remark || item.note || ''
     }));
 });
 
-// --- 其他輔助邏輯 ---
-const closeModal = () => emit('update:modelValue', false);
+watch(() => props.modelValue, (isOpen) => {
+    if (isOpen) {
+        currentServings.value = originalServings.value;
+    }
+}, { immediate: true });
 
-const getAvatarStyle = (name) => {
-    if (!name) return { backgroundColor: '#74D09C' };
-    const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
-    const charCodeSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-    return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
-};
-
+/**
+ * 整合介紹區域所需的資料
+ */
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
-    const loginUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const today = new Date().toISOString().split('T')[0];
 
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
 
-    // 🏆 修正封面圖：改用 parsePublicFile
     const rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
+    const finalImage = (rawImg && (rawImg.startsWith('data:') || rawImg.startsWith('http'))) ? rawImg : parsePublicFile(rawImg);
 
     return {
-        id: r.id || r.recipe_id,
-        title: r.adapt_title || r.title || '新改編食譜',
-        image: parsePublicFile(rawImg),
-        description: r.clean_description || r.description || '暫無詳細說明',
+        id: getCleanId(r.id || r.recipe_id),
+        title: r.title || r.recipe_title || '未命名食譜',
+        image: finalImage,
+        description: r.description || r.recipe_description || '暫無詳細說明',
         time: formattedTime,
         difficulty: r.difficulty || 1,
-        userName: r.user_name || r.author_name || loginUser.user_name || "未知作者",
-        handle: (r.user_email || loginUser.user_email || "guest@mail.com").split('@')[0],
-        publishTime: r.created_at || today,
-        isOwner: !!(r.is_mine)
+        tags: r.tags || []
     };
 });
 
+/**
+ * 整合步驟資料
+ */
 const stepsData = computed(() => {
     const steps = props.recipe?.steps || [];
-    return steps.map((s, idx) => ({
-        id: s.id || idx,
-        title: s.step_title || s.title || `步驟 ${idx + 1}`,
-        content: s.content || s.step_content || '',
-        // 🏆 修正步驟圖：改用 parsePublicFile
-        image: parsePublicFile(s.image || s.step_image_url || ''),
-        time: s.time || ''
-    }));
+    return steps.map((s, idx) => {
+        const stepImg = s.image || s.step_image_url || '';
+        return {
+            id: s.id || idx,
+            title: s.step_title || s.title || `步驟 ${idx + 1}`,
+            content: s.content || s.step_content || s.description || '',
+            image: (stepImg && (stepImg.startsWith('data:') || stepImg.startsWith('http'))) ? stepImg : parsePublicFile(stepImg),
+            time: s.time || ''
+        };
+    });
 });
+
+const closeModal = () => emit('update:modelValue', false);
 </script>
 
 <template>
@@ -130,6 +168,18 @@ const stepsData = computed(() => {
         <div v-if="modelValue" class="adaptation-modal-overlay" @click.self="closeModal">
             <div class="modal-window">
                 <button class="close-x" @click="closeModal">✕</button>
+
+                <div class="fixed-floating-bar">
+                    <button class="action-circle-btn">
+                        <i-material-symbols-thumb-up-outline-rounded />
+                    </button>
+                    <button class="action-circle-btn">
+                        <i-material-symbols-share-outline />
+                    </button>
+                    <button class="action-circle-btn report">
+                        <i-material-symbols-error-outline-rounded />
+                    </button>
+                </div>
 
                 <div class="modal-scroll-body">
                     <div class="container-fluid">
@@ -140,24 +190,23 @@ const stepsData = computed(() => {
                                     {{ introData?.title }}
                                 </h2>
                                 <span class="badge">改編版本</span>
-
-                                
                             </div>
 
-                            <div class="user-info-box">
-                                <div class="user-avatar-circle" :style="getAvatarStyle(introData?.userName || '')">
-                                    {{ introData?.userName?.charAt(0).toUpperCase() }}
-                                </div>
-                                <div class="user-text-meta">
-                                    <div class="user-name">{{ introData?.userName }}</div>
-                                    <div class="user-sub">@{{ introData?.handle }} • {{ introData?.publishTime }}</div>
-                                </div>
+                            <div class="action-group">
+                                <AuthorInfo
+                                    :name="isOwner ? (authStore.user?.user_name || authStore.user?.name) : (recipe.user_name || recipe.author_name || 'Recimo 用戶')"
+                                    :handle="`user_${recipe.author_id || recipe.user_id}`" :time="recipe.created_at" />
+
+                                <button v-if="isOwner" class="btn-delete-adaptation" @click="handleDelete">
+                                    <i-material-symbols-delete-outline-rounded class="mr-4" />
+                                    刪除改編
+                                </button>
                             </div>
                         </div>
 
                         <div class="row main-content-row">
                             <div class="col-7 col-md-12 content-left">
-                                <RecipeIntro :info="introData" :hide-actions="true" class="intro-section" />
+                                <RecipeIntro :info="introData" :hide-actions="false" class="intro-section" />
                                 <RecipeSteps :steps="stepsData" class="steps-section" />
                             </div>
 
@@ -165,7 +214,6 @@ const stepsData = computed(() => {
                                 <div class="sticky-sidebar">
                                     <NutritionCard v-if="nutrition" :nutrition="displayedNutrition"
                                         :servings="currentServings" @change-servings="val => currentServings = val" />
-
                                     <RecipeIngredients :list="ingredientsData" :readonly="true" />
                                 </div>
                             </div>
@@ -180,7 +228,26 @@ const stepsData = computed(() => {
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
+.btn-delete-adaptation {
+    display: flex;
+    align-items: center;
+    white-space: nowrap; // 確保文字不會折行
+    background-color: #fff1f0;
+    color: #ff4d4f;
+    border: 1px solid #ffccc7;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    cursor: pointer;
 
+    &:hover {
+        background-color: #ff4d4f;
+        color: white;
+        border-color: #ff4d4f;
+    }
+}
 
 .adaptation-modal-overlay {
     position: fixed;
@@ -218,9 +285,6 @@ const stepsData = computed(() => {
         font-size: 26px;
         color: $neutral-color-700;
         cursor: pointer;
-        line-height: 1;
-        padding: 5px;
-        transition: color 0.2s;
         z-index: 10;
 
         &:hover {
@@ -234,53 +298,31 @@ const stepsData = computed(() => {
     overflow-y: auto;
     padding: 48px;
 
-    &::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: $neutral-color-100;
-        border-radius: 10px;
-
-        &:hover {
-            background: $neutral-color-400;
-        }
-    }
-
-    scrollbar-width: thin;
-    scrollbar-color: $neutral-color-100 transparent;
-
     @media (max-width: 768px) {
         padding: 24px;
     }
 }
 
-.main-content-row {
+.action-group {
+    display: flex;
+    align-items: center;
+    gap: 20px; // 作者與按鈕之間的間距
+
+    :deep(.author-info-wrapper) {
+        margin-bottom: 0; // 移除組件內可能的下間距
+    }
+
     @media (max-width: 768px) {
-        display: flex;
-        flex-direction: column;
+        width: 100%;
+        flex-direction: row; // 手機版保持水平
+        justify-content: space-between; // 一左一右
+        align-items: center;
+        gap: 12px;
+    }
 
-        .content-left {
-            display: contents;
-        }
-
-        .intro-section {
-            order: 1;
-            margin-bottom: 32px;
-        }
-
-        .sidebar-right {
-            order: 2;
-            margin-bottom: 32px;
-        }
-
-        .steps-section {
-            order: 3;
-        }
+    @media (max-width: 480px) {
+        flex-direction: column; // 極窄螢幕才改垂直
+        align-items: flex-start;
     }
 }
 
@@ -290,7 +332,6 @@ const stepsData = computed(() => {
     justify-content: space-between;
     border-bottom: 2px solid $neutral-color-100;
     padding-bottom: 20px;
-    padding-right: 40px;
 
     .title-group {
         display: flex;
@@ -298,75 +339,84 @@ const stepsData = computed(() => {
         gap: 16px;
     }
 
-    .zh-h2 {
-        margin: 0;
-        display: flex;
-        align-items: center;
-    }
-
-    .badge {
-        background: $primary-color-100;
-        color: $primary-color-700;
-        padding: 4px 14px;
-        border-radius: 99px;
-        font-weight: 600;
-        font-size: 14px;
-    }
-
-    .user-info-box {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-
-        .user-avatar-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
+        .badge {
+            display: inline-flex;
+            /* 使用 flex 且保持行內塊特性 */
             align-items: center;
             justify-content: center;
+    
+            height: 25px;
+            background: $primary-color-100;
+            color: $primary-color-700;
+            padding: 0 14px;
+            border-radius: 99px;
             font-weight: 600;
-            font-size: 15px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            flex-shrink: 0;
-            order: 2;
+            font-size: 14px;
+            white-space: nowrap;
+            line-height: 1;
         }
 
-        .user-text-meta {
-            text-align: right;
-            order: 1;
-
-            .user-name {
-                font-weight: 600;
-                margin-bottom: 7px;
-                color: $neutral-color-800;
-                font-size: 15px;
-            }
-
-            .user-sub {
-                font-size: 12px;
-                color: $neutral-color-400;
-            }
-        }
+    @media (max-width: 992px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
     }
 
     @media (max-width: 768px) {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-        padding-right: 30px;
+        padding-right: 0;
 
-        .user-info-box {
+        .title-group {
             width: 100%;
-            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+    }
+}
 
-            .user-avatar-circle {
-                order: 1;
-            }
+.fixed-floating-bar {
+    position: absolute;
+    bottom: 30px;
+    right: 40px;
+    display: flex;
+    gap: 12px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 8px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 
-            .user-text-meta {
-                order: 2;
-                text-align: left;
+    @media (max-width: 768px) {
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .action-circle-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #74D09C;
+        font-size: 22px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        &:hover {
+            transform: translateY(-3px);
+            background: #f0fdf4;
+        }
+
+        &.report {
+            color: #ff7875;
+
+            &:hover {
+                background: #fff1f0;
             }
         }
     }
@@ -375,58 +425,34 @@ const stepsData = computed(() => {
 .sticky-sidebar {
     position: sticky;
     top: 0;
-
-    .ingredients-wrapper {
-        margin-top: 30px;
-        // background: $primary-color-100;
-        padding: 24px;
-        border-radius: 20px;
-        // border: 1px solid rgba($primary-color-400, 0.2);
-    }
-
-    .sidebar-title {
-        padding-left: 10px;
-    }
-}
-
-.nutrition-section {
-    background: white;
-    padding: 24px;
-    border-radius: 20px;
-    border: 1px solid $neutral-color-100;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .content-left {
     padding-right: 32px;
+
+    @media (max-width: 768px) {
+        padding-right: 0;
+    }
 }
 
-.color-p4 {
-    color: $neutral-color-400;
-}
-
-.mt-12 {
-    margin-top: 12px;
-}
-
-.text-center {
-    text-align: center;
-}
-
-.mr-8 {
-    margin-right: 8px;
-}
-
-.mb-16 {
-    margin-bottom: 16px;
-}
-
-.mb-24 {
-    margin-bottom: 24px;
+/* 調整圖示垂直位置 */
+.icon-v-align {
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+    color: $neutral-color-800;
 }
 
 .mb-32 {
     margin-bottom: 32px;
+}
+
+.mr-4 {
+    margin-right: 4px;
+}
+
+.mr-8 {
+    margin-right: 8px;
 }
 
 .modal-fade-enter-active {
@@ -441,21 +467,5 @@ const stepsData = computed(() => {
 .modal-fade-leave-to {
     opacity: 0;
     transform: translateY(20px);
-}
-
-.fade-in {
-    animation: fadeIn 0.6s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 </style>

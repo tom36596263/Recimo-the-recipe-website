@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router'; //為了開始烹飪跳轉連結而引入的功能
 // 導入開發好的燈箱組件
 import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
@@ -21,6 +21,21 @@ const props = defineProps({
         default: false
     }
 });
+
+// 1. 組件掛載時檢查資料
+onMounted(() => {
+    console.log('--- RecipeIntro 組件已掛載 ---');
+    console.log('完整的 info 資料:', props.info);
+    console.log('Tags 資料:', props.info.tags);
+});
+
+// 2. 監聽 info 的變化（防止非同步讀取資料延遲）
+watch(() => props.info, (newVal) => {
+    console.log('info 資料發生更新:', newVal);
+    console.log('更新後的 Tags:', newVal?.tags);
+}, { deep: true });
+
+
 
 // 「開始烹飪」按飪跳轉邏輯
 const router = useRouter(); //宣告 router 變數
@@ -64,6 +79,7 @@ const onModalSubmit = (data) => {
 </script>
 
 <template>
+
     <div class="recipe-intro-wrapper">
         <div class="image-box">
             <template v-if="props.info.image">
@@ -120,8 +136,16 @@ const onModalSubmit = (data) => {
             </div>
         </div>
 
+
+
         <article class="quote-box">
             <div class="recipe-description">
+                <div class="recipe-tags-container" v-if="props.info.tags && props.info.tags.length">
+                    <span v-for="tag in props.info.tags" :key="tag.tag_id" class="recipe-tag">
+                        {{ tag.tag_name }}
+                    </span>
+                </div>
+
                 <p class="p-p1">{{ props.info.description }}</p>
             </div>
         </article>
@@ -288,20 +312,61 @@ const onModalSubmit = (data) => {
 
 .recipe-description {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    align-items: flex-start;
     min-height: 120px;
     border-bottom: $primary-color-400 1px solid;
     border-top: $primary-color-100 8px solid;
     margin: 24px 0;
+    padding: 24px 20px;
 
     p {
-        padding: 20px;
+        padding: 0;
+        margin-top: 12px;
         line-height: 2.1;
         color: $neutral-color-800;
-        inline-size: 100%;
-        overflow-wrap: break-word;
+        width: 100%;
         white-space: pre-wrap;
+    }
+}
+
+.recipe-description {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 120px;
+    border-bottom: $primary-color-400 1px solid;
+    border-top: $primary-color-100 8px solid;
+    margin: 24px 0;
+    padding: 32px 20px 24px 20px;
+
+    p {
+        margin-top: 20px;
+        line-height: 2;
+        color: $neutral-color-800;
+        letter-spacing: 0.5px;
+    }
+
+
+    .recipe-tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+
+        .recipe-tag {
+            background-color: $neutral-color-100;
+            color: $neutral-color-800;
+            padding: 4px 14px;
+            border-radius: 5px;
+            font-size: 13px;
+            border: 1px solid transparent;
+            transition: 0.3s;
+
+        }
+    }
+
+    @media screen and (max-width: 810px) {
+        gap: 8px;
     }
 }
 </style>

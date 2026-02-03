@@ -5,6 +5,7 @@ import BaseBtn from '@/components/common/BaseBtn.vue'
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
+import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
 
 const { proxy } = getCurrentInstance(); // 取得全域方法代理
 
@@ -54,8 +55,9 @@ const navItems = computed(() => {
 // 登出邏輯
 const handleLogout = () => {
     authStore.logout();   // 執行清除狀態
-    closeMenu();          // 關閉手機版選單
-    router.push('/');     // 跳轉回首頁
+    cartStore.clear(false);    // 傳入 false，代表「只清空前端畫面，不要去打 API 刪除資料庫」
+    closeMenu();        // 關閉手機版選單
+    router.push('/');
 };
 
 // 購物車數量圓點
@@ -64,7 +66,7 @@ const cartTotal = computed(() => cartStore.totalCount);
 
 // 暫時解決user img前多/的問題
 const userAvatar = computed(() => {
-    const url = authStore.user?.user_url;
+    const url = authStore.user?.image;
 
     // 1. 如果沒資料，顯示預設圖 (一樣要透過 proxy 呼叫全域函式)
     if (!url) return proxy.$parsePublicFile('img/site/None_avatar.svg');
@@ -87,8 +89,7 @@ const userAvatar = computed(() => {
                         <span></span>
                     </div>
                     <div class="logo">
-                        <router-link to="/"><img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')"
-                                alt="logo"></router-link>
+                        <router-link to="/"><img :src="LogoBlack" alt="Recimo Logo"></router-link>
                     </div>
                     <div class="link-group">
                         <div class="page-link" :class="{ 'mobile-active': isMenuOpen }">
@@ -116,7 +117,7 @@ const userAvatar = computed(() => {
                                     <template v-if="authStore.isLoggedIn">
                                         <span class="btn-text p-p1">我的廚房</span>
                                         <div class="user-avatar-min">
-                                            <img :src="userAvatar" :alt="`${authStore.user?.user_name || 'User'}.img`"
+                                            <img :src="userAvatar" :alt="`${authStore.user?.name || 'User'}.img`"
                                                 @error="(e) => e.target.src = $parsePublicFile('img/site/None_avatar.svg')">
                                         </div>
                                     </template>

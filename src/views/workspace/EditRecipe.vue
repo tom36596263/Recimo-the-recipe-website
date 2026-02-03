@@ -2,22 +2,28 @@
 import { ref, provide, onMounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useRecipeStore } from '@/stores/recipeEditor';
+import { useAuthStore } from '@/stores/authStore';
 import { publicApi } from '@/utils/publicApi';
-// 🏆 1. 引入團隊規範的圖片解析函式
 import { parsePublicFile } from '@/utils/parseFile';
+import { phpApi } from '@/utils/phpApi';
 
 import EditorHeader from '@/components/workspace/editrecipe/EditorHeader.vue';
 import IngredientEditor from '@/components/workspace/editrecipe/IngredientEditor.vue';
 import StepEditor from '@/components/workspace/editrecipe/StepEditor.vue';
+import TagModal from '@/components/workspace/editrecipe/modals/TagModal.vue';
 
 const router = useRouter();
 const route = useRoute();
 const recipeStore = useRecipeStore();
+const authStore = useAuthStore();
 
 const isEditing = ref(true);
 const isPublished = ref(false);
 
-// --- 1. 食譜表單資料 ---
+const ingredientsMasterList = ref([]);
+const tagsMasterList = ref([]);
+const isTagModalOpen = ref(false);
+
 const recipeForm = ref({
   recipe_id: null,
   parent_recipe_id: null,
@@ -28,23 +34,12 @@ const recipeForm = ref({
   totalTime: 0,
   ingredients: [],
   steps: [],
+  tags: [],
   original_title: '',
   adapt_title: '',
-  adapt_description: ''
+  adapt_description: '',
+  recipe_servings: 1
 });
-
-// 自動計算總時間
-watch(
-  () => recipeForm.value.steps,
-  (newSteps) => {
-    if (!newSteps || !isEditing.value) return;
-    const autoSum = newSteps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
-    if (!recipeForm.value.totalTime || recipeForm.value.totalTime === 0) {
-      recipeForm.value.totalTime = autoSum;
-    }
-  },
-  { deep: true }
-);
 
 const isAdaptModeActive = computed(() => {
   const hasParentId = !!recipeForm.value.parent_recipe_id;
@@ -52,170 +47,248 @@ const isAdaptModeActive = computed(() => {
   return hasParentId || hasAdaptQuery;
 });
 
-// --- 2. 核心邏輯 (資料載入) ---
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    if (!file) return resolve(null);
+    if (typeof file === 'string') return resolve(file);
+    if (file instanceof File) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    } else {
+      resolve(null);
+    }
+  });
+};
+
+watch(() => recipeForm.value.steps, (newSteps) => {
+  if (!newSteps || !isEditing.value) return;
+  const autoSum = newSteps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
+  if (Number(recipeForm.value.totalTime) === 0) recipeForm.value.totalTime = autoSum;
+}, { deep: true });
+
+watch(() => recipeForm.value.ingredients, (newIngs) => {
+  newIngs.forEach(ing => {
+    if (ing.id && (ing.kcal_per_100g === undefined || ing.kcal_per_100g === null)) {
+      const master = ingredientsMasterList.value.find(m => Number(m.ingredient_id) === Number(ing.id));
+      if (master) {
+        ing.kcal_per_100g = master.kcal_per_100g || 0;
+        ing.protein_per_100g = master.protein_per_100g || 0;
+        ing.fat_per_100g = master.fat_per_100g || 0;
+        ing.carbs_per_100g = master.carbs_per_100g || 0;
+        ing.gram_conversion = master.gram_conversion || 1.0;
+        if (!ing.unit) ing.unit = master.unit_name || '份';
+      }
+    }
+  });
+}, { deep: true });
+
 onMounted(async () => {
   const rawId = route.query.editId || route.params.id;
   const editIdFromUrl = rawId ? Number(rawId) : null;
   const isAdapt = route.query.action === 'adapt';
 
-  // 如果 Store 已經有暫存資料（例如從預覽跳回），優先使用
-  if (recipeStore.rawEditorData) {
-    recipeForm.value = { ...recipeStore.rawEditorData };
-    recipeStore.rawEditorData = null;
-    return;
-  }
-
-  if (!editIdFromUrl) return;
+  if (isAdapt) isPublished.value = true;
 
   try {
-    const [resR, resRecipeIng, resIngMaster, resS, resStepIng] = await Promise.all([
-      publicApi.get('data/recipe/recipes.json'),
-      publicApi.get('data/recipe/recipe_ingredient.json'),
+    const [resIng, resTag] = await Promise.all([
       publicApi.get('data/recipe/ingredients.json'),
-      publicApi.get('data/recipe/steps.json'),
-      publicApi.get('data/recipe/step_ingredients.json')
+      publicApi.get('data/recipe/tags.json')
     ]);
+    ingredientsMasterList.value = resIng.data || [];
+    tagsMasterList.value = resTag.data || [];
 
-    const found = resR.data.find(r => Number(r.recipe_id) === editIdFromUrl);
-    if (!found) return;
-
-    // 設定基礎資訊與改編邏輯
-    if (isAdapt) {
-      recipeForm.value.recipe_id = null;
-      recipeForm.value.parent_recipe_id = editIdFromUrl;
-      recipeForm.value.original_title = found.recipe_title;
-      recipeForm.value.adapt_title = `${found.recipe_title} (改編版)`;
-      recipeForm.value.title = found.recipe_title;
-    } else {
-      recipeForm.value.recipe_id = editIdFromUrl;
-      recipeForm.value.title = found.recipe_title;
+    if (recipeStore.rawEditorData) {
+      recipeForm.value = { ...recipeStore.rawEditorData };
+      if (isAdapt) {
+        recipeForm.value.parent_recipe_id = editIdFromUrl;
+        recipeForm.value.recipe_id = null;
+      }
+      recipeStore.rawEditorData = null;
+      return;
     }
 
-    recipeForm.value.description = found.recipe_description || found.recipe_descreption || '';
-    recipeForm.value.difficulty = found.recipe_difficulty || 1;
+    if (!editIdFromUrl) return;
 
-    // 🏆 2. 統一使用 parsePublicFile 處理封面圖
-    const rawCover = found.recipe_image_url || found.recipe_cover_image || '';
-    recipeForm.value.coverImg = parsePublicFile(rawCover);
+    const response = await phpApi.get(`recipes/recipe_detail_get.php?recipe_id=${editIdFromUrl}`);
+    if (response.data && response.data.success) {
+      const { main, ingredients, steps, tags } = response.data.data;
 
-    // 時間格式化 (HH:mm 轉分鐘)
-    const totalTimeStr = String(found.recipe_total_time || '30');
-    if (totalTimeStr.includes(':')) {
-      const p = totalTimeStr.split(':');
-      recipeForm.value.totalTime = parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
-    } else {
-      recipeForm.value.totalTime = parseInt(totalTimeStr, 10) || 30;
-    }
-
-    // 食材資料組裝
-    const links = resRecipeIng.data.filter(i => Number(i.recipe_id) === editIdFromUrl);
-    recipeForm.value.ingredients = links.map(link => {
-      const master = resIngMaster.data.find(m => Number(m.ingredient_id) === Number(link.ingredient_id));
-      return {
-        id: link.ingredient_id,
-        name: master?.ingredient_name || '',
-        amount: link.amount,
-        unit: link.unit_name || master?.unit_name || '份',
-        note: link.remark || '',
-        kcal_per_100g: master?.kcal_per_100g || 0
-      };
-    });
-
-    // 步驟資料組裝
-    const stepsData = resS.data
-      .filter(s => Number(s.recipe_id) === editIdFromUrl)
-      .sort((a, b) => (a.step_order || 0) - (b.step_order || 0));
-
-    recipeForm.value.steps = stepsData.map((s, index) => {
-      let parsedTime = 0;
-      const rawStepTime = String(s.step_total_time || '');
-      if (rawStepTime.includes(':')) {
-        const parts = rawStepTime.split(':');
-        parsedTime = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-      } else {
-        parsedTime = parseInt(rawStepTime, 10) || 0;
+      if (isAdapt) {
+        recipeForm.value.recipe_id = null;
+        recipeForm.value.parent_recipe_id = editIdFromUrl;
+        recipeForm.value.original_title = main.recipe_title;
+        recipeForm.value.adapt_title = main.recipe_title + ' (改編版)';
+        recipeForm.value.title = main.recipe_title;
+        recipeForm.value.description = main.recipe_description || '';
       }
 
-      // 🏆 3. 統一使用 parsePublicFile 處理步驟圖，不再手寫 replace 邏輯
-      const rawImg = s.step_image_url || s.image || '';
-
-      return {
-        id: isAdapt ? `adapt-step-${editIdFromUrl}-${index}` : (s.step_id || `s-${editIdFromUrl}-${index}`),
-        origin_step_id: s.step_id || null,
-        title: s.step_title || `步驟 ${index + 1}`,
+      recipeForm.value.difficulty = Number(main.recipe_difficulty) || 1;
+      recipeForm.value.recipe_servings = Number(main.recipe_servings) || 1;
+      recipeForm.value.coverImg = parsePublicFile(main.recipe_image_url || '');
+      recipeForm.value.totalTime = parseInt(main.recipe_total_time, 10) || 0;
+      recipeForm.value.tags = tags.map(t => ({ tag_id: t.tag_id, tag_name: t.tag_name }));
+      recipeForm.value.ingredients = ingredients.map(ing => ({
+        id: Number(ing.ingredient_id),
+        name: ing.ingredient_name,
+        amount: ing.amount,
+        unit: ing.unit_name || '份',
+        note: ing.remark || '',
+        color_tag: ing.color_tag || '',
+        kcal_per_100g: Number(ing.kcal_per_100g),
+        protein_per_100g: Number(ing.protein_per_100g),
+        fat_per_100g: Number(ing.fat_per_100g),
+        carbs_per_100g: Number(ing.carbs_per_100g),
+        gram_conversion: Number(ing.gram_conversion)
+      }));
+      recipeForm.value.steps = steps.map((s, idx) => ({
+        id: isAdapt ? `adapt-s-${idx}` : (s.step_id || `s-${idx}`),
+        title: s.step_title || `步驟 ${idx + 1}`,
         content: s.step_content || '',
-        image: parsePublicFile(rawImg),
-        time: parsedTime,
-        tags: resStepIng.data.filter(si => Number(si.step_id) === Number(s.step_id)).map(si => si.ingredient_id)
-      };
-    });
+        image: parsePublicFile(s.step_image_url || ''),
+        time: s.total_seconds ? Math.floor(Number(s.total_seconds) / 60) : 0,
+        tags: s.step_ingredients ? s.step_ingredients.map(id => Number(id)) : []
+      }));
+    }
   } catch (err) {
-    console.error('❌ 載入食譜失敗:', err);
+    console.error('❌ 載入失敗:', err);
   }
 });
 
-// --- 3. 預覽 (處理 File 物件轉 Blob) ---
-const handlePreview = () => {
-  const previewForm = JSON.parse(JSON.stringify(recipeForm.value));
-
-  // 處理封面圖如果是剛上傳的檔案
-  if (recipeForm.value.coverImg instanceof File) {
-    previewForm.coverImg = URL.createObjectURL(recipeForm.value.coverImg);
+const publishToDb = async () => {
+  if (!authStore.isLoggedIn) {
+    authStore.openLoginAlert();
+    return;
   }
 
-  // 處理步驟圖如果是剛上傳的檔案
-  recipeForm.value.steps.forEach((step, index) => {
-    if (step.image instanceof File) {
-      previewForm.steps[index].image = URL.createObjectURL(step.image);
-    }
-  });
-
-  recipeStore.rawEditorData = { ...recipeForm.value };
-  recipeStore.setPreviewFromEditor(previewForm);
-
-  const currentId = route.query.editId || route.params.id || 0;
-  const query = { mode: 'preview', editId: currentId };
-  if (isAdaptModeActive.value) query.action = 'adapt';
-
-  router.push({ path: `/workspace/recipe-detail/${currentId}`, query });
-};
-
-// --- 4. 儲存 ---
-const handleSave = () => {
-  const finalTitle = isAdaptModeActive.value
-    ? (recipeForm.value.adapt_title || `${recipeForm.value.original_title} (改編版)`)
-    : recipeForm.value.title;
-
-  if (isPublished.value) {
-    const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
-
-    const saveData = {
-      ...recipeForm.value,
-      id: Date.now(),
-      title: finalTitle,
-      description: isAdaptModeActive.value ? recipeForm.value.adapt_description : recipeForm.value.description,
-      adaptation_note: isAdaptModeActive.value ? recipeForm.value.adapt_description : '',
-      publishDate: new Date().toLocaleDateString(),
-      is_local: true,
-      is_adaptation: isAdaptModeActive.value,
-      is_mine: true
+  try {
+    const handleImage = async (img) => {
+      if (!img) return null;
+      if (img instanceof File) return await fileToBase64(img);
+      return typeof img === 'string' ? img : null;
     };
 
-    localRevisions.unshift(saveData);
-    localStorage.setItem('user_revisions', JSON.stringify(localRevisions));
-    alert(`🎉「${finalTitle}」已公開發布！`);
+    const coverData = await handleImage(recipeForm.value.coverImg);
 
-    if (isAdaptModeActive.value && recipeForm.value.parent_recipe_id) {
-      router.push(`/workspace/modify-recipe/${recipeForm.value.parent_recipe_id}`);
+    const processedSteps = await Promise.all(
+      recipeForm.value.steps.map(async (s) => ({
+        step_title: s.title,
+        step_content: s.content || s.step_content || '', // ✨ 容錯處理：確保內容不消失
+        step_image_url: await handleImage(s.image),
+        step_total_time: `00:${String(s.time || 0).padStart(2, '0')}:00`,
+        step_ingredients: s.tags
+      }))
+    );
+
+    const payload = {
+      parent_recipe_id: recipeForm.value.parent_recipe_id || null,
+      author_id: authStore.user.id || authStore.user.user_id,
+      recipe_title: isAdaptModeActive.value
+        ? (recipeForm.value.adapt_title || recipeForm.value.title)
+        : recipeForm.value.title,
+      // ✨ 修正描述抓取邏輯：優先抓改編描述，若無則抓取原始描述
+      recipe_description: isAdaptModeActive.value
+        ? (recipeForm.value.adapt_description || recipeForm.value.description)
+        : recipeForm.value.description,
+      recipe_image_url: coverData,
+      recipe_difficulty: recipeForm.value.difficulty,
+      total_time: recipeForm.value.totalTime,
+      recipe_servings: recipeForm.value.recipe_servings,
+      ingredients: recipeForm.value.ingredients.map(ing => ({
+        ingredient_id: ing.id,
+        amount: ing.amount,
+        remark: ing.note,
+        unit_name: ing.unit || '份'
+      })),
+      steps: processedSteps,
+      tags: recipeForm.value.tags.map(t => t.tag_id)
+    };
+
+    const response = await phpApi.post('recipes/recipe_adaptation_add.php', payload);
+
+    if (response.data && response.data.success) {
+      alert('🎉 感謝分享！改編版本已正式發布。');
+
+      if (isAdaptModeActive.value) {
+        const parentId = recipeForm.value.parent_recipe_id;
+        router.push(`/workspace/modify-recipe/${parentId}`);
+      } else {
+        router.push('/workspace/my-recipes');
+      }
     } else {
-      router.push('/workspace');
+      const errorMsg = response.data?.message || '資料庫寫入失敗';
+      alert(`發布失敗：${errorMsg}`);
     }
-  } else {
-    alert('草稿儲存成功！');
-    router.push('/workspace');
-  }
 
+  } catch (err) {
+    console.error('❌ 發布過程發生異常:', err);
+    const errorDetail = err.response?.data?.message || err.message;
+    alert(`發布異常：${errorDetail}`);
+  }
+};
+
+const handleSave = async () => {
+  if (isAdaptModeActive.value) {
+    await publishToDb();
+    return;
+  }
+  if (isPublished.value) {
+    alert('全新食譜發布功能開發中，目前僅存為本地快取');
+  } else {
+    alert('草稿已存至本地！');
+    router.push('/workspace/my-recipes');
+  }
   recipeStore.rawEditorData = null;
+};
+
+const handlePreview = async () => {
+  const coverBase64 = await fileToBase64(recipeForm.value.coverImg);
+  const processedSteps = await Promise.all(
+    recipeForm.value.steps.map(async (s, idx) => ({
+      ...s,
+      step_id: s.id || `s-${idx}`,
+      step_title: s.title || `步驟 ${idx + 1}`,
+      step_content: s.content || s.step_content || '',
+      step_total_time: s.time ? `${s.time} 分鐘` : '0 分鐘',
+      step_order: idx + 1,
+      step_image_url: await fileToBase64(s.image)
+    }))
+  );
+  const tagToStatus = { 'tag-green': 'add', 'tag-orange': 'mod', 'tag-blue': 'rep' };
+  const processedIngredients = recipeForm.value.ingredients.map(ing => ({
+    ...ing,
+    ingredient_id: ing.id,
+    ingredient_name: ing.name,
+    unit_name: ing.unit || '份',
+    status: tagToStatus[ing.color_tag] || '',
+    kcal_per_100g: Number(ing.kcal_per_100g || 0),
+    protein_per_100g: Number(ing.protein_per_100g || 0),
+    fat_per_100g: Number(ing.fat_per_100g || 0),
+    carbs_per_100g: Number(ing.carbs_per_100g || 0),
+    gram_conversion: Number(ing.gram_conversion || 1.0)
+  }));
+  const previewData = {
+    ...recipeForm.value,
+    recipe_title: isAdaptModeActive.value ? (recipeForm.value.adapt_title || recipeForm.value.title) : recipeForm.value.title,
+    recipe_description: isAdaptModeActive.value ? (recipeForm.value.adapt_description || recipeForm.value.description) : recipeForm.value.description,
+    recipe_cover_image: coverBase64,
+    recipe_servings: Number(recipeForm.value.recipe_servings || 1),
+    ingredients: processedIngredients,
+    steps: processedSteps,
+    recipe_tags: recipeForm.value.tags,
+    totalTime: Number(recipeForm.value.totalTime || 0)
+  };
+  recipeStore.rawEditorData = JSON.parse(JSON.stringify(recipeForm.value));
+  recipeStore.setPreviewFromEditor(previewData);
+  router.push({
+    path: `/workspace/recipe-detail/${route.query.editId || route.params.id || 0}`,
+    query: { mode: 'preview', editId: route.query.editId || route.params.id, action: route.query.action }
+  });
+};
+
+const handleAddTags = (newTags) => {
+  recipeForm.value.tags.push(...newTags);
 };
 
 provide('isEditing', isEditing);
@@ -225,13 +298,15 @@ provide('isEditing', isEditing);
   <div :class="['recipe-editor-page', { 'is-editing': isEditing }]">
     <main class="editor-main-layout container">
       <div class="header-section">
-        <EditorHeader v-model="recipeForm" :is-editing="isEditing" :is-adapt-mode="isAdaptModeActive" />
+        <EditorHeader v-model="recipeForm" :is-editing="isEditing" :is-adapt-mode="isAdaptModeActive"
+          @open-tag-modal="isTagModalOpen = true" />
       </div>
 
       <div class="recipe-main-content">
         <div class="row custom-row-fit">
           <aside class="ingredient-sidebar col-5 col-md-12">
-            <IngredientEditor :ingredients="recipeForm.ingredients" :is-editing="isEditing" />
+            <IngredientEditor :ingredients="recipeForm.ingredients" :is-editing="isEditing"
+              :is-adapt-mode="isAdaptModeActive" />
           </aside>
           <section class="step-content col-7 col-md-12">
             <StepEditor v-model:steps="recipeForm.steps" :ingredients="recipeForm.ingredients"
@@ -243,14 +318,16 @@ provide('isEditing', isEditing);
       <footer class="editor-footer">
         <div class="footer-center-group">
           <BaseBtn title="預覽" variant="outline" :width="100" @click="handlePreview" class="preview-btn" />
-          <BaseBtn :title="isPublished ? '確認發布' : '完成編輯'" :width="200" @click="handleSave" class="save-btn" />
-          <div class="publish-toggle">
+          <BaseBtn :title="isAdaptModeActive ? '分享我的版本' : (isPublished ? '確認發布' : '完成編輯')" :width="200"
+            @click="handleSave" class="save-btn" />
+          <div v-if="!isAdaptModeActive" class="publish-toggle">
             <input type="checkbox" id="publish-check" v-model="isPublished" />
             <label for="publish-check" class="p-p2">公開發布</label>
           </div>
         </div>
       </footer>
     </main>
+    <TagModal v-model="isTagModalOpen" :selected-list="recipeForm.tags" @add-multiple="handleAddTags" />
   </div>
 </template>
 
@@ -269,7 +346,6 @@ provide('isEditing', isEditing);
   border: 1px solid $primary-color-400;
   border-radius: 12px;
   background: $neutral-color-white;
-  box-sizing: border-box;
   overflow: hidden;
 
   .custom-row-fit {
@@ -294,29 +370,21 @@ provide('isEditing', isEditing);
     gap: 20px;
     width: 100%;
     max-width: 600px;
-
-    @media screen and (max-width: 1024px) {
-      gap: 12px;
-      transform: scale(0.9);
-    }
   }
 
   .publish-toggle {
     display: flex;
     align-items: center;
     gap: 8px;
-    white-space: nowrap;
 
     input {
       width: 18px;
       height: 18px;
-      accent-color: $primary-color-800;
       cursor: pointer;
     }
 
     label {
       cursor: pointer;
-      color: $neutral-color-700;
     }
   }
 }
@@ -332,7 +400,6 @@ provide('isEditing', isEditing);
 
 .preview-btn {
   width: 100px !important;
-  min-width: 100px !important;
   border: 1px solid $primary-color-400 !important;
   color: $primary-color-400 !important;
 

@@ -1,56 +1,111 @@
 <script setup>
-    import { markRaw, computed } from 'vue';
-    import { useRouter } from 'vue-router';
+import { markRaw, computed, ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+import { addFavorite, removeFavorite, checkFavorite } from '@/utils/favoritesApi';
 
-    import BaseTag from '@/components/common/BaseTag.vue';
-    import BaseBtn from '@/components/common/BaseBtn.vue';
-    import LikeButton from '@/components/common/LikeButton.vue'
+import BaseTag from '@/components/common/BaseTag.vue';
+import BaseBtn from '@/components/common/BaseBtn.vue';
+import LikeButton from '@/components/common/LikeButton.vue'
 
-    import IconLocalFireDepartment from '~icons/material-symbols/Local-Fire-Department-outline';
-    import IconramenDining from '~icons/material-symbols/Ramen-Dining-outline';
-    import IconAlarm from '~icons/material-symbols/Alarm-outline';
+import IconLocalFireDepartment from '~icons/material-symbols/Local-Fire-Department-outline';
+import IconramenDining from '~icons/material-symbols/Ramen-Dining-outline';
+import IconAlarm from '~icons/material-symbols/Alarm-outline';
 
-    const props = defineProps({
-        recipe: {
-            type: Object,
-            required: true
-        }
+const props = defineProps({
+    recipe: {
+        type: Object,
+        required: true
+    }
+});
+
+const router = useRouter();
+
+const goToDetail = () => {
+    router.push({
+        name: 'workspace-recipe-detail',
+        params: { id: props.recipe.id }
     });
+};
 
-    const router = useRouter();
+const recipeInfo = computed(() => [
+    {
+        icon: markRaw(IconLocalFireDepartment),
+        label: '熱量',
+        value: props.recipe.nutritional_info.calories.replace('kcal', ''),
+        unit: 'kcal'
+    },
+    {
+        icon: markRaw(IconramenDining),
+        label: '份量',
+        value: props.recipe.nutritional_info.serving_size,
+        unit: '人份'
+    },
+    {
+        icon: markRaw(IconAlarm),
+        label: '製作時間',
+        value: props.recipe.nutritional_info.cooking_time.replace('分鐘', ''),
+        unit: '分鐘'
+    }
+]);
 
-    const goToDetail = () => {
-        router.push({ 
-            name: 'workspace-recipe-detail', 
-            params: { id: props.recipe.id } 
-        });
-    };
+const handleLikeChange = (isLiked, item) => {
+    console.log(`用戶對 ${item.userName} 的留言點讚狀態：`, isLiked);
+    // 這裡可以呼叫 API 更新後端數據
+};
 
-    const recipeInfo = computed(() => [
-        {
-            icon: markRaw(IconLocalFireDepartment),
-            label: '熱量',
-            value: props.recipe.nutritional_info.calories.replace('kcal', ''),
-            unit: 'kcal'
-        },
-        {
-            icon: markRaw(IconramenDining),
-            label: '份量',
-            value: props.recipe.nutritional_info.serving_size,
-            unit: '人份'
-        },
-        {
-            icon: markRaw(IconAlarm),
-            label: '製作時間',
-            value: props.recipe.nutritional_info.cooking_time.replace('分鐘', ''),
-            unit: '分鐘'
+// 收藏功能狀態
+const authStore = useAuthStore();
+const userId = authStore.user?.id ?? 0;
+const isFavorited = ref(false);
+const loadingFavorite = ref(false);
+const heartAnimate = ref(false);
+
+// 查詢是否已收藏
+const fetchFavoriteStatus = async () => {
+    if (!userId) {
+        isFavorited.value = false;
+        return;
+    }
+    try {
+        const { data } = await checkFavorite(userId, props.recipe.id);
+        isFavorited.value = data.favorited;
+    } catch (err) {
+        isFavorited.value = false;
+    }
+};
+
+// 切換收藏
+const toggleFavorite = async (e) => {
+    e.stopPropagation();
+    if (!userId || !props.recipe.id) {
+        authStore.isLoginLightboxOpen = true;
+        return;
+    }
+    loadingFavorite.value = true;
+    heartAnimate.value = true;
+    setTimeout(() => heartAnimate.value = false, 400);
+    try {
+        let res;
+        if (isFavorited.value) {
+            res = await removeFavorite(userId, props.recipe.id);
+            isFavorited.value = false;
+        } else {
+            res = await addFavorite(userId, props.recipe.id);
+            isFavorited.value = true;
         }
-    ]);
+        if (res?.data?.success === false) {
+            isFavorited.value = !isFavorited.value;
+        }
+        console.log('收藏API回傳', res?.data);
+    } catch (err) {
+        console.error('API錯誤', err);
+    } finally {
+        loadingFavorite.value = false;
+    }
+};
 
-    const handleLikeChange = (isLiked, item) => {
-        console.log(`用戶對 ${item.userName} 的留言點讚狀態：`, isLiked);
-        // 這裡可以呼叫 API 更新後端數據
-    };
+onMounted(fetchFavoriteStatus);
 </script>
 <template>
     <div class="recipe-card-lg">
@@ -61,17 +116,17 @@
         <div class="card-body">
             <div class="title">
                 <h3 class="zh-h3">{{ recipe.recipe_name }}</h3>
-                <i-material-symbols-Favorite-outline @click.prevent.stop />
+                <!-- 收藏按鈕，已收藏顯示紅色，未收藏顯示預設色 -->
+                <i-material-symbols-Favorite v-if="isFavorited" style="color: #e74c3c"
+                    @click.prevent.stop="toggleFavorite" :class="{ 'favorite-animate': heartAnimate }" />
+                <i-material-symbols-Favorite-outline v-else @click.prevent.stop="toggleFavorite"
+                    :class="{ 'favorite-animate': heartAnimate }" />
             </div>
             <div class="tag">
                 <BaseTag v-for="tag in recipe.tags" :key="tag" :text="tag" />
             </div>
             <div class="recipe-info">
-                <div 
-                v-for="(item, index) in recipeInfo" 
-                :key="index" 
-                class="recipe-info-item p-p3"
-                >
+                <div v-for="(item, index) in recipeInfo" :key="index" class="recipe-info-item p-p3">
                     <span class="label">
                         <component :is="item.icon" />{{ item.label }}
                     </span>
@@ -79,139 +134,182 @@
                 </div>
             </div>
         </div>
-        
+
         <footer>
             <div class="personal-info">
                 <div class="personal-img">
-                    <img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo" >
+                    <img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo">
                 </div>
                 <p class="p-p1">Recimo</p>
                 <div @click.prevent.stop>
-                    <LikeButton 
-                    :initial-likes="recipe.author.likes || 0" 
-                    @update:liked="(val) => handleLikeChange(val, item)"
-                    />
+                    <LikeButton :initial-likes="recipe.author.likes || 0"
+                        @update:liked="(val) => handleLikeChange(val, item)" />
                 </div>
-                
+
             </div>
-            
+
             <!-- <div class="btn-group">
                 <BaseBtn title="食譜詳情" variant="solid" height="30" @click="goToDetail" class="btn" />
             </div> -->
-            
+
         </footer>
     </div>
 </template>
 <style lang="scss" scoped>
-    .recipe-card-lg{
-        border: 1px solid $neutral-color-400;
-        border-radius: $radius-base;
+.recipe-card-lg {
+    border: 1px solid $neutral-color-400;
+    border-radius: $radius-base;
+    overflow: hidden;
+    background-color: $neutral-color-white;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba($neutral-color-black, 0.08);
+        border-color: $primary-color-400;
+    }
+
+    .card-header {
         overflow: hidden;
-        background-color: $neutral-color-white;
-        transition: all 0.3s ease;
-        &:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba($neutral-color-black, 0.08);
-            border-color: $primary-color-400;
-        }
-        .card-header{
-            overflow: hidden;
-            height: 320px;
+        height: 320px;
+        width: 100%;
+
+        img {
+            width: fit-content;
+            object-fit: cover;
+            display: block;
             width: 100%;
-            img{
-                width:fit-content;
-                object-fit: cover;
-                display: block;
-                width: 100%;
-                height: 100%;
-                transition: .3s ease;
-                &:hover{
-                    scale: 1.1;
-                }
+            height: 100%;
+            transition: .3s ease;
+
+            &:hover {
+                scale: 1.1;
             }
         }
-        .card-body{
-            padding: 16px;
-            
-            .title{
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 6px;
-                color: $primary-color-700;
-            }
-            .icon-group{
-                display: flex;
-                gap: 12px;
-            }
-            .tag{
-                display: flex;
-                gap: 6px;
-            }
-            .recipe-info{
-                display: flex;
-                justify-content: space-around;
-                background-color: $neutral-color-100;
-                margin-top: 10px;
-                padding: 10px;
-                border-radius: $radius-base;
-                .recipe-info-item{
-                    text-align: center;
-                    .label{
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        margin-bottom: 6px;
-                    }
-                }
-            }
-        }
-        footer{
-            padding: 0 16px 16px 16px;
-            justify-content: space-between;
+    }
+
+    .card-body {
+        padding: 16px;
+
+        .title {
             display: flex;
-            .btn-group{
-                display: flex;
-                gap: 8px;
-            }
-            .personal-info{
-                display: flex;
-                align-items: center;
-                .p-p1{
-                    margin-right: 6px;
-                }
-                .en-h3{
-                    margin-left: 6px;
-                }
-            }
-            .personal-img{
-                width: 24px;
-                height: 24px;
-                margin-right: 8px;
-                border-radius: $radius-pill;
-                border: 1px solid $neutral-color-700;
-                overflow: hidden;
-                display: flex;
-                justify-content: center;
-                img{
-                    width: 20px;
-                    
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            color: $primary-color-700;
+        }
+
+        .icon-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .tag {
+            display: flex;
+            gap: 6px;
+        }
+
+        .recipe-info {
+            display: flex;
+            justify-content: space-around;
+            background-color: $neutral-color-100;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: $radius-base;
+
+            .recipe-info-item {
+                text-align: center;
+
+                .label {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-bottom: 6px;
                 }
             }
         }
     }
-    @media screen and (max-width: 1300px){
-        .recipe-card-lg{
-            footer{
-                .btn{
-                    width: 85px;
-                }
+
+    footer {
+        padding: 0 16px 16px 16px;
+        justify-content: space-between;
+        display: flex;
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .personal-info {
+            display: flex;
+            align-items: center;
+
+            .p-p1 {
+                margin-right: 6px;
             }
-            // .btn-group{
-            //     .btn{
-            //         width: 100px;
-            //     }
-            // }
+
+            .en-h3 {
+                margin-left: 6px;
+            }
+        }
+
+        .personal-img {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            border-radius: $radius-pill;
+            border: 1px solid $neutral-color-700;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+
+            img {
+                width: 20px;
+
+            }
         }
     }
+}
+
+.title {
+    position: relative;
+
+    .favorite-animate {
+        animation: heart-bounce 0.4s;
+    }
+}
+
+@keyframes heart-bounce {
+    0% {
+        transform: scale(1);
+    }
+
+    30% {
+        transform: scale(1.3);
+    }
+
+    60% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@media screen and (max-width: 1300px) {
+    .recipe-card-lg {
+        footer {
+            .btn {
+                width: 85px;
+            }
+        }
+
+        // .btn-group{
+        //     .btn{
+        //         width: 100px;
+        //     }
+        // }
+    }
+}
 </style>

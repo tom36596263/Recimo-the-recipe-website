@@ -15,29 +15,24 @@ const props = defineProps({
 
 const router = useRouter();
 
-// ✨ 修正重點：在 readonly 模式下不執行跳轉，交由父組件決定行為
 const goToDetail = () => {
     if (!props.readonly) {
-        // 如果不是唯讀模式（例如在一般列表），則執行原本的跳轉邏輯
         const targetId = props.recipe.id || props.recipe.recipe_id;
         if (targetId) {
             router.push(`/workspace/recipe-detail/${targetId}`);
         }
     }
-    // 當 readonly 為 true 時，這裡什麼都不做，點擊事件會向上冒泡給父層
 };
 
 const handleLikeChange = (val, recipe) => {
     console.log('讚數更新:', val);
 };
 
-// AdaptRecipeCard.vue 的 <script setup>
-const emit = defineEmits(['upload-image']); // 👈 加入這行
+const emit = defineEmits(['upload-image']);
 
 const handleUploadImage = () => {
-    emit('upload-image'); // 👈 觸發事件
+    emit('upload-image');
 };
-
 </script>
 
 <template>
@@ -62,10 +57,13 @@ const handleUploadImage = () => {
                 <input type="text" :value="recipe.title" placeholder="改編版本標題..." readonly>
             </div>
 
+            <div v-if="recipe.ingredients" class="ingredients-section">
+            </div>
+
             <div class="input-group content-input" :class="{ 'has-tag': recipe.keyChangeTag }">
                 <i-material-symbols-arrow-right-alt-rounded class="arrow-icon" />
-                <input type="text" :value="recipe.summary || recipe.adaptation_note || recipe.description"
-                    placeholder="關鍵更改內容..." readonly>
+                <textarea class="adaptation-textarea" :value="recipe.adaptation_note" placeholder="關鍵更改內容..."
+                    readonly></textarea>
             </div>
         </div>
 
@@ -96,7 +94,7 @@ const handleUploadImage = () => {
     border-radius: 12px;
     overflow: hidden;
     background-color: $neutral-color-white;
-    height: 100%;
+    min-height: 320px;
     display: flex;
     flex-direction: column;
     transition: all 0.3s ease;
@@ -117,23 +115,22 @@ const handleUploadImage = () => {
         height: 160px;
         background-color: $neutral-color-100;
         overflow: hidden;
+        flex-shrink: 0;
     }
 
-    /* ✨ 修正後的標籤：解決文字重疊 */
     .key-change-badge {
         position: absolute;
         top: 8px;
         left: 8px;
-        // 💡 關鍵：給予右邊距，確保標籤不會貼到右邊邊界，且有空間折行
         max-width: calc(100% - 16px);
         z-index: 20;
         background: rgba($primary-color-700, 0.9);
         backdrop-filter: blur(4px);
         color: white;
         padding: 4px 10px;
-        border-radius: 12px; // 稍微調方一點點，折行時比較好看
-        display: flex; // 改用 flex
-        align-items: flex-start; // 對齊頂部，適合多行
+        border-radius: 12px;
+        display: flex;
+        align-items: flex-start;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         pointer-events: none;
 
@@ -143,16 +140,16 @@ const handleUploadImage = () => {
             background-color: #52c41a;
             border-radius: 50%;
             margin-right: 6px;
-            margin-top: 5px; // 微調圓點位置對齊第一行字
+            margin-top: 5px;
             flex-shrink: 0;
         }
 
         .badge-text {
             font-size: 11px;
             font-weight: 500;
-            line-height: 1.5; // 💡 增加行高，防止文字重疊
-            white-space: normal; // 允許自然換行
-            word-break: break-all; // 避免長英文字母衝出去
+            line-height: 1.5;
+            white-space: normal;
+            word-break: break-all;
             flex: 1;
         }
     }
@@ -170,8 +167,6 @@ const handleUploadImage = () => {
         z-index: 10;
     }
 
-    // 當 Hover 時，如果不是 readonly 狀態，標籤可以選擇稍微變淡或維持原樣
-    // 這裡我們維持標籤顯示，但讓 overlay 不要蓋過它
     &:not(.is-readonly) .card-header:hover .change-hint-overlay {
         opacity: 1;
     }
@@ -179,10 +174,33 @@ const handleUploadImage = () => {
     .card-body {
         padding: 12px 16px;
         flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+
+        /* ✨ 手機版排序核心 ✨ */
+        @media (max-width: 768px) {
+            display: grid; // 改用 grid 更好控制
+            grid-template-columns: 1fr;
+
+            .title-input {
+                order: 1;
+            }
+
+            .ingredients-section,
+            .nutrition-list {
+                order: 2;
+            }
+
+            // 食材營養往前
+            .content-input {
+                order: 3;
+            }
+
+            // 步驟/筆記最後
+        }
 
         .input-group {
             display: flex;
-            align-items: center;
             margin-bottom: 8px;
 
             input {
@@ -201,28 +219,40 @@ const handleUploadImage = () => {
         }
 
         .content-input {
-            display: flex;
-            align-items: center;
+            align-items: flex-start;
 
             .arrow-icon {
                 font-size: 20px;
                 margin-right: 6px;
+                margin-top: 2px;
                 color: $primary-color-700;
                 flex-shrink: 0;
             }
 
-            input {
-                font-size: 14px;
+            .adaptation-textarea {
+                width: 100%;
+                border: none;
+                outline: none;
+                background: transparent;
                 color: $neutral-color-400;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                font-size: 14px;
+                line-height: 1.5;
+                resize: none;
+                padding: 0;
+                height: 4.5em;
+                font-family: inherit;
+                cursor: default;
+                scrollbar-width: none;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                }
             }
 
             &.has-tag {
-                opacity: 0.6;
+                opacity: 0.7;
 
-                input {
+                .adaptation-textarea {
                     font-size: 13px;
                     font-style: italic;
                 }
@@ -237,6 +267,7 @@ const handleUploadImage = () => {
 
     footer {
         padding: 0 16px 16px;
+        flex-shrink: 0;
 
         .personal-info {
             display: flex;
