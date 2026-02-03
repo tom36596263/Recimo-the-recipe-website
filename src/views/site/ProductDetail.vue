@@ -273,7 +273,7 @@ onUnmounted(() => {
                   </tr>
                 </tbody>
               </table>
-              <p class="p-p2 nutrition-table__note">一人份的營養成分表示/一份250g</p>
+              <p class="p-p2 nutrition-table__note">一人份的營養成分表示/一份{{ productInfo.tags.product_net_weight }}g</p>
             </div>
             <div class="product-detail__extra">
               <div class="product-detail__section">
