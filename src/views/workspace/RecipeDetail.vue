@@ -733,25 +733,36 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
 
 .title-content {
     display: flex;
-    align-items: center; // 垂直居中對齊
-    justify-content: flex-start; // 預設靠左
+    align-items: center;
+    justify-content: flex-start;
     padding: 20px 0;
     border-bottom: 1px solid $neutral-color-100;
 
     .zh-h2 {
-        flex-shrink: 0; // 防止標題被擠壓
+        flex-shrink: 0;
+        display: flex;
+        /* 建議加上 flex 更好對齊 */
+        align-items: center;
 
         .main-icon {
-                font-size: 24px;
-                color: $neutral-color-black;
-        
-                /* 核心微調程式碼 */
-                transform: translateY(5px); // 往正值調就是往下移動，1px 或 2px 通常就夠了
-        
-                /* 備選方案：如果不想用 transform */
-                // margin-top: 4px; 
+            margin-right: 15px;
+            font-size: 24px;
+            color: $neutral-color-black;
+
+            /* 1. 先設定手機版的位移 (你說手機版可以了) */
+            transform: translateY(4px);
+
+            /* 2. 透過媒體查詢，單獨調整桌機版 (螢幕大於 768px 時) */
+            @media screen and (min-width: 769px) {
+                /* 既然桌機版偏上，就把數值再調大一點，例如 9px 或 10px */
+                transform: translateY(3px) !important;
+
+                /* 如果 translateY 還是動不了，試試看直接改 margin */
+                // margin-top: 5px; 
             }
+        }
     }
+
 
     .meta-wrapper {
         margin-left: auto; // 【最簡單靠右關鍵】這行會吃掉左邊所有剩餘空間
@@ -984,20 +995,7 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
     line-height: 1;
 }
 
-/* 3. 微調標題內的圖示位置 */
-.zh-h2 {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0; // 移除預設下邊距以精準對齊標籤
 
-    .main-icon {
-        margin-right: 8px;
-        font-size: 28px;
-        color: $neutral-color-800;
-        // 如果圖示看起來太高，可以用原本的 transform 微調
-        transform: translateY(2px);
-    }
-}
 
 @media screen and (max-width: 768px) {
     .title-content {
