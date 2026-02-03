@@ -878,4 +878,9 @@ const startCooking = () => {
         transform: rotate(0deg);
     }
 }
+
+.draggable-card-wrapper {
+    touch-action: none;
+    /* 告訴瀏覽器這個元素完全由 JS 處理觸控，不要猜測滾動方向 */
+}
 </style>
