@@ -74,6 +74,8 @@ const handleDelete = async () => {
     }
 };
 
+const isHubOpen = ref(false);
+
 // --- 份量與營養計算邏輯 ---
 const originalServings = computed(() => {
     return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
@@ -442,6 +444,50 @@ const closeModal = () => emit('update:modelValue', false);
     top: -2px;
     color: $neutral-color-800;
 }
+
+/* --- 捲軸美化 --- */
+.modal-scroll-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 48px;
+
+    /* 1. 捲軸整體寬度 */
+    &::-webkit-scrollbar {
+        width: 8px;
+        /* 寬度稍微縮小，看起來比較精緻 */
+    }
+
+    /* 2. 捲軸軌道 (背景) */
+    &::-webkit-scrollbar-track {
+        background: transparent;
+        /* 軌道透明，維持背景乾淨 */
+    }
+
+    /* 3. 捲軸滑塊 (動起來的部分) */
+    &::-webkit-scrollbar-thumb {
+        background: $neutral-color-100;
+        /* 使用淺灰色 */
+        border-radius: 10px;
+        /* 圓角化 */
+        border: 2px solid transparent;
+        /* 透過透明邊框製造內縮感 */
+        background-clip: padding-box;
+
+        &:hover {
+            background: $neutral-color-400;
+            /* 滑鼠移上去變深色一點 */
+        }
+    }
+
+    /* Firefox 支援 (標準屬性) */
+    scrollbar-width: thin;
+    scrollbar-color: $neutral-color-100;
+
+    @media (max-width: 768px) {
+        padding: 24px;
+    }
+}
+
 
 .mb-32 {
     margin-bottom: 32px;

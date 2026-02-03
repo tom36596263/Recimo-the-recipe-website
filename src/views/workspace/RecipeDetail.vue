@@ -34,6 +34,8 @@ const isLoading = ref(true);
 const isLiked = ref(false);
 const localLikesOffset = ref(0); // 本地模擬按讚增減
 
+const isHubOpen = ref(false); // 用來控制選單展開/收合
+
 const isPreviewMode = computed(() => route.query.mode === 'preview');
 const isReportModalOpen = ref(false);
 
@@ -548,45 +550,36 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
 
 
 
-    <div v-if="!isLoading && rawRecipe" class="fixed-floating-bar" :class="{ 'is-preview': isPreviewMode }">
-        <button class="action-circle-btn" :class="{ 'active': isLiked }" @click="toggleRecipeLike">
+    
+
+    <div v-if="isHubOpen" class="hub-overlay" @click="isHubOpen = false"></div>
+
+    <div v-if="!isLoading && rawRecipe" class="recipe-action-hub"
+        :class="{ 'active': isHubOpen, 'is-preview': isPreviewMode }">
+
+        <button class="main-hub-btn" @click="isLiked = !isLiked; localLikesOffset = isLiked ? 1 : 0">
             <i-material-symbols-thumb-up-rounded v-if="isLiked" />
             <i-material-symbols-thumb-up-outline-rounded v-else />
             <span v-if="displayRecipeLikes > 0" class="badge">{{ displayRecipeLikes }}</span>
+
+            <div class="indicator" :class="{ 'rotate': isHubOpen }" @click.stop="isHubOpen = !isHubOpen">
+                <i-material-symbols-add-rounded />
+            </div>
         </button>
 
-        <button class="action-circle-btn" @click="handleShare">
-            <i-material-symbols-share-outline />
-        </button>
-
-        <button class="action-circle-btn" @click="handleGoToEdit">
-            <i-material-symbols-edit />
-        </button>
-
-        <button class="action-circle-btn report" @click="isReportModalOpen = true">
-            <i-material-symbols-error-outline-rounded />
-        </button>
+        <div class="sub-actions">
+            <button class="sub-btn" @click="handleGoToEdit" title="編輯/改編">
+                <i-material-symbols-edit />
+            </button>
+            <button class="sub-btn" @click="handleShare" title="分享">
+                <i-material-symbols-share-outline />
+            </button>
+            <button class="sub-btn report" @click="isReportModalOpen = true" title="檢舉">
+                <i-material-symbols-error-outline-rounded />
+            </button>
+        </div>
     </div>
 
-    <div v-if="!isLoading && rawRecipe" class="fixed-floating-bar" :class="{ 'is-preview': isPreviewMode }">
-    <button class="action-circle-btn" :class="{ 'active': isLiked }" @click="toggleRecipeLike">
-        <i-material-symbols-thumb-up-rounded v-if="isLiked" />
-        <i-material-symbols-thumb-up-outline-rounded v-else />
-        <span v-if="displayRecipeLikes > 0" class="badge">{{ displayRecipeLikes }}</span>
-    </button>
-    
-    <button class="action-circle-btn" @click="handleShare">
-        <i-material-symbols-share-outline />
-    </button>
-
-    <button class="action-circle-btn" @click="handleGoToEdit">
-        <i-material-symbols-edit />
-    </button>
-
-    <button class="action-circle-btn report" @click="isReportModalOpen = true">
-        <i-material-symbols-error-outline-rounded />
-    </button>
-</div>
 
     <div v-else-if="isLoading" class="loading-state">
         <p>正在為您準備食譜資料...</p>
@@ -742,39 +735,31 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
     .zh-h2 {
         flex-shrink: 0;
         display: flex;
-        /* 建議加上 flex 更好對齊 */
         align-items: center;
 
         .main-icon {
             margin-right: 15px;
             font-size: 24px;
             color: $neutral-color-black;
-
-            /* 1. 先設定手機版的位移 (你說手機版可以了) */
             transform: translateY(4px);
 
-            /* 2. 透過媒體查詢，單獨調整桌機版 (螢幕大於 768px 時) */
             @media screen and (min-width: 769px) {
-                /* 既然桌機版偏上，就把數值再調大一點，例如 9px 或 10px */
                 transform: translateY(3px) !important;
-
-                /* 如果 translateY 還是動不了，試試看直接改 margin */
-                // margin-top: 5px; 
             }
         }
     }
 
 
     .meta-wrapper {
-        margin-left: auto; // 【最簡單靠右關鍵】這行會吃掉左邊所有剩餘空間
+        margin-left: auto;
         display: flex;
-        align-items: center; // 讓作者資訊跟按鈕水平對齊
-        gap: 16px; // 兩者之間的間距
+        align-items: center;
+        gap: 16px;
 
         @media screen and (max-width: 768px) {
             margin-left: 0;
             width: 100%;
-            justify-content: space-between; // 手機版時，作者左、按鈕右
+            justify-content: space-between;
         }
     }
 
@@ -880,20 +865,18 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
     }
 }
 
-/* 詳情頁專用：固定右下角毛玻璃按鈕列 */
+/* --- [區塊 A] 詳情頁彈窗專用 --- */
 .fixed-floating-bar {
     position: fixed;
     bottom: 30px;
     right: 40px;
     display: flex;
-    flex-direction: row; // 橫向排列
+    flex-direction: row;
     gap: 12px;
     z-index: 1000;
-
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-
     padding: 10px;
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -909,7 +892,7 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
 
     &.is-preview {
         opacity: 0.5;
-        pointer-events: none; // 預覽模式禁用
+        pointer-events: none;
     }
 
     .action-circle-btn {
@@ -921,12 +904,17 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
         display: flex;
         align-items: center;
         justify-content: center;
-        color: $primary-color-700;
+        color: $primary-color-700 !important;
         font-size: 22px;
         cursor: pointer;
         transition: all 0.2s ease;
         position: relative;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        svg,
+        :deep(svg) {
+            fill: currentColor;
+        }
 
         &:hover {
             transform: translateY(-3px);
@@ -934,15 +922,25 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
         }
 
         &.active {
-            background: $primary-color-700;
-            color: white;
+            background: $primary-color-700 !important;
+            color: white !important;
+
+            svg,
+            :deep(svg) {
+                fill: white;
+            }
         }
 
         &.report {
-            color: #ff7875;
+            color: #ff7875 !important;
 
             &:hover {
                 background: #fff1f0;
+            }
+
+            svg,
+            :deep(svg) {
+                fill: #ff7875;
             }
         }
 
@@ -960,43 +958,195 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
     }
 }
 
-/* 微調原本標題列的樣式，讓它不那麼空 */
-.title-content {
-    .icon-group {
+/* --- [區塊 B] 頁面通用食譜按鈕 Hub (修正後的順序與樣式) --- */
+.recipe-action-hub {
+    position: fixed;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
 
-        // 移除 gap，因為現在只剩一個按鈕
-        .adapt-btn-wrapper {
-            margin-left: 0;
+    /* 桌機版：讚 -> 編輯 -> 分享 -> 檢舉 (橫向) */
+    @media (min-width: 992px) {
+        bottom: 30px;
+        right: 30px;
+        flex-direction: row; // 確保按讚在最左，檢舉在最右
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px);
+        padding: 10px 16px;
+        border-radius: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+        .sub-actions {
+            display: flex !important;
+            flex-direction: row;
+            gap: 12px;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: none !important;
+        }
+
+        .indicator {
+            display: none !important;
+        }
+    }
+
+    /* 手機版：展開後 編輯/分享/檢舉 在 讚 的上方 */
+    @media (max-width: 991px) {
+        bottom: 100px;
+        right: 24px;
+        flex-direction: column;
+        gap: 12px;
+
+        .sub-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            order: -1; // 讓子按鈕群組在 column 模式下出現在主按鈕上方
+        }
+
+        &.active .sub-actions {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+    }
+
+    /* 按鈕顏色邏輯 */
+    .main-hub-btn {
+        background: $primary-color-700;
+        color: white !important;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        cursor: pointer;
+        position: relative;
+
+        svg,
+        :deep(svg) {
+            fill: $neutral-color-white;
+        }
+    }
+
+    .sub-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        background: $neutral-color-white;
+        color: $primary-color-700 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        svg,
+        :deep(svg) {
+            fill: currentColor;
+        }
+
+        &:hover {
+            background: $primary-color-100;
+        }
+
+        &.report {
+            color: $accent-color-700 !important;
+
+            svg,
+            :deep(svg) {
+                fill: $accent-color-700;
+            }
+
+            &:hover {
+                background: $neutral-color-100;
+            }
+        }
+    }
+
+    .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #ff4d4f;
+        color: white;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 10px;
+        border: 2px solid white;
+    }
+
+    .indicator {
+        position: absolute;
+        bottom: -4px;
+        right: -4px;
+        background: $primary-color-700;
+        color: $neutral-color-white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+
+        &.rotate {
+            transform: rotate(45deg);
         }
     }
 }
 
-/* 1. 標題與標籤的容器 */
-.title-group {
-    display: flex;
-    align-items: center; // 確保垂直居中對齊
-    gap: 16px; // 標題與標籤之間的間距
-    flex-wrap: wrap; // 防止手機版標題太長時標籤被切掉
+.hub-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 999;
+
+    @media (min-width: 992px) {
+        display: none;
+    }
 }
 
-/* 2. 重寫改編標籤樣式 (移植自燈箱版本) */
+.title-content .icon-group .adapt-btn-wrapper {
+    margin-left: 0;
+}
+
+.title-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
 .badge-adaptation {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
-    height: 26px; // 固定高度讓它看起來像膠囊
-    background: #E8F5E9; // 淺綠色背景 (對應 $primary-color-100)
-    color: #2E7D32; // 深綠色文字 (對應 $primary-color-700)
+    height: 26px;
+    background: $neutral-color-white;
+    color: $primary-color-700;
     padding: 0 14px;
-    border-radius: 99px; // 圓角膠囊狀
+    border-radius: 99px;
     font-weight: 600;
     font-size: 14px;
-    white-space: nowrap; // 標籤文字不折行
+    white-space: nowrap;
     line-height: 1;
 }
-
-
 
 @media screen and (max-width: 768px) {
     .title-content {
@@ -1015,35 +1165,30 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
             }
         }
 
-                .meta-wrapper {
-                    margin-left: 0 !important;
-                    width: 100% !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: space-between !important;
-                    /* 確保左右撐開 */
-        
-                    /* 作者資訊區塊 */
-                    :deep(.author-info-container) {
-                        flex-shrink: 0;
-                    }
-        
-                    /* 針對按鈕群組（強制推到最右邊） */
-                    .adapt-btn-wrapper,
-                    .delete-btn-wrapper,
-                    :deep(.delete-adaptation-btn) {
-                        margin-left: auto !important;
-                        /* 核心：吃掉左邊空間 */
-                        display: flex !important;
-                        justify-content: flex-end;
-                        gap: 8px;
-                    }
-        
-                    :deep(button) {
-                        white-space: nowrap;
-                    }
-                }
+        .meta-wrapper {
+            margin-left: 0 !important;
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+
+            :deep(.author-info-container) {
+                flex-shrink: 0;
+            }
+
+            .adapt-btn-wrapper,
+            .delete-btn-wrapper,
+            :deep(.delete-adaptation-btn) {
+                margin-left: auto !important;
+                display: flex !important;
+                justify-content: flex-end;
+                gap: 8px;
+            }
+
+            :deep(button) {
+                white-space: nowrap;
+            }
+        }
     }
 }
-
 </style>
