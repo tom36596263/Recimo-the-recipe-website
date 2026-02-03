@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { useAuthStore } from '@/stores/authStore'// 🏆 引入 AuthStore 進行權限比對
 import PostReportModal from '@/components/workspace/recipedetail/modals/PostReportModal.vue'
 import CookSnapUploadModal from '@/components/workspace/recipedetail/modals/CookSnapUploadModal.vue'
 
@@ -11,10 +12,26 @@ const props = defineProps({
   }
 })
 
-// 🏆 1. 定義 emit 事件，讓父組件能收到資料
-const emit = defineEmits(['post-snap'])
+// 🏆 定義事件：包含原本的上傳與新增的刪除
+const emit = defineEmits(['post-snap', 'delete-snap'])
 
+const authStore = useAuthStore()
 const wallViewport = ref(null)
+
+// --- 權限判斷邏輯 ---
+// 判斷該照片是否為當前登入使用者所擁有
+const isOwner = (photoUserId) => {
+  const currentUserId = authStore.user?.user_id || authStore.user?.id
+  // 轉為 Number 確保比對正確
+  return currentUserId && Number(currentUserId) === Number(photoUserId)
+}
+
+// --- 刪除點擊處理 ---
+const onDeleteClick = (id) => {
+  if (confirm('確定要刪除這張作品照嗎？（此動作無法復原）')) {
+    emit('delete-snap', id)
+  }
+}
 
 // --- 檢舉彈窗邏輯 ---
 const isReportModalOpen = ref(false)
@@ -27,15 +44,12 @@ const selectedPhotoData = ref({
 })
 
 const handleReport = (photo) => {
-  console.log('📢 觸發檢舉，照片原始資料:', photo);
-
-  // 🏆 對帳修正：確保抓取父組件 map 過後的 id (即 gallery_id)
   selectedPhotoData.value = {
-    id: photo.id,            // 對應資料庫的 gallery_id
-    content: photo.comment,  // 對應 gallery_text
+    id: photo.id,
+    content: photo.comment,
     userName: photo.userName || '匿名用戶',
     time: photo.createdAt || '剛剛',
-    image: photo.url         // 彈窗預覽圖
+    image: photo.url
   }
   isReportModalOpen.value = true
 }
@@ -51,20 +65,13 @@ const handleUploadClick = () => {
   isUploadModalOpen.value = true
 }
 
-// 在 CookSnap.vue 中修改
 const onUploadSubmit = (data) => {
-  console.log('子組件接收:', data)
-
-  let previewUrl = data.image
-  if (data.image instanceof File) {
-    previewUrl = URL.createObjectURL(data.image)
-  }
-
+  console.log('CookSnap.vue 轉發資料:', data)
+  // 直接轉發原始 File 物件
   emit('post-snap', {
-    content: data.note || '',
-    image: previewUrl
+    note: data.note || '',
+    image: data.image
   })
-
   isUploadModalOpen.value = false
 }
 
@@ -105,12 +112,17 @@ const scrollWall = (direction) => {
         <div v-for="photo in list" :key="photo.id" class="work-item">
           <img :src="photo.url" :alt="photo.userName + ' 的作品'" />
           <div class="work-overlay">
+
+            <div v-if="isOwner(photo.userId)" class="delete-icon-wrapper" @click.stop="onDeleteClick(photo.id)">
+              <i-material-symbols-delete-outline-rounded class="delete-icon" />
+            </div>
+
             <p class="comment-text p-p2">{{ photo.comment }}</p>
 
             <span class="upload-time en-h3">{{ photo.createdAt }}</span>
 
-            <div class="report-icon-wrapper" @click.stop="handleReport(photo)">
-              <i-material-symbols:error-outline-rounded />
+            <div v-if="!isOwner(photo.userId)" class="report-icon-wrapper" @click.stop="handleReport(photo)">
+              <i-material-symbols-error-outline-rounded />
             </div>
           </div>
         </div>
@@ -127,13 +139,39 @@ const scrollWall = (direction) => {
 
     <PostReportModal v-model="isReportModalOpen" targetType="gallery" :commentData="selectedPhotoData"
       @success="onReportSubmit" />
-
     <CookSnapUploadModal v-model="isUploadModalOpen" @submit="onUploadSubmit" />
   </div>
 </template>
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
+
+// 🏆 刪除按鈕專屬樣式
+.delete-icon-wrapper {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  background-color: rgba(231, 76, 60, 0.7); // 柔和的紅色
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+
+  &:hover {
+    background-color: rgba(231, 76, 60, 1);
+    transform: scale(1.1);
+  }
+
+  .delete-icon {
+    font-size: 20px;
+  }
+}
 
 .recipe-result-container {
   padding: 24px 0;

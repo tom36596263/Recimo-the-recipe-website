@@ -461,26 +461,83 @@ const handleDeleteComment = async (commentId) => {
     }
 };
 
-const handlePostSnap = async (formData) => {
+const handlePostSnap = async (payload) => {
+    // 🏆 核心偵錯：看看到底是 File 還是 String
+    console.log("--- 上傳流程開始 ---");
+    console.log("1. 原始 Payload:", payload);
+    console.log("2. 圖片類型:", typeof payload.image);
+    console.log("3. 是否為 File 物件:", payload.image instanceof File);
+
     if (!authStore.user) return alert('請先登入');
 
-    // formData 通常包含圖片檔案與文字內容
+    const userId = authStore.user.user_id || authStore.user.id;
+    const recipeId = route.params.id;
+
+    // 驗證 ID
+    if (!userId || !recipeId) {
+        console.error("缺少 ID:", { userId, recipeId });
+        return alert('無法讀取用戶或食譜資訊');
+    }
+
+    const formData = new FormData();
+    formData.append('recipe_id', recipeId);
+    formData.append('user_id', userId);
+    formData.append('gallery_text', payload.note || '');
+
+    // 🏆 關鍵修正：確保只有 File 物件才能附加到 'image'
+    if (payload.image instanceof File) {
+        formData.append('image', payload.image);
+        console.log("4. FormData 已成功附加 File 物件");
+    } else {
+        // 如果進到這裡，代表 Modal 傳出來的就是那個 blob 網址字串
+        console.error("致命錯誤：Payload 提供的不是檔案實體，而是網址：", payload.image);
+        alert("圖片讀取異常，請重新選取圖片後再試一次");
+        return;
+    }
+
     try {
         const response = await phpApi.post('recipes/gallery.php', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
         });
 
+        console.log("5. 後端回傳:", response.data);
+
         if (response.data.success) {
-            alert('上傳成品照成功！');
-            fetchData(); // 重新整理資料以顯示新照片
+            alert('成品照發布成功！');
+            if (typeof fetchData === 'function') fetchData();
         } else {
             alert('上傳失敗：' + response.data.message);
         }
     } catch (err) {
-        console.error('上傳成品照出錯:', err);
-        alert('系統錯誤，請稍後再試');
+        console.error('API 出錯:', err);
+        alert('上傳出錯，請檢查伺服器連線');
     }
 };
+
+const handleDeleteSnap = async (galleryId) => {
+    const userId = authStore.user?.user_id || authStore.user?.id;
+
+    try {
+        // 🏆 注意：這裡改用 .delete() 或是傳參數給 gallery.php
+        const response = await phpApi.delete('recipes/gallery.php', {
+            data: {
+                gallery_id: galleryId,
+                user_id: userId
+            }
+        });
+
+        if (response.data.success) {
+            alert(response.data.message);
+            fetchData(); // 重新整理列表
+        }
+    } catch (err) {
+        console.error('刪除請求失敗', err);
+    }
+};
+
+
 
 onMounted(() => {
     fetchData();
@@ -575,7 +632,7 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
 
                 <div v-if="!isPreviewMode && !isAdaptation" class="col-12 cook-snap-full fade-up" style="--delay: 7">
                     <section class="mb-10 content-wrapper">
-                        <CookSnap :list="snapsData" @post-snap="handlePostSnap" />
+                        <CookSnap :list="snapsData" @post-snap="handlePostSnap" @delete-snap="handleDeleteSnap" />
                     </section>
                 </div>
             </div>
