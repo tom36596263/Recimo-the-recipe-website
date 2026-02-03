@@ -35,10 +35,9 @@ defineProps({
     display: flex;
     flex-direction: column;
     justify-content: center;
-
     width: 100%;
     padding: 4px 8px;
-    margin-bottom: 2px; // 卡片與卡片之間的小間距
+    margin-bottom: 2px;
 
     background-color: $neutral-color-white; // 使用純白背景與底層灰色區隔
     border: 1px solid $neutral-color-100;
@@ -48,20 +47,14 @@ defineProps({
     transition: transform 0.2s ease;
     cursor: pointer;
 
-    // 滑鼠懸停效果：稍微放大並加深邊框，給予使用者回饋
-    &:hover {
-        transform: translateY(-1px);
-        border-color: $primary-color-400;
-    }
-
     &__title {
-        font-size: 0.8rem; // 較小的字體以適應窄欄位
+        font-size: 0.8rem;
         font-weight: 500;
-        color: $primary-color-800; // 使用主色調深綠色
+        color: $primary-color-800;
         text-align: left;
         line-height: 1.2;
 
-        /* --- 關鍵程式碼：處理文字過長 --- */
+        /* --- 處理文字過長 --- */
         white-space: nowrap; // 強制文字不換行
         overflow: hidden; // 隱藏超出容器的部分
         text-overflow: ellipsis; // 在末尾顯示 "..."

@@ -19,6 +19,9 @@ const planId = computed(() => Number(route.params.id));
 const planData = ref({});        // 存放單一計畫的基本資訊 (標題、日期範圍)
 const mealPlanItems = ref([]);   // 存放該計畫所有的配餐明細 (包含食譜 ID、餐期)
 const allRecipes = ref([]);      // 存放全域食譜庫資料
+const mealTemplates = ref([]);       // 存放模板清單 (meal_plan_template.json)
+const mealTemplateItems = ref([]);  // 存放模板食譜關聯 (meal_plan_template_items.json)
+const coverTemplates = ref([]); // 存放封面模板
 
 // --- UI 控制 ---
 const showPanel = ref(false);    // 控制右側資訊面板 (PlanPanel)
@@ -28,10 +31,13 @@ const selectedDate = ref(null);  // 當前選中的日期 (若為 null 則顯示
 const fetchData = async () => {
   try {
     // 同時抓取計畫清單、明細、食譜資料
-    const [planRes, itemsRes, recipesRes] = await Promise.all([
+    const [planRes, itemsRes, recipesRes, templatesRes, templateItemsRes, coverTemplatesRes] = await Promise.all([
       publicApi.get('data/plan/meal_plans.json'),
       publicApi.get('data/plan/meal_plan_items.json'),
-      publicApi.get('data/recipe/recipes.json')
+      publicApi.get('data/recipe/recipes.json'),
+      publicApi.get('data/plan/meal_plan_template.json'),
+      publicApi.get('data/plan/meal_plan_template_items.json'),
+      publicApi.get('data/plan/meal_plan_cover_template.json')
     ]);
 
     // 1. 根據路由 ID 找出對應的計畫資訊
@@ -40,6 +46,13 @@ const fetchData = async () => {
     mealPlanItems.value = itemsRes.data.filter(item => item.plan_id === planId.value);
     // 3. 儲存食譜資料庫供搜尋使用
     allRecipes.value = recipesRes.data;
+    // 儲存預設計畫
+    mealTemplates.value = templatesRes.data;
+    // 4. 儲存預設計畫明細
+    mealTemplateItems.value = templateItemsRes.data;
+    // 5. 儲存預設封面圖
+    coverTemplates.value = coverTemplatesRes.data;
+
   } catch (err) {
     console.error('資料讀取失敗：', err.message);
   }
@@ -107,9 +120,85 @@ const handleDateSelect = (date) => { selectedDate.value = date; };
 const closeDetail = () => { selectedDate.value = null; };
 const openPanel = () => { showPanel.value = true; };
 const closePanel = () => { showPanel.value = false; };
-const onWheel = (e) => { e.currentTarget.scrollLeft += e.deltaY * 0.2; };
 
+// --- 套用模板邏輯 ---
+const handleApplyTemplate = (templateId) => {
+  if (!planData.value.start_date) return;
 
+  // 1. 找出該模板對應的所有食譜項目
+  const sourceItems = mealTemplateItems.value.filter(it => it.template_id === templateId);
+
+  // 2. 轉換邏輯：計算實際日期
+  const startDate = new Date(planData.value.start_date);
+
+  const newItems = sourceItems.map(it => {
+    const targetDate = new Date(startDate);
+    targetDate.setDate(startDate.getDate() + (it.day_number - 1)); // day_number 轉日期
+
+    return {
+      item_id: Date.now() + Math.random(), // 隨機 ID
+      plan_id: planId.value,
+      recipe_id: it.recipe_id,
+      planned_date: targetDate.toISOString().split('T')[0],
+      meal_type: it.meal_type,
+      sort_order: it.sort_order
+    };
+  });
+
+  // 3. 更新計畫 (可選擇覆蓋或累加，這裡示範累加)
+  mealPlanItems.value = [...mealPlanItems.value, ...newItems];
+};
+
+// --- 計畫日期變更 ---
+const handleUpdatePlanDate = (newRange) => {
+  if (!newRange || !newRange.start || !newRange.end) return;
+
+  // 輔助函式：轉成 YYYY-MM-DD 字串
+  const formatDate = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  // 直接更新 planData，觸發響應式更新
+  planData.value.start_date = formatDate(newRange.start);
+  planData.value.end_date = formatDate(newRange.end);
+
+  // (選用) 如果需要將變更存回後端，可以在這裡呼叫 API
+  // publicApi.post('/plan/update', planData.value)...
+};
+
+// ------變更日期-------
+const handleDateChangeRequest = (newDate) => {
+  // 檢查範圍：確保新日期在計畫的開始與結束日期之間
+  const start = new Date(planData.value.start_date);
+  const end = new Date(planData.value.end_date);
+
+  // 如果超出範圍，可以選擇不執行，或是跳出提示
+  if (newDate >= start && newDate <= end) {
+    selectedDate.value = newDate;
+  } else {
+    console.warn('已到達計畫日期的邊界');
+  }
+};
+
+// ------存放目標熱量並傳遞資料 ------
+const dailyTargetKcal = ref(2000); // 預設值
+
+const updateTargetKcal = (val) => {
+  dailyTargetKcal.value = val;
+  // 如果需要存回後端： publicApi.post(...)
+};
+
+// ------接住封面圖的更新------
+const handleUpdatePlanCover = (updatedData) => {
+  // 更新本地的 planData，Vue 的響應式會自動通知所有組件
+  planData.value = updatedData;
+
+  // (選用) 這裡可以呼叫 API 把封面變更存進資料庫
+  // publicApi.put(`data/plan/${planId.value}`, updatedData);
+};
 </script>
 
 <template>
@@ -131,7 +220,7 @@ const onWheel = (e) => { e.currentTarget.scrollLeft += e.deltaY * 0.2; };
       <Transition name="fade-scale" mode="out-in">
         <div v-if="!selectedDate" key="week" class="meal-plan-container col-12">
           <ColumnTitle />
-          <div class="meal-plan-container__columns" @wheel.prevent="onWheel">
+          <div class="meal-plan-container__columns">
             <DayColumn v-for="date in datelist" :key="date.getTime()" :current-date="date" :items="getItemsByDate(date)"
               @click="handleDateSelect(date)" />
           </div>
@@ -139,14 +228,18 @@ const onWheel = (e) => { e.currentTarget.scrollLeft += e.deltaY * 0.2; };
 
         <div v-else key="picker" class="meal-detail-view col-12">
           <RecipePicker :date="selectedDate" :current-items="getItemsByDate(selectedDate)" :all-recipes="allRecipes"
-            @back="closeDetail" @add="handleAddRecipe" @remove="handleRemoveRecipe" />
+            :target-calories="dailyTargetKcal" :start-date="planData.start_date" :end-date="planData.end_date"
+            @update-target="updateTargetKcal" @back="closeDetail" @add="handleAddRecipe" @remove="handleRemoveRecipe"
+            @change-date="handleDateChangeRequest" />
         </div>
       </Transition>
     </div>
 
     <Transition name="slide-fade">
-      <PlanPanel v-if="showPanel" :plan-data="planData" :meal-plan-items="mealPlanItems" :all-recipes="allRecipes"
-        @close="closePanel" />
+      <PlanPanel v-if="showPanel" :target-calories="dailyTargetKcal" :plan-data="planData"
+        :meal-plan-items="mealPlanItems" :all-recipes="allRecipes" :initial-date="selectedDate"
+        :meal-templates="mealTemplates" :cover-templates="coverTemplates" @apply-template="handleApplyTemplate"
+        @update-plan-date="handleUpdatePlanDate" @update-plan="handleUpdatePlanCover" @close="closePanel" />
     </Transition>
 
     <Transition name="fade">
@@ -174,8 +267,8 @@ const onWheel = (e) => { e.currentTarget.scrollLeft += e.deltaY * 0.2; };
     gap: 15px;
 
     .back-btn {
-      background: $neutral-color-white;
-      border: 1px solid $neutral-color-100;
+      background: $neutral-color-100;
+      border: 1px solid transparent;
       width: 40px;
       height: 40px;
       border-radius: 8px;
@@ -184,11 +277,11 @@ const onWheel = (e) => { e.currentTarget.scrollLeft += e.deltaY * 0.2; };
       align-items: center;
       cursor: pointer;
       color: $primary-color-800;
-      transition: all 0.2s ease;
 
       &:hover {
-        background: $primary-color-100;
-        border-color: $primary-color-400;
+        background: $accent-color-100;
+        border-color: $accent-color-800;
+        color: $accent-color-700;
       }
     }
 
@@ -210,7 +303,6 @@ const onWheel = (e) => { e.currentTarget.scrollLeft += e.deltaY * 0.2; };
     background-color: $primary-color-100;
     color: $primary-color-800;
     cursor: pointer;
-    transition: 0.3s;
 
     &:hover {
       background-color: $accent-color-100;
@@ -237,8 +329,28 @@ const onWheel = (e) => { e.currentTarget.scrollLeft += e.deltaY * 0.2; };
       flex-shrink: 0;
     }
 
+    // 1. 設定捲軸「寬度」(垂直時) 或「高度」(水平時)
     &::-webkit-scrollbar {
-      display: none; // 隱藏原生捲軸保持美觀
+      height: 15px;
+    }
+
+    // 2. 捲軸軌道 (背景)
+    &::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 5px;
+    }
+
+    // 3. 捲軸本體 (Thumb)
+    &::-webkit-scrollbar-thumb {
+      background-color: $neutral-color-400;
+      border-radius: 5px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: $accent-color-400;
+      }
     }
   }
 }

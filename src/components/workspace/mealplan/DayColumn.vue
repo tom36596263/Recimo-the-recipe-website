@@ -71,6 +71,7 @@ const dinnerItems = computed(() => props.items.filter(item => item.meal_type ===
     border-radius: 10px;
     color: $primary-color-800;
     transition: all 0.3s ease;
+    border: 1px solid transparent;
   }
 
   &__date {
