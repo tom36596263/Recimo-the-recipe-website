@@ -737,6 +737,7 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
     justify-content: flex-start;
     padding: 20px 0;
     border-bottom: 1px solid $neutral-color-100;
+    margin-bottom: 20px;
 
     .zh-h2 {
         flex-shrink: 0;
