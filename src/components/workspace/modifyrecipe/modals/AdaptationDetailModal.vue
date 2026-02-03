@@ -9,6 +9,7 @@ import RecipeIntro from '@/components/workspace/recipedetail/RecipeIntro.vue';
 import RecipeIngredients from '@/components/workspace/recipedetail/RecipeIngredients.vue';
 import RecipeSteps from '@/components/workspace/recipedetail/RecipeSteps.vue';
 import NutritionCard from '@/components/workspace/recipedetail/NutritionCard.vue';
+import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
 
 const props = defineProps({
     modelValue: Boolean,
@@ -33,10 +34,10 @@ const getCleanId = (id) => {
  * 權限判斷：是否為食譜擁有者
  */
 const isOwner = computed(() => {
-    const currentUserId = authStore.user?.id || authStore.user?.user_id;
-    const recipeAuthorId = props.recipe?.author_id || props.recipe?.user_id;
-    if (!currentUserId || !recipeAuthorId) return false;
-    return Number(currentUserId) === Number(recipeAuthorId);
+    const currentUserId = authStore.user?.user_id || authStore.user?.id;
+    const authorId = props.recipe?.author_id || props.recipe?.user_id;
+    if (!currentUserId || !authorId) return false;
+    return Number(currentUserId) === Number(authorId);
 });
 
 /**
@@ -53,7 +54,7 @@ const handleDelete = async () => {
         try {
             const res = await phpApi.post('recipes/recipe_adaptation_delete.php', {
                 recipe_id: cleanId,
-                user_id: authStore.user?.id || authStore.user?.user_id
+                user_id: authStore.user?.user_id || authStore.user?.id
             });
 
             if (res.data.success) {
@@ -106,7 +107,7 @@ const ingredientsData = computed(() => {
     const ratio = (1 / originalServings.value) * currentServings.value;
     return list.map(item => ({
         INGREDIENT_NAME: item.ingredient_name || item.name || '未知食材',
-        amount: item.amount ? (Number(item.amount) * ratio) : 0,
+        amount: item.amount ? (Number(item.amount) * ratio).toFixed(1) : 0,
         unit_name: item.unit_name || item.unit || 'g',
         note: item.remark || item.note || ''
     }));
@@ -124,26 +125,12 @@ watch(() => props.modelValue, (isOpen) => {
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
-    const today = new Date().toISOString().split('T')[0];
-
-    // --- 修正邏輯：找不到作者名稱就設為 null ---
-    const resolvedUserName = (isOwner.value
-        ? (authStore.user?.user_name || authStore.user?.name)
-        : (r.user_name || r.author_name)
-    ) || null;
-
-    // Handle 解析
-    const emailBase = (isOwner.value
-        ? (authStore.user?.user_email || authStore.user?.email)
-        : (r.user_email || r.author_email)
-    ) || '';
-    const resolvedHandle = emailBase ? emailBase.split('@')[0] : '';
 
     const rawTime = r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
 
     const rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
-    const finalImage = (rawImg && rawImg.startsWith('data:')) ? rawImg : parsePublicFile(rawImg);
+    const finalImage = (rawImg && (rawImg.startsWith('data:') || rawImg.startsWith('http'))) ? rawImg : parsePublicFile(rawImg);
 
     return {
         id: getCleanId(r.id || r.recipe_id),
@@ -152,10 +139,6 @@ const introData = computed(() => {
         description: r.description || r.recipe_description || '暫無詳細說明',
         time: formattedTime,
         difficulty: r.difficulty || 1,
-        userName: resolvedUserName,
-        handle: resolvedHandle,
-        publishTime: r.created_at || today,
-        isOwner: isOwner.value,
         tags: r.tags || []
     };
 });
@@ -171,20 +154,13 @@ const stepsData = computed(() => {
             id: s.id || idx,
             title: s.step_title || s.title || `步驟 ${idx + 1}`,
             content: s.content || s.step_content || s.description || '',
-            image: (stepImg && stepImg.startsWith('data:')) ? stepImg : parsePublicFile(stepImg),
+            image: (stepImg && (stepImg.startsWith('data:') || stepImg.startsWith('http'))) ? stepImg : parsePublicFile(stepImg),
             time: s.time || ''
         };
     });
 });
 
 const closeModal = () => emit('update:modelValue', false);
-
-const getAvatarStyle = (name) => {
-    if (!name) return { backgroundColor: '#eee' };
-    const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
-    const charCodeSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-    return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
-};
 </script>
 
 <template>
@@ -193,12 +169,25 @@ const getAvatarStyle = (name) => {
             <div class="modal-window">
                 <button class="close-x" @click="closeModal">✕</button>
 
+                <div class="fixed-floating-bar">
+                    <button class="action-circle-btn">
+                        <i-material-symbols-thumb-up-outline-rounded />
+                    </button>
+                    <button class="action-circle-btn">
+                        <i-material-symbols-share-outline />
+                    </button>
+                    <button class="action-circle-btn report">
+                        <i-material-symbols-error-outline-rounded />
+                    </button>
+                </div>
+
                 <div class="modal-scroll-body">
                     <div class="container-fluid">
                         <div class="modal-title-bar mb-32">
                             <div class="title-group">
                                 <h2 class="zh-h2">
-                                    <i-material-symbols-restaurant-rounded class="mr-8 icon-v-align" />
+                                    <i-material-symbols-restaurant-rounded class="mr-8 icon-v-align"
+                                        style="color: #74D09C;" />
                                     {{ introData?.title }}
                                 </h2>
                                 <span class="badge">改編版本</span>
@@ -210,18 +199,9 @@ const getAvatarStyle = (name) => {
                                     刪除改編
                                 </button>
 
-                                <div v-if="introData?.userName" class="user-info-box">
-                                    <div class="user-avatar-circle" :style="getAvatarStyle(introData.userName)">
-                                        {{ introData.userName.charAt(0).toUpperCase() }}
-                                    </div>
-                                    <div class="user-text-meta">
-                                        <div class="user-name">{{ introData.userName }}</div>
-                                        <div class="user-sub">
-                                            <span v-if="introData.handle">@{{ introData.handle }} • </span>
-                                            {{ introData.publishTime }}
-                                        </div>
-                                    </div>
-                                </div>
+                                <AuthorInfo
+                                    :name="isOwner ? (authStore.user?.user_name || authStore.user?.name) : (recipe.user_name || recipe.author_name || 'Recimo 用戶')"
+                                    :handle="`user_${recipe.author_id || recipe.user_id}`" :time="recipe.created_at" />
                             </div>
                         </div>
 
@@ -352,40 +332,6 @@ const getAvatarStyle = (name) => {
         font-size: 14px;
     }
 
-    .user-info-box {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-
-        .user-avatar-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            order: 2;
-        }
-
-        .user-text-meta {
-            text-align: right;
-            order: 1;
-
-            .user-name {
-                font-weight: 600;
-                color: $neutral-color-800;
-                font-size: 15px;
-            }
-
-            .user-sub {
-                font-size: 12px;
-                color: $neutral-color-400;
-            }
-        }
-    }
-
     @media (max-width: 768px) {
         flex-direction: column;
         align-items: flex-start;
@@ -397,9 +343,55 @@ const getAvatarStyle = (name) => {
             align-items: flex-end;
             gap: 16px;
         }
+    }
+}
 
-        .user-info-box .user-text-meta {
-            text-align: left;
+.fixed-floating-bar {
+    position: absolute;
+    bottom: 30px;
+    right: 40px;
+    display: flex;
+    gap: 12px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 8px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+
+    @media (max-width: 768px) {
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .action-circle-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #74D09C;
+        font-size: 22px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        &:hover {
+            transform: translateY(-3px);
+            background: #f0fdf4;
+        }
+
+        &.report {
+            color: #ff7875;
+
+            &:hover {
+                background: #fff1f0;
+            }
         }
     }
 }
