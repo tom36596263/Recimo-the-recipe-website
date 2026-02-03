@@ -488,12 +488,11 @@ const handleGoogleSuccess = async (response) => {
                       class="login-btn" />
                     <p class="auth-form__divider">更多登入方式</p>
                     <div class="social-login">
-                      <img src="@/assets/images/login/google.svg" @click="login" style="cursor: pointer"
-                        alt="Google Login" />
+                      <img src="@/assets/images/login/google.svg" @click="login" alt="Google Login" />
                       <!-- <GoogleLogin :callback="handleGoogleSuccess" popup-type="CODE">
                       </GoogleLogin> -->
-                      <a href="#"><img src="@/assets/images/login/fb.svg" /></a>
-                      <a href="#"><img src="@/assets/images/login/line.svg" /></a>
+                      <img src="@/assets/images/login/fb.svg" />
+                      <img src="@/assets/images/login/line.svg" />
                     </div>
                     <p class="mobile-switch-text" @click="isRegister = true">還不是會員嗎？快前往註冊吧~</p>
                   </div>
@@ -761,13 +760,16 @@ const handleGoogleSuccess = async (response) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 
   // 針對 Google 登入元件的包裝層
   // :deep(div[id^="google-login-button"]) {
   //   margin-right: 10px; // 讓它跟後面的 FB 按鈕保持距離
   // }
 
-  a {
+  img {
+    width: 40px;
+    margin: 15px 20px 0 20px;
     display: inline-block; // 確保 transform 在連結上生效
     transition: transform 0.3s ease; // 設定動畫時間與曲線
 
@@ -783,17 +785,6 @@ const handleGoogleSuccess = async (response) => {
       transform: scale(0.6);
     }
   }
-}
-
-.social-login img {
-  width: 40px;
-  margin: 15px 20px 10px 20px;
-
-  // 放大 1.15 倍
-  transform: scale(1.15);
-
-  // 增加一點陰影，讓它看起來像浮起來
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 
 // ========================================== 
