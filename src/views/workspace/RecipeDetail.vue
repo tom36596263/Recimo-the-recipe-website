@@ -17,6 +17,8 @@ import RecipeReportModal from '@/components/workspace/recipedetail/modals/Recipe
 import RelatedRecipes from '@/components/workspace/recipedetail/RelatedRecipes.vue';
 import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
 
+
+
 const route = useRoute();
 const router = useRouter();
 const recipeStore = useRecipeStore();
@@ -142,13 +144,14 @@ const fetchData = async () => {
 
         if (resDetail.data && resDetail.data.success) {
             const serverData = resDetail.data.data;
+            const mainData = serverData.main;
 
             rawRecipe.value = {
                 ...serverData.main,
                 // 🏆 關鍵修正：確保作者名稱有被存入 rawRecipe
                 // 根據一般 API 慣例，嘗試從 main 裡面抓取可能的名字欄位
-                author_name: serverData.main.author_name || serverData.main.user_name || 'Recimo 用戶',
-                author_id: serverData.main.author_id || serverData.main.user_id,
+                author_name: mainData.author_name || 'Recimo 用戶',
+                author_id: mainData.author_id,
 
                 recipe_description: serverData.main.recipe_descreption || serverData.main.recipe_description || '',
                 tags: serverData.tags || []
@@ -233,6 +236,16 @@ const isFromWorkspace = computed(() => {
 const isAdaptation = computed(() => {
     // 根據你提供的 JSON，關鍵在於 parent_recipe_id 是否有值
     return !!(rawRecipe.value?.parent_recipe_id);
+});
+
+// --- 權限判斷 ---
+const isMyRecipe = computed(() => {
+    // 1. 確保 rawRecipe 有資料
+    // 2. 比較 authStore 裡的 user_id 與食譜的 author_id
+    const currentUserId = authStore.user?.user_id || authStore.user?.id;
+    const authorId = rawRecipe.value?.author_id || rawRecipe.value?.user_id;
+
+    return currentUserId && authorId && Number(currentUserId) === Number(authorId);
 });
 
 // --- 3. 計算屬性 ---
@@ -457,37 +470,16 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
                     {{ recipeIntroData.title }}
                 </div>
 
-                <!-- <AuthorInfo :name="rawRecipe?.author_name || 'Recimo用戶'" :handle="`user_${rawRecipe?.author_id || '0'}`" -->
-                    <!-- :time="rawRecipe?.created_at" class="mt-12" /> -->
-
-
-
-                <div class="icon-group" :class="{ 'is-preview': isPreviewMode }">
-                    <div class="action-item" :class="{ 'active': isLiked }" @click="toggleRecipeLike">
-                        <i-material-symbols-thumb-up-rounded v-if="isLiked" class="action-icon" />
-                        <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
-                        <span class="count-text">{{ displayRecipeLikes }}</span>
-                    </div>
-
-                    <div class="action-item" @click="handleShare">
-                        <i-material-symbols-share-outline class="action-icon" />
-                    </div>
-
-                    <div class="action-item" @click="handleGoToEdit">
-                        <i-material-symbols-edit class="action-icon" />
-                    </div>
-
-                    <div class="action-item" @click="isReportModalOpen = true">
-                        <i-material-symbols-error-outline-rounded class="action-icon report-btn" />
-                    </div>
+                <div class="meta-wrapper">
+                    <AuthorInfo :name="rawRecipe.author_name" :handle="`user_${rawRecipe.author_id}`"
+                        :time="rawRecipe.created_at" />
 
                     <div v-if="!isPreviewMode" class="adapt-btn-wrapper">
                         <router-link v-if="isAdaptation" :to="`/workspace/recipe-detail/${rawRecipe.parent_recipe_id}`">
-                            <BaseBtn title="查看原食譜" variant="outline" height="40" class="w-auto" />
+                            <BaseBtn title="查看原食譜" variant="outline" class="w-auto" />
                         </router-link>
-
                         <router-link v-else :to="`/workspace/modify-recipe/${rawRecipe.recipe_id}`">
-                            <BaseBtn title="改編一覽" variant="outline" height="40" class="w-auto" />
+                            <BaseBtn title="改編一覽" variant="outline" class="w-auto" />
                         </router-link>
                     </div>
                 </div>
@@ -540,6 +532,48 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
             </div>
         </main>
     </div>
+
+
+
+    <div v-if="!isLoading && rawRecipe" class="fixed-floating-bar" :class="{ 'is-preview': isPreviewMode }">
+        <button class="action-circle-btn" :class="{ 'active': isLiked }" @click="toggleRecipeLike">
+            <i-material-symbols-thumb-up-rounded v-if="isLiked" />
+            <i-material-symbols-thumb-up-outline-rounded v-else />
+            <span v-if="displayRecipeLikes > 0" class="badge">{{ displayRecipeLikes }}</span>
+        </button>
+
+        <button class="action-circle-btn" @click="handleShare">
+            <i-material-symbols-share-outline />
+        </button>
+
+        <button class="action-circle-btn" @click="handleGoToEdit">
+            <i-material-symbols-edit />
+        </button>
+
+        <button class="action-circle-btn report" @click="isReportModalOpen = true">
+            <i-material-symbols-error-outline-rounded />
+        </button>
+    </div>
+
+    <div v-if="!isLoading && rawRecipe" class="fixed-floating-bar" :class="{ 'is-preview': isPreviewMode }">
+    <button class="action-circle-btn" :class="{ 'active': isLiked }" @click="toggleRecipeLike">
+        <i-material-symbols-thumb-up-rounded v-if="isLiked" />
+        <i-material-symbols-thumb-up-outline-rounded v-else />
+        <span v-if="displayRecipeLikes > 0" class="badge">{{ displayRecipeLikes }}</span>
+    </button>
+    
+    <button class="action-circle-btn" @click="handleShare">
+        <i-material-symbols-share-outline />
+    </button>
+
+    <button class="action-circle-btn" @click="handleGoToEdit">
+        <i-material-symbols-edit />
+    </button>
+
+    <button class="action-circle-btn report" @click="isReportModalOpen = true">
+        <i-material-symbols-error-outline-rounded />
+    </button>
+</div>
 
     <div v-else-if="isLoading" class="loading-state">
         <p>正在為您準備食譜資料...</p>
@@ -686,29 +720,39 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
 
 .title-content {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    align-items: center; // 垂直居中對齊
+    justify-content: flex-start; // 預設靠左
     padding: 20px 0;
-    margin-bottom: 20px;
     border-bottom: 1px solid $neutral-color-100;
 
-    @media screen and (max-width: 768px) {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-        padding: 15px 0;
-    }
-
     .zh-h2 {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        flex-shrink: 0; // 防止標題被擠壓
 
         .main-icon {
-            font-size: 24px;
-            color: $neutral-color-black;
+                font-size: 24px;
+                color: $neutral-color-black;
+        
+                /* 核心微調程式碼 */
+                transform: translateY(5px); // 往正值調就是往下移動，1px 或 2px 通常就夠了
+        
+                /* 備選方案：如果不想用 transform */
+                // margin-top: 4px; 
+            }
+    }
+
+    .meta-wrapper {
+        margin-left: auto; // 【最簡單靠右關鍵】這行會吃掉左邊所有剩餘空間
+        display: flex;
+        align-items: center; // 讓作者資訊跟按鈕水平對齊
+        gap: 16px; // 兩者之間的間距
+
+        @media screen and (max-width: 768px) {
+            margin-left: 0;
+            width: 100%;
+            justify-content: space-between; // 手機版時，作者左、按鈕右
         }
     }
+
 
     .icon-group {
         display: flex;
@@ -810,4 +854,96 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
         display: none !important;
     }
 }
+
+/* 詳情頁專用：固定右下角毛玻璃按鈕列 */
+.fixed-floating-bar {
+    position: fixed;
+    bottom: 30px;
+    right: 40px;
+    display: flex;
+    flex-direction: row; // 橫向排列
+    gap: 12px;
+    z-index: 1000;
+
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    padding: 10px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+
+    @media (max-width: 768px) {
+        bottom: 20px;
+        right: 20px;
+        gap: 8px;
+        padding: 8px;
+    }
+
+    &.is-preview {
+        opacity: 0.5;
+        pointer-events: none; // 預覽模式禁用
+    }
+
+    .action-circle-btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $primary-color-700;
+        font-size: 22px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        &:hover {
+            transform: translateY(-3px);
+            background: $primary-color-100;
+        }
+
+        &.active {
+            background: $primary-color-700;
+            color: white;
+        }
+
+        &.report {
+            color: #ff7875;
+
+            &:hover {
+                background: #fff1f0;
+            }
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4d4f;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid white;
+        }
+    }
+}
+
+/* 微調原本標題列的樣式，讓它不那麼空 */
+.title-content {
+    .icon-group {
+
+        // 移除 gap，因為現在只剩一個按鈕
+        .adapt-btn-wrapper {
+            margin-left: 0;
+        }
+    }
+}
+
 </style>
