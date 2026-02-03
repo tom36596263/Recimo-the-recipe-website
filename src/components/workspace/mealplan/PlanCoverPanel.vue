@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { parsePublicFile } from '@/utils/parseFile.js';
 
 const props = defineProps({
     templates: { type: Array, default: () => [] }
@@ -42,7 +43,7 @@ const selectTemplate = (item) => {
 
                         <div v-for="item in templates" :key="item.cover_template_id" class="cover-card"
                             @click="selectTemplate(item)">
-                            <img :src="item.template_url" :alt="item.template_name" />
+                            <img :src="parsePublicFile(item.template_url)" :alt="item.template_name" />
                             <div class="cover-card__name">{{ item.template_name }}</div>
                         </div>
                     </div>
