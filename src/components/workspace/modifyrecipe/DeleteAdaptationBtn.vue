@@ -47,7 +47,7 @@ const handleDelete = async () => {
 <template>
     <button class="btn-delete-adaptation" @click="handleDelete">
         <i-material-symbols-delete-outline-rounded class="mr-4" />
-        刪除改編
+        刪除
     </button>
 </template>
 

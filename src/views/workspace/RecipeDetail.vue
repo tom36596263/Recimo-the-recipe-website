@@ -16,7 +16,7 @@ import RecipeIntro from '../../components/workspace/recipedetail/RecipeIntro.vue
 import RecipeReportModal from '@/components/workspace/recipedetail/modals/RecipeReportModal.vue';
 import RelatedRecipes from '@/components/workspace/recipedetail/RelatedRecipes.vue';
 import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
-
+import DeleteAdaptationBtn from '@/components/workspace/modifyrecipe/DeleteAdaptationBtn.vue'; 
 
 
 const route = useRoute();
@@ -388,6 +388,13 @@ const handleGoToEdit = () => {
     });
 };
 
+// 處理刪除成功後的跳轉
+const onDeleteSuccess = (deletedId) => {
+    console.log(`食譜 ${deletedId} 已刪除`);
+    // 這裡導向你的工作區食譜列表頁面
+    router.push('/workspace/my-recipes');
+};
+
 const toggleWorkspaceTopBar = (show) => {
     const topBar = document.querySelector('.workspace-top-bar');
     if (topBar) topBar.style.display = show ? '' : 'none';
@@ -473,6 +480,9 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
                 <div class="meta-wrapper">
                     <AuthorInfo :name="rawRecipe.author_name" :handle="`user_${rawRecipe.author_id}`"
                         :time="rawRecipe.created_at" />
+
+                        <DeleteAdaptationBtn v-if="isMyRecipe && !isPreviewMode" :recipe-id="rawRecipe.recipe_id"
+                        :is-db-data="true" @success="onDeleteSuccess" />
 
                     <div v-if="!isPreviewMode" class="adapt-btn-wrapper">
                         <router-link v-if="isAdaptation" :to="`/workspace/recipe-detail/${rawRecipe.parent_recipe_id}`">
