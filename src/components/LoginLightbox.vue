@@ -768,13 +768,14 @@ const handleGoogleSuccess = async (response) => {
   // }
 
   img {
-    width: 40px;
+    width: 45px;
+    height: 45px;
     margin: 15px 20px 0 20px;
     display: inline-block; // 確保 transform 在連結上生效
     transition: transform 0.3s ease; // 設定動畫時間與曲線
 
     &:hover {
-      transform: scale(1.15);
+      transform: scale(1.25);
 
       // 增加一點陰影，讓它看起來像浮起來
       filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
@@ -850,6 +851,10 @@ const handleGoogleSuccess = async (response) => {
   perspective: 2000px;
   // 告訴瀏覽器此處滾動不需等待 JS
   touch-action: pan-y;
+  // 當螢幕高度太小時，允許內部滾動
+  overflow-y: auto;
+  // 增加上下邊距，避免書本貼死螢幕邊緣
+  padding: 20px 0;
 
   &__overlay {
     position: absolute;
