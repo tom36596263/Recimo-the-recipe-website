@@ -10,6 +10,7 @@ import RecipeIngredients from '@/components/workspace/recipedetail/RecipeIngredi
 import RecipeSteps from '@/components/workspace/recipedetail/RecipeSteps.vue';
 import NutritionCard from '@/components/workspace/recipedetail/NutritionCard.vue';
 import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
+import RecipeReportModal from '@/components/workspace/recipedetail/modals/RecipeReportModal.vue';
 
 const props = defineProps({
     modelValue: Boolean,
@@ -20,7 +21,7 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['update:modelValue', 'delete-recipe']);
+const emit = defineEmits(['update:modelValue', 'delete-recipe', 'update-like']);
 const router = useRouter();
 const authStore = useAuthStore();
 
@@ -39,6 +40,42 @@ const isOwner = computed(() => {
     if (!currentUserId || !authorId) return false;
     return Number(currentUserId) === Number(authorId);
 });
+
+// 2. 定義檢舉彈窗的狀態
+const isReportModalOpen = ref(false);
+
+// 3. 處理檢舉提交邏輯
+const onReportSubmit = (reportForm) => {
+    console.log('改編食譜檢舉內容:', reportForm);
+    isReportModalOpen.value = false;
+    alert('感謝您的回饋，我們已收到針對此改編版本的檢舉。');
+};
+
+/**
+ * 處理按讚邏輯 (純前端模擬版)
+ */
+const handleToggleLike = () => {
+    // 雖然不接 PHP，但可以保留登入檢查的邏輯
+    if (!authStore.isLoggedIn) {
+        alert('請先登入才能為食譜按讚！');
+        return;
+    }
+
+    const rawId = props.recipe?.id || props.recipe?.recipe_id;
+
+    // 直接計算新狀態並傳給父層
+    const newIsLiked = !props.recipe.is_liked;
+    const newLikeCount = newIsLiked
+        ? (props.recipe.like_count || 0) + 1
+        : Math.max(0, (props.recipe.like_count || 0) - 1);
+
+    // 觸發事件讓父層更新 variantItems
+    emit('update-like', {
+        recipeId: rawId,
+        isLiked: newIsLiked,
+        likeCount: newLikeCount
+    });
+};
 
 /**
  * 處理刪除改編食譜
@@ -71,6 +108,44 @@ const handleDelete = async () => {
     } else {
         emit('delete-recipe', cleanId);
         closeModal();
+    }
+};
+
+/**
+ * 處理分享邏輯：抓取原始食譜 ID 並生成固定格式網址
+ */
+const handleShare = async () => {
+    // 1. 抓取並清理 ID
+    // 優先順序：props.recipe.recipe_id (資料庫回傳) 或 props.recipe.id (本地或通用)
+    const rawId = props.recipe?.recipe_id || props.recipe?.id;
+    const cleanId = getCleanId(rawId);
+
+    if (!cleanId) {
+        alert('無法取得食譜 ID，分享失敗');
+        return;
+    }
+
+    // 2. 組成目標網址 (指向詳情頁)
+    const shareUrl = `${window.location.origin}/workspace/recipe-detail/${cleanId}`;
+
+    // 3. 準備分享資料
+    const shareData = {
+        title: props.recipe?.title || props.recipe?.recipe_title || '分享食譜',
+        text: props.recipe?.description || props.recipe?.recipe_description || '來看看這份好吃的食譜！',
+        url: shareUrl,
+    };
+
+    // 4. 執行分享或複製
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+        } else {
+            await navigator.clipboard.writeText(shareUrl);
+            alert(`網址已複製到剪貼簿：\n${shareUrl}`);
+        }
+    } catch (err) {
+        // 使用者點擊取消分享會進到這裡，不需要特別報錯
+        console.warn('分享操作已取消或失敗:', err);
     }
 };
 
@@ -172,13 +247,18 @@ const closeModal = () => emit('update:modelValue', false);
                 <button class="close-x" @click="closeModal">✕</button>
 
                 <div class="fixed-floating-bar">
-                    <button class="action-circle-btn">
-                        <i-material-symbols-thumb-up-outline-rounded />
+                    <button class="action-circle-btn like-btn" :class="{ 'active': recipe?.is_liked }"
+                        @click="handleToggleLike">
+                        <i-material-symbols-thumb-up-rounded v-if="recipe?.is_liked" />
+                        <i-material-symbols-thumb-up-outline-rounded v-else />
+                        <span v-if="recipe?.like_count > 0" class="badge like-badge">
+                            {{ recipe.like_count }}
+                        </span>
                     </button>
-                    <button class="action-circle-btn">
+                    <button class="action-circle-btn" @click="handleShare" title="分享">
                         <i-material-symbols-share-outline />
                     </button>
-                    <button class="action-circle-btn report">
+                    <button class="action-circle-btn report" @click="isReportModalOpen = true" title="檢舉">
                         <i-material-symbols-error-outline-rounded />
                     </button>
                 </div>
@@ -222,6 +302,17 @@ const closeModal = () => emit('update:modelValue', false);
                         </div>
                     </div>
                 </div>
+
+                <Teleport to="body">
+                    <RecipeReportModal v-if="isReportModalOpen" v-model="isReportModalOpen" :targetData="{
+                        recipe_id: introData?.id,
+                        title: introData?.title,
+                        content: introData?.description,
+                        userName: isOwner ? (authStore.user?.user_name || authStore.user?.name) : (recipe.user_name || recipe.author_name || '未知作者'),
+                        author_id: recipe.author_id || recipe.user_id,
+                        image: introData?.image
+                    }" @submit="onReportSubmit" />
+                </Teleport>
             </div>
         </div>
     </Transition>
@@ -233,7 +324,7 @@ const closeModal = () => emit('update:modelValue', false);
 .btn-delete-adaptation {
     display: flex;
     align-items: center;
-    white-space: nowrap; // 確保文字不會折行
+    white-space: nowrap;
     background-color: #fff1f0;
     color: #ff4d4f;
     border: 1px solid #ffccc7;
@@ -308,22 +399,22 @@ const closeModal = () => emit('update:modelValue', false);
 .action-group {
     display: flex;
     align-items: center;
-    gap: 20px; // 作者與按鈕之間的間距
+    gap: 20px;
 
     :deep(.author-info-wrapper) {
-        margin-bottom: 0; // 移除組件內可能的下間距
+        margin-bottom: 0;
     }
 
     @media (max-width: 768px) {
         width: 100%;
-        flex-direction: row; // 手機版保持水平
-        justify-content: space-between; // 一左一右
+        flex-direction: row;
+        justify-content: space-between;
         align-items: center;
         gap: 12px;
     }
 
     @media (max-width: 480px) {
-        flex-direction: column; // 極窄螢幕才改垂直
+        flex-direction: column;
         align-items: flex-start;
     }
 }
@@ -341,22 +432,20 @@ const closeModal = () => emit('update:modelValue', false);
         gap: 16px;
     }
 
-        .badge {
-            display: inline-flex;
-            /* 使用 flex 且保持行內塊特性 */
-            align-items: center;
-            justify-content: center;
-    
-            height: 25px;
-            background: $primary-color-100;
-            color: $primary-color-700;
-            padding: 0 14px;
-            border-radius: 99px;
-            font-weight: 600;
-            font-size: 14px;
-            white-space: nowrap;
-            line-height: 1;
-        }
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 25px;
+        background: $primary-color-100;
+        color: $primary-color-700;
+        padding: 0 14px;
+        border-radius: 99px;
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+        line-height: 1;
+    }
 
     @media (max-width: 992px) {
         flex-direction: column;
@@ -374,52 +463,100 @@ const closeModal = () => emit('update:modelValue', false);
     }
 }
 
+/* --- 修改後的按讚與 Hub 樣式邏輯 --- */
 .fixed-floating-bar {
     position: absolute;
     bottom: 30px;
     right: 40px;
     display: flex;
+    align-items: center;
     gap: 12px;
     z-index: 100;
-    background: rgba(255, 255, 255, 0.4);
+
+    // 桌機版容器樣式
+    background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    padding: 8px;
+    padding: 10px 16px;
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 
     @media (max-width: 768px) {
         bottom: 20px;
         right: 20px;
+        flex-direction: column-reverse; // 確保按讚在最下面作為主按鈕
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        backdrop-filter: none;
     }
 
     .action-circle-btn {
-        width: 42px;
-        height: 42px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
-        background: white;
+        background: $neutral-color-white;
         border: none;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #74D09C;
+        color: $primary-color-700;
         font-size: 22px;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
+        position: relative;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
-        &:hover {
-            transform: translateY(-3px);
-            background: #f0fdf4;
+        svg,
+        :deep(svg) {
+            fill: currentColor;
         }
 
+        &:hover {
+            background: $primary-color-100;
+            transform: translateY(-2px);
+        }
+
+        // 按讚啟動樣式 (主按鈕樣式)
+        &.like-btn.active {
+            // background: $primary-color-700 !important;
+            // color: $neutral-color-white !important;
+
+            svg,
+            :deep(svg) {
+                fill: $neutral-color-white !important;
+            }
+        }
+
+        // 檢舉按鈕專用顏色
         &.report {
-            color: #ff7875;
+            color: $accent-color-700 !important;
+
+            svg,
+            :deep(svg) {
+                fill: $accent-color-700;
+            }
 
             &:hover {
-                background: #fff1f0;
+                background: $neutral-color-100;
             }
+        }
+
+        // 數字標籤
+        .like-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: $primary-color-400;
+            color: $neutral-color-white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid $neutral-color-white;
+            font-weight: bold;
+            line-height: 1;
         }
     }
 }
@@ -437,7 +574,6 @@ const closeModal = () => emit('update:modelValue', false);
     }
 }
 
-/* 調整圖示垂直位置 */
 .icon-v-align {
     vertical-align: middle;
     position: relative;
@@ -445,49 +581,29 @@ const closeModal = () => emit('update:modelValue', false);
     color: $neutral-color-800;
 }
 
-/* --- 捲軸美化 --- */
 .modal-scroll-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 48px;
-
-    /* 1. 捲軸整體寬度 */
     &::-webkit-scrollbar {
         width: 8px;
-        /* 寬度稍微縮小，看起來比較精緻 */
     }
 
-    /* 2. 捲軸軌道 (背景) */
     &::-webkit-scrollbar-track {
         background: transparent;
-        /* 軌道透明，維持背景乾淨 */
     }
 
-    /* 3. 捲軸滑塊 (動起來的部分) */
     &::-webkit-scrollbar-thumb {
         background: $neutral-color-100;
-        /* 使用淺灰色 */
         border-radius: 10px;
-        /* 圓角化 */
         border: 2px solid transparent;
-        /* 透過透明邊框製造內縮感 */
         background-clip: padding-box;
 
         &:hover {
             background: $neutral-color-400;
-            /* 滑鼠移上去變深色一點 */
         }
     }
 
-    /* Firefox 支援 (標準屬性) */
     scrollbar-width: thin;
     scrollbar-color: $neutral-color-100;
-
-    @media (max-width: 768px) {
-        padding: 24px;
-    }
 }
-
 
 .mb-32 {
     margin-bottom: 32px;

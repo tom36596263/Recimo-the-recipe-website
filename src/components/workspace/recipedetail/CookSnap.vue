@@ -19,6 +19,7 @@ const wallViewport = ref(null)
 // --- 檢舉彈窗邏輯 ---
 const isReportModalOpen = ref(false)
 const selectedPhotoData = ref({
+  id: null,
   content: '',
   userName: '',
   time: '',
@@ -26,13 +27,15 @@ const selectedPhotoData = ref({
 })
 
 const handleReport = (photo) => {
-  console.log('點擊的成品照資料:', photo);
+  console.log('📢 觸發檢舉，照片原始資料:', photo);
+
+  // 🏆 對帳修正：確保抓取父組件 map 過後的 id (即 gallery_id)
   selectedPhotoData.value = {
-    content: photo.comment,
+    id: photo.id,            // 對應資料庫的 gallery_id
+    content: photo.comment,  // 對應 gallery_text
     userName: photo.userName || '匿名用戶',
-    time: photo.time || '剛剛',
-    image: photo.url,
-    userId: photo.userId
+    time: photo.createdAt || '剛剛',
+    image: photo.url         // 彈窗預覽圖
   }
   isReportModalOpen.value = true
 }
@@ -50,7 +53,7 @@ const handleUploadClick = () => {
 
 // 在 CookSnap.vue 中修改
 const onUploadSubmit = (data) => {
-  console.log('子組件接收:', data) // 你可以在這裡看 data 裡面是不是只有 note
+  console.log('子組件接收:', data)
 
   let previewUrl = data.image
   if (data.image instanceof File) {
@@ -99,10 +102,13 @@ const scrollWall = (direction) => {
       </button>
 
       <div class="wall-viewport" ref="wallViewport">
-        <div v-for="(photo, index) in list" :key="index" class="work-item">
-          <img :src="photo.url" :alt="'User work ' + index" />
+        <div v-for="photo in list" :key="photo.id" class="work-item">
+          <img :src="photo.url" :alt="photo.userName + ' 的作品'" />
           <div class="work-overlay">
             <p class="comment-text p-p2">{{ photo.comment }}</p>
+
+            <span class="upload-time en-h3">{{ photo.createdAt }}</span>
+
             <div class="report-icon-wrapper" @click.stop="handleReport(photo)">
               <i-material-symbols:error-outline-rounded />
             </div>
@@ -119,7 +125,8 @@ const scrollWall = (direction) => {
       </button>
     </div>
 
-    <PostReportModal v-model="isReportModalOpen" :commentData="selectedPhotoData" @submit="onReportSubmit" />
+    <PostReportModal v-model="isReportModalOpen" targetType="gallery" :commentData="selectedPhotoData"
+      @success="onReportSubmit" />
 
     <CookSnapUploadModal v-model="isUploadModalOpen" @submit="onUploadSubmit" />
   </div>
@@ -270,6 +277,15 @@ const scrollWall = (direction) => {
         padding: 16px;
         opacity: 0;
         transition: opacity 0.3s ease;
+
+        .upload-time {
+          position: absolute;
+          bottom: 10px;
+          left: 12px;
+          font-size: 10px;
+          color: rgba($neutral-color-white, 0.7);
+          pointer-events: none;
+        }
 
         .comment-text {
           color: $neutral-color-white;

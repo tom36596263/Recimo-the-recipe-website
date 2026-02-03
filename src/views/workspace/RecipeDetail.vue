@@ -137,7 +137,7 @@ const fetchData = async () => {
     try {
         const [resDetail, resG, resU, resC] = await Promise.all([
             phpApi.get(`recipes/recipe_detail_get.php?recipe_id=${recipeId}`),
-            publicApi.get('data/social/gallery.json'),
+            phpApi.get(`recipes/gallery.php?recipe_id=${recipeId}`), // 改成你的 PHP 路徑
             publicApi.get('data/user/users.json'),
             recipeId ? phpApi.get(`social/comment.php?recipe_id=${recipeId}`) : Promise.resolve({ data: [] })
         ]);
@@ -182,29 +182,42 @@ const fetchData = async () => {
         }
 
         // --- 3. 處理成品照 ---
-        if (resG.data) {
+        if (resG.data && resG.data.success) { // 確保 API 回傳 success 為 true
             const API_BASE_URL = 'http://localhost:8888/recimo_api/';
-            snapsData.value = resG.data
-                .filter(item => Number(item.RECIPE_ID) === recipeId)
+
+            // 1. 注意這裡全部改用小寫欄位名
+            snapsData.value = resG.data.data
+                .filter(item => Number(item.recipe_id) === recipeId)
                 .map(item => {
                     let finalImg = '';
-                    const rawUrl = item.GALLERY_URL || '';
-                    if (rawUrl.includes(':\\')) {
+                    const rawUrl = item.gallery_url || '';
+
+                    // 2. 解析圖片路徑 (相容 Windows 路徑與一般網址)
+                    if (rawUrl.startsWith('http')) {
+                        finalImg = rawUrl;
+                    } else if (rawUrl.includes(':\\')) {
+                        // 處理像 C:\xampp\htdocs\... 這種路徑
                         const parts = rawUrl.split('recimo_api\\');
                         const relativePath = parts[1] ? parts[1].replace(/\\/g, '/') : '';
                         finalImg = `${API_BASE_URL}${relativePath}`;
                     } else {
-                        finalImg = getSmartImageUrl(rawUrl);
+                        // 處理像 img/social/... 這種相對路徑
+                        const cleanPath = rawUrl.startsWith('/') ? rawUrl.slice(1) : rawUrl;
+                        finalImg = `${API_BASE_URL}${cleanPath}`;
                     }
+
                     return {
-                        id: item.GALLERY_ID,
+                        id: item.gallery_id,
                         url: finalImg,
-                        comment: item.GALLERY_TEXT,
-                        createdAt: item.UPLOAD_AT,
-                        userId: item.USER_ID,
-                        userName: resU.data?.find(u => u.user_id === item.USER_ID)?.user_name || '熱心用戶'
+                        comment: item.gallery_text,
+                        createdAt: item.upload_at,
+                        userId: item.user_id,
+                        // API 截圖顯示已經有 user_name 欄位
+                        userName: item.user_name || '熱心用戶'
                     };
                 });
+
+            console.log('✅ 成功抓取成品照:', snapsData.value);
         }
 
         // --- 4. 處理留言 ---
@@ -445,6 +458,27 @@ const handleDeleteComment = async (commentId) => {
         }
     } catch (err) {
         alert('刪除失敗，請檢查網路或權限');
+    }
+};
+
+const handlePostSnap = async (formData) => {
+    if (!authStore.user) return alert('請先登入');
+
+    // formData 通常包含圖片檔案與文字內容
+    try {
+        const response = await phpApi.post('recipes/gallery.php', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+
+        if (response.data.success) {
+            alert('上傳成品照成功！');
+            fetchData(); // 重新整理資料以顯示新照片
+        } else {
+            alert('上傳失敗：' + response.data.message);
+        }
+    } catch (err) {
+        console.error('上傳成品照出錯:', err);
+        alert('系統錯誤，請稍後再試');
     }
 };
 
@@ -1020,8 +1054,8 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
 
     /* 按鈕顏色邏輯 */
     .main-hub-btn {
-        background: $primary-color-700;
-        color: white !important;
+        background: $neutral-color-white;
+        color: $primary-color-700 !important;
         width: 44px;
         height: 44px;
         border-radius: 50%;
