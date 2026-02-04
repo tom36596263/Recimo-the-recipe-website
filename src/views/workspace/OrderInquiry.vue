@@ -10,7 +10,6 @@ import BaseTag from '@/components/common/BaseTag.vue';
 const ordersData = ref([]);
 const currentPage = ref(1);
 const pageSize = 5;
-
 const activeTag = ref('全部訂單');
 const selectedDate = ref('');
 // const userInfo = JSON.parse(localStorage.getItem('user_info'));
@@ -26,30 +25,24 @@ const selectedDate = ref('');
 
 // 讀取資料
 const fetchOrders = async () => {
-  // 1. 修改 Key 名稱為 'user' (與你儲存的一致)
   const userData = localStorage.getItem('user');
-
   if (!userData) {
     console.error("找不到使用者登入資訊 (Key: 'user')");
     return;
   }
-
   const userInfo = JSON.parse(userData);
-
-  // 2. 確保抓到 id (根據內容是小寫 id)
+  //確保抓到 id (根據內容是小寫 id)
   const userId = userInfo?.id;
 
   if (!userId) {
     console.error("解析不出 userId，請檢查內容:", userInfo);
     return;
   }
-
   console.log("成功抓到當前登入者 ID:", userId);
   try {
-    //抓取訂單清單 (補上 /mall/ 路徑)
+    //抓取訂單清單
     const resList = await phpApi.get('mall/user_order_list.php', {
       params: { user_id: userId }
-
     });
 
     const list = Array.isArray(resList.data) ? resList.data : [];
@@ -58,7 +51,6 @@ const fetchOrders = async () => {
     const detailedOrders = await Promise.all(
       list.map(async (basicOrder) => {
         try {
-          // 注意：你的網址參數是 id=...，所以這裡帶 id
           const oid = basicOrder.order_id || basicOrder.ORDER_ID;
           const resDetail = await phpApi.get('mall/user_order.php', {
             params: {
@@ -136,7 +128,6 @@ const filteredProducts = computed(() => {
   }
 
   //過濾日期
-
   if (selectedDate.value) {
     result = result.filter(item => {
       const rawDate = item.created || item.CREATED || '';
@@ -290,7 +281,6 @@ const onCancel = async (orderId) => {
 </template>
 
 <style>
-/* 你的 CSS 樣式保持原樣即可 */
 .tag-container {
   display: flex;
   justify-content: space-between;
@@ -343,5 +333,9 @@ input[type=date] {
 .mydate {
   display: flex;
   align-items: center;
+}
+
+.pagination {
+  margin-bottom: 100px;
 }
 </style>
