@@ -24,7 +24,7 @@ onMounted(async () => {
         const [resRecipes, resRecipeTags, resTags] = await Promise.all([
             publicApi.get('data/recipe/recipes.json'),
             publicApi.get('data/recipe/recipe_tag.json'),
-            publicApi.get('data/recipe/tags.json')
+            publicApi.get('data/recipe/tags.json') 
         ]);
 
         const recipeData = resRecipes.data;

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 // ========== 取得 localStorage user_id ==========
 const userId = ref(null);
 import { useRouter } from 'vue-router';
@@ -7,9 +7,11 @@ import { phpApi, publicApi } from '@/utils/publicApi';
 import { parsePublicFile } from '@/utils/parseFile'
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 
 
 const router = useRouter();
+const favoritesStore = useFavoritesStore();
 // ========== 狀態管理 ==========
 // 最近觀看食譜列表（顯示 4 筆）
 const recentRecipes = ref([]);
@@ -64,6 +66,44 @@ const goToMyFavorites = () => {
 const goToPersonalRecipes = () => {
     router.push({ name: 'personal-recipes' });
 };
+// ========== 獲取收藏食譜 ==========
+/**
+ * 獲取收藏食譜列表（獨立函數，供初始化和更新使用）
+ */
+const fetchFavoriteRecipes = async () => {
+    if (!userId.value) {
+        favoriteRecipes.value = [];
+        totalFavoriteCount.value = 0;
+        return;
+    }
+
+    try {
+        const resFavorites = await phpApi.get(`social/favorites.php`, { params: { user_id: userId.value } });
+        const favoritesData = Array.isArray(resFavorites.data.favorites) ? resFavorites.data.favorites : [];
+        favoriteRecipes.value = favoritesData.slice(0, 4).map(fav => ({
+            id: fav.recipe_id,
+            recipe_name: fav.recipe_title || fav.recipe_name || fav.title || '',
+            image_url: fav.recipe_image_url
+                ? (fav.recipe_image_url.startsWith('http')
+                    ? fav.recipe_image_url
+                    : parsePublicFile(fav.recipe_image_url))
+                : (fav.image_url && fav.image_url.startsWith('http')
+                    ? fav.image_url
+                    : fav.image_url
+                        ? parsePublicFile(fav.image_url)
+                        : ''),
+            author: {
+                name: fav.user_name || fav.author_name || 'Recimo',
+                likes: fav.recipe_like_count || fav.likes || fav.like_count || 0
+            }
+        }));
+        totalFavoriteCount.value = favoritesData.length;
+    } catch (e) {
+        console.error('獲取收藏食譜失敗:', e);
+        favoriteRecipes.value = [];
+        totalFavoriteCount.value = 0;
+    }
+};
 
 // ========== 生命週期 ==========
 /**
@@ -117,39 +157,8 @@ onMounted(async () => {
                 totalPersonalCount.value = 0;
             }
 
-            // 我的收藏：串接 favorites.php，使用 userId 當參數，最多顯示四個
-            if (userId.value) {
-                try {
-                    const resFavorites = await phpApi.get(`social/favorites.php`, { params: { user_id: userId.value } });
-                    // 假設回傳格式 { success: true, favorites: [...] }
-                    const favoritesData = Array.isArray(resFavorites.data.favorites) ? resFavorites.data.favorites : [];
-                    // 如果 API 已直接回傳完整食譜資訊，優先直接用 API 回傳資料
-                    favoriteRecipes.value = favoritesData.slice(0, 4).map(fav => ({
-                        id: fav.recipe_id,
-                        recipe_name: fav.recipe_title || fav.recipe_name || fav.title || '',
-                        image_url: fav.recipe_image_url
-                            ? (fav.recipe_image_url.startsWith('http')
-                                ? fav.recipe_image_url
-                                : parsePublicFile(fav.recipe_image_url))
-                            : (fav.image_url && fav.image_url.startsWith('http')
-                                ? fav.image_url
-                                : fav.image_url
-                                    ? parsePublicFile(fav.image_url)
-                                    : ''),
-                        author: {
-                            name: fav.user_name || fav.author_name || 'Recimo',
-                            likes: fav.recipe_like_count || fav.likes || fav.like_count || 0
-                        }
-                    }));
-                    totalFavoriteCount.value = favoritesData.length;
-                } catch (e) {
-                    favoriteRecipes.value = [];
-                    totalFavoriteCount.value = 0;
-                }
-            } else {
-                favoriteRecipes.value = [];
-                totalFavoriteCount.value = 0;
-            }
+            // 我的收藏：使用獨立函數獲取
+            await fetchFavoriteRecipes();
 
             // 最近觀看：串接 history.php，使用 userId 當參數，最多顯示四個
             if (userId.value) {
@@ -186,16 +195,27 @@ onMounted(async () => {
                 recentRecipes.value = [];
                 totalRecentCount.value = 0;
             }
-            
+
         } catch (e) {
             console.error('解析 user 資料失敗:', e);
             userId.value = null;
         }
     }
-
-
-
 });
+
+// ========== 監聽收藏變化 ==========
+/**
+ * 監聽 favoritesStore 的變化，當收藏狀態改變時自動刷新收藏列表
+ */
+watch(
+    () => favoritesStore.favoriteIds,
+    () => {
+        if (userId.value) {
+            fetchFavoriteRecipes();
+        }
+    },
+    { deep: true }
+);
 </script>
 
 <!-- filepath: src/views/workspace/MyRecipes.vue -->

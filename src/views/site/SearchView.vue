@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { phpApi } from '@/utils/publicApi';
+import { publicApi } from '@/utils/publicApi';
 
 import SearchBanner from '@/components/site/search/SearchBanner.vue';
 import SearchResultCard from '@/components/site/search/SearchResultCard.vue';
@@ -9,6 +9,9 @@ import PageBtn from '@/components/common/PageBtn.vue';
 
 // 1. 定義響應式變數
 const recipes = ref([]);
+const products = ref([]);
+const recipeTags = ref([]);
+const tags = ref([]);
 const searchQuery = ref('');
 const currentPage = ref(1); 
 const pageSize = 5;
@@ -18,16 +21,17 @@ const isLoading = ref(true);
 const fetchSearchResults = async (keyword = '') => {
     isLoading.value = true;
     try {
-        const response = await phpApi.get('recipes/search_get.php', {
-            params: { keyword: keyword }
-        });
-
-        if (response.data.status === 'success') {
-            // PHP 已經 JOIN 好了所有資料，直接存入 recipes
-            recipes.value = response.data.data || [];
-        } else {
-            recipes.value = [];
-        }
+        const [resRecipes,resProducts, resRecipeTags, resTags ] = await Promise.all([
+            publicApi.get('data/recipe/recipes.json'),
+            publicApi.get('data/mall/products.json'),
+            publicApi.get('data/recipe/recipe_tag.json'),
+            publicApi.get('data/recipe/tags.json')
+        ]);
+        recipes.value = resRecipes.data;
+        products.value = resProducts.data;
+        recipeTags.value = resRecipeTags.data;
+        tags.value = resTags.data;
+        console.log(products.value);
     } catch (err) {
         console.error("搜尋載入失敗:", err);
         recipes.value = [];
@@ -48,13 +52,30 @@ watch(searchQuery, (newVal) => {
 });
 
 // 5. 計算屬性
-const filteredRecipes = computed(() => recipes.value);
+const filteredRecipes = computed(() => {
+    const query = searchQuery.value.trim().toLowerCase();
+    if(!query) return recipes.value;
 
+    const matchTagIds = tags.value
+    .filter(t => t.tag_name.toLowerCase()
+    .includes(query))
+    .map(t => t.tag_id);
+
+    return recipes.value.filter(recipe => {
+        const titleMatch = recipe.recipe_title.toLowerCase().includes(query);
+        const tagMatch = recipeTags.value.some(rt => 
+            rt.recipe_id === recipe.recipe_id && matchTagIds.includes(rt.tag_id)
+        );
+        return titleMatch || tagMatch;
+    });
+});
 const displayCounts = computed(() => {
+    const currentResults = filteredRecipes.value; // 取得目前過濾後的食譜
+    
     return {
-        recipes: recipes.value.length,
-        // 只要 linked_product_id 不是 null，就代表有關聯料理包
-        products: recipes.value.filter(r => r.linked_product_id).length
+        recipes: currentResults.length,
+        // 統一判斷邏輯：確保 linked_product_id 有值（非 null/undefined/0/空字串）
+        products: currentResults.filter(recipe => !!recipe.linked_product_id).length
     };
 });
 
