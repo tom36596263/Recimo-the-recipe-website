@@ -19,23 +19,6 @@ const props = defineProps({
 });
 // 1. 判定邏輯：食譜一定有 (以此為準)，料理包看 product_id 是否存在
 const hasProduct = computed(() => !!props.recipe?.product_id);
-
-// const props = defineProps({
-//     recipe: {
-//         type: Object,
-//         default: null
-//     },
-//     product: {
-//         type: Object,
-//         default: null
-//     },
-//     recipeTags: {
-//         type: Array,
-//         default: () => []
-//     }
-// });
-
-
 const router = useRouter();
 
 const recipeImagePath = computed(() => {
@@ -64,25 +47,7 @@ const goToProductDetail = () => {
     if (!hasProduct.value) return;
     router.push({ name: 'product-detail', params: { id: props.recipe.product_id } });
 };
-// const goToRecipeDetail = () => {
-//     if (!props.recipe) return;
 
-//     runWithAuth(() => {
-//         router.push({
-//             name: 'workspace-recipe-detail',
-//             params: { id: props.recipe.recipe_id }
-//         })
-//     })
-//     console.log('go to recipe detail' );
-
-// }
-// const goToProductDetail = () => {
-//     if (!props.product) return;
-//     router.push({
-//         name: 'product-detail',
-//         params: { id: props.product.product_id }
-//     })
-// }
 </script>
 
 <template>
