@@ -2,10 +2,10 @@ import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 
 export const useAuthStore = defineStore('auth', () => {
-    // ✅ 修改：將原本要去的地方存入 localStorage，避免重整後消失
+    // 將原本要去的地方存入 localStorage，避免重整後消失
     const pendingPath = ref(localStorage.getItem('pendingPath') || null);
 
-    // ✅ 修改：存入目標路徑的方法
+    // 存入目標路徑的方法
     const setPendingPath = (path) => {
         pendingPath.value = path;
         localStorage.setItem('pendingPath', path);
@@ -30,19 +30,23 @@ export const useAuthStore = defineStore('auth', () => {
     // 攔截動作紀錄
     const pendingAction = ref(null);
 
-    // ✅ 新增：專門給 LINE 登入跳轉後的成功訊號
+    // 專門給 LINE 登入跳轉後的成功訊號
     const isLineLoginSuccess = ref(false);
     // ==========================================
     // 登入
     // ==========================================
     const login = (foundUser) => {
-        // 這裡做一個簡單的轉換：如果後端給的是 avatar，我們就把它複製一份給 image
+        // 在這裡把後端各式各樣的欄位名，統一轉成前端要用的 key
         const normalizedUser = {
             ...foundUser,
-            image: foundUser.image || foundUser.avatar // 誰有值就用誰
+            // 姓名對接：優先用 name，再來是 user_name，都沒就空字串
+            name: foundUser.name || foundUser.user_name || '新朋友',
+
+            // 圖片對接：相容 image, avatar, 還有你 PHP 寫的 user_url
+            image: foundUser.image || foundUser.user_url || foundUser.avatar || null
         };
 
-        // console.log('正規化後的資料:', normalizedUser);
+        console.log('正規化後的完整資料:', normalizedUser);
 
         user.value = normalizedUser;
         localStorage.setItem('user', JSON.stringify(normalizedUser));
@@ -53,7 +57,7 @@ export const useAuthStore = defineStore('auth', () => {
         }
     };
 
-    // ✅ 新增：觸發訊號的方法
+    // 觸發訊號的方法
     const triggerLineSuccess = () => {
         isLineLoginSuccess.value = true;
     };

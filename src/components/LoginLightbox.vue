@@ -389,13 +389,13 @@ const { login } = useTokenClient({
   onError: (error) => {
     // console.error("Google Login Failed", error);
   },
-  // 建議明確宣告 scope
+  // 明確宣告 scope
   scope: 'openid email profile',
 });
 
 // 接收 token
 const handleGoogleSuccess = async (response) => {
-  console.log('Google Response:', response); // 檢查有沒有 response.access_token
+  // console.log('Google Response:', response); // 檢查有沒有 response.access_token
   try {
     // 發送 access_token 到後端
     const res = await phpApi.post('auth/google-login.php', {
@@ -438,8 +438,8 @@ const handleGoogleSuccess = async (response) => {
 // LINE 登入跳轉函式
 // ==========================================
 const handleLineLogin = () => {
-  // 💡 在跳轉前，先把當前頁面路徑存入 LocalStorage
-  // 如果您想去特定頁面，可以存 router.currentRoute.value.fullPath
+  // 在跳轉前，先把當前頁面路徑存入 LocalStorage
+  // 如果想去特定頁面，可以存 router.currentRoute.value.fullPath
   localStorage.setItem('pendingPath', window.location.pathname);
 
   const clientID = '2009040716';
@@ -450,6 +450,59 @@ const handleLineLogin = () => {
   const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientID}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid%20email`;
 
   window.location.href = lineAuthUrl;
+};
+
+// ==========================================
+// Facebook 登入處理
+// ==========================================
+const handleFBLogin = () => {
+  window.FB.login(function (response) {
+    if (response.authResponse) {
+      const accessToken = response.authResponse.accessToken;
+      // console.log('FB 登入成功，拿到 Token:', accessToken);
+
+      // 直接呼叫你下面寫好的那個 async 函式
+      sendFBTokenToBackend(accessToken);
+    }
+  }, { scope: 'email,public_profile' });
+};
+
+const sendFBTokenToBackend = async (accessToken) => {
+  try {
+    // phpApi 會自動補上 http://localhost/你的專案路徑/api/
+    const res = await phpApi.post('auth/facebook-login.php', {
+      access_token: accessToken
+    });
+
+    const result = res.data;
+
+    if (result.status === 'success') {
+      const formattedUser = {
+        ...result.user,
+        name: result.user.user_name,  // 將 user_name 對應到 name
+        image: result.user.user_url   // 將 user_url 對應到 image
+      };
+
+      // console.log('格式化後的用戶資料：', formattedUser);
+      authStore.login(result.user);
+      await cartStore.fetchCart();
+
+      showLoginSuccess.value = true;
+      isVisible.value = false;
+
+      setTimeout(() => {
+        showLoginSuccess.value = false;
+        emit('close');
+        handleClose();
+      }, 1500);
+    } else {
+      loginErrorMessage.value = result.message || 'Facebook 登入失敗';
+      showLoginFail.value = true;
+    }
+  } catch (error) {
+    // console.error('FB API Error:', error);
+    alert('FB 伺服器連線異常');
+  }
 };
 </script>
 
@@ -509,7 +562,7 @@ const handleLineLogin = () => {
                       <img src="@/assets/images/login/google.svg" @click="login" alt="Google Login" />
                       <!-- <GoogleLogin :callback="handleGoogleSuccess" popup-type="CODE">
                       </GoogleLogin> -->
-                      <img src="@/assets/images/login/fb.svg" />
+                      <img src="@/assets/images/login/fb.svg" @click="handleFBLogin" alt="FB Login" />
                       <img src="@/assets/images/login/line.svg" alt="Line Login" @click="handleLineLogin"
                         class="line-btn" />
                     </div>

@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { phpApi } from '@/utils/publicApi.js'; // 這是您常用的 API 工具
+import { phpApi } from '@/utils/publicApi.js';
 import { useAuthStore } from '@/stores/authStore';
 
 const route = useRoute();
@@ -9,10 +9,10 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 onMounted(async () => {
-    // 1. 從 URL 取得 LINE 回傳的 code
+    // 從 URL 取得 LINE 回傳的 code
     const code = route.query.code;
 
-    // 獲取當初被守衛攔截時存下的目標頁面 (如有)
+    // 獲取當初被守衛攔截時存下的目標頁面
     const targetPath = localStorage.getItem('pendingPath');
 
     if (!code) {
@@ -22,8 +22,7 @@ onMounted(async () => {
     }
 
     try {
-        // 2. 將 code 打給您的 PHP 後端
-        // 注意：後續我們需要去寫這支 auth/line-login.php
+        // 將 code 打給PHP 後端
         const res = await phpApi.post('auth/line-login.php', { code });
         console.log('PHP 原始回傳：', res.data);
 
@@ -32,15 +31,15 @@ onMounted(async () => {
 
             // localStorage.setItem('line_login_success', 'true');
 
-            // // 💡 老師，改用這個方式回首頁，強制瀏覽器重整，App.vue 才會偵測到
+            // 強制瀏覽器重整，App.vue 才會偵測到
             // window.location.href = '/';
             if (res.data && res.data.status === 'success') {
                 authStore.login(res.data.user);
 
-                // 1. 存入彈窗訊號
+                // 存入彈窗訊號
                 localStorage.setItem('line_login_success', 'true');
 
-                // 2. ✅ 關鍵：從 localStorage 讀取目的地
+                // 從 localStorage 讀取目的地
                 const targetPath = localStorage.getItem('pendingPath');
 
                 if (targetPath) {
