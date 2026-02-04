@@ -107,13 +107,21 @@ const filteredRecipes = computed(() => {
 //     };
 // });
 // 5. 計算屬性 (因為後端已經濾過了，這裡直接處理分頁與統計)
+// const displayCounts = computed(() => {
+//     return {
+//         recipes: allResults.value.filter(i => i.source_type === 'recipe').length,
+//         products: allResults.value.filter(i => i.source_type === 'product').length
+//     };
+// });
 const displayCounts = computed(() => {
+    const total = allResults.value.length;
+    // 有 product_id 的才算料理包筆數
+    const hasProductCount = allResults.value.filter(i => !!i.product_id).length;
     return {
-        recipes: allResults.value.filter(i => i.source_type === 'recipe').length,
-        products: allResults.value.filter(i => i.source_type === 'product').length
+        recipes: total,
+        products: hasProductCount
     };
 });
-
 // const totalPages = computed(() => {
 //     return Math.ceil(filteredRecipes.value.length / pageSize) || 1;
 // });
@@ -168,7 +176,7 @@ const handleEmptyAction = (action) => {
             <div class="col-12" v-if="!isLoading">
                 <SearchResultCard 
                     v-for="item in paginateRecipes" 
-                    :key="item.source_type + item.id"
+                    :key="'recipe-'+ item.recipe_id"
                     :recipe="item" 
                     :is-product="item.source_type === 'product'"
                     :recipeTags="item.tags.map(t => ({tag_name: t}))" 

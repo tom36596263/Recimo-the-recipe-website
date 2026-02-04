@@ -10,33 +10,40 @@ import BaseBtn from '@/components/common/BaseBtn.vue';
 const { runWithAuth } = useAuthGuard();
 
 const props = defineProps({
-    recipe: {
-        type: Object,
-        default: null
-    },
-    product: {
-        type: Object,
-        default: null
-    },
+    // 現在每一筆 data 都是一個食譜物件，可能帶有 product_id
+    recipe: { type: Object, default: null },
     recipeTags: {
         type: Array,
         default: () => []
     }
 });
+// 1. 判定邏輯：食譜一定有 (以此為準)，料理包看 product_id 是否存在
+const hasProduct = computed(() => !!props.recipe?.product_id);
+
+// const props = defineProps({
+//     recipe: {
+//         type: Object,
+//         default: null
+//     },
+//     product: {
+//         type: Object,
+//         default: null
+//     },
+//     recipeTags: {
+//         type: Array,
+//         default: () => []
+//     }
+// });
+
 
 const router = useRouter();
 
-// const recipeImagePath = computed(() => {
-//     if (props.product && props.product.product_image) {
-//         const cover = props.product.product_image.find(img => img.is_cover);
-//         return cover ? cover.image_url : props.product.product_image[0].image_url;
-//     }
-//     return `img/recipes/${props.recipe.recipe_id}/cover.png`;
-// });
 const recipeImagePath = computed(() => {
-    // 優先使用 props.recipe 裡的 recipe_image_url，這是 PHP API 回傳的標準路徑
-    // 不論是食譜還是產品，你的 PHP 現在都統一放進這個欄位了
-    return props.recipe?.recipe_image_url || '';
+    if (props.product && props.product.product_image) {
+        const cover = props.product.product_image.find(img => img.is_cover);
+        return cover ? cover.image_url : props.product.product_image[0].image_url;
+    }
+    return `img/recipes/${props.recipe.recipe_id}/cover.png`;
 });
 
 const displayTitle = computed(() => {
@@ -44,28 +51,38 @@ const displayTitle = computed(() => {
 });
 
 const displayDescription = computed(() => {
-    return props.product?.product_description || props.recipe?.recipe_descreption || '';
+    return props.product?.product_description || props.recipe?.recipe_description || '';
 })
-
+// 2. 導向邏輯
 const goToRecipeDetail = () => {
-    if (!props.recipe) return;
-
     runWithAuth(() => {
-        router.push({
-            name: 'workspace-recipe-detail',
-            params: { id: props.recipe.recipe_id }
-        })
-    })
-    console.log('go to recipe detail' );
+        router.push({ name: 'workspace-recipe-detail', params: { id: props.recipe.recipe_id } });
+    });
+};
 
-}
 const goToProductDetail = () => {
-    if (!props.product) return;
-    router.push({
-        name: 'product-detail',
-        params: { id: props.product.product_id }
-    })
-}
+    if (!hasProduct.value) return;
+    router.push({ name: 'product-detail', params: { id: props.recipe.product_id } });
+};
+// const goToRecipeDetail = () => {
+//     if (!props.recipe) return;
+
+//     runWithAuth(() => {
+//         router.push({
+//             name: 'workspace-recipe-detail',
+//             params: { id: props.recipe.recipe_id }
+//         })
+//     })
+//     console.log('go to recipe detail' );
+
+// }
+// const goToProductDetail = () => {
+//     if (!props.product) return;
+//     router.push({
+//         name: 'product-detail',
+//         params: { id: props.product.product_id }
+//     })
+// }
 </script>
 
 <template>
@@ -76,17 +93,17 @@ const goToProductDetail = () => {
         </div>
         <div class="recipe-info">
             <div class="title">
-                <h4 class="zh-h3">{{ recipe.recipe_title }}</h4>
+                <h4 class="zh-h3">{{ recipe.display_title }}</h4>
                 <div class="tags-group">
                     <BaseTag v-if="product?.product_category" :text="product.product_category" class="tag-item" />
                     <BaseTag v-for="tag in recipeTags" :key="tag.tag_id" :text="tag.tag_name" class="tag-item" />
                 </div>
-                <p class="p-p2">{{ recipe.recipe_description }}</p>
+                <p class="p-p2">{{ recipe.display_description }}</p>
             </div>
             <div class="btn-group">
-                <BaseBtn title="食譜詳情" :variant="recipe ? 'solid' : 'outline'" :disabled="!recipe"
+                <BaseBtn title="食譜詳情" :variant="recipe ? 'solid' : 'outline'"
                     @click="goToRecipeDetail" />
-                <BaseBtn title="料理包詳情" :variant="product ? 'solid' : 'outline'" :disabled="!product"
+                <BaseBtn title="料理包詳情" :variant="hasProduct ? 'solid' : 'outline'" :disabled="!hasProduct"
                     @click="goToProductDetail" />
             </div>
         </div>
