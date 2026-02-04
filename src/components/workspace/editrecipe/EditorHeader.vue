@@ -67,22 +67,30 @@ const setDifficulty = (val) => {
 
 // --- EditorHeader.vue ---
 
-// 1. 修改自動計算屬性 (確保它是即時的)
+// 1. 確保 autoTotalTime 計算出來一定是數字
 const autoTotalTime = computed(() => {
-  if (!props.modelValue.steps || props.modelValue.steps.length === 0) return 0;
-  return props.modelValue.steps.reduce((sum, step) => sum + (Number(step.time) || 0), 0);
+  const steps = props.modelValue.steps || [];
+  if (steps.length === 0) return 0;
+  return steps.reduce((sum, step) => {
+    // 確保這裡把字串轉成數字，防止 60 變成 "60"
+    const stepTime = parseInt(step.time, 10) || 0;
+    return sum + stepTime;
+  }, 0);
 });
 
-// EditorHeader.vue
-
 const displayTime = computed(() => {
-  // 如果自動加總有值，就優先顯示自動加總
-  // 這樣能確保即使資料庫裡有舊的、錯誤的時間數值，也會被目前的步驟時間覆蓋
-  if (autoTotalTime.value > 0) {
-    return autoTotalTime.value;
+  // 確保是純數字
+  const manualTime = Number(props.modelValue.totalTime) || 0;
+  const autoTime = Number(autoTotalTime.value) || 0;
+
+  // 邏輯：只有當「非編輯模式」且「手動有值」時才用手動
+  // 或者是手動值大於 0 時優先
+  if (manualTime > 0) {
+    return manualTime;
   }
-  // 如果步驟都沒填時間，才看手動輸入的值
-  return Number(props.modelValue.totalTime) || 0;
+
+  // 預設回歸自動計算
+  return autoTime;
 });
 
 // EditorHeader.vue 內的 adaptRecipeData 修正版

@@ -65,7 +65,9 @@ const fileToBase64 = (file) => {
 watch(() => recipeForm.value.steps, (newSteps) => {
   if (!newSteps || !isEditing.value) return;
   const autoSum = newSteps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
-  if (Number(recipeForm.value.totalTime) === 0) recipeForm.value.totalTime = autoSum;
+
+  // 只有當使用者沒動過總時間，或者總時間不合理時才同步
+  recipeForm.value.totalTime = autoSum;
 }, { deep: true });
 
 watch(() => recipeForm.value.ingredients, (newIngs) => {
@@ -147,7 +149,7 @@ onMounted(async () => {
         title: s.step_title || `步驟 ${idx + 1}`,
         content: s.step_content || '',
         image: parsePublicFile(s.step_image_url || ''),
-        time: s.total_seconds ? Math.floor(Number(s.total_seconds) / 60) : 0,
+        time: s.total_seconds ? Math.round(Number(s.total_seconds) / 60) : 0,
         tags: s.step_ingredients ? s.step_ingredients.map(id => Number(id)) : []
       }));
     }
@@ -171,14 +173,22 @@ const publishToDb = async () => {
 
     const coverData = await handleImage(recipeForm.value.coverImg);
 
+    // 在 publishToDb 內修改
     const processedSteps = await Promise.all(
-      recipeForm.value.steps.map(async (s) => ({
-        step_title: s.title,
-        step_content: s.content || s.step_content || '', // ✨ 容錯處理：確保內容不消失
-        step_image_url: await handleImage(s.image),
-        step_total_time: `00:${String(s.time || 0).padStart(2, '0')}:00`,
-        step_ingredients: s.tags
-      }))
+      recipeForm.value.steps.map(async (s) => {
+        const totalMinutes = Number(s.time) || 0;
+        const hrs = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        const timeString = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
+
+        return {
+          step_title: s.title,
+          step_content: s.content || '',
+          step_image_url: await handleImage(s.image),
+          step_total_time: timeString, // 這樣 60 分鐘會變成 01:00:00
+          step_ingredients: s.tags
+        };
+      })
     );
 
     const payload = {
