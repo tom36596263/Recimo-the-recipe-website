@@ -199,6 +199,15 @@ const handleCoverUpload = (e) => {
               {{ n <= modelValue.difficulty ? '★' : '☆' }} </span>
           </div>
         </div>
+        <div v-if="!isAdaptMode" class="meta-item">
+          <span class="label">份量：</span>
+          <template v-if="isEditing">
+            <input type="number" class="inline-input servings-input" :value="modelValue.servings"
+              @input="updateField('servings', Number($event.target.value))" placeholder="2" min="1" max="20" />
+            <span class="unit">人份</span>
+          </template>
+          <span v-else class="value">{{ modelValue.servings || 0 }} 人份</span>
+        </div>
       </div>
 
       <div class="row-tags">
@@ -539,6 +548,22 @@ const handleCoverUpload = (e) => {
     outline: none;
     padding: 0 4px;
     background: transparent;
+
+    // 專門給份量輸入框的微調（如果需要的話）
+      &.servings-input {
+        width: 40px;
+      }
+    }
+    
+    .unit {
+      color: $neutral-color-800;
+      // margin-left: 4px;
+    }
+    
+    .value {
+      color: $primary-color-800;
+      font-weight: 500;
+    
   }
 
   .stars-group {
