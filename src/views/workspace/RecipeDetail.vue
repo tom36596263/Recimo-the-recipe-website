@@ -92,7 +92,7 @@ const fetchData = async () => {
                     tags: preview.recipe_tags || preview.tags || []
                 };
 
-                servings.value = previewServings;
+                servings.value = 1;
 
                 // 處理食材 (rawIngredients) - 確保欄位與正式模式一致以利 computed 計算
                 rawIngredients.value = (preview.ingredients || []).map(ing => {
@@ -137,7 +137,7 @@ const fetchData = async () => {
     try {
         const [resDetail, resG, resU, resC] = await Promise.all([
             phpApi.get(`recipes/recipe_detail_get.php?recipe_id=${recipeId}`),
-            phpApi.get(`recipes/gallery.php?recipe_id=${recipeId}`), // 改成你的 PHP 路徑
+            phpApi.get(`social/gallery.php?recipe_id=${recipeId}`), // 改成你的 PHP 路徑
             publicApi.get('data/user/users.json'),
             recipeId ? phpApi.get(`social/comment.php?recipe_id=${recipeId}`) : Promise.resolve({ data: [] })
         ]);
@@ -178,33 +178,37 @@ const fetchData = async () => {
                 (Number(a.step_order) || 0) - (Number(b.step_order) || 0)
             );
 
-            servings.value = Number(rawRecipe.value.recipe_servings || 1);
+            servings.value = 1; // 強制預設顯示為 1 份 (即整份食譜)
         }
 
         // --- 3. 處理成品照 ---
-        if (resG.data && resG.data.success) { // 確保 API 回傳 success 為 true
-            const API_BASE_URL = 'http://localhost:8888/recimo_api/';
+        if (resG.data && resG.data.success) {
+            // 🏆 直接引用 axios 實例的 baseURL，確保開發與生產環境一致
+            const API_BASE_URL = phpApi.defaults.baseURL.endsWith('/')
+                ? phpApi.defaults.baseURL
+                : `${phpApi.defaults.baseURL}/`;
 
-            // 1. 注意這裡全部改用小寫欄位名
             snapsData.value = resG.data.data
                 .filter(item => Number(item.recipe_id) === recipeId)
                 .map(item => {
                     let finalImg = '';
                     const rawUrl = item.gallery_url || '';
 
-                    // 2. 解析圖片路徑 (相容 Windows 路徑與一般網址)
                     if (rawUrl.startsWith('http')) {
                         finalImg = rawUrl;
                     } else if (rawUrl.includes(':\\')) {
-                        // 處理像 C:\xampp\htdocs\... 這種路徑
+                        // 處理 Windows 實體路徑備案
                         const parts = rawUrl.split('recimo_api\\');
                         const relativePath = parts[1] ? parts[1].replace(/\\/g, '/') : '';
                         finalImg = `${API_BASE_URL}${relativePath}`;
                     } else {
-                        // 處理像 img/social/... 這種相對路徑
-                        const cleanPath = rawUrl.startsWith('/') ? rawUrl.slice(1) : rawUrl;
+                        // 🏆 核心修正：移除路徑開頭的斜線，確保拼接正確
+                        const cleanPath = rawUrl.replace(/^\/+/, '');
                         finalImg = `${API_BASE_URL}${cleanPath}`;
                     }
+
+                    // 🔍 診錯日誌：如果還是破圖，請在瀏覽器控制台看這個輸出的網址
+                    console.log(`🖼️ 成品照 ID ${item.gallery_id} 最終路徑:`, finalImg);
 
                     return {
                         id: item.gallery_id,
@@ -212,7 +216,6 @@ const fetchData = async () => {
                         comment: item.gallery_text,
                         createdAt: item.upload_at,
                         userId: item.user_id,
-                        // API 截圖顯示已經有 user_name 欄位
                         userName: item.user_name || '熱心用戶'
                     };
                 });
@@ -286,10 +289,10 @@ const ingredientsData = computed(() => {
 const nutritionWrapper = computed(() => {
     if (!rawRecipe.value || rawIngredients.value.length === 0) return [];
 
-    // 這裡的 scale 計算是基於「當前選擇份數」相對於「食譜原始份數」
-    const original = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
-    const current = Math.max(1, Number(servings.value || 1));
-    const scale = current / original;
+    // 【核心邏輯修正】
+    // 不再關心 original 是幾人份，我們直接計算「原始食材清單」的 100% 總量
+    // 所以 scale 直接等於當前的份數 (預設為 1，即一整份)
+    const scale = Math.max(1, Number(servings.value || 1));
 
     let totalKcal = 0, totalP = 0, totalF = 0, totalC = 0;
 
@@ -297,13 +300,14 @@ const nutritionWrapper = computed(() => {
         const amt = Number(ing.amount) || 0;
         const conv = Number(ing.gram_conversion) || 1;
         const weight = amt * conv;
+
+        // 累加所有食材
         totalKcal += (Number(ing.kcal_per_100g) || 0) * (weight / 100);
         totalP += (Number(ing.protein_per_100g) || 0) * (weight / 100);
         totalF += (Number(ing.fat_per_100g) || 0) * (weight / 100);
         totalC += (Number(ing.carbs_per_100g) || 0) * (weight / 100);
     });
 
-    // 返回陣列格式以符合 NutritionCard 的 Props
     return [{
         calories_per_100g: Math.round(totalKcal * scale),
         protein_per_100g: Number((totalP * scale).toFixed(1)),
@@ -313,6 +317,11 @@ const nutritionWrapper = computed(() => {
         unit_weight: 1
     }];
 });
+
+// 同時，在 fetchData 成功後，強制將 servings 設為 1
+// 找這行：servings.value = Number(rawRecipe.value.recipe_servings || 1);
+// 改成：
+servings.value = 1;
 
 const recipeIntroData = computed(() => {
     if (!rawRecipe.value) return null;
@@ -496,7 +505,7 @@ const handlePostSnap = async (payload) => {
     }
 
     try {
-        const response = await phpApi.post('recipes/gallery.php', formData, {
+        const response = await phpApi.post('social/gallery.php', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -521,7 +530,7 @@ const handleDeleteSnap = async (galleryId) => {
 
     try {
         // 🏆 注意：這裡改用 .delete() 或是傳參數給 gallery.php
-        const response = await phpApi.delete('recipes/gallery.php', {
+        const response = await phpApi.delete('social/gallery.php', {
             data: {
                 gallery_id: galleryId,
                 user_id: userId
@@ -696,7 +705,7 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
 
 
     <div v-if="!isPreviewMode && !isAdaptation" class="col-12 fade-up" style="--delay: 8">
-        <RelatedRecipes :currentId="route.params.id" />
+        <RelatedRecipes :currentId="route.params.id" :excludeAdapted="true" />
     </div>
 </template>
 
