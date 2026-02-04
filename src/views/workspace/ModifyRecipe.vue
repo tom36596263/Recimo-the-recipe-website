@@ -190,6 +190,28 @@ function goBack() {
     router.push(`/workspace/recipe-detail/${originalRecipe.value.id}`);
 }
 
+/**
+ * 接住燈箱傳來的 update-like 事件
+ */
+function handleLikeUpdate(data) {
+    // 找到陣列中 ID 相同的那一項
+    const target = variantItems.value.find(item => String(item.id) === String(data.recipeId));
+
+    if (target) {
+        // 更新小卡上的數據
+        target.is_liked = data.isLiked;
+        target.like_count = data.likeCount;
+
+        // 同步更新目前燈箱選中的資料 (讓燈箱內的按讚按鈕變色)
+        if (selectedRecipe.value && String(selectedRecipe.value.id) === String(data.recipeId)) {
+            selectedRecipe.value.is_liked = data.isLiked;
+            selectedRecipe.value.like_count = data.likeCount;
+        }
+    }
+}
+
+
+
 // 生命週期 Hook
 onMounted(async () => {
     // 預載營養資料庫
@@ -277,7 +299,8 @@ watch(() => route.params.id, (newId) => {
             </TransitionGroup>
         </div>
 
-        <AdaptationDetailModal v-model="isModalOpen" :recipe="selectedRecipe" :nutrition="currentNutrition" />
+        <AdaptationDetailModal v-model="isModalOpen" :recipe="selectedRecipe" :nutrition="currentNutrition"
+            @update-like="handleLikeUpdate" />
     </div>
 </template>
 

@@ -25,10 +25,10 @@ const props = defineProps({
 });
 
 // 定義事件，當點擊 + 按鈕時通知父元件
-const emit = defineEmits(['add-to-cart']);
+const emit = defineEmits(['add-ingredient']);
 
 const handleAddClick = () => {
-    emit('add-ingredient'); // 發送訊號給父層
+    emit('add-ingredient');
 };
 
 const normalizedImageSrc = computed(() => {

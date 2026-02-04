@@ -35,6 +35,7 @@ export const useCartStore = defineStore('cart', () => {
     for (const item of guestItems) {
       try {
         await phpApi.post('mall/add_cartitem.php', {
+          user_id: authStore.userId,
           product_id: item.product_id || item.id,
           quantity: item.quantity || item.count || 1
         });
@@ -78,7 +79,11 @@ export const useCartStore = defineStore('cart', () => {
     if (!authStore.isLoggedIn) return;
     try {
       const response = await phpApi.get('mall/get_cart.php', {
-        withCredentials: true // 這行沒加，PHP 就拿不到 Session ID
+        // 將 userId 作為參數傳送給後端
+        params: {
+          user_id: authStore.userId
+        },
+        withCredentials: true
       });
       if (response.data.status === 'success') {
         const rawData = response.data.data || [];
@@ -124,7 +129,7 @@ export const useCartStore = defineStore('cart', () => {
     // 分流處理
     if (authStore.isLoggedIn) {
       // A. 已登入：同步到資料庫
-      await phpApi.post('mall/add_cartitem.php', { product_id: productId, quantity: qty });
+      await phpApi.post('mall/add_cartitem.php', { user_id: authStore.userId, product_id: productId, quantity: qty });
     } else {
       // B. 訪客：存入 localStorage
       localStorage.setItem('guest_cart', JSON.stringify(items.value));
@@ -146,7 +151,10 @@ export const useCartStore = defineStore('cart', () => {
 
       if (authStore.isLoggedIn) {
         try {
-          await phpApi.post('mall/update_cartitem.php', { product_id: id, quantity: val });
+          await phpApi.post('mall/update_cartitem.php', {
+            user_id: authStore.userId, // 傳送目前使用者 ID
+            product_id: id, quantity: val
+          });
         } catch (error) {
           console.error("API 更新數量失敗", error);
         }
@@ -174,7 +182,10 @@ export const useCartStore = defineStore('cart', () => {
     items.value = items.value.filter(i => (i.product_id !== id && i.id !== id));
     if (authStore.isLoggedIn) {
       try {
-        await phpApi.post('mall/delete_cartitem.php', { product_id: id });
+        await phpApi.post('mall/delete_cartitem.php', {
+          user_id: authStore.userId, // 傳送目前使用者 ID
+          product_id: id
+        });
       } catch (error) {
         console.error("伺服器刪除失敗", error);
       }
@@ -192,7 +203,10 @@ export const useCartStore = defineStore('cart', () => {
 
     // 只有當 syncWithServer 為 true 時，才去打後端 API
     if (syncWithServer && authStore.isLoggedIn) {
-      phpApi.post('mall/clear_cart.php');
+      // 傳送 user_id 給後端
+      phpApi.post('mall/clear_cart.php', {
+        user_id: authStore.userId
+      });
     }
   };
 

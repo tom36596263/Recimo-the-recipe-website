@@ -1,0 +1,164 @@
+[
+  {
+    "daily_target_id": 1,
+    "plan_id": 1,
+    "target_date": "2026-01-19",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 2,
+    "plan_id": 1,
+    "target_date": "2026-01-20",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 3,
+    "plan_id": 1,
+    "target_date": "2026-01-21",
+    "target_kcal": 2000
+  },
+
+  {
+    "daily_target_id": 4,
+    "plan_id": 2,
+    "target_date": "2026-01-22",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 5,
+    "plan_id": 2,
+    "target_date": "2026-01-23",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 6,
+    "plan_id": 2,
+    "target_date": "2026-01-24",
+    "target_kcal": 2000
+  },
+
+  {
+    "daily_target_id": 7,
+    "plan_id": 3,
+    "target_date": "2026-02-16",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 8,
+    "plan_id": 3,
+    "target_date": "2026-02-17",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 9,
+    "plan_id": 3,
+    "target_date": "2026-02-18",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 10,
+    "plan_id": 3,
+    "target_date": "2026-02-19",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 11,
+    "plan_id": 3,
+    "target_date": "2026-02-20",
+    "target_kcal": 2000
+  },
+
+  {
+    "daily_target_id": 12,
+    "plan_id": 4,
+    "target_date": "2026-02-10",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 13,
+    "plan_id": 4,
+    "target_date": "2026-02-11",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 14,
+    "plan_id": 4,
+    "target_date": "2026-02-12",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 15,
+    "plan_id": 4,
+    "target_date": "2026-02-13",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 16,
+    "plan_id": 4,
+    "target_date": "2026-02-14",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 17,
+    "plan_id": 4,
+    "target_date": "2026-02-15",
+    "target_kcal": 2000
+  },
+
+  {
+    "daily_target_id": 18,
+    "plan_id": 5,
+    "target_date": "2026-02-16",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 19,
+    "plan_id": 5,
+    "target_date": "2026-02-17",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 20,
+    "plan_id": 5,
+    "target_date": "2026-02-18",
+    "target_kcal": 2000
+  },
+
+  {
+    "daily_target_id": 21,
+    "plan_id": 6,
+    "target_date": "2026-03-13",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 22,
+    "plan_id": 6,
+    "target_date": "2026-03-14",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 23,
+    "plan_id": 6,
+    "target_date": "2026-03-15",
+    "target_kcal": 2000
+  },
+
+  {
+    "daily_target_id": 24,
+    "plan_id": 7,
+    "target_date": "2026-05-19",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 25,
+    "plan_id": 7,
+    "target_date": "2026-05-20",
+    "target_kcal": 2000
+  },
+  {
+    "daily_target_id": 26,
+    "plan_id": 7,
+    "target_date": "2026-05-21",
+    "target_kcal": 2000
+  }
+]
