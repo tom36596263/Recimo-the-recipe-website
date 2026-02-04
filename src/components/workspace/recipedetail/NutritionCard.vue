@@ -60,7 +60,7 @@ const formatDisplayValue = (val) => {
     <div class="servings-control">
       <button type="button" @click="updateServings(-1)" :disabled="servings <= 1" class="control-btn"> − </button>
 
-      <div class="servings-display p-p1">{{ servings }} 人份</div>
+      <div class="servings-display p-p1">{{ servings }} 份</div>
 
       <button type="button" @click="updateServings(1)" :disabled="servings >= 20" class="control-btn"> + </button>
     </div>
