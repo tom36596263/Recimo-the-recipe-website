@@ -433,6 +433,24 @@ const handleGoogleSuccess = async (response) => {
     alert('伺服器連線異常，請稍後再試');
   }
 };
+
+// ==========================================
+// LINE 登入跳轉函式
+// ==========================================
+const handleLineLogin = () => {
+  // 💡 在跳轉前，先把當前頁面路徑存入 LocalStorage
+  // 如果您想去特定頁面，可以存 router.currentRoute.value.fullPath
+  localStorage.setItem('pendingPath', window.location.pathname);
+
+  const clientID = '2009040716';
+  const origin = window.location.origin;
+  const redirectUri = encodeURIComponent(`${origin}/auth/callback`);
+  const state = Math.random().toString(36).substring(7);
+
+  const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientID}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid%20email`;
+
+  window.location.href = lineAuthUrl;
+};
 </script>
 
 <template>
@@ -492,7 +510,8 @@ const handleGoogleSuccess = async (response) => {
                       <!-- <GoogleLogin :callback="handleGoogleSuccess" popup-type="CODE">
                       </GoogleLogin> -->
                       <img src="@/assets/images/login/fb.svg" />
-                      <img src="@/assets/images/login/line.svg" />
+                      <img src="@/assets/images/login/line.svg" alt="Line Login" @click="handleLineLogin"
+                        class="line-btn" />
                     </div>
                     <p class="mobile-switch-text" @click="isRegister = true">還不是會員嗎？快前往註冊吧~</p>
                   </div>
@@ -775,15 +794,15 @@ const handleGoogleSuccess = async (response) => {
     transition: transform 0.3s ease; // 設定動畫時間與曲線
 
     &:hover {
-      transform: scale(1.25);
+      transform: scale(1.2);
 
       // 增加一點陰影，讓它看起來像浮起來
       filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
     }
 
     &:active {
-      // 點擊瞬間縮小回 0.6 倍，增加點擊回饋感
-      transform: scale(0.6);
+      // 點擊瞬間縮小回 0.8 倍，增加點擊回饋感
+      transform: scale(0.8);
     }
   }
 }

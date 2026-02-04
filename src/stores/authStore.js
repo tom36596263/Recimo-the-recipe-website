@@ -2,6 +2,14 @@ import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 
 export const useAuthStore = defineStore('auth', () => {
+    // ✅ 修改：將原本要去的地方存入 localStorage，避免重整後消失
+    const pendingPath = ref(localStorage.getItem('pendingPath') || null);
+
+    // ✅ 修改：存入目標路徑的方法
+    const setPendingPath = (path) => {
+        pendingPath.value = path;
+        localStorage.setItem('pendingPath', path);
+    };
     // ==========================================
     // 登入狀態
     // ==========================================
@@ -22,18 +30,32 @@ export const useAuthStore = defineStore('auth', () => {
     // 攔截動作紀錄
     const pendingAction = ref(null);
 
+    // ✅ 新增：專門給 LINE 登入跳轉後的成功訊號
+    const isLineLoginSuccess = ref(false);
     // ==========================================
     // 登入
     // ==========================================
     const login = (foundUser) => {
-        user.value = foundUser;
-        localStorage.setItem('user', JSON.stringify(foundUser));
+        // 這裡做一個簡單的轉換：如果後端給的是 avatar，我們就把它複製一份給 image
+        const normalizedUser = {
+            ...foundUser,
+            image: foundUser.image || foundUser.avatar // 誰有值就用誰
+        };
 
-        // 登入後如果有被擋下的動作，就執行它
+        // console.log('正規化後的資料:', normalizedUser);
+
+        user.value = normalizedUser;
+        localStorage.setItem('user', JSON.stringify(normalizedUser));
+
         if (pendingAction.value) {
             pendingAction.value();
             pendingAction.value = null;
         }
+    };
+
+    // ✅ 新增：觸發訊號的方法
+    const triggerLineSuccess = () => {
+        isLineLoginSuccess.value = true;
     };
 
     // 門禁守衛彈窗
@@ -68,6 +90,9 @@ export const useAuthStore = defineStore('auth', () => {
         isLoginAlertOpen,
         isLoginLightboxOpen,
         pendingAction,
+        isLineLoginSuccess,
+        pendingPath,
+        triggerLineSuccess,
         login,
         logout,
         openLoginAlert,

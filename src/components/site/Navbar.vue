@@ -66,15 +66,16 @@ const cartTotal = computed(() => cartStore.totalCount);
 
 // 暫時解決user img前多/的問題
 const userAvatar = computed(() => {
-    const url = authStore.user?.image;
+    // 同時相容 image 與 avatar
+    const url = authStore.user?.image || authStore.user?.avatar;
 
-    // 1. 如果沒資料，顯示預設圖 (一樣要透過 proxy 呼叫全域函式)
     if (!url) return proxy.$parsePublicFile('img/site/None_avatar.svg');
 
-    // 2. 處理路徑：如果 url 開頭有斜線，去掉它
-    const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+    // 如果網址開頭是 http，代表是 Line 或外部圖片，直接回傳
+    if (url.startsWith('http')) return url;
 
-    // 3. 透過 proxy 呼叫全域方法
+    // 如果是本地路徑，處理斜線
+    const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
     return proxy.$parsePublicFile(cleanUrl);
 });
 </script>
