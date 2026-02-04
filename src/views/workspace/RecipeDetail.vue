@@ -120,7 +120,8 @@ const fetchData = async () => {
           return {
             ...ing,
             ingredient_name: name,
-            amount: Number(ing.amount || 0),
+            amount: Number(ing.amount || 0) * previewServings,
+            
             unit_name: unit,
             // 關鍵：確保計算營養所需的係數都存在
             gram_conversion: isWeightUnit
@@ -309,12 +310,20 @@ const displayRecipeLikes = computed(() => {
 
 const ingredientsData = computed(() => {
   if (!rawRecipe.value || !rawIngredients.value.length) return [];
-  const originalServings = Math.max(
-    1,
-    Number(rawRecipe.value.recipe_servings || 1)
-  );
+
+  const originalServings = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
   const currentServings = Math.max(1, Number(servings.value || 1));
-  const scale = currentServings / originalServings;
+
+  let scale = 1;
+
+  if (isPreviewMode.value) {
+    // 預覽模式：食材已經是「整份」了，顯示單份時要除回原始份數
+    scale = currentServings / originalServings;
+  } else {
+    // 正式模式：API 給的是「單份」食材數據，直接乘上當前想看的份數
+    // 既然你 fetchData 強制 servings.value = 1，這裡算出來就是正確的 1 份
+    scale = currentServings;
+  }
 
   return rawIngredients.value.map((item) => ({
     INGREDIENT_NAME: item.ingredient_name,
@@ -323,38 +332,43 @@ const ingredientsData = computed(() => {
     note: item.remark || item.note || ''
   }));
 });
-
 const nutritionWrapper = computed(() => {
   if (!rawRecipe.value || rawIngredients.value.length === 0) return [];
 
-  // 【核心邏輯修正】
-  // 不再關心 original 是幾人份，我們直接計算「原始食材清單」的 100% 總量
-  // 所以 scale 直接等於當前的份數 (預設為 1，即一整份)
-  const scale = Math.max(1, Number(servings.value || 1));
-
-  let totalKcal = 0,
-    totalP = 0,
-    totalF = 0,
-    totalC = 0;
+  // 1. 計算食材陣列裡的基礎總量 (這是目前 rawIngredients 裡所有數值的累加)
+  let baseKcal = 0, baseP = 0, baseF = 0, baseC = 0;
 
   rawIngredients.value.forEach((ing) => {
     const amt = Number(ing.amount) || 0;
     const conv = Number(ing.gram_conversion) || 1;
     const weight = amt * conv;
 
-    // 累加所有食材
-    totalKcal += (Number(ing.kcal_per_100g) || 0) * (weight / 100);
-    totalP += (Number(ing.protein_per_100g) || 0) * (weight / 100);
-    totalF += (Number(ing.fat_per_100g) || 0) * (weight / 100);
-    totalC += (Number(ing.carbs_per_100g) || 0) * (weight / 100);
+    baseKcal += (Number(ing.kcal_per_100g) || 0) * (weight / 100);
+    baseP += (Number(ing.protein_per_100g) || 0) * (weight / 100);
+    baseF += (Number(ing.fat_per_100g) || 0) * (weight / 100);
+    baseC += (Number(ing.carbs_per_100g) || 0) * (weight / 100);
   });
 
+  // 2. 根據模式定義不同的放大倍率 (multiplier)
+  let multiplier = 1;
+  const currentServings = Math.max(1, Number(servings.value || 1));
+  const originalServings = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
+
+  if (isPreviewMode.value) {
+    // 預覽模式：因為 rawIngredients 已經乘過 originalServings，所以計算單份要先除回來
+    multiplier = currentServings / originalServings;
+  } else {
+    // 正式模式：食材是單份數據，直接乘上當前份數
+    multiplier = currentServings;
+  }
+
+  // 3. 回傳最終計算結果
   return [
     {
-      calories_per_100g: Math.round(totalKcal * scale),
-      protein_per_100g: Number((totalP * scale).toFixed(1)),
-      fat_per_100g: Number((totalF * scale).toFixed(1)),
-      carbs_per_100g: Number((totalC * scale).toFixed(1)),
+      calories_per_100g: Math.round(baseKcal * multiplier),
+      protein_per_100g: Number((baseP * multiplier).toFixed(1)),
+      fat_per_100g: Number((baseF * multiplier).toFixed(1)),
+      carbs_per_100g: Number((baseC * multiplier).toFixed(1)),
       amount: 1,
       unit_weight: 1
     }

@@ -219,12 +219,26 @@ const publishToDb = async () => {
       recipe_difficulty: recipeForm.value.difficulty,
       total_time: recipeForm.value.totalTime,
       recipe_servings: recipeForm.value.recipe_servings,
-      ingredients: recipeForm.value.ingredients.map(ing => ({
-        ingredient_id: ing.id,
-        amount: ing.amount,
-        remark: ing.note,
-        unit_name: ing.unit || '份'
-      })),
+
+      // --- 核心修改部分 ---
+      ingredients: recipeForm.value.ingredients.map(ing => {
+        // 檢查 ID 是否為前端生成的隨機字串 (例如 "id1740...")
+        const isTempId = typeof ing.id === 'string' && ing.id.startsWith('id');
+
+        return {
+          // 如果是隨機 ID 傳 null，否則傳原始數字 ID
+          ingredient_id: isTempId ? null : ing.id,
+          // 🏆 務必帶上名字，後端才能處理新食材
+          ingredient_name: ing.name,
+          amount: ing.amount,
+          remark: ing.note,
+          unit_name: ing.unit || '份',
+          // 改編模式專用標記顏色 (如有需要)
+          color_tag: ing.color_tag || null
+        };
+      }),
+      // ------------------
+
       steps: processedSteps,
       tags: recipeForm.value.tags.map(t => t.tag_id)
     };
