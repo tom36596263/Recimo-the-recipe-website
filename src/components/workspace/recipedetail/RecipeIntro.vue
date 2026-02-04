@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
+import { useFavoritesStore } from '@/stores/favoritesStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router'; //為了開始烹飪跳轉連結而引入的功能
 // 導入開發好的燈箱組件
 import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
@@ -51,19 +53,29 @@ const handleStartCooking = () => {
 };
 
 // 控制燈箱顯隱的狀態
+
 const showModal = ref(false);
-const isFavorited = ref(false);
+const favoritesStore = useFavoritesStore();
+const authStore = useAuthStore();
+const isFavorited = computed(() => favoritesStore.isFavorited(props.info.id));
+
 
 const toggleFavorite = () => {
     if (!isFavorited.value) {
-        // 尚未收藏 → 收藏 + 開 modal
-        isFavorited.value = true;
+        // 尚未收藏 → 開 modal
         showModal.value = true;
     } else {
-        // 已收藏 → 取消收藏（不開 modal）
-        isFavorited.value = false;
+        // 已收藏 → 開 modal 讓使用者選擇移動或取消
+        showModal.value = true;
     }
 };
+
+// 載入時自動同步收藏狀態
+onMounted(() => {
+    if (authStore.user) {
+        favoritesStore.fetchFavorites(authStore.user.user_id || authStore.user.id);
+    }
+});
 
 // 產生星星陣列
 const starArray = computed(() => {
@@ -73,8 +85,9 @@ const starArray = computed(() => {
 
 // 處理燈箱確認提交後的邏輯
 const onModalSubmit = (data) => {
-    console.log('加入資料夾成功：', data);
-    // 這裡可以處理後續 API 動作
+    if (data && data.updated && authStore.user) {
+        favoritesStore.fetchFavorites(authStore.user.user_id || authStore.user.id);
+    }
 };
 </script>
 

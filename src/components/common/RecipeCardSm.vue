@@ -1,10 +1,9 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import LikeButton from '@/components/common/LikeButton.vue'
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
-const favoritesStore = useFavoritesStore();
+import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
 
 const props = defineProps({
     recipe: {
@@ -20,39 +19,35 @@ const props = defineProps({
 
 const router = useRouter();
 
-// 收藏功能狀態
-const authStore = useAuthStore();
-const userId = authStore.user?.id ?? 0;
-const recipeId = props.recipe.id;
-const isFavorited = computed(() => favoritesStore.isFavorited(recipeId));
-const loadingFavorite = ref(false);
-const heartAnimate = ref(false);
 
-// 查詢是否已收藏
-const fetchFavoriteStatus = async () => {
-    await favoritesStore.fetchFavorites(userId);
+const authStore = useAuthStore();
+const showAddToFolderModal = ref(false);
+const recipeId = computed(() => props.recipe.id);
+const favoritesStore = useFavoritesStore();
+const userId = computed(() => authStore.user?.id || authStore.user?.user_id || null);
+const isFavorited = computed(() => favoritesStore.isFavorited(recipeId.value));
+
+// 彈窗關閉時自動刷新收藏狀態
+const handleModalSubmit = () => {
+    showAddToFolderModal.value = false;
+    if (userId.value) {
+        favoritesStore.fetchFavorites(userId.value);
+    }
 };
 
-// 切換收藏
-const toggleFavorite = async (e) => {
+// 初始載入收藏狀態
+if (userId.value) {
+    favoritesStore.fetchFavorites(userId.value);
+}
+
+const handleHeartClick = (e) => {
     e.stopPropagation();
-    if (!userId || !recipeId) {
+    if (!authStore.user) {
         authStore.isLoginLightboxOpen = true;
         return;
     }
-    loadingFavorite.value = true;
-    heartAnimate.value = true;
-    setTimeout(() => heartAnimate.value = false, 400);
-    let res;
-    if (isFavorited.value) {
-        res = await favoritesStore.removeFavorite(userId, recipeId);
-    } else {
-        res = await favoritesStore.addFavorite(userId, recipeId);
-    }
-    loadingFavorite.value = false;
+    showAddToFolderModal.value = true;
 };
-
-onMounted(fetchFavoriteStatus);
 
 const goToDetail = () => {
     // 如果禁用導航，則不執行跳轉
@@ -68,19 +63,16 @@ const goToDetail = () => {
 <template>
     <div class="recipe-card-sm" @click="goToDetail">
         <header class="card-header">
-            <!-- 收藏按鈕，已收藏顯示紅色，未收藏顯示預設色 -->
-            <div class="icon-group" @click.stop="toggleFavorite"
-                :style="{ cursor: loadingFavorite ? 'not-allowed' : 'pointer' }">
-                <i-material-symbols-Favorite v-if="isFavorited" style="color: #e74c3c"
-                    :class="{ 'favorite-animate': heartAnimate }" />
-                <i-material-symbols-Favorite-outline v-else :class="{ 'favorite-animate': heartAnimate }" />
+            <!-- 收藏按鈕，根據收藏狀態顯示激活 -->
+            <div class="icon-group" @click.stop="handleHeartClick" style="cursor: pointer;">
+                <i-material-symbols-Favorite v-if="isFavorited" style="color: #e74c3c" />
+                <i-material-symbols-Favorite-outline v-else />
             </div>
             <img :src="recipe.image_url" alt="recipe.recipe_name">
         </header>
         <div class="card-body">
             <div class="title">
                 <h5 class="zh-h5">{{ recipe.recipe_name }}</h5>
-
             </div>
         </div>
         <footer>
@@ -89,13 +81,10 @@ const goToDetail = () => {
                     <img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo">
                 </div>
                 <p class="p-p1">Recimo</p>
-                <div @click.prevent.stop>
-                    <LikeButton :initial-likes="recipe.author.likes || 0"
-                        @update:liked="(val) => handleLikeChange(val, item)" />
-                </div>
             </div>
-
         </footer>
+        <AddToFolderModal v-model="showAddToFolderModal" :commentData="{}" :recipe-id="recipeId"
+            @submit="handleModalSubmit" />
     </div>
 </template>
 <style lang="scss" scoped>

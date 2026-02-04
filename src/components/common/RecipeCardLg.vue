@@ -2,7 +2,8 @@
 import { markRaw, computed, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
-import { addFavorite, removeFavorite, checkFavorite } from '@/utils/favoritesApi';
+import { useFavoritesStore } from '@/stores/favoritesStore';
+import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
 
 import BaseTag from '@/components/common/BaseTag.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
@@ -54,58 +55,35 @@ const handleLikeChange = (isLiked, item) => {
     // 這裡可以呼叫 API 更新後端數據
 };
 
-// 收藏功能狀態
+// 收藏功能
 const authStore = useAuthStore();
-const userId = authStore.user?.id ?? 0;
-const isFavorited = ref(false);
-const loadingFavorite = ref(false);
-const heartAnimate = ref(false);
+const showAddToFolderModal = ref(false);
+const recipeId = computed(() => props.recipe.id);
+const favoritesStore = useFavoritesStore();
+const userId = computed(() => authStore.user?.id || authStore.user?.user_id || null);
+const isFavorited = computed(() => favoritesStore.isFavorited(recipeId.value));
 
-// 查詢是否已收藏
-const fetchFavoriteStatus = async () => {
-    if (!userId) {
-        isFavorited.value = false;
-        return;
-    }
-    try {
-        const { data } = await checkFavorite(userId, props.recipe.id);
-        isFavorited.value = data.favorited;
-    } catch (err) {
-        isFavorited.value = false;
+// 彈窗關閉時自動刷新收藏狀態
+const handleModalSubmit = () => {
+    showAddToFolderModal.value = false;
+    if (userId.value) {
+        favoritesStore.fetchFavorites(userId.value);
     }
 };
 
-// 切換收藏
-const toggleFavorite = async (e) => {
+// 初始載入收藏狀態
+if (userId.value) {
+    favoritesStore.fetchFavorites(userId.value);
+}
+
+const handleHeartClick = (e) => {
     e.stopPropagation();
-    if (!userId || !props.recipe.id) {
+    if (!authStore.user) {
         authStore.isLoginLightboxOpen = true;
         return;
     }
-    loadingFavorite.value = true;
-    heartAnimate.value = true;
-    setTimeout(() => heartAnimate.value = false, 400);
-    try {
-        let res;
-        if (isFavorited.value) {
-            res = await removeFavorite(userId, props.recipe.id);
-            isFavorited.value = false;
-        } else {
-            res = await addFavorite(userId, props.recipe.id);
-            isFavorited.value = true;
-        }
-        if (res?.data?.success === false) {
-            isFavorited.value = !isFavorited.value;
-        }
-        console.log('收藏API回傳', res?.data);
-    } catch (err) {
-        console.error('API錯誤', err);
-    } finally {
-        loadingFavorite.value = false;
-    }
+    showAddToFolderModal.value = true;
 };
-
-onMounted(fetchFavoriteStatus);
 </script>
 <template>
     <div class="recipe-card-lg">
@@ -116,11 +94,11 @@ onMounted(fetchFavoriteStatus);
         <div class="card-body">
             <div class="title">
                 <h3 class="zh-h3">{{ recipe.recipe_name }}</h3>
-                <!-- 收藏按鈕，已收藏顯示紅色，未收藏顯示預設色 -->
-                <i-material-symbols-Favorite v-if="isFavorited" style="color: #e74c3c"
-                    @click.prevent.stop="toggleFavorite" :class="{ 'favorite-animate': heartAnimate }" />
-                <i-material-symbols-Favorite-outline v-else @click.prevent.stop="toggleFavorite"
-                    :class="{ 'favorite-animate': heartAnimate }" />
+                <!-- 收藏按鈕，根據收藏狀態顯示激活 -->
+                <div style="cursor: pointer;" @click.prevent.stop="handleHeartClick">
+                    <i-material-symbols-Favorite v-if="isFavorited" style="color: #e74c3c" />
+                    <i-material-symbols-Favorite-outline v-else />
+                </div>
             </div>
             <div class="tag">
                 <BaseTag v-for="tag in recipe.tags" :key="tag" :text="tag" />
@@ -153,6 +131,8 @@ onMounted(fetchFavoriteStatus);
             </div> -->
 
         </footer>
+        <AddToFolderModal v-model="showAddToFolderModal" :commentData="{}" :recipe-id="recipeId"
+            @submit="handleModalSubmit" />
     </div>
 </template>
 <style lang="scss" scoped>
