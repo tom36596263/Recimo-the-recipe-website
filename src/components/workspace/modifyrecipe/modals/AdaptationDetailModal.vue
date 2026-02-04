@@ -152,33 +152,41 @@ const handleShare = async () => {
 const isHubOpen = ref(false);
 
 // --- 份量與營養計算邏輯 ---
+// --- 份量與營養計算邏輯 ---
+
+// 1. 取得原始份量 (servings)
+// --- 份量與營養計算邏輯 ---
+
+// 1. 取得原始份量與當前選擇份量
 const originalServings = computed(() => {
     return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
 });
-
 const currentServings = ref(1);
 
-const baseNutritionPerServing = computed(() => {
-    const n = props.nutrition;
-    return {
-        calories: Number(n?.calories || 0),
-        protein: Number(n?.protein || 0),
-        fat: Number(n?.fat || 0),
-        carbs: Number(n?.carbs || 0),
-    };
-});
-
+// 2. 🏆 核心營養計算邏輯 (修正：資料庫已是單份，直接乘人數)
 const displayedNutrition = computed(() => {
-    const base = baseNutritionPerServing.value;
-    const s = currentServings.value;
+    const r = props.recipe;
+    if (!r) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
+
+    // 資料庫現在存的是「單份」數值 (例如 964)
+    const perServingKcal = parseFloat(r.recipe_kcal_per_100g || 0);
+    const perServingP = parseFloat(r.recipe_protein_per_100g || 0);
+    const perServingF = parseFloat(r.recipe_fat_per_100g || 0);
+    const perServingC = parseFloat(r.recipe_carbs_per_100g || 0);
+
+    // 🏆 修改重點：直接乘以「當前畫面上選的人數」
+    // 如果畫面上選 2 人，就是 964 * 2 = 1928
+    const count = currentServings.value;
+
     return {
-        calories: Math.round(base.calories * s),
-        protein: (base.protein * s).toFixed(1),
-        fat: (base.fat * s).toFixed(1),
-        carbs: (base.carbs * s).toFixed(1),
+        calories: Math.round(perServingKcal * count),
+        protein: Number((perServingP * count).toFixed(1)),
+        fat: Number((perServingF * count).toFixed(1)),
+        carbs: Number((perServingC * count).toFixed(1))
     };
 });
 
+// 3. 食材清單顯示 (隨人數縮放量)
 const ingredientsData = computed(() => {
     const list = props.recipe?.ingredients || [];
     const ratio = (1 / originalServings.value) * currentServings.value;
