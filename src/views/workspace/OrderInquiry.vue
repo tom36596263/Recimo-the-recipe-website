@@ -82,8 +82,25 @@ const fetchOrders = async () => {
   }
 };
 
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible') {
+    console.log('偵測到回到頁面，自動更新訂單狀態...');
+    fetchOrders(); // 執行您原本抓取資料的函數
+  }
+};
+
 onMounted(() => {
   fetchOrders();
+  window.addEventListener('visibilitychange', handleVisibilityChange);
+  // 額外保險：當視窗獲得焦點時也觸發
+  window.addEventListener('focus', fetchOrders);
+});
+
+// 記得在組件卸載時移除監聽，避免記憶體洩漏
+import { onUnmounted } from 'vue';
+onUnmounted(() => {
+  window.removeEventListener('visibilitychange', handleVisibilityChange);
+  window.removeEventListener('focus', fetchOrders);
 });
 
 const tags = [

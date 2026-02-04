@@ -1,14 +1,14 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useAuthStore } from '@/stores/authStore'; // 🏆 引入 Store 拿 user_id
-import { phpApi } from '@/utils/phpApi.js';     // 🏆 引入你的 axios 實體
+import { useAuthStore } from '@/stores/authStore';
+import { phpApi } from '@/utils/phpApi.js';
 
 const props = defineProps({
     modelValue: Boolean,
     targetData: {
         type: Object,
         default: () => ({
-            recipe_id: null, // 🏆 確保食譜 ID 欄位正確
+            recipe_id: null,
             title: '載入中...',
             userName: '未知作者',
             time: '',
@@ -19,28 +19,18 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue']);
-const authStore = useAuthStore(); // 初始化 Store
+const authStore = useAuthStore();
 
 const displayAuthor = computed(() => {
-    // 診斷：看看現在 props 到底拿到了什麼
-    // console.log("Modal 接收到的 props:", props.targetData);
-
-    // 1. 判斷是否為官方 (ID 1)
     if (props.targetData.author_id === 1 || props.targetData.author_id === "1") {
         return 'Recimo 官方';
     }
-
-    // 2. 如果 props 有名字，且不是預設的「未知作者」，就顯示它
     if (props.targetData.userName && props.targetData.userName !== '未知作者') {
         return props.targetData.userName;
     }
-
-    // 3. 【強力補救】如果 props 沒抓到，嘗試抓目前登入者 (authStore)
-    // 你的 authStore 結構是 authStore.user.user_name
     if (authStore.user && authStore.user.user_name) {
         return authStore.user.user_name;
     }
-
     return '未知作者';
 });
 
@@ -55,22 +45,13 @@ const selectedReason = ref('內容侵權 (盜圖或盜文)');
 const reportNote = ref('');
 
 const handleClose = () => {
-    reportNote.value = ''; // 關閉時清空
+    reportNote.value = '';
     emit('update:modelValue', false);
 };
 
 const handleSubmit = async () => {
-    // 1. 取得檢舉人 ID
     const reporterId = authStore.user?.user_id || authStore.user?.id;
-
-    // 2. 取得食譜 ID (注意：這裡要確保父組件傳進來的 key 是 recipe_id)
     const targetId = props.targetData.recipe_id;
-
-    // 🏆 診斷點：如果報錯「欄位不足」，請看瀏覽器控制台 (F12) 的輸出
-    console.log("=== 檢舉發送檢查 ===");
-    console.log("reporter_id:", reporterId);
-    console.log("target_id:", targetId);
-    console.log("reason:", selectedReason.value);
 
     if (!reporterId) {
         alert("請先登入才能進行檢舉");
@@ -79,7 +60,6 @@ const handleSubmit = async () => {
 
     if (!targetId) {
         alert("程式錯誤：找不到食譜 ID，請聯繫管理員");
-        console.error("targetData 內容：", props.targetData);
         return;
     }
 
@@ -93,14 +73,11 @@ const handleSubmit = async () => {
 
     try {
         const response = await phpApi.post('social/submit_report.php', payload);
-
         if (response.data.status === 'success') {
             alert('感謝您的檢舉，我們會盡快審核該食譜。');
             handleClose();
         } else {
-            // 如果後端回傳「欄位不足」，這裡會印出詳細原因
             alert('檢舉失敗：' + (response.data.message || '請稍後再試'));
-            console.warn("後端回傳錯誤：", response.data);
         }
     } catch (error) {
         console.error("API Error:", error);
@@ -168,19 +145,22 @@ const getImageUrl = (url) => {
     </Teleport>
 </template>
 
-
 <style scoped lang="scss">
-
 @import '@/assets/scss/abstracts/_color.scss';
 
 .black-mask {
     position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    /* 稍微加深遮罩 */
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 100;
+    z-index: 3000;
+    /* 🏆 必須大於外層 Modal 的 2000 */
     padding: 20px;
 }
 
@@ -194,7 +174,7 @@ const getImageUrl = (url) => {
     border-radius: 12px;
     padding: 20px 30px;
     position: relative;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     height: auto;
     overflow: hidden;
     text-align: left;
@@ -235,7 +215,6 @@ const getImageUrl = (url) => {
     width: 100%;
     flex: none;
 }
-
 
 @media (max-height: 700px) {
     .modal-card {
@@ -281,15 +260,6 @@ const getImageUrl = (url) => {
         grid-row: 1;
         overflow-y: auto;
         padding-right: 4px;
-
-        .comment-text {
-            margin: 0;
-            font-size: 14px;
-            line-height: 1.4;
-            word-break: break-all;
-            white-space: pre-wrap;
-            font-weight: 500;
-        }
     }
 
     .user-meta {
@@ -316,7 +286,6 @@ const getImageUrl = (url) => {
     flex-direction: column;
     gap: 6px;
 
-
     .radio-item {
         display: flex;
         align-items: center;
@@ -338,32 +307,6 @@ textarea {
     border: 1px solid $primary-color-400;
     padding: 10px 12px;
     resize: none;
-    box-sizing: border-box;
-
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    overflow-x: hidden;
-    overflow-y: auto;
-
-    scrollbar-width: thin;
-    scrollbar-color: $primary-color-100 transparent;
-
-    &::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background-color: $primary-color-100;
-        border-radius: 10px;
-
-        &:hover {
-            background-color: $primary-color-400;
-        }
-    }
 
     &:focus {
         border-color: $primary-color-700;

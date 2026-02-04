@@ -1,11 +1,22 @@
 <script setup>
 import { ref } from 'vue';
+import BaseBtn from '@/components/common/BaseBtn.vue';
+import { phpApi } from '@/utils/phpApi.js';
+// 🏆 1. 建議引入 authStore 來抓 ID，這比直接抓 localStorage 穩
+import { useAuthStore } from '@/stores/authStore';
+
+const authStore = useAuthStore();
 
 const props = defineProps({
     modelValue: Boolean,
+    targetType: {
+        type: String,
+        default: 'gallery'
+    },
     commentData: {
         type: Object,
         default: () => ({
+            id: null,
             content: '載入中...',
             userName: '未知用戶',
             time: '',
@@ -14,28 +25,66 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['update:modelValue', 'submit']);
+const emit = defineEmits(['update:modelValue', 'success']);
 
 const reasons = [
+    '內容侵權 (盜圖或盜文)',
     '垃圾訊息 / 廣告',
-    '仇恨或攻擊言論',
     '色情或不當內容',
-    '不實資訊',
+    '仇恨或攻擊言論',
     '其他原因'
 ];
-const selectedReason = ref('垃圾訊息 / 廣告');
+
+// 🏆 修正：確保 selectedReason 只宣告一次
+const selectedReason = ref('內容侵權 (盜圖或盜文)');
 const reportNote = ref('');
 
 const handleClose = () => {
+    reportNote.value = '';
     emit('update:modelValue', false);
 };
 
-const handleSubmit = () => {
-    emit('submit', {
+const handleSubmit = async () => {
+    // 🏆 2. 修改 ID 抓取邏輯：優先從 Store 拿，拿不到再試 localStorage 不同的 Key
+    const reporterId = authStore.user?.id ||
+        authStore.user?.user_id ||
+        localStorage.getItem('user_id') ||
+        localStorage.getItem('id');
+
+    if (!reporterId) {
+        alert("系統偵測不到登入資訊，請嘗試重新登入。");
+        return;
+    }
+
+    const payload = {
+        reporter_id: reporterId,
+        target_type: props.targetType,
+        target_id: props.commentData.id,
         reason: selectedReason.value,
         note: reportNote.value
-    });
-    alert("感謝您的檢舉！為了維護優質的社群分享品質，我們將會盡快審核該內容。謝謝您與我們共同守護美食社群！");
+    };
+
+    try {
+        // 🏆 3. 發送請求 (請確認後端 phpApi.js 的 baseURL 包含到 api/ 這一層)
+        const response = await phpApi.post('social/submit_report.php', payload);
+        const result = response.data;
+
+        if (result.status === 'success') {
+            alert("感謝您的檢舉！我們將會盡快審核該內容。");
+            reportNote.value = '';
+            emit('success');
+            emit('update:modelValue', false);
+        } else {
+            alert("檢舉失敗：" + result.message);
+        }
+    } catch (error) {
+        console.error('API Error:', error);
+        // 🏆 4. 針對「連線失敗」給出更具體的提示
+        const msg = error.code === 'ERR_NETWORK'
+            ? "連線失敗：請檢查 MAMP 是否開啟，或 API 網址是否正確。"
+            : "伺服器錯誤，請稍後再試。";
+        alert(msg);
+    }
 };
 </script>
 
@@ -48,14 +97,16 @@ const handleSubmit = () => {
                 </button>
 
                 <div class="modal-header">
-                    <div class="modal-title zh-h4-bold ">檢舉這張照片</div>
+                    <div class="modal-title zh-h4-bold">
+                        {{ targetType === 'gallery' ? '檢舉這張照片' : '檢舉這則留言' }}
+                    </div>
                     <div class="green-divider"></div>
                 </div>
 
                 <div class="report-content custom-scrollbar">
                     <div class="comment-box photo-mode">
                         <div class="photo-fixed">
-                            <img :src="commentData.image || 'https://via.placeholder.com/150'" alt="成品照" />
+                            <img :src="commentData.image || 'https://via.placeholder.com/150'" alt="預覽內容" />
                         </div>
 
                         <div class="text-scroll-area">
@@ -159,7 +210,6 @@ const handleSubmit = () => {
     flex: none;
 }
 
-
 @media (max-height: 700px) {
     .modal-card {
         max-height: 95vh;
@@ -239,7 +289,6 @@ const handleSubmit = () => {
     flex-direction: column;
     gap: 6px;
 
-
     .radio-item {
         display: flex;
         align-items: center;
@@ -262,31 +311,19 @@ textarea {
     padding: 10px 12px;
     resize: none;
     box-sizing: border-box;
-
-    /* 1. 確保斷行，禁止底部卷軸 */
     white-space: pre-wrap;
     word-wrap: break-word;
     overflow-x: hidden;
     overflow-y: auto;
-
-    /* 2. 美化側邊卷軸 (Firefox) */
     scrollbar-width: thin;
     scrollbar-color: $primary-color-100 transparent;
 
-    /* 3. 美化側邊卷軸 (Chrome, Edge, Safari) */
     &::-webkit-scrollbar {
         width: 6px;
-        /* 卷軸寬度 */
-    }
-
-    &::-webkit-scrollbar-track {
-        background: transparent;
-        /* 軌道顏色 */
     }
 
     &::-webkit-scrollbar-thumb {
         background-color: $primary-color-100;
-        /* 卷軸顏色 */
         border-radius: 10px;
 
         &:hover {

@@ -36,7 +36,7 @@ const handleAdd = () => {
 
             <div class="tag-group">
                 <BaseTag :text="`${recipe.recipe_kcal_per_100g} kcal`" />
-                <BaseTag :text="`${recipe.recipe_protein_per_100g}P`" />
+                <BaseTag :text="`${recipe.recipe_protein_per_100g} P`" />
                 <BaseTag :text="`難度：${recipe.recipe_difficulty}`" />
             </div>
         </div>

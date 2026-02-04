@@ -26,7 +26,9 @@ const reasons = [
     '色情或不當內容',
     '不實資訊',
     '其他原因'
-];
+];;
+
+
 const selectedReason = ref('垃圾訊息 / 廣告');
 const reportNote = ref('');
 

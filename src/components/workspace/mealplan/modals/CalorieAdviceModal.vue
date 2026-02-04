@@ -50,6 +50,12 @@ const handleCalculate = () => {
     // 確保熱量不會低於基礎生存需求
     calculatedResult.value = Math.max(1000, Math.round(total));
 };
+
+const handleApply = () => {
+    // 發送事件，並傳回計算結果
+    emit('apply', calculatedResult.value);
+    emit('update:modelValue', false); // 關閉視窗
+};
 </script>
 
 <template>
@@ -184,8 +190,8 @@ const handleCalculate = () => {
     transition: color 0.2s ease;
 
     &:hover {
-            color: $neutral-color-black;
-        }
+        color: $neutral-color-black;
+    }
 }
 
 /* --- 表單內容區 --- */

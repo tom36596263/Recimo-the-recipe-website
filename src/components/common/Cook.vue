@@ -7,6 +7,8 @@ import CookCard from '@/components/common/CookCard.vue';
 import axios from 'axios';
 // import { publicApi } from '@/utils/publicApi';
 import { phpApi } from '@/utils/publicApi';
+import { onUnmounted } from 'vue';
+
 
 const ingredients = ref([]);
 
@@ -34,6 +36,53 @@ onMounted(() => {
         .catch(err => {
             console.error('連線失敗', err);
         });
+});
+
+//定義後台新增修改前台立馬更新
+const fetchIngredientsData = async () => {
+    try {
+        const res = await phpApi.get('recipes/user_ingredients.php');
+        let responseData = res.data;
+
+        if (typeof responseData === 'string') {
+            try {
+                responseData = JSON.parse(responseData);
+            } catch (e) {
+                console.error("JSON 解析失敗", responseData);
+            }
+        }
+
+        if (responseData && responseData.status === 'success') {
+            ingredients.value = responseData.data;
+            console.log('食材資料已同步刷新');
+        }
+    } catch (err) {
+        console.error('重新載入食材失敗', err);
+    }
+};
+
+// 2. 定義視窗焦點回饋的處理函數
+const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+        console.log('回到廚房頁面，自動檢查食材更新...');
+        fetchIngredientsData();
+    }
+};
+
+onMounted(() => {
+    // 初次載入
+    fetchIngredientsData();
+
+    // 3. 註冊監聽事件：切換標籤回來時觸發
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    // 4. 額外保險：當視窗重新獲得焦點時觸發
+    window.addEventListener('focus', fetchIngredientsData);
+});
+
+// 5. 卸載組件時移除監聽，避免資源浪費
+onUnmounted(() => {
+    window.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.removeEventListener('focus', fetchIngredientsData);
 });
 
 // --- 標籤設定 ---
@@ -877,5 +926,10 @@ const startCooking = () => {
     100% {
         transform: rotate(0deg);
     }
+}
+
+.draggable-card-wrapper {
+    touch-action: none;
+    /* 告訴瀏覽器這個元素完全由 JS 處理觸控，不要猜測滾動方向 */
 }
 </style>

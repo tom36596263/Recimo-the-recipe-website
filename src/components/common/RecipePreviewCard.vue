@@ -11,41 +11,8 @@ import 'swiper/css/free-mode';
 
 // Swiper 模組
 const modules = [FreeMode];
-import { useAuthStore } from '@/stores/authStore';
-import { useFavoritesStore } from '@/stores/favoritesStore';
-const authStore = useAuthStore();
-const favoritesStore = useFavoritesStore();
-const userId = computed(() => authStore.user?.id ?? 0);
-const recipeId = computed(() => props.recipe.recipe_id || props.recipe.id);
-const isFavorited = computed(() => favoritesStore.isFavorited(recipeId.value));
-const loadingFavorite = ref(false);
-const heartAnimate = ref(false);
 
 const router = useRouter();
-
-const fetchFavoriteStatus = async () => {
-    await favoritesStore.fetchFavorites(userId.value);
-};
-
-const toggleFavorite = async (e) => {
-    e.stopPropagation();
-    if (!userId.value || !recipeId.value) {
-        authStore.isLoginLightboxOpen = true;
-        return;
-    }
-    loadingFavorite.value = true;
-    heartAnimate.value = true;
-    setTimeout(() => heartAnimate.value = false, 400);
-    let res;
-    if (isFavorited.value) {
-        res = await favoritesStore.removeFavorite(userId.value, recipeId.value);
-    } else {
-        res = await favoritesStore.addFavorite(userId.value, recipeId.value);
-    }
-    loadingFavorite.value = false;
-};
-
-onMounted(fetchFavoriteStatus);
 
 // ==================== Props 定義 ====================
 const props = defineProps({
@@ -157,7 +124,7 @@ const getIngredientIcon = (mainCategory, subCategory) => {
 <template>
     <div class="recipe-preview-card">
 
-        <!-- ==================== 頭部區域：作者信息與收藏按鈕 ==================== -->
+        <!-- ==================== 頭部區域：作者信息 ==================== -->
         <div class="preview-header">
             <!-- 作者信息：頭像 + 名稱 -->
             <div class="author-info">
@@ -168,13 +135,6 @@ const getIngredientIcon = (mainCategory, subCategory) => {
                 </div>
                 <!--  -->
                 <span class="author-name">{{ recipe.author?.name || 'Recimo' }}</span>
-            </div>
-            <!-- 加入收藏按鈕 -->
-            <div class="favorite-btn" @click.stop="toggleFavorite"
-                :style="{ cursor: loadingFavorite ? 'not-allowed' : 'pointer' }">
-                <i-material-symbols-Favorite v-if="isFavorited" style="color: #e74c3c"
-                    :class="{ 'favorite-animate': heartAnimate }" />
-                <i-material-symbols-Favorite-outline v-else :class="{ 'favorite-animate': heartAnimate }" />
             </div>
         </div>
 

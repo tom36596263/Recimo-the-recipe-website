@@ -34,6 +34,8 @@ const isLoading = ref(true);
 const isLiked = ref(false);
 const localLikesOffset = ref(0); // 本地模擬按讚增減
 
+const isHubOpen = ref(false); // 用來控制選單展開/收合
+
 const isPreviewMode = computed(() => route.query.mode === 'preview');
 const isReportModalOpen = ref(false);
 
@@ -135,7 +137,7 @@ const fetchData = async () => {
     try {
         const [resDetail, resG, resU, resC] = await Promise.all([
             phpApi.get(`recipes/recipe_detail_get.php?recipe_id=${recipeId}`),
-            publicApi.get('data/social/gallery.json'),
+            phpApi.get(`recipes/gallery.php?recipe_id=${recipeId}`), // 改成你的 PHP 路徑
             publicApi.get('data/user/users.json'),
             recipeId ? phpApi.get(`social/comment.php?recipe_id=${recipeId}`) : Promise.resolve({ data: [] })
         ]);
@@ -180,29 +182,42 @@ const fetchData = async () => {
         }
 
         // --- 3. 處理成品照 ---
-        if (resG.data) {
+        if (resG.data && resG.data.success) { // 確保 API 回傳 success 為 true
             const API_BASE_URL = 'http://localhost:8888/recimo_api/';
-            snapsData.value = resG.data
-                .filter(item => Number(item.RECIPE_ID) === recipeId)
+
+            // 1. 注意這裡全部改用小寫欄位名
+            snapsData.value = resG.data.data
+                .filter(item => Number(item.recipe_id) === recipeId)
                 .map(item => {
                     let finalImg = '';
-                    const rawUrl = item.GALLERY_URL || '';
-                    if (rawUrl.includes(':\\')) {
+                    const rawUrl = item.gallery_url || '';
+
+                    // 2. 解析圖片路徑 (相容 Windows 路徑與一般網址)
+                    if (rawUrl.startsWith('http')) {
+                        finalImg = rawUrl;
+                    } else if (rawUrl.includes(':\\')) {
+                        // 處理像 C:\xampp\htdocs\... 這種路徑
                         const parts = rawUrl.split('recimo_api\\');
                         const relativePath = parts[1] ? parts[1].replace(/\\/g, '/') : '';
                         finalImg = `${API_BASE_URL}${relativePath}`;
                     } else {
-                        finalImg = getSmartImageUrl(rawUrl);
+                        // 處理像 img/social/... 這種相對路徑
+                        const cleanPath = rawUrl.startsWith('/') ? rawUrl.slice(1) : rawUrl;
+                        finalImg = `${API_BASE_URL}${cleanPath}`;
                     }
+
                     return {
-                        id: item.GALLERY_ID,
+                        id: item.gallery_id,
                         url: finalImg,
-                        comment: item.GALLERY_TEXT,
-                        createdAt: item.UPLOAD_AT,
-                        userId: item.USER_ID,
-                        userName: resU.data?.find(u => u.user_id === item.USER_ID)?.user_name || '熱心用戶'
+                        comment: item.gallery_text,
+                        createdAt: item.upload_at,
+                        userId: item.user_id,
+                        // API 截圖顯示已經有 user_name 欄位
+                        userName: item.user_name || '熱心用戶'
                     };
                 });
+
+            console.log('✅ 成功抓取成品照:', snapsData.value);
         }
 
         // --- 4. 處理留言 ---
@@ -446,6 +461,84 @@ const handleDeleteComment = async (commentId) => {
     }
 };
 
+const handlePostSnap = async (payload) => {
+    // 🏆 核心偵錯：看看到底是 File 還是 String
+    console.log("--- 上傳流程開始 ---");
+    console.log("1. 原始 Payload:", payload);
+    console.log("2. 圖片類型:", typeof payload.image);
+    console.log("3. 是否為 File 物件:", payload.image instanceof File);
+
+    if (!authStore.user) return alert('請先登入');
+
+    const userId = authStore.user.user_id || authStore.user.id;
+    const recipeId = route.params.id;
+
+    // 驗證 ID
+    if (!userId || !recipeId) {
+        console.error("缺少 ID:", { userId, recipeId });
+        return alert('無法讀取用戶或食譜資訊');
+    }
+
+    const formData = new FormData();
+    formData.append('recipe_id', recipeId);
+    formData.append('user_id', userId);
+    formData.append('gallery_text', payload.note || '');
+
+    // 🏆 關鍵修正：確保只有 File 物件才能附加到 'image'
+    if (payload.image instanceof File) {
+        formData.append('image', payload.image);
+        console.log("4. FormData 已成功附加 File 物件");
+    } else {
+        // 如果進到這裡，代表 Modal 傳出來的就是那個 blob 網址字串
+        console.error("致命錯誤：Payload 提供的不是檔案實體，而是網址：", payload.image);
+        alert("圖片讀取異常，請重新選取圖片後再試一次");
+        return;
+    }
+
+    try {
+        const response = await phpApi.post('recipes/gallery.php', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        console.log("5. 後端回傳:", response.data);
+
+        if (response.data.success) {
+            alert('成品照發布成功！');
+            if (typeof fetchData === 'function') fetchData();
+        } else {
+            alert('上傳失敗：' + response.data.message);
+        }
+    } catch (err) {
+        console.error('API 出錯:', err);
+        alert('上傳出錯，請檢查伺服器連線');
+    }
+};
+
+const handleDeleteSnap = async (galleryId) => {
+    const userId = authStore.user?.user_id || authStore.user?.id;
+
+    try {
+        // 🏆 注意：這裡改用 .delete() 或是傳參數給 gallery.php
+        const response = await phpApi.delete('recipes/gallery.php', {
+            data: {
+                gallery_id: galleryId,
+                user_id: userId
+            }
+        });
+
+        if (response.data.success) {
+            alert(response.data.message);
+            fetchData(); // 重新整理列表
+        }
+    } catch (err) {
+        console.error('刪除請求失敗', err);
+    }
+};
+
+
+
 onMounted(() => {
     fetchData();
     if (isPreviewMode.value) toggleWorkspaceTopBar(false);
@@ -539,7 +632,7 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
 
                 <div v-if="!isPreviewMode && !isAdaptation" class="col-12 cook-snap-full fade-up" style="--delay: 7">
                     <section class="mb-10 content-wrapper">
-                        <CookSnap :list="snapsData" @post-snap="handlePostSnap" />
+                        <CookSnap :list="snapsData" @post-snap="handlePostSnap" @delete-snap="handleDeleteSnap" />
                     </section>
                 </div>
             </div>
@@ -548,45 +641,36 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
 
 
 
-    <div v-if="!isLoading && rawRecipe" class="fixed-floating-bar" :class="{ 'is-preview': isPreviewMode }">
-        <button class="action-circle-btn" :class="{ 'active': isLiked }" @click="toggleRecipeLike">
+    
+
+    <div v-if="isHubOpen" class="hub-overlay" @click="isHubOpen = false"></div>
+
+    <div v-if="!isLoading && rawRecipe" class="recipe-action-hub"
+        :class="{ 'active': isHubOpen, 'is-preview': isPreviewMode }">
+
+        <button class="main-hub-btn" @click="isLiked = !isLiked; localLikesOffset = isLiked ? 1 : 0">
             <i-material-symbols-thumb-up-rounded v-if="isLiked" />
             <i-material-symbols-thumb-up-outline-rounded v-else />
             <span v-if="displayRecipeLikes > 0" class="badge">{{ displayRecipeLikes }}</span>
+
+            <div class="indicator" :class="{ 'rotate': isHubOpen }" @click.stop="isHubOpen = !isHubOpen">
+                <i-material-symbols-add-rounded />
+            </div>
         </button>
 
-        <button class="action-circle-btn" @click="handleShare">
-            <i-material-symbols-share-outline />
-        </button>
-
-        <button class="action-circle-btn" @click="handleGoToEdit">
-            <i-material-symbols-edit />
-        </button>
-
-        <button class="action-circle-btn report" @click="isReportModalOpen = true">
-            <i-material-symbols-error-outline-rounded />
-        </button>
+        <div class="sub-actions">
+            <button class="sub-btn" @click="handleGoToEdit" title="編輯/改編">
+                <i-material-symbols-edit />
+            </button>
+            <button class="sub-btn" @click="handleShare" title="分享">
+                <i-material-symbols-share-outline />
+            </button>
+            <button class="sub-btn report" @click="isReportModalOpen = true" title="檢舉">
+                <i-material-symbols-error-outline-rounded />
+            </button>
+        </div>
     </div>
 
-    <div v-if="!isLoading && rawRecipe" class="fixed-floating-bar" :class="{ 'is-preview': isPreviewMode }">
-    <button class="action-circle-btn" :class="{ 'active': isLiked }" @click="toggleRecipeLike">
-        <i-material-symbols-thumb-up-rounded v-if="isLiked" />
-        <i-material-symbols-thumb-up-outline-rounded v-else />
-        <span v-if="displayRecipeLikes > 0" class="badge">{{ displayRecipeLikes }}</span>
-    </button>
-    
-    <button class="action-circle-btn" @click="handleShare">
-        <i-material-symbols-share-outline />
-    </button>
-
-    <button class="action-circle-btn" @click="handleGoToEdit">
-        <i-material-symbols-edit />
-    </button>
-
-    <button class="action-circle-btn report" @click="isReportModalOpen = true">
-        <i-material-symbols-error-outline-rounded />
-    </button>
-</div>
 
     <div v-else-if="isLoading" class="loading-state">
         <p>正在為您準備食譜資料...</p>
@@ -733,36 +817,40 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
 
 .title-content {
     display: flex;
-    align-items: center; // 垂直居中對齊
-    justify-content: flex-start; // 預設靠左
+    align-items: center;
+    justify-content: flex-start;
     padding: 20px 0;
     border-bottom: 1px solid $neutral-color-100;
+    margin-bottom: 20px;
 
     .zh-h2 {
-        flex-shrink: 0; // 防止標題被擠壓
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
 
         .main-icon {
-                font-size: 24px;
-                color: $neutral-color-black;
-        
-                /* 核心微調程式碼 */
-                transform: translateY(5px); // 往正值調就是往下移動，1px 或 2px 通常就夠了
-        
-                /* 備選方案：如果不想用 transform */
-                // margin-top: 4px; 
+            margin-right: 15px;
+            font-size: 24px;
+            color: $neutral-color-black;
+            transform: translateY(4px);
+
+            @media screen and (min-width: 769px) {
+                transform: translateY(3px) !important;
             }
+        }
     }
 
+
     .meta-wrapper {
-        margin-left: auto; // 【最簡單靠右關鍵】這行會吃掉左邊所有剩餘空間
+        margin-left: auto;
         display: flex;
-        align-items: center; // 讓作者資訊跟按鈕水平對齊
-        gap: 16px; // 兩者之間的間距
+        align-items: center;
+        gap: 16px;
 
         @media screen and (max-width: 768px) {
             margin-left: 0;
             width: 100%;
-            justify-content: space-between; // 手機版時，作者左、按鈕右
+            justify-content: space-between;
         }
     }
 
@@ -868,20 +956,18 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
     }
 }
 
-/* 詳情頁專用：固定右下角毛玻璃按鈕列 */
+/* --- [區塊 A] 詳情頁彈窗專用 --- */
 .fixed-floating-bar {
     position: fixed;
     bottom: 30px;
     right: 40px;
     display: flex;
-    flex-direction: row; // 橫向排列
+    flex-direction: row;
     gap: 12px;
     z-index: 1000;
-
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-
     padding: 10px;
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -897,7 +983,7 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
 
     &.is-preview {
         opacity: 0.5;
-        pointer-events: none; // 預覽模式禁用
+        pointer-events: none;
     }
 
     .action-circle-btn {
@@ -909,12 +995,17 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
         display: flex;
         align-items: center;
         justify-content: center;
-        color: $primary-color-700;
+        color: $primary-color-700 !important;
         font-size: 22px;
         cursor: pointer;
         transition: all 0.2s ease;
         position: relative;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        svg,
+        :deep(svg) {
+            fill: currentColor;
+        }
 
         &:hover {
             transform: translateY(-3px);
@@ -922,15 +1013,25 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
         }
 
         &.active {
-            background: $primary-color-700;
-            color: white;
+            background: $primary-color-700 !important;
+            color: white !important;
+
+            svg,
+            :deep(svg) {
+                fill: white;
+            }
         }
 
         &.report {
-            color: #ff7875;
+            color: #ff7875 !important;
 
             &:hover {
                 background: #fff1f0;
+            }
+
+            svg,
+            :deep(svg) {
+                fill: #ff7875;
             }
         }
 
@@ -948,55 +1049,194 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
     }
 }
 
-/* 微調原本標題列的樣式，讓它不那麼空 */
-.title-content {
-    .icon-group {
+/* --- [區塊 B] 頁面通用食譜按鈕 Hub (修正後的順序與樣式) --- */
+.recipe-action-hub {
+    position: fixed;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
 
-        // 移除 gap，因為現在只剩一個按鈕
-        .adapt-btn-wrapper {
-            margin-left: 0;
+    /* 桌機版：讚 -> 編輯 -> 分享 -> 檢舉 (橫向) */
+    @media (min-width: 992px) {
+        bottom: 30px;
+        right: 30px;
+        flex-direction: row; // 確保按讚在最左，檢舉在最右
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px);
+        padding: 10px 16px;
+        border-radius: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+        .sub-actions {
+            display: flex !important;
+            flex-direction: row;
+            gap: 12px;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: none !important;
+        }
+
+        .indicator {
+            display: none !important;
+        }
+    }
+
+    /* 手機版：展開後 編輯/分享/檢舉 在 讚 的上方 */
+    @media (max-width: 991px) {
+        bottom: 100px;
+        right: 24px;
+        flex-direction: column;
+        gap: 12px;
+
+        .sub-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            order: -1; // 讓子按鈕群組在 column 模式下出現在主按鈕上方
+        }
+
+        &.active .sub-actions {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+    }
+
+    /* 按鈕顏色邏輯 */
+    .main-hub-btn {
+        background: $neutral-color-white;
+        color: $primary-color-700 !important;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        cursor: pointer;
+        position: relative;
+
+        svg,
+        :deep(svg) {
+            fill: $neutral-color-white;
+        }
+    }
+
+    .sub-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        background: $neutral-color-white;
+        color: $primary-color-700 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        svg,
+        :deep(svg) {
+            fill: currentColor;
+        }
+
+        &:hover {
+            background: $primary-color-100;
+        }
+
+        &.report {
+            color: $accent-color-700 !important;
+
+            svg,
+            :deep(svg) {
+                fill: $accent-color-700;
+            }
+
+            &:hover {
+                background: $neutral-color-100;
+            }
+        }
+    }
+
+    .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: $primary-color-400;
+        color: white;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 10px;
+        border: 2px solid white;
+    }
+
+    .indicator {
+        position: absolute;
+        bottom: -4px;
+        right: -4px;
+        background: $primary-color-700;
+        color: $neutral-color-white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+
+        &.rotate {
+            transform: rotate(45deg);
         }
     }
 }
 
-/* 1. 標題與標籤的容器 */
-.title-group {
-    display: flex;
-    align-items: center; // 確保垂直居中對齊
-    gap: 16px; // 標題與標籤之間的間距
-    flex-wrap: wrap; // 防止手機版標題太長時標籤被切掉
+.hub-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 999;
+
+    @media (min-width: 992px) {
+        display: none;
+    }
 }
 
-/* 2. 重寫改編標籤樣式 (移植自燈箱版本) */
+.title-content .icon-group .adapt-btn-wrapper {
+    margin-left: 0;
+}
+
+.title-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
 .badge-adaptation {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
-    height: 26px; // 固定高度讓它看起來像膠囊
-    background: #E8F5E9; // 淺綠色背景 (對應 $primary-color-100)
-    color: #2E7D32; // 深綠色文字 (對應 $primary-color-700)
+    height: 26px;
+    background: $primary-color-100;
+    color: $primary-color-700;
     padding: 0 14px;
-    border-radius: 99px; // 圓角膠囊狀
+    border-radius: 99px;
     font-weight: 600;
     font-size: 14px;
-    white-space: nowrap; // 標籤文字不折行
+    white-space: nowrap;
     line-height: 1;
-}
-
-/* 3. 微調標題內的圖示位置 */
-.zh-h2 {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0; // 移除預設下邊距以精準對齊標籤
-
-    .main-icon {
-        margin-right: 8px;
-        font-size: 28px;
-        color: $neutral-color-800;
-        // 如果圖示看起來太高，可以用原本的 transform 微調
-        transform: translateY(2px);
-    }
 }
 
 @media screen and (max-width: 768px) {
@@ -1016,35 +1256,30 @@ watch(() => [route.params.id, route.query.mode], () => fetchData());
             }
         }
 
-                .meta-wrapper {
-                    margin-left: 0 !important;
-                    width: 100% !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: space-between !important;
-                    /* 確保左右撐開 */
-        
-                    /* 作者資訊區塊 */
-                    :deep(.author-info-container) {
-                        flex-shrink: 0;
-                    }
-        
-                    /* 針對按鈕群組（強制推到最右邊） */
-                    .adapt-btn-wrapper,
-                    .delete-btn-wrapper,
-                    :deep(.delete-adaptation-btn) {
-                        margin-left: auto !important;
-                        /* 核心：吃掉左邊空間 */
-                        display: flex !important;
-                        justify-content: flex-end;
-                        gap: 8px;
-                    }
-        
-                    :deep(button) {
-                        white-space: nowrap;
-                    }
-                }
+        .meta-wrapper {
+            margin-left: 0 !important;
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+
+            :deep(.author-info-container) {
+                flex-shrink: 0;
+            }
+
+            .adapt-btn-wrapper,
+            .delete-btn-wrapper,
+            :deep(.delete-adaptation-btn) {
+                margin-left: auto !important;
+                display: flex !important;
+                justify-content: flex-end;
+                gap: 8px;
+            }
+
+            :deep(button) {
+                white-space: nowrap;
+            }
+        }
     }
 }
-
 </style>

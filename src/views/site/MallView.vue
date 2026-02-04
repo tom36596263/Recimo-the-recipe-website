@@ -89,13 +89,23 @@ const displayedProducts = computed(() => {
   return filteredProducts.value.slice(startIndex, endIndex);
 });
 
-// --- 其他 Computed ---
+// --- 修正後的 randomProducts ---
 const randomProducts = computed(() => {
   if (productList.value.length === 0) return [];
-  const shuffled = [...productList.value].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, 4);
-  //... 是「展開運算子 (Spread Operator)」。意思是把 productList 裡面的東西全部倒出來，放進一個新的 [] 裡面
-  //sort(() => 0.5 - Math.random()) 是洗牌的概念
+
+  // 1. 修正：進入 .tags 層級去抓 product_is_hot
+  const hotItems = productList.value.filter(item => {
+    // 檢查 item.tags 是否存在，並判斷 product_is_hot 是否為 true
+    return item.tags && item.tags.product_is_hot === true;
+  });
+
+  // 2. 如果熱銷商品多於 4 筆，隨機選取 4 筆（增加視覺變化）
+  if (hotItems.length > 0) {
+    return [...hotItems].sort(() => 0.5 - Math.random()).slice(0, 4);
+  } else {
+    // 備案：如果資料庫完全沒設熱銷，隨機抓
+    return [...productList.value].sort(() => 0.5 - Math.random()).slice(0, 4);
+  }
 });
 
 // --- 事件處理 ---
@@ -138,6 +148,8 @@ const setPage = (page) => {
 
 onMounted(() => {
   fetchData(); //當網頁畫面全部準備好（掛載完成）的那一瞬間，請幫我執行 fetchData 這個函式,fetchData 去倉庫搬貨，搬回來後更新了 productList.value。
+  // 每 60 秒自動更新
+  // setInterval(fetchData, 1000);
 });
 
 const getImg = (name) => {

@@ -1,16 +1,4 @@
-/**
-* 我的收藏頁面
-* 功能：
-* 1. 顯示用戶收藏的食譜列表
-* 2. 支持按標籤篩選食譜
-* 3. 雙欄佈局：左側為食譜列表，右側為預覽詳情
-* 4. 分頁功能：每頁顯示 6 個食譜
-* 5. 空狀態處理：無收藏時引導用戶探索食譜
-*/
 <script setup>
-// ...existing code...
-// ...existing code...
-// ...existing code...
 // 關閉手機版預覽模態框
 function closeModal() {
     isModalOpen.value = false;
@@ -33,8 +21,11 @@ import RecipePreviewCard from '@/components/common/RecipePreviewCard.vue';
 import BaseTag from '@/components/common/BaseTag.vue';
 import PageBtn from '@/components/common/PageBtn.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 
 // ========== 狀態管理 ==========
+const favoritesStore = useFavoritesStore();
+
 // 所有收藏食譜列表（完整數據）
 const allRecipes = ref([]);
 const userId = ref(null);
@@ -51,10 +42,17 @@ const modalRecipe = ref(null);
 // 螢幕寬度
 const windowWidth = ref(window.innerWidth);
 
-// ========== 標籤篩選 ==========
-// 只顯示「全部」
-const tags = ref(['全部']);
-const selectedTag = ref('全部');
+// ========== 資料夾篩選 ==========
+const folders = ref([]);
+const selectedFolderId = ref(null); // null 代表「全部」
+const newFolderName = ref('');
+const loading = ref(false);
+const MAX_FOLDERS = 12;
+
+// 編輯資料夾狀態
+const isEditMode = ref(false);
+const editFolderName = ref('');
+const editingFolderId = ref(null);
 
 // ========== 分頁設置 ==========
 // 當前頁碼
@@ -72,14 +70,18 @@ const totalPages = computed(() => {
 });
 
 /**
- * 根據選中的標籤篩選食譜
- * 若選擇「全部」或未選擇，則返回所有食譜
+ * 根據選中的資料夾篩選食譜
+ * 若未選擇資料夾，則返回所有食譜
  */
 const filteredRecipes = computed(() => {
-    if (!selectedTag.value || selectedTag.value === '全部') {
+    if (selectedFolderId.value === null) {
         return allRecipes.value;
     }
-    return allRecipes.value.filter(recipe => recipe.tags.includes(selectedTag.value));
+    // 篩選該資料夾的收藏（folder_id 為 null 代表未分類）
+    return allRecipes.value.filter(recipe => {
+        const recipeFolderId = recipe.folder_id ? Number(recipe.folder_id) : null;
+        return recipeFolderId === selectedFolderId.value;
+    });
 });
 
 /**
@@ -92,6 +94,160 @@ const currentPageRecipes = computed(() => {
     return filteredRecipes.value.slice(start, end);
 });
 
+// ========== 資料夾管理 ==========
+// 取得資料夾列表
+const fetchFolders = async () => {
+    if (!userId.value) return;
+    try {
+        // 同時獲取資料夾列表和收藏列表
+        const [foldersRes, favoritesRes] = await Promise.all([
+            phpApi.get('/personal/fav_folders.php', { params: { creator_id: userId.value } }),
+            phpApi.get('social/favorites.php', { params: { user_id: userId.value } })
+        ]);
+
+        if (foldersRes.data.success) {
+            // 統計每個資料夾的食譜數量
+            const favorites = favoritesRes.data.favorites || [];
+            const folderCounts = {};
+
+            favorites.forEach(fav => {
+                const folderId = fav.folder_id ? Number(fav.folder_id) : null;
+                if (folderId) {
+                    folderCounts[folderId] = (folderCounts[folderId] || 0) + 1;
+                }
+            });
+
+            folders.value = foldersRes.data.folders.map(f => {
+                const folderId = Number(f.favorites_folder_id);
+                return {
+                    id: folderId,
+                    name: f.folder_name,
+                    count: folderCounts[folderId] || 0
+                };
+            });
+        }
+    } catch (e) {
+        console.error('取得資料夾失敗:', e);
+    }
+};
+
+// 新增資料夾
+const handleAddFolder = async () => {
+    if (folders.value.length >= MAX_FOLDERS) {
+        alert('最多只能建立12個資料夾');
+        return;
+    }
+    if (!newFolderName.value.trim() || !userId.value) {
+        console.log('新增資料夾驗證失敗:', { newFolderName: newFolderName.value, userId: userId.value });
+        return;
+    }
+    loading.value = true;
+    try {
+        const form = new FormData();
+        form.append('creator_id', userId.value);
+        form.append('folder_name', newFolderName.value.trim());
+
+        console.log('準備新增資料夾:', {
+            creator_id: userId.value,
+            folder_name: newFolderName.value.trim()
+        });
+
+        const { data } = await phpApi.post('/personal/fav_folders.php', form, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        console.log('新增資料夾回應:', data);
+
+        if (data.success) {
+            await fetchFolders();
+            newFolderName.value = '';
+            alert('資料夾新增成功！');
+        } else {
+            alert(data.message || '新增失敗');
+        }
+    } catch (e) {
+        console.error('新增資料夾錯誤:', e);
+        alert('新增資料夾失敗: ' + (e.response?.data?.message || e.message));
+    } finally {
+        loading.value = false;
+    }
+};
+
+// 選擇資料夾
+const selectFolder = (folderId) => {
+    selectedFolderId.value = folderId;
+    currentPage.value = 1; // 切換資料夾時重置頁碼
+};
+
+// 編輯資料夾名稱
+const startEditFolder = (folder) => {
+    editingFolderId.value = folder.id;
+    editFolderName.value = folder.name;
+};
+
+const cancelEditFolder = () => {
+    editingFolderId.value = null;
+    editFolderName.value = '';
+};
+
+const saveEditFolder = async () => {
+    if (!editFolderName.value.trim() || !editingFolderId.value) return;
+    loading.value = true;
+    try {
+        const payload = new URLSearchParams();
+        payload.append('favorites_folder_id', editingFolderId.value);
+        payload.append('folder_name', editFolderName.value.trim());
+        const { data } = await phpApi.patch('/personal/fav_folders.php', payload);
+        if (data.success) {
+            await fetchFolders();
+            cancelEditFolder();
+        } else {
+            alert(data.message || '修改失敗');
+        }
+    } catch (e) {
+        alert('修改資料夾失敗');
+    } finally {
+        loading.value = false;
+    }
+};
+
+// 刪除資料夾
+const deleteFolder = async (folder) => {
+    if (!folder || !folder.id) {
+        alert('資料夾ID不存在');
+        return;
+    }
+    if (!confirm(`確定要刪除「${folder.name}」資料夾？資料夾內的收藏也會一併刪除。`)) return;
+    loading.value = true;
+    try {
+        const payload = new URLSearchParams();
+        payload.append('favorites_folder_id', folder.id);
+        const { data } = await phpApi.delete('/personal/fav_folders.php', {
+            data: payload.toString(),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+        if (data.success) {
+            await fetchFolders();
+            // 如果刪除的是當前選中的資料夾，切換回「全部」
+            if (selectedFolderId.value === folder.id) {
+                selectedFolderId.value = null;
+            }
+            // 重新載入收藏列表
+            await loadFavorites();
+        } else {
+            alert(data.message || '刪除失敗');
+        }
+    } catch (e) {
+        console.error('刪除錯誤：', e);
+        alert('刪除資料夾失敗');
+    } finally {
+        loading.value = false;
+    }
+};
+
 // ========== 事件處理 ==========
 /**
  * 處理分頁切換
@@ -101,30 +257,9 @@ const handlePageChange = (page) => {
     currentPage.value = page;
 };
 
-// 選擇食譜（點擊卡片時觸發）
-onMounted(async () => {
-    // 監聽視窗大小變化
-    const handleResize = () => {
-        windowWidth.value = window.innerWidth;
-    };
-    window.addEventListener('resize', handleResize);
-
-    onUnmounted(() => {
-        window.removeEventListener('resize', handleResize);
-    });
-
-    // 取得 localStorage 裡的 user 物件，並解析 user_id
-    const userStr = localStorage.getItem('user');
-    if (!userStr) return;
-    try {
-        const userObj = JSON.parse(userStr);
-        userId.value = userObj.id;
-    } catch (e) {
-        userId.value = null;
-        return;
-    }
+// 載入收藏列表
+const loadFavorites = async () => {
     if (!userId.value) return;
-
     try {
         // 取得收藏清單
         const resFavorites = await phpApi.get('social/favorites.php', { params: { user_id: userId.value } });
@@ -152,6 +287,37 @@ onMounted(async () => {
         allRecipes.value = [];
         console.error('載入收藏資料失敗:', error);
     }
+};
+
+// 選擇食譜（點擊卡片時觸發）
+onMounted(async () => {
+    // 監聽視窗大小變化
+    const handleResize = () => {
+        windowWidth.value = window.innerWidth;
+    };
+    window.addEventListener('resize', handleResize);
+
+    onUnmounted(() => {
+        window.removeEventListener('resize', handleResize);
+    });
+
+    // 取得 localStorage 裡的 user 物件，並解析 user_id
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return;
+    try {
+        const userObj = JSON.parse(userStr);
+        userId.value = userObj.id;
+    } catch (e) {
+        userId.value = null;
+        return;
+    }
+    if (!userId.value) return;
+
+    // 取得資料夾列表
+    await fetchFolders();
+
+    // 載入收藏列表
+    await loadFavorites();
 });
 // ...已移除標籤相關程式碼，保留前方收藏卡片 enrich 處理...
 // 分頁換頁時自動 focus 分頁中的第一個食譜卡片（大螢幕）
@@ -160,6 +326,23 @@ watch(currentPage, () => {
         selectedRecipe.value = currentPageRecipes.value[0];
     }
 });
+
+// ========== 監聽收藏變化 ==========
+/**
+ * 監聽 favoritesStore 的變化，當收藏狀態改變時自動刷新收藏列表和資料夾
+ */
+watch(
+    () => favoritesStore.favoriteIds,
+    async () => {
+        if (userId.value) {
+            await Promise.all([
+                loadFavorites(),
+                fetchFolders()
+            ]);
+        }
+    },
+    { deep: true }
+);
 </script>
 
 <template>
@@ -171,7 +354,91 @@ watch(currentPage, () => {
                 </div>
             </div>
 
-            <!-- 標籤篩選已移除 -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="folder-section">
+                        <!-- 區塊標題與編輯按鈕 -->
+                        <div class="section-header">
+                            <h3 class="section-title">資料夾分類</h3>
+                            <button class="edit-toggle-btn" @click="isEditMode = !isEditMode"
+                                :class="{ 'active': isEditMode }">
+                                <i class="fa-solid fa-pen" v-if="!isEditMode"></i>
+                                <i class="fa-solid fa-check" v-else></i>
+                                <span>{{ isEditMode ? '完成' : '編輯' }}</span>
+                            </button>
+                        </div>
+
+                        <div class="folder-filter">
+                            <!-- 一般模式：顯示可選擇的標籤 -->
+                            <template v-if="!isEditMode">
+                                <div class="folder-tag" :class="{ 'selected': selectedFolderId === null }"
+                                    @click="selectFolder(null)">
+                                    <i class="fa-solid fa-heart"></i>
+                                    <span>全部收藏</span>
+                                    <span class="count">{{ allRecipes.length }}</span>
+                                </div>
+                                <div v-for="folder in folders" :key="folder.id" class="folder-tag"
+                                    :class="{ 'selected': selectedFolderId === folder.id }"
+                                    @click="selectFolder(folder.id)">
+                                    <i class="fa-solid fa-folder"></i>
+                                    <span>{{ folder.name }}</span>
+                                    <span class="count">{{ folder.count }}</span>
+                                </div>
+                            </template>
+
+                            <!-- 編輯模式：顯示編輯/刪除按鈕 -->
+                            <template v-else>
+                                <div v-for="folder in folders" :key="folder.id" class="folder-edit-card">
+                                    <template v-if="editingFolderId === folder.id">
+                                        <div class="edit-input-group">
+                                            <i class="fa-solid fa-folder"></i>
+                                            <input v-model="editFolderName" type="text" class="folder-edit-input"
+                                                maxlength="10" placeholder="資料夾名稱" @keyup.enter="saveEditFolder"
+                                                @keyup.esc="cancelEditFolder" />
+                                        </div>
+                                        <div class="edit-actions">
+                                            <button class="action-btn save" @click="saveEditFolder" title="儲存">
+                                                <i class="fa-solid fa-check"></i>
+                                            </button>
+                                            <button class="action-btn cancel" @click="cancelEditFolder" title="取消">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template v-else>
+                                        <div class="folder-info">
+                                            <i class="fa-solid fa-folder"></i>
+                                            <span class="folder-name">{{ folder.name }}</span>
+                                            <span class="folder-count">({{ folder.count }})</span>
+                                        </div>
+                                        <div class="edit-actions">
+                                            <button class="action-btn edit" @click="startEditFolder(folder)" title="改名">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="action-btn delete" @click="deleteFolder(folder)" title="刪除">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- 新增資料夾輸入框 -->
+                            <div v-if="!isEditMode" class="add-folder-card">
+                                <div class="add-input-group">
+                                    <i class="fa-solid fa-folder-plus"></i>
+                                    <input v-model="newFolderName" type="text" placeholder="新增資料夾" maxlength="10"
+                                        class="add-folder-input" @keyup.enter="handleAddFolder" />
+                                </div>
+                                <button class="add-btn" :class="{ 'active': newFolderName.length > 0 }"
+                                    :disabled="!newFolderName.trim() || loading" @click="handleAddFolder">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- 有食譜時顯示列表 -->
             <div v-if="allRecipes.length > 0" class="row">
@@ -236,15 +503,366 @@ watch(currentPage, () => {
 }
 
 .page-title {
-    margin-bottom: 24px;
+    margin-bottom: 32px;
     color: $neutral-color-800;
 }
 
-.tag-filter {
+/* ==================== 資料夾區塊 ==================== */
+.folder-section {
+    background: $neutral-color-white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid $primary-color-100;
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: $neutral-color-800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: $primary-color-700;
+            border-radius: 2px;
+        }
+    }
+
+    .edit-toggle-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border: 1.5px solid $primary-color-400;
+        background: $neutral-color-white;
+        color: $primary-color-700;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        i {
+            font-size: 12px;
+        }
+
+        &:hover {
+            background: $primary-color-100;
+            border-color: $primary-color-700;
+        }
+
+        &.active {
+            background: $primary-color-700;
+            color: $neutral-color-white;
+            border-color: $primary-color-700;
+        }
+    }
+}
+
+.folder-filter {
     display: flex;
     gap: 12px;
-    margin-bottom: 32px;
     flex-wrap: wrap;
+    align-items: stretch;
+}
+
+/* 一般模式 - 資料夾標籤 */
+.folder-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: $neutral-color-100;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+
+    i {
+        font-size: 16px;
+        color: $primary-color-700;
+    }
+
+    span {
+        font-size: 14px;
+        font-weight: 500;
+        color: $neutral-color-800;
+    }
+
+    .count {
+        font-size: 12px;
+        color: $neutral-color-700;
+        background: $neutral-color-white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    &:hover {
+        background: $primary-color-100;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(62, 141, 96, 0.15);
+    }
+
+    &.selected {
+        background: $primary-color-700;
+        border-color: $primary-color-700;
+
+        i,
+        span {
+            color: $neutral-color-white;
+        }
+
+        .count {
+            background: rgba(255, 255, 255, 0.2);
+            color: $neutral-color-white;
+        }
+    }
+}
+
+/* 編輯模式 - 資料夾卡片 */
+.folder-edit-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: $neutral-color-white;
+    border: 2px dashed $primary-color-400;
+    border-radius: 12px;
+    min-width: 260px;
+    transition: all 0.3s ease;
+
+    &:hover {
+        border-color: $primary-color-700;
+        box-shadow: 0 2px 8px rgba(62, 141, 96, 0.1);
+    }
+
+    .folder-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+
+        i {
+            font-size: 18px;
+            color: $primary-color-700;
+        }
+
+        .folder-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: $neutral-color-800;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .folder-count {
+            font-size: 12px;
+            color: $neutral-color-700;
+        }
+    }
+
+    .edit-input-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+
+        i {
+            font-size: 18px;
+            color: $primary-color-700;
+        }
+
+        .folder-edit-input {
+            flex: 1;
+            height: 36px;
+            padding: 0 12px;
+            border: 1.5px solid $primary-color-400;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+
+            &:focus {
+                border-color: $primary-color-700;
+                box-shadow: 0 0 0 3px rgba($primary-color-400, 0.15);
+            }
+        }
+    }
+
+    .edit-actions {
+        display: flex;
+        gap: 6px;
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+
+            &.edit {
+                background: $primary-color-100;
+                color: $primary-color-700;
+
+                &:hover {
+                    background: $primary-color-400;
+                    color: $neutral-color-white;
+                }
+            }
+
+            &.delete {
+                background: $secondary-color-danger-200;
+                color: $secondary-color-danger-700;
+
+                &:hover {
+                    background: $secondary-color-danger-700;
+                    color: $neutral-color-white;
+                }
+            }
+
+            &.save {
+                background: $secondary-color-success-200;
+                color: $secondary-color-success-700;
+
+                &:hover {
+                    background: $secondary-color-success-700;
+                    color: $neutral-color-white;
+                }
+            }
+
+            &.cancel {
+                background: $neutral-color-100;
+                color: $neutral-color-700;
+
+                &:hover {
+                    background: $neutral-color-400;
+                    color: $neutral-color-white;
+                }
+            }
+        }
+    }
+}
+
+/* 新增資料夾卡片 */
+.add-folder-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 8px 16px;
+    background: linear-gradient(135deg, $primary-color-100 0%, rgba($primary-color-400, 0.1) 100%);
+    border: 2px dashed $primary-color-400;
+    border-radius: 12px;
+    min-width: 240px;
+    transition: all 0.3s ease;
+
+    &:hover {
+        border-color: $primary-color-700;
+        box-shadow: 0 4px 12px rgba(62, 141, 96, 0.15);
+    }
+
+    .add-input-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+
+        i {
+            font-size: 18px;
+            color: $primary-color-700;
+        }
+
+        .add-folder-input {
+            flex: 1;
+            height: 36px;
+            padding: 0 12px;
+            border: none;
+            background: $neutral-color-white;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+
+            &:focus {
+                box-shadow: 0 0 0 3px rgba($primary-color-400, 0.2);
+            }
+
+            &::placeholder {
+                color: $neutral-color-400;
+            }
+        }
+    }
+
+    .add-btn {
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: $neutral-color-400;
+        color: $neutral-color-white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 16px;
+
+        &:hover:not(:disabled) {
+            background: $primary-color-700;
+            transform: scale(1.05);
+        }
+
+        &.active {
+            background: $primary-color-700;
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.edit-mode-toggle {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .recipe-grid {
@@ -409,9 +1027,28 @@ watch(currentPage, () => {
         margin-bottom: 20px;
     }
 
-    // 隱藏右側預覽卡片
     .col-4 {
         display: none;
+    }
+
+    .folder-section {
+        padding: 20px;
+    }
+
+    .folder-filter {
+        gap: 10px;
+    }
+
+    .folder-tag {
+        min-width: auto;
+        flex: 1 1 calc(50% - 5px);
+        max-width: calc(50% - 5px);
+    }
+
+    .folder-edit-card,
+    .add-folder-card {
+        min-width: 100%;
+        width: 100%;
     }
 }
 
@@ -424,8 +1061,45 @@ watch(currentPage, () => {
         margin-bottom: 20px;
     }
 
-    .tag-filter {
+    .folder-section {
+        padding: 16px;
         margin-bottom: 24px;
+    }
+
+    .section-header {
+        .section-title {
+            font-size: 16px;
+        }
+
+        .edit-toggle-btn {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+    }
+
+    .folder-filter {
+        gap: 8px;
+    }
+
+    .folder-tag {
+        flex: 1 1 100%;
+        max-width: 100%;
+        padding: 12px 14px;
+    }
+
+    .folder-edit-card {
+        flex-direction: column;
+        align-items: stretch;
+        min-width: 100%;
+
+        .folder-info {
+            width: 100%;
+        }
+
+        .edit-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
     }
 
     .recipe-grid {

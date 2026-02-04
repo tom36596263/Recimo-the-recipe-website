@@ -1,6 +1,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 
+const props = defineProps({
+  templates: { type: Array, default: () => [] } // 接收動態資料
+});
+
+const emit2 = defineEmits(['select']);
+
 // 控制手風琴開關的狀態，預設關閉
 const isOpen = ref(false);
 
@@ -9,26 +15,10 @@ const toggleAccordion = () => {
   isOpen.value = !isOpen.value;
 };
 
-// 3筆假資料
-const defaultPlans = ref([
-  {
-    id: 1,
-    title: '低醣好心情',
-    description: '針對想穩定血糖、避免飯後嗜睡的上班族。'
-  },
-  {
-    id: 2,
-    title: '美肌抗氧',
-    description:
-      '富含維生素 C、E 與健康油脂（如鮭魚、堅果），主打由內而外的保養。'
-  },
-  {
-    id: 3,
-    title: '腸胃友善',
-    description:
-      '選擇易消化、高纖維或含益生質的食材，適合壓力大或消化不良的時期。'
-  }
-]);
+// 點擊卡片觸發
+const selectPlan = (id) => {
+  emit2('select', id);
+};
 </script>
 
 <template>
@@ -41,9 +31,13 @@ const defaultPlans = ref([
     </div>
 
     <div class="accordion__content" v-show="isOpen">
-      <div v-for="plan in defaultPlans" :key="plan.id" class="plan-card">
+      <div v-for="plan in templates" :key="plan.template_id" class="plan-card" @click="selectPlan(plan.template_id)">
         <h4 class="plan-card__title">{{ plan.title }}</h4>
         <p class="plan-card__desc">{{ plan.description }}</p>
+      </div>
+
+      <div v-if="templates.length === 0" class="p-p1" style="color:#999">
+        載入模板中...
       </div>
     </div>
   </div>
