@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { publicApi } from '@/utils/publicApi'
+import { phpApi } from '@/utils/publicApi'
 import SearchBar from '@/components/common/SearchBar.vue'
 import BaseTag from '@/components/common/BaseTag.vue'
 import SearchPageBanner from '@/assets/images/site/search-page-banner.png'
@@ -12,17 +12,14 @@ const hotTags = ref([])
 
 const fetchRandomTags = async () => {
     try{
-        const [resTags, resProducts] = await Promise.all([
-            publicApi.get('data/recipe/tags.json'),
-            publicApi.get('data/mall/products.json')
-        ]);
-        const recipeTagNames = resTags.data.map(tag => tag.tag_name);
-        const productCategories = [...new Set(resProducts.data.map(p => p.product_category))];
-        const allHotTags = [...recipeTagNames, ...productCategories];
+        const response = await phpApi.get('recipes/all_search_tags_get.php');
+        if (response.data.status === 'success') {
+            const allTags = response.data.data;
 
-        hotTags.value = allHotTags
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 5);
+            hotTags.value = allTags
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 5);
+        }
     }catch(err){
         console.error("無法載入隨機標籤:", err);
     }
@@ -33,7 +30,6 @@ onMounted(() => {
 const handleTagClick = (tagName) => {
     emit('update:modelValue', tagName);
 }
-
 </script>
 
 <template>
@@ -50,10 +46,11 @@ const handleTagClick = (tagName) => {
             </div>
             <div class="search-container">
                 <SearchBar
-                :modelValue="modelValue"
-                @update:modelValue="val => emit('update:modelValue', val)"
-                placeholder="輸入關鍵字尋找好料理..." 
-                maxWidth="100%"/>
+                    :modelValue="modelValue"
+                    @update:modelValue="val => emit('update:modelValue', val)"
+                    placeholder="輸入關鍵字尋找好料理..." 
+                    maxWidth="100%"
+                />
             </div>
             <div class="tags-group">
                 <BaseTag v-for="tag in hotTags"
