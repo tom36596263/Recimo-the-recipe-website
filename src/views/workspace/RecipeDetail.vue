@@ -92,7 +92,7 @@ const fetchData = async () => {
                     tags: preview.recipe_tags || preview.tags || []
                 };
 
-                servings.value = previewServings;
+                servings.value = 1;
 
                 // 處理食材 (rawIngredients) - 確保欄位與正式模式一致以利 computed 計算
                 rawIngredients.value = (preview.ingredients || []).map(ing => {

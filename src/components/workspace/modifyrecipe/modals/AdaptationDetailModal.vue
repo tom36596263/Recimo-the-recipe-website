@@ -198,9 +198,10 @@ const ingredientsData = computed(() => {
     }));
 });
 
+// ✅ 修改後：每次打開燈箱都固定從 1 份開始
 watch(() => props.modelValue, (isOpen) => {
     if (isOpen) {
-        currentServings.value = originalServings.value;
+        currentServings.value = 1;
     }
 }, { immediate: true });
 
