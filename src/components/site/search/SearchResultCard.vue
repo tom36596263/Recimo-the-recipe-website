@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router'
 import { useAuthGuard } from '@/composables/useAuthGuard';
+import { parsePublicFile } from '@/utils/parseFile';
 
 import BaseTag from '@/components/common/BaseTag.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
@@ -17,7 +18,7 @@ const props = defineProps({
         type: Object,
         default: null
     },
-    recipeTags:{
+    recipeTags: {
         type: Array,
         default: () => []
     }
@@ -25,12 +26,17 @@ const props = defineProps({
 
 const router = useRouter();
 
+// const recipeImagePath = computed(() => {
+//     if (props.product && props.product.product_image) {
+//         const cover = props.product.product_image.find(img => img.is_cover);
+//         return cover ? cover.image_url : props.product.product_image[0].image_url;
+//     }
+//     return `img/recipes/${props.recipe.recipe_id}/cover.png`;
+// });
 const recipeImagePath = computed(() => {
-    if(props.product && props.product.product_image){
-        const cover = props.product.product_image.find(img => img.is_cover);
-        return cover ? cover.image_url : props.product.product_image[0].image_url;
-    }
-    return `img/recipes/${props.recipe.recipe_id}/cover.png`;
+    // 優先使用 props.recipe 裡的 recipe_image_url，這是 PHP API 回傳的標準路徑
+    // 不論是食譜還是產品，你的 PHP 現在都統一放進這個欄位了
+    return props.recipe?.recipe_image_url || '';
 });
 
 const displayTitle = computed(() => {
@@ -42,7 +48,7 @@ const displayDescription = computed(() => {
 })
 
 const goToRecipeDetail = () => {
-    if(!props.recipe) return; 
+    if (!props.recipe) return;
 
     runWithAuth(() => {
         router.push({
@@ -50,10 +56,11 @@ const goToRecipeDetail = () => {
             params: { id: props.recipe.recipe_id }
         })
     })
-    
+    console.log('go to recipe detail' );
+
 }
 const goToProductDetail = () => {
-    if(!props.product) return;
+    if (!props.product) return;
     router.push({
         name: 'product-detail',
         params: { id: props.product.product_id }
@@ -63,93 +70,80 @@ const goToProductDetail = () => {
 
 <template>
     <div class="search-card">
-        
+
         <div class="recipe-img">
-            <img :src="$parsePublicFile(recipeImagePath)" alt="recipe.recipe_title" />
+            <img :src="parsePublicFile(recipeImagePath)" alt="recipe.recipe_title" />
         </div>
         <div class="recipe-info">
             <div class="title">
-                <h4 class="zh-h3">{{recipe.recipe_title}}</h4>
+                <h4 class="zh-h3">{{ recipe.recipe_title }}</h4>
                 <div class="tags-group">
-                    <BaseTag 
-                        v-if="product?.product_category"
-                        :text="product.product_category"
-                        class="tag-item"
-                    />
-                    <BaseTag 
-                        v-for="tag in recipeTags"
-                        :key="tag.tag_id"
-                        :text="tag.tag_name"
-                        class="tag-item"/>
+                    <BaseTag v-if="product?.product_category" :text="product.product_category" class="tag-item" />
+                    <BaseTag v-for="tag in recipeTags" :key="tag.tag_id" :text="tag.tag_name" class="tag-item" />
                 </div>
                 <p class="p-p2">{{ recipe.recipe_description }}</p>
             </div>
             <div class="btn-group">
-                <BaseBtn 
-                    title="食譜詳情" 
-                    :variant="recipe ? 'solid' : 'outline'"
-                    :disabled="!recipe"
+                <BaseBtn title="食譜詳情" :variant="recipe ? 'solid' : 'outline'" :disabled="!recipe"
                     @click="goToRecipeDetail" />
-                <BaseBtn 
-                    title="料理包詳情" 
-                    :variant="product ? 'solid' : 'outline'"
-                    :disabled="!product"
-                    @click="goToProductDetail"/>
+                <BaseBtn title="料理包詳情" :variant="product ? 'solid' : 'outline'" :disabled="!product"
+                    @click="goToProductDetail" />
             </div>
         </div>
-        
+
     </div>
 </template>
 
 <style lang="scss" scoped>
-    .search-card {
-        display: flex;
-        
-        padding: 20px 0;
-        border-bottom: 1px solid $neutral-color-400;
-        width: 100%;
+.search-card {
+    display: flex;
 
-        .recipe-img {
-            height: 160px;
-            min-width: 200px;
-            border-radius: $radius-base;
-            overflow: hidden;
-            margin-right: 20px;
-            
-            img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-        }
+    padding: 20px 0;
+    border-bottom: 1px solid $neutral-color-400;
+    width: 100%;
 
-        .recipe-info {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
+    .recipe-img {
+        height: 160px;
+        min-width: 200px;
+        border-radius: $radius-base;
+        overflow: hidden;
+        margin-right: 20px;
+
+        img {
             width: 100%;
-
-            
-            .title {
-                margin-right: 30px;
-                .tags-group {
-                    display: flex;
-                    gap: 8px;
-                    flex-wrap: wrap;
-                    margin: 8px 0;
-                }
-            }
-            .btn-group{
-                display: flex;
-                flex-direction: column;
-                gap:10px;
-            }
+            height: 100%;
+            object-fit: cover;
         }
     }
-@media screen and (max-width: 810px){
 
+    .recipe-info {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+
+
+        .title {
+            margin-right: 30px;
+
+            .tags-group {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin: 8px 0;
+            }
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
 }
+
+@media screen and (max-width: 810px) {}
 
 @media screen and (max-width: 810px) {
     .search-card {
@@ -167,13 +161,14 @@ const goToProductDetail = () => {
 
         .recipe-info {
             flex-direction: column;
+
             .title {
                 margin-right: 0;
-                
+
                 .zh-h3 {
                     font-size: 1.25rem;
                 }
-                
+
                 .p-p2 {
                     display: none;
                 }

@@ -14,7 +14,7 @@ const fetchRandomTags = async () => {
     try{
         const [resTags, resProducts] = await Promise.all([
             publicApi.get('data/recipe/tags.json'),
-            publicApi.get('data/mall/products.json')
+            publicApi.get('data/mall/products.json') 
         ]);
         const recipeTagNames = resTags.data.map(tag => tag.tag_name);
         const productCategories = [...new Set(resProducts.data.map(p => p.product_category))];
@@ -33,7 +33,6 @@ onMounted(() => {
 const handleTagClick = (tagName) => {
     emit('update:modelValue', tagName);
 }
-
 </script>
 
 <template>
@@ -50,10 +49,11 @@ const handleTagClick = (tagName) => {
             </div>
             <div class="search-container">
                 <SearchBar
-                :modelValue="modelValue"
-                @update:modelValue="val => emit('update:modelValue', val)"
-                placeholder="輸入關鍵字尋找好料理..." 
-                maxWidth="100%"/>
+                    :modelValue="modelValue"
+                    @update:modelValue="val => emit('update:modelValue', val)"
+                    placeholder="輸入關鍵字尋找好料理..." 
+                    maxWidth="100%"
+                />
             </div>
             <div class="tags-group">
                 <BaseTag v-for="tag in hotTags"
