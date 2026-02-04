@@ -22,7 +22,6 @@ recimo
 
 # 【環境變數與機密資訊】
 # 絕對不可上傳，每位組員應根據 .env.example 自行建立本地的 .env
-# .env
 .env.local
 .env.*.local
 .env.development.local

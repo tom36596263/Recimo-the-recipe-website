@@ -17,8 +17,8 @@ const emit = defineEmits(['update:modelValue', 'submit']);
 
 // --- 狀態變數 ---
 const fileInput = ref(null);
-const previewImage = ref(null);
-const selectedFile = ref(null);
+const previewImage = ref(null); // 用於前端預覽的 blob 網址
+const selectedFile = ref(null); // 用於傳送給後端的原始檔案實體
 const reportNote = ref('');
 
 // --- 圖片選擇邏輯 ---
@@ -29,6 +29,7 @@ const triggerFileSelect = () => {
 const onFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+        console.log("選取的檔案實體:", file); // 🏆 這裡應該印出 File { name: "...", size: ... }
         selectedFile.value = file;
         previewImage.value = URL.createObjectURL(file);
     }
@@ -36,36 +37,49 @@ const onFileChange = (e) => {
 
 // --- 關閉與重置邏輯 ---
 const handleClose = () => {
-    // 1. 先重置所有內部狀態
+    // 1. 先重置所有內部狀態，避免下次開啟時殘留舊資料
     previewImage.value = null;
     selectedFile.value = null;
     reportNote.value = '';
 
-    // 2. 如果 input file 有值也清掉，避免選同一張圖不觸發 change
+    // 2. 清除 input file 的值，確保選取同一張圖時仍能觸發 change 事件
     if (fileInput.value) {
         fileInput.value.value = '';
     }
 
-    // 3. 通知父組件關閉
+    // 3. 通知父組件關閉 Modal
     emit('update:modelValue', false);
 };
 
+// --- 提交邏輯 ---
 const handleSubmit = () => {
-    // 檢查是否有選圖片（選填可移除此判斷）
+    // 1. 偵錯檢查：看看當下變數到底是什麼
+    console.log("Submit 觸發，selectedFile 內容:", selectedFile.value);
+
+    // 2. 驗證是否已選取圖片
     if (!selectedFile.value) {
         alert("請先上傳成品照片喔！");
         return;
     }
 
+    // 3. 再次確認檔案類型 (如果是字串，代表邏輯在某處被覆蓋了)
+    if (typeof selectedFile.value === 'string') {
+        console.error("錯誤：selectedFile 變成了字串！內容是：", selectedFile.value);
+        alert("圖片讀取異常，請重新選取圖片");
+        return;
+    }
+
+    // 🏆 重要：傳送真正的檔案實體
+    // 這裡我們確保傳出去的是 selectedFile.value 這個 File 物件
     emit('submit', {
         image: selectedFile.value,
         note: reportNote.value
     });
 
-    alert("太棒了！看到您的成果感覺好美味呀，您的分享將會成為其他料理愛好者最棒的參考喔！");
-
-    handleClose(); // 這裡會呼叫上面的重置邏輯並關閉
+    alert("成品照上傳中，請稍候...");
+    handleClose();
 };
+
 </script>
 
 <template>
@@ -95,7 +109,7 @@ const handleSubmit = () => {
                             </div>
                         </template>
 
-                        <img v-else :src="previewImage" class="preview-img" />
+                        <img v-else :src="previewImage" class="preview-img" alt="成果預覽" />
                     </div>
 
                     <div class="input-section">
@@ -114,7 +128,6 @@ const handleSubmit = () => {
 </template>
 
 <style scoped lang="scss">
-/* 保持原有樣式不變 */
 .black-mask {
     position: fixed;
     inset: 0;
@@ -193,13 +206,12 @@ const handleSubmit = () => {
     }
 }
 
-/* 改動處：圖片上傳區域樣式 (依照圖片設計) */
 .upload-box {
     border: 2px dashed $neutral-color-400;
     background: $neutral-color-100;
     border-radius: 10px;
     margin-bottom: 20px;
-    height: 220px; // 依照圖片比例調整高度
+    height: 220px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -276,31 +288,23 @@ textarea {
     padding: 10px 12px;
     resize: none;
     box-sizing: border-box;
-
-    /* 1. 確保斷行，禁止底部卷軸 */
     white-space: pre-wrap;
     word-wrap: break-word;
     overflow-x: hidden;
     overflow-y: auto;
-
-    /* 2. 美化側邊卷軸 (Firefox) */
     scrollbar-width: thin;
     scrollbar-color: $primary-color-100 transparent;
 
-    /* 3. 美化側邊卷軸 (Chrome, Edge, Safari) */
     &::-webkit-scrollbar {
         width: 6px;
-        /* 卷軸寬度 */
     }
 
     &::-webkit-scrollbar-track {
         background: transparent;
-        /* 軌道顏色 */
     }
 
     &::-webkit-scrollbar-thumb {
         background-color: $primary-color-100;
-        /* 卷軸顏色 */
         border-radius: 10px;
 
         &:hover {
