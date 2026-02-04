@@ -28,47 +28,30 @@ const currentNutrition = ref(null);
  * 包含熱量計算與異常數值校正
  */
 async function openAdaptDetail(item) {
-    selectedRecipe.value = item;
+    // 🏆 關鍵：不要直接傳入原始的 item，而是傳入一個將 servings 強設為 1 的新物件
+    selectedRecipe.value = {
+        ...item,
+        servings: 1  // 強制讓燈箱拿到的 servings prop 是 1
+    };
 
     if (!nutritionStore.isLoaded) {
         await nutritionStore.fetchMasterData();
     }
 
     if (item.ingredients && item.ingredients.length > 0) {
-        // 1. 執行計算 (計算出該份食譜的「總量」)
+        // 1. 執行計算（算出食材 100% 的總營養量）
         const total = nutritionStore.calculateRecipeNutrition(item.ingredients);
 
-        // 2. 份數抓取：統一檢查 recipe_servings 與 servings
-        // 優先順序：item 內的設定 > 預設值 1
-        const servings = Number(item.recipe_servings || item.servings || 0);
+        // 2. 🏆 這裡也要改成 1，不要再用 item.recipe_servings 除法了
+        // 這樣顯示出來的數值就是「整份食譜」的總熱量
+        const displayServings = 1;
 
-        // 3. 🔍 [偵錯工具]
-        console.group(`📊 食譜計算詳情: ${item.title}`);
-        console.log(`📌 原始食材總量:`, total);
-        console.log(`📌 最終使用的份數: ${servings}`);
-
-        // 模擬計算過程表格
-        const debugTable = item.ingredients.map(ing => {
-            const master = nutritionStore.ingredientMaster.find(m =>
-                String(m.ingredient_id) === String(ing.id || ing.ingredient_id)
-            );
-            return {
-                "食材": ing.name || ing.ingredient_name,
-                "數量": ing.amount,
-                "單位": ing.unit || ing.unit_name,
-                "每100g熱量": master?.kcal_per_100g || "未匹配",
-                "轉換克數": ing.gram_conversion || "1"
-            };
-        });
-        console.table(debugTable);
-        console.groupEnd();
-
-        // 4. 更新畫面數值 (總量 / 份數 = 每份營養)
+        // 4. 更新燈箱要用的數據
         currentNutrition.value = {
-            calories: Math.round(total.kcal / servings),
-            protein: (total.protein / servings).toFixed(1),
-            fat: (total.fat / servings).toFixed(1),
-            carbs: (total.carbs / servings).toFixed(1)
+            calories: Math.round(total.kcal),
+            protein: total.protein.toFixed(1),
+            fat: total.fat.toFixed(1),
+            carbs: total.carbs.toFixed(1)
         };
     } else {
         currentNutrition.value = { calories: 0, protein: 0, fat: 0, carbs: 0 };

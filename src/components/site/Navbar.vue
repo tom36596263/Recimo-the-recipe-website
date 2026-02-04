@@ -64,7 +64,7 @@ const handleLogout = () => {
 const cartStore = useCartStore();
 const cartTotal = computed(() => cartStore.totalCount);
 
-// 暫時解決user img前多/的問題
+// 頭貼
 const userAvatar = computed(() => {
     // 同時相容 image 與 avatar
     const url = authStore.user?.image || authStore.user?.avatar;
