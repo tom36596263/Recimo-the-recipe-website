@@ -6,7 +6,7 @@ import { useFavoritesStore } from '@/stores/favoritesStore';
 import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
 
 import BaseTag from '@/components/common/BaseTag.vue';
-import BaseBtn from '@/components/common/BaseBtn.vue';
+import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
 import LikeButton from '@/components/common/LikeButton.vue'
 
 import IconLocalFireDepartment from '~icons/material-symbols/Local-Fire-Department-outline';
@@ -116,7 +116,7 @@ const handleHeartClick = (e) => {
         <footer>
             <div class="personal-info">
                 <div class="personal-img">
-                    <img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo">
+                    <img :src="LogoBlack" alt="Recimo Logo">
                 </div>
                 <p class="p-p1">Recimo</p>
                 <div @click.prevent.stop>
