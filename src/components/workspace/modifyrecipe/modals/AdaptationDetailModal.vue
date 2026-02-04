@@ -304,7 +304,8 @@ const closeModal = () => emit('update:modelValue', false);
                             <div class="col-5 col-md-12 sidebar-right">
                                 <div class="sticky-sidebar">
                                     <NutritionCard v-if="nutrition" :nutrition="displayedNutrition"
-                                        :servings="currentServings" @change-servings="val => currentServings = val" />
+                                        :servings="currentServings" :base-servings="originalServings"
+                                        @change-servings="val => currentServings = val" />
                                     <RecipeIngredients :list="ingredientsData" :readonly="true" />
                                 </div>
                             </div>
