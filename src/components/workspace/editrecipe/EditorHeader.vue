@@ -34,24 +34,17 @@ const goToOriginal = () => {
   }
 };
 
+
 // EditorHeader.vue 
 
-const updateField = (field, value) => {
-  // 1. 產生一個乾淨的拷貝
-  const nextData = { ...props.modelValue };
+// EditorHeader.vue
 
-  // 2. 執行欄位更新
+const updateField = (field, value) => {
+  const nextData = { ...props.modelValue };
   nextData[field] = value;
 
-  // 3. ✨ 核心修正：實名制隔離
-  if (field === 'adapt_description') {
-    nextData.description = props.modelValue.description;
-    nextData.clean_description = props.modelValue.description;
-  }
-
-  if (field === 'description') {
-    nextData.clean_description = value;
-  }
+  // ❌ 刪除原本這裡所有 if (field === 'adapt_description') 的邏輯
+  // 保持數據純淨，不要手動去同步 description 或 clean_description
 
   emit('update:modelValue', nextData);
 };
@@ -93,26 +86,24 @@ const displayTime = computed(() => {
   return autoTime;
 });
 
-// EditorHeader.vue 內的 adaptRecipeData 修正版
+// EditorHeader.vue 內的 adaptRecipeData
+
+// EditorHeader.vue 內
+
 const adaptRecipeData = computed(() => {
   const m = props.modelValue;
-
   return {
-    ...m,
-    // 標題：如果使用者還沒填改編標題，先顯示原食譜標題作為參考（或改為空）
+    recipe_id: m.id || m.recipe_id,
     title: m.adapt_title || m.title || '未命名改編',
-    adaptation_title: m.adapt_title || '', // 👈 這裡不給保底，沒填就是空
 
-    // 關鍵內容：徹底移除對 m.description 的抓取
-    // 這樣在使用者填寫 adapt_description 之前，小卡會顯示預設的 placeholder
+    // ✨ 這裡改為只認 adapt_description
+    // 這樣你在輸入框打字時，小卡才會跟著動
     adaptation_note: m.adapt_description || '',
 
-    // 排除標籤干擾 
-    keyChangeTag: '',
-
-    // 圖片與 ID
-    recipe_id: m.parent_recipe_id || m.recipe_id,
-    coverImg: m.coverImg || m.adaptation_image_url
+    coverImg: m.image || m.coverImg || m.recipe_image_url,
+    author: m.author || { author_name: 'Recimo User', author_image: '' },
+    likes: m.likes || 0,
+    keyChangeTag: m.keyChangeTag || ''
   };
 });
 
@@ -178,9 +169,9 @@ const handleCoverUpload = (e) => {
         </div>
 
         <div class="input-container full-width">
-          <textarea :value="modelValue.adapt_description" @input="updateField('adapt_description', $event.target.value)"
-            class="form-input p-p1 adaptation-textarea" :class="{ 'is-success': modelValue.adapt_description }"
-            placeholder="說明改編了什麼？" maxlength="60" rows="3"></textarea>
+          <textarea class="form-input adaptation-textarea p-p1" :value="modelValue.adapt_description"
+            @input="updateField('adapt_description', $event.target.value)" placeholder="說明改編了什麼..."
+            maxlength="60"></textarea>
           <span class="char-counter p-p3">{{ modelValue.adapt_description?.length || 0 }}/60</span>
         </div>
       </div>
@@ -236,11 +227,10 @@ const handleCoverUpload = (e) => {
         </div>
       </div>
 
-      <div class="row-description" :class="{ 'editing-border': isEditing, 'is-adapt': isAdaptMode }">
+      <div class="row-description">
         <textarea v-if="isEditing" :value="modelValue.description"
-          @input="updateField('description', $event.target.value)" class="desc-textarea p-p2" placeholder="請輸入說明..."
-          maxlength="200"></textarea>
-        <p v-else class="desc-display p-p2">{{ modelValue.description || '暫無簡介' }}</p>
+          @input="updateField('description', $event.target.value)" class="desc-textarea p-p2"
+          placeholder="請輸入詳細說明..."></textarea>
       </div>
     </div>
   </section>

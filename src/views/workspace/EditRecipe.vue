@@ -194,13 +194,27 @@ const publishToDb = async () => {
     const payload = {
       parent_recipe_id: recipeForm.value.parent_recipe_id || null,
       author_id: authStore.user.id || authStore.user.user_id,
+
+      // 標題邏輯：如果是改編模式，優先用改編標題
       recipe_title: isAdaptModeActive.value
         ? (recipeForm.value.adapt_title || recipeForm.value.title)
         : recipeForm.value.title,
-      // ✨ 修正描述抓取邏輯：優先抓改編描述，若無則抓取原始描述
-      recipe_description: isAdaptModeActive.value
-        ? (recipeForm.value.adapt_description || recipeForm.value.description)
-        : recipeForm.value.description,
+
+      // 🔥 修正：這裡永遠只放詳細介紹 (aaa)
+      // 不管是不是改編模式，都要保留這份完整的食譜說明
+      recipe_description: recipeForm.value.description || '暫無詳細說明',
+
+      // ✨ 新增：這裡專門放改編重點 (bbb)
+      // 對應後端 recipes 表中的 adaptation_note 欄位
+      adaptation_note: isAdaptModeActive.value
+        ? (recipeForm.value.adapt_description || '')
+        : '',
+
+      // 改編版本的小標題 (bbb 的標題)
+      adaptation_title: isAdaptModeActive.value
+        ? (recipeForm.value.adapt_title || recipeForm.value.title)
+        : '',
+
       recipe_image_url: coverData,
       recipe_difficulty: recipeForm.value.difficulty,
       total_time: recipeForm.value.totalTime,

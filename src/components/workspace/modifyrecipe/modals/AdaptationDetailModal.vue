@@ -198,11 +198,10 @@ const ingredientsData = computed(() => {
     }));
 });
 
-// ✅ 修改後：每次打開燈箱都固定從 1 份開始
-watch(() => props.modelValue, (isOpen) => {
-    if (isOpen) {
-        currentServings.value = 1;
-    }
+watch(() => props.recipe, (newVal) => {
+    console.log('--- 燈箱收到的完整資料 ---');
+    console.log(newVal);
+    // 在控制台展開這個物件，看看「長文本內容」到底躲在哪個 Key 裡面
 }, { immediate: true });
 
 /**
@@ -222,10 +221,13 @@ const introData = computed(() => {
         id: getCleanId(r.id || r.recipe_id),
         title: r.title || r.recipe_title || '未命名食譜',
         image: finalImage,
-        description: r.description || r.recipe_description || '暫無詳細說明',
-        time: formattedTime,
+
+        // 🔥 修正這裡：強制先抓 recipe_description (aaa)
+        description: r.recipe_description || r.description || '暫無詳細說明',
+
         difficulty: r.difficulty || 1,
-        tags: r.tags || []
+        tags: r.tags || [],
+        time: formattedTime
     };
 });
 

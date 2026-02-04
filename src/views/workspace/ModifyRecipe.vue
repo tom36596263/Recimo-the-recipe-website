@@ -95,22 +95,34 @@ async function loadRecipeData(recipeId) {
         };
 
         const formattedDbAdaptations = (adaptations || []).map(child => {
-            // 💡 這裡先定義「摘要」要抓哪個欄位
-            // 如果後端有傳 summary 或 adaptation_note 就用它，否則才從描述截斷
-            const shortNote = child.adaptation_note || child.summary ||
+            // 1. 【生成 UI 專用文字】 
+            // 我們只定義一個變數來存「卡片專用」的短語，完全不去動 child 裡的原始 key
+            const shortDisplay = child.adaptation_note ||
                 (child.recipe_description ? child.recipe_description.slice(0, 15) + '...' : '點擊查看改編重點');
 
+            // 2. 【組合回傳物件】
             return {
+                // 先展開原始資料，確保 recipe_description (aaa) 被原封不動帶進來
                 ...child,
+
                 id: `db-${child.recipe_id}`,
-                title: child.recipe_title,
 
-                // ✨ 修改這裡：傳給小卡的摘要
-                adaptation_note: shortNote,
+                // 卡片標題
+                title: child.recipe_title || '未命名食譜',
 
-                // 💾 保留原本的完整描述，讓燈箱彈窗 (selectedRecipe) 還是能看到完整內容
-                recipe_description: child.recipe_description || '暫無詳細說明',
+                // 🏆 關鍵修正：
+                // 我們新增一個 key 叫 card_summary 給卡片用
+                // 這樣就不會發生「為了縮短文字而把原始 recipe_description 改掉」的慘劇
+                card_summary: shortDisplay,
 
+                // 燈箱專用：確保這兩個 key 裝的是「長文本 (aaa)」
+                description: child.recipe_description,
+                recipe_description: child.recipe_description,
+
+                // 原始筆記 (bbb) 保持原樣
+                adaptation_note: child.adaptation_note,
+
+                // 其他欄位
                 coverImg: parsePublicFile(child.recipe_image_url),
                 is_mine: false,
                 ingredients: child.ingredients || [],
@@ -130,14 +142,16 @@ async function loadRecipeData(recipeId) {
                     ...r,
                     id: r.id,
                     title: r.title || '未命名改編',
+
+                    // 🔥 確保本地資料也是用 description 這個字
+                    description: r.description || r.recipe_description || r.adapt_description || '',
+
                     ingredients: r.ingredients || [],
                     steps: r.steps || [],
                     servings: s,
-                    recipe_servings: s, // 雙重保險
                     is_mine: true
                 };
             });
-
         // 4. 合併並更新畫面
         variantItems.value = [...localAdaptations, ...formattedDbAdaptations];
         console.log('✅ 資料載入成功，總數:', variantItems.value.length);
