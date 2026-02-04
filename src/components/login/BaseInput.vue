@@ -67,7 +67,8 @@ const inputClasses = computed(() => ({
 
         <div class="input-field-wrapper">
             <input ref="inputRef" v-model="model" :type="type" :class="inputClasses" :placeholder="placeholder"
-                @blur="emit('blur')" @keydown.enter.prevent="$emit('enter-press')" />
+                @blur="emit('blur')" @keydown.enter.prevent="$emit('enter-press')"
+                :autocomplete="$attrs.autocomplete" />
 
             <div class="suffix-icon">
                 <slot name="suffix"></slot>

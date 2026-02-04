@@ -89,6 +89,13 @@ const routes = [
         component: () => import('@/views/site/CartView.vue'),
         meta: { layout: 'default', title: '我的購物車', breadcrumb: '我的購物車' }
       },
+      // === 新增 LINE 登入回呼路由 ===
+      {
+        path: '/auth/callback',
+        name: 'line-callback',
+        component: () => import('@/views/site/AuthCallbackView.vue'),
+        meta: { layout: 'default', title: '登入中', breadcrumb: 'LINE 登入' }
+      },
       {
         path: '/checkout',
         name: 'checkout',

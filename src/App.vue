@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, watch } from 'vue';
+import { computed, onMounted, watch, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import DefaultLayout from '@/layouts/DefaultLayout.vue'; // 官網版面
 import WorkspaceLayout from '@/layouts/WorkspaceLayout.vue'; // 工作區版面
@@ -7,10 +7,15 @@ import GlobalModalManager from '@/GlobalModalManager.vue';
 // 引用 store
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
+// 引用彈窗
+import BaseModal from '@/components/BaseModal.vue';
 
 const route = useRoute();
 const authStore = useAuthStore();
 const cartStore = useCartStore();
+
+// 控制 Line 登入成功的彈窗變數
+const showLineSuccess = ref(false);
 
 /**
  * 根據路由的 meta.layout 切換版面
@@ -25,8 +30,20 @@ const layoutComponent = computed(() => {
 });
 
 onMounted(async () => {
+  // 原有的購物車檢查
   if (authStore.isLoggedIn) {
     await cartStore.fetchCart();
+  }
+
+  // 2. ✅ 檢查是否有 LINE 登入成功的訊號
+  if (localStorage.getItem('line_login_success') === 'true') {
+    showLineSuccess.value = true;
+    localStorage.removeItem('line_login_success'); // 顯示後立刻刪除，避免重複彈出
+
+    // 延遲自動關閉
+    setTimeout(() => {
+      showLineSuccess.value = false;
+    }, 1500);
   }
 });
 
@@ -42,6 +59,9 @@ watch(() => authStore.isLoggedIn, async (newVal) => {
   <router-view />
   <!-- </component> -->
   <GlobalModalManager />
+  <!-- Line登入成功 -->
+  <BaseModal :isOpen="showLineSuccess" type="success" iconClass="fa-solid fa-check" title="登入成功"
+    :description="`${authStore.user?.name}，歡迎回來Recimo~`" @close="showLineSuccess = false" />
 </template>
 
 <style lang="scss">
