@@ -389,3 +389,77 @@ UPDATE recipes SET
         ELSE recipe_title END;
 
 COMMIT;
+
+
+
+-- 旻倫0204聯集刪除資料庫設定
+-- 處理步驟 (Steps)
+ALTER TABLE steps DROP FOREIGN KEY fk_steps_recipe;
+ALTER TABLE steps ADD CONSTRAINT fk_steps_recipe 
+FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+-- 處理食譜標籤 (Recipe Tags)
+ALTER TABLE recipe_tag DROP FOREIGN KEY fk_recipe_id;
+ALTER TABLE recipe_tag ADD CONSTRAINT fk_recipe_id 
+FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+-- 處理食譜食材 (Recipe Ingredients)
+ALTER TABLE recipe_ingredients DROP FOREIGN KEY fk_recipe_ing_recipe;
+ALTER TABLE recipe_ingredients ADD CONSTRAINT fk_recipe_ing_recipe
+FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+-- 處理步驟食材 (Step Ingredients)
+ALTER TABLE step_ingredients DROP FOREIGN KEY fk_si_step;
+ALTER TABLE step_ingredients ADD CONSTRAINT fk_si_step 
+FOREIGN KEY (step_id) REFERENCES steps(step_id) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+-- 社群
+-- 成品照片 (Galleries)
+ALTER TABLE recipe_gallery DROP FOREIGN KEY fk_gallery_recipe;
+ALTER TABLE recipe_gallery ADD CONSTRAINT fk_gallery_recipe
+FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+-- 留言 (Comments)
+ALTER TABLE recipe_comments DROP FOREIGN KEY fk_comments_recipe;
+ALTER TABLE recipe_comments ADD CONSTRAINT fk_comments_recipe 
+FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+-- 收藏 (Favorites)
+ALTER TABLE favorites DROP FOREIGN KEY fk_favorites_recipe;
+ALTER TABLE favorites ADD CONSTRAINT fk_favorites_recipe 
+FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+-- 瀏覽紀錄 (Browsing Histories)
+ALTER TABLE browsing_history DROP FOREIGN KEY fk_history_recipe_id;
+ALTER TABLE browsing_history ADD CONSTRAINT fk_history_recipe_id
+FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+-- 食譜檢舉紀錄 (Reported Recipes)
+ALTER TABLE reported_recipes DROP FOREIGN KEY fk_reports_recipe;
+ALTER TABLE reported_recipes ADD CONSTRAINT fk_reports_recipe
+FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+-- 烹飪日誌 (Cooking Logs)
+ALTER TABLE cooking_logs DROP FOREIGN KEY fk_logs_recipe;
+ALTER TABLE cooking_logs ADD CONSTRAINT fk_logs_recipe
+FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
