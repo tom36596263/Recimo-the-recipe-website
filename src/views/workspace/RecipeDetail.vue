@@ -465,13 +465,37 @@ const handleGoToEdit = () => {
   const currentId = isPreviewMode.value
     ? route.query.editId
     : rawRecipe.value?.recipe_id;
-  router.push({
-    path: '/workspace/edit-recipe',
-    query: {
-      editId: currentId,
-      action: isPreviewMode.value ? route.query.action : 'adapt'
+
+  if (!currentId) return;
+
+  if (isMyRecipe.value) {
+    // 1. 如果是我自己的食譜
+    if (isAdaptation.value) {
+      // 這是已經存檔過的改編作品，使用你指定的 action 名稱
+      router.push({
+        path: '/workspace/edit-recipe',
+        query: {
+          editId: currentId,
+          action: 'edit_adaptation'  // 👈 這裡改成你指定的字串
+        }
+      });
+    } else {
+      // 這是原創作品
+      router.push({
+        path: '/workspace/edit-recipe',
+        query: { editId: currentId }
+      });
     }
-  });
+  } else {
+    // 2. 如果是別人的食譜 -> 第一次改編
+    router.push({
+      path: '/workspace/edit-recipe',
+      query: {
+        editId: currentId,
+        action: 'adapt'
+      }
+    });
+  }
 };
 
 // 處理刪除成功後的跳轉
@@ -799,17 +823,16 @@ watch(
     </button>
 
     <div class="sub-actions">
-      <button class="sub-btn" @click="handleGoToEdit" title="編輯/改編">
-        <i-material-symbols-edit />
+      <button class="sub-btn" @click="handleGoToEdit"
+        :title="isMyRecipe ? (isAdaptation ? '編輯改編內容' : '編輯食譜') : '改編這份食譜'">
+        <i-material-symbols-edit v-if="isMyRecipe" />
+        <i-material-symbols-edit-note-outline-rounded v-else />
       </button>
+
       <button class="sub-btn" @click="handleShare" title="分享">
         <i-material-symbols-share-outline />
       </button>
-      <button
-        class="sub-btn report"
-        @click="isReportModalOpen = true"
-        title="檢舉"
-      >
+      <button class="sub-btn report" @click="isReportModalOpen = true" title="檢舉">
         <i-material-symbols-error-outline-rounded />
       </button>
     </div>

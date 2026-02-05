@@ -208,8 +208,10 @@ const ingredientsData = computed(() => {
     }));
 });
 
-watch(() => props.recipe?.recipe_id, () => {
-    currentServings.value = 1;
+watch(() => props.recipe, (newVal) => {
+    console.log('當前用戶 ID:', authStore.user?.user_id || authStore.user?.id);
+    console.log('食譜作者 ID:', newVal?.author_id || newVal?.user_id);
+    console.log('比對結果:', isOwner.value);
 }, { immediate: true });
 
 /**
@@ -257,6 +259,34 @@ const stepsData = computed(() => {
 });
 
 const closeModal = () => emit('update:modelValue', false);
+
+/**
+ * 處理跳轉編輯頁面
+ */
+/**
+ * 處理跳轉編輯頁面
+ */
+const handleGoToEdit = () => {
+    const rawId = props.recipe?.recipe_id || props.recipe?.id;
+    const cleanId = getCleanId(rawId);
+
+    if (!cleanId) {
+        alert('無法取得食譜 ID，無法編輯');
+        return;
+    }
+
+    // 跳轉至編輯頁
+    router.push({
+        path: '/workspace/edit-recipe',
+        query: {
+            editId: cleanId,
+            // 🔥 關鍵修改：改為 edit_adaptation
+            // 這樣 EditRecipe.vue 的 onMounted 才會正確執行「載入舊改編」的邏輯
+            action: 'edit_adaptation'
+        }
+    });
+};
+
 </script>
 
 <template>
@@ -266,6 +296,8 @@ const closeModal = () => emit('update:modelValue', false);
                 <button class="close-x" @click="closeModal">✕</button>
 
                 <div class="fixed-floating-bar">
+                    
+
                     <button class="action-circle-btn like-btn" :class="{ 'active': recipe?.is_liked }"
                         @click="handleToggleLike">
                         <i-material-symbols-thumb-up-rounded v-if="recipe?.is_liked" />
@@ -274,6 +306,10 @@ const closeModal = () => emit('update:modelValue', false);
                             {{ recipe.like_count }}
                         </span>
                     </button>
+                    <button v-if="isOwner" class="action-circle-btn edit-btn" @click="handleGoToEdit" title="編輯此版本">
+                        <i-material-symbols-edit />
+                    </button>
+
                     <button class="action-circle-btn" @click="handleShare" title="分享">
                         <i-material-symbols-share-outline />
                     </button>
@@ -528,6 +564,15 @@ const closeModal = () => emit('update:modelValue', false);
         transition: all 0.3s ease;
         position: relative;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        &.edit-btn {
+                color: $primary-color-700; // 使用你的主色調
+        
+                &:hover {
+                    background-color: $primary-color-100;
+                    color: $primary-color-700;
+                }
+            }
 
         svg,
         :deep(svg) {
