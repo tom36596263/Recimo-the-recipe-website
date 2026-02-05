@@ -76,7 +76,7 @@ const saveEditFolder = async () => {
 
 // 刪除資料夾
 const deleteFolder = async (folder) => {
-    console.log('準備刪除資料夾：', folder);
+    // ...existing code...
     if (!folder || !folder.id) {
         alert('資料夾ID不存在');
         return;
@@ -86,14 +86,14 @@ const deleteFolder = async (folder) => {
     try {
         const payload = new URLSearchParams();
         payload.append('favorites_folder_id', folder.id);
-        console.log('刪除參數：', payload.toString());
+        // ...existing code...
         const { data } = await phpApi.delete('/personal/fav_folders.php', {
             data: payload.toString(),
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
-        console.log('刪除回應：', data);
+        // ...existing code...
         if (data.success) {
             await fetchFolders();
             if (selectedFolderId.value === folder.id) selectedFolderId.value = null;
@@ -123,8 +123,7 @@ const fetchFolders = async () => {
             phpApi.get('/social/favorites.php', { params: { user_id: userId.value } })
         ]);
 
-        console.log('資料夾 API 回應:', foldersRes.data);
-        console.log('收藏列表 API 回應:', favoritesRes.data);
+        // ...existing code...
 
         if (foldersRes.data.success) {
             // 統計每個資料夾的食譜數量
@@ -138,7 +137,7 @@ const fetchFolders = async () => {
                 }
             });
 
-            console.log('資料夾食譜統計:', folderCounts);
+            // ...existing code...
 
             folders.value = foldersRes.data.folders.map(f => {
                 const folderId = Number(f.favorites_folder_id);
@@ -147,10 +146,10 @@ const fetchFolders = async () => {
                     id: folderId,
                     count: folderCounts[folderId] || 0
                 };
-                console.log('資料夾項目:', folderData);
+                // ...existing code...
                 return folderData;
             });
-            console.log('所有資料夾:', folders.value);
+            // ...existing code...
             // 不自動選中任何資料夾，除非已收藏
             if (!favoriteInfo.value) {
                 selectedFolderId.value = null;
@@ -172,7 +171,6 @@ watch(userId, (val) => {
 // 監聽 modal 開啟狀態，每次開啟都重新載入資料夾
 watch(() => props.modelValue, (isOpen) => {
     if (isOpen && userId.value) {
-        console.log('Modal 開啟，重新載入資料夾');
         fetchFolders();
     }
 });

@@ -249,6 +249,17 @@ const routes = [
         }
       },
       {
+        path: 'user/:userId',
+        name: 'other-user-profile',
+        component: () => import('@/views/workspace/ProfileView.vue'),
+        meta: {
+          title: '其他使用者主頁',
+          layout: 'workspace',
+          requiresAuth: true
+        },
+        props: true
+      },
+      {
         path: 'settings',
         name: 'user-settings',
         component: () => import('@/views/workspace/SettingsView.vue'),
