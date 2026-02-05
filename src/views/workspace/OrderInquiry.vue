@@ -12,7 +12,7 @@ const pageSize = 5;
 const activeTag = ref('全部訂單');
 const selectedDate = ref('');
 const pollTimer = ref(null); // 🌟 新增：輪詢計時器
-
+const showSuccessModal = ref(false);
 // 讀取資料 (核心函式)
 const fetchOrders = async () => {
   const userData = localStorage.getItem('user');
