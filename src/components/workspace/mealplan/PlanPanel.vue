@@ -80,13 +80,13 @@ const currentNutritionData = computed(() => {
   );
 
   return todaysItems.reduce((acc, item) => {
-    const recipe = props.allRecipes.find(r => r.recipe_id === item.recipe_id);
+    const recipe = props.allRecipes.find(r => Number(r.recipe_id) === Number(item.recipe_id));
     if (recipe) {
-      acc.calories += recipe.recipe_kcal_per_100g || 0;
-      acc.protein += recipe.recipe_protein_per_100g || 0;
-      acc.carbs += recipe.recipe_carbs_per_100g || 0;
-      acc.fat += recipe.recipe_fat_per_100g || 0;
-      acc.starch += (recipe.recipe_carbs_per_100g * 0.7) || 0;
+      acc.calories += Number(recipe.recipe_kcal_per_100g) || 0;
+      acc.protein += Number(recipe.recipe_protein_per_100g) || 0;
+      acc.carbs += Number(recipe.recipe_carbs_per_100g) || 0;
+      acc.fat += Number(recipe.recipe_fat_per_100g) || 0;
+      acc.starch += (Number(recipe.recipe_carbs_per_100g) * 0.7) || 0;
     }
     return acc;
   }, { calories: 0, protein: 0, carbs: 0, starch: 0, fat: 0 });
