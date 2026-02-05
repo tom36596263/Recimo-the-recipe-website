@@ -66,8 +66,10 @@ const cartTotal = computed(() => cartStore.totalCount);
 
 // 頭貼
 const userAvatar = computed(() => {
-    // 同時相容 image 與 avatar
-    const url = authStore.user?.image || authStore.user?.avatar;
+    // 直接從 authStore.user 取得最新值
+    const url = authStore.user?.image || authStore.user?.user_url || authStore.user?.avatar;
+
+    console.log('🖼️ Navbar 計算頭像 URL:', url);
 
     if (!url) return proxy.$parsePublicFile('img/site/None_avatar.svg');
 

@@ -80,6 +80,56 @@ export const useAuthStore = defineStore('auth', () => {
     };
 
     // ==========================================
+    // 更新使用者資訊
+    // ==========================================
+    const updateUserInfo = (newData) => {
+        if (!user.value) {
+            console.warn('❌ user.value 不存在，無法更新');
+            return;
+        }
+        
+        console.log('🔄 準備更新使用者資訊:', newData);
+        console.log('🔍 更新前的 user.value:', user.value);
+        
+        // 建立新物件（確保 Vue 響應式系統能偵測到變化）
+        const updatedUser = {
+            ...user.value,
+            ...newData
+        };
+        
+        // 特別處理 name 欄位（確保兼容性）
+        if (newData.user_name || newData.name) {
+            updatedUser.name = newData.user_name || newData.name || user.value.name;
+            updatedUser.user_name = newData.user_name || newData.name || user.value.user_name;
+        }
+        
+        // 特別處理 image/avatar 欄位（確保兼容性）
+        if (newData.user_url || newData.image || newData.avatar) {
+            const newImage = newData.user_url || newData.image || newData.avatar;
+            updatedUser.image = newImage;
+            updatedUser.user_url = newImage;
+            updatedUser.avatar = newImage;
+        }
+        
+        // 重新賦值（觸發響應式更新）
+        user.value = updatedUser;
+        
+        // 同步到 localStorage
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        console.log('✅ authStore 已更新使用者資訊:', user.value);
+        console.log('✅ 新頭像 URL:', user.value.image);
+    };
+
+    // ==========================================
+    // 頭像 URL 計算屬性
+    // ==========================================
+    const avatarUrl = computed(() => {
+        if (!user.value) return null;
+        return user.value.image || user.value.user_url || user.value.avatar || null;
+    });
+
+    // ==========================================
     // 登出
     // ==========================================
     const logout = () => {
@@ -96,9 +146,11 @@ export const useAuthStore = defineStore('auth', () => {
         pendingAction,
         isLineLoginSuccess,
         pendingPath,
+        avatarUrl,
         triggerLineSuccess,
         login,
         logout,
+        updateUserInfo,
         openLoginAlert,
         openLoginLightbox,
         closeAll
