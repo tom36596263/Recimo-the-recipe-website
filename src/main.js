@@ -23,4 +23,26 @@ app.use(GoogleSignInPlugin, {
     clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
 })
 
+// Facebook登入用
+function initFacebookSDK() {
+    window.fbAsyncInit = function () {
+        window.FB.init({
+            appId: '25884304981181407',
+            cookie: true,
+            xfbml: true,
+            version: 'v18.0'
+        });
+    };
+
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/zh_TW/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+}
+
+initFacebookSDK();
+
 app.mount('#app') // 將應用程式掛載至 index.html 的 #app 容器，正式啟動渲染

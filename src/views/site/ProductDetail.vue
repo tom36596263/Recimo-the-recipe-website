@@ -5,6 +5,7 @@ import { phpApi, base } from '@/utils/publicApi.js';
 import { useRouteName } from '@/composables/useRouteName';
 import { useCartStore } from '@/stores/cartStore';
 import ProductRmd from '@/components/mall/ProductRmd.vue';
+import { parsePublicFile } from '@/utils/parseFile';
 // 用來執行動作
 import { useRouter } from 'vue-router';
 const router = useRouter();
@@ -82,65 +83,33 @@ const productInfo = ref(null); // 儲存當前商品的所有資訊
 const isNotFound = ref(false); // 用來記錄是否找不到商品
 const { setDetailName } = useRouteName()
 
-// 定義一個 Script 內部可用的轉換函式
-const parseFile = (url) => {
-  if (!url) return '';
 
-  // 1. 清理傳入的 url
-  const cleanPath = url.replace(/^public\//, '').replace(/^\/+/, '');
-
-  // 2. 處理 base，確保它是純粹的域名+路徑，不帶結尾斜線
-  let baseUrl = base.replace(/\/+$/, '');
-
-  // 3. 手動拼接，確保中間只有一個斜線
-  const finalUrl = `${baseUrl}/${cleanPath}`.trim();
-
-  // 4. 強制檢查結果，如果開頭還是有 /http，就把它切掉
-  // 有時候 Vue 綁定會因為 baseUrl 的格式自動加上斜線
-  return finalUrl.startsWith('/') && finalUrl.includes('http')
-    ? finalUrl.substring(1)
-    : finalUrl;
-};
 
 const fetchData = async () => {
   try {
-    isNotFound.value = false; // 每次重新抓取前先重設
-    productInfo.value = null; // 確保每次切換時先清空
-    // const response = await axios.get(`${base}data/mall/products.json`);
+    isNotFound.value = false;
+    productInfo.value = null;
     const response = await phpApi.get('mall/user_products.php');
-
     const item = response.data.find(p => String(p.product_id) === String(productId.value));
-
-    // document.title = `${item.product_name} | Recimo`;
 
     if (item) {
       productInfo.value = item;
       document.title = `${item.product_name} | Recimo`;
 
-      // 圖片初始化：
-      // 對應後端 JOIN 出來的陣列
+      // 🖼️ 圖片初始化：統一使用 parsePublicFile
       if (item.images && item.images.length > 0) {
-        // 預設大圖顯示第一張，記得過濾路徑
-        mainImage.value = parseFile(item.images[0]);
-        activeImage.value = parseFile(item.images[0]);
+        // 這裡處理大圖
+        mainImage.value = parsePublicFile(item.images[0]);
+        activeImage.value = parsePublicFile(item.images[0]);
       }
 
-      // 數量重置
       count.value = 1;
-      // 設定路由名稱（麵包屑或標題用）
       setDetailName(productInfo.value.product_name);
-
-      // console.log("成功找到商品：", item.product_name);
     } else {
-      // productInfo.value = null; // 確保清空舊資料
       isNotFound.value = true;
-      document.title = `無此商品 | Recimo`;
-      // console.warn("找不到該 ID 的商品資料");
     }
   } catch (error) {
     isNotFound.value = true;
-    document.title = `載入失敗 | Recimo`;
-    // console.error("抓取失敗", error);
   }
 };
 
@@ -203,12 +172,11 @@ onUnmounted(() => {
               <div v-for="(imgUrl, index) in productInfo.images" :key="index"
                 class="product-gallery__item col-3 col-sm-4">
 
-                <div class="product-gallery__thumb" :class="{ 'is-active': activeImage === parseFile(imgUrl) }"
-                  @click="changeImage(parseFile(imgUrl))">
+                <div class="product-gallery__thumb" :class="{ 'is-active': activeImage === parsePublicFile(imgUrl) }"
+                  @click="changeImage(parsePublicFile(imgUrl))">
 
-                  <img :src="parseFile(imgUrl)" :alt="productInfo.product_name">
+                  <img :src="parsePublicFile(imgUrl)" :alt="productInfo.product_name">
                 </div>
-
               </div>
             </div>
           </div>

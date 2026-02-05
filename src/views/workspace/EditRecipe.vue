@@ -65,7 +65,9 @@ const fileToBase64 = (file) => {
 watch(() => recipeForm.value.steps, (newSteps) => {
   if (!newSteps || !isEditing.value) return;
   const autoSum = newSteps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
-  if (Number(recipeForm.value.totalTime) === 0) recipeForm.value.totalTime = autoSum;
+
+  // 只有當使用者沒動過總時間，或者總時間不合理時才同步
+  recipeForm.value.totalTime = autoSum;
 }, { deep: true });
 
 watch(() => recipeForm.value.ingredients, (newIngs) => {
@@ -147,7 +149,7 @@ onMounted(async () => {
         title: s.step_title || `步驟 ${idx + 1}`,
         content: s.step_content || '',
         image: parsePublicFile(s.step_image_url || ''),
-        time: s.total_seconds ? Math.floor(Number(s.total_seconds) / 60) : 0,
+        time: s.total_seconds ? Math.round(Number(s.total_seconds) / 60) : 0,
         tags: s.step_ingredients ? s.step_ingredients.map(id => Number(id)) : []
       }));
     }
@@ -171,36 +173,72 @@ const publishToDb = async () => {
 
     const coverData = await handleImage(recipeForm.value.coverImg);
 
+    // 在 publishToDb 內修改
     const processedSteps = await Promise.all(
-      recipeForm.value.steps.map(async (s) => ({
-        step_title: s.title,
-        step_content: s.content || s.step_content || '', // ✨ 容錯處理：確保內容不消失
-        step_image_url: await handleImage(s.image),
-        step_total_time: `00:${String(s.time || 0).padStart(2, '0')}:00`,
-        step_ingredients: s.tags
-      }))
+      recipeForm.value.steps.map(async (s) => {
+        const totalMinutes = Number(s.time) || 0;
+        const hrs = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        const timeString = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
+
+        return {
+          step_title: s.title,
+          step_content: s.content || '',
+          step_image_url: await handleImage(s.image),
+          step_total_time: timeString, // 這樣 60 分鐘會變成 01:00:00
+          step_ingredients: s.tags
+        };
+      })
     );
 
     const payload = {
       parent_recipe_id: recipeForm.value.parent_recipe_id || null,
       author_id: authStore.user.id || authStore.user.user_id,
+
+      // 標題邏輯：如果是改編模式，優先用改編標題
       recipe_title: isAdaptModeActive.value
         ? (recipeForm.value.adapt_title || recipeForm.value.title)
         : recipeForm.value.title,
-      // ✨ 修正描述抓取邏輯：優先抓改編描述，若無則抓取原始描述
-      recipe_description: isAdaptModeActive.value
-        ? (recipeForm.value.adapt_description || recipeForm.value.description)
-        : recipeForm.value.description,
+
+      // 🔥 修正：這裡永遠只放詳細介紹 (aaa)
+      // 不管是不是改編模式，都要保留這份完整的食譜說明
+      recipe_description: recipeForm.value.description || '暫無詳細說明',
+
+      // ✨ 新增：這裡專門放改編重點 (bbb)
+      // 對應後端 recipes 表中的 adaptation_note 欄位
+      adaptation_note: isAdaptModeActive.value
+        ? (recipeForm.value.adapt_description || '')
+        : '',
+
+      // 改編版本的小標題 (bbb 的標題)
+      adaptation_title: isAdaptModeActive.value
+        ? (recipeForm.value.adapt_title || recipeForm.value.title)
+        : '',
+
       recipe_image_url: coverData,
       recipe_difficulty: recipeForm.value.difficulty,
       total_time: recipeForm.value.totalTime,
       recipe_servings: recipeForm.value.recipe_servings,
-      ingredients: recipeForm.value.ingredients.map(ing => ({
-        ingredient_id: ing.id,
-        amount: ing.amount,
-        remark: ing.note,
-        unit_name: ing.unit || '份'
-      })),
+
+      // --- 核心修改部分 ---
+      ingredients: recipeForm.value.ingredients.map(ing => {
+        // 檢查 ID 是否為前端生成的隨機字串 (例如 "id1740...")
+        const isTempId = typeof ing.id === 'string' && ing.id.startsWith('id');
+
+        return {
+          // 如果是隨機 ID 傳 null，否則傳原始數字 ID
+          ingredient_id: isTempId ? null : ing.id,
+          // 🏆 務必帶上名字，後端才能處理新食材
+          ingredient_name: ing.name,
+          amount: ing.amount,
+          remark: ing.note,
+          unit_name: ing.unit || '份',
+          // 改編模式專用標記顏色 (如有需要)
+          color_tag: ing.color_tag || null
+        };
+      }),
+      // ------------------
+
       steps: processedSteps,
       tags: recipeForm.value.tags.map(t => t.tag_id)
     };
