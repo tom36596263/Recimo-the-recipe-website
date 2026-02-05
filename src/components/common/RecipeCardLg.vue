@@ -89,7 +89,7 @@ const handleHeartClick = (e) => {
 <template>
     <div class="recipe-card-lg">
         <header class="card-header">
-            <img :src="LogoBlack" alt="recipe.recipe_name">
+            <img :src="parsePublicFile(recipe.image_url)" alt="recipe.recipe_name">
         </header>
 
         <div class="card-body">
