@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { publicApi } from '@/utils/publicApi';
+import { ref, computed, onMounted, watch } from 'vue';
+import { phpApi } from '@/utils/publicApi';
 
 
 const props = defineProps({
@@ -30,24 +30,43 @@ const categoryMap = {
     'others': '其他'
 };
 
-const fetchIngredients = async () => {
+const fetchIngredients = async (keyword = '') => {
     try {
-        // 1. 使用 publicApi.get 代替原生 fetch
-        // 2. Axios 會自動解析 JSON，不需要再執行 .json()
-        const res = await publicApi.get('data/recipe/ingredients.json');
 
-        // 3. Axios 的回傳資料會放在 res.data 屬性中
-        rawIngredients.value = res.data;
+        // 串接 PHP API，如果有關鍵字就帶入參數
+        const url = keyword 
+            ? `recipes/admin_get_ingredients.php?keyword=${encodeURIComponent(keyword)}`
+            : 'recipes/admin_get_ingredients.php';
+            
+        const res = await phpApi.get(url);
 
-        if (rawIngredients.value.length > 0 && !currentCategory.value) {
-            currentCategory.value = rawIngredients.value[0].main_category;
+        // 注意：根據你的 PHP，資料放在 res.data.data
+        if (res.data.status === 'success') {
+            rawIngredients.value = res.data.data;
+
+            // 初始化分類 (如果不是在搜尋模式下)
+            if (!keyword && rawIngredients.value.length > 0 && !currentCategory.value) {
+                currentCategory.value = rawIngredients.value[0].main_category;
+            }
         }
+        // // 1. 使用 publicApi.get 代替原生 fetch
+        // // 2. Axios 會自動解析 JSON，不需要再執行 .json()
+        // const res = await publicApi.get('data/recipe/ingredients.json'); 
+
+        // // 3. Axios 的回傳資料會放在 res.data 屬性中
+        // rawIngredients.value = res.data;
+
+        // if (rawIngredients.value.length > 0 && !currentCategory.value) {
+        //     currentCategory.value = rawIngredients.value[0].main_category;
+        // }
     } catch (error) {
         // 如果 API 報錯（例如 404 或 500），會直接進到這裡
         console.error("食材資料讀取失敗:", error);
     }
 };
-
+watch(searchQuery, (newVal) => {
+    fetchIngredients(newVal);
+});
 onMounted(() => {
     fetchIngredients();
 });
@@ -56,33 +75,62 @@ const categories = computed(() => {
     const allCats = rawIngredients.value.map(item => item.main_category);
     return [...new Set(allCats)];
 });
-
+// 修改 displayIngredients：
+// 因為 API 已經幫我們處理好搜尋了，我們只需要判斷「分類篩選」
 const displayIngredients = computed(() => {
+    // 如果有搜尋文字，API 回傳的就是搜尋結果，直接顯示
     if (searchQuery.value) {
-        return rawIngredients.value.filter(item =>
-            item.ingredient_name.includes(searchQuery.value)
-        );
+        return rawIngredients.value;
     }
+    // 如果沒有搜尋，則在前端切換分類顯示
     return rawIngredients.value.filter(item => item.main_category === currentCategory.value);
 });
+// const displayIngredients = computed(() => {
+//     if (searchQuery.value) {
+//         return rawIngredients.value.filter(item =>
+//             item.ingredient_name.includes(searchQuery.value)
+//         );
+//     }
+//     return rawIngredients.value.filter(item => item.main_category === currentCategory.value);
+// });
 
 // --- 邏輯判斷 ---
-const isInParent = (name) => {
-    return props.selectedList.some(s => s.name === name || s.ingredient_name === name);
+// const isInParent = (name) => {
+//     return props.selectedList.some(s => s.name === name || s.ingredient_name === name);
+// };
+const isInParent = (id) => {
+    // 建議用 ID 判斷最準確
+    return props.selectedList.some(s => Number(s.id) === Number(id) || Number(s.ingredient_id) === Number(id));
 };
 
-const isInTemp = (name) => {
-    return tempSelected.value.some(s => s.ingredient_name === name);
-};
+// const isInTemp = (name) => {
+//     return tempSelected.value.some(s => s.ingredient_name === name);
+// };
 
+// const handleToggleSelect = (item) => {
+//     if (isInParent(item.ingredient_name)) return;
+//     const index = tempSelected.value.findIndex(s => s.ingredient_name === item.ingredient_name);
+//     if (index > -1) {
+//         tempSelected.value.splice(index, 1);
+//     } else {
+//         tempSelected.value.push(item);
+//     }
+// };
+
+// 修改 handleToggleSelect 以 ID 為準
 const handleToggleSelect = (item) => {
-    if (isInParent(item.ingredient_name)) return;
-    const index = tempSelected.value.findIndex(s => s.ingredient_name === item.ingredient_name);
+    if (isInParent(item.ingredient_id)) return;
+    const index = tempSelected.value.findIndex(s => Number(s.ingredient_id) === Number(item.ingredient_id));
     if (index > -1) {
         tempSelected.value.splice(index, 1);
     } else {
         tempSelected.value.push(item);
     }
+};
+
+// 修改 isInTemp 
+const isInTemp = (id) => {
+    return tempSelected.value.some(s => Number(s.ingredient_id) === Number(id));
 };
 
 const handleClose = () => {
@@ -137,12 +185,12 @@ const handleConfirm = () => {
                             </div>
 
                             <button class="add-btn p-p3" :class="{
-                                'in-temp': isInTemp(item.ingredient_name),
-                                'in-parent': isInParent(item.ingredient_name)
-                            }" :disabled="isInParent(item.ingredient_name)" @click="handleToggleSelect(item)">
+                                'in-temp': isInTemp(item.ingredient_id),
+                                'in-parent': isInParent(item.ingredient_id)
+                            }" :disabled="isInParent(item.ingredient_id)" @click="handleToggleSelect(item)">
 
-                                <span v-if="isInParent(item.ingredient_name)">已在食譜中</span>
-                                <span v-else-if="isInTemp(item.ingredient_name)">✓ 已選取</span>
+                                <span v-if="isInParent(item.ingredient_id)">已在食譜中</span>
+                                <span v-else-if="isInTemp(item.ingredient_id)">✓ 已選取</span>
                                 <span v-else>選取</span>
                             </button>
                         </div>
@@ -153,9 +201,10 @@ const handleConfirm = () => {
                     </div>
 
                     <div class="info-right more-box">
-
-                        <BaseBtn :title="`確認新增 (${tempSelected.length})`" :width="200" @click="handleConfirm"
-                            class="cook-btn" />
+                        <button data-v-bc6311fa="" type="button" class="btn btn-solid h-40 cook-btn"
+                            style="--btn-width: auto;" @click="handleConfirm">
+                            確認新增 ({{ tempSelected.length }})
+                        </button>
                     </div>
 
                 </div>
@@ -344,8 +393,9 @@ const handleConfirm = () => {
 
     .cook-btn {
         padding: 8px 40px;
+        border-radius: 30px;
         cursor: pointer;
-        // font-weight: bold;
+        font-weight: bold;
     }
 }
 
