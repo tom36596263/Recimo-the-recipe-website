@@ -4,6 +4,7 @@ import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
 import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
+import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
 
 const props = defineProps({
     recipe: {
@@ -78,7 +79,7 @@ const goToDetail = () => {
         <footer>
             <div class="personal-info">
                 <div class="personal-img">
-                    <img :src="$parsePublicFile('img/site/Recimo-logo-black.svg')" alt="logo">
+                    <img :src="LogoBlack" alt="recipe.recipe_name">
                 </div>
                 <p class="p-p1">Recimo</p>
             </div>

@@ -20,12 +20,12 @@ const orderItems = computed(() => {
 });
 const formatImageUrl = (rawImage) => {
   if (!rawImage) return '';
-  // 1. 如果已經是 http 開頭（PHP 已拼好），直接回傳
+  //如果已經是 http 開頭（PHP 已拼好），直接回傳
   if (typeof rawImage === 'string' && rawImage.startsWith('http')) return rawImage;
 
   let relativePath = rawImage;
 
-  // 2. 處理資料庫原始 JSON 格式 (例如: [{"image_url":"..."}])
+  // 處理資料庫原始 JSON 格式 (例如: [{"image_url":"..."}])
   if (typeof rawImage === 'string' && (rawImage.startsWith('[') || rawImage.startsWith('{'))) {
     try {
       const parsed = JSON.parse(rawImage);
@@ -36,7 +36,7 @@ const formatImageUrl = (rawImage) => {
     } catch (e) { console.warn('JSON parse error', e); }
   }
 
-  // 3. 💡 修正：如果 PHP 回傳的是相對路徑（例如 img/mall/xxx.jpg）
+  //如果 PHP 回傳的是相對路徑（例如 img/mall/xxx.jpg）
   // 我們應該拼接「當前環境」的 API Base URL，而不是寫死 localhost
   if (relativePath && !relativePath.startsWith('http')) {
     // 這裡建議使用 phpApi 的配置路徑，或者維持相對路徑讓組件處理
@@ -61,25 +61,25 @@ const cardInput4 = ref(null);
 const fetchCartData = async () => {
   try {
     isLoading.value = true;
-    // 1. 確保 URL 是正確的 get_cart.php
+    //確保 URL 是正確的 get_cart.php
     const response = await phpApi.get('/mall/get_cart.php');
 
-    // 2. 自動相容兩種格式：如果是物件就拿 .data，如果是陣列就直接用
+    //自動相容兩種格式：如果是物件就拿 .data，如果是陣列就直接用
     const result = response.data;
     const rawData = result.status === 'success' ? result.data : result;
 
     if (Array.isArray(rawData)) {
-      // 🌟 修改處：刪除這裡所有的圖片處理邏輯，直接用 map 簡單處理
+      //刪除這裡所有的圖片處理邏輯，直接用 map 簡單處理
       cartItemsFromDB.value = rawData.map(item => {
-        // 1. 取得原始圖片欄位
+        //取得原始圖片欄位
         const rawImage = item.product_image || item.image || '';
 
         return {
           ...item,
-          // 2. 🌟 直接呼叫上方的 formatImageUrl 函式 (它會自動判斷環境)
+          //直接呼叫上方的 formatImageUrl 函式 (它會自動判斷環境)
           product_image: formatImageUrl(rawImage),
 
-          // 3. 處理數值格式
+          //處理數值格式
           quantity: Number(item.quantity || item.count || 1),
           product_price: Number(item.product_price || item.price)
         };
@@ -250,7 +250,7 @@ const shippingFee = computed(() => {
 const totalAmount = computed(() => {
   return subtotal.value + shippingFee.value;
 });
-// 1. 先建立一個清空資料庫的輔助函式
+//先建立一個清空資料庫的輔助函式
 const clearDatabaseCart = async () => {
   try {
     const response = await phpApi.get('/mall/clear_cart.php'); // 確保路徑對應你的檔案
@@ -263,7 +263,7 @@ const clearDatabaseCart = async () => {
 };
 
 const handleSubmit = async () => {
-  // --- 1. 驗證登入 ---
+  //驗證登入
   const userInfo = JSON.parse(localStorage.getItem('user'));
   const currentUserId = userInfo?.id || userInfo?.user_id;
 
@@ -272,7 +272,7 @@ const handleSubmit = async () => {
     return;
   }
 
-  // --- 2. 驗證欄位 ---
+  //  驗證欄位 
   validateField('user_name');
   validateField('user_phone');
   validateField('user_email');
@@ -307,7 +307,7 @@ const handleSubmit = async () => {
     return;
   }
 
-  // --- 3. 準備 Payload ---
+  // 準備 Payload 
   const orderPayload = {
     user_id: currentUserId,
     logistics_id: form.value.logistics_id,
@@ -328,22 +328,21 @@ const handleSubmit = async () => {
   };
 
   try {
-    // --- 4. 呼叫後端 API ---
-    const response = await phpApi.post('/mall/add_order.php', orderPayload);
+    //呼叫後端 API 
+    const response = await phpApi.post('mall/add_order.php', orderPayload);
 
     if (response.data.success) {
       const realOrderId = response.data.order_id;
 
-      // --- 5. 清空購物車 ---
+      //清空購物車
       await clearDatabaseCart();
       cartStore.items = [];
       cartItemsFromDB.value = [];
 
-      // --- 6. 分流處理：信用卡轉址 vs 貨到付款顯示成功 ---
+      //信用卡轉址 vs 貨到付款顯示成功 ---
       if (form.value.payment_method === 'card') {
-        // [信用卡] -> 跳轉綠界
-        // 這裡不需要顯示燈箱，直接離開
-        const checkoutUrl = `http://localhost:8888/recimo_api/mall/ecpay_checkout.php?order_id=${realOrderId}`;
+        const baseUrl = phpApi.defaults.baseURL;
+        const checkoutUrl = `${baseUrl}/mall/ecpay_checkout.php?order_id=${realOrderId}`;
         window.location.href = checkoutUrl;
       } else {
         // [貨到付款] -> 顯示成功燈箱
