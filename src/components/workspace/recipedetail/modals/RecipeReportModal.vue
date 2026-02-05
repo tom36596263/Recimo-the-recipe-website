@@ -18,7 +18,7 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'submit']);
 const authStore = useAuthStore();
 
 const displayAuthor = computed(() => {
@@ -75,6 +75,7 @@ const handleSubmit = async () => {
         const response = await phpApi.post('social/submit_report.php', payload);
         if (response.data.status === 'success') {
             alert('感謝您的檢舉，我們會盡快審核該食譜。');
+            emit('submit', response.data);
             handleClose();
         } else {
             alert('檢舉失敗：' + (response.data.message || '請稍後再試'));

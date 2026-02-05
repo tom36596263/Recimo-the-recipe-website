@@ -43,7 +43,7 @@ const recipeForm = ref({
 
 const isAdaptModeActive = computed(() => {
   const hasParentId = !!recipeForm.value.parent_recipe_id;
-  const hasAdaptQuery = route.query.action === 'adapt';
+  const hasAdaptQuery = route.query.action === 'adapt' || route.query.action === 'edit_adaptation';
   return hasParentId || hasAdaptQuery;
 });
 
@@ -65,21 +65,20 @@ const fileToBase64 = (file) => {
 watch(() => recipeForm.value.steps, (newSteps) => {
   if (!newSteps || !isEditing.value) return;
   const autoSum = newSteps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
-
-  // 只有當使用者沒動過總時間，或者總時間不合理時才同步
   recipeForm.value.totalTime = autoSum;
 }, { deep: true });
 
 watch(() => recipeForm.value.ingredients, (newIngs) => {
   newIngs.forEach(ing => {
     if (ing.id && (ing.kcal_per_100g === undefined || ing.kcal_per_100g === null)) {
+      // 加上 ?. 確保 master 存在才讀取，避免噴錯
       const master = ingredientsMasterList.value.find(m => Number(m.ingredient_id) === Number(ing.id));
       if (master) {
-        ing.kcal_per_100g = master.kcal_per_100g || 0;
-        ing.protein_per_100g = master.protein_per_100g || 0;
-        ing.fat_per_100g = master.fat_per_100g || 0;
-        ing.carbs_per_100g = master.carbs_per_100g || 0;
-        ing.gram_conversion = master.gram_conversion || 1.0;
+        ing.kcal_per_100g = Number(master.kcal_per_100g) || 0;
+        ing.protein_per_100g = Number(master.protein_per_100g) || 0;
+        ing.fat_per_100g = Number(master.fat_per_100g) || 0;
+        ing.carbs_per_100g = Number(master.carbs_per_100g) || 0;
+        ing.gram_conversion = Number(master.gram_conversion) || 1.0;
         if (!ing.unit) ing.unit = master.unit_name || '份';
       }
     }
@@ -90,13 +89,14 @@ onMounted(async () => {
   const rawId = route.query.editId || route.params.id;
   const editIdFromUrl = rawId ? Number(rawId) : null;
   const isAdapt = route.query.action === 'adapt';
+  const isEditAdaptation = route.query.action === 'edit_adaptation';
 
-  if (isAdapt) isPublished.value = true;
+  if (isAdapt || isEditAdaptation) isPublished.value = true;
 
   try {
     const [resIng, resTag] = await Promise.all([
-      publicApi.get('data/recipe/ingredients.json'),
-      publicApi.get('data/recipe/tags.json')
+      phpApi.get('recipes/admin_get_ingredients.php'),
+      phpApi.get('recipes/recipe_tags_get.php')
     ]);
     ingredientsMasterList.value = resIng.data || [];
     tagsMasterList.value = resTag.data || [];
@@ -124,6 +124,17 @@ onMounted(async () => {
         recipeForm.value.adapt_title = main.recipe_title + ' (改編版)';
         recipeForm.value.title = main.recipe_title;
         recipeForm.value.description = main.recipe_description || '';
+      } else if (isEditAdaptation) {
+        recipeForm.value.recipe_id = editIdFromUrl;
+        recipeForm.value.parent_recipe_id = main.parent_recipe_id;
+        recipeForm.value.title = main.recipe_title;
+        recipeForm.value.description = main.recipe_description || '';
+        recipeForm.value.adapt_title = main.adaptation_title || main.recipe_title;
+        recipeForm.value.adapt_description = main.adaptation_note || '';
+      } else {
+        recipeForm.value.recipe_id = editIdFromUrl;
+        recipeForm.value.title = main.recipe_title;
+        recipeForm.value.description = main.recipe_description || '';
       }
 
       recipeForm.value.difficulty = Number(main.recipe_difficulty) || 1;
@@ -131,6 +142,7 @@ onMounted(async () => {
       recipeForm.value.coverImg = parsePublicFile(main.recipe_image_url || '');
       recipeForm.value.totalTime = parseInt(main.recipe_total_time, 10) || 0;
       recipeForm.value.tags = tags.map(t => ({ tag_id: t.tag_id, tag_name: t.tag_name }));
+
       recipeForm.value.ingredients = ingredients.map(ing => ({
         id: Number(ing.ingredient_id),
         name: ing.ingredient_name,
@@ -144,8 +156,9 @@ onMounted(async () => {
         carbs_per_100g: Number(ing.carbs_per_100g),
         gram_conversion: Number(ing.gram_conversion)
       }));
+
       recipeForm.value.steps = steps.map((s, idx) => ({
-        id: isAdapt ? `adapt-s-${idx}` : (s.step_id || `s-${idx}`),
+        id: (isAdapt) ? `adapt-s-${idx}` : (s.step_id || `s-${idx}`),
         title: s.step_title || `步驟 ${idx + 1}`,
         content: s.step_content || '',
         image: parsePublicFile(s.step_image_url || ''),
@@ -165,15 +178,26 @@ const publishToDb = async () => {
   }
 
   try {
+    // 🔥 修改後的圖片處理邏輯
     const handleImage = async (img) => {
       if (!img) return null;
-      if (img instanceof File) return await fileToBase64(img);
-      return typeof img === 'string' ? img : null;
+
+      // 1. 如果是新選的檔案 (File 物件)
+      if (img instanceof File) {
+        return await fileToBase64(img);
+      }
+
+      // 2. 如果是字串 (可能是 Base64，也可能是原本的圖片路徑/URL)
+      // 必須回傳 img，否則沒換圖時會傳 null 給後端導致 SQL 報錯
+      if (typeof img === 'string') {
+        return img;
+      }
+
+      return null;
     };
 
     const coverData = await handleImage(recipeForm.value.coverImg);
 
-    // 在 publishToDb 內修改
     const processedSteps = await Promise.all(
       recipeForm.value.steps.map(async (s) => {
         const totalMinutes = Number(s.time) || 0;
@@ -184,69 +208,47 @@ const publishToDb = async () => {
         return {
           step_title: s.title,
           step_content: s.content || '',
+          // 🔥 步驟圖也要套用同樣的邏輯，避免步驟圖更新失敗
           step_image_url: await handleImage(s.image),
-          step_total_time: timeString, // 這樣 60 分鐘會變成 01:00:00
+          step_total_time: timeString,
           step_ingredients: s.tags
         };
       })
     );
 
     const payload = {
+      recipe_id: recipeForm.value.recipe_id || null,
       parent_recipe_id: recipeForm.value.parent_recipe_id || null,
       author_id: authStore.user.id || authStore.user.user_id,
-
-      // 標題邏輯：如果是改編模式，優先用改編標題
-      recipe_title: isAdaptModeActive.value
-        ? (recipeForm.value.adapt_title || recipeForm.value.title)
-        : recipeForm.value.title,
-
-      // 🔥 修正：這裡永遠只放詳細介紹 (aaa)
-      // 不管是不是改編模式，都要保留這份完整的食譜說明
+      recipe_title: isAdaptModeActive.value ? (recipeForm.value.adapt_title || recipeForm.value.title) : recipeForm.value.title,
       recipe_description: recipeForm.value.description || '暫無詳細說明',
-
-      // ✨ 新增：這裡專門放改編重點 (bbb)
-      // 對應後端 recipes 表中的 adaptation_note 欄位
-      adaptation_note: isAdaptModeActive.value
-        ? (recipeForm.value.adapt_description || '')
-        : '',
-
-      // 改編版本的小標題 (bbb 的標題)
-      adaptation_title: isAdaptModeActive.value
-        ? (recipeForm.value.adapt_title || recipeForm.value.title)
-        : '',
-
-      recipe_image_url: coverData,
+      adaptation_note: isAdaptModeActive.value ? (recipeForm.value.adapt_description || '') : '',
+      adaptation_title: isAdaptModeActive.value ? (recipeForm.value.adapt_title || recipeForm.value.title) : '',
+      recipe_image_url: coverData, // 這裡現在保證會有值（新 Base64 或舊路徑）
       recipe_difficulty: recipeForm.value.difficulty,
       total_time: recipeForm.value.totalTime,
       recipe_servings: recipeForm.value.recipe_servings,
-
-      // --- 核心修改部分 ---
       ingredients: recipeForm.value.ingredients.map(ing => {
-        // 檢查 ID 是否為前端生成的隨機字串 (例如 "id1740...")
         const isTempId = typeof ing.id === 'string' && ing.id.startsWith('id');
-
         return {
-          // 如果是隨機 ID 傳 null，否則傳原始數字 ID
           ingredient_id: isTempId ? null : ing.id,
-          // 🏆 務必帶上名字，後端才能處理新食材
           ingredient_name: ing.name,
           amount: ing.amount,
           remark: ing.note,
           unit_name: ing.unit || '份',
-          // 改編模式專用標記顏色 (如有需要)
           color_tag: ing.color_tag || null
         };
       }),
-      // ------------------
-
       steps: processedSteps,
       tags: recipeForm.value.tags.map(t => t.tag_id)
     };
 
-    const response = await phpApi.post('recipes/recipe_adaptation_add.php', payload);
+    const apiUrl = recipeForm.value.recipe_id ? 'recipes/recipe_adaptation_update.php' : 'recipes/recipe_adaptation_add.php';
+    const response = await phpApi.post(apiUrl, payload);
 
     if (response.data && response.data.success) {
-      alert('🎉 感謝分享！改編版本已正式發布。');
+      const msg = recipeForm.value.recipe_id ? '🎉 食譜已更新！' : '🎉 感謝分享！改編版本已正式發布。';
+      alert(msg);
 
       if (isAdaptModeActive.value) {
         const parentId = recipeForm.value.parent_recipe_id;
@@ -255,10 +257,8 @@ const publishToDb = async () => {
         router.push('/workspace/my-recipes');
       }
     } else {
-      const errorMsg = response.data?.message || '資料庫寫入失敗';
-      alert(`發布失敗：${errorMsg}`);
+      alert(`發布失敗：${response.data?.message || '資料庫寫入失敗'}`);
     }
-
   } catch (err) {
     console.error('❌ 發布過程發生異常:', err);
     const errorDetail = err.response?.data?.message || err.message;
@@ -272,7 +272,7 @@ const handleSave = async () => {
     return;
   }
   if (isPublished.value) {
-    alert('全新食譜發布功能開發中，目前僅存為本地快取');
+    alert('全新食譜發布功能開發中');
   } else {
     alert('草稿已存至本地！');
     router.push('/workspace/my-recipes');
