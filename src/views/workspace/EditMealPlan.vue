@@ -88,7 +88,27 @@ const datelist = computed(() => {
   return list;
 });
 
-// --- 邏輯方法 ---
+// ------ 處理從 RecipePicker 傳來的切換日期請求 -------
+const handleDateChangeRequest = (newDate) => {
+  if (!planData.value.start_date || !planData.value.end_date) return;
+
+  // 1. 建立邊界檢查 (確保不會切換到計畫範圍外)
+  const start = new Date(planData.value.start_date);
+  const end = new Date(planData.value.end_date);
+
+  // 💡 將時間部分歸零，確保比對時只看日期
+  start.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+  newDate.setHours(0, 0, 0, 0);
+
+  // 2. 如果新日期在範圍內，更新 selectedDate，這會驅動 RecipePicker 更新內容
+  if (newDate >= start && newDate <= end) {
+    selectedDate.value = newDate;
+  } else {
+    console.warn('已到達計畫日期的邊界，無法繼續切換');
+  }
+};
+
 // --- 計畫資訊變更（含標題與日期範圍） ---
 const handleUpdatePlanInfo = async (newInfo) => {
   // 1. 強化版日期格式化：避免重複轉換導致的 Invalid Date
@@ -256,6 +276,34 @@ const updateTargetKcal = async (newKcal) => {
   }
 };
 
+// 批量更新目標熱量
+const handleBatchUpdateTargetKcal = async (newKcal) => {
+  console.log('準備批量更新，熱量：', newKcal); // 🔴 除錯點 1
+
+  try {
+    const res = await phpApi.post('mealplans/batch_update_daily_targets.php', {
+      plan_id: planId.value,
+      user_id: authStore.userId,
+      target_kcal: newKcal
+    });
+
+    console.log('API 回傳結果：', res.data); // 🔴 除錯點 2
+
+    if (res.data.success) {
+      // 重新抓取資料
+      const targetsRes = await phpApi.get(`mealplans/get_daily_targets.php?plan_id=${planId.value}`);
+      dailyTargets.value = targetsRes.data || [];
+      console.log('全計畫熱量目標已同步至前端');
+    } else {
+      alert('更新失敗：' + res.data.error);
+    }
+  } catch (err) {
+    // 🔴 除錯點 3：顯示更詳細的錯誤
+    console.error('批量更新請求出錯：', err.response?.data || err.message);
+    alert('網路請求失敗，請檢查控制台');
+  }
+};
+
 // UI 切換方法保持不變 ...
 const handleDateSelect = (date) => { selectedDate.value = date; };
 const closeDetail = () => { selectedDate.value = null; };
@@ -299,7 +347,7 @@ const handleUpdatePlanCover = (updatedData) => {
           <RecipePicker :date="selectedDate" :current-items="getItemsByDate(selectedDate)" :all-recipes="allRecipes"
             :target-calories="currentDayTargetKcal" :start-date="planData.start_date" :end-date="planData.end_date"
             @update-target="updateTargetKcal" @back="closeDetail" @add="handleAddRecipe" @remove="handleRemoveRecipe"
-            @change-date="handleDateChangeRequest" />
+            @change-date="handleDateChangeRequest" @apply-all-target="handleBatchUpdateTargetKcal" />
         </div>
       </Transition>
     </div>

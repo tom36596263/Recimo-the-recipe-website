@@ -37,19 +37,18 @@ const goToEdit = () => {
     <div class="plan-card" @click="goToEdit">
         <div class="plan-card__cover">
             <img src="https://placehold.jp/24/2e6f4a/ffffff/300x150.png?text=MealPlan" alt="Cover" />
-            <div class="plan-card__badge">{{ durationDays }}日計畫</div>
         </div>
 
         <div class="plan-card__content">
-            <h3 class="plan-card__title">{{ plan.title }}</h3>
-            <div class="plan-card__info">
-                <i-material-symbols-calendar-month-outline />
-                <span>{{ plan.start_date }} ~ {{ plan.end_date }}</span>
-            </div>
+            <h3 class="plan-card__title p-p1">{{ plan.title }}</h3>
+
 
             <div class="plan-card__footer">
-                <span class="plan-card__date">建立於 {{ plan.created_at.split(' ')[0] }}</span>
-                <button class="plan-card__more" @click.stop>
+                <div class="plan-card__info p-p3">
+                    <i-material-symbols-calendar-month-outline />
+                    <span>{{ plan.start_date }} ~ {{ plan.end_date }}</span>
+                </div>
+                <button class="plan-card__more p-p3" @click.stop>
                     <i-material-symbols-more-vert />
                 </button>
             </div>
@@ -60,12 +59,13 @@ const goToEdit = () => {
 <style lang="scss" scoped>
 .plan-card {
     background: $neutral-color-white;
-    border-radius: 12px;
+    border-radius: 10px;
     overflow: hidden;
     border: 1px solid $neutral-color-100;
     transition: all 0.3s ease;
     cursor: pointer;
-    height: 100%;
+    height: 250px;
+    width: 100%;
 
     &:hover {
         transform: translateY(-5px);
@@ -84,17 +84,6 @@ const goToEdit = () => {
         }
     }
 
-    &__badge {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgba($primary-color-800, 0.85);
-        color: white;
-        padding: 2px 10px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        backdrop-filter: blur(4px);
-    }
 
     &__content {
         padding: 16px;
@@ -104,27 +93,13 @@ const goToEdit = () => {
     }
 
     &__title {
-        font-size: 1.1rem;
-        font-weight: bold;
         color: $primary-color-800;
         margin: 0;
         // 限制顯示兩行，過長則顯示省略號
         display: -webkit-box;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
         overflow: hidden;
-    }
-
-    &__info {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.85rem;
-        color: $neutral-color-700;
-
-        svg {
-            font-size: 1rem;
-        }
     }
 
     &__footer {
@@ -133,12 +108,17 @@ const goToEdit = () => {
         justify-content: space-between;
         align-items: center;
         padding-top: 10px;
-        border-top: 1px solid $neutral-color-100;
     }
 
-    &__date {
-        font-size: 0.75rem;
-        color: $neutral-color-400;
+
+    &__info {
+        display: flex;
+        align-items: center;
+        color: $neutral-color-700;
+
+        svg {
+            font-size: 1rem;
+        }
     }
 
     &__more {
