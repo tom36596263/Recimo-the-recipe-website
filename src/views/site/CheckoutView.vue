@@ -329,7 +329,7 @@ const handleSubmit = async () => {
 
   try {
     // --- 4. 呼叫後端 API ---
-    const response = await phpApi.post('/mall/add_order.php', orderPayload);
+    const response = await phpApi.post('mall/add_order.php', orderPayload);
 
     if (response.data.success) {
       const realOrderId = response.data.order_id;
@@ -341,9 +341,8 @@ const handleSubmit = async () => {
 
       // --- 6. 分流處理：信用卡轉址 vs 貨到付款顯示成功 ---
       if (form.value.payment_method === 'card') {
-        // [信用卡] -> 跳轉綠界
-        // 這裡不需要顯示燈箱，直接離開
-        const checkoutUrl = `http://localhost:8888/recimo_api/mall/ecpay_checkout.php?order_id=${realOrderId}`;
+        const baseUrl = phpApi.defaults.baseURL;
+        const checkoutUrl = `${baseUrl}/mall/ecpay_checkout.php?order_id=${realOrderId}`;
         window.location.href = checkoutUrl;
       } else {
         // [貨到付款] -> 顯示成功燈箱
