@@ -27,7 +27,7 @@ const props = defineProps({
 });
 
 // 定義 Emit 事件，用於通知父組件行為
-const emit = defineEmits(['back', 'add', 'remove', 'update-target', 'change-date']);
+const emit = defineEmits(['back', 'add', 'remove', 'update-target', 'change-date', 'apply-all-target']);
 
 
 // --- 切換日期與判斷邊界邏輯 ---
@@ -137,9 +137,12 @@ watch(() => props.targetCalories, (newVal) => {
 
 // 4. 處理彈窗回傳的數值 (Modal -> 本地輸入框)
 const handleApplyAdvice = (kcal) => {
-    localTarget.value = kcal;
-    // 因為 localTarget 變了，上面的 watch(localTarget) 會自動觸發 emit，不用手動再 emit
+    localTarget.value = kcal; // 更新目前顯示的數值
+
+    // 💡 通知父層：這是一個「批量更新」動作
+    emit('apply-all-target', kcal);
 };
+
 </script>
 
 <template>

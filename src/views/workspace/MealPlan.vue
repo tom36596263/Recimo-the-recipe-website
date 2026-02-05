@@ -21,113 +21,107 @@ onMounted(fetchPlans);
 </script>
 
 <template>
-  <div class="overview-container container">
-    <div class="overview-header row">
-      <div class="overview-header__text">
-        <h1 class="p-h2">我的備餐計畫</h1>
+  <div class="overview__container container">
+    <div class="overview__header row">
+      <div class="overview__tag-wrapper col-6">
+        <div class="folder-tag">過年年菜</div>
+        <div class="folder-tag">三月苗栗露營</div>
+        <div class="folder-tag">其他</div>
       </div>
-      <button class="create-btn">
-        <i-material-symbols-add-rounded />
-        建立新計畫
-      </button>
     </div>
 
-    <div v-if="isLoading" class="loading-state row">載入計畫中...</div>
+    <div v-if="isLoading" class="overview__loading-state row">載入計畫中...</div>
 
-    <div v-else class="plan-grid row">
-      <div v-for="plan in plans" :key="plan.plan_id" class="col-3">
+    <div v-else class="overview__plan-grid row">
+
+      <div class="col-3 overview__card">
+        <div class="overview__empty-card">
+          <i class="fa-solid fa-plus"></i>
+          <p class="p-p1">創建計畫</p>
+        </div>
+      </div>
+
+      <div v-for="plan in plans" :key="plan.plan_id" class="col-3 overview__card">
         <PlanFileCard :plan="plan" />
       </div>
 
-      <div class="col-3">
-        <div class="empty-card">
-          <i-material-symbols-add-circle-outline-rounded />
-          <span>開始新的規劃</span>
-        </div>
-      </div>
+
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.overview-container {
+.overview {
   padding: 20px;
-}
 
-.overview-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 30px;
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 30px;
+  }
 
-  &__text {
-    h1 {
-      color: $primary-color-800;
-      margin-bottom: 4px;
-    }
+  &__tag-wrapper {
+    display: flex;
+    // justify-content: space-between;
+    gap: 10px;
 
-    p {
-      color: $neutral-color-400;
-      margin: 0;
+    .folder-tag {
+      background-color: $neutral-color-100;
+      border-radius: 10px;
+      height: 32px;
+      padding: 2px 10px;
     }
   }
 
-  .create-btn {
+  &__loading-state {
+    text-align: center;
+    padding: 100px;
+    color: $neutral-color-400;
+  }
+
+  &__plan-grid {
+    margin-top: 10px;
+  }
+
+  &__card {
+    margin-bottom: 20px;
+  }
+
+  &__empty-card {
+    height: 100%;
+    min-height: 250px;
+    border: 2px dashed $neutral-color-400;
+    border-radius: 10px;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
-    background-color: $primary-color-700;
-    color: white;
-    border: none;
-    padding: 10px 24px;
-    border-radius: 30px;
-    font-weight: bold;
+    gap: 12px;
+    color: $neutral-color-400;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.3s ease;
+
+    i {
+      font-size: 48px;
+      transition: all 0.3s ease;
+    }
+
+    span {
+      font-weight: bold;
+    }
 
     &:hover {
-      background-color: $primary-color-800;
-      box-shadow: 0 4px 12px rgba($primary-color-700, 0.3);
+      background-color: $primary-color-100;
+      border-color: $primary-color-400;
+
+      // color: $primary-color-800;
+      i {
+        color: $primary-color-800;
+      }
     }
   }
-}
 
-.plan-grid {
-  margin-top: 10px;
-}
 
-.empty-card {
-  height: 100%;
-  min-height: 250px;
-  border: 2px dashed $neutral-color-100;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  color: $neutral-color-400;
-  cursor: pointer;
-  transition: 0.3s;
-
-  svg {
-    font-size: 3rem;
-  }
-
-  span {
-    font-weight: bold;
-  }
-
-  &:hover {
-    background-color: $primary-color-100;
-    border-color: $primary-color-400;
-    color: $primary-color-800;
-  }
-}
-
-.loading-state {
-  text-align: center;
-  padding: 100px;
-  color: $neutral-color-400;
 }
 </style>

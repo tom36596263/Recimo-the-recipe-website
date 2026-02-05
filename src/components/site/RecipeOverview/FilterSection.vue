@@ -32,7 +32,7 @@ const filters = ref([
     {
         "id": "kcal",
         "label": "熱量估算",
-        "options": ["全部", "150kcal(輕食)", "150-300kcal(均衡)", "300kcal以上(豐盛)"]
+        "options": ["全部", "500kcal(輕食)", "500-1000kcal(均衡)", "1000kcal以上(豐盛)"]
     }
 ]);
 

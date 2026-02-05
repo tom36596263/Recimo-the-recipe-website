@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { publicApi } from '@/utils/publicApi';
-
+// 1. 改成使用 phpApi
+import { phpApi } from '@/utils/phpApi';
 
 const props = defineProps({
     modelValue: Boolean,
@@ -30,21 +30,23 @@ const categoryMap = {
     'others': '其他'
 };
 
+// 2. 修改抓取邏輯
 const fetchIngredients = async () => {
     try {
-        // 1. 使用 publicApi.get 代替原生 fetch
-        // 2. Axios 會自動解析 JSON，不需要再執行 .json()
-        const res = await publicApi.get('data/recipe/ingredients.json');
+        // 呼叫組員寫好的 PHP
+        const res = await phpApi.get('recipes/admin_get_ingredients.php');
 
-        // 3. Axios 的回傳資料會放在 res.data 屬性中
-        rawIngredients.value = res.data;
+        // 根據組員的 PHP 格式，資料在 res.data.data
+        if (res.data && res.data.status === 'success') {
+            rawIngredients.value = res.data.data;
 
-        if (rawIngredients.value.length > 0 && !currentCategory.value) {
-            currentCategory.value = rawIngredients.value[0].main_category;
+            // 如果成功抓到資料且目前沒選分類，自動選第一個
+            if (rawIngredients.value.length > 0 && !currentCategory.value) {
+                currentCategory.value = rawIngredients.value[0].main_category;
+            }
         }
     } catch (error) {
-        // 如果 API 報錯（例如 404 或 500），會直接進到這裡
-        console.error("食材資料讀取失敗:", error);
+        console.error("從資料庫讀取食材失敗:", error);
     }
 };
 
@@ -52,6 +54,7 @@ onMounted(() => {
     fetchIngredients();
 });
 
+// --- 後續 computed 與 methods 保持不變 ---
 const categories = computed(() => {
     const allCats = rawIngredients.value.map(item => item.main_category);
     return [...new Set(allCats)];
@@ -66,7 +69,6 @@ const displayIngredients = computed(() => {
     return rawIngredients.value.filter(item => item.main_category === currentCategory.value);
 });
 
-// --- 邏輯判斷 ---
 const isInParent = (name) => {
     return props.selectedList.some(s => s.name === name || s.ingredient_name === name);
 };

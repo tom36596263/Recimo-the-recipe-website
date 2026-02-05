@@ -4,7 +4,7 @@
     import { useAuthGuard } from '@/composables/useAuthGuard'
     import { useRouter } from 'vue-router';
     import { ref, onMounted } from 'vue';
-    import { publicApi } from '@/utils/publicApi'
+    import { phpApi } from '@/utils/publicApi'
 
     const { runWithAuth } = useAuthGuard();
     const router = useRouter();
@@ -21,56 +21,93 @@
 
 onMounted(async () => {
     try {
-        const [resRecipes, resRecipeTags, resTags] = await Promise.all([
-            publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/recipe/recipe_tag.json'),
-            publicApi.get('data/recipe/tags.json') 
-        ]);
+        // const [resRecipes, resRecipeTags, resTags] = await Promise.all([
+        //     publicApi.get('data/recipe/recipes.json'),
+        //     publicApi.get('data/recipe/recipe_tag.json'),
+        //     publicApi.get('data/recipe/tags.json')  
+        // ]);
+        const res = await phpApi.get('recipes/all_recipe_get.php?mode=public');
+        if (res.data.status === 'success') {
+            const recipeData = res.data.data;
 
-        const recipeData = resRecipes.data;
-        const recipeTagsData = resRecipeTags.data;
-        const tagsData = resTags.data;
+            // 2. 隨機取 3 筆
+            const randomRecipes = [...recipeData]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3);
 
-        const tagMap = {};
-        tagsData.forEach(tag => {
-            tagMap[tag.tag_id] = tag.tag_name;
-        });
+            recipes.value = randomRecipes.map(recipe => {
+                // 3. 處理時間顯示
+                const timeParts = recipe.recipe_total_time.split(':');
+                const hours = parseInt(timeParts[0]);
+                const minutes = parseInt(timeParts[1]);
+                const displayTime = hours > 0 ? `${hours * 60 + minutes}分鐘` : `${minutes}分鐘`;
 
-        const randomRecipes = [...recipeData]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 3);
+                // 4. 處理標籤 (假設 SQL 使用 GROUP_CONCAT 回傳逗號分隔字串)
+                // 範例："素食,家常菜" -> ["素食", "家常菜"]
+                const recipeTagsNames = recipe.tag_names ? recipe.tag_names.split(',') : [];
 
-        const base = import.meta.env.BASE_URL;
-        recipes.value = randomRecipes.map(recipe => {
+                return {
+                    id: recipe.recipe_id,
+                    recipe_name: recipe.recipe_title,
+                    difficulty: recipe.recipe_difficulty,
+                    image_url: recipe.recipe_image_url,
+                    tags: recipeTagsNames,
+                    nutritional_info: {
+                        calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
+                        serving_size: recipe.recipe_servings,
+                        cooking_time: displayTime
+                    },
+                    author: {
+                        name: recipe.author_name || 'Recimo', // 如果 SQL 有 join 到作者名
+                        likes: recipe.recipe_like_count
+                    }
+                };
+            });
+        }
+        // const recipeData = res.data;
+        // const recipeTagsData = res.data.recipe_tags || [];
+        // const tagsData = res.data.tags || [];
 
-            const matchedTagIds = recipeTagsData
-                .filter(rt => rt.recipe_id === recipe.recipe_id)
-                .map(rt => rt.tag_id);
+        // const tagMap = {};
+        // tagsData.forEach(tag => {
+        //     tagMap[tag.tag_id] = tag.tag_name;
+        // });
 
-            // 透過 tagMap 轉換成 tag_name 陣列
-            const recipeTagsNames = matchedTagIds.map(id => tagMap[id]).filter(Boolean);
-            const timeParts = recipe.recipe_total_time.split(':');
-            const hours = parseInt(timeParts[0]);
-            const minutes = parseInt(timeParts[1]);
-            const displayTime = hours > 0 ? `${hours * 60 + minutes}分鐘` : `${minutes}分鐘`;
+        // const randomRecipes = [...recipeData]
+        // .sort(() => Math.random() - 0.5)
+        // .slice(0, 3);
 
-            return {
-                id: recipe.recipe_id,
-                recipe_name: recipe.recipe_title,
-                difficulty: recipe.recipe_difficulty,
-                image_url: recipe.recipe_image_url,
-                tags: recipeTagsNames,
-                nutritional_info: {
-                    calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
-                    serving_size: recipe.recipe_servings,
-                    cooking_time: displayTime
-                },
-                author: {
-                    name: 'Recimo',
-                    likes: recipe.recipe_like_count
-                }
-            };
-        });
+        // const base = import.meta.env.BASE_URL;
+        // recipes.value = randomRecipes.map(recipe => {
+
+        //     const matchedTagIds = recipeTagsData
+        //         .filter(rt => rt.recipe_id === recipe.recipe_id)
+        //         .map(rt => rt.tag_id);
+
+        //     // 透過 tagMap 轉換成 tag_name 陣列
+        //     const recipeTagsNames = matchedTagIds.map(id => tagMap[id]).filter(Boolean);
+        //     const timeParts = recipe.recipe_total_time.split(':');
+        //     const hours = parseInt(timeParts[0]);
+        //     const minutes = parseInt(timeParts[1]);
+        //     const displayTime = hours > 0 ? `${hours * 60 + minutes}分鐘` : `${minutes}分鐘`;
+
+        //     return {
+        //         id: recipe.recipe_id,
+        //         recipe_name: recipe.recipe_title,
+        //         difficulty: recipe.recipe_difficulty,
+        //         image_url: recipe.recipe_image_url,
+        //         tags: recipeTagsNames,
+        //         nutritional_info: {
+        //             calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
+        //             serving_size: recipe.recipe_servings,
+        //             cooking_time: displayTime
+        //         },
+        //         author: {
+        //             name: 'Recimo',
+        //             likes: recipe.recipe_like_count
+        //         }
+        //     };
+        // });
     } catch (error) {
         console.error('載入資料失敗:', error);
     }

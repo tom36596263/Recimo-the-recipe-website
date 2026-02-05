@@ -60,6 +60,7 @@ const fetchData = async () => {
   const recipeId = Number(route.params.id);
   console.log('🔍 [路由偵錯] 轉換後的 recipeId:', recipeId);
 
+  
   // --- 1. 預覽模式優先處理 ---
   if (isPreviewMode.value) {
     console.log('🚀 [偵錯] 進入預覽模式，嘗試從 Store 讀取資料');
@@ -99,7 +100,7 @@ const fetchData = async () => {
           recipe_total_time:
             preview.totalTime || preview.recipe_total_time || '0:30',
           recipe_servings: previewServings,
-          recipe_likes: 0,
+          recipe_likes: Number(mainData.recipe_like_count || 0),
           author_name: authStore.user?.user_name || '您的預覽',
           tags: preview.recipe_tags || preview.tags || []
         };
@@ -158,12 +159,13 @@ const fetchData = async () => {
       console.warn('⚠️ 網址為預覽模式但 Store 內無資料，切換回正式模式嘗試');
     }
   }
+  const currentUid = authStore.user?.user_id || authStore.user?.id || 0;
 
   // --- 2. 正式模式：從伺服器抓取資料 ---
   console.log('🏠 [偵錯] 進入正式模式，請求 API 中...');
   try {
     const [resDetail, resG, resU, resC] = await Promise.all([
-      phpApi.get(`recipes/recipe_detail_get.php?recipe_id=${recipeId}`),
+      phpApi.get(`recipes/recipe_detail_get.php?recipe_id=${recipeId}&user_id=${currentUid}`),
       phpApi.get(`social/gallery.php?recipe_id=${recipeId}`), // 改成你的 PHP 路徑
       publicApi.get('data/user/users.json'),
       recipeId
@@ -183,13 +185,16 @@ const fetchData = async () => {
         // 根據一般 API 慣例，嘗試從 main 裡面抓取可能的名字欄位
         author_name: mainData.author_name || 'Recimo 用戶',
         author_id: mainData.author_id,
-
+        recipe_likes: Number(mainData.recipe_like_count || 0),
         recipe_description:
           serverData.main.recipe_descreption ||
           serverData.main.recipe_description ||
           '',
         tags: serverData.tags || []
       };
+
+      isLiked.value = !!mainData.is_liked;
+      localLikesOffset.value = 0; // 重置位移量
 
       rawIngredients.value = (serverData.ingredients || []).map((ing) => {
         const unit = ing.unit_name || '份';
@@ -260,13 +265,15 @@ const fetchData = async () => {
     // --- 4. 處理留言 ---
     if (resC.data && Array.isArray(resC.data)) {
       commentList.value = resC.data.map((c) => {
-        const userData = resU.data?.find((u) => u.user_id === c.user_id);
+        // 🏆 直接從 c (PHP 回傳的每一筆資料) 裡面拿資料
         return {
           comment_id: c.comment_id,
           userId: c.user_id,
-          userName: userData?.user_name || 'Recimo用戶',
+          // 這裡要對齊 PHP 回傳的欄位名稱
+          userName: c.userName || 'Recimo用戶',
           handle: `user_${c.user_id}`,
-          userAvatar: getSmartImageUrl(userData?.user_image),
+          // 這裡建議對齊你組件用的變數名稱
+          userAvatar: getSmartImageUrl(c.user_avatar),
           content: c.comment_text,
           time: c.comment_at,
           likes: Number(c.like_count || 0)
@@ -290,20 +297,16 @@ const isAdaptation = computed(() => {
   return !!rawRecipe.value?.parent_recipe_id;
 });
 
-// --- 權限判斷 ---
 const isMyRecipe = computed(() => {
-  // 1. 確保 rawRecipe 有資料
-  // 2. 比較 authStore 裡的 user_id 與食譜的 author_id
-  const currentUserId = authStore.user?.user_id || authStore.user?.id;
-  const authorId = rawRecipe.value?.author_id || rawRecipe.value?.user_id;
+  const currentUserId = Number(authStore.user?.user_id || authStore.user?.id);
+  const authorId = Number(rawRecipe.value?.author_id || rawRecipe.value?.user_id);
 
-  return (
-    currentUserId && authorId && Number(currentUserId) === Number(authorId)
-  );
+  if (!currentUserId || !authorId) return false;
+  return currentUserId === authorId;
 });
 
-// --- 3. 計算屬性 ---
 const displayRecipeLikes = computed(() => {
+  // 🏆 確保這裡是 recipe_likes，跟你在 toggleRecipeLike 賦值的地方一樣
   const baseLikes = Number(rawRecipe.value?.recipe_likes || 0);
   return baseLikes + localLikesOffset.value;
 });
@@ -455,23 +458,71 @@ const formatTime = (timeVal) => {
   return `${timeStr} 分鐘`;
 };
 
-const toggleRecipeLike = () => {
+const toggleRecipeLike = async () => {
   if (isPreviewMode.value) return;
-  isLiked.value = !isLiked.value;
-  localLikesOffset.value = isLiked.value ? 1 : 0;
-};
+  if (!authStore.user) {
+    alert('請先登入！');
+    return;
+  }
 
+  const recipeId = rawRecipe.value.recipe_id;
+
+  // 🏆 關鍵：根據目前愛心是否亮燈，決定下一步是 plus 還是 minus
+  const currentAction = isLiked.value ? 'minus' : 'plus';
+
+  try {
+    const response = await phpApi.post('social/like_toggle.php', {
+      recipe_id: recipeId,
+      user_id: authStore.user.user_id || authStore.user.id,
+      action: currentAction // 🚀 告訴後端要加還是減
+    });
+
+    if (response.data.success) {
+      // 更新燈號與數字
+      isLiked.value = response.data.is_liked;
+      rawRecipe.value.recipe_likes = response.data.new_count;
+      localLikesOffset.value = 0;
+    }
+  } catch (err) {
+    console.error('API 錯誤:', err.response?.data?.message || err.message);
+    alert('操作失敗，請檢查資料庫連結');
+  }
+};
 const handleGoToEdit = () => {
   const currentId = isPreviewMode.value
     ? route.query.editId
     : rawRecipe.value?.recipe_id;
-  router.push({
-    path: '/workspace/edit-recipe',
-    query: {
-      editId: currentId,
-      action: isPreviewMode.value ? route.query.action : 'adapt'
+
+  if (!currentId) return;
+
+  if (isMyRecipe.value) {
+    // 1. 如果是我自己的食譜
+    if (isAdaptation.value) {
+      // 這是已經存檔過的改編作品，使用你指定的 action 名稱
+      router.push({
+        path: '/workspace/edit-recipe',
+        query: {
+          editId: currentId,
+          action: 'edit_adaptation'  // 👈 這裡改成你指定的字串
+        }
+      });
+    } else {
+      // 這是原創作品
+      router.push({
+        path: '/workspace/edit-recipe',
+        query: { editId: currentId }
+      });
     }
-  });
+  } else {
+    // 2. 如果是別人的食譜 -> 第一次改編
+    router.push({
+      path: '/workspace/edit-recipe',
+      query: {
+        editId: currentId,
+        action: 'adapt'
+      }
+    });
+  }
 };
 
 // 處理刪除成功後的跳轉
@@ -776,40 +827,31 @@ watch(
     class="recipe-action-hub"
     :class="{ active: isHubOpen, 'is-preview': isPreviewMode }"
   >
-    <button
-      class="main-hub-btn"
-      @click="
-        isLiked = !isLiked;
-        localLikesOffset = isLiked ? 1 : 0;
-      "
-    >
+    <button class="main-hub-btn custom-tooltip" :data-tooltip="isLiked ? '取消讚' : '這份食譜很讚'" @click="toggleRecipeLike">
       <i-material-symbols-thumb-up-rounded v-if="isLiked" />
       <i-material-symbols-thumb-up-outline-rounded v-else />
-      <span v-if="displayRecipeLikes > 0" class="badge">{{
-        displayRecipeLikes
-      }}</span>
 
-      <div
-        class="indicator"
-        :class="{ rotate: isHubOpen }"
-        @click.stop="isHubOpen = !isHubOpen"
-      >
+      <span v-if="displayRecipeLikes > 0" class="badge">
+        {{ displayRecipeLikes }}
+      </span>
+
+      <div class="indicator" :class="{ rotate: isHubOpen }" @click.stop="isHubOpen = !isHubOpen">
         <i-material-symbols-add-rounded />
       </div>
     </button>
 
     <div class="sub-actions">
-      <button class="sub-btn" @click="handleGoToEdit" title="編輯/改編">
-        <i-material-symbols-edit />
+      <button v-if="isMyRecipe || !isAdaptation" class="sub-btn custom-tooltip" @click="handleGoToEdit"
+        :data-tooltip="isMyRecipe ? (isAdaptation ? '編輯改編內容' : '編輯食譜') : '改編這份食譜'">
+        <i-material-symbols-edit v-if="isMyRecipe" />
+        <i-material-symbols-edit-note-outline-rounded v-else />
       </button>
-      <button class="sub-btn" @click="handleShare" title="分享">
+
+      <button class="sub-btn custom-tooltip" @click="handleShare" data-tooltip="分享網址">
         <i-material-symbols-share-outline />
       </button>
-      <button
-        class="sub-btn report"
-        @click="isReportModalOpen = true"
-        title="檢舉"
-      >
+
+      <button class="sub-btn report custom-tooltip" @click="isReportModalOpen = true" data-tooltip="檢舉食譜">
         <i-material-symbols-error-outline-rounded />
       </button>
     </div>
@@ -1387,6 +1429,75 @@ watch(
   white-space: nowrap;
   line-height: 1;
 }
+
+/* --- 自定義漂亮的提示框 --- */
+.custom-tooltip {
+  position: relative; // 必須為 relative 以便定位提示框
+
+  &::before {
+    content: attr(data-tooltip); // 自動抓取 HTML 上的文字
+    position: absolute;
+    bottom: 120%; // 顯示在按鈕上方
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+
+    // 樣式設計：符合你的 Recimo 綠色系
+    background-color: $primary-color-700;
+    color: $neutral-color-white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+
+    // 動態效果
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+  }
+
+  // 小箭頭
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 105%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: $primary-color-700;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  // 滑鼠移入時顯示
+  &:hover {
+    &::before {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    &::after {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}
+
+// 針對檢舉按鈕可以改用紅色系提示
+.sub-btn.report.custom-tooltip {
+  &::before {
+    background-color: $accent-color-700;
+  }
+
+  &::after {
+    border-top-color: $accent-color-700;
+  }
+}
+
 
 @media screen and (max-width: 768px) {
   .title-content {

@@ -163,7 +163,7 @@ onMounted(async () => {
             // 最近觀看：串接 history.php，使用 userId 當參數，最多顯示四個
             if (userId.value) {
                 try {
-                    const resHistory = await phpApi.get(`personal/history.php`, { params: { user_id: userId.value, limit: 4 } });
+                    const resHistory = await phpApi.get(`personal/history.php`, { params: { user_id: userId.value } });
                     // 回傳格式 { success: true, history: [...] }
                     const historyData = Array.isArray(resHistory.data.history) ? resHistory.data.history : [];
                     recentRecipes.value = historyData.slice(0, 4).map(item => {
