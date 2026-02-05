@@ -296,24 +296,26 @@ const handleGoToEdit = () => {
                 <button class="close-x" @click="closeModal">✕</button>
 
                 <div class="fixed-floating-bar">
-                    
-
-                    <button class="action-circle-btn like-btn" :class="{ 'active': recipe?.is_liked }"
-                        @click="handleToggleLike">
+                    <button class="action-circle-btn like-btn custom-tooltip" :class="{ 'active': recipe?.is_liked }"
+                        @click="handleToggleLike" :data-tooltip="recipe?.is_liked ? '取消讚' : '這份改編很讚'">
                         <i-material-symbols-thumb-up-rounded v-if="recipe?.is_liked" />
                         <i-material-symbols-thumb-up-outline-rounded v-else />
                         <span v-if="recipe?.like_count > 0" class="badge like-badge">
                             {{ recipe.like_count }}
                         </span>
                     </button>
-                    <button v-if="isOwner" class="action-circle-btn edit-btn" @click="handleGoToEdit" title="編輯此版本">
+
+                    <button v-if="isOwner" class="action-circle-btn edit-btn custom-tooltip" @click="handleGoToEdit"
+                        data-tooltip="編輯此改編版本">
                         <i-material-symbols-edit />
                     </button>
 
-                    <button class="action-circle-btn" @click="handleShare" title="分享">
+                    <button class="action-circle-btn custom-tooltip" @click="handleShare" data-tooltip="分享此版本">
                         <i-material-symbols-share-outline />
                     </button>
-                    <button class="action-circle-btn report" @click="isReportModalOpen = true" title="檢舉">
+
+                    <button class="action-circle-btn report custom-tooltip" @click="isReportModalOpen = true"
+                        data-tooltip="檢舉內容">
                         <i-material-symbols-error-outline-rounded />
                     </button>
                 </div>
@@ -695,4 +697,68 @@ const handleGoToEdit = () => {
     opacity: 0;
     transform: translateY(20px);
 }
+
+/* --- 自定義漂亮的提示框 (Modal 專用) --- */
+.custom-tooltip {
+    position: relative;
+
+    &::before {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 125%; // 距離按鈕再高一點點
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background-color: $primary-color-700;
+        color: $neutral-color-white;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        pointer-events: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 2100; // 確保高於 Modal
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 110%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: $primary-color-700;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 2100;
+    }
+
+    &:hover {
+        &::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        &::after {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+
+    // 檢舉按鈕提示變紅色
+    &.report {
+        &::before {
+            background-color: $accent-color-700;
+        }
+
+        &::after {
+            border-top-color: $accent-color-700;
+        }
+    }
+}
+
 </style>

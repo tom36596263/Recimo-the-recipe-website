@@ -71,13 +71,14 @@ watch(() => recipeForm.value.steps, (newSteps) => {
 watch(() => recipeForm.value.ingredients, (newIngs) => {
   newIngs.forEach(ing => {
     if (ing.id && (ing.kcal_per_100g === undefined || ing.kcal_per_100g === null)) {
+      // 加上 ?. 確保 master 存在才讀取，避免噴錯
       const master = ingredientsMasterList.value.find(m => Number(m.ingredient_id) === Number(ing.id));
       if (master) {
-        ing.kcal_per_100g = master.kcal_per_100g || 0;
-        ing.protein_per_100g = master.protein_per_100g || 0;
-        ing.fat_per_100g = master.fat_per_100g || 0;
-        ing.carbs_per_100g = master.carbs_per_100g || 0;
-        ing.gram_conversion = master.gram_conversion || 1.0;
+        ing.kcal_per_100g = Number(master.kcal_per_100g) || 0;
+        ing.protein_per_100g = Number(master.protein_per_100g) || 0;
+        ing.fat_per_100g = Number(master.fat_per_100g) || 0;
+        ing.carbs_per_100g = Number(master.carbs_per_100g) || 0;
+        ing.gram_conversion = Number(master.gram_conversion) || 1.0;
         if (!ing.unit) ing.unit = master.unit_name || '份';
       }
     }
@@ -94,7 +95,7 @@ onMounted(async () => {
 
   try {
     const [resIng, resTag] = await Promise.all([
-      publicApi.get('data/recipe/ingredients.json'),
+      phpApi.get('recipes/admin_get_ingredients.php'),
       phpApi.get('recipes/recipe_tags_get.php')
     ]);
     ingredientsMasterList.value = resIng.data || [];
