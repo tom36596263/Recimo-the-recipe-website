@@ -63,7 +63,7 @@ const selectedMealType = ref(1);  // 目前選擇要操作的餐期 (0:早餐, 1
 const currentTotalKcal = computed(() => {
     return Math.round(
         props.currentItems.reduce((sum, item) => {
-            return sum + (item.detail?.recipe_kcal_per_100g || 0);
+            return sum + Number(item.detail?.recipe_kcal_per_100g || 0);
         }, 0)
     );
 });

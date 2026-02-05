@@ -3,6 +3,7 @@ import { computed } from "vue";
 
 const props = defineProps({
   servings: { type: Number, default: 1 },
+  baseServings: { type: Number, default: 1 },
   ingredients: { type: Array, default: () => [] },
   // 🏆 關鍵：新增支援直接傳入算好的營養數據物件
   nutrition: { type: Object, default: null }
@@ -53,7 +54,12 @@ const formatDisplayValue = (val) => {
 <template>
   <div class="nutrition-card">
     <header class="card-header">
-      <div class="zh-h3">營養小清單</div>
+      <div class="header-title-row">
+        <div class="zh-h3">營養小清單</div>
+        <span class="base-servings-tag" v-if="baseServings">
+          (每份適合約 {{ baseServings }} 人享用)
+        </span>
+      </div>
       <div class="en-h3">Nutrition List</div>
     </header>
 
@@ -110,6 +116,18 @@ const formatDisplayValue = (val) => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+
+  .header-title-row {
+      display: flex;
+      align-items: baseline; // 讓中文字與基準份數對齊基線
+      gap: 10px; // 中間留點空隙
+    }
+  
+    .base-servings-tag {
+      color: $neutral-color-400; // 使用中性灰色
+      font-size: 0.85rem; // 稍微小一點
+      font-weight: normal; // 不要太粗
+    }
 
   .zh-h3 {
     margin-bottom: 10px;

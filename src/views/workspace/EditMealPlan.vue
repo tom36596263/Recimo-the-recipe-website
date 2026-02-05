@@ -1,56 +1,68 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { publicApi } from '@/utils/publicApi';
+import { useAuthStore } from '@/stores/authStore';
+import { publicApi, phpApi } from '@/utils/publicApi';
 import DayColumn from '@/components/workspace/mealplan/DayColumn.vue';
 import ColumnTitle from '@/components/workspace/mealplan/ColumnTitle.vue';
 import PlanPanel from '@/components/workspace/mealplan/PlanPanel.vue';
 import RecipePicker from '@/components/workspace/mealplan/RecipePicker.vue';
 
+// --- 登入狀態處理 ---
+const authStore = useAuthStore();
+
 // --- 路由處理 ---
 const route = useRoute();
 const router = useRouter();
 
-// 使用 computed 確保當路由參數改變時，ID 會同步更新
-// 這裡將網址中的 :id 轉為數字，方便與 JSON 的 plan_id 比對
 const planId = computed(() => Number(route.params.id));
 
 // --- 資料狀態 ---
-const planData = ref({});        // 存放單一計畫的基本資訊 (標題、日期範圍)
-const mealPlanItems = ref([]);   // 存放該計畫所有的配餐明細 (包含食譜 ID、餐期)
-const allRecipes = ref([]);      // 存放全域食譜庫資料
-const mealTemplates = ref([]);       // 存放模板清單 (meal_plan_template.json)
-const mealTemplateItems = ref([]);  // 存放模板食譜關聯 (meal_plan_template_items.json)
-const coverTemplates = ref([]); // 存放封面模板
+const planData = ref({});
+const mealPlanItems = ref([]);
+const allRecipes = ref([]);
+const mealTemplates = ref([]);
+const mealTemplateItems = ref([]);
+const coverTemplates = ref([]);
+const dailyTargets = ref([]);
 
 // --- UI 控制 ---
-const showPanel = ref(false);    // 控制右側資訊面板 (PlanPanel)
-const selectedDate = ref(null);  // 當前選中的日期 (若為 null 則顯示週視圖)
+const showPanel = ref(false);
+const selectedDate = ref(null);
 
 // --- API 請求函數 ---
 const fetchData = async () => {
+  // 先判斷是否有登入
+  if (!authStore.userId) {
+    authStore.openLoginAlert();
+    return;
+  }
+
   try {
-    // 同時抓取計畫清單、明細、食譜資料
-    const [planRes, itemsRes, recipesRes, templatesRes, templateItemsRes, coverTemplatesRes] = await Promise.all([
-      publicApi.get('data/plan/meal_plans.json'),
-      publicApi.get('data/plan/meal_plan_items.json'),
-      publicApi.get('data/recipe/recipes.json'),
-      publicApi.get('data/plan/meal_plan_template.json'),
-      publicApi.get('data/plan/meal_plan_template_items.json'),
-      publicApi.get('data/plan/meal_plan_cover_template.json')
+    const [
+      planRes,
+      itemsRes,
+      targetsRes,
+      recipesRes,
+      templatesRes,
+      templateItemsRes,
+      coverTemplatesRes
+    ] = await Promise.all([
+      phpApi.get(`mealplans/get_meal_plan.php?plan_id=${planId.value}&user_id=${authStore.userId}`),
+      phpApi.get(`mealplans/get_plan_items.php?plan_id=${planId.value}`),
+      phpApi.get(`mealplans/get_daily_targets.php?plan_id=${planId.value}`),
+      phpApi.get('mealplans/get_all_recipes.php'),
+      phpApi.get('mealplans/get_meal_templates.php'),
+      phpApi.get('mealplans/get_template_items.php'),
+      phpApi.get('mealplans/get_cover_templates.php')
     ]);
 
-    // 1. 根據路由 ID 找出對應的計畫資訊
-    planData.value = planRes.data.find(p => p.plan_id === planId.value) || {};
-    // 2. 篩選出屬於此計畫的配餐項目
-    mealPlanItems.value = itemsRes.data.filter(item => item.plan_id === planId.value);
-    // 3. 儲存食譜資料庫供搜尋使用
+    planData.value = planRes.data || {};
+    mealPlanItems.value = itemsRes.data || [];
+    dailyTargets.value = targetsRes.data || [];
     allRecipes.value = recipesRes.data;
-    // 儲存預設計畫
     mealTemplates.value = templatesRes.data;
-    // 4. 儲存預設計畫明細
     mealTemplateItems.value = templateItemsRes.data;
-    // 5. 儲存預設封面圖
     coverTemplates.value = coverTemplatesRes.data;
 
   } catch (err) {
@@ -58,17 +70,13 @@ const fetchData = async () => {
   }
 };
 
-// --- 生命週期 ---
 onMounted(fetchData);
 
-// 監聽路由 ID 變化：若使用者在網址直接輸入不同 ID，需重新抓取資料
 watch(() => route.params.id, (newId) => {
   if (newId) fetchData();
 });
 
 // --- 計算屬性 ---
-
-// 根據計畫的開始與結束日期，生成一個 Date 物件陣列 (用於週視圖欄位)
 const datelist = computed(() => {
   if (!planData.value.start_date) return [];
   const start = new Date(planData.value.start_date);
@@ -81,123 +89,184 @@ const datelist = computed(() => {
 });
 
 // --- 邏輯方法 ---
+// --- 計畫資訊變更（含標題與日期範圍） ---
+const handleUpdatePlanInfo = async (newInfo) => {
+  // 1. 強化版日期格式化：避免重複轉換導致的 Invalid Date
+  const formatDate = (date) => {
+    if (!date) return null;
+    // 如果已經是 YYYY-MM-DD 字串，直接回傳，不要再進 new Date()
+    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
 
-// 根據日期過濾出當天的配餐，並注入食譜詳細內容
-const getItemsByDate = (date) => {
-  const dateStr = date.toISOString().split('T')[0]; // 取得 YYYY-MM-DD
-  return mealPlanItems.value
-    .filter(item => item.planned_date.includes(dateStr))
-    .map(item => {
-      const recipeDetail = allRecipes.value.find(r => r.recipe_id === item.recipe_id);
-      return { ...item, detail: recipeDetail }; // 合併明細與食譜詳情
-    });
-};
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return null; // 檢查是否為有效日期
 
-// 處理從 RecipePicker 傳回來的「新增食譜」事件
-const handleAddRecipe = (payload) => {
-  mealPlanItems.value.push({
-    item_id: Date.now(), // 前端生成臨時唯一 ID
-    plan_id: planData.value.plan_id,
-    recipe_id: payload.recipe_id,
-    planned_date: payload.date,
-    meal_type: payload.meal_type,
-    sort_order: 1
-  });
-};
-
-// 處理從 RecipePicker 傳回來的「刪除食譜」事件
-const handleRemoveRecipe = (itemId) => {
-  // 透過 itemId 找出索引並移除
-  const index = mealPlanItems.value.findIndex(item => item.item_id === itemId);
-  if (index !== -1) {
-    mealPlanItems.value.splice(index, 1);
-    console.log('已刪除項目 ID:', itemId);
-  }
-};
-
-// UI 切換方法
-const handleDateSelect = (date) => { selectedDate.value = date; };
-const closeDetail = () => { selectedDate.value = null; };
-const openPanel = () => { showPanel.value = true; };
-const closePanel = () => { showPanel.value = false; };
-
-// --- 套用模板邏輯 ---
-const handleApplyTemplate = (templateId) => {
-  if (!planData.value.start_date) return;
-
-  // 1. 找出該模板對應的所有食譜項目
-  const sourceItems = mealTemplateItems.value.filter(it => it.template_id === templateId);
-
-  // 2. 轉換邏輯：計算實際日期
-  const startDate = new Date(planData.value.start_date);
-
-  const newItems = sourceItems.map(it => {
-    const targetDate = new Date(startDate);
-    targetDate.setDate(startDate.getDate() + (it.day_number - 1)); // day_number 轉日期
-
-    return {
-      item_id: Date.now() + Math.random(), // 隨機 ID
-      plan_id: planId.value,
-      recipe_id: it.recipe_id,
-      planned_date: targetDate.toISOString().split('T')[0],
-      meal_type: it.meal_type,
-      sort_order: it.sort_order
-    };
-  });
-
-  // 3. 更新計畫 (可選擇覆蓋或累加，這裡示範累加)
-  mealPlanItems.value = [...mealPlanItems.value, ...newItems];
-};
-
-// --- 計畫日期變更 ---
-const handleUpdatePlanDate = (newRange) => {
-  if (!newRange || !newRange.start || !newRange.end) return;
-
-  // 輔助函式：轉成 YYYY-MM-DD 字串
-  const formatDate = (d) => {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
   };
 
-  // 直接更新 planData，觸發響應式更新
-  planData.value.start_date = formatDate(newRange.start);
-  planData.value.end_date = formatDate(newRange.end);
+  // 🔴 關鍵：確保這三個變數絕對不會變成 null
+  const updatedStart = formatDate(newInfo.start) || planData.value.start_date;
+  const updatedEnd = formatDate(newInfo.end) || planData.value.end_date;
+  const updatedTitle = (newInfo.title !== undefined) ? newInfo.title : planData.value.title;
 
-  // (選用) 如果需要將變更存回後端，可以在這裡呼叫 API
-  // publicApi.post('/plan/update', planData.value)...
-};
+  // 如果標題為空，不執行更新
+  if (!updatedTitle.trim()) return;
 
-// ------變更日期-------
-const handleDateChangeRequest = (newDate) => {
-  // 檢查範圍：確保新日期在計畫的開始與結束日期之間
-  const start = new Date(planData.value.start_date);
-  const end = new Date(planData.value.end_date);
+  try {
+    const res = await phpApi.post('mealplans/update_plan_info.php', {
+      plan_id: Number(planId.value), // 確保是數字
+      user_id: Number(authStore.userId), // 確保是數字
+      title: updatedTitle,
+      start_date: updatedStart,
+      end_date: updatedEnd
+    });
 
-  // 如果超出範圍，可以選擇不執行，或是跳出提示
-  if (newDate >= start && newDate <= end) {
-    selectedDate.value = newDate;
-  } else {
-    console.warn('已到達計畫日期的邊界');
+    if (res.data.success) {
+      // ✅ 成功才更新本地狀態
+      // 使用展開運算子確保響應式完整
+      planData.value = {
+        ...planData.value,
+        title: updatedTitle,
+        start_date: updatedStart,
+        end_date: updatedEnd
+      };
+      console.log('資料庫更新成功');
+    } else {
+      console.error('後端回報更新失敗:', res.data.error);
+      alert('更新失敗：' + (res.data.error || '原因未知'));
+    }
+  } catch (err) {
+    console.error('網路請求出錯:', err.message);
   }
 };
 
-// ------存放目標熱量並傳遞資料 ------
-const dailyTargetKcal = ref(2000); // 預設值
+// 預設方案套用
+const handleApplyTemplate = async (templateId) => {
+  if (!confirm('套用方案將會清空目前已安排的食譜，確定要執行嗎？')) return;
 
-const updateTargetKcal = (val) => {
-  dailyTargetKcal.value = val;
-  // 如果需要存回後端： publicApi.post(...)
+  try {
+    // 1. 呼叫後端一鍵處理 API
+    const res = await phpApi.post('mealplans/apply_template.php', {
+      plan_id: planId.value,
+      template_id: templateId,
+      user_id: authStore.userId
+    });
+
+    if (res.data.success) {
+      // 2. 套用成功後，直接重新執行 fetchData 重新撈取所有資料
+      // 這樣 planData (新日期) 和 mealPlanItems (新食譜) 就會同步更新到最新狀態
+      await fetchData();
+
+      console.log('方案套用成功！天數與食譜已同步更新');
+    }
+  } catch (err) {
+    console.error('套用方案失敗：', err.message);
+    alert('套用失敗，請確認模板資料正確性');
+  }
 };
 
-// ------接住封面圖的更新------
-const handleUpdatePlanCover = (updatedData) => {
-  // 更新本地的 planData，Vue 的響應式會自動通知所有組件
-  planData.value = updatedData;
+// 以日期抓備餐計畫明細
+const getItemsByDate = (date) => {
+  const dateStr = date.toISOString().split('T')[0];
+  return mealPlanItems.value
+    .filter(item => item.planned_date.includes(dateStr))
+    .map(item => {
+      const recipeDetail = item.detail || allRecipes.value.find(r => r.recipe_id === item.recipe_id);
+      return { ...item, detail: recipeDetail };
+    });
+};
 
-  // (選用) 這裡可以呼叫 API 把封面變更存進資料庫
-  // publicApi.put(`data/plan/${planId.value}`, updatedData);
+// 處理「新增食譜」事件
+const handleAddRecipe = async (payload) => {
+  try {
+    const res = await phpApi.post('mealplans/add_meal_item.php', {
+      plan_id: planData.value.plan_id,
+      recipe_id: payload.recipe_id,
+      date: payload.date,
+      meal_type: payload.meal_type
+    });
+
+    if (res.data.success) {
+      const itemsRes = await phpApi.get(`mealplans/get_plan_items.php?plan_id=${planId.value}`);
+      mealPlanItems.value = itemsRes.data;
+    }
+  } catch (err) {
+    console.error('新增食譜失敗：', err.message);
+  }
+};
+
+// 處理「刪除食譜」事件
+const handleRemoveRecipe = async (itemId) => {
+  // if (!confirm('確定要移除這道食譜嗎？')) return;
+
+  try {
+    const res = await phpApi.post('mealplans/remove_meal_item.php', {
+      item_id: itemId,
+      user_id: authStore.userId
+    });
+
+    if (res.data.success) {
+      const index = mealPlanItems.value.findIndex(item => item.item_id === itemId);
+      if (index !== -1) {
+        mealPlanItems.value.splice(index, 1);
+      }
+    }
+  } catch (err) {
+    console.error('刪除失敗：', err.message);
+  }
+};
+
+//處理子元件傳上來的目標熱量
+// 當前選中日期的目標熱量
+const currentDayTargetKcal = computed(() => {
+  if (!selectedDate.value) return 2000; // 週視圖模式預設
+
+  const dateStr = selectedDate.value.toISOString().split('T')[0];
+  const found = dailyTargets.value.find(t => t.target_date === dateStr);
+
+  // 如果資料庫有設定就用設定值，沒有就給預設 2000
+  return found ? Number(found.target_kcal) : 2000;
+})
+
+const updateTargetKcal = async (newKcal) => {
+  if (!selectedDate.value || !planId.value) return;
+
+  const dateStr = selectedDate.value.toISOString().split('T')[0];
+
+  try {
+    // 1. 呼叫 PHP API (你寫好的 update_daily_target.php)
+    await phpApi.post('mealplans/update_daily_target.php', {
+      plan_id: planId.value,
+      user_id: authStore.userId,
+      date: dateStr,
+      target_kcal: newKcal
+    });
+
+    // 2. 同步更新本地 dailyTargets 陣列，這樣畫面（如圖表）才會立刻變
+    const index = dailyTargets.value.findIndex(t => t.target_date === dateStr);
+    if (index !== -1) {
+      dailyTargets.value[index].target_kcal = newKcal;
+    } else {
+      dailyTargets.value.push({ target_date: dateStr, target_kcal: newKcal });
+    }
+  } catch (err) {
+    console.error('更新熱量目標失敗：', err.message);
+  }
+};
+
+// UI 切換方法保持不變 ...
+const handleDateSelect = (date) => { selectedDate.value = date; };
+const closeDetail = () => { selectedDate.value = null; };
+const openPanel = () => { showPanel.value = true; };
+const closePanel = () => { showPanel.value = false; };
+
+// 模板與日期更新邏輯 ...
+// (建議：這些 update 操作未來也應比照 handleRemoveRecipe 改為呼叫 phpApi.post)
+
+const handleUpdatePlanCover = (updatedData) => {
+  planData.value = updatedData;
 };
 </script>
 
@@ -228,7 +297,7 @@ const handleUpdatePlanCover = (updatedData) => {
 
         <div v-else key="picker" class="meal-detail-view col-12">
           <RecipePicker :date="selectedDate" :current-items="getItemsByDate(selectedDate)" :all-recipes="allRecipes"
-            :target-calories="dailyTargetKcal" :start-date="planData.start_date" :end-date="planData.end_date"
+            :target-calories="currentDayTargetKcal" :start-date="planData.start_date" :end-date="planData.end_date"
             @update-target="updateTargetKcal" @back="closeDetail" @add="handleAddRecipe" @remove="handleRemoveRecipe"
             @change-date="handleDateChangeRequest" />
         </div>
@@ -236,10 +305,10 @@ const handleUpdatePlanCover = (updatedData) => {
     </div>
 
     <Transition name="slide-fade">
-      <PlanPanel v-if="showPanel" :target-calories="dailyTargetKcal" :plan-data="planData"
+      <PlanPanel v-if="showPanel" :target-calories="currentDayTargetKcal" :plan-data="planData"
         :meal-plan-items="mealPlanItems" :all-recipes="allRecipes" :initial-date="selectedDate"
         :meal-templates="mealTemplates" :cover-templates="coverTemplates" @apply-template="handleApplyTemplate"
-        @update-plan-date="handleUpdatePlanDate" @update-plan="handleUpdatePlanCover" @close="closePanel" />
+        @update-plan-info="handleUpdatePlanInfo" @update-plan="handleUpdatePlanCover" @close="closePanel" />
     </Transition>
 
     <Transition name="fade">
