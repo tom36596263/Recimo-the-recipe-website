@@ -1,7 +1,6 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import OrderCard from '@/components/mall/OrderCard.vue';
-// import { publicApi } from '@/utils/publicApi';
 import { phpApi } from '@/utils/publicApi';
 import BaseModal from '@/components/BaseModal.vue';
 import BaseTag from '@/components/common/BaseTag.vue';
@@ -12,45 +11,39 @@ const currentPage = ref(1);
 const pageSize = 5;
 const activeTag = ref('全部訂單');
 const selectedDate = ref('');
-// const userInfo = JSON.parse(localStorage.getItem('user_info'));
-// const userId = userInfo?.id || userInfo?.user_id || null;
+const pollTimer = ref(null); // 🌟 新增：輪詢計時器
 
-// console.log("從 localStorage 抓到的原始資料:", userInfo);
-// console.log("最終解析出的 userId:", userId);
-
-// if (!userId) {
-//   console.error("錯誤：抓不到使用者 ID，請重新登入！");
-//   // 可以導向登入頁面
-// }
-
-// 讀取資料
+// 讀取資料 (核心函式)
 const fetchOrders = async () => {
   const userData = localStorage.getItem('user');
-  if (!userData) {
-    console.error("找不到使用者登入資訊 (Key: 'user')");
-    return;
-  }
+  if (!userData) return;
+
   const userInfo = JSON.parse(userData);
-  //確保抓到 id (根據內容是小寫 id)
-  const userId = userInfo?.id;
+
+  // 增加這行 log，在雲端環境打開 F12 看看它到底是長什麼樣子
+  console.log('目前 localStorage 裡的用戶資訊:', userInfo);
+
+  // 嘗試所有可能的欄位名稱
+  const userId = userInfo?.id || userInfo?.user_id || userInfo?.data?.id || userInfo?.data?.user_id;
 
   if (!userId) {
     console.error("解析不出 userId，請檢查內容:", userInfo);
     return;
   }
-  console.log("成功抓到當前登入者 ID:", userId);
+
   try {
-    //抓取訂單清單
+    // 1. 抓取訂單清單
     const resList = await phpApi.get('mall/user_order_list.php', {
       params: { user_id: userId }
     });
 
     const list = Array.isArray(resList.data) ? resList.data : [];
 
-    // 併發抓取每一筆的明細 (包含 items)
+    // 2. 併發抓取明細
     const detailedOrders = await Promise.all(
       list.map(async (basicOrder) => {
         try {
+          // 相容大小寫
           const oid = basicOrder.order_id || basicOrder.ORDER_ID;
           const resDetail = await phpApi.get('mall/user_order.php', {
             params: {
@@ -58,10 +51,9 @@ const fetchOrders = async () => {
               user_id: userId
             }
           });
-          // PHP 回傳的結構通常是 { ..., items: [...] }
           return resDetail.data;
         } catch (e) {
-          console.error(`訂單 ${basicOrder.order_id} 詳情讀取失敗`, e);
+          console.error(`訂單 ${basicOrder.order_id} 詳情失敗`, e);
           return basicOrder;
         }
       })
@@ -74,26 +66,56 @@ const fetchOrders = async () => {
   }
 };
 
+// 🌟 新增：智慧輪詢機制
+// 當使用者回到頁面時，我們每 1.5 秒抓一次，連續抓 5 次
+// 這樣可以解決「綠界 callback 還沒跑完，使用者就回來了」的問題
+const startPolling = () => {
+  console.log('開始檢查訂單狀態...');
+  let count = 0;
+
+  // 先清除舊的計時器，避免重複
+  if (pollTimer.value) clearInterval(pollTimer.value);
+
+  // 立即執行一次
+  fetchOrders();
+
+  // 設定計時器
+  pollTimer.value = setInterval(() => {
+    count++;
+    console.log(`第 ${count} 次自動更新...`);
+    fetchOrders();
+
+    // 5次後停止 (約 7.5 秒)
+    if (count >= 5) {
+      clearInterval(pollTimer.value);
+      pollTimer.value = null;
+    }
+  }, 1500);
+};
+
+// 監聽頁面可見性變化
 const handleVisibilityChange = () => {
   if (document.visibilityState === 'visible') {
-    console.log('偵測到回到頁面，自動更新訂單狀態...');
-    fetchOrders(); // 執行您原本抓取資料的函數
+    // 當使用者切換分頁或是從綠界跳轉回來時，啟動輪詢
+    startPolling();
   }
 };
 
 onMounted(() => {
-  fetchOrders();
+  // 進來頁面先跑一次輪詢，因為可能是剛結帳完跳轉過來的
+  startPolling();
+
   window.addEventListener('visibilitychange', handleVisibilityChange);
-  // 額外保險：當視窗獲得焦點時也觸發
-  window.addEventListener('focus', fetchOrders);
+  window.addEventListener('focus', handleVisibilityChange);
 });
 
-// 記得在組件卸載時移除監聽，避免記憶體洩漏
-import { onUnmounted } from 'vue';
 onUnmounted(() => {
   window.removeEventListener('visibilitychange', handleVisibilityChange);
-  window.removeEventListener('focus', fetchOrders);
+  window.removeEventListener('focus', handleVisibilityChange);
+  if (pollTimer.value) clearInterval(pollTimer.value);
 });
+
+// --- 以下篩選與分頁邏輯保持不變 ---
 
 const tags = [
   { text: '全部訂單', width: '138px' },
@@ -103,7 +125,6 @@ const tags = [
   { text: '已取消訂單', width: '138px' }
 ];
 
-//狀態對照表 (維持不變，對應 0, 1, 2...)
 const statusMapping = {
   "新訂單": 0,
   '已確認訂單': 1,
@@ -112,22 +133,18 @@ const statusMapping = {
   '已取消訂單': -1
 };
 
-//兼容資料庫與前端格式
 const filteredProducts = computed(() => {
   let result = ordersData.value;
 
-  // 過濾狀態
   if (activeTag.value !== '全部訂單') {
     const targetStatus = statusMapping[activeTag.value];
-
     result = result.filter((item) => {
+      // 確保相容 PHP 回傳的各種 key 大小寫
       const rawStatus = item.ORDER_STATUS ?? item.order_status ?? item.status;
-      // 使用 == (雙等於) 或 Number() 強制轉型，確保 "1" 等於 1
       return Number(rawStatus) === targetStatus;
     });
   }
 
-  //過濾日期
   if (selectedDate.value) {
     result = result.filter(item => {
       const rawDate = item.created || item.CREATED || '';
@@ -135,31 +152,26 @@ const filteredProducts = computed(() => {
     });
   }
 
-
-  // 剛結帳完的訂單會在最上面
   result.sort((a, b) => {
-    const dateA = new Date(a.CREATED || a.date);
-    const dateB = new Date(b.CREATED || b.date);
-    return dateB - dateA; // 降序
+    const dateA = new Date(a.CREATED || a.created || a.date);
+    const dateB = new Date(b.CREATED || b.created || b.date);
+    return dateB - dateA;
   });
 
   return result;
 });
 
-//頁碼計算 
 const totalPages = computed(() => {
   if (filteredProducts.value.length === 0) return 0;
   return Math.ceil(filteredProducts.value.length / pageSize);
 });
 
-//分頁裁切
 const paginatedOrders = computed(() => {
   const startIndex = (currentPage.value - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   return filteredProducts.value.slice(startIndex, endIndex);
 });
 
-//事件處理
 const selectTag = (tagName) => {
   activeTag.value = tagName;
   currentPage.value = 1;
@@ -183,10 +195,8 @@ const openCalender = () => {
   }
 }
 
-//取消訂單邏輯
-const showSuccessModal = ref(false);
+// 取消訂單
 const onCancel = async (orderId) => {
-  // 【新增】在這裡定義 userId，否則第 181 行會報錯
   const userInfo = JSON.parse(localStorage.getItem('user'));
   const currentUserId = userInfo?.id || userInfo?.user_id;
 
@@ -195,44 +205,23 @@ const onCancel = async (orderId) => {
     return;
   }
 
-  console.log("發送取消請求 - UserID:", currentUserId, "OrderID:", orderId);
-
   try {
     const res = await phpApi.post('mall/cancel_order.php', {
-      user_id: currentUserId, // 🌟 使用剛剛定義的變數
+      user_id: currentUserId,
       order_id: orderId
     });
 
     if (res.data.success) {
-      //後端成功後，更新本地資料狀態，讓畫面即時變化
-      const targetIndex = ordersData.value.findIndex(order => {
-        const currentId = order.order_id || order.ORDER_ID || order.id;
-        return currentId === orderId;
-      });
-
-      if (targetIndex !== -1) {
-        // 統一更新為 -1 (取消狀態)
-        if (ordersData.value[targetIndex].order_status !== undefined) {
-          ordersData.value[targetIndex].order_status = -1;
-        } else if (ordersData.value[targetIndex].ORDER_STATUS !== undefined) {
-          ordersData.value[targetIndex].ORDER_STATUS = -1;
-        } else {
-          ordersData.value[targetIndex].status = -1;
-        }
-      }
-
-      //顯示成功彈窗
+      // 成功後直接重抓一次資料，確保狀態同步
+      fetchOrders();
       showSuccessModal.value = true;
     }
   } catch (err) {
-    // 這裡可以幫你抓出 PHP 噴出的真正錯誤訊息
-    console.error('取消失敗回應:', err.response?.data);
+    console.error('取消失敗:', err);
+    alert('取消失敗，請稍後再試');
   }
 };
-
-
 </script>
-
 <template>
   <div class="container">
     <div class="row">
