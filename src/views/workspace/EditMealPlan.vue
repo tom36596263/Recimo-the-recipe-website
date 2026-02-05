@@ -89,7 +89,85 @@ const datelist = computed(() => {
 });
 
 // --- 邏輯方法 ---
+// --- 計畫資訊變更（含標題與日期範圍） ---
+const handleUpdatePlanInfo = async (newInfo) => {
+  // 1. 強化版日期格式化：避免重複轉換導致的 Invalid Date
+  const formatDate = (date) => {
+    if (!date) return null;
+    // 如果已經是 YYYY-MM-DD 字串，直接回傳，不要再進 new Date()
+    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
 
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return null; // 檢查是否為有效日期
+
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  // 🔴 關鍵：確保這三個變數絕對不會變成 null
+  const updatedStart = formatDate(newInfo.start) || planData.value.start_date;
+  const updatedEnd = formatDate(newInfo.end) || planData.value.end_date;
+  const updatedTitle = (newInfo.title !== undefined) ? newInfo.title : planData.value.title;
+
+  // 如果標題為空，不執行更新
+  if (!updatedTitle.trim()) return;
+
+  try {
+    const res = await phpApi.post('mealplans/update_plan_info.php', {
+      plan_id: Number(planId.value), // 確保是數字
+      user_id: Number(authStore.userId), // 確保是數字
+      title: updatedTitle,
+      start_date: updatedStart,
+      end_date: updatedEnd
+    });
+
+    if (res.data.success) {
+      // ✅ 成功才更新本地狀態
+      // 使用展開運算子確保響應式完整
+      planData.value = {
+        ...planData.value,
+        title: updatedTitle,
+        start_date: updatedStart,
+        end_date: updatedEnd
+      };
+      console.log('資料庫更新成功');
+    } else {
+      console.error('後端回報更新失敗:', res.data.error);
+      alert('更新失敗：' + (res.data.error || '原因未知'));
+    }
+  } catch (err) {
+    console.error('網路請求出錯:', err.message);
+  }
+};
+
+// 預設方案套用
+const handleApplyTemplate = async (templateId) => {
+  if (!confirm('套用方案將會清空目前已安排的食譜，確定要執行嗎？')) return;
+
+  try {
+    // 1. 呼叫後端一鍵處理 API
+    const res = await phpApi.post('mealplans/apply_template.php', {
+      plan_id: planId.value,
+      template_id: templateId,
+      user_id: authStore.userId
+    });
+
+    if (res.data.success) {
+      // 2. 套用成功後，直接重新執行 fetchData 重新撈取所有資料
+      // 這樣 planData (新日期) 和 mealPlanItems (新食譜) 就會同步更新到最新狀態
+      await fetchData();
+
+      console.log('方案套用成功！天數與食譜已同步更新');
+    }
+  } catch (err) {
+    console.error('套用方案失敗：', err.message);
+    alert('套用失敗，請確認模板資料正確性');
+  }
+};
+
+// 以日期抓備餐計畫明細
 const getItemsByDate = (date) => {
   const dateStr = date.toISOString().split('T')[0];
   return mealPlanItems.value
@@ -230,7 +308,7 @@ const handleUpdatePlanCover = (updatedData) => {
       <PlanPanel v-if="showPanel" :target-calories="currentDayTargetKcal" :plan-data="planData"
         :meal-plan-items="mealPlanItems" :all-recipes="allRecipes" :initial-date="selectedDate"
         :meal-templates="mealTemplates" :cover-templates="coverTemplates" @apply-template="handleApplyTemplate"
-        @update-plan-date="handleUpdatePlanDate" @update-plan="handleUpdatePlanCover" @close="closePanel" />
+        @update-plan-info="handleUpdatePlanInfo" @update-plan="handleUpdatePlanCover" @close="closePanel" />
     </Transition>
 
     <Transition name="fade">
