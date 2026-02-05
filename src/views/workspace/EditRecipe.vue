@@ -177,22 +177,28 @@ const publishToDb = async () => {
     return;
   }
 
+  // 🏆 核心修正：使用 Store 提供的 userId 計算屬性
+  // 這樣不論你的 LocalStorage 存的是 id 還是 user_id，都能正確抓到
+  const currentUserId = authStore.userId;
+
+  console.log('當前登入用戶資訊:', authStore.user);
+  console.log('準備傳給 API 的 ID:', currentUserId);
+
+  if (!currentUserId) {
+    alert('找不到您的用戶資訊，請嘗試重新登入。');
+    return;
+  }
+
   try {
-    // 🔥 修改後的圖片處理邏輯
+    // 🔥 圖片處理邏輯
     const handleImage = async (img) => {
       if (!img) return null;
-
-      // 1. 如果是新選的檔案 (File 物件)
       if (img instanceof File) {
         return await fileToBase64(img);
       }
-
-      // 2. 如果是字串 (可能是 Base64，也可能是原本的圖片路徑/URL)
-      // 必須回傳 img，否則沒換圖時會傳 null 給後端導致 SQL 報錯
       if (typeof img === 'string') {
         return img;
       }
-
       return null;
     };
 
@@ -208,7 +214,6 @@ const publishToDb = async () => {
         return {
           step_title: s.title,
           step_content: s.content || '',
-          // 🔥 步驟圖也要套用同樣的邏輯，避免步驟圖更新失敗
           step_image_url: await handleImage(s.image),
           step_total_time: timeString,
           step_ingredients: s.tags
@@ -219,12 +224,12 @@ const publishToDb = async () => {
     const payload = {
       recipe_id: recipeForm.value.recipe_id || null,
       parent_recipe_id: recipeForm.value.parent_recipe_id || null,
-      author_id: authStore.user.id || authStore.user.user_id,
+      author_id: currentUserId, // 這裡現在保證能拿到正確的 ID 數字
       recipe_title: isAdaptModeActive.value ? (recipeForm.value.adapt_title || recipeForm.value.title) : recipeForm.value.title,
       recipe_description: recipeForm.value.description || '暫無詳細說明',
       adaptation_note: isAdaptModeActive.value ? (recipeForm.value.adapt_description || '') : '',
       adaptation_title: isAdaptModeActive.value ? (recipeForm.value.adapt_title || recipeForm.value.title) : '',
-      recipe_image_url: coverData, // 這裡現在保證會有值（新 Base64 或舊路徑）
+      recipe_image_url: coverData,
       recipe_difficulty: recipeForm.value.difficulty,
       total_time: recipeForm.value.totalTime,
       recipe_servings: recipeForm.value.recipe_servings,

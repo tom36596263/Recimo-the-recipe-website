@@ -338,7 +338,7 @@ const ingredientsData = computed(() => {
 const nutritionWrapper = computed(() => {
   if (!rawRecipe.value || rawIngredients.value.length === 0) return [];
 
-  // 1. 計算食材陣列裡的基礎總量 (這是目前 rawIngredients 裡所有數值的累加)
+  // 1. 計算食材陣列裡的基礎總量
   let baseKcal = 0, baseP = 0, baseF = 0, baseC = 0;
 
   rawIngredients.value.forEach((ing) => {
@@ -352,18 +352,10 @@ const nutritionWrapper = computed(() => {
     baseC += (Number(ing.carbs_per_100g) || 0) * (weight / 100);
   });
 
-  // 2. 根據模式定義不同的放大倍率 (multiplier)
-  let multiplier = 1;
-  const currentServings = Math.max(1, Number(servings.value || 1));
-  const originalServings = Math.max(1, Number(rawRecipe.value.recipe_servings || 1));
-
-  if (isPreviewMode.value) {
-    // 預覽模式：因為 rawIngredients 已經乘過 originalServings，所以計算單份要先除回來
-    multiplier = currentServings / originalServings;
-  } else {
-    // 正式模式：食材是單份數據，直接乘上當前份數
-    multiplier = currentServings;
-  }
+  // 🏆 關鍵修正：統一放大倍率
+  // 不管預覽還是正式模式，直接乘以當前份數 (servings.value)
+  // 因為你前面已經強制 servings.value = 1，所以這裡會精準顯示「一整份」的熱量
+  const multiplier = Math.max(1, Number(servings.value || 1));
 
   // 3. 回傳最終計算結果
   return [
