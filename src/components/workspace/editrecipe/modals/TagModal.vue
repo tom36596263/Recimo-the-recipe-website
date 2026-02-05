@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { publicApi } from '@/utils/publicApi';
+// 1. ✨ 關鍵：改用 phpApi，這樣 baseURL 才會是 localhost:8888
+import { phpApi } from '@/utils/phpApi';
 
 const props = defineProps({
     modelValue: Boolean,
@@ -20,29 +21,44 @@ const currentCategory = ref('全部');
 const rawTags = ref([]);
 const tempSelected = ref([]);
 
-// 抓取資料 (省略重複部分...)
 const fetchTags = async () => {
     try {
-        const res = await publicApi.get('data/recipe/tags.json');
-        rawTags.value = res.data || [];
+        // 2. ✨ 關鍵：使用 phpApi，路徑只要寫相對路徑
+        const res = await phpApi.get('recipes/recipe_tags_get.php');
+
+        console.log("燈箱收到 PHP 回應:", res.data);
+
+        if (res.data && res.data.success) {
+            // 3. ✨ 關鍵：對齊 PHP 回傳的結構 (res.data.data)
+            rawTags.value = res.data.data || [];
+            console.log("燈箱內的 rawTags 已載入陣列:", rawTags.value);
+        } else {
+            console.error("PHP 回傳 success 為 false:", res.data?.message);
+        }
     } catch (error) {
-        console.error("標籤資料讀取失敗:", error);
+        console.error("燈箱抓取標籤失敗，請檢查 MAMP (8888) 是否啟動:", error);
     }
 };
 
-onMounted(() => { fetchTags(); });
+onMounted(() => {
+    fetchTags();
+});
 
-// 自動提取分類 (省略重複部分...)
+// --- 以下邏輯維持不變 ---
+
 const categories = computed(() => {
+    // 加上安全檢查避免 map undefined
+    if (!rawTags.value) return ['全部'];
     const types = rawTags.value.map(item => item.tag_type);
     return ['全部', ...new Set(types)];
 });
 
-// 搜尋與過濾 (省略重複部分...)
 const displayTags = computed(() => {
-    let list = rawTags.value;
+    let list = rawTags.value || [];
     if (searchQuery.value) {
-        return list.filter(item => item.tag_name.toLowerCase().includes(searchQuery.value.toLowerCase()));
+        return list.filter(item =>
+            item.tag_name && item.tag_name.toLowerCase().includes(searchQuery.value.toLowerCase())
+        );
     }
     if (currentCategory.value !== '全部') {
         list = list.filter(item => item.tag_type === currentCategory.value);
@@ -50,23 +66,17 @@ const displayTags = computed(() => {
     return list;
 });
 
-// --- 核心邏輯：數量判斷 ---
-// 計算「已在頁面上的」+「在燈箱剛選的」總數
 const totalCount = computed(() => props.selectedList.length + tempSelected.value.length);
-
 const isInParent = (id) => props.selectedList.some(s => Number(s.tag_id) === Number(id));
 const isInTemp = (id) => tempSelected.value.some(s => Number(s.tag_id) === Number(id));
 
 const handleToggleSelect = (item) => {
     if (isInParent(item.tag_id)) return;
-
     const index = tempSelected.value.findIndex(s => Number(s.tag_id) === Number(item.tag_id));
 
     if (index > -1) {
-        // 如果已經在暫選清單，就移除 (取消選取不受限)
         tempSelected.value.splice(index, 1);
     } else {
-        // ✨ 新增標籤前，先檢查是否滿額
         if (totalCount.value >= MAX_TAGS) {
             alert(`標籤數量已達上限 ${MAX_TAGS} 個囉！`);
             return;
