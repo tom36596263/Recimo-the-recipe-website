@@ -1,6 +1,6 @@
 /**
- * 編輯個人檔案彈窗組件
- */
+* 編輯個人檔案彈窗組件
+*/
 <script setup>
 import { ref, watch } from 'vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
@@ -16,12 +16,37 @@ const formData = ref({
     username: '',
     role: '',
     coverImage: '',
-    avatar: ''
+    avatar: '',
+    coverImageFile: null,  // 新增：儲存封面圖檔案
+    avatarFile: null       // 新增：儲存頭像檔案
 });
 
 const maxRoleLength = 30;
 const coverImageInput = ref(null);
 const avatarInput = ref(null);
+
+// 圖片驗證設定
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+/**
+ * 驗證圖片檔案
+ */
+const validateImage = (file) => {
+    // 檢查檔案類型
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        alert('請上傳 JPG、PNG 或 WebP 格式的圖片');
+        return false;
+    }
+
+    // 檢查檔案大小
+    if (file.size > MAX_FILE_SIZE) {
+        alert('圖片大小不可超過 5MB');
+        return false;
+    }
+
+    return true;
+};
 
 watch(() => props.userProfile, (newVal) => {
     if (newVal) {
@@ -29,14 +54,36 @@ watch(() => props.userProfile, (newVal) => {
             username: newVal.username || '',
             role: newVal.role || '',
             coverImage: newVal.coverImage || '',
-            avatar: newVal.avatar || ''
+            avatar: newVal.avatar || '',
+            coverImageFile: null,
+            avatarFile: null
         };
     }
 }, { immediate: true });
 
+const handleClose = () => {
+    // 重置為原始資料
+    if (props.userProfile) {
+        formData.value = {
+            username: props.userProfile.username || '',
+            role: props.userProfile.role || '',
+            coverImage: props.userProfile.coverImage || '',
+            avatar: props.userProfile.avatar || '',
+            coverImageFile: null,
+            avatarFile: null
+        };
+    }
+
+    // 清空檔案 input
+    if (coverImageInput.value) coverImageInput.value.value = '';
+    if (avatarInput.value) avatarInput.value.value = '';
+
+    emit('close');
+};
+
 const handleSave = () => {
     emit('save', { ...formData.value });
-    emit('close');
+    handleClose();
 };
 
 const handleEditCover = () => {
@@ -46,6 +93,16 @@ const handleEditCover = () => {
 const handleCoverChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
+        // 驗證圖片
+        if (!validateImage(file)) {
+            event.target.value = ''; // 清空 input
+            return;
+        }
+
+        // 儲存檔案物件供上傳使用
+        formData.value.coverImageFile = file;
+
+        // 產生預覽圖
         const reader = new FileReader();
         reader.onload = (e) => {
             formData.value.coverImage = e.target.result;
@@ -61,6 +118,16 @@ const handleEditAvatar = () => {
 const handleAvatarChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
+        // 驗證圖片
+        if (!validateImage(file)) {
+            event.target.value = ''; // 清空 input
+            return;
+        }
+
+        // 儲存檔案物件供上傳使用
+        formData.value.avatarFile = file;
+
+        // 產生預覽圖
         const reader = new FileReader();
         reader.onload = (e) => {
             formData.value.avatar = e.target.result;
@@ -71,18 +138,13 @@ const handleAvatarChange = (event) => {
 </script>
 
 <template>
-    <div v-if="show" class="edit-profile-modal-overlay" @click="$emit('close')">
+    <div v-if="show" class="edit-profile-modal-overlay" @click="handleClose">
         <div class="edit-profile-modal-container" @click.stop>
             <!-- 封面 -->
             <div class="cover-section">
                 <img :src="formData.coverImage" alt="封面" class="cover-image">
-                <input 
-                    ref="coverImageInput" 
-                    type="file" 
-                    accept="image/*" 
-                    @change="handleCoverChange"
-                    style="display: none;"
-                >
+                <input ref="coverImageInput" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    @change="handleCoverChange" style="display: none;">
                 <BaseBtn @click="handleEditCover" class="edit-cover-btn">編輯封面照</BaseBtn>
             </div>
 
@@ -94,13 +156,8 @@ const handleAvatarChange = (event) => {
                         <span class="avatar-edit-text">更換頭像</span>
                     </div>
                 </div>
-                <input 
-                    ref="avatarInput" 
-                    type="file" 
-                    accept="image/*" 
-                    @change="handleAvatarChange"
-                    style="display: none;"
-                >
+                <input ref="avatarInput" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    @change="handleAvatarChange" style="display: none;">
             </div>
 
             <!-- 表單 -->
@@ -109,29 +166,20 @@ const handleAvatarChange = (event) => {
 
                 <div class="form-group">
                     <label class="form-label">暱稱</label>
-                    <input 
-                        v-model="formData.username" 
-                        type="text" 
-                        class="form-input"
-                        placeholder="請輸入暱稱"
-                    >
+                    <input v-model="formData.username" type="text" class="form-input" placeholder="請輸入暱稱">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">狀態消息</label>
                     <div class="textarea-wrapper">
-                        <textarea 
-                            v-model="formData.role" 
-                            class="form-textarea"
-                            placeholder="請輸入狀態消息"
-                            :maxlength="maxRoleLength"
-                        ></textarea>
+                        <textarea v-model="formData.role" class="form-textarea" placeholder="請輸入狀態消息"
+                            :maxlength="maxRoleLength"></textarea>
                         <span class="char-count">{{ formData.role.length }}/{{ maxRoleLength }}</span>
                     </div>
                 </div>
 
                 <div class="button-group">
-                    <BaseBtn @click="$emit('close')" class="cancel-btn">取消</BaseBtn>
+                    <BaseBtn @click="handleClose" class="cancel-btn">取消</BaseBtn>
                     <BaseBtn @click="handleSave" class="save-btn">儲存</BaseBtn>
                 </div>
             </div>
@@ -199,7 +247,7 @@ const handleAvatarChange = (event) => {
     width: 120px;
     height: 120px;
     cursor: pointer;
-    
+
     &:hover .avatar-overlay {
         opacity: 1;
     }
