@@ -18,7 +18,7 @@ const props = defineProps({
   coverTemplates: { type: Array, default: () => [] }
 });
 
-const emit = defineEmits(['close', 'apply-template', 'update-plan-date', 'update-plan']);
+const emit = defineEmits(['close', 'apply-template', 'update-plan-info', 'update-plan']);
 const onSelectTemplate = (id) => {
   emit('apply-template', id); // 向上轉發
 };
@@ -121,7 +121,8 @@ onMounted(() => {
 });
 // 處理範圍更新，轉發給 EditMealPlan
 const onUpdateRange = (range) => {
-  emit('update-plan-date', range);
+  // range 包含 { start, end }
+  emit('update-plan-info', range);
 };
 
 
@@ -155,7 +156,8 @@ const closePanel = () => { emit('close'); };
     <div class="plan-panel__header">
       <div class="plan-panel__field p-p1">
         計畫名稱：
-        <input type="text" :placeholder="planData.title || '載入中...'" class="plan-panel__input p-p1" />
+        <input type="text" :value="planData.title || '載入中...'"
+          @blur="(e) => emit('update-plan-info', { title: e.target.value })" class="plan-panel__input p-p1" />
       </div>
       <div class="plan-panel__close" @click="closePanel">
         <i-material-symbols-close />
