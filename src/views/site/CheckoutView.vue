@@ -19,12 +19,13 @@ const orderItems = computed(() => {
   }));
 });
 const formatImageUrl = (rawImage) => {
-  const PHP_BASE_URL = 'http://localhost:8888/recimo_api';
   if (!rawImage) return '';
-  if (rawImage.startsWith('http')) return rawImage;
+  // 1. 如果已經是 http 開頭（PHP 已拼好），直接回傳
+  if (typeof rawImage === 'string' && rawImage.startsWith('http')) return rawImage;
 
   let relativePath = rawImage;
-  // 處理 JSON 格式
+
+  // 2. 處理資料庫原始 JSON 格式 (例如: [{"image_url":"..."}])
   if (typeof rawImage === 'string' && (rawImage.startsWith('[') || rawImage.startsWith('{'))) {
     try {
       const parsed = JSON.parse(rawImage);
@@ -35,8 +36,16 @@ const formatImageUrl = (rawImage) => {
     } catch (e) { console.warn('JSON parse error', e); }
   }
 
-  const cleanPath = relativePath.replace(/^public\//, '').replace(/^\/+/, '');
-  return `${PHP_BASE_URL}/${cleanPath}`;
+  // 3. 💡 修正：如果 PHP 回傳的是相對路徑（例如 img/mall/xxx.jpg）
+  // 我們應該拼接「當前環境」的 API Base URL，而不是寫死 localhost
+  if (relativePath && !relativePath.startsWith('http')) {
+    // 這裡建議使用 phpApi 的配置路徑，或者維持相對路徑讓組件處理
+    const cleanPath = relativePath.replace(/^public\//, '').replace(/^\/+/, '');
+    // 假設你的 phpApi.defaults.baseURL 是正確的環境網址
+    return `${phpApi.defaults.baseURL}/${cleanPath}`.replace(/([^:]\/)\/+/g, "$1");
+  }
+
+  return relativePath;
 };
 
 const cartItemsFromDB = ref([]); // 新增：存儲從 PHP 抓回來的購物車資料
@@ -60,34 +69,17 @@ const fetchCartData = async () => {
     const rawData = result.status === 'success' ? result.data : result;
 
     if (Array.isArray(rawData)) {
-      const PHP_BASE_URL = 'http://localhost:8888/recimo_api';
-
+      // 🌟 修改處：刪除這裡所有的圖片處理邏輯，直接用 map 簡單處理
       cartItemsFromDB.value = rawData.map(item => {
-        let finalImageUrl = '';
-        let rawImage = item.product_image;
-
-        // 處理圖片路徑（處理 JSON 或 字串路徑）
-        if (rawImage) {
-          if (rawImage.startsWith('http')) {
-            finalImageUrl = rawImage;
-          } else {
-            // 如果是 JSON 格式 ["img1.jpg"] 則取第一張
-            if (rawImage.startsWith('[') || rawImage.startsWith('{')) {
-              try {
-                const parsed = JSON.parse(rawImage);
-                rawImage = Array.isArray(parsed) ? (parsed[0].image_url || parsed[0]) : rawImage;
-              } catch (e) { }
-            }
-            // 去除多餘路徑，拼接成完整網址
-            const cleanPath = rawImage.replace(/^public\//, '').replace(/^\/+/, '');
-            finalImageUrl = `${PHP_BASE_URL}/${cleanPath}`;
-          }
-        }
+        // 1. 取得原始圖片欄位
+        const rawImage = item.product_image || item.image || '';
 
         return {
           ...item,
-          product_image: finalImageUrl,
-          // 確保欄位名稱跟子組件 props 一致 (quantity vs count)
+          // 2. 🌟 直接呼叫上方的 formatImageUrl 函式 (它會自動判斷環境)
+          product_image: formatImageUrl(rawImage),
+
+          // 3. 處理數值格式
           quantity: Number(item.quantity || item.count || 1),
           product_price: Number(item.product_price || item.price)
         };
@@ -271,17 +263,16 @@ const clearDatabaseCart = async () => {
 };
 
 const handleSubmit = async () => {
-  // --- 1. 先抓取目前登入者的 ID (這行最重要) ---
+  // --- 1. 驗證登入 ---
   const userInfo = JSON.parse(localStorage.getItem('user'));
-  // 這裡我們定義了 currentUserId
   const currentUserId = userInfo?.id || userInfo?.user_id;
 
   if (!currentUserId) {
     alert('偵測不到登入資訊，請重新登入後再結帳');
-    // router.push('/login'); // 視情況導向登入頁
     return;
   }
-  // 1. 驗證邏輯 (保持不變)
+
+  // --- 2. 驗證欄位 ---
   validateField('user_name');
   validateField('user_phone');
   validateField('user_email');
@@ -293,33 +284,30 @@ const handleSubmit = async () => {
     validateField('shipping_address');
   }
 
-  if (form.value.payment_method === 'card') {
-    validateField('card_num_1');
-    validateField('card_num_2');
-    validateField('card_num_3');
-    validateField('card_num_4');
-    validateField('card_expiry');
-    validateField('card_cvc');
-  }
+  // if (form.value.payment_method === 'card') {
+  //   validateField('card_num_1');
+  //   validateField('card_num_2');
+  //   validateField('card_num_3');
+  //   validateField('card_num_4');
+  //   validateField('card_expiry');
+  //   validateField('card_cvc');
+  // }
 
   const hasError = Object.values(errors.value).some((msg) => msg !== '');
-
   if (hasError) {
     alert('資料填寫有誤，請檢查紅色欄位');
     return;
   }
-
   if (!form.value.shipping_type) {
     alert('請選擇宅配地址方式');
     return;
   }
-
   if (!form.value.payment_method) {
     alert('請選擇付款方式');
     return;
   }
 
-  // 2. 準備 Payload
+  // --- 3. 準備 Payload ---
   const orderPayload = {
     user_id: currentUserId,
     logistics_id: form.value.logistics_id,
@@ -339,69 +327,41 @@ const handleSubmit = async () => {
     }))
   };
 
-  // 3. 嘗試呼叫 API (如果不通也沒關係，繼續往下走)
-  let apiSuccess = false;
-  let realOrderId = null;
-
   try {
-    // A. 呼叫原本的 add_order.php 送出訂單
+    // --- 4. 呼叫後端 API ---
     const response = await phpApi.post('/mall/add_order.php', orderPayload);
-    console.log('API 回傳:', response.data);
 
     if (response.data.success) {
-      apiSuccess = true;
-      realOrderId = response.data.order_id;
+      const realOrderId = response.data.order_id;
 
-      // B. 🌟 關鍵：訂單成功後，立即呼叫清空購物車 API
+      // --- 5. 清空購物車 ---
       await clearDatabaseCart();
+      cartStore.items = [];
+      cartItemsFromDB.value = [];
+
+      // --- 6. 分流處理：信用卡轉址 vs 貨到付款顯示成功 ---
+      if (form.value.payment_method === 'card') {
+        // [信用卡] -> 跳轉綠界
+        // 這裡不需要顯示燈箱，直接離開
+        const checkoutUrl = `http://localhost:8888/recimo_api/mall/ecpay_checkout.php?order_id=${realOrderId}`;
+        window.location.href = checkoutUrl;
+      } else {
+        // [貨到付款] -> 顯示成功燈箱
+        // 不需要再存 LocalStorage，因為資料庫已經有這筆訂單了
+        // 你的訂單列表頁面 (Order.vue) 會直接去撈資料庫
+        showSuccessModal.value = true;
+        setTimeout(() => {
+          handleModalCloseAndRedirect();
+        }, 3000);
+      }
+    } else {
+      alert('訂單建立失敗：' + (response.data.message || '未知錯誤'));
     }
   } catch (error) {
-    console.error('API 連線失敗，走本地模擬模式:', error);
+    console.error('API 連線失敗:', error);
+    alert('系統錯誤，請檢查網路連線或聯繫管理員');
   }
-
-
-  // 4. 🌟 無論 API 成功或失敗，都執行原本的 LocalStorage 與燈箱邏輯 🌟
-
-  // 使用 API 回傳的 ID 或是 生成假 ID
-  const finalOrderId = realOrderId || Number(Date.now().toString().slice(-8));
-
-  const orderMasterPayload = {
-    ORDER_ID: finalOrderId,
-    USER_ID: 1,
-    LOGISTICS_ID: form.value.logistics_id,
-    SUBTOTAL: subtotal.value,
-    DISCOUNT_AMOUNT: 0,
-    SHIPPING_FEE: shippingFee.value,
-    TOTAL_AMOUNT: totalAmount.value,
-    CREATED: new Date().toISOString().slice(0, 19).replace('T', ' '),
-    RECIPIENT_NAME: orderPayload.recipient_name,
-    RECIPIENT_PHONE: orderPayload.recipient_phone,
-    SHIPPING_ADDRESS: orderPayload.shipping_address,
-    ORDER_STATUS: 0,
-    PAYMENT_METHOD: form.value.payment_method,
-    PAYMENT_STATUS: form.value.payment_method === 'card' ? 1 : 0,
-    items: orderPayload.items,
-    products: orderPayload.items
-  };
-
-  // 存入 LocalStorage
-  const existingOrders = JSON.parse(localStorage.getItem('mall_orders') || '[]');
-  existingOrders.unshift(orderMasterPayload);
-  localStorage.setItem('mall_orders', JSON.stringify(existingOrders));
-
-  // 清空購物車狀態
-  cartStore.items = [];         // 清空 Pinia
-  cartItemsFromDB.value = [];   // 清空原本從 PHP 抓回來的暫存
-
-  // 顯示成功燈箱
-  showSuccessModal.value = true;
-
-  // 3秒後跳轉
-  setTimeout(() => {
-    handleModalCloseAndRedirect();
-  }, 3000);
 };
-
 const handleModalCloseAndRedirect = () => {
   showSuccessModal.value = false;
   router.push('../workspace/orders');
@@ -544,7 +504,7 @@ const backcart = () => {
               </div>
             </div>
 
-            <div v-show="form.payment_method === 'card'">
+            <!-- <div v-show="form.payment_method === 'card'">
               <div class="pay-field">
                 <label class="p-p1">卡號</label>
                 <div class="card-row">
@@ -595,7 +555,7 @@ const backcart = () => {
                   <span class="error-msg p-p2" v-if="errors.card_cvc">{{ errors.card_cvc }}</span>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
 
           <div class="submit">

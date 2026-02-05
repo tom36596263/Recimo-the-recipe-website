@@ -8,13 +8,11 @@ import { useRouter, useRoute } from 'vue-router';
 import PageBtn from '@/components/common/PageBtn.vue'
 import { useAuthStore } from '@/stores/authStore';
 
-// --- Swiper 相關設定 (請用這段取代舊的) ---
+//Swiper 相關設定
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
 import 'swiper/css/pagination';
-import 'swiper/css/free-mode'; // 記得加上這個樣式
-
-// 關鍵修正：把 Pagination 和 FreeMode 寫在同一行
+import 'swiper/css/free-mode';
 import { Pagination, FreeMode } from 'swiper/modules';
 
 //會員登入
@@ -27,11 +25,11 @@ const handleFollow = () => {
     console.log("已登入，執行關注 API");
   });
 };
-const authStore = useAuthStore(); // [新增] 啟用 store
+const authStore = useAuthStore(); //啟用 store
 
 
 const modules = [Pagination, FreeMode];
-// --- 新增：Swiper RWD 斷點設定 ---
+//Swiper RWD 斷點設定
 const swiperBreakpoints = {
   // 當螢幕寬度 >= 0px (手機)
   0: {
@@ -45,18 +43,13 @@ const swiperBreakpoints = {
   }
 };
 
-// --- 資料與狀態 ---
-const baseURL = import.meta.env.BASE_URL;
+//資料與狀態
 const productList = ref([]);
-const activeTag = ref('全部'); // 目前選中的標籤
-const currentPage = ref(1); // 目前在第幾頁
-const pageSize = 8; // 一頁顯示幾筆 (4欄 x 2排 = 8筆)
+const activeTag = ref('全部');
+const currentPage = ref(1);
+const pageSize = 8;
 const router = useRouter();
 const route = useRoute();
-
-
-
-// --- 標籤設定 ---
 const tags = [
   { text: '全部', width: '62px' },
   { text: '低卡健身系列', width: '138px' },
@@ -65,102 +58,75 @@ const tags = [
   { text: '台式家常系列', width: '138px' }
 ];
 
-// --- 核心邏輯步驟 1：先過濾資料 (Filter) ---
+//熱銷商品 (改用監聽，避免每次分頁變動都重新洗牌)
+const randomProducts = ref([]);
+const updateHotList = (data) => {
+  if (data.length === 0) return;
+  const hotItems = data.filter(item => item.tags && item.tags.product_is_hot === true);
+  // 如果有熱銷標記，隨機取 4 筆；否則全品項隨機取 4 筆
+  const pool = hotItems.length > 0 ? hotItems : data;
+  randomProducts.value = [...pool].sort(() => 0.5 - Math.random()).slice(0, 4);
+};
+
+//過濾資料
 const filteredProducts = computed(() => {
-  //經過篩選後的所有商品清單
-  if (activeTag.value === '全部') {
-    return productList.value;
-  }
-  // 注意：這裡假設你的 JSON 資料裡有一個屬性叫做 category (或 tag)
-  // 且內容跟上面的 text 完全一樣 (例如 "低卡健身系列")
+  if (activeTag.value === '全部') return productList.value;
   return productList.value.filter((item) => item.product_category === activeTag.value);
 });
 
-// --- 核心邏輯步驟 2：計算總頁數 ---
-const totalPages = computed(() => {
-  return Math.ceil(filteredProducts.value.length / pageSize);
-}); //Math.ceil 無條件進位
-
-// --- 核心邏輯步驟 3：切分出當前頁面要顯示的資料 (Slice) ---
+//分頁
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / pageSize));
 const displayedProducts = computed(() => {
-  const startIndex = (currentPage.value - 1) * pageSize; //currentPage.value：目前在第幾頁。
-  const endIndex = startIndex + pageSize;
-  // 從過濾後的清單中，取出這一段
-  return filteredProducts.value.slice(startIndex, endIndex);
+  const startIndex = (currentPage.value - 1) * pageSize;
+  return filteredProducts.value.slice(startIndex, startIndex + pageSize);
+
 });
 
-// --- 修正後的 randomProducts ---
-const randomProducts = computed(() => {
-  if (productList.value.length === 0) return [];
-
-  // 1. 修正：進入 .tags 層級去抓 product_is_hot
-  const hotItems = productList.value.filter(item => {
-    // 檢查 item.tags 是否存在，並判斷 product_is_hot 是否為 true
-    return item.tags && item.tags.product_is_hot === true;
-  });
-
-  // 2. 如果熱銷商品多於 4 筆，隨機選取 4 筆（增加視覺變化）
-  if (hotItems.length > 0) {
-    return [...hotItems].sort(() => 0.5 - Math.random()).slice(0, 4);
-  } else {
-    // 備案：如果資料庫完全沒設熱銷，隨機抓
-    return [...productList.value].sort(() => 0.5 - Math.random()).slice(0, 4);
-  }
-});
-
-// --- 事件處理 ---
+//事件處理抓資料庫資料
 const fetchData = async () => {
   try {
-    // 使用 phpApi 時，只需要寫「相對路徑」
-    // 假設你的 PHP 檔案路徑是 /recimo_api/mall/get_products.php
     const response = await phpApi.get('mall/user_products.php');
-
     productList.value = response.data;
-    console.log('成功透過 phpApi 抓取資料！', productList.value);
-  } catch (error) {
-    productList.value = []
-    console.error('API 連線失敗:', error);
-    // 偵錯小技巧：印出伺服器回傳的錯誤訊息
-    if (error.response) {
-      console.log('錯誤狀態碼:', error.response.status);
-      console.log('錯誤內容:', error.response.data);
+
+    // 只有在第一次載入或資料清單變動時才初始化熱銷區
+    if (randomProducts.value.length === 0) {
+      updateHotList(response.data);
     }
+    console.log('資料同步成功');
+  } catch (error) {
+    productList.value = [];
+    console.error('API 連線失敗:', error);
   }
+};
+
+// 切換標籤時同步抓取 API
+const selectTag = async (tagName) => {
+  activeTag.value = tagName; // 改變選中狀態
+  currentPage.value = 1;      // 回到第一頁
+  await fetchData();         // 換標籤時順便抓取最新資料
 };
 
 const handlePageChange = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
-  }
-};
-const selectTag = (tagName) => {
-  activeTag.value = tagName;
-  currentPage.value = 1; // 切換標籤時，要切回第一頁，不然使用者會迷路
-};
-
-const setPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-    // 建議：換頁後通常會把視窗滾動到商品區上方，體驗較好
-    window.scrollTo({ top: 500, behavior: 'smooth' });
+    window.scrollTo({ top: 900, behavior: 'smooth' });
   }
 };
 
 onMounted(() => {
-  fetchData(); //當網頁畫面全部準備好（掛載完成）的那一瞬間，請幫我執行 fetchData 這個函式,fetchData 去倉庫搬貨，搬回來後更新了 productList.value。
-  // 每 60 秒自動更新
-  // setInterval(fetchData, 1000);
+  fetchData();
+  // 已移除 setInterval，現在僅在進入頁面與切換 Tag 時更新
 });
 
 const getImg = (name) => {
   return new URL(`../../assets/images/mall/${name}`, import.meta.url).href;
 };
 
-// 2. 修改 columns 資料，使用 getImg 包住檔名
+//修改 columns 資料，使用 getImg 包住檔名
 const columns = ref([
   // 第一欄
   [
-    getImg('food1.png'), // 替換成你的圖片檔名
+    getImg('food1.png'),
     getImg('food2.png'),
     getImg('food3.png')
   ],
@@ -173,7 +139,6 @@ const columns = ref([
 ]);
 
 const goToDetail = (productId) => {
-  // 導向詳情頁，路徑通常是 /mall/:id
   router.push(`/mall/${productId}`);
 };
 </script>
