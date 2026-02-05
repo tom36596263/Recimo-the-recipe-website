@@ -10,14 +10,13 @@ import { phpApi } from '@/utils/publicApi';
 import { onUnmounted } from 'vue';
 
 
-const ingredients = ref([]);
-
+const ingredients = ref([]);//接收非同步抓取的資料
 onMounted(() => {
     phpApi.get('recipes/user_ingredients.php')
         .then(res => {
             let responseData = res.data;
 
-            // --- 關鍵修正：如果是字串，手動轉成物件 ---
+            // 如果是字串，手動轉成物件,vue指讀取物件
             if (typeof responseData === 'string') {
                 try {
                     responseData = JSON.parse(responseData);
@@ -61,7 +60,7 @@ const fetchIngredientsData = async () => {
     }
 };
 
-// 2. 定義視窗焦點回饋的處理函數
+//定義視窗焦點回饋的處理函數
 const handleVisibilityChange = () => {
     if (document.visibilityState === 'visible') {
         console.log('回到廚房頁面，自動檢查食材更新...');
@@ -70,16 +69,16 @@ const handleVisibilityChange = () => {
 };
 
 onMounted(() => {
-    // 初次載入
+    //初次載入
     fetchIngredientsData();
 
-    // 3. 註冊監聽事件：切換標籤回來時觸發
+    //切換標籤回來時觸發
     window.addEventListener('visibilitychange', handleVisibilityChange);
-    // 4. 額外保險：當視窗重新獲得焦點時觸發
+    //當視窗重新獲得焦點時觸發
     window.addEventListener('focus', fetchIngredientsData);
 });
 
-// 5. 卸載組件時移除監聽，避免資源浪費
+//卸載組件時移除監聽，避免資源浪費
 onUnmounted(() => {
     window.removeEventListener('visibilitychange', handleVisibilityChange);
     window.removeEventListener('focus', fetchIngredientsData);
@@ -110,17 +109,16 @@ const filteredIngredients = computed(() => {
     }
 
     let results = [];
-
-    // 2. 第一層篩選：決定是「搜尋模式」還是「分類模式」
+    //決定是「搜尋模式」還是「分類模式」
     if (keyword.value.trim() !== '') {
-        // --- A. 搜尋模式：無視分類，搜尋全部 ---
-        const searchText = keyword.value.trim().toLowerCase();
+        //搜尋模式：無視分類，搜尋全部
+        const searchText = keyword.value.trim().toLowerCase();  //.trim()：把使用者不小心打出的「前後空格」刪掉 .toLowerCase()：把所有英文字母轉成小寫
         results = ingredients.value.filter(item => {
-            const itemName = item.ingredient_name ? String(item.ingredient_name) : '';
-            return itemName.toLowerCase().includes(searchText);
+            const itemName = item.ingredient_name ? String(item.ingredient_name) : ''; //如果某筆食材資料剛好沒有名字（或是資料庫漏填了），程式會給它一個空字串 ''  String(...)：確保讀到的名字一定是「字串」格式。
+            return itemName.toLowerCase().includes(searchText);  //.includes(searchText)：它會檢查食材名字裡是否包含使用者輸入的關鍵字。
         });
     } else {
-        // --- B. 分類模式：依照上方標籤 (activeTag) ---
+        //分類模式：依照上方標籤 (activeTag)
         const currentTagObj = tags.find(tag => tag.text === activeTag.value);
 
         // 確保有找到對應的標籤設定
@@ -132,10 +130,10 @@ const filteredIngredients = computed(() => {
         }
     }
 
-    // 3. 第二層篩選：把「已經在鍋子裡」的扣掉
+    // 把「已經在鍋子裡」的扣掉
     // 這裡會檢查 potIngredients 陣列，如果 ID 一樣就不顯示
     return results.filter(item => {
-        const isInPot = potIngredients.value.some(potItem => {
+        const isInPot = potIngredients.value.some(potItem => {  //some()：這是 JavaScript 的一個方法，它會像探測器一樣掃描整個鍋子。它會拿「現在要顯示的食材 ID」去跟「鍋子裡所有食材的 ID」一個一個比對。
             // 請特別注意：這裡假設你的 JSON 資料欄位名稱是 ingredient_id
             return potItem.ingredient_id === item.ingredient_id;
         });

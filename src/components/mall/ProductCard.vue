@@ -35,7 +35,7 @@ const addToCart = () => {
 </script>
 <template>
     <router-link :to="`/mall/${item.product_id}`" class="product-card card-content">
-        <img :src="item.image_url" :alt="item.product_name">
+        <img :src="$parsePublicFile(item.image_url)" :alt="item.product_name">
 
         <div class="product-card__content">
             <h4 class="p-p1 product-card__title">{{ item.product_name }}</h4>
