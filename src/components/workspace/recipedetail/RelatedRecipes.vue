@@ -11,7 +11,9 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 const props = defineProps({
-    currentId: { type: [String, Number], required: true }
+    currentId: { type: [String, Number], required: true },
+    // 🏆 接收父組件傳來的「是否排除改編」標記，預設為 false 保持相容性
+    excludeAdapted: { type: Boolean, default: false }
 });
 
 const modules = [Navigation, Pagination];
@@ -43,12 +45,11 @@ const fetchRelated = async () => {
     isReady.value = false;
 
     try {
+        // 注意：這裡抓的是 recipes.json 靜態檔，請確保裡面的資料有 parent_recipe_id 欄位
         const res = await publicApi.get('data/recipe/recipes.json');
 
         const cleanedData = res.data.map(r => {
             const rawImg = r.recipe_image_url || r.recipe_cover_image || '';
-
-            // 🏆 使用 formatImg 處理圖片路徑
             const finalImg = formatImg(rawImg);
 
             return {
@@ -65,9 +66,21 @@ const fetchRelated = async () => {
         });
 
         relatedList.value = cleanedData
-            .filter(r => Number(r.id) !== Number(props.currentId))
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 8);
+            .filter(r => {
+                // 1. 排除目前正在看的這篇
+                const isNotCurrent = Number(r.id) !== Number(props.currentId);
+
+                // 2. 🏆 判斷是否為「改編食譜」
+                // 根據父頁面邏輯：parent_recipe_id 有值（且不為0）就是改編
+                const isAdapted = r.parent_recipe_id && Number(r.parent_recipe_id) !== 0;
+
+                // 3. 決定是否保留：如果要求排除改編，則必須非改編才能通過
+                const isEligible = props.excludeAdapted ? !isAdapted : true;
+
+                return isNotCurrent && isEligible;
+            })
+            .sort(() => 0.5 - Math.random()) // 隨機排序
+            .slice(0, 8); // 取前 8 筆
 
         await nextTick();
         isReady.value = true;
@@ -115,7 +128,7 @@ const swiperBreakpoints = {
     padding: 10px 0 20px 0;
     margin: 20px 0 40px 0;
     min-width: 0;
-    overflow: hidden; // 保持外層整潔
+    overflow: hidden;
     position: relative;
     background-color: transparent;
 }
@@ -144,7 +157,6 @@ const swiperBreakpoints = {
 }
 
 .recipe-swiper {
-
     padding: 30px 20px 50px 20px;
     margin: -30px -20px 0 -20px;
     overflow: visible !important;
@@ -185,7 +197,6 @@ const swiperBreakpoints = {
     :deep(.swiper-button-next) {
         right: 10px;
     }
-
 
     :deep(.swiper-pagination-bullet) {
         width: 5px;

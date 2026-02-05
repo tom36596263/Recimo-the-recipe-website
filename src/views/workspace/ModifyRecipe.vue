@@ -28,47 +28,30 @@ const currentNutrition = ref(null);
  * 包含熱量計算與異常數值校正
  */
 async function openAdaptDetail(item) {
-    selectedRecipe.value = item;
+    // 🏆 關鍵：不要直接傳入原始的 item，而是傳入一個將 servings 強設為 1 的新物件
+    selectedRecipe.value = {
+        ...item,
+        servings: 1  // 強制讓燈箱拿到的 servings prop 是 1
+    };
 
     if (!nutritionStore.isLoaded) {
         await nutritionStore.fetchMasterData();
     }
 
     if (item.ingredients && item.ingredients.length > 0) {
-        // 1. 執行計算 (計算出該份食譜的「總量」)
+        // 1. 執行計算（算出食材 100% 的總營養量）
         const total = nutritionStore.calculateRecipeNutrition(item.ingredients);
 
-        // 2. 份數抓取：統一檢查 recipe_servings 與 servings
-        // 優先順序：item 內的設定 > 預設值 1
-        const servings = Number(item.recipe_servings || item.servings || 0);
+        // 2. 🏆 這裡也要改成 1，不要再用 item.recipe_servings 除法了
+        // 這樣顯示出來的數值就是「整份食譜」的總熱量
+        const displayServings = 1;
 
-        // 3. 🔍 [偵錯工具]
-        console.group(`📊 食譜計算詳情: ${item.title}`);
-        console.log(`📌 原始食材總量:`, total);
-        console.log(`📌 最終使用的份數: ${servings}`);
-
-        // 模擬計算過程表格
-        const debugTable = item.ingredients.map(ing => {
-            const master = nutritionStore.ingredientMaster.find(m =>
-                String(m.ingredient_id) === String(ing.id || ing.ingredient_id)
-            );
-            return {
-                "食材": ing.name || ing.ingredient_name,
-                "數量": ing.amount,
-                "單位": ing.unit || ing.unit_name,
-                "每100g熱量": master?.kcal_per_100g || "未匹配",
-                "轉換克數": ing.gram_conversion || "1"
-            };
-        });
-        console.table(debugTable);
-        console.groupEnd();
-
-        // 4. 更新畫面數值 (總量 / 份數 = 每份營養)
+        // 4. 更新燈箱要用的數據
         currentNutrition.value = {
-            calories: Math.round(total.kcal / servings),
-            protein: (total.protein / servings).toFixed(1),
-            fat: (total.fat / servings).toFixed(1),
-            carbs: (total.carbs / servings).toFixed(1)
+            calories: Math.round(total.kcal),
+            protein: total.protein.toFixed(1),
+            fat: total.fat.toFixed(1),
+            carbs: total.carbs.toFixed(1)
         };
     } else {
         currentNutrition.value = { calories: 0, protein: 0, fat: 0, carbs: 0 };
@@ -112,22 +95,34 @@ async function loadRecipeData(recipeId) {
         };
 
         const formattedDbAdaptations = (adaptations || []).map(child => {
-            // 💡 這裡先定義「摘要」要抓哪個欄位
-            // 如果後端有傳 summary 或 adaptation_note 就用它，否則才從描述截斷
-            const shortNote = child.adaptation_note || child.summary ||
+            // 1. 【生成 UI 專用文字】 
+            // 我們只定義一個變數來存「卡片專用」的短語，完全不去動 child 裡的原始 key
+            const shortDisplay = child.adaptation_note ||
                 (child.recipe_description ? child.recipe_description.slice(0, 15) + '...' : '點擊查看改編重點');
 
+            // 2. 【組合回傳物件】
             return {
+                // 先展開原始資料，確保 recipe_description (aaa) 被原封不動帶進來
                 ...child,
+
                 id: `db-${child.recipe_id}`,
-                title: child.recipe_title,
 
-                // ✨ 修改這裡：傳給小卡的摘要
-                adaptation_note: shortNote,
+                // 卡片標題
+                title: child.recipe_title || '未命名食譜',
 
-                // 💾 保留原本的完整描述，讓燈箱彈窗 (selectedRecipe) 還是能看到完整內容
-                recipe_description: child.recipe_description || '暫無詳細說明',
+                // 🏆 關鍵修正：
+                // 我們新增一個 key 叫 card_summary 給卡片用
+                // 這樣就不會發生「為了縮短文字而把原始 recipe_description 改掉」的慘劇
+                card_summary: shortDisplay,
 
+                // 燈箱專用：確保這兩個 key 裝的是「長文本 (aaa)」
+                description: child.recipe_description,
+                recipe_description: child.recipe_description,
+
+                // 原始筆記 (bbb) 保持原樣
+                adaptation_note: child.adaptation_note,
+
+                // 其他欄位
                 coverImg: parsePublicFile(child.recipe_image_url),
                 is_mine: false,
                 ingredients: child.ingredients || [],
@@ -147,14 +142,16 @@ async function loadRecipeData(recipeId) {
                     ...r,
                     id: r.id,
                     title: r.title || '未命名改編',
+
+                    // 🔥 確保本地資料也是用 description 這個字
+                    description: r.description || r.recipe_description || r.adapt_description || '',
+
                     ingredients: r.ingredients || [],
                     steps: r.steps || [],
                     servings: s,
-                    recipe_servings: s, // 雙重保險
                     is_mine: true
                 };
             });
-
         // 4. 合併並更新畫面
         variantItems.value = [...localAdaptations, ...formattedDbAdaptations];
         console.log('✅ 資料載入成功，總數:', variantItems.value.length);

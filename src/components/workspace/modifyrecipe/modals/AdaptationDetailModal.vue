@@ -152,48 +152,64 @@ const handleShare = async () => {
 const isHubOpen = ref(false);
 
 // --- 份量與營養計算邏輯 ---
+// --- 份量與營養計算邏輯 ---
+
+// 1. 取得原始份量 (servings)
+// --- 份量與營養計算邏輯 ---
+
+// 1. 取得原始份量與當前選擇份量
 const originalServings = computed(() => {
-    return Math.max(Number(props.recipe?.recipe_servings || props.recipe?.servings || 1), 1);
+    // 🏆 關鍵：確保優先抓取資料庫回傳的 recipe_servings
+    const s = props.recipe?.recipe_servings || props.recipe?.servings || 1;
+    console.log('原始份量偵測:', s); // 可以在控制台檢查這個數字對不對
+    return Math.max(Number(s), 1);
 });
 
+// 預設份量設為 1
 const currentServings = ref(1);
 
-const baseNutritionPerServing = computed(() => {
-    const n = props.nutrition;
-    return {
-        calories: Number(n?.calories || 0),
-        protein: Number(n?.protein || 0),
-        fat: Number(n?.fat || 0),
-        carbs: Number(n?.carbs || 0),
-    };
-});
-
+// 2. 🏆 核心營養計算邏輯 (修正：資料庫已是單份，直接乘人數)
 const displayedNutrition = computed(() => {
-    const base = baseNutritionPerServing.value;
-    const s = currentServings.value;
+    const r = props.recipe;
+    if (!r) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
+
+    // 資料庫現在存的是「單份」數值 (例如 964)
+    const perServingKcal = parseFloat(r.recipe_kcal_per_100g || 0);
+    const perServingP = parseFloat(r.recipe_protein_per_100g || 0);
+    const perServingF = parseFloat(r.recipe_fat_per_100g || 0);
+    const perServingC = parseFloat(r.recipe_carbs_per_100g || 0);
+
+    // 🏆 修改重點：直接乘以「當前畫面上選的人數」
+    // 如果畫面上選 2 人，就是 964 * 2 = 1928
+    const count = currentServings.value;
+
     return {
-        calories: Math.round(base.calories * s),
-        protein: (base.protein * s).toFixed(1),
-        fat: (base.fat * s).toFixed(1),
-        carbs: (base.carbs * s).toFixed(1),
+        calories: Math.round(perServingKcal * count),
+        protein: Number((perServingP * count).toFixed(1)),
+        fat: Number((perServingF * count).toFixed(1)),
+        carbs: Number((perServingC * count).toFixed(1))
     };
 });
 
+// 3. 食材清單顯示 (隨人數縮放量)
 const ingredientsData = computed(() => {
     const list = props.recipe?.ingredients || [];
-    const ratio = (1 / originalServings.value) * currentServings.value;
+
+    // 🏆 修改重點：直接使用當前選擇的人數作為倍率
+    // 不再除以 originalServings，這樣 item.amount 就會被視為「一份」的基準量
+    const ratio = currentServings.value;
+
     return list.map(item => ({
         INGREDIENT_NAME: item.ingredient_name || item.name || '未知食材',
+        // 一份的量 * 人數
         amount: item.amount ? (Number(item.amount) * ratio).toFixed(1) : 0,
         unit_name: item.unit_name || item.unit || 'g',
         note: item.remark || item.note || ''
     }));
 });
 
-watch(() => props.modelValue, (isOpen) => {
-    if (isOpen) {
-        currentServings.value = originalServings.value;
-    }
+watch(() => props.recipe?.recipe_id, () => {
+    currentServings.value = 1;
 }, { immediate: true });
 
 /**
@@ -213,10 +229,13 @@ const introData = computed(() => {
         id: getCleanId(r.id || r.recipe_id),
         title: r.title || r.recipe_title || '未命名食譜',
         image: finalImage,
-        description: r.description || r.recipe_description || '暫無詳細說明',
-        time: formattedTime,
+
+        // 🔥 修正這裡：強制先抓 recipe_description (aaa)
+        description: r.recipe_description || r.description || '暫無詳細說明',
+
         difficulty: r.difficulty || 1,
-        tags: r.tags || []
+        tags: r.tags || [],
+        time: formattedTime
     };
 });
 
@@ -295,7 +314,8 @@ const closeModal = () => emit('update:modelValue', false);
                             <div class="col-5 col-md-12 sidebar-right">
                                 <div class="sticky-sidebar">
                                     <NutritionCard v-if="nutrition" :nutrition="displayedNutrition"
-                                        :servings="currentServings" @change-servings="val => currentServings = val" />
+                                        :servings="currentServings" :base-servings="originalServings"
+                                        @change-servings="val => currentServings = val" />
                                     <RecipeIngredients :list="ingredientsData" :readonly="true" />
                                 </div>
                             </div>

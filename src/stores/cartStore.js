@@ -91,9 +91,9 @@ export const useCartStore = defineStore('cart', () => {
         items.value = rawData.map(item => {
           let imageUrl = '';
           try {
-            // 1. 把 product_image 字串轉成真正的 JS 陣列
+            // 把 product_image 字串轉成真正的 JS 陣列
             const images = JSON.parse(item.product_image);
-            // 2. 找到封面圖 (is_cover 為 true 的那張)
+            // 找到封面圖 (is_cover 為 true 的那張)
             const cover = images.find(img => img.is_cover) || images[0];
             imageUrl = cover ? cover.image_url : '';
           } catch (e) {
@@ -102,7 +102,7 @@ export const useCartStore = defineStore('cart', () => {
 
           return {
             ...item,
-            // 3. 把處理好的路徑覆蓋回去，並確保加上伺服器基礎路徑 (base)
+            // 把處理好的路徑覆蓋回去，並確保加上伺服器基礎路徑 (base)
             product_image: imageUrl
           };
         });
@@ -120,7 +120,6 @@ export const useCartStore = defineStore('cart', () => {
     const index = items.value.findIndex(p => (p.product_id || p.id) === productId);
 
     if (index !== -1) {
-      // 統一用 quantity
       items.value[index].quantity = Number(items.value[index].quantity || 0) + qty;
     } else {
       items.value.push({ ...item, product_id: productId, quantity: qty });
