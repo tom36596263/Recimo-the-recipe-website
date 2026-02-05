@@ -265,13 +265,15 @@ const fetchData = async () => {
     // --- 4. 處理留言 ---
     if (resC.data && Array.isArray(resC.data)) {
       commentList.value = resC.data.map((c) => {
-        const userData = resU.data?.find((u) => u.user_id === c.user_id);
+        // 🏆 直接從 c (PHP 回傳的每一筆資料) 裡面拿資料
         return {
           comment_id: c.comment_id,
           userId: c.user_id,
-          userName: userData?.user_name || 'Recimo用戶',
+          // 這裡要對齊 PHP 回傳的欄位名稱
+          userName: c.userName || 'Recimo用戶',
           handle: `user_${c.user_id}`,
-          userAvatar: getSmartImageUrl(userData?.user_image),
+          // 這裡建議對齊你組件用的變數名稱
+          userAvatar: getSmartImageUrl(c.user_avatar),
           content: c.comment_text,
           time: c.comment_at,
           likes: Number(c.like_count || 0)
