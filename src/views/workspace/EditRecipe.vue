@@ -18,7 +18,7 @@ const recipeStore = useRecipeStore();
 const authStore = useAuthStore();
 
 const isEditing = ref(true);
-const isPublished = ref(false);
+const isPublished = ref(true);
 
 const ingredientsMasterList = ref([]);
 const tagsMasterList = ref([]);
@@ -363,7 +363,8 @@ provide('isEditing', isEditing);
           <BaseBtn title="預覽" variant="outline" :width="100" @click="handlePreview" class="preview-btn" />
           <BaseBtn :title="isAdaptModeActive ? '分享我的版本' : (isPublished ? '確認發布' : '完成編輯')" :width="200"
             @click="handleSave" class="save-btn" />
-          <div v-if="!isAdaptModeActive" class="publish-toggle">
+
+          <div v-if="!isAdaptModeActive" class="publish-toggle" style="display: none;">
             <input type="checkbox" id="publish-check" v-model="isPublished" />
             <label for="publish-check" class="p-p2">公開發布</label>
           </div>

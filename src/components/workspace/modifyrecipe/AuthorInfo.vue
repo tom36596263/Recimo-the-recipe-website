@@ -5,7 +5,9 @@
         </div>
         <div class="user-text-meta">
             <div class="user-name">{{ name }}</div>
-            <div class="user-sub">@{{ handle }} • {{ time }}</div>
+            <div class="user-sub">
+                @{{ handle }}<span v-if="time"> • {{ time }}</span>
+            </div>
         </div>
     </div>
 </template>

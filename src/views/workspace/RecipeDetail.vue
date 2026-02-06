@@ -102,7 +102,8 @@ const fetchData = async () => {
           recipe_servings: previewServings,
           recipe_likes: Number(mainData.recipe_like_count || 0),
           author_name: authStore.user?.user_name || '您的預覽',
-          tags: preview.recipe_tags || preview.tags || []
+          tags: preview.recipe_tags || preview.tags || [],
+          created_at: '',
         };
 
         servings.value = 1;
@@ -186,6 +187,7 @@ const fetchData = async () => {
         author_name: mainData.author_name || 'Recimo 用戶',
         author_id: mainData.author_id,
         recipe_likes: Number(mainData.recipe_like_count || 0),
+        created_at: mainData.recipe_created_at || mainData.created_at || '剛剛',
         recipe_description:
           serverData.main.recipe_descreption ||
           serverData.main.recipe_description ||
@@ -708,11 +710,12 @@ watch(
         </div>
 
         <div class="meta-wrapper">
-          <AuthorInfo
-            :name="rawRecipe.author_name"
-            :handle="`user_${rawRecipe.author_id}`"
-            :time="rawRecipe.created_at"
-          />
+          <AuthorInfo v-if="!isPreviewMode && rawRecipe" :name="rawRecipe.author_name"
+            :handle="`user_${rawRecipe.author_id}`" :time="rawRecipe.created_at" />
+
+          <div v-else-if="isPreviewMode" class="preview-badge">
+            ✨ 正在預覽您的食譜草稿
+          </div>
 
           <DeleteAdaptationBtn
             v-if="isMyRecipe && !isPreviewMode"
