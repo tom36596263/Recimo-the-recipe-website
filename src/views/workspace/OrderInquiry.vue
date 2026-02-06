@@ -141,7 +141,7 @@ const filteredProducts = computed(() => {
     result = result.filter((item) => {
       // 確保相容 PHP 回傳的各種 key 大小寫
       const rawStatus = item.ORDER_STATUS ?? item.order_status ?? item.status;
-      return Number(rawStatus) === targetStatus;
+      return Number(rawStatus) === Number(targetStatus);
     });
   }
 

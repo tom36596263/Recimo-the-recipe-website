@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { parsePublicFile } from '@/utils/parseFile.js';
 
 /**
  * PlanFileCard.vue 
@@ -11,17 +12,77 @@ const props = defineProps({
     plan: {
         type: Object,
         required: true
-    }
+    },
+    coverTemplates: { type: Array, default: () => [] }
 });
 
 const router = useRouter();
 
-// 計算計畫天數：利用結束日期減開始日期
-const durationDays = computed(() => {
+// --- 計算最終要顯示的封面路徑 ---
+const activeCoverUrl = computed(() => {
+    // 1. 如果是使用者上傳 (type 2)
+    if (props.plan.cover_type === 2 && props.plan.custom_cover_url) {
+        return parsePublicFile(props.plan.custom_cover_url);
+    }
+
+    // 2. 如果是官方預設 (type 1)
+    if (props.plan.cover_type === 1) {
+        const target = props.coverTemplates.find(
+            (t) => Number(t.cover_template_id) === Number(props.plan.cover_template_id)
+        );
+        return target ? parsePublicFile(target.template_url) : '';
+    }
+
+    // 3. 預設圖 (避免空白)
+    return 'https://placehold.jp/24/2e6f4a/ffffff/300x150.png?text=No+Cover';
+});
+
+// --- 核心邏輯：判斷計畫狀態 ---
+const statusInfo = computed(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // 歸零時間，只比日期
+
     const start = new Date(props.plan.start_date);
     const end = new Date(props.plan.end_date);
-    const diffTime = Math.abs(end - start);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    if (now < start) {
+        return { text: '未開始', class: 'upcoming' };
+    } else if (now >= start && now <= end) {
+        return { text: '進行中', class: 'active' };
+    } else {
+        return { text: '已結束', class: 'closed' };
+    }
+});
+
+// --- 新增：日期格式化邏輯 ---
+const formattedDateRange = computed(() => {
+    if (!props.plan.start_date || !props.plan.end_date) return '';
+
+    const start = new Date(props.plan.start_date);
+    const end = new Date(props.plan.end_date);
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const startYear = start.getFullYear();
+    const startMonth = months[start.getMonth()];
+    const startDate = start.getDate();
+
+    const endYear = end.getFullYear();
+    const endMonth = months[end.getMonth()];
+    const endDate = end.getDate();
+
+    // 情況 1: 同年且同月
+    if (startYear === endYear && startMonth === endMonth) {
+        return `${startMonth} ${startDate} ~ ${endDate}, ${startYear}`;
+    }
+
+    // 情況 2: 同年但不同月
+    if (startYear === endYear) {
+        return `${startMonth} ${startDate} ~ ${endMonth} ${endDate}, ${startYear}`;
+    }
+
+    // 情況 3: 不同年
+    return `${startMonth} ${startDate}, ${startYear} ~ ${endMonth} ${endDate}, ${endYear}`;
 });
 
 // 進入編輯頁面：使用 index.js 定義的 name 跳轉
@@ -36,17 +97,23 @@ const goToEdit = () => {
 <template>
     <div class="plan-card" @click="goToEdit">
         <div class="plan-card__cover">
-            <img src="https://placehold.jp/24/2e6f4a/ffffff/300x150.png?text=MealPlan" alt="Cover" />
+            <img :src="activeCoverUrl" alt="Plan Cover" />
         </div>
 
         <div class="plan-card__content">
-            <h3 class="plan-card__title p-p1">{{ plan.title }}</h3>
+
+            <div class="plan-card__header">
+                <h3 class="plan-card__title p-p1">{{ plan.title }}</h3>
+                <div :class="['plan-card__status-tag', statusInfo.class]">
+                    {{ statusInfo.text }}
+                </div>
+            </div>
 
 
             <div class="plan-card__footer">
                 <div class="plan-card__info p-p3">
                     <i-material-symbols-calendar-month-outline />
-                    <span>{{ plan.start_date }} ~ {{ plan.end_date }}</span>
+                    <span>{{ formattedDateRange }}</span>
                 </div>
                 <button class="plan-card__more p-p3" @click.stop>
                     <i-material-symbols-more-vert />
@@ -90,6 +157,36 @@ const goToEdit = () => {
         display: flex;
         flex-direction: column;
         gap: 8px;
+    }
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    &__status-tag {
+        height: 32px;
+        border-radius: 10px;
+        background-color: $neutral-color-100;
+        color: $secondary-color-success-700;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0 10px;
+        flex-shrink: 0;
+
+        &.upcoming {
+            color: $secondary-color-info-700;
+        }
+
+        &.active {
+            color: $secondary-color-success-700;
+        }
+
+        &.closed {
+            color: $secondary-color-danger-700;
+        }
     }
 
     &__title {
