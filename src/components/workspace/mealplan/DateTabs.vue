@@ -90,7 +90,7 @@ const rangeValue = computed({
     </div>
 
     <VDatePicker v-model.range="rangeValue" color="green" :popover="{
-      visibility: 'click', placement: 'bottom-end', modifiers: [
+      visibility: 'click', placement: 'bottom', modifiers: [
         { name: 'offset', options: { offset: [0, 10] } } // 調整彈窗與按鈕的距離 [左右, 上下]
       ]
     }">
