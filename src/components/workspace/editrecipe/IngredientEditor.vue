@@ -77,8 +77,11 @@ const handleAddMultiple = (items) => {
     });
 };
 const removeItem = (id) => {
-    // 過濾掉被刪除的項目，並通知父組件更新
+    // 1. 建立一個全新的陣列，排除掉該 id 的項目
+    // 🏆 這樣做才符合 Vue 的單向數據流 (One-Way Data Flow)
     const newIngredients = props.ingredients.filter(i => i.id !== id);
+
+    // 2. 透過 emit 通知父組件：新的清單長這樣，請幫我更新
     emit('update:ingredients', newIngredients);
 };
 // const removeItem = (id) => {

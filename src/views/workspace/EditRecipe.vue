@@ -519,7 +519,7 @@ provide('isEditing', isEditing);
       <div class="recipe-main-content">
         <div class="row custom-row-fit">
           <aside class="ingredient-sidebar col-5 col-md-12">
-            <IngredientEditor :ingredients="recipeForm.ingredients" :is-editing="isEditing"
+            <IngredientEditor v-model:ingredients="recipeForm.ingredients" :is-editing="isEditing"
               :is-adapt-mode="isAdaptModeActive" />
           </aside>
           <section class="step-content col-7 col-md-12">
