@@ -63,101 +63,67 @@ const fetchData = async () => {
   
   // --- 1. 預覽模式優先處理 ---
   if (isPreviewMode.value) {
-    console.log('🚀 [偵錯] 進入預覽模式，嘗試從 Store 讀取資料');
     const preview = recipeStore.previewData;
 
     if (preview) {
       try {
-        // 同步抓取食材母表以校正營養係數
-        const resIngMaster = await publicApi.get(
-          'data/recipe/ingredients.json'
-        );
+        // 同步抓取食材母表以校正營養係數 (保留你原本這段邏輯)
+        const resIngMaster = await publicApi.get('data/recipe/ingredients.json');
         const masterIng = resIngMaster.data || [];
 
-        // 【份數捕獲】確保預覽模式能拿到正確的原始份數
-        const previewServings = Math.max(
-          1,
-          Number(
-            preview.recipe_servings ||
-              preview.servings ||
-              preview.recipe_serving ||
-              1
-          )
-        );
+        // 份數捕獲：與編輯頁傳過來的 key 對齊
+        const previewServings = Math.max(1, Number(preview.recipe_servings || 1));
 
-        console.log('📊 [預覽偵錯] 解析出的份數:', previewServings);
-
-        // 映射為前端統一格式 (rawRecipe)
+        // 【關鍵修正】映射為與正式 API 格式完全一致的 rawRecipe
         rawRecipe.value = {
+          ...preview,
           recipe_id: 0,
-          recipe_title: preview.title || preview.recipe_title || '未命名食譜',
-          recipe_description:
-            preview.description || preview.recipe_description || '',
-          recipe_image_url: preview.coverImg || preview.recipe_cover_image,
-          recipe_difficulty: Number(
-            preview.difficulty || preview.recipe_difficulty || 1
-          ),
-          recipe_total_time:
-            preview.totalTime || preview.recipe_total_time || '0:30',
-          recipe_servings: previewServings,
-          recipe_likes: Number(mainData.recipe_like_count || 0),
+          recipe_title: preview.recipe_title || '未命名食譜',
+          recipe_description: preview.recipe_description || '',
+          recipe_image_url: preview.recipe_cover_image, // 對齊編輯頁傳來的 key
+          recipe_difficulty: Number(preview.recipe_difficulty || 1),
+          recipe_total_time: preview.recipe_total_time || '0:30',
+          recipe_servings: previewServings, // 用於 computed 裡的 originalServings 計算
+          recipe_likes: 0,
           author_name: authStore.user?.user_name || '您的預覽',
-          tags: preview.recipe_tags || preview.tags || [],
+          tags: preview.recipe_tags || [],
           created_at: '',
         };
 
-        servings.value = 1;
-
-        // 處理食材 (rawIngredients) - 確保欄位與正式模式一致以利 computed 計算
+        // 處理食材 (保持你原本的 amount 運算，但確保 Key 對齊)
         rawIngredients.value = (preview.ingredients || []).map((ing) => {
-          const name = (ing.ingredient_name || ing.name || '').trim();
-          const master = masterIng.find(
-            (m) => String(m.ingredient_name).trim() === name
-          );
-          const unit = ing.unit || ing.unit_name || master?.unit_name || '份';
-          const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(
-            unit.toLowerCase()
-          );
+          const name = (ing.ingredient_name || '').trim();
+          const master = masterIng.find((m) => String(m.ingredient_name).trim() === name);
+          const unit = ing.unit_name || master?.unit_name || '份';
+          const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(unit.toLowerCase());
 
           return {
             ...ing,
             ingredient_name: name,
-            amount: Number(ing.amount || 0) * previewServings,
-            
+            amount: Number(ing.amount || 0), // 保持原始數值，由 computed 處理份數縮放
             unit_name: unit,
-            // 關鍵：確保計算營養所需的係數都存在
-            gram_conversion: isWeightUnit
-              ? 1
-              : Number(master?.gram_conversion || ing.gram_conversion || 1),
-            kcal_per_100g: Number(
-              master?.kcal_per_100g || ing.kcal_per_100g || 0
-            ),
-            protein_per_100g: Number(
-              master?.protein_per_100g || ing.protein_per_100g || 0
-            ),
-            fat_per_100g: Number(master?.fat_per_100g || ing.fat_per_100g || 0),
-            carbs_per_100g: Number(
-              master?.carbs_per_100g || ing.carbs_per_100g || 0
-            )
+            gram_conversion: isWeightUnit ? 1 : Number(ing.gram_conversion || master?.gram_conversion || 1),
+            kcal_per_100g: Number(ing.kcal_per_100g || master?.kcal_per_100g || 0),
+            protein_per_100g: Number(ing.protein_per_100g || master?.protein_per_100g || 0),
+            fat_per_100g: Number(ing.fat_per_100g || master?.fat_per_100g || 0),
+            carbs_per_100g: Number(ing.carbs_per_100g || master?.carbs_per_100g || 0)
           };
         });
 
-        // 處理步驟 (rawSteps)
-        rawSteps.value = (preview.steps || [])
-          .map((s, idx) => ({
-            ...s,
-            step_order: s.step_order || idx + 1
-          }))
-          .sort((a, b) => Number(a.step_order) - Number(b.step_order));
+        // 處理步驟
+        rawSteps.value = (preview.steps || []).map((s, idx) => ({
+          ...s,
+          step_order: s.step_order || idx + 1
+        })).sort((a, b) => Number(a.step_order) - Number(b.step_order));
 
-        console.log('✅ [預覽成功] 資料已從 Store 渲染至畫面');
+        // 設為 1 份顯示模式
+        servings.value = 1;
+
         isLoading.value = false;
         return;
       } catch (err) {
         console.error('預覽資料解析失敗:', err);
       }
-    } else {
-      console.warn('⚠️ 網址為預覽模式但 Store 內無資料，切換回正式模式嘗試');
     }
   }
   const currentUid = authStore.user?.user_id || authStore.user?.id || 0;
@@ -1468,11 +1434,11 @@ watch(
   &::before {
     content: attr(data-tooltip); // 自動抓取 HTML 上的文字
     position: absolute;
-    bottom: 120%; // 顯示在按鈕上方
+    bottom: 120%; // 電腦版預設：顯示在按鈕上方
     left: 50%;
     transform: translateX(-50%) translateY(10px);
 
-    // 樣式設計：符合你的 Recimo 綠色系
+    // 樣式設計
     background-color: $primary-color-700;
     color: $neutral-color-white;
     padding: 6px 12px;
@@ -1487,6 +1453,15 @@ watch(
     pointer-events: none;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 100;
+
+    // 🏆 手機版調整：改為向左彈出
+    @media screen and (max-width: 809px) {
+      bottom: auto;
+      left: auto; // 取消電腦版的 left: 50%
+      right: 125%; // 定位在按鈕左側
+      top: 50%; // 垂直置中
+      transform: translateY(-50%) translateX(10px); // 初始位移從右往左移回
+    }
   }
 
   // 小箭頭
@@ -1501,6 +1476,17 @@ watch(
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
+
+    // 🏆 手機版調整：箭頭轉向右邊（指回按鈕）
+    @media screen and (max-width: 809px) {
+      bottom: auto;
+      left: auto;
+      right: 105%; // 定位在提示框與按鈕之間
+      top: 50%;
+      transform: translateY(-50%);
+      border-top-color: transparent; // 取消向下的顏色
+      border-left-color: $primary-color-700; // 改為向左的尖角顏色（視覺上是提示框右側指出的箭頭）
+    }
   }
 
   // 滑鼠移入時顯示
@@ -1508,7 +1494,14 @@ watch(
     &::before {
       opacity: 1;
       visibility: visible;
-      transform: translateX(-50%) translateY(0);
+
+      @media screen and (min-width: 810px) {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      @media screen and (max-width: 809px) {
+        transform: translateY(-50%) translateX(0);
+      }
     }
 
     &::after {
@@ -1518,14 +1511,20 @@ watch(
   }
 }
 
-// 針對檢舉按鈕可以改用紅色系提示
+// 針對檢舉按鈕
 .sub-btn.report.custom-tooltip {
   &::before {
     background-color: $accent-color-700;
   }
 
   &::after {
-    border-top-color: $accent-color-700;
+    @media screen and (min-width: 810px) {
+      border-top-color: $accent-color-700;
+    }
+
+    @media screen and (max-width: 809px) {
+      border-left-color: $accent-color-700;
+    }
   }
 }
 
