@@ -54,7 +54,7 @@ const notFound = ref(false);
 const userProfile = ref({
     username: authStore.user?.user_name || '訪客',
     role: authStore.user?.user_bio || '無內容',
-    avatar: authStore.user?.user_url ? parsePublicFile(authStore.user.user_url) : parsePublicFile('img/profile/1.png'),
+    avatar: authStore.user?.user_url ? parsePublicFile(authStore.user.user_url) : parsePublicFile('img/site/None_avatar.svg'),
     coverImage: parsePublicFile('img/profile/2.png'),
     isFollowing: false,  // 新增：追蹤狀態
     stats: {
@@ -107,6 +107,17 @@ const handleSaveProfile = async (updatedData) => {
     if (!authStore.userId) return;
 
     try {
+        // 🎯 立即使用預覽圖更新 authStore（即時反應到所有組件）
+        if (isOwnProfile.value) {
+            const immediateUpdate = {};
+            if (updatedData.username) immediateUpdate.user_name = updatedData.username;
+            // 使用 base64 預覽圖立即更新
+            if (updatedData.avatar) immediateUpdate.user_url = updatedData.avatar;
+            
+            authStore.updateUserInfo(immediateUpdate);
+            console.log('🚀 立即更新頭像預覽到全域 Store');
+        }
+
         const formData = new FormData();
         formData.append('user_id', authStore.userId);
 
@@ -128,6 +139,18 @@ const handleSaveProfile = async (updatedData) => {
         });
 
         if (data.success) {
+            // 🎯 上傳成功後，用伺服器回傳的正式 URL 替換預覽圖
+            if (isOwnProfile.value && data.data) {
+                const finalUpdate = {};
+                // 檢查各種可能的欄位名稱
+                const serverAvatarUrl = data.data.user_url || data.data.avatar_url || data.avatar_url;
+                if (serverAvatarUrl) {
+                    finalUpdate.user_url = serverAvatarUrl;
+                    authStore.updateUserInfo(finalUpdate);
+                    console.log('✅ 已更新為伺服器正式頭像 URL:', serverAvatarUrl);
+                }
+            }
+            
             // 重新載入個人資料
             await loadProfile();
             showEditModal.value = false;

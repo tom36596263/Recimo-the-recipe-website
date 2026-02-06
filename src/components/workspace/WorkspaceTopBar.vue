@@ -4,8 +4,10 @@ import { useRoute } from 'vue-router';
 import SearchBar from '@/components/common/SearchBar.vue';
 import NotificationPanel from '@/components/common/NotificationPanel.vue';
 import { useCartStore } from '@/stores/cartStore';
+import { useAuthStore } from '@/stores/authStore';
 import { base } from '@/utils/publicApi';
 const route = useRoute();
+const authStore = useAuthStore();
 
 // 通知相關狀態
 const showNotifications = ref(false);
@@ -42,33 +44,21 @@ const getAvatarUrl = (path) => {
     return proxy.$parsePublicFile(cleanPath);
 };
 
-// 1. 定義使用者資訊狀態 (給予初始預設值)
-const userInfo = ref({
-    user_name: 'Recimo',
-    user_url: proxy.$parsePublicFile('img/site/None_avatar.svg')
+// 使用者資訊從 authStore 取得
+const userName = computed(() => authStore.user?.name || authStore.user?.user_name || 'Recimo');
+const userAvatar = computed(() => {
+    // 直接從 authStore.user 取得，確保響應式更新
+    const url = authStore.user?.image || authStore.user?.user_url || authStore.user?.avatar;
+    
+    console.log('🖼️ WorkspaceTopBar 計算頭像 URL:', url);
+    
+    if (!url) return proxy.$parsePublicFile('img/site/None_avatar.svg');
+    if (/^https?:\/\/|^data:image/.test(url)) return url;
+    const cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    return proxy.$parsePublicFile(cleanPath);
 });
 
 onMounted(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-        try {
-            const parseData = JSON.parse(savedUser);
-            if (parseData.name) {
-                userInfo.value.user_name = parseData.name;
-            }
-
-            // 同時檢查 image 或 avatar 欄位
-            const userImg = parseData.image || parseData.avatar;
-
-            if (userImg) {
-                userInfo.value.user_url = getAvatarUrl(userImg);
-            }
-
-        } catch (error) {
-            console.error("解析使用者資料失敗", error);
-            userInfo.value.user_url = getAvatarUrl('img/site/None_avatar.svg');
-        }
-    }
     document.addEventListener('click', handleClickOutside);
 });
 
@@ -85,12 +75,12 @@ const cartTotal = computed(() => cartStore.totalCount);
     <div class="workspace-top-bar">
         <div class="col-6 col-md-12 personal-info">
             <div class="personal-img">
-                <img :src="userInfo.user_url" :alt="`${userInfo.user_name}.img`"
+                <img :src="userAvatar" :alt="`${userName}.img`"
                     @error="(e) => e.target.src = getAvatarUrl('img/site/None_avatar.svg')">
             </div>
 
             <div class="title">
-                <h3 class="en-h3">Hi~ <span>{{ userInfo.user_name }}</span></h3>
+                <h3 class="en-h3">Hi~ <span>{{ userName }}</span></h3>
                 <h5 class="zh-h5">一起來發現食譜的新創意吧!</h5>
             </div>
         </div>

@@ -288,6 +288,36 @@ const fetchData = async () => {
   }
 };
 
+// --- 新增瀏覽紀錄 ---
+const addBrowsingHistory = async () => {
+  // 確認條件：使用者已登入、非預覽模式、有有效的 recipe_id
+  if (!authStore.userId || isPreviewMode.value) {
+    return;
+  }
+
+  const recipeId = Number(route.params.id);
+  if (!recipeId) {
+    return;
+  }
+
+  try {
+    const formData = new URLSearchParams();
+    formData.append('user_id', authStore.userId);
+    formData.append('recipe_id', recipeId);
+
+    await phpApi.post('personal/history.php', formData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    console.log('✅ 瀏覽紀錄已新增');
+  } catch (err) {
+    console.error('❌ 新增瀏覽紀錄失敗:', err);
+    // 不影響主要功能，靜默處理錯誤
+  }
+};
+
 const isFromWorkspace = computed(() => {
   return route.path.includes('/workspace/recipe-detail');
 });
@@ -664,15 +694,21 @@ const handleDeleteSnap = async (galleryId) => {
   }
 };
 
-onMounted(() => {
-  fetchData();
+onMounted(async () => {
+  await fetchData();
+  // 資料載入完成後，新增瀏覽紀錄
+  addBrowsingHistory();
   if (isPreviewMode.value) toggleWorkspaceTopBar(false);
 });
 onUnmounted(() => toggleWorkspaceTopBar(true));
 
 watch(
   () => [route.params.id, route.query.mode],
-  () => fetchData()
+  async () => {
+    await fetchData();
+    // 切換食譜時也要記錄瀏覽紀錄
+    addBrowsingHistory();
+  }
 );
 </script>
 
