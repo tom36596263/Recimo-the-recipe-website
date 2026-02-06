@@ -39,23 +39,30 @@ const goToOriginal = () => {
 
 // EditorHeader.vue
 
+// const updateField = (field, value) => {
+//   const nextData = { ...props.modelValue };
+//   nextData[field] = value;
+
+//   // ❌ 刪除原本這裡所有 if (field === 'adapt_description') 的邏輯
+//   // 保持數據純淨，不要手動去同步 description 或 clean_description
+
+//   emit('update:modelValue', nextData);
+// };
+
 const updateField = (field, value) => {
-  const nextData = { ...props.modelValue };
-  nextData[field] = value;
-
-  // ❌ 刪除原本這裡所有 if (field === 'adapt_description') 的邏輯
-  // 保持數據純淨，不要手動去同步 description 或 clean_description
-
-  emit('update:modelValue', nextData);
+  // 確保每次更新都是產生一個新的物件引用，Vue 才能偵測到變化
+  emit('update:modelValue', { 
+    ...props.modelValue, 
+    [field]: value 
+  });
 };
-
 const removeTag = (tagId) => {
   const updatedTags = props.modelValue.tags.filter(t => t.tag_id !== tagId);
   updateField('tags', updatedTags);
 };
 
 const setDifficulty = (val) => {
-  if (props.isEditing) updateField('difficulty', val);
+  if (props.isEditing) updateField('difficulty', Number(val));
 };
 
 // --- EditorHeader.vue ---
@@ -114,6 +121,21 @@ const handleCoverUpload = (e) => {
   reader.onload = (evt) => updateField('coverImg', evt.target.result);
   reader.readAsDataURL(file);
 };
+
+watch(
+  () => props.modelValue.steps,
+  (newSteps) => {
+    if (!props.isEditing) return; // 只有編輯模式才自動計算
+    
+    const newSum = newSteps?.reduce((sum, s) => sum + (Number(s.time) || 0), 0) || 0;
+    
+    // 如果用戶還沒手動輸入時間，或者手動輸入為 0，則自動帶入加總
+    if (!props.modelValue.totalTime || props.modelValue.totalTime === 0) {
+      updateField('totalTime', newSum);
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <template>
