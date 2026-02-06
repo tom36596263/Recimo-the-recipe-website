@@ -5,6 +5,7 @@ import { publicApi, phpApi } from '@/utils/publicApi';
 import { parsePublicFile } from '@/utils/parseFile';
 import { useRecipeStore } from '@/stores/recipeEditor';
 import { useAuthStore } from '@/stores/authStore';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 
 // 元件引用
 import RecipeSteps from '../../components/workspace/recipedetail/RecipeSteps.vue';
@@ -22,6 +23,7 @@ const route = useRoute();
 const router = useRouter();
 const recipeStore = useRecipeStore();
 const authStore = useAuthStore();
+const favoritesStore = useFavoritesStore();
 
 // --- 1. 響應式資料狀態 ---
 const rawRecipe = ref(null);
@@ -697,6 +699,12 @@ const handleDeleteSnap = async (galleryId) => {
 };
 
 onMounted(async () => {
+  // 統一載入收藏狀態
+  const userId = authStore.user?.id || authStore.user?.user_id;
+  if (userId) {
+    await favoritesStore.fetchFavorites(userId);
+  }
+
   await fetchData();
   // 資料載入完成後，新增瀏覽紀錄
   addBrowsingHistory();

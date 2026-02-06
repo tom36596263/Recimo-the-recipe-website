@@ -70,13 +70,6 @@ const toggleFavorite = () => {
     }
 };
 
-// 載入時自動同步收藏狀態
-onMounted(() => {
-    if (authStore.user) {
-        favoritesStore.fetchFavorites(authStore.user.user_id || authStore.user.id);
-    }
-});
-
 // 產生星星陣列
 const starArray = computed(() => {
     const score = props.info.difficulty ?? 3;
@@ -86,7 +79,7 @@ const starArray = computed(() => {
 // 處理燈箱確認提交後的邏輯
 const onModalSubmit = (data) => {
     if (data && data.updated && authStore.user) {
-        favoritesStore.fetchFavorites(authStore.user.user_id || authStore.user.id);
+        favoritesStore.refetchFavorites(authStore.user.user_id || authStore.user.id);
     }
 };
 </script>

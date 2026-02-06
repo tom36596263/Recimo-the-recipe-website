@@ -122,6 +122,11 @@ onMounted(async () => {
         try {
             const userObj = JSON.parse(userStr);
             userId.value = userObj.id;
+            
+            // 統一載入收藏狀態
+            if (userId.value) {
+                await favoritesStore.fetchFavorites(userId.value);
+            }
             // console.log(userId.value);
 
             // 個人食譜：改為串接 myreipe_get.php，使用 userId 當參數，最多顯示四個

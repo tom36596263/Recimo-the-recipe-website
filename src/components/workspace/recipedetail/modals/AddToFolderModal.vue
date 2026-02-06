@@ -162,16 +162,15 @@ const fetchFolders = async () => {
     }
 };
 
-// 監聽 userId 變化，自動載入
+// 監聽 modal 開啟狀態，只在打開時才載入資料
 import { watch } from 'vue';
-watch(userId, (val) => {
-    if (val) fetchFolders();
-}, { immediate: true });
-
-// 監聽 modal 開啟狀態，每次開啟都重新載入資料夾
 watch(() => props.modelValue, (isOpen) => {
     if (isOpen && userId.value) {
-        fetchFolders();
+        // 同時載入資料夾列表和收藏資訊
+        Promise.all([
+            fetchFolders(),
+            fetchFavoriteInfo()
+        ]);
     }
 });
 
@@ -243,13 +242,6 @@ const fetchFavoriteInfo = async () => {
     }
 };
 
-// modal 開啟時自動查詢
-import { onMounted } from 'vue';
-onMounted(() => {
-    fetchFavoriteInfo();
-});
-
-// 按下確認時：未加入則加入，有則移動
 const handleSubmit = async () => {
     if (!userId.value || !recipeId.value) {
         alert('缺少 userId 或 recipeId');

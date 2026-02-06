@@ -5,10 +5,14 @@
     import { useRouter } from 'vue-router';
     import { ref, onMounted } from 'vue';
     import { phpApi } from '@/utils/publicApi'
+    import { useFavoritesStore } from '@/stores/favoritesStore';
+    import { useAuthStore } from '@/stores/authStore';
 
     const { runWithAuth } = useAuthGuard();
     const router = useRouter();
     const recipes = ref([])
+    const favoritesStore = useFavoritesStore();
+    const authStore = useAuthStore();
 
     const handleCardClick = (id) => {
         runWithAuth(() => {
@@ -20,6 +24,12 @@
     }
 
 onMounted(async () => {
+    // 統一載入收藏狀態
+    const userId = authStore.user?.id || authStore.user?.user_id;
+    if (userId) {
+        await favoritesStore.fetchFavorites(userId);
+    }
+
     try {
         // const [resRecipes, resRecipeTags, resTags] = await Promise.all([
         //     publicApi.get('data/recipe/recipes.json'),
