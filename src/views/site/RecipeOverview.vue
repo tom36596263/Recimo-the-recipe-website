@@ -4,6 +4,8 @@ import { phpApi } from '@/utils/publicApi'
 import { useRouter } from 'vue-router'
 import { useAuthGuard } from '@/composables/useAuthGuard'
 import BaseBtn from '@/components/common/BaseBtn.vue';
+import { useFavoritesStore } from '@/stores/favoritesStore';
+import { useAuthStore } from '@/stores/authStore';
 
 import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
 import FilterSection from '@/components/site/RecipeOverview/FilterSection.vue'
@@ -15,6 +17,8 @@ import Cook from '@/components/common/Cook.vue'
 const isShow = ref(false);
 const router = useRouter()
 const { runWithAuth } = useAuthGuard()
+const favoritesStore = useFavoritesStore();
+const authStore = useAuthStore();
 const allRecipe = ref([])
 const currentPage = ref(1)
 const pageSize = 6
@@ -127,6 +131,12 @@ const fetchRecipes = async () => {
 
 // 在生命週期中呼叫它
 onMounted(() => {
+    // 統一載入收藏狀態
+    const userId = authStore.user?.id || authStore.user?.user_id;
+    if (userId) {
+        favoritesStore.fetchFavorites(userId);
+    }
+
     fetchRecipes();
 });
 

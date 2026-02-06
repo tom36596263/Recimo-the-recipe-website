@@ -68,14 +68,9 @@ const isFavorited = computed(() => favoritesStore.isFavorited(recipeId.value));
 const handleModalSubmit = () => {
     showAddToFolderModal.value = false;
     if (userId.value) {
-        favoritesStore.fetchFavorites(userId.value);
+        favoritesStore.refetchFavorites(userId.value);
     }
 };
-
-// 初始載入收藏狀態
-if (userId.value) {
-    favoritesStore.fetchFavorites(userId.value);
-}
 
 const handleHeartClick = (e) => {
     e.stopPropagation();

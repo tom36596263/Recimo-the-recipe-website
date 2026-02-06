@@ -7,6 +7,7 @@ import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
 import EditProfileModal from '@/components/common/EditProfileModal.vue';
 import { parsePublicFile } from '@/utils/parseFile';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 
 // ==================== Props ====================
 const props = defineProps({
@@ -18,6 +19,7 @@ const props = defineProps({
 
 // ==================== Store & Router ====================
 const authStore = useAuthStore();
+const favoritesStore = useFavoritesStore();
 const route = useRoute();
 const router = useRouter();
 
@@ -499,6 +501,11 @@ const displayedRecipes = computed(() => {
 
 // ==================== 生命週期 ====================
 onMounted(async () => {
+    // 統一載入收藏狀態
+    if (authStore.userId) {
+        await favoritesStore.fetchFavorites(authStore.userId);
+    }
+
     await loadProfile();
     await loadMyRecipes();
 });
