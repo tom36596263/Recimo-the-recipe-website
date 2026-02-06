@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import draggable from 'vuedraggable';
 
 const props = defineProps(['steps', 'ingredients', 'isEditing']);
@@ -37,6 +37,19 @@ const showTimerPop = ref(false);
 const showIngPop = ref(false);
 const popStyle = ref({ top: '0px', left: '0px', position: 'fixed' });
 
+// --- ✨ 核心修正：雙向綁定中轉站 ---
+const internalSteps = computed({
+  get: () => props.steps,
+  set: (val) => emit('update:steps', val)
+});
+
+// --- 修改資料的方法，都改用複製陣列後 emit ---
+const updateStepField = (index, field, value) => {
+  const newSteps = [...props.steps];
+  newSteps[index] = { ...newSteps[index], [field]: value };
+  emit('update:steps', newSteps);
+};
+
 const addStep = () => {
   const newStep = {
     id: 's' + Date.now(),
@@ -54,6 +67,10 @@ const addStep = () => {
 const removeStep = (id) => {
   // ✅ 使用 filter 產生新陣列，觸發響應
   localSteps.value = localSteps.value.filter(s => (s.id !== id && s.step_id !== id));
+  const newSteps = props.steps.filter(s => (s.id || s.step_id) !== id);
+  // if (index !== -1) props.steps.splice(index, 1);
+  emit('update:steps', newSteps);
+  
 };
 
 const getActiveStep = () => {
@@ -93,14 +110,32 @@ const toggleTag = (step, ingId) => {
   }
 };
 
+// const getStepImage = (step) => {
+//   if (!step || !step.image) return null;
+//   const imgSource = step.image;
+//   if (typeof imgSource === 'string' && imgSource.trim().length > 0) {
+//     if (imgSource.startsWith('data:') || imgSource.startsWith('http')) return imgSource;
+//     return imgSource.startsWith('/') || imgSource.startsWith('.') ? imgSource : `/${imgSource}`;
+//   }
+//   return null;
+// };
 const getStepImage = (step) => {
   if (!step || !step.image) return null;
+  
+  // 如果是 File 物件 (剛上傳)，產生臨時預覽圖
+  if (step.image instanceof File) {
+    return URL.createObjectURL(step.image);
+  }
+  // 2. 如果是字串 (資料庫來的路徑)
   const imgSource = step.image;
   if (typeof imgSource === 'string' && imgSource.trim().length > 0) {
-    if (imgSource.startsWith('data:') || imgSource.startsWith('http')) return imgSource;
-    return imgSource.startsWith('/') || imgSource.startsWith('.') ? imgSource : `/${imgSource}`;
+    // 如果已經是完整 URL (http) 或 Base64 (data:)，直接回傳
+    if (imgSource.startsWith('data:') || imgSource.startsWith('http')) {
+      return imgSource;
+    }
+    // ✅ 核心修改：使用 parsePublicFile 處理相對路徑 (如 img/recipes/...)
+    return parsePublicFile(imgSource);
   }
-  return null;
 };
 
 const handleImgError = (e) => {

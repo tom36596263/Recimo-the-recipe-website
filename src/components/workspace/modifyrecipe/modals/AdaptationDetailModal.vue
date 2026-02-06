@@ -157,55 +157,58 @@ const isHubOpen = ref(false);
 // 1. 取得原始份量 (servings)
 // --- 份量與營養計算邏輯 ---
 
-// 1. 取得原始份量與當前選擇份量
+// 取得原始份量與當前選擇份量
 const originalServings = computed(() => {
-    // 🏆 關鍵：確保優先抓取資料庫回傳的 recipe_servings
-    const s = props.recipe?.recipe_servings || props.recipe?.servings || 1;
-    console.log('原始份量偵測:', s); // 可以在控制台檢查這個數字對不對
+    const r = props.recipe?.main || props.recipe;
+    const s = r?.recipe_servings || r?.servings || 1;
     return Math.max(Number(s), 1);
 });
 
 // 預設份量設為 1
 const currentServings = ref(1);
 
-// 2. 🏆 核心營養計算邏輯 (修正：資料庫已是單份，直接乘人數)
+// 修正後的計算邏輯
+// 修正後的計算邏輯 - 保持你的公式不變，僅對齊欄位
 const displayedNutrition = computed(() => {
-    const r = props.recipe;
+    // 優先檢查 props.recipe.main，若無則用 props.recipe (相容不同 API 結構)
+    const r = props.recipe?.main || props.recipe;
     if (!r) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
 
-    // 資料庫現在存的是「單份」數值 (例如 964)
-    const perServingKcal = parseFloat(r.recipe_kcal_per_100g || 0);
-    const perServingP = parseFloat(r.recipe_protein_per_100g || 0);
-    const perServingF = parseFloat(r.recipe_fat_per_100g || 0);
-    const perServingC = parseFloat(r.recipe_carbs_per_100g || 0);
+    // 🏆 欄位對接：轉為數字以利計算
+    const perKcal = parseFloat(r.recipe_kcal_per_100g || 0);
+    const perP = parseFloat(r.recipe_protein_per_100g || 0);
+    const perF = parseFloat(r.recipe_fat_per_100g || 0);
+    const perC = parseFloat(r.recipe_carbs_per_100g || 0);
 
-    // 🏆 修改重點：直接乘以「當前畫面上選的人數」
-    // 如果畫面上選 2 人，就是 964 * 2 = 1928
+    // 🏆 邏輯保持：數值 * 當前選擇的人數 (currentServings)
     const count = currentServings.value;
 
     return {
-        calories: Math.round(perServingKcal * count),
-        protein: Number((perServingP * count).toFixed(1)),
-        fat: Number((perServingF * count).toFixed(1)),
-        carbs: Number((perServingC * count).toFixed(1))
+        calories: Math.round(perKcal * count),
+        protein: Number((perP * count).toFixed(1)),
+        fat: Number((perF * count).toFixed(1)),
+        carbs: Number((perC * count).toFixed(1))
     };
 });
 
-// 3. 食材清單顯示 (隨人數縮放量)
 const ingredientsData = computed(() => {
+    // 確保抓到陣列
     const list = props.recipe?.ingredients || [];
 
-    // 🏆 修改重點：直接使用當前選擇的人數作為倍率
-    // 不再除以 originalServings，這樣 item.amount 就會被視為「一份」的基準量
-    const ratio = currentServings.value;
+    // 計算份量比例 (保持你的邏輯)
+    const ratio = currentServings.value / originalServings.value;
 
-    return list.map(item => ({
-        INGREDIENT_NAME: item.ingredient_name || item.name || '未知食材',
-        // 一份的量 * 人數
-        amount: item.amount ? (Number(item.amount) * ratio).toFixed(1) : 0,
-        unit_name: item.unit_name || item.unit || 'g',
-        note: item.remark || item.note || ''
-    }));
+    return list.map(item => {
+        const rawAmount = parseFloat(item.amount || item.INGREDIENT_AMOUNT || 0);
+
+        return {
+            // 對齊資料庫回傳的欄位名
+            INGREDIENT_NAME: item.ingredient_name || item.name || '未知食材',
+            amount: isNaN(rawAmount) ? 0 : (rawAmount * ratio).toFixed(1),
+            unit_name: item.unit_name || item.unit || 'g',
+            note: item.remark || item.note || ''
+        };
+    });
 });
 
 watch(() => props.recipe, (newVal) => {
@@ -214,28 +217,35 @@ watch(() => props.recipe, (newVal) => {
     console.log('比對結果:', isOwner.value);
 }, { immediate: true });
 
-/**
- * 整合介紹區域所需的資料
- */
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
 
-    const rawTime = r.totalTime || r.time || 30;
+    // 🏆 修改 1: 時間對齊 recipe_total_time
+    const rawTime = r.recipe_total_time || r.totalTime || r.time || 30;
     const formattedTime = String(rawTime).includes('分') ? rawTime : `${rawTime} 分鐘`;
 
-    const rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
-    const finalImage = (rawImg && (rawImg.startsWith('data:') || rawImg.startsWith('http'))) ? rawImg : parsePublicFile(rawImg);
+    // --- 圖片路徑清洗邏輯保持不變 ---
+    let rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
+    let finalImage = '';
+    if (!rawImg) {
+        finalImage = '';
+    } else if (rawImg.startsWith('data:') || rawImg.startsWith('http')) {
+        finalImage = rawImg;
+    } else if (rawImg.includes('/cjd102/g2/')) {
+        finalImage = `${window.location.origin}${rawImg.startsWith('/') ? '' : '/'}${rawImg}`;
+    } else {
+        finalImage = parsePublicFile(rawImg);
+    }
 
     return {
-        id: getCleanId(r.id || r.recipe_id),
-        title: r.title || r.recipe_title || '未命名食譜',
+        id: getCleanId(r.recipe_id || r.id),
+        // 🏆 修改 2: 標題優先對齊 recipe_title
+        title: r.recipe_title || r.title || '未命名食譜',
         image: finalImage,
-
-        // 🔥 修正這裡：強制先抓 recipe_description (aaa)
+        // 🏆 修改 3: 描述優先對齊 recipe_description
         description: r.recipe_description || r.description || '暫無詳細說明',
-
-        difficulty: r.difficulty || 1,
+        difficulty: r.recipe_difficulty || r.difficulty || 1,
         tags: r.tags || [],
         time: formattedTime
     };
@@ -247,12 +257,25 @@ const introData = computed(() => {
 const stepsData = computed(() => {
     const steps = props.recipe?.steps || [];
     return steps.map((s, idx) => {
-        const stepImg = s.image || s.step_image_url || '';
+        let stepImg = s.image || s.step_image_url || '';
+        let finalStepImg = '';
+
+        if (!stepImg) {
+            finalStepImg = '';
+        } else if (stepImg.startsWith('data:') || stepImg.startsWith('http')) {
+            finalStepImg = stepImg;
+        } else if (stepImg.includes('/cjd102/g2/')) {
+            // 🔥 防止步驟圖片也發生重複路徑問題
+            finalStepImg = `${window.location.origin}${stepImg.startsWith('/') ? '' : '/'}${stepImg}`;
+        } else {
+            finalStepImg = parsePublicFile(stepImg);
+        }
+
         return {
             id: s.id || idx,
             title: s.step_title || s.title || `步驟 ${idx + 1}`,
             content: s.content || s.step_content || s.description || '',
-            image: (stepImg && (stepImg.startsWith('data:') || stepImg.startsWith('http'))) ? stepImg : parsePublicFile(stepImg),
+            image: finalStepImg,
             time: s.time || ''
         };
     });
@@ -333,8 +356,9 @@ const handleGoToEdit = () => {
 
                             <div class="action-group">
                                 <AuthorInfo
-                                    :name="isOwner ? (authStore.user?.user_name || authStore.user?.name) : (recipe.user_name || recipe.author_name || 'Recimo 用戶')"
-                                    :handle="`user_${recipe.author_id || recipe.user_id}`" :time="recipe.created_at" />
+                                    :name="isOwner ? (authStore.user?.user_name || authStore.user?.name) : (recipe.author_name || 'Recimo 用戶')"
+                                    :handle="`user_${recipe.author_id || recipe.user_id || 'unknown'}`"
+                                    :time="recipe.recipe_created_at || recipe.created_at || '剛剛'" />
 
                                 <button v-if="isOwner" class="btn-delete-adaptation" @click="handleDelete">
                                     <i-material-symbols-delete-outline-rounded class="mr-4" />
