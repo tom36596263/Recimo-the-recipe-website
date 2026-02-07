@@ -15,8 +15,11 @@ import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import RecipePreviewCard from '@/components/common/RecipePreviewCard.vue';
 import PageBtn from '@/components/common/PageBtn.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 
 // ========== 狀態管理 ==========
+const favoritesStore = useFavoritesStore();
+
 // 所有最近觀看食譜列表（完整數據）
 const allRecipes = ref([]);
 
@@ -128,6 +131,9 @@ onMounted(async () => {
         return;
     }
     if (!userId) return;
+
+    // 統一載入收藏狀態
+    await favoritesStore.fetchFavorites(userId);
 
     try {
         // 串接 history.php 拿到最近瀏覽紀錄

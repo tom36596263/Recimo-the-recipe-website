@@ -25,6 +25,8 @@ import { useFavoritesStore } from '@/stores/favoritesStore';
 
 // ========== 狀態管理 ==========
 const favoritesStore = useFavoritesStore();
+import { useAuthStore } from '@/stores/authStore';
+const authStore = useAuthStore();
 
 // 所有收藏食譜列表（完整數據）
 const allRecipes = ref([]);
@@ -313,6 +315,9 @@ onMounted(async () => {
     }
     if (!userId.value) return;
 
+    // 統一載入收藏狀態
+    await favoritesStore.fetchFavorites(userId.value);
+
     // 取得資料夾列表
     await fetchFolders();
 
@@ -326,23 +331,6 @@ watch(currentPage, () => {
         selectedRecipe.value = currentPageRecipes.value[0];
     }
 });
-
-// ========== 監聽收藏變化 ==========
-/**
- * 監聽 favoritesStore 的變化，當收藏狀態改變時自動刷新收藏列表和資料夾
- */
-watch(
-    () => favoritesStore.favoriteIds,
-    async () => {
-        if (userId.value) {
-            await Promise.all([
-                loadFavorites(),
-                fetchFolders()
-            ]);
-        }
-    },
-    { deep: true }
-);
 </script>
 
 <template>

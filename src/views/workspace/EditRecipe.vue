@@ -18,7 +18,7 @@ const recipeStore = useRecipeStore();
 const authStore = useAuthStore();
 
 const isEditing = ref(true);
-const isPublished = ref(false);
+const isPublished = ref(true);
 
 const ingredientsMasterList = ref([]);
 const tagsMasterList = ref([]);
@@ -480,6 +480,7 @@ const handleSave = async () => {
 };
 
 const handlePreview = async () => {
+  // 1. 處理圖片轉 Base64
   const coverBase64 = await fileToBase64(recipeForm.value.coverImg);
   const processedSteps = await Promise.all(
     recipeForm.value.steps.map(async (s, idx) => ({
@@ -492,6 +493,8 @@ const handlePreview = async () => {
       step_image_url: await fileToBase64(s.image)
     }))
   );
+
+  // 2. 處理食材標籤狀態與營養係數
   const tagToStatus = { 'tag-green': 'add', 'tag-orange': 'mod', 'tag-blue': 'rep' };
   const processedIngredients = recipeForm.value.ingredients.map(ing => ({
     ...ing,
@@ -505,22 +508,34 @@ const handlePreview = async () => {
     carbs_per_100g: Number(ing.carbs_per_100g || 0),
     gram_conversion: Number(ing.gram_conversion || 1.0)
   }));
+
+  // 3. 封裝 Preview 資料 (確保 Key 與詳情頁 fetchData 讀取的名稱一致)
   const previewData = {
-    ...recipeForm.value,
+    // 這裡先展開原始資料，再覆寫詳情頁需要的特定 Key
+    ...JSON.parse(JSON.stringify(recipeForm.value)),
     recipe_title: isAdaptModeActive.value ? (recipeForm.value.adapt_title || recipeForm.value.title) : recipeForm.value.title,
     recipe_description: isAdaptModeActive.value ? (recipeForm.value.adapt_description || recipeForm.value.description) : recipeForm.value.description,
-    recipe_cover_image: coverBase64,
+    recipe_cover_image: coverBase64, // 詳情頁 read 此 Key
     recipe_servings: Number(recipeForm.value.recipe_servings || 1),
     ingredients: processedIngredients,
     steps: processedSteps,
-    recipe_tags: recipeForm.value.tags,
+    recipe_tags: recipeForm.value.tags, // 對齊詳情頁 serverData.tags 邏輯
     totalTime: Number(recipeForm.value.totalTime || 0)
   };
+
+  // 4. 同步回 Store 並跳轉
+  // 先存原始編輯狀態供「返回」使用
   recipeStore.rawEditorData = JSON.parse(JSON.stringify(recipeForm.value));
+  // 再存預覽用資料
   recipeStore.setPreviewFromEditor(previewData);
+
   router.push({
     path: `/workspace/recipe-detail/${route.query.editId || route.params.id || 0}`,
-    query: { mode: 'preview', editId: route.query.editId || route.params.id, action: route.query.action }
+    query: {
+      mode: 'preview',
+      editId: route.query.editId || route.params.id,
+      action: route.query.action
+    }
   });
 };
 
@@ -542,7 +557,7 @@ provide('isEditing', isEditing);
       <div class="recipe-main-content">
         <div class="row custom-row-fit">
           <aside class="ingredient-sidebar col-5 col-md-12">
-            <IngredientEditor :ingredients="recipeForm.ingredients" :is-editing="isEditing"
+            <IngredientEditor v-model:ingredients="recipeForm.ingredients" :is-editing="isEditing"
               :is-adapt-mode="isAdaptModeActive" />
           </aside>
           <section class="step-content col-7 col-md-12">

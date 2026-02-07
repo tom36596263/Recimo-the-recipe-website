@@ -8,8 +8,10 @@ import RecipePreviewCard from '@/components/common/RecipePreviewCard.vue';
 import BaseTag from '@/components/common/BaseTag.vue';
 import PageBtn from '@/components/common/PageBtn.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 
 const router = useRouter();
+const favoritesStore = useFavoritesStore();
 
 // ========== 狀態管理 ==========
 // 所有個人食譜列表（完整數據）
@@ -120,6 +122,12 @@ onMounted(async () => {
         try {
             const userObj = JSON.parse(userStr);
             userId.value = userObj.id;
+            
+            // 統一載入收藏狀態
+            if (userId.value) {
+                await favoritesStore.fetchFavorites(userId.value);
+            }
+
             if (userId.value) {
                 try {
                     const resMyRecipes = await phpApi.get(`personal/myrecipe_get.php`, { params: { user_id: userId.value } });

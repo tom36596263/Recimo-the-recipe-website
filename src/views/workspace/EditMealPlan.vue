@@ -278,7 +278,7 @@ const updateTargetKcal = async (newKcal) => {
 
 // 批量更新目標熱量
 const handleBatchUpdateTargetKcal = async (newKcal) => {
-  console.log('準備批量更新，熱量：', newKcal); // 🔴 除錯點 1
+  console.log('準備批量更新，熱量：', newKcal);
 
   try {
     const res = await phpApi.post('mealplans/batch_update_daily_targets.php', {
@@ -287,7 +287,7 @@ const handleBatchUpdateTargetKcal = async (newKcal) => {
       target_kcal: newKcal
     });
 
-    console.log('API 回傳結果：', res.data); // 🔴 除錯點 2
+    console.log('API 回傳結果：', res.data);
 
     if (res.data.success) {
       // 重新抓取資料

@@ -729,7 +729,7 @@ const handleGoToEdit = () => {
     &::before {
         content: attr(data-tooltip);
         position: absolute;
-        bottom: 125%; // 距離按鈕再高一點點
+        bottom: 125%; // 電腦版預設：顯示在按鈕上方
         left: 50%;
         transform: translateX(-50%) translateY(10px);
         background-color: $primary-color-700;
@@ -744,12 +744,21 @@ const handleGoToEdit = () => {
         pointer-events: none;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         z-index: 2100; // 確保高於 Modal
+
+        // 🏆 手機版調整：向左彈出
+        @media screen and (max-width: 809px) {
+            bottom: auto;
+            left: auto;
+            right: 130%; // 稍微拉開一點距離
+            top: 50%;
+            transform: translateY(-50%) translateX(10px);
+        }
     }
 
     &::after {
         content: '';
         position: absolute;
-        bottom: 110%;
+        bottom: 110%; // 電腦版預設：箭頭在下
         left: 50%;
         transform: translateX(-50%);
         border: 6px solid transparent;
@@ -758,13 +767,31 @@ const handleGoToEdit = () => {
         visibility: hidden;
         transition: all 0.3s ease;
         z-index: 2100;
+
+        // 🏆 手機版調整：箭頭轉向右側（指回按鈕）
+        @media screen and (max-width: 809px) {
+            bottom: auto;
+            left: auto;
+            right: 110%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-top-color: transparent;
+            border-left-color: $primary-color-700; // 指向按鈕
+        }
     }
 
     &:hover {
         &::before {
             opacity: 1;
             visibility: visible;
-            transform: translateX(-50%) translateY(0);
+
+            @media screen and (min-width: 810px) {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            @media screen and (max-width: 809px) {
+                transform: translateY(-50%) translateX(0);
+            }
         }
 
         &::after {
@@ -780,7 +807,16 @@ const handleGoToEdit = () => {
         }
 
         &::after {
-            border-top-color: $accent-color-700;
+
+            // 電腦版顏色
+            @media screen and (min-width: 810px) {
+                border-top-color: $accent-color-700;
+            }
+
+            // 手機版顏色
+            @media screen and (max-width: 809px) {
+                border-left-color: $accent-color-700;
+            }
         }
     }
 }
