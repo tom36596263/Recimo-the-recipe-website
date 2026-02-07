@@ -241,7 +241,7 @@ const introData = computed(() => {
     return {
         id: getCleanId(r.recipe_id || r.id),
         // 🏆 修改 2: 標題優先對齊 recipe_title
-        title: r.recipe_title || r.title || '未命名食譜',
+        title: r.adaptation_title || r.recipe_title || r.title || '未命名食譜',
         image: finalImage,
         // 🏆 修改 3: 描述優先對齊 recipe_description
         description: r.recipe_description || r.description || '暫無詳細說明',

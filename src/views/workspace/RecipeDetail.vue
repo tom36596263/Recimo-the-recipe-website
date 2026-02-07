@@ -403,7 +403,7 @@ const stepsData = computed(() => {
 const onReportSubmit = (reportForm) => {
   console.log('收到檢舉內容:', reportForm);
   isReportModalOpen.value = false;
-  alert('感謝您的回饋，我們已收到檢舉。');
+  // alert('感謝您的回饋，我們已收到檢舉。');
 };
 
 const handleShare = () => {
