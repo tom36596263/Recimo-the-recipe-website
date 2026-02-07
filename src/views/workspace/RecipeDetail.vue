@@ -55,6 +55,8 @@ const getSmartImageUrl = (url) => {
 const snapsData = ref([]);
 const commentList = ref([]);
 
+const cookSnapRef = ref(null);
+
 // --- 核心抓取邏輯 ---
 const fetchData = async () => {
   isLoading.value = true;
@@ -321,7 +323,7 @@ const ingredientsData = computed(() => {
 
   if (isPreviewMode.value) {
     // 預覽模式：食材已經是「整份」了，顯示單份時要除回原始份數
-    scale = currentServings / originalServings;
+    scale = currentServings;
   } else {
     // 正式模式：API 給的是「單份」食材數據，直接乘上當前想看的份數
     // 既然你 fetchData 強制 servings.value = 1，這裡算出來就是正確的 1 份
@@ -585,61 +587,46 @@ const handleDeleteComment = async (commentId) => {
   }
 };
 
-const handlePostSnap = async (payload) => {
-  // 🏆 核心偵錯：看看到底是 File 還是 String
-  console.log('--- 上傳流程開始 ---');
-  console.log('1. 原始 Payload:', payload);
-  console.log('2. 圖片類型:', typeof payload.image);
-  console.log('3. 是否為 File 物件:', payload.image instanceof File);
+const isSnapSuccessOpen = ref(false); // 🏆 補上這一行！
 
+const handlePostSnap = async (payload) => {
   if (!authStore.user) return alert('請先登入');
 
   const userId = authStore.user.user_id || authStore.user.id;
   const recipeId = route.params.id;
-
-  // 驗證 ID
-  if (!userId || !recipeId) {
-    console.error('缺少 ID:', { userId, recipeId });
-    return alert('無法讀取用戶或食譜資訊');
-  }
 
   const formData = new FormData();
   formData.append('recipe_id', recipeId);
   formData.append('user_id', userId);
   formData.append('gallery_text', payload.note || '');
 
-  // 🏆 關鍵修正：確保只有 File 物件才能附加到 'image'
   if (payload.image instanceof File) {
     formData.append('image', payload.image);
-    console.log('4. FormData 已成功附加 File 物件');
   } else {
-    // 如果進到這裡，代表 Modal 傳出來的就是那個 blob 網址字串
-    console.error(
-      '致命錯誤：Payload 提供的不是檔案實體，而是網址：',
-      payload.image
-    );
-    alert('圖片讀取異常，請重新選取圖片後再試一次');
+    alert('圖片讀取異常，請重新選取');
     return;
   }
 
   try {
     const response = await phpApi.post('social/gallery.php', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
 
-    console.log('5. 後端回傳:', response.data);
-
     if (response.data.success) {
-      alert('成品照發布成功！');
-      if (typeof fetchData === 'function') fetchData();
+      // 🏆 修正策略：先呼叫顯示燈箱
+      isSnapSuccessOpen.value = true;
+      if (cookSnapRef.value) {
+        cookSnapRef.value.showSuccess();
+
+        // 💡 重點：我們先手動把新照片「推」進 list，讓畫面立刻有感
+        // 而不是直接 fetchData() 導致組件重刷
+        await fetchData();
+      }
     } else {
       alert('上傳失敗：' + response.data.message);
     }
   } catch (err) {
     console.error('API 出錯:', err);
-    alert('上傳出錯，請檢查伺服器連線');
   }
 };
 
@@ -814,11 +801,7 @@ watch(
           style="--delay: 7"
         >
           <section class="mb-10 content-wrapper">
-            <CookSnap
-              :list="snapsData"
-              @post-snap="handlePostSnap"
-              @delete-snap="handleDeleteSnap"
-            />
+            <CookSnap ref="cookSnapRef" :list="snapsData" @post-snap="handlePostSnap" @delete-snap="handleDeleteSnap" />
           </section>
         </div>
       </div>
@@ -896,6 +879,10 @@ watch(
   >
     <RelatedRecipes :currentId="route.params.id" :excludeAdapted="true" />
   </div>
+  <Teleport to="body">
+    <SnapFinishedSuccessModal :isOpen="isSnapSuccessOpen" @close="isSnapSuccessOpen = false" />
+  </Teleport>
+
 </template>
 
 <style lang="scss" scoped>

@@ -196,7 +196,7 @@ const ingredientsData = computed(() => {
     const list = props.recipe?.ingredients || [];
 
     // 計算份量比例 (保持你的邏輯)
-    const ratio = currentServings.value / originalServings.value;
+    const ratio = currentServings.value;
 
     return list.map(item => {
         const rawAmount = parseFloat(item.amount || item.INGREDIENT_AMOUNT || 0);
