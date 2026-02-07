@@ -15,12 +15,12 @@ export const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
 export const publicApi = axios.create({
     baseURL: base,
-    timeout: 5000
+    timeout: 15000
 })
 
 export const phpApi = axios.create({
     baseURL: apiBase, // 確保結尾有斜線
-    timeout: 5000,
+    timeout: 15000,
     headers: { 'Content-Type': 'application/json' },
     withCredentials: true, // 這行沒加，PHP 永遠拿不到 Session
 })
