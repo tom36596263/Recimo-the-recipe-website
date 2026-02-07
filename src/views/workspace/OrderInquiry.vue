@@ -11,17 +11,14 @@ const currentPage = ref(1);
 const pageSize = 5;
 const activeTag = ref('全部訂單');
 const selectedDate = ref('');
-const pollTimer = ref(null); // 🌟 新增：輪詢計時器
 const showSuccessModal = ref(false);
+
 // 讀取資料 (核心函式)
 const fetchOrders = async () => {
   const userData = localStorage.getItem('user');
   if (!userData) return;
 
   const userInfo = JSON.parse(userData);
-
-  // 增加這行 log，在雲端環境打開 F12 看看它到底是長什麼樣子
-  console.log('目前 localStorage 裡的用戶資訊:', userInfo);
 
   // 嘗試所有可能的欄位名稱
   const userId = userInfo?.id || userInfo?.user_id || userInfo?.data?.id || userInfo?.data?.user_id;
@@ -66,53 +63,25 @@ const fetchOrders = async () => {
   }
 };
 
-// 🌟 新增：智慧輪詢機制
-// 當使用者回到頁面時，我們每 1.5 秒抓一次，連續抓 5 次
-// 這樣可以解決「綠界 callback 還沒跑完，使用者就回來了」的問題
-const startPolling = () => {
-  console.log('開始檢查訂單狀態...');
-  let count = 0;
-
-  // 先清除舊的計時器，避免重複
-  if (pollTimer.value) clearInterval(pollTimer.value);
-
-  // 立即執行一次
-  fetchOrders();
-
-  // 設定計時器
-  pollTimer.value = setInterval(() => {
-    count++;
-    console.log(`第 ${count} 次自動更新...`);
-    fetchOrders();
-
-    // 5次後停止 (約 7.5 秒)
-    if (count >= 5) {
-      clearInterval(pollTimer.value);
-      pollTimer.value = null;
-    }
-  }, 1500);
-};
-
 // 監聽頁面可見性變化
 const handleVisibilityChange = () => {
   if (document.visibilityState === 'visible') {
-    // 當使用者切換分頁或是從綠界跳轉回來時，啟動輪詢
-    startPolling();
+    // 當使用者切換分頁或是從綠界跳轉回來時，重新抓一次資料
+    // 這裡原本寫 startPolling()，因為函式被刪了所以報錯，改成 fetchOrders()
+    fetchOrders();
   }
 };
 
 onMounted(() => {
-  // 進來頁面先跑一次輪詢，因為可能是剛結帳完跳轉過來的
-  startPolling();
+  // 進來頁面直接抓一次
+  // 這裡原本寫 startPolling()，因為函式被刪了所以報錯，改成 fetchOrders()
+  fetchOrders();
 
   window.addEventListener('visibilitychange', handleVisibilityChange);
-  window.addEventListener('focus', handleVisibilityChange);
 });
 
 onUnmounted(() => {
   window.removeEventListener('visibilitychange', handleVisibilityChange);
-  window.removeEventListener('focus', handleVisibilityChange);
-  if (pollTimer.value) clearInterval(pollTimer.value);
 });
 
 // --- 以下篩選與分頁邏輯保持不變 ---

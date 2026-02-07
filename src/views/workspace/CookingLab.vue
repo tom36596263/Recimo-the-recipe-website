@@ -41,6 +41,8 @@ import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import PageBtn from '@/components/common/PageBtn.vue';
 import { publicApi } from '@/utils/publicApi';
 import { parsePublicFile } from '@/utils/parseFile';
+import { useFavoritesStore } from '@/stores/favoritesStore';
+import { useAuthStore } from '@/stores/authStore';
 
 /**
  * 註冊 Chart.js 模組
@@ -52,6 +54,9 @@ import { parsePublicFile } from '@/utils/parseFile';
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
 // ========== 狀態管理 ==========
+const favoritesStore = useFavoritesStore();
+const authStore = useAuthStore();
+
 // 時間範圍切換（每週/每月）
 const timeRange = ref('monthly');
 
@@ -364,6 +369,12 @@ const goToPage = (page) => {
 
 // ========== 生命週期 ==========
 onMounted(async () => {
+    // 統一載入收藏狀態
+    const userId = authStore.user?.id || authStore.user?.user_id;
+    if (userId) {
+        await favoritesStore.fetchFavorites(userId);
+    }
+
     try {
         // 並行載入所有需要的 JSON 檔案
         const [resRecipes, resRecipeTags, resTags, resIngredients] = await Promise.all([

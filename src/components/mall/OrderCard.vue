@@ -99,12 +99,12 @@ const totalAmount = computed(() => {
   if (amount !== undefined && amount !== null) return amount;
 
   // 如果後端沒給總金額，才用商品列表累加
-  return displayItems.value.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  return displayItems.value.reduce((sum, item) => sum + Number(item.price), 0);
 });
 
 // 計算總數量
 const totalQuantity = computed(() => {
-  return displayItems.value.reduce((sum, item) => sum + item.qty, 0);
+  return displayItems.value.reduce((sum, item) => sum + Number(item.qty), 0);
 });
 
 // 取得付款方式 

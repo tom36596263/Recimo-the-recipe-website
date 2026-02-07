@@ -126,7 +126,7 @@ async function loadRecipeData(recipeId) {
                 coverImg: parsePublicFile(child.recipe_image_url),
                 is_mine: false,
                 ingredients: child.ingredients || [],
-                steps: child.steps || [],
+                steps: child.steps || child.recipe_steps || [],
                 servings: Number(child.recipe_servings || 2)
             };
         });
