@@ -810,11 +810,7 @@ watch(
 
   <div v-if="isHubOpen" class="hub-overlay" @click="isHubOpen = false"></div>
 
-  <div
-    v-if="!isLoading && rawRecipe"
-    class="recipe-action-hub"
-    :class="{ active: isHubOpen, 'is-preview': isPreviewMode }"
-  >
+  <div v-if="!isLoading && rawRecipe && !isPreviewMode" class="recipe-action-hub" :class="{ active: isHubOpen }">
     <button class="main-hub-btn custom-tooltip" :data-tooltip="isLiked ? '取消讚' : '這份食譜很讚'" @click="toggleRecipeLike">
       <i-material-symbols-thumb-up-rounded v-if="isLiked" />
       <i-material-symbols-thumb-up-outline-rounded v-else />
