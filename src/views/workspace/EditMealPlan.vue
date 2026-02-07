@@ -311,10 +311,31 @@ const openPanel = () => { showPanel.value = true; };
 const closePanel = () => { showPanel.value = false; };
 
 // 模板與日期更新邏輯 ...
-// (建議：這些 update 操作未來也應比照 handleRemoveRecipe 改為呼叫 phpApi.post)
+const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
+  if (isUpload) {
+    // 🔴 關鍵：必須重新賦值一個新物件 {}，不要只改屬性
+    planData.value = { ...updatedData };
+    console.log('上傳成功，畫面已同步更新');
+    return;
+  }
 
-const handleUpdatePlanCover = (updatedData) => {
-  planData.value = updatedData;
+  // 藍色區塊（切換模板 API）保持不變 ...
+  const payload = {
+    plan_id: planId.value,
+    user_id: authStore.userId,
+    cover_type: updatedData.cover_type,
+    cover_template_id: updatedData.cover_template_id,
+    custom_cover_url: updatedData.custom_cover_url
+  };
+
+  try {
+    const res = await phpApi.post('mealplans/update_plan_cover.php', payload);
+    if (res.data.success) {
+      planData.value = { ...updatedData }; // 🔴 同樣要使用展開運算子
+    }
+  } catch (err) {
+    console.error('更新失敗', err);
+  }
 };
 </script>
 

@@ -34,7 +34,7 @@ const closeCoverPanel = () => {
 // 封面選擇函式
 const handleCoverSelect = (payload) => {
   emit('update-plan', {
-    ...props.planData, // 保留舊資料
+    ...props.planData,
     cover_type: payload.type,
     cover_template_id: payload.id
   });
@@ -184,8 +184,13 @@ const closePanel = () => { emit('close'); };
       </template>
     </div>
 
-    <PlanCoverPanel v-if="showCoverPanel" :templates="props.coverTemplates" @select="handleCoverSelect"
-      @close="closeCoverPanel" />
+    <PlanCoverPanel v-if="showCoverPanel" :templates="props.coverTemplates" :plan-id="props.planData.plan_id"
+      :current-custom-url="props.planData.custom_cover_url" @select="handleCoverSelect" @uploaded="(newUrl) => emit('update-plan', {
+        ...props.planData,
+        cover_type: 2,
+        cover_template_id: null,
+        custom_cover_url: newUrl
+      }, true)" @close="closeCoverPanel" />
 
     <div class="plan-panel__tabs">
       <DateTabs v-if="planData.start_date" v-model="activeTabId" :tabs="dateTabsData" :start-date="planData.start_date"

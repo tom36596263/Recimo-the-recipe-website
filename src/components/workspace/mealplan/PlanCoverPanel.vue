@@ -1,50 +1,87 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { phpApi } from '@/utils/publicApi';
 import { parsePublicFile } from '@/utils/parseFile.js';
+import { useAuthStore } from '@/stores/authStore';
+
+const authStore = useAuthStore();
 
 const props = defineProps({
-    templates: { type: Array, default: () => [] }
+    templates: { type: Array, default: () => [] },
+    planId: { type: [Number, String], required: true },
+    currentCustomUrl: { type: String, default: null }
 });
 
-const emit = defineEmits(['close', 'select']);
-
+const emit = defineEmits(['close', 'select', 'uploaded']);
 const closePanel = () => { emit("close") };
 
+// --- 處理使用者上傳的封面圖片 ---
+const fileInput = ref(null);
+
+// 觸發隱藏的 file input
+const triggerUpload = () => {
+    fileInput.value.click();
+};
+
+// 處理檔案選擇與上傳
+const onFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('cover_image', file);
+    formData.append('plan_id', props.planId);
+    formData.append('user_id', authStore.userId);
+
+    try {
+        // ✅ 修正：移除第二個參數後的 { headers: ... }
+        const res = await phpApi.post('mealplans/upload_plan_cover.php', formData);
+
+        if (res.data.success) {
+            // 通知父層更新路徑
+            emit('uploaded', res.data.url);
+            emit('close');
+        } else {
+            // 這裡可以幫助除錯：顯示後端回傳的錯誤
+            console.error('後端錯誤：', res.data.error, res.data.debug);
+            alert('上傳失敗：' + res.data.error);
+        }
+    } catch (err) {
+        console.error('上傳請求失敗', err);
+    }
+};
+
 const selectTemplate = (item) => {
-    emit('select', {
-        type: 1,
-        id: item.cover_template_id,
-        url: item.template_url
-    });
-    closePanel();
+    emit('select', { type: 1, id: item.cover_template_id });
+    emit('close');
+};
+
+// 選擇已上傳的圖片
+const selectCustom = () => {
+    emit('select', { type: 2, id: null }); // type 2 代表使用 custom_cover_url
+    emit('close');
 };
 </script>
 
 <template>
     <Teleport to="body">
-        <div class="overlay" @click.self="closePanel">
+        <div class="overlay" @click.self="emit('close')">
             <div class="cover-panel">
-                <div class="cover-panel__header">
-                    <div class="cover-panel__title zh-h4-bold">選擇封面圖片</div>
-                    <div class="cover-panel__close-btn" @click="closePanel">
-                        <i-material-symbols-close />
-                    </div>
-                </div>
-
                 <div class="cover-panel__body">
                     <div class="grid-container">
-                        <div class="cover-card cover-card--special">
+                        <div class="cover-card cover-card--special" @click="triggerUpload">
                             <i-material-symbols-add-rounded />
+                            <input type="file" ref="fileInput" hidden accept="image/*" @change="onFileChange" />
                         </div>
 
-                        <div class="cover-card cover-card--system">
-                            <span class="p-p2">系統預設</span>
+                        <div v-if="currentCustomUrl" class="cover-card cover-card--uploaded" @click="selectCustom">
+                            <img :src="parsePublicFile(currentCustomUrl)" alt="Custom Cover" />
+                            <div class="cover-card__name">我的圖片</div>
                         </div>
 
                         <div v-for="item in templates" :key="item.cover_template_id" class="cover-card"
                             @click="selectTemplate(item)">
-                            <img :src="parsePublicFile(item.template_url)" :alt="item.template_name" />
-                            <div class="cover-card__name">{{ item.template_name }}</div>
+                            <img :src="parsePublicFile(item.template_url)" />
                         </div>
                     </div>
                 </div>
