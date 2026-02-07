@@ -79,21 +79,9 @@ const autoTotalTime = computed(() => {
 });
 
 const displayTime = computed(() => {
-  // 確保是純數字
-  const manualTime = Number(props.modelValue.totalTime) || 0;
-  const autoTime = Number(autoTotalTime.value) || 0;
-
-  // 邏輯：只有當「非編輯模式」且「手動有值」時才用手動
-  // 或者是手動值大於 0 時優先
-  if (manualTime > 0) {
-    return manualTime;
-  }
-
-  // 預設回歸自動計算
-  return autoTime;
+  return Number(props.modelValue.totalTime) || 0;
 });
 
-// EditorHeader.vue 內的 adaptRecipeData
 
 // EditorHeader.vue 內
 
