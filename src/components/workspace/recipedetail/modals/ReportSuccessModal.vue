@@ -15,8 +15,8 @@ const emit = defineEmits(['close']);
 </script>
 
 <template>
-    <BaseModal :is-open="isOpen" type="success" icon-class="fa-solid fa-circle-check" title="檢舉已提交" description=""
-        @close="$emit('close')">
+    <BaseModal :is-open="isOpen" type="success" icon-class="fa-solid fa-circle-check" title="檢舉已提交"
+        description="我們將會盡快審核檢舉內容並進行處理。" @close="$emit('close')">
         <template #actions>
             <BaseBtn title="我知道了" width="100%" height="40" @click="$emit('close')" />
         </template>

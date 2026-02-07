@@ -29,10 +29,7 @@ const emit = defineEmits(['close']);
     /* 調整為適合展示成功的比例 */
     height: auto !important;
     min-height: 250px;
-    padding: 30px 40px 40px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    padding-bottom: 60px;
 }
 
 /* 讓圖示顏色更明亮一點（選用） */
