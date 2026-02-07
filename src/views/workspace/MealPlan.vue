@@ -2,6 +2,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { phpApi } from '@/utils/publicApi';
 import { useAuthStore } from '@/stores/authStore';
+import { useRouter } from 'vue-router';
+import CreatePlanModal from '@/components/workspace/mealplan/modals/CreatePlanModal.vue';
 import PlanFileCard from '@/components/workspace/mealplan/PlanFileCard.vue';
 
 const authStore = useAuthStore();
@@ -51,6 +53,68 @@ const filteredPlans = computed(() => {
   if (!filterStatus.value) return plans.value;
   return plans.value.filter(plan => getPlanStatus(plan) === filterStatus.value);
 });
+
+// --- 點擊卡片導向編輯頁 ---
+const router = useRouter();
+const showCreateModal = ref(false);
+const handleCreatePlan = async (data) => {
+  const formatDate = (d) => d.toISOString().split('T')[0];
+
+  try {
+    const res = await phpApi.post('mealplans/create_plan.php', {
+      user_id: authStore.userId,
+      title: data.title,
+      start_date: formatDate(data.range.start),
+      end_date: formatDate(data.range.end)
+    });
+
+    if (res.data.success) {
+      router.push({
+        name: 'edit-meal-plan',
+        params: { id: res.data.plan_id }
+      });
+    }
+  } catch (err) {
+    console.error('建立失敗', err);
+  }
+};
+
+// ---  刪除與複製功能的處理函式 ---
+// 處理刪除
+const onPlanDelete = async (id) => {
+  if (!confirm('確定要刪除這個計畫嗎？此動作無法復原。')) return;
+
+  try {
+    const res = await phpApi.post('mealplans/delete_plan.php', {
+      plan_id: id,
+      user_id: authStore.userId
+    });
+
+    if (res.data.success) {
+      // 本地直接過濾掉，不用重新 fetch 整個頁面更流暢
+      plans.value = plans.value.filter(p => p.plan_id !== id);
+    }
+  } catch (err) {
+    console.error('刪除失敗', err);
+  }
+};
+
+// 處理複製 (逻辑類似 handleApplyTemplate，但改為整份複製)
+const onPlanCopy = async (id) => {
+  try {
+    const res = await phpApi.post('mealplans/duplicate_plan.php', {
+      plan_id: id,
+      user_id: authStore.userId
+    });
+
+    if (res.data.success) {
+      fetchPlans(); // 複製後重新撈取清單
+      alert('計畫已成功複製！');
+    }
+  } catch (err) {
+    console.error('複製失敗', err);
+  }
+};
 </script>
 
 <template>
@@ -70,15 +134,17 @@ const filteredPlans = computed(() => {
 
     <div v-else class="overview__plan-grid row">
 
-      <div class="col-3 overview__card">
+      <div class="col-3 overview__card" @click="showCreateModal = true">
         <div class="overview__empty-card">
           <i class="fa-solid fa-plus"></i>
           <p class="p-p1">創建計畫</p>
         </div>
       </div>
 
+      <CreatePlanModal v-model="showCreateModal" @create="handleCreatePlan" />
+
       <div v-for="plan in filteredPlans" :key="plan.plan_id" class="col-3 overview__card">
-        <PlanFileCard :plan="plan" :cover-templates="coverTemplates" />
+        <PlanFileCard :plan="plan" :cover-templates="coverTemplates" @delete="onPlanDelete" @copy="onPlanCopy" />
       </div>
 
       <div v-if="filteredPlans.length === 0" class="col-9 p-p1 text-muted">
