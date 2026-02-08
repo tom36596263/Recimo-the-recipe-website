@@ -1,12 +1,23 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import draggable from 'vuedraggable';
+import { parsePublicFile } from '@/utils/parseFile';
 
 const props = defineProps(['steps', 'ingredients', 'isEditing']);
 const emit = defineEmits(['update:steps']);
 
-// --- ✨ 關鍵修正 1：建立本地副本，並與父組件隔離 ---
+// --- 狀態宣告 ---
 const localSteps = ref([]);
+const activeStepId = ref(null);
+const showTimerPop = ref(false);
+const showIngPop = ref(false);
+const popStyle = ref({ top: '0px', left: '0px', position: 'fixed' });
+
+// --- ✨ 關鍵修正：同步函式 ---
+const syncToParent = () => {
+  // 使用展開運算子產生新陣列引用，通知父組件更新（觸發計算總時間）
+  emit('update:steps', [...localSteps.value]);
+};
 
 // 監控 props.steps，只有在「內容真正改變」時才更新本地副本，防止遞迴
 watch(() => props.steps, (newVal) => {
@@ -21,24 +32,13 @@ watch(() => props.steps, (newVal) => {
   }
 }, { immediate: true, deep: true });
 
-// StepEditor.vue
-watch(localSteps, (newVal) => {
-  // 直接發送深拷貝，確保父組件拿到的是乾淨的資料且觸發響應
-  emit('update:steps', JSON.parse(JSON.stringify(newVal)));
-}, { deep: true });
-
-const activeStepId = ref(null);
-const showTimerPop = ref(false);
-const showIngPop = ref(false);
-const popStyle = ref({ top: '0px', left: '0px', position: 'fixed' });
-
 // --- ✨ 核心修正：雙向綁定中轉站 ---
 const internalSteps = computed({
   get: () => props.steps,
   set: (val) => emit('update:steps', val)
 });
 
-// --- 修改資料的方法，都改用複製陣列後 emit ---
+// --- 修改資料的方法 ---
 const updateStepField = (index, field, value) => {
   const newSteps = [...props.steps];
   newSteps[index] = { ...newSteps[index], [field]: value };
@@ -55,18 +55,13 @@ const addStep = () => {
     tags: []
   };
 
-  // ✅ 只修改本地副本，watch 會自動 emit 給父組件
   localSteps.value.push(newStep);
-  emit('update:steps', [...localSteps.value]);
+  syncToParent(); // 手動同步給父組件
 };
 
 const removeStep = (id) => {
-  // ✅ 使用 filter 產生新陣列，觸發響應
   localSteps.value = localSteps.value.filter(s => (s.id !== id && s.step_id !== id));
-  const newSteps = props.steps.filter(s => (s.id || s.step_id) !== id);
-  // if (index !== -1) props.steps.splice(index, 1);
-  emit('update:steps', newSteps);
-  
+  syncToParent(); // 手動同步給父組件
 };
 
 const getActiveStep = () => {
@@ -104,32 +99,21 @@ const toggleTag = (step, ingId) => {
   } else {
     step.tags.splice(index, 1);
   }
+  syncToParent(); // 食材標籤變動也要同步
 };
 
-// const getStepImage = (step) => {
-//   if (!step || !step.image) return null;
-//   const imgSource = step.image;
-//   if (typeof imgSource === 'string' && imgSource.trim().length > 0) {
-//     if (imgSource.startsWith('data:') || imgSource.startsWith('http')) return imgSource;
-//     return imgSource.startsWith('/') || imgSource.startsWith('.') ? imgSource : `/${imgSource}`;
-//   }
-//   return null;
-// };
 const getStepImage = (step) => {
   if (!step || !step.image) return null;
-  
-  // 如果是 File 物件 (剛上傳)，產生臨時預覽圖
+
   if (step.image instanceof File) {
     return URL.createObjectURL(step.image);
   }
-  // 2. 如果是字串 (資料庫來的路徑)
+
   const imgSource = step.image;
   if (typeof imgSource === 'string' && imgSource.trim().length > 0) {
-    // 如果已經是完整 URL (http) 或 Base64 (data:)，直接回傳
     if (imgSource.startsWith('data:') || imgSource.startsWith('http')) {
       return imgSource;
     }
-    // ✅ 核心修改：使用 parsePublicFile 處理相對路徑 (如 img/recipes/...)
     return parsePublicFile(imgSource);
   }
 };
@@ -161,21 +145,18 @@ const uploadStepImg = (step) => {
     const reader = new FileReader();
     reader.onload = (f) => {
       step.image = f.target.result;
+      syncToParent(); // 圖片讀取完同步
     };
     reader.readAsDataURL(file);
   };
   input.click();
 };
 
-// StepEditor.vue 內
 const closePops = () => {
   showTimerPop.value = false;
   showIngPop.value = false;
   toggleBodyScroll(false);
-
-  // 🏆 關鍵：手動發送一次 emit
-  // 這樣無論 watch 有沒有抓到那個微小的 time 變化，父組件都會強制收到更新
-  emit('update:steps', [...localSteps.value]);
+  syncToParent(); // 🏆 關鍵：手動發送一次 emit
 };
 
 onMounted(() => window.addEventListener('click', closePops));
@@ -192,7 +173,7 @@ onUnmounted(() => {
     </div>
 
     <draggable :list="localSteps" class="step-list" handle=".drag-dots" item-key="id" :disabled="!isEditing"
-      ghost-class="ghost-step" animation="300">
+      ghost-class="ghost-step" animation="300" @end="syncToParent">
       <template #item="{ element: step, index: idx }">
         <div class="step-item-outer">
           <div class="step-card">
@@ -202,8 +183,8 @@ onUnmounted(() => {
                 <div class="step-number p-p2">{{ idx + 1 }}</div>
               </div>
 
-              <input v-if="isEditing" v-model="step.title" class="step-title-input zh-h4" placeholder="步驟標題"
-                maxlength="30" />
+              <input v-if="isEditing" v-model="step.title" @input="syncToParent" class="step-title-input zh-h4"
+                placeholder="步驟標題" maxlength="30" />
               <span v-else class="step-title-display zh-h4">
                 {{ step.title || ('步驟 ' + (idx + 1)) }}
               </span>
@@ -243,8 +224,8 @@ onUnmounted(() => {
                 </div>
 
                 <div v-if="isEditing" class="textarea-wrapper">
-                  <textarea v-model="step.content" class="step-textarea p-p2" placeholder="詳細說明步驟內容..."
-                    maxlength="100"></textarea>
+                  <textarea v-model="step.content" @input="syncToParent" class="step-textarea p-p2"
+                    placeholder="詳細說明步驟內容..." maxlength="100"></textarea>
                   <span class="char-counter">{{ step.content?.length || 0 }}/100</span>
                 </div>
                 <div v-else class="step-text-display p-p2">
@@ -278,7 +259,7 @@ onUnmounted(() => {
       <div style="display: flex; align-items: center; gap: 8px;">
         <input type="number" v-model.number="getActiveStep().time" step="1" min="0" max="1440"
           style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; outline: none;" placeholder="輸入分鐘"
-          @keyup.enter="closePops" />
+          @input="syncToParent" @keyup.enter="closePops" />
         <span class="p-p3">分鐘</span>
       </div>
       <button @click="closePops"
@@ -384,7 +365,7 @@ onUnmounted(() => {
       padding: 4px 8px;
 
       @media (max-width: 768px) {
-        font-size: 20px; // 放大刪除鈕，手機好點擊
+        font-size: 20px;
         padding: 8px;
       }
     }
@@ -395,7 +376,7 @@ onUnmounted(() => {
     gap: 20px;
 
     @media (max-width: 768px) {
-      flex-direction: column; // 🚀 關鍵：手機版圖上文下
+      flex-direction: column;
       gap: 16px;
     }
   }
@@ -420,8 +401,8 @@ onUnmounted(() => {
   transition: all 0.2s;
 
   @media (max-width: 768px) {
-    width: 100%; // 🚀 關鍵：手機版圖片寬度 100%
-    height: 180px; // 稍微拉高高度
+    width: 100%;
+    height: 180px;
   }
 
   &.has-image {
@@ -506,8 +487,8 @@ onUnmounted(() => {
     overflow-wrap: break-word;
 
     @media (max-width: 768px) {
-      min-height: 120px; // 🚀 手機版輸入框高一點
-      font-size: 16px; // 防止 iOS 自動放大畫面
+      min-height: 120px;
+      font-size: 16px;
     }
   }
 
@@ -520,7 +501,6 @@ onUnmounted(() => {
   }
 }
 
-// ... 下方 popover-box, add-step-wrapper 等樣式維持不變 ...
 .popover-box {
   background: $neutral-color-white;
   border: 1px solid $primary-color-400;

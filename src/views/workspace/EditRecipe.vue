@@ -62,24 +62,22 @@ const fileToBase64 = (file) => {
   });
 };
 
-// 父組件中的 watch
+// RecipeEditor 父組件
 watch(
   () => recipeForm.value.steps,
   (newSteps) => {
     if (!isEditing.value || !newSteps) return;
 
     const autoSum = newSteps.reduce((sum, s) => {
-      // 🏆 修正：先強制轉數字，若為空或 NaN 則取 0
-      const stepTime = Number(s.time) || 0;
-      return sum + stepTime;
+      return sum + (Number(s.time) || 0);
     }, 0);
 
-    recipeForm.value.totalTime = autoSum;
-
-    // 💡 除錯建議：打開這行，看輸入時數字有沒有跑出來
-    // console.log('Total Calculated:', autoSum);
+    // 🏆 只有當數值真的不同時才寫入，防止不必要的重複渲染
+    if (recipeForm.value.totalTime !== autoSum) {
+      recipeForm.value.totalTime = autoSum;
+    }
   },
-  { deep: true, immediate: true }
+  { deep: true }
 );
 
 
