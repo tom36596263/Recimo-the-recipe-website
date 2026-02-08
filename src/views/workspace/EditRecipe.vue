@@ -62,11 +62,29 @@ const fileToBase64 = (file) => {
   });
 };
 
-watch(() => recipeForm.value.steps, (newSteps) => {
-  if (!newSteps || !isEditing.value) return;
-  const autoSum = newSteps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
-  recipeForm.value.totalTime = autoSum;
-}, { deep: true });
+// 父組件中的 watch
+watch(
+  () => recipeForm.value.steps,
+  (newSteps) => {
+    if (!isEditing.value || !newSteps) return;
+
+    const autoSum = newSteps.reduce((sum, s) => {
+      // 🏆 修正：先強制轉數字，若為空或 NaN 則取 0
+      const stepTime = Number(s.time) || 0;
+      return sum + stepTime;
+    }, 0);
+
+    recipeForm.value.totalTime = autoSum;
+
+    // 💡 除錯建議：打開這行，看輸入時數字有沒有跑出來
+    // console.log('Total Calculated:', autoSum);
+  },
+  { deep: true, immediate: true }
+);
+
+
+
+
 
 watch(() => recipeForm.value.ingredients, (newIngs) => {
   newIngs.forEach(ing => {

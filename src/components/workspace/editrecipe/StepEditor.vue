@@ -21,15 +21,10 @@ watch(() => props.steps, (newVal) => {
   }
 }, { immediate: true, deep: true });
 
-// 監控 localSteps，當本地改動時同步回父組件
+// StepEditor.vue
 watch(localSteps, (newVal) => {
-  const newStr = JSON.stringify(newVal);
-  const oldStr = JSON.stringify(props.steps);
-
-  // 防止回傳一模一樣的資料觸發父組件更新
-  if (newStr !== oldStr) {
-    emit('update:steps', JSON.parse(newStr));
-  }
+  // 直接發送深拷貝，確保父組件拿到的是乾淨的資料且觸發響應
+  emit('update:steps', JSON.parse(JSON.stringify(newVal)));
 }, { deep: true });
 
 const activeStepId = ref(null);
@@ -56,12 +51,13 @@ const addStep = () => {
     title: '',
     content: '',
     image: null,
-    time: null,
+    time: 0,
     tags: []
   };
 
   // ✅ 只修改本地副本，watch 會自動 emit 給父組件
   localSteps.value.push(newStep);
+  emit('update:steps', [...localSteps.value]);
 };
 
 const removeStep = (id) => {
@@ -171,10 +167,15 @@ const uploadStepImg = (step) => {
   input.click();
 };
 
+// StepEditor.vue 內
 const closePops = () => {
   showTimerPop.value = false;
   showIngPop.value = false;
   toggleBodyScroll(false);
+
+  // 🏆 關鍵：手動發送一次 emit
+  // 這樣無論 watch 有沒有抓到那個微小的 time 變化，父組件都會強制收到更新
+  emit('update:steps', [...localSteps.value]);
 };
 
 onMounted(() => window.addEventListener('click', closePops));

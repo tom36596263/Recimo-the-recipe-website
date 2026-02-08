@@ -5,5 +5,5 @@ const apiBase = import.meta.env.VITE_API_BASE;
 
 export const phpApi = axios.create({
     baseURL: apiBase, // 打包時會自動切換成伺服器地址
-    timeout: 5000
+    timeout: 15000
 });
