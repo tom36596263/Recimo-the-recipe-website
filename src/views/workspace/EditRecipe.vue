@@ -404,7 +404,8 @@ const publishNewRecipeToDb = async () => {
       difficulty: Number(recipeForm.value.difficulty) || 1,
       totalTime: Number(recipeForm.value.totalTime) || 0,
       servings: Number(recipeForm.value.recipe_servings) || 1, // PHP 期待 $input['servings']
-      status: 1, // 強制設為 1 (已發布狀態)
+      // status: isPublished.value ? 1 : 0,
+      status: 1,
       
       // 食材處理 (修正 Key 名稱)
       ingredients: recipeForm.value.ingredients.map(ing => ({
@@ -456,29 +457,13 @@ const publishNewRecipeToDb = async () => {
 //   console.log('Save Clicked', isPublished.value)
 // };
 const handleSave = async () => {
-  // 1. 基礎驗證
-  if (!recipeForm.value.title && !isAdaptModeActive.value) {
-    alert('請輸入食譜標題');
-    return;
-  }
-
-  // 2. 根據模式執行不同的儲存函式
-  // 我們在呼叫前強制確保 status 邏輯（或在函式內寫死為 1）
-  isPublished.value = true; 
-
-  try {
-    if (isAdaptModeActive.value) {
-      // 改編模式：呼叫 publishToDb (對應 recipe_adaptation_add.php)
-      await publishToDb();
-    } else {
-      // 一般模式：呼叫 publishNewRecipeToDb (對應 recipe_post.php)
-      await publishNewRecipeToDb();
-    }
-  } catch (err) {
-    console.error('儲存失敗:', err);
+  // 不論 isPublished 狀態，只要點擊就執行儲存/發布
+  if (isAdaptModeActive.value) {
+    await publishToDb();
+  } else {
+    await publishNewRecipeToDb();
   }
 };
-
 const handlePreview = async () => {
   // 1. 處理圖片轉 Base64
   const coverBase64 = await fileToBase64(recipeForm.value.coverImg);
@@ -570,16 +555,13 @@ provide('isEditing', isEditing);
       <footer class="editor-footer">
         <div class="footer-center-group">
           <BaseBtn title="預覽" variant="outline" :width="100" @click="handlePreview" class="preview-btn" />
-          <BaseBtn 
-            :title="isAdaptModeActive ? '分享我的版本' : '確認發布'" 
-            :width="200"
-            @click="handleSave" 
-            class="save-btn" 
-          />
-          <!-- <div v-if="!isAdaptModeActive" class="publish-toggle">
+          <BaseBtn :title="isAdaptModeActive ? '分享我的版本' : (isPublished ? '確認發布' : '完成編輯')" :width="200"
+            @click="handleSave" class="save-btn" />
+
+          <div v-if="!isAdaptModeActive" class="publish-toggle" style="display: none;">
             <input type="checkbox" id="publish-check" v-model="isPublished" />
             <label for="publish-check" class="p-p2">公開發布</label>
-          </div> -->
+          </div>
         </div>
       </footer>
     </main>

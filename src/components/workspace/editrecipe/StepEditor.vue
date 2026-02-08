@@ -201,7 +201,7 @@ onUnmounted(() => {
                 <div class="step-number p-p2">{{ idx + 1 }}</div>
               </div>
 
-              <input v-if="isEditing" v-model="step.title" class="step-title-input zh-h4" placeholder="步驟標題"
+              <input v-if="isEditing" v-model="step.title" class="step-title-input zh-h4" placeholder="請輸入步驟標題"
                 maxlength="30" />
               <span v-else class="step-title-display zh-h4">
                 {{ step.title || ('步驟 ' + (idx + 1)) }}
@@ -223,7 +223,7 @@ onUnmounted(() => {
                 </div>
               </div>
 
-              <div class="step-info">
+              <div class="step-info" >
                 <div class="tag-row">
                   <BaseTag :text="step.time ? `${step.time} 分鐘` : '+ 時間'" variant="action" :show-icon="false"
                     width="85px" @click.stop="openPop($event, step.id || idx, 'timer')" />
