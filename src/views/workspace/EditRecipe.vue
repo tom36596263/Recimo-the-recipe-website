@@ -288,92 +288,7 @@ const publishToDb = async () => {
     alert(`發布異常：${errorDetail}`);
   }
 };
-//   if (!authStore.isLoggedIn) {
-//     authStore.openLoginAlert();
-//     return;
-//   }
 
-//   // 🏆 核心修正：使用 Store 提供的 userId 計算屬性
-//   // 這樣不論你的 LocalStorage 存的是 id 還是 user_id，都能正確抓到
-//   const currentUserId = authStore.userId;
-
-//   console.log('當前登入用戶資訊:', authStore.user);
-//   console.log('準備傳給 API 的 ID:', currentUserId);
-
-//   if (!currentUserId) {
-//     alert('找不到您的用戶資訊，請嘗試重新登入。');
-//     return;
-//   }
-
-//   try {
-//     // 🔥 圖片處理邏輯
-//     const handleImage = async (img) => {
-//       if (!img) return null;
-//       if (img instanceof File) {
-//         return await fileToBase64(img);
-//       }
-//       if (typeof img === 'string') {
-//         return img;
-//       }
-//       return null;
-//     };
-
-//     const coverData = await handleImage(recipeForm.value.coverImg);
-
-//     const processedSteps = await Promise.all(
-//       recipeForm.value.steps.map(async (s) => {
-//         const totalMinutes = Number(s.time) || 0;
-//         const hrs = Math.floor(totalMinutes / 60);
-//         const mins = totalMinutes % 60;
-//         const timeString = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
-
-//         return {
-//           title: s.title,
-//           content: s.content || '',
-//           image: await handleImage(s.image),
-//           time: timeString,
-//           tags: s.tags
-//         };
-//       })
-//     );
-
-//     const payload = {
-//       recipe_id: recipeForm.value.recipe_id, // 若有 id 則傳入
-//       mode: recipeForm.value.recipe_id ? 'update' : 'create', // 明確告知 PHP 是更新還是創建
-//       author_id: currentUserId, // 這裡現在保證能拿到正確的 ID 數字
-//       title: recipeForm.value.title,
-//       recipe_description: recipeForm.value.description || '暫無詳細說明',
-//       // adaptation_note: isAdaptModeActive.value ? (recipeForm.value.adapt_description || '') : '',
-//       // adaptation_title: isAdaptModeActive.value ? (recipeForm.value.adapt_title || recipeForm.value.title) : '',
-//       coverImg: coverData,
-//       recipe_difficulty: recipeForm.value.difficulty,
-//       totalTime: recipeForm.value.totalTime,
-//       servings: recipeForm.value.recipe_servings,
-//       status: isPublished.value ? 1 : 0,
-//       ingredients: recipeForm.value.ingredients.map(ing => ({
-//         id: (typeof ing.id === 'string' && ing.id.startsWith('id')) ? null : ing.id,
-//         amount: ing.amount,
-//         unit: ing.unit || '份',
-//         note: ing.note || ''
-//       })),
-//       steps: processedSteps,
-//       tags: recipeForm.value.tags.map(t => t.tag_id)
-//     };
-
-//     const response = await phpApi.post('recipes/recipe_post.php', payload);
-
-//     if (response.data && response.data.success) {
-//       alert('🎉 食譜發布成功！');
-//       router.push('/workspace/my-recipes');
-//     } else {
-//       alert(`發布失敗：${response.data?.message}`);
-//     }
-
-//   } catch (err) {
-//     console.error('❌ 創建失敗:', err);
-//     alert('系統發生異常，請稍後再試');
-//   }
-// };
 const publishNewRecipeToDb = async () => {
   if (!authStore.isLoggedIn) {
     authStore.openLoginAlert();
@@ -454,26 +369,7 @@ const publishNewRecipeToDb = async () => {
     alert('系統發生異常，請檢查網路連線或稍後再試');
   }
 };
-// const handleSave = async () => {
-//   if (isAdaptModeActive.value) {
-//     await publishToDb();
-//     return;
-//   }
-//   if (isPublished.value) {
-//     await publishNewRecipeToDb();
-//     return; 
-//   } 
-//   // 情況 C：一般模式 + 點擊「完成編輯」（未勾選公開）
-//   // 這裡通常應該也要呼叫 API 儲存，但 status 設為草稿 (例如 0)，或者直接跳回列表
-//   const confirmSave = confirm("確定完成編輯並儲存為草稿嗎？");
-//   if (confirmSave) {
-//     // 強制觸發一次儲存（確保資料有進資料庫，但 status 為未發布）
-//     await publishNewRecipeToDb(); 
-//     // 或者如果你只想純跳轉，可以改用：
-//     // router.push('/workspace/my-recipes');
-//   }
-//   console.log('Save Clicked', isPublished.value)
-// };
+
 const handleSave = async () => {
   // 不論 isPublished 狀態，只要點擊就執行儲存/發布
   if (isAdaptModeActive.value) {
