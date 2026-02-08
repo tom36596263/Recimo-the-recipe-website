@@ -1,3 +1,95 @@
+<template>
+    <div class="comment-section">
+        <h2 class="section-title zh-h3">美味悄悄話</h2>
+
+        <div class="input-container">
+            <textarea ref="inputRef" v-model="userInput" placeholder="分享你的想法..." class="styled-input" maxlength="200"
+                rows="1" @input="autoResize" @keydown.enter.exact.prevent="handleSend"></textarea>
+
+            <span class="char-counter" :class="{ 'limit': userInput.length >= 200 }">
+                {{ userInput.length }}/200
+            </span>
+
+            <button class="send-icon-btn" :class="{ 'active': userInput.trim() }" @click="handleSend">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="comment-list">
+            <template v-if="list && list.length > 0">
+                <div v-for="(item, index) in list" :key="item.comment_id || index" class="comment-item">
+                    <router-link :to="`/workspace/user/${item.userId || item.user_id}`" class="user-link-wrapper">
+                        <div class="user-avatar-text" :style="getAvatarStyle(item.userName || item.username)">
+                            {{ (item.userName || item.username || '?').charAt(0).toUpperCase() }}
+                        </div>
+                    </router-link>
+
+                    <div class="comment-body">
+                        <div class="comment-header">
+                            <router-link :to="`/workspace/user/${item.userId || item.user_id}`"
+                                class="user-link-wrapper">
+                                <span class="user-name p-p1">{{ item.userName || item.username || '訪客' }}</span>
+                            </router-link>
+                            <span class="user-meta p-p3">
+                                @{{
+                                    item.handle && item.handle.includes('@')
+                                        ? item.handle.split('@')[0]
+                                        : (item.handle ? item.handle : '未抓到Email')
+                                }}
+                                • {{ item.comment_at || item.time }}
+
+                            </span>
+                        </div>
+                        <p class="comment-text p-p2">{{ item.content || item.comment_text }}</p>
+
+                        <div class="comment-footer">
+                            <button class="action-btn like-btn"
+                                :class="{ 'active': clickedLikes.has(Number(item.comment_id)) }"
+                                @click="handleLikeClick(item.comment_id)">
+                                <i-material-symbols-thumb-up-rounded v-if="clickedLikes.has(Number(item.comment_id))"
+                                    class="action-icon" />
+                                <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
+                                <span class="count">{{ item.likes ?? item.like_count ?? 0 }}</span>
+                            </button>
+
+                            <button v-if="!isOwner(item)" class="action-btn report-btn"
+                                :class="{ 'active': reportingIndex === index }" @click="openReport(item, index)">
+                                <i-material-symbols-error-outline-rounded class="action-icon" />
+                            </button>
+
+                            <button v-if="isOwner(item)" class="action-btn delete-btn"
+                                @click="openDeleteConfirm(item.comment_id)">
+                                <i-material-symbols-delete-outline-rounded class="action-icon" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <div v-else class="empty-comment-state">
+                <i-material-symbols-chat-bubble-outline-rounded class="empty-icon" />
+                <p class="p-p2">目前還沒有留言，快來當第一個分享的人吧！</p>
+            </div>
+        </div>
+
+        <Teleport to="body">
+            <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment"
+                @update:modelValue="val => !val && (reportingIndex = null)" />
+
+            <BaseModal :isOpen="isDeleteModalOpen" type="info" iconClass="fa-regular fa-trash-can" title="確定要刪除這條留言嗎？"
+                @close="isDeleteModalOpen = false">
+                <p class="p-p2" style="text-align: center;">刪除後的留言無法找回喔！</p>
+                <template #actions>
+                    <button class="btn-solid" @click="handleConfirmDelete">確定刪除</button>
+                    <button class="btn-outline" @click="isDeleteModalOpen = false">取消</button>
+                </template>
+            </BaseModal>
+        </Teleport>
+    </div>
+</template>
+
 <script setup>
 import { ref, onMounted, watch, nextTick } from "vue";
 import { useRoute } from "vue-router";
@@ -98,94 +190,6 @@ const handleConfirmDelete = () => {
 };
 </script>
 
-<template>
-    <div class="comment-section">
-        <h2 class="section-title zh-h3">美味悄悄話</h2>
-
-        <div class="input-container">
-            <textarea ref="inputRef" v-model="userInput" placeholder="分享你的想法..." class="styled-input" maxlength="200"
-                rows="1" @input="autoResize" @keydown.enter.exact.prevent="handleSend"></textarea>
-
-            <span class="char-counter" :class="{ 'limit': userInput.length >= 200 }">
-                {{ userInput.length }}/200
-            </span>
-
-            <button class="send-icon-btn" :class="{ 'active': userInput.trim() }" @click="handleSend">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                </svg>
-            </button>
-        </div>
-
-        <div class="comment-list">
-            <template v-if="list && list.length > 0">
-                <div v-for="(item, index) in list" :key="item.comment_id || index" class="comment-item">
-                    <div class="user-avatar-text" :style="getAvatarStyle(item.userName || item.username)">
-                        {{ (item.userName || item.username || '?').charAt(0).toUpperCase() }}
-                    </div>
-
-                    <div class="comment-body">
-                        <div class="comment-header">
-                            <span class="user-name p-p1">{{ item.userName || item.username || '訪客' }}</span>
-                            <span class="user-meta p-p3">
-                                @{{
-                                    item.handle && item.handle.includes('@')
-                                        ? item.handle.split('@')[0]
-                                : (item.handle ? item.handle : '未抓到Email')
-                                }}
-                                • {{ item.comment_at || item.time }}
-
-                            </span>
-                        </div>
-                        <p class="comment-text p-p2">{{ item.content || item.comment_text }}</p>
-
-                        <div class="comment-footer">
-                            <button class="action-btn like-btn"
-                                :class="{ 'active': clickedLikes.has(Number(item.comment_id)) }"
-                                @click="handleLikeClick(item.comment_id)">
-                                <i-material-symbols-thumb-up-rounded v-if="clickedLikes.has(Number(item.comment_id))"
-                                    class="action-icon" />
-                                <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
-                                <span class="count">{{ item.likes ?? item.like_count ?? 0 }}</span>
-                            </button>
-
-                            <button v-if="!isOwner(item)" class="action-btn report-btn"
-                                :class="{ 'active': reportingIndex === index }" @click="openReport(item, index)">
-                                <i-material-symbols-error-outline-rounded class="action-icon" />
-                            </button>
-
-                            <button v-if="isOwner(item)" class="action-btn delete-btn"
-                                @click="openDeleteConfirm(item.comment_id)">
-                                <i-material-symbols-delete-outline-rounded class="action-icon" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </template>
-
-            <div v-else class="empty-comment-state">
-                <i-material-symbols-chat-bubble-outline-rounded class="empty-icon" />
-                <p class="p-p2">目前還沒有留言，快來當第一個分享的人吧！</p>
-            </div>
-        </div>
-
-        <Teleport to="body">
-            <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment"
-                @update:modelValue="val => !val && (reportingIndex = null)" />
-
-            <BaseModal :isOpen="isDeleteModalOpen" type="info" iconClass="fa-regular fa-trash-can" title="確定要刪除這條留言嗎？"
-                @close="isDeleteModalOpen = false">
-                <p class="p-p2" style="text-align: center;">刪除後的留言無法找回喔！</p>
-                <template #actions>
-                    <button class="btn-solid" @click="handleConfirmDelete">確定刪除</button>
-                    <button class="btn-outline" @click="isDeleteModalOpen = false">取消</button>
-                </template>
-            </BaseModal>
-        </Teleport>
-    </div>
-    <!-- <pre>{{ item.handle }}</pre> -->
-</template>
-
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
 
@@ -274,7 +278,25 @@ const handleConfirmDelete = () => {
     padding-bottom: 16px;
     border-bottom: 1px solid $neutral-color-100;
 
+    // 🚀 新增：跳轉連結包裝層樣式
+    .user-link-wrapper {
+        text-decoration: none !important;
+        color: inherit !important;
+        display: flex;
+        align-items: center;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 0.8;
+
+            .user-name {
+                color: $primary-color-700;
+            }
+        }
+    }
+
     .user-avatar-text {
+        margin-top: -40px;
         width: 44px;
         height: 44px;
         border-radius: 50%;
@@ -292,6 +314,8 @@ const handleConfirmDelete = () => {
 
         .comment-header {
             margin-bottom: 6px;
+            display: flex;
+            align-items: center;
 
             .user-name {
                 font-weight: 600;

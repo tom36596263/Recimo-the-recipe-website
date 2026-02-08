@@ -1,16 +1,18 @@
 <template>
-    <div class="user-info-box">
-        <div class="user-avatar-circle" :style="avatarStyle">
-            <img v-if="avatarUrl" :src="parsePublicFile(avatarUrl)" class="avatar-img" />
-            <span v-else>{{ name?.charAt(0).toUpperCase() }}</span>
-        </div>
-        <div class="user-text-meta">
-            <div class="user-name">{{ name }}</div>
-            <div class="user-sub">
-                @{{ displayHandle }}<span v-if="time"> • {{ time }}</span>
+    <router-link :to="`/workspace/user/${userId}`" class="user-info-box-link">
+        <div class="user-info-box">
+            <div class="user-avatar-circle" :style="avatarStyle">
+                <img v-if="avatarUrl" :src="parsePublicFile(avatarUrl)" class="avatar-img" />
+                <span v-else>{{ name?.charAt(0).toUpperCase() }}</span>
+            </div>
+            <div class="user-text-meta">
+                <div class="user-name">{{ name }}</div>
+                <div class="user-sub">
+                    @{{ displayHandle }}<span v-if="time"> • {{ time }}</span>
+                </div>
             </div>
         </div>
-    </div>
+    </router-link>
 </template>
 
 <script setup>
@@ -18,8 +20,9 @@ import { computed } from 'vue';
 import { parsePublicFile } from '@/utils/parseFile';
 
 const props = defineProps({
+    userId: { type: [Number, String], required: true },
     name: { type: String, default: 'Recimo官方' },
-    handle: { type: String, default: 'recimo' }, // 這裡之後傳入 email
+    handle: { type: String, default: 'recimo' },
     time: { type: String, default: '' },
     avatarUrl: { type: String, default: null }
 });
@@ -94,5 +97,22 @@ const avatarStyle = computed(() => {
             color: $neutral-color-400;
         }
     }
+}
+
+/* 針對包裝組件的 router-link 進行樣式重置 */
+.user-info-box-link {
+    text-decoration: none !important; // 強制去掉底線
+    color: inherit !important; // 強制繼承原本的文字顏色
+    display: inline-block; // 確保寬度正確
+
+    &:hover {
+        opacity: 0.8; // 增加回饋感
+    }
+}
+
+/* 確保全域 a 標籤在組件內不顯示底線 */
+a {
+    text-decoration: none;
+    color: inherit;
 }
 </style>

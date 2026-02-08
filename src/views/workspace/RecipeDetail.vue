@@ -728,7 +728,8 @@ watch(
         </div>
 
         <div class="meta-wrapper">
-          <AuthorInfo v-if="!isPreviewMode && rawRecipe" :name="rawRecipe.author_name" :handle="rawRecipe.user_email || `user_${rawRecipe.author_id}`" :time="rawRecipe.created_at"
+          <AuthorInfo v-if="!isPreviewMode && rawRecipe" :user-id="rawRecipe.author_id" :name="rawRecipe.author_name"
+            :handle="rawRecipe.user_email || `user_${rawRecipe.author_id}`" :time="rawRecipe.created_at"
             :avatar-url="rawRecipe.author_image" />
 
           <div v-else-if="isPreviewMode" class="preview-badge">
