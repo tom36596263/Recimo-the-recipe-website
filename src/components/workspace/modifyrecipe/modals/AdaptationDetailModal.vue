@@ -214,6 +214,7 @@ const handleGoToEdit = () => {
                             <div class="action-group">
                                 <!-- <pre>{{ recipe.user_email }}</pre> -->
                                 <AuthorInfo
+                                    :user-id="isOwner ? (authStore.user?.id || authStore.user?.user_id) : recipe.author_id"
                                     :name="isOwner ? (authStore.user?.user_name || authStore.user?.name) : (recipe.author_name || 'Recimo 用戶')"
                                     :handle="isOwner ? (authStore.user?.user_email) : (recipe.user_email || `user_${recipe.author_id}`)"
                                     :time="recipe.recipe_created_at || '剛剛'"
