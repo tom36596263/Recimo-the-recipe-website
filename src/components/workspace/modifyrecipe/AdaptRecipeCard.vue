@@ -1,6 +1,9 @@
 <script setup>
 import { useRouter } from 'vue-router';
+import { computed } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
 import LikeButton from '@/components/common/LikeButton.vue'
+import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
 
 const props = defineProps({
     recipe: {
@@ -14,6 +17,13 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const authStore = useAuthStore();
+
+// 判斷是否為本人
+const isOwner = computed(() => {
+    const currentUserId = authStore.user?.id || authStore.user?.user_id;
+    return currentUserId === props.recipe.author_id;
+});
 
 const goToDetail = () => {
     if (!props.readonly) {
@@ -69,15 +79,18 @@ const handleUploadImage = () => {
         </div>
 
         <footer>
-            <div class="personal-info">
-                <div class="personal-img" :style="{
-                    backgroundImage: (recipe.author && typeof recipe.author === 'object' && recipe.author.author_image)
-                        ? `url(${recipe.author.author_image})` : '',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center'
-                }"></div>
-                <p class="p-p1">{{ (recipe.author && typeof recipe.author === 'object') ? recipe.author.author_name :
-                    (recipe.author || 'Recimo User') }}</p>
+            <div class="personal-info-wrapper">
+                <div @click.stop>
+                    <AuthorInfo
+                        :user-id="isOwner ? (authStore.user?.id || authStore.user?.user_id) : (recipe.author_id || recipe.author?.author_id)"
+                        :name="isOwner ? (authStore.user?.user_name || authStore.user?.name) : ((recipe.author && typeof recipe.author === 'object') ? (recipe.author.author_name || recipe.author.name) : (recipe.author_name || recipe.author || 'Recimo User'))"
+                        :handle="isOwner
+                            ? (authStore.user?.user_email || authStore.user?.email)
+                            : (recipe.user_email || recipe.author?.user_email || recipe.author?.email || `user_${recipe.author_id}`)"
+                        :time="recipe.created_at"
+                        :avatar-url="isOwner ? (authStore.user?.user_url || authStore.user?.avatarUrl) : (recipe.author?.author_image || recipe.author_image)" />
+                </div>
+
                 <div @click.prevent.stop>
                     <LikeButton :initial-likes="recipe.likes || 0"
                         @update:liked="(val) => handleLikeChange(val, recipe)" />
@@ -178,9 +191,8 @@ const handleUploadImage = () => {
         display: flex;
         flex-direction: column;
 
-        /* ✨ 手機版排序核心 ✨ */
         @media (max-width: 768px) {
-            display: grid; // 改用 grid 更好控制
+            display: grid;
             grid-template-columns: 1fr;
 
             .title-input {
@@ -192,12 +204,9 @@ const handleUploadImage = () => {
                 order: 2;
             }
 
-            // 食材營養往前
             .content-input {
                 order: 3;
             }
-
-            // 步驟/筆記最後
         }
 
         .input-group {
@@ -270,24 +279,11 @@ const handleUploadImage = () => {
         padding: 0 16px 16px;
         flex-shrink: 0;
 
-        .personal-info {
+        .personal-info-wrapper {
             display: flex;
             align-items: center;
-
-            .p-p1 {
-                font-size: 14px;
-                margin-left: 8px;
-                margin-right: auto;
-                color: $neutral-color-400;
-            }
-        }
-
-        .personal-img {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background-color: $neutral-color-100;
-            border: 1px solid $neutral-color-400;
+            justify-content: space-between;
+            width: 100%;
         }
     }
 }

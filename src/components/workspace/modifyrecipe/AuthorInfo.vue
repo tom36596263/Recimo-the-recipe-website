@@ -22,21 +22,36 @@ import { parsePublicFile } from '@/utils/parseFile';
 const props = defineProps({
     userId: { type: [Number, String], required: true },
     name: { type: String, default: 'Recimo官方' },
-    handle: { type: String, default: 'recimo' },
+    handle: { type: String, default: '' }, // 預設改為空，方便判斷
     time: { type: String, default: '' },
     avatarUrl: { type: String, default: null }
 });
 
 /**
- * 🏆 核心邏輯：把 email 前綴當成帳號
- * 如果 handle 包含 '@'，則取 '@' 之前的字串
+ * 🏆 終極優化邏輯
+ * 無論外部傳什麼進來，這裡都保證輸出一個好看的 handle
  */
 const displayHandle = computed(() => {
-    if (!props.handle) return 'user';
-    if (props.handle.includes('@')) {
+    // 1. 如果有 handle 且包含 @ (是 Email)，取前面那段
+    if (props.handle && String(props.handle).includes('@')) {
         return props.handle.split('@')[0];
     }
-    return props.handle;
+
+    // 2. 如果 handle 存在且不是預設的 'user_xxx' 格式，就直接用 handle
+    // 這裡過濾掉像 'user_12' 這種系統生成的暫時 ID
+    if (props.handle && !String(props.handle).startsWith('user_')) {
+        return props.handle;
+    }
+
+    // 3. 如果 handle 是空的，或是 'user_xxx' 格式，
+    // 嘗試從 name 轉換（去掉空格、轉小寫）作為替代帳號，若 name 也是預設，則顯示 user
+    if (props.name && props.name !== 'Recimo官方' && props.name !== 'Recimo User') {
+        // 例如 "Jimmy Wang" -> "jimmywang"
+        return props.name.replace(/\s+/g, '').toLowerCase();
+    }
+
+    // 4. 最後的最後，顯示 recimo 或 user
+    return 'recimo';
 });
 
 const avatarStyle = computed(() => {
@@ -99,18 +114,16 @@ const avatarStyle = computed(() => {
     }
 }
 
-/* 針對包裝組件的 router-link 進行樣式重置 */
 .user-info-box-link {
-    text-decoration: none !important; // 強制去掉底線
-    color: inherit !important; // 強制繼承原本的文字顏色
-    display: inline-block; // 確保寬度正確
+    text-decoration: none !important;
+    color: inherit !important;
+    display: inline-block;
 
     &:hover {
-        opacity: 0.8; // 增加回饋感
+        opacity: 0.8;
     }
 }
 
-/* 確保全域 a 標籤在組件內不顯示底線 */
 a {
     text-decoration: none;
     color: inherit;
