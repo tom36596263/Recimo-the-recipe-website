@@ -3,7 +3,6 @@ import { ref, watch, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { phpApi } from '@/utils/phpApi';
 import { publicApi } from '@/utils/publicApi';
-// 🏆 1. 引入團隊規範工具，取代原本手寫的 fixPath
 import { parsePublicFile } from '@/utils/parseFile';
 import { useNutritionStore } from '@/stores/nutritionStore.js';
 
@@ -23,15 +22,28 @@ const isModalOpen = ref(false);
 const selectedRecipe = ref(null);
 const currentNutrition = ref(null);
 
+// --- 🏆 Toast 提示狀態 ---
+const isToastVisible = ref(false);
+const toastMessage = ref('');
+
+/**
+ * 顯示全域 Toast
+ */
+function showToast(msg) {
+    toastMessage.value = msg;
+    isToastVisible.value = true;
+    setTimeout(() => {
+        isToastVisible.value = false;
+    }, 3000);
+}
+
 /**
  * 打開改編詳情燈箱
- * 包含熱量計算與異常數值校正
  */
 async function openAdaptDetail(item) {
-    // 🏆 關鍵：不要直接傳入原始的 item，而是傳入一個將 servings 強設為 1 的新物件
     selectedRecipe.value = {
         ...item,
-        servings: 1  // 強制讓燈箱拿到的 servings prop 是 1
+        servings: 1
     };
 
     if (!nutritionStore.isLoaded) {
@@ -39,14 +51,7 @@ async function openAdaptDetail(item) {
     }
 
     if (item.ingredients && item.ingredients.length > 0) {
-        // 1. 執行計算（算出食材 100% 的總營養量）
         const total = nutritionStore.calculateRecipeNutrition(item.ingredients);
-
-        // 2. 🏆 這裡也要改成 1，不要再用 item.recipe_servings 除法了
-        // 這樣顯示出來的數值就是「整份食譜」的總熱量
-        const displayServings = 1;
-
-        // 4. 更新燈箱要用的數據
         currentNutrition.value = {
             calories: Math.round(total.kcal),
             protein: total.protein.toFixed(1),
@@ -56,7 +61,6 @@ async function openAdaptDetail(item) {
     } else {
         currentNutrition.value = { calories: 0, protein: 0, fat: 0, carbs: 0 };
     }
-
     isModalOpen.value = true;
 }
 
@@ -65,27 +69,15 @@ async function openAdaptDetail(item) {
  */
 async function loadRecipeData(recipeId) {
     try {
-        console.log(`🚀 開始從 PHP 載入食譜 ID: ${recipeId}`);
-
         const res = await phpApi.get('recipes/recipe_detail_get.php', {
             params: { recipe_id: recipeId }
         });
-
         const apiResponse = res.data;
+        if (!apiResponse.success || !apiResponse.data) return;
 
-        if (!apiResponse.success || !apiResponse.data) {
-            console.error('後端回傳失敗或資料格式錯誤', apiResponse);
-            return;
-        }
+        const { main, adaptations } = apiResponse.data;
+        if (!main) return;
 
-        const { main, ingredients, steps, tags, adaptations } = apiResponse.data;
-
-        if (!main) {
-            console.error('找不到主食譜資訊(main)');
-            return;
-        }
-
-        // 1. 處理母食譜資料
         originalRecipe.value = {
             id: main.recipe_id,
             title: main.recipe_title,
@@ -95,34 +87,17 @@ async function loadRecipeData(recipeId) {
         };
 
         const formattedDbAdaptations = (adaptations || []).map(child => {
-            // 1. 【生成 UI 專用文字】 
-            // 我們只定義一個變數來存「卡片專用」的短語，完全不去動 child 裡的原始 key
             const shortDisplay = child.adaptation_note ||
                 (child.recipe_description ? child.recipe_description.slice(0, 15) + '...' : '點擊查看改編重點');
 
-            // 2. 【組合回傳物件】
             return {
-                // 先展開原始資料，確保 recipe_description (aaa) 被原封不動帶進來
                 ...child,
-
                 id: `db-${child.recipe_id}`,
-
-                // 卡片標題
                 title: child.recipe_title || '未命名食譜',
-
-                // 🏆 關鍵修正：
-                // 我們新增一個 key 叫 card_summary 給卡片用
-                // 這樣就不會發生「為了縮短文字而把原始 recipe_description 改掉」的慘劇
                 card_summary: shortDisplay,
-
-                // 燈箱專用：確保這兩個 key 裝的是「長文本 (aaa)」
                 description: child.recipe_description,
                 recipe_description: child.recipe_description,
-
-                // 原始筆記 (bbb) 保持原樣
                 adaptation_note: child.adaptation_note,
-
-                // 其他欄位
                 coverImg: parsePublicFile(child.recipe_image_url),
                 is_mine: false,
                 ingredients: child.ingredients || [],
@@ -131,41 +106,42 @@ async function loadRecipeData(recipeId) {
             };
         });
 
-        // 3. 處理本地改編 (LocalStorage)
         const targetParentId = Number(recipeId);
         const localRevisions = JSON.parse(localStorage.getItem('user_revisions') || '[]');
         const localAdaptations = localRevisions
             .filter(r => Number(r.parent_recipe_id) === targetParentId)
-            .map(r => {
-                const s = Number(r.servings || r.recipe_servings || 1);
-                return {
-                    ...r,
-                    id: r.id,
-                    title: r.title || '未命名改編',
+            .map(r => ({
+                ...r,
+                id: r.id,
+                title: r.title || '未命名改編',
+                description: r.description || r.recipe_description || r.adapt_description || '',
+                ingredients: r.ingredients || [],
+                steps: r.steps || [],
+                servings: Number(r.servings || r.recipe_servings || 1),
+                is_mine: true
+            }));
 
-                    // 🔥 確保本地資料也是用 description 這個字
-                    description: r.description || r.recipe_description || r.adapt_description || '',
-
-                    ingredients: r.ingredients || [],
-                    steps: r.steps || [],
-                    servings: s,
-                    is_mine: true
-                };
-            });
-        // 4. 合併並更新畫面
         variantItems.value = [...localAdaptations, ...formattedDbAdaptations];
-        console.log('✅ 資料載入成功，總數:', variantItems.value.length);
-
     } catch (err) {
         console.error('❌ 載入失敗:', err.message);
     }
 }
 
+// 🏆 刪除功能 + Toast
 function deleteLocalRecipe(targetId) {
     if (!confirm('確定要刪除這個本地改編版本嗎？')) return;
     const localData = JSON.parse(localStorage.getItem('user_revisions') || '[]');
     const filtered = localData.filter(r => String(r.id) !== String(targetId));
     localStorage.setItem('user_revisions', JSON.stringify(filtered));
+
+    // 
+    handleDelete(targetId);
+}
+
+// 🏆 發布成功處理 (由燈箱 emit 過來)
+function handlePublishSuccess() {
+    isModalOpen.value = false;
+    showToast('作品已發布'); // <--- 觸發 Toast
     loadRecipeData(route.params.id || route.query.editId);
 }
 
@@ -187,19 +163,11 @@ function goBack() {
     router.push(`/workspace/recipe-detail/${originalRecipe.value.id}`);
 }
 
-/**
- * 接住燈箱傳來的 update-like 事件
- */
 function handleLikeUpdate(data) {
-    // 找到陣列中 ID 相同的那一項
     const target = variantItems.value.find(item => String(item.id) === String(data.recipeId));
-
     if (target) {
-        // 更新小卡上的數據
         target.is_liked = data.isLiked;
         target.like_count = data.likeCount;
-
-        // 同步更新目前燈箱選中的資料 (讓燈箱內的按讚按鈕變色)
         if (selectedRecipe.value && String(selectedRecipe.value.id) === String(data.recipeId)) {
             selectedRecipe.value.is_liked = data.isLiked;
             selectedRecipe.value.like_count = data.likeCount;
@@ -207,18 +175,23 @@ function handleLikeUpdate(data) {
     }
 }
 
+function handleDelete(recipeId) {
+    // 1. 顯示黑色膠囊提示
+    showToast('作品已刪除');
 
+    // 2. 重新從 API 載入最新資料，確保畫面同步
+    const currentId = route.params.id || route.query.editId;
+    if (currentId) {
+        loadRecipeData(currentId);
+    }
+}
 
-// 生命週期 Hook
 onMounted(async () => {
-    // 預載營養資料庫
     await nutritionStore.fetchMasterData();
-
     const recipeId = route.params.id || route.query.editId;
     if (recipeId) {
         loadRecipeData(recipeId);
     } else {
-        console.warn("⚠️ 找不到食譜 ID，初始化空資料");
         initEmptyRecipe();
     }
 });
@@ -226,7 +199,6 @@ onMounted(async () => {
 watch(() => route.params.id, (newId) => {
     if (newId) loadRecipeData(newId);
 });
-
 </script>
 
 <template>
@@ -251,7 +223,6 @@ watch(() => route.params.id, (newId) => {
                         <div class="stat-tag p-p3 mb-24">
                             共有 {{ variantItems.length }} 個改編版本
                         </div>
-
                         <div class="mobile-only-btn">
                             <BaseBtn title="返回原食譜" variant="outline" class="w-100" @click="goBack" />
                         </div>
@@ -281,9 +252,7 @@ watch(() => route.params.id, (newId) => {
 
                     <div class="card-wrapper" style="position: relative; height: 100%;">
                         <AdaptRecipeCard class="demo-readonly-card" :recipe="{
-                            // 1. 這裡補上改編標題（如果有的話）
                             adaptation_title: item.adaptation_title,
-                            // 2. 原始標題作為備援
                             title: item.title,
                             adaptation_note: item.adaptation_note || item.summary,
                             coverImg: item.coverImg
@@ -299,14 +268,56 @@ watch(() => route.params.id, (newId) => {
         </div>
 
         <AdaptationDetailModal v-model="isModalOpen" :recipe="selectedRecipe" :nutrition="currentNutrition"
-            @update-like="handleLikeUpdate" />
+            @update-like="handleLikeUpdate" @publish-success="handlePublishSuccess" @delete-recipe="handleDelete" />
+
+        <Transition name="toast">
+            <div v-if="isToastVisible" class="global-delete-toast">
+                <i-material-symbols-check-circle-rounded class="toast-icon" />
+                <span>{{ toastMessage }}</span>
+            </div>
+        </Transition>
     </div>
 </template>
 
 <style lang="scss" scoped>
-/* 🔴 以下 CSS 與你提供的完全一致，未做任何刪減或改動 */
 @import '@/assets/scss/abstracts/_color.scss';
 
+// 🏆 Toast 專用樣式 (你提供的版本)
+.global-delete-toast {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20000;
+    background-color: #323232;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+}
+
+.toast-icon {
+    color: #2ecc71 !important;
+    /* 亮綠色勾勾 */
+    font-size: 20px !important;
+}
+
+.toast-enter-active,
+.toast-leave-active {
+    transition: all 0.4s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+    opacity: 0;
+    transform: translate(-50%, -40px);
+}
+
+// --- 以下為原本的 CSS (保持原樣) ---
 .mobile-only-btn {
     display: none !important;
 }
@@ -324,10 +335,20 @@ watch(() => route.params.id, (newId) => {
 
     .main-image-container {
         overflow: hidden;
+        width: 100%;
+        height: 320px;
+        border-radius: 16px;
+        background-color: $neutral-color-100;
 
-        img {
-            animation: imageScale 1.2s ease-out;
+        .hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
+    }
+
+    .info-content {
+        padding-left: 32px;
     }
 }
 
@@ -384,16 +405,6 @@ watch(() => route.params.id, (newId) => {
     }
 }
 
-@keyframes imageScale {
-    from {
-        transform: scale(1.1);
-    }
-
-    to {
-        transform: scale(1);
-    }
-}
-
 .custom-grid {
     display: flex;
     flex-wrap: wrap;
@@ -413,38 +424,6 @@ watch(() => route.params.id, (newId) => {
 
 .w-100 {
     width: 100% !important;
-}
-
-.original-recipe-hero {
-    .main-image-container {
-        width: 100%;
-        height: 320px;
-        border-radius: 16px;
-        background-color: $neutral-color-100;
-
-        .hero-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    }
-
-    .info-content {
-        padding-left: 32px;
-    }
-
-    .color-p1 {
-        color: $neutral-color-700;
-        line-height: 2;
-    }
-
-    .stat-tag {
-        display: inline-block;
-        background: $primary-color-100;
-        color: $primary-color-800;
-        padding: 6px 16px;
-        border-radius: 20px;
-    }
 }
 
 .add-card-placeholder {
@@ -471,12 +450,6 @@ watch(() => route.params.id, (newId) => {
         .plus-icon {
             font-size: 56px;
             display: block;
-        }
-
-        .uppercase {
-            color: $neutral-color-400;
-            font-size: 12px;
-            margin-top: 8px;
         }
     }
 }

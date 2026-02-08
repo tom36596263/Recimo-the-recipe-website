@@ -3,6 +3,7 @@ import { ref, onMounted, watch, nextTick } from "vue"; // 🏆 加入 nextTick
 import { useRoute } from "vue-router";
 import { useAuthStore } from '@/stores/authStore';
 import CommentReportModal from './modals/CommentReportModal.vue';
+import BaseModal from '@/components/BaseModal.vue'; // 🏆 加入 BaseModal
 
 const props = defineProps({
     list: { type: Array, default: () => [] }
@@ -17,6 +18,10 @@ const inputRef = ref(null); // 🏆 用於操控高度
 const isReportModalOpen = ref(false);
 const activeComment = ref({ content: '', userName: '', time: '' });
 const reportingIndex = ref(null);
+
+// 🏆 留言刪除確認燈箱變數
+const isDeleteModalOpen = ref(false);
+const commentIdToDelete = ref(null);
 
 // 🚀 權限判斷
 const isOwner = (handle) => {
@@ -82,6 +87,21 @@ const openReport = (item, index) => {
     reportingIndex.value = index;
     isReportModalOpen.value = true;
 };
+
+// 🏆 觸發刪除確認燈箱
+const openDeleteConfirm = (id) => {
+    commentIdToDelete.value = id;
+    isDeleteModalOpen.value = true;
+};
+
+// 🏆 執行正式刪除
+const handleConfirmDelete = () => {
+    if (commentIdToDelete.value) {
+        emit('delete-comment', commentIdToDelete.value);
+    }
+    isDeleteModalOpen.value = false;
+    commentIdToDelete.value = null;
+};
 </script>
 
 <template>
@@ -133,7 +153,7 @@ const openReport = (item, index) => {
                             </button>
 
                             <button v-if="isOwner(item.handle)" class="action-btn delete-btn"
-                                @click="emit('delete-comment', item.comment_id)">
+                                @click="openDeleteConfirm(item.comment_id)">
                                 <i-material-symbols-delete-outline-rounded class="action-icon" />
                             </button>
                         </div>
@@ -147,8 +167,19 @@ const openReport = (item, index) => {
             </div>
         </div>
 
-        <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment"
-            @update:modelValue="val => !val && (reportingIndex = null)" />
+        <Teleport to="body">
+            <CommentReportModal v-model="isReportModalOpen" :comment-data="activeComment"
+                @update:modelValue="val => !val && (reportingIndex = null)" />
+
+            <BaseModal :isOpen="isDeleteModalOpen" type="info" iconClass="fa-regular fa-trash-can" title="確定要刪除這條留言嗎？"
+                @close="isDeleteModalOpen = false">
+                <p class="p-p2" style="text-align: center;">刪除後的留言無法找回喔！</p>
+                <template #actions>
+                    <button class="btn-solid" @click="handleConfirmDelete">確定刪除</button>
+                    <button class="btn-outline" @click="isDeleteModalOpen = false">取消</button>
+                </template>
+            </BaseModal>
+        </Teleport>
     </div>
 </template>
 
