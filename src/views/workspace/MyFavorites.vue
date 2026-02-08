@@ -180,6 +180,14 @@ const handleAddFolder = async () => {
 const selectFolder = (folderId) => {
     selectedFolderId.value = folderId;
     currentPage.value = 1; // 切換資料夾時重置頁碼
+    // 換資料夾時自動 focus 第一個食譜（大螢幕）
+    setTimeout(() => {
+        if (filteredRecipes.value.length > 0 && window.innerWidth > 1024) {
+            selectedRecipe.value = filteredRecipes.value[0];
+        } else {
+            selectedRecipe.value = null;
+        }
+    }, 0);
 };
 
 // 編輯資料夾名稱
@@ -308,7 +316,7 @@ onMounted(async () => {
     if (!userStr) return;
     try {
         const userObj = JSON.parse(userStr);
-        userId.value = userObj.id;
+        userId.value = userObj.user_id;
     } catch (e) {
         userId.value = null;
         return;
@@ -429,7 +437,7 @@ watch(currentPage, () => {
             </div>
 
             <!-- 有食譜時顯示列表 -->
-            <div v-if="allRecipes.length > 0" class="row">
+            <div v-if="filteredRecipes.length > 0" class="row">
                 <!-- 左側食譜列表 -->
                 <div class="col-8 col-lg-12">
                     <div class="recipe-grid">
@@ -452,8 +460,15 @@ watch(currentPage, () => {
                 <div class="col-12">
                     <div class="empty-state">
                         <i class="fa-regular fa-heart"></i>
-                        <h3 class="empty-title">還沒有收藏任何食譜</h3>
-                        <p class="empty-text">發現喜歡的食譜時，點擊愛心收藏起來吧！</p>
+                        <h3 class="empty-title">
+                            {{ selectedFolderId === null ? '還沒有收藏任何食譜' : '這個資料夾還沒有食譜' }}
+                        </h3>
+                        <p class="empty-text">
+                            {{ selectedFolderId === null 
+                                ? '發現喜歡的食譜時，點擊愛心收藏起來吧！' 
+                                : '快去探索食譜並加入這個資料夾吧！' 
+                            }}
+                        </p>
                         <BaseBtn title="探索食譜" variant="solid" :height="40" href="/workspace/recipes" />
                     </div>
                 </div>
@@ -461,7 +476,7 @@ watch(currentPage, () => {
         </section>
 
         <!-- 分頁（只在有食譜時顯示） -->
-        <section v-if="allRecipes.length > 0" class="container page-btn-section">
+        <section v-if="filteredRecipes.length > 0" class="container page-btn-section">
             <div class="row">
                 <div class="col-12">
                     <PageBtn :current-page="currentPage" :total-pages="totalPages" @update:page="handlePageChange" />

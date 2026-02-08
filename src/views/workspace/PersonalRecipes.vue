@@ -121,7 +121,7 @@ onMounted(async () => {
     if (userStr) {
         try {
             const userObj = JSON.parse(userStr);
-            userId.value = userObj.id;
+            userId.value = userObj.user_id;
             
             // 統一載入收藏狀態
             if (userId.value) {

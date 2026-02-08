@@ -1,7 +1,5 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-// ========== 取得 localStorage user_id ==========
-const userId = ref(null);
 import { useRouter } from 'vue-router';
 import { phpApi, publicApi } from '@/utils/publicApi';
 import { parsePublicFile } from '@/utils/parseFile'
@@ -9,6 +7,8 @@ import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
 import { useFavoritesStore } from '@/stores/favoritesStore';
 
+// ========== 取得 localStorage user_id ==========
+const userId = ref(null);
 
 const router = useRouter();
 const favoritesStore = useFavoritesStore();
@@ -122,7 +122,7 @@ onMounted(async () => {
     if (userStr) {
         try {
             const userObj = JSON.parse(userStr);
-            userId.value = userObj.id;
+            userId.value = userObj.user_id;
             
             // 統一載入收藏狀態
             if (userId.value) {
@@ -133,6 +133,8 @@ onMounted(async () => {
             // 個人食譜：改為串接 myreipe_get.php，使用 userId 當參數，最多顯示四個
             if (userId.value) {
                 try {
+                    console.log('11');
+                    
                     const resMyRecipes = await phpApi.get(`personal/myrecipe_get.php`, { params: { user_id: userId.value } });
                     // 假設回傳為陣列
                     const myRecipesData = Array.isArray(resMyRecipes.data) ? resMyRecipes.data : [];
