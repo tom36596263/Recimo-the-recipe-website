@@ -5,6 +5,8 @@ import { useAuthStore } from '@/stores/authStore';
 const authStore = useAuthStore();
 // 引用input
 import BaseInput from '@/components/login/BaseInput.vue';
+// 引用彈窗
+import BaseModal from '@/components/BaseModal.vue';
 // 引用聯絡我們表單
 import ContactForm from '@/components/site/benefits/ContactForm-workspace.vue';
 // 呼叫Api
@@ -33,6 +35,29 @@ const accountData = ref({
 const isLineUser = computed(() => {
     return accountData.value.user_email && accountData.value.user_email.endsWith('@line.com');
 });
+
+// ==========================================
+// 彈窗
+// ==========================================
+// 控制彈窗狀態
+const isModalOpen = ref(false);
+const modalConfig = ref({
+    type: 'info',
+    iconClass: 'fa-solid fa-circle-info',
+    title: '',
+    description: ''
+});
+
+// 封裝彈窗呼叫方法
+const showAlert = (title, description = '', type = 'info', icon = 'fa-solid fa-circle-info') => {
+    modalConfig.value = {
+        title,
+        description, // 將傳入的描述存入 config
+        type,
+        iconClass: icon,
+    };
+    isModalOpen.value = true;
+};
 
 // ==========================================
 // 資料初始化與同步邏輯
@@ -131,25 +156,34 @@ const handleUpdateAccount = async () => {
         const isAllNumbers = /^\d+$/.test(phone);
 
         if (phone.length !== 10 || !isAllNumbers) {
-            alert('手機號碼格式錯誤：請輸入 10 碼純數字（範例：0912345678）');
+            // alert('手機號碼格式錯誤：請輸入 10 碼純數字（範例：0912345678）');
+            showAlert('手機號碼格式錯誤', '請輸入 10 碼純數字（範例：0912345678）', 'danger', 'fa-solid fa-exclamation');
             return;
         }
 
         if (!phone.startsWith('09')) {
-            alert('手機號碼格式錯誤：必須以 09 開頭');
+            // alert('手機號碼格式錯誤：必須以 09 開頭');
+            showAlert('手機號碼格式錯誤', '必須以 09 開頭', 'danger', 'fa-solid fa-exclamation');
             return;
         }
     }
     // 密碼驗證邏輯
     if (accountData.value.user_password) {
         const allRulesMet = Object.values(passwordRules.value).every(v => v);
-        if (!allRulesMet) { alert('密碼強度不足'); return; }
+        if (!allRulesMet) {
+            // alert('密碼強度不足'); 
+            showAlert('密碼強度不足', '請參考下方密碼規定', 'danger', 'fa-solid fa-exclamation');
+            return;
+        }
         if (accountData.value.user_password !== accountData.value.confirm_password) {
-            alert('兩次密碼輸入不一致'); return;
+            showAlert('兩次密碼輸入不一致', '請再試一次歐', 'danger', 'fa-solid fa-exclamation');
+            // alert('兩次密碼輸入不一致'); 
+            return;
         }
     }
     if (!accountData.value.user_id) {
-        alert('錯誤：抓不到會員編號，請重新整理頁面');
+        // alert('錯誤：抓不到會員編號，請重新整理頁面');
+        alert('錯誤：請重新整理頁面');
         return;
     }
 
@@ -168,7 +202,8 @@ const handleUpdateAccount = async () => {
         // console.log("更新成功後回傳的資料：", response.data.data); // 檢查這裡的 user_email
 
         if (response.data.status === 'success') {
-            alert('更新成功！');
+            // alert('更新成功！');
+            showAlert('更新成功！', '', 'success', 'fa-solid fa-check');
             // 更新成功後，清空前端的密碼輸入框，避免下次重複送出舊密碼
             accountData.value.user_password = '';
             accountData.value.confirm_password = '';
@@ -178,9 +213,11 @@ const handleUpdateAccount = async () => {
             }
 
         } else if (response.data.status === 'info') {
-            alert('資料沒有變動喔！');
+            // alert('資料沒有變動喔！');
+            showAlert('資料沒有變動喔！', 'info');
         } else {
-            alert(response.data.message);
+            // alert(response.data.message);
+            showAlert(response.data.message || '更新失敗', 'danger', 'fa-solid fa-exclamation');
         }
     } catch (error) {
         // console.error(error);
@@ -205,7 +242,7 @@ const handleUpdateAccount = async () => {
         </div>
 
         <div class="content-body">
-            <div v-if="activeTab === 'account'" class="account-pane">
+            <form v-if="activeTab === 'account'" class="account-pane" @submit.prevent="handleUpdateAccount">
                 <div class="info-row">
                     <label class="p-p1">會員編號</label>
                     <span class="static-text p-p1">{{ accountData.user_id }}</span>
@@ -233,19 +270,19 @@ const handleUpdateAccount = async () => {
                 <div class="info-row">
                     <label class="p-p1">會員手機</label>
                     <BaseInput v-model="accountData.user_phone" placeholder="請輸入您的手機" maxlength="10" inputmode="numeric"
-                        @input="handlePhoneInput" />
+                        @input="handlePhoneInput(accountData.user_phone)" autocomplete="tel" />
                 </div>
 
                 <div class="info-row">
                     <label class="p-p1">會員地址</label>
-                    <BaseInput v-model="accountData.user_address" placeholder="請輸入您的地址" />
+                    <BaseInput v-model="accountData.user_address" placeholder="請輸入您的地址" autocomplete="street-address" />
                 </div>
 
                 <div v-if="!isLineUser" class="info-row align-top">
                     <label class="p-p1">更改密碼</label>
                     <div class="password-group">
                         <BaseInput v-model="accountData.user_password" :type="isPasswordVisible ? 'text' : 'password'"
-                            placeholder="請輸入新密碼">
+                            placeholder="請輸入新密碼" autocomplete="new-password">
                             <template #suffix>
                                 <i :class="isPasswordVisible ? 'fas fa-eye' : 'fas fa-eye-slash'"
                                     @click="togglePassword" style="cursor: pointer; color: #666;"></i>
@@ -277,13 +314,13 @@ const handleUpdateAccount = async () => {
                 <div v-if="!isLineUser" class="info-row">
                     <label class="p-p1">確認密碼</label>
                     <BaseInput v-model="accountData.confirm_password" :type="isPasswordVisible ? 'text' : 'password'"
-                        placeholder="請再輸入一次新密碼" />
+                        placeholder="請再輸入一次新密碼" autocomplete="new-password" />
                 </div>
 
                 <div class="btn-center">
                     <BaseBtn title="更新資料" :width="180" :height="40" @click="handleUpdateAccount" />
                 </div>
-            </div>
+            </form>
 
             <div v-else-if="activeTab === 'notifications'" class="notify-pane">
                 <div class="notify-item p-p1" v-for="(val, key) in { sharing: '分享通知', comments: '留言通知', likes: '按讚通知' }"
@@ -292,7 +329,7 @@ const handleUpdateAccount = async () => {
                         <div class="title">{{ val }}</div>
                         <div class="desc">💡 如有其他使用者{{ key === 'sharing' ? '分享您的食譜' : key === 'comments' ? '在您的食譜下留言' :
                             '對您的食譜按讚'
-                            }}，則傳送通知給您</div>
+                        }}，則傳送通知給您</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" v-model="settings.notifications[key]" disabled>
@@ -325,6 +362,9 @@ const handleUpdateAccount = async () => {
             </div>
         </div>
     </div>
+
+    <BaseModal :isOpen="isModalOpen" :type="modalConfig.type" :title="modalConfig.title"
+        :iconClass="modalConfig.iconClass" :description="modalConfig.description" @close="isModalOpen = false" />
 </template>
 
 <style lang="scss" scoped>
@@ -422,6 +462,7 @@ const handleUpdateAccount = async () => {
         align-items: center;
         color: $secondary-color-danger-700; // 未通過
         transition: color 0.3s ease;
+        margin-top: 5px;
 
         i {
             font-size: 12px;
