@@ -281,8 +281,10 @@ watch(() => route.params.id, (newId) => {
 
                     <div class="card-wrapper" style="position: relative; height: 100%;">
                         <AdaptRecipeCard class="demo-readonly-card" :recipe="{
+                            // 1. 這裡補上改編標題（如果有的話）
+                            adaptation_title: item.adaptation_title,
+                            // 2. 原始標題作為備援
                             title: item.title,
-                            // ✨ 改成傳遞 adaptation_note，因為小卡裡面現在只認這個
                             adaptation_note: item.adaptation_note || item.summary,
                             coverImg: item.coverImg
                         }" :readonly="true" />

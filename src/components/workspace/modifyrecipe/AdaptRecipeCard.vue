@@ -54,7 +54,8 @@ const handleUploadImage = () => {
 
         <div class="card-body">
             <div class="input-group title-input">
-                <input type="text" :value="recipe.title" placeholder="改編版本標題..." readonly>
+                <input type="text" :value="recipe.adaptation_title || recipe.recipe_title || recipe.title || '未命名食譜'"
+                    placeholder="改編版本標題..." readonly>
             </div>
 
             <div v-if="recipe.ingredients" class="ingredients-section">

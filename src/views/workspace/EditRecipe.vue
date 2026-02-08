@@ -62,11 +62,29 @@ const fileToBase64 = (file) => {
   });
 };
 
-watch(() => recipeForm.value.steps, (newSteps) => {
-  if (!newSteps || !isEditing.value) return;
-  const autoSum = newSteps.reduce((sum, s) => sum + (Number(s.time) || 0), 0);
-  recipeForm.value.totalTime = autoSum;
-}, { deep: true });
+// 父組件中的 watch
+watch(
+  () => recipeForm.value.steps,
+  (newSteps) => {
+    if (!isEditing.value || !newSteps) return;
+
+    const autoSum = newSteps.reduce((sum, s) => {
+      // 🏆 修正：先強制轉數字，若為空或 NaN 則取 0
+      const stepTime = Number(s.time) || 0;
+      return sum + stepTime;
+    }, 0);
+
+    recipeForm.value.totalTime = autoSum;
+
+    // 💡 除錯建議：打開這行，看輸入時數字有沒有跑出來
+    // console.log('Total Calculated:', autoSum);
+  },
+  { deep: true, immediate: true }
+);
+
+
+
+
 
 watch(() => recipeForm.value.ingredients, (newIngs) => {
   newIngs.forEach(ing => {
@@ -404,7 +422,7 @@ const publishNewRecipeToDb = async () => {
       difficulty: Number(recipeForm.value.difficulty) || 1,
       totalTime: Number(recipeForm.value.totalTime) || 0,
       servings: Number(recipeForm.value.recipe_servings) || 1, // PHP 期待 $input['servings']
-      status: isPublished.value ? 1 : 0,
+      status: 1, // 強制設為 1 (已發布狀態)
       
       // 食材處理 (修正 Key 名稱)
       ingredients: recipeForm.value.ingredients.map(ing => ({
@@ -435,25 +453,48 @@ const publishNewRecipeToDb = async () => {
     alert('系統發生異常，請檢查網路連線或稍後再試');
   }
 };
+// const handleSave = async () => {
+//   if (isAdaptModeActive.value) {
+//     await publishToDb();
+//     return;
+//   }
+//   if (isPublished.value) {
+//     await publishNewRecipeToDb();
+//     return; 
+//   } 
+//   // 情況 C：一般模式 + 點擊「完成編輯」（未勾選公開）
+//   // 這裡通常應該也要呼叫 API 儲存，但 status 設為草稿 (例如 0)，或者直接跳回列表
+//   const confirmSave = confirm("確定完成編輯並儲存為草稿嗎？");
+//   if (confirmSave) {
+//     // 強制觸發一次儲存（確保資料有進資料庫，但 status 為未發布）
+//     await publishNewRecipeToDb(); 
+//     // 或者如果你只想純跳轉，可以改用：
+//     // router.push('/workspace/my-recipes');
+//   }
+//   console.log('Save Clicked', isPublished.value)
+// };
 const handleSave = async () => {
-  if (isAdaptModeActive.value) {
-    await publishToDb();
+  // 1. 基礎驗證
+  if (!recipeForm.value.title && !isAdaptModeActive.value) {
+    alert('請輸入食譜標題');
     return;
   }
-  if (isPublished.value) {
-    await publishNewRecipeToDb();
-    return; 
-  } 
-  // 情況 C：一般模式 + 點擊「完成編輯」（未勾選公開）
-  // 這裡通常應該也要呼叫 API 儲存，但 status 設為草稿 (例如 0)，或者直接跳回列表
-  const confirmSave = confirm("確定完成編輯並儲存為草稿嗎？");
-  if (confirmSave) {
-    // 強制觸發一次儲存（確保資料有進資料庫，但 status 為未發布）
-    await publishNewRecipeToDb(); 
-    // 或者如果你只想純跳轉，可以改用：
-    // router.push('/workspace/my-recipes');
+
+  // 2. 根據模式執行不同的儲存函式
+  // 我們在呼叫前強制確保 status 邏輯（或在函式內寫死為 1）
+  isPublished.value = true; 
+
+  try {
+    if (isAdaptModeActive.value) {
+      // 改編模式：呼叫 publishToDb (對應 recipe_adaptation_add.php)
+      await publishToDb();
+    } else {
+      // 一般模式：呼叫 publishNewRecipeToDb (對應 recipe_post.php)
+      await publishNewRecipeToDb();
+    }
+  } catch (err) {
+    console.error('儲存失敗:', err);
   }
-  console.log('Save Clicked', isPublished.value)
 };
 
 const handlePreview = async () => {
@@ -547,13 +588,16 @@ provide('isEditing', isEditing);
       <footer class="editor-footer">
         <div class="footer-center-group">
           <BaseBtn title="預覽" variant="outline" :width="100" @click="handlePreview" class="preview-btn" />
-          <BaseBtn :title="isAdaptModeActive ? '分享我的版本' : (isPublished ? '確認發布' : '完成編輯')" :width="200"
-            @click="handleSave" class="save-btn" />
-
-          <div v-if="!isAdaptModeActive" class="publish-toggle" style="display: none;">
+          <BaseBtn 
+            :title="isAdaptModeActive ? '分享我的版本' : '確認發布'" 
+            :width="200"
+            @click="handleSave" 
+            class="save-btn" 
+          />
+          <!-- <div v-if="!isAdaptModeActive" class="publish-toggle">
             <input type="checkbox" id="publish-check" v-model="isPublished" />
             <label for="publish-check" class="p-p2">公開發布</label>
-          </div>
+          </div> -->
         </div>
       </footer>
     </main>

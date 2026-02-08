@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { parsePublicFile } from '@/utils/parseFile.js';
 
@@ -8,6 +8,7 @@ import { parsePublicFile } from '@/utils/parseFile.js';
  * 目的：在計畫總覽頁顯示單個計畫檔案。
  * 串接：接收 plan 物件，點擊時導向動態編輯頁。
  */
+// --- Props 定義 ---
 const props = defineProps({
     plan: {
         type: Object,
@@ -15,6 +16,9 @@ const props = defineProps({
     },
     coverTemplates: { type: Array, default: () => [] }
 });
+
+// 定義emit：刪除、複製
+const emit = defineEmits(['delete', 'copy']);
 
 const router = useRouter();
 
@@ -92,6 +96,35 @@ const goToEdit = () => {
         params: { id: props.plan.plan_id }
     });
 };
+
+// --- 其他功能：刪除、複製 ---
+const showMenu = ref(false);
+// 切換選單顯示
+const toggleMenu = () => {
+    showMenu.value = !showMenu.value;
+};
+
+// 點擊外部自動關閉選單
+const closeMenu = (e) => {
+    if (!e.target.closest('.plan-card__more-container')) {
+        showMenu.value = false;
+    }
+};
+
+onMounted(() => window.addEventListener('click', closeMenu));
+onUnmounted(() => window.removeEventListener('click', closeMenu));
+
+// 處理複製動作
+const handleCopy = () => {
+    showMenu.value = false;
+    emit('copy', props.plan.plan_id);
+};
+
+// 處理刪除動作
+const handleRemove = () => {
+    showMenu.value = false;
+    emit('delete', props.plan.plan_id);
+};
 </script>
 
 <template>
@@ -115,9 +148,22 @@ const goToEdit = () => {
                     <i-material-symbols-calendar-month-outline />
                     <span>{{ formattedDateRange }}</span>
                 </div>
-                <button class="plan-card__more p-p3" @click.stop>
-                    <i-material-symbols-more-vert />
-                </button>
+                <div class="plan-card__more-container">
+                    <button class="plan-card__more p-p3" @click.stop="toggleMenu">
+                        <i-material-symbols-more-vert />
+                    </button>
+
+                    <Transition name="fade">
+                        <div v-if="showMenu" class="plan-card__dropdown-menu">
+                            <div class="menu-item" @click.stop="handleCopy">
+                                <i-material-symbols-content-copy-outline /> 複製計畫
+                            </div>
+                            <div class="menu-item delete" @click.stop="handleRemove">
+                                <i-material-symbols-delete-outline-rounded /> 刪除計畫
+                            </div>
+                        </div>
+                    </Transition>
+                </div>
             </div>
         </div>
     </div>
@@ -218,6 +264,10 @@ const goToEdit = () => {
         }
     }
 
+    &__more-container {
+        position: relative;
+    }
+
     &__more {
         background: none;
         border: none;
@@ -230,6 +280,58 @@ const goToEdit = () => {
             color: $primary-color-800;
             background-color: $neutral-color-100;
         }
+    }
+
+    &__dropdown-menu {
+        position: absolute;
+        bottom: 40px; // 向上彈出
+        right: 0;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: 1px solid $neutral-color-100;
+        width: 120px;
+        z-index: 50;
+        overflow: hidden;
+
+        .menu-item {
+            padding: 10px 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: $neutral-color-700;
+            transition: 0.2s;
+
+            &:hover {
+                background-color: $neutral-color-100;
+                color: $primary-color-800;
+            }
+
+            &.delete {
+                color: $secondary-color-danger-700;
+
+                &:hover {
+                    background-color: #fff1f0;
+                }
+            }
+
+            svg {
+                font-size: 16px;
+            }
+        }
+    }
+
+    // 過渡動畫
+    .fade-enter-active,
+    .fade-leave-active {
+        transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .fade-enter-from,
+    .fade-leave-to {
+        opacity: 0;
+        transform: translateY(5px);
     }
 }
 </style>

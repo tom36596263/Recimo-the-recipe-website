@@ -34,7 +34,7 @@ const closeCoverPanel = () => {
 // 封面選擇函式
 const handleCoverSelect = (payload) => {
   emit('update-plan', {
-    ...props.planData, // 保留舊資料
+    ...props.planData,
     cover_type: payload.type,
     cover_template_id: payload.id
   });
@@ -128,22 +128,24 @@ const onUpdateRange = (range) => {
 
 // --- 計算最終要顯示的封面路徑 ---
 const activeCoverUrl = computed(() => {
+  // 取得類型並轉為數字，避免 "2" !== 2 的問題
+  const type = Number(props.planData.cover_type);
+
   // 1. 如果是使用者上傳 (type 2)
-  if (props.planData.cover_type === 2 && props.planData.custom_cover_url) {
+  if (type === 2 && props.planData.custom_cover_url) {
+    // 💡 增加 console.log 來除錯，看看這裡印出什麼
+    console.log('顯示自訂封面:', props.planData.custom_cover_url);
     return parsePublicFile(props.planData.custom_cover_url);
   }
 
   // 2. 如果是官方預設 (type 1)
-  if (props.planData.cover_type === 1) {
-    // 🔴 關鍵比對邏輯：從 12 個模板中找出 ID 相符的那一個
+  if (type === 1) {
     const target = props.coverTemplates.find(
-      (t) => t.cover_template_id === props.planData.cover_template_id
+      (t) => Number(t.cover_template_id) === Number(props.planData.cover_template_id)
     );
-    // 找到就回傳該模板的 url，沒找到就回傳空字串或預設圖
     return target ? parsePublicFile(target.template_url) : '';
   }
 
-  // 3. 其他情況 (如 type 3 系統預設，目前可先留空或放預設圖)
   return '';
 });
 
@@ -184,8 +186,13 @@ const closePanel = () => { emit('close'); };
       </template>
     </div>
 
-    <PlanCoverPanel v-if="showCoverPanel" :templates="props.coverTemplates" @select="handleCoverSelect"
-      @close="closeCoverPanel" />
+    <PlanCoverPanel v-if="showCoverPanel" :templates="props.coverTemplates" :plan-id="props.planData.plan_id"
+      :current-custom-url="props.planData.custom_cover_url" @select="handleCoverSelect" @uploaded="(newUrl) => emit('update-plan', {
+        ...props.planData,
+        cover_type: 2,
+        cover_template_id: null,
+        custom_cover_url: newUrl
+      }, true)" @close="closeCoverPanel" />
 
     <div class="plan-panel__tabs">
       <DateTabs v-if="planData.start_date" v-model="activeTabId" :tabs="dateTabsData" :start-date="planData.start_date"
