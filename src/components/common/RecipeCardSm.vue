@@ -4,7 +4,7 @@ import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
 import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
-import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
+import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
 
 const props = defineProps({
     recipe: {
@@ -73,10 +73,8 @@ const goToDetail = () => {
         </div>
         <footer>
             <div class="personal-info">
-                <div class="personal-img">
-                    <img :src="LogoBlack" alt="recipe.recipe_name">
-                </div>
-                <p class="p-p1">Recimo</p>
+                <AuthorInfo v-if="!isPreviewMode && recipe" :name="recipe.author_name"
+            :handle="`user_${recipe.author.id}`" :time="recipe.created_at" />
             </div>
         </footer>
         <AddToFolderModal v-model="showAddToFolderModal" :commentData="{}" :recipe-id="recipeId"
