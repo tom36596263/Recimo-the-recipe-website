@@ -329,7 +329,7 @@ const handleUpdateAccount = async () => {
                         <div class="title">{{ val }}</div>
                         <div class="desc">💡 如有其他使用者{{ key === 'sharing' ? '分享您的食譜' : key === 'comments' ? '在您的食譜下留言' :
                             '對您的食譜按讚'
-                        }}，則傳送通知給您</div>
+                            }}，則傳送通知給您</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" v-model="settings.notifications[key]" disabled>
@@ -522,5 +522,58 @@ const handleUpdateAccount = async () => {
     border: none;
     border-top: 1px solid $primary-color-700;
     margin: 30px 0;
+}
+
+@media screen and (max-width: 810px) {
+
+    // 對應您的 $breakpoints md
+    .settings-wrapper {
+        .tabs-container {
+            padding: 0 5px;
+
+            .tab-item {
+                margin: 0 5px;
+                padding: 10px 5px;
+                font-size: 14px; // 手機版稍微縮小文字
+            }
+        }
+
+        .content-body {
+            margin: auto 10px;
+            padding: 25px 15px; // 減少手機版的內距
+        }
+    }
+
+    .info-row {
+        flex-direction: column; // 關鍵：改為上下堆疊
+        align-items: stretch;
+        margin-bottom: 25px;
+
+        label {
+            height: auto;
+            margin-bottom: 8px;
+            margin-right: 0;
+            font-weight: bold;
+        }
+
+        .static-text {
+            padding-left: 0; // 手機版靜態文字不再縮進
+            color: $primary-color-700;
+        }
+    }
+
+    .password-group {
+        .password-requirements {
+            padding-left: 0;
+            margin-top: 10px;
+        }
+    }
+
+    /* 手機版按鈕寬度調整 */
+    .btn-center {
+        :deep(.base-btn) {
+            width: 100% !important; // 讓按鈕在手機版填滿，更好按
+        }
+    }
 }
 </style>
