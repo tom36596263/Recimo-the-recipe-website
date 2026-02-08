@@ -243,7 +243,7 @@ const fetchData = async (quiet = false) => {
           userId: c.user_id,
           // 這裡要對齊 PHP 回傳的欄位名稱
           userName: c.userName || 'Recimo用戶',
-          handle: `user_${c.user_id}`,
+          handle: c.handle ? c.handle : `user_${c.user_id}`,
           // 這裡建議對齊你組件用的變數名稱
           userAvatar: getSmartImageUrl(c.user_avatar),
           content: c.comment_text,
@@ -728,8 +728,8 @@ watch(
         </div>
 
         <div class="meta-wrapper">
-          <AuthorInfo v-if="!isPreviewMode && rawRecipe" :name="rawRecipe.author_name"
-            :handle="`user_${rawRecipe.author_id}`" :time="rawRecipe.created_at" />
+          <AuthorInfo v-if="!isPreviewMode && rawRecipe" :name="rawRecipe.author_name" :handle="rawRecipe.user_email || `user_${rawRecipe.author_id}`" :time="rawRecipe.created_at"
+            :avatar-url="rawRecipe.author_image" />
 
           <div v-else-if="isPreviewMode" class="preview-badge">
             ✨ 正在預覽您的食譜草稿
@@ -925,7 +925,7 @@ watch(
         </div>
       </Transition>
     </Teleport>
-    
+
   </Teleport>
 
 </template>

@@ -1,9 +1,9 @@
 <script setup>
-import { ref, onMounted, watch, nextTick } from "vue"; // 🏆 加入 nextTick
+import { ref, onMounted, watch, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import { useAuthStore } from '@/stores/authStore';
 import CommentReportModal from './modals/CommentReportModal.vue';
-import BaseModal from '@/components/BaseModal.vue'; // 🏆 加入 BaseModal
+import BaseModal from '@/components/BaseModal.vue';
 
 const props = defineProps({
     list: { type: Array, default: () => [] }
@@ -14,48 +14,46 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 const userInput = ref("");
-const inputRef = ref(null); // 🏆 用於操控高度
+const inputRef = ref(null);
 const isReportModalOpen = ref(false);
 const activeComment = ref({ content: '', userName: '', time: '' });
 const reportingIndex = ref(null);
 
-// 🏆 留言刪除確認燈箱變數
 const isDeleteModalOpen = ref(false);
 const commentIdToDelete = ref(null);
 
-// 🚀 權限判斷
-const isOwner = (handle) => {
-    if (!handle) return false;
-    const userIdFromComment = Number(handle.replace('user_', ''));
-    const currentUserId = Number(authStore.user?.user_id || authStore.user?.id);
-    return userIdFromComment === currentUserId;
+// 🚀 權限判斷：支援 userId (大寫) 與 user_id (底線)
+const isOwner = (item) => {
+    if (!item || !authStore.user) return false;
+    const currentUserId = Number(authStore.user.user_id || authStore.user.id);
+    const commentUserId = Number(item.userId || item.user_id);
+    return commentUserId === currentUserId;
 };
 
-// 🚀 自動調整高度邏輯
 const autoResize = () => {
     const el = inputRef.value;
     if (!el) return;
-    el.style.height = '46px'; // 重設基準高度
-    el.style.height = el.scrollHeight + 'px'; // 撐開高度
+    el.style.height = '46px';
+    el.style.height = el.scrollHeight + 'px';
 };
 
-// 點讚紀錄與持久化
 const clickedLikes = ref(new Set());
 const getStorageKey = () => `liked_comments_recipe_${route.params.id || 'common'}`;
 const loadLikedStatus = () => {
     const saved = localStorage.getItem(getStorageKey());
     if (saved) {
-        const likedArray = JSON.parse(saved);
-        clickedLikes.value = new Set(likedArray);
+        try {
+            clickedLikes.value = new Set(JSON.parse(saved));
+        } catch (e) { clickedLikes.value = new Set(); }
     }
 };
 
-onMounted(() => { loadLikedStatus(); });
-watch(() => route.params.id, () => { loadLikedStatus(); });
+onMounted(loadLikedStatus);
+watch(() => route.params.id, loadLikedStatus);
 
 const getAvatarStyle = (name) => {
     const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
-    const charCodeSum = String(name).split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    const charCodeSum = String(name || 'User').split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
     return { backgroundColor: brandingColors[charCodeSum % 6], color: '#555555' };
 };
 
@@ -63,7 +61,6 @@ const handleSend = () => {
     if (!userInput.value.trim()) return;
     emit('post-comment', userInput.value);
     userInput.value = "";
-    // 🏆 送出後重設高度
     nextTick(() => {
         if (inputRef.value) inputRef.value.style.height = '46px';
     });
@@ -73,13 +70,12 @@ const handleLikeClick = (commentId) => {
     const id = Number(commentId);
     if (clickedLikes.value.has(id)) {
         clickedLikes.value.delete(id);
-        localStorage.setItem(getStorageKey(), JSON.stringify([...clickedLikes.value]));
         emit('like-comment', id, 'dislike');
     } else {
         clickedLikes.value.add(id);
-        localStorage.setItem(getStorageKey(), JSON.stringify([...clickedLikes.value]));
         emit('like-comment', id, 'like');
     }
+    localStorage.setItem(getStorageKey(), JSON.stringify([...clickedLikes.value]));
 };
 
 const openReport = (item, index) => {
@@ -88,13 +84,11 @@ const openReport = (item, index) => {
     isReportModalOpen.value = true;
 };
 
-// 🏆 觸發刪除確認燈箱
 const openDeleteConfirm = (id) => {
     commentIdToDelete.value = id;
     isDeleteModalOpen.value = true;
 };
 
-// 🏆 執行正式刪除
 const handleConfirmDelete = () => {
     if (commentIdToDelete.value) {
         emit('delete-comment', commentIdToDelete.value);
@@ -126,16 +120,24 @@ const handleConfirmDelete = () => {
         <div class="comment-list">
             <template v-if="list && list.length > 0">
                 <div v-for="(item, index) in list" :key="item.comment_id || index" class="comment-item">
-                    <div class="user-avatar-text" :style="getAvatarStyle(item.userName)">
-                        {{ item.userName ? item.userName.charAt(0).toUpperCase() : '?' }}
+                    <div class="user-avatar-text" :style="getAvatarStyle(item.userName || item.username)">
+                        {{ (item.userName || item.username || '?').charAt(0).toUpperCase() }}
                     </div>
 
                     <div class="comment-body">
                         <div class="comment-header">
-                            <span class="user-name p-p1">{{ item.userName }}</span>
-                            <span class="user-meta p-p3">@{{ item.handle }} • {{ item.time }}</span>
+                            <span class="user-name p-p1">{{ item.userName || item.username || '訪客' }}</span>
+                            <span class="user-meta p-p3">
+                                @{{
+                                    item.handle && item.handle.includes('@')
+                                        ? item.handle.split('@')[0]
+                                : (item.handle ? item.handle : '未抓到Email')
+                                }}
+                                • {{ item.comment_at || item.time }}
+
+                            </span>
                         </div>
-                        <p class="comment-text p-p2">{{ item.content }}</p>
+                        <p class="comment-text p-p2">{{ item.content || item.comment_text }}</p>
 
                         <div class="comment-footer">
                             <button class="action-btn like-btn"
@@ -144,15 +146,15 @@ const handleConfirmDelete = () => {
                                 <i-material-symbols-thumb-up-rounded v-if="clickedLikes.has(Number(item.comment_id))"
                                     class="action-icon" />
                                 <i-material-symbols-thumb-up-outline-rounded v-else class="action-icon" />
-                                <span class="count">{{ item.likes || 0 }}</span>
+                                <span class="count">{{ item.likes ?? item.like_count ?? 0 }}</span>
                             </button>
 
-                            <button v-if="!isOwner(item.handle)" class="action-btn report-btn"
+                            <button v-if="!isOwner(item)" class="action-btn report-btn"
                                 :class="{ 'active': reportingIndex === index }" @click="openReport(item, index)">
                                 <i-material-symbols-error-outline-rounded class="action-icon" />
                             </button>
 
-                            <button v-if="isOwner(item.handle)" class="action-btn delete-btn"
+                            <button v-if="isOwner(item)" class="action-btn delete-btn"
                                 @click="openDeleteConfirm(item.comment_id)">
                                 <i-material-symbols-delete-outline-rounded class="action-icon" />
                             </button>
@@ -181,6 +183,7 @@ const handleConfirmDelete = () => {
             </BaseModal>
         </Teleport>
     </div>
+    <!-- <pre>{{ item.handle }}</pre> -->
 </template>
 
 <style lang="scss" scoped>
@@ -200,14 +203,14 @@ const handleConfirmDelete = () => {
 .input-container {
     position: relative;
     display: flex;
-    align-items: flex-end; // 🏆 讓按鈕靠底部
+    align-items: flex-end;
     margin-bottom: 32px;
 
     .styled-input {
         width: 100%;
         min-height: 46px;
         max-height: 200px;
-        padding: 12px 95px 12px 16px; // 🏆 稍微增加右側內距，給計數器更多空間
+        padding: 12px 95px 12px 16px;
         border: 1.5px solid $primary-color-700;
         border-radius: 12px;
         font-size: 15px;
@@ -216,12 +219,10 @@ const handleConfirmDelete = () => {
         resize: none;
         line-height: 1.5;
         font-family: inherit;
-
-        /* 🏆 隱藏捲軸但保留捲動功能 (針對不同瀏覽器) */
-        scrollbar-width: none; // Firefox
+        scrollbar-width: none;
 
         &::-webkit-scrollbar {
-            display: none; // Chrome, Safari, Edge
+            display: none;
         }
 
         &:focus {
@@ -230,15 +231,14 @@ const handleConfirmDelete = () => {
         }
     }
 
-    /* 🏆 微調計數器位置，讓它跟發送按鈕保持一點距離 */
     .char-counter {
         position: absolute;
-        right: 52px; // 從 48px 微調到 52px
+        right: 52px;
         bottom: 12px;
         font-size: 12px;
         color: $neutral-color-400;
-        user-select: none; // 防止計數器文字被選取
-        background: $neutral-color-white; // 避免文字疊在捲軸位置時透過去
+        user-select: none;
+        background: $neutral-color-white;
 
         &.limit {
             color: $secondary-color-danger-700;
@@ -309,7 +309,6 @@ const handleConfirmDelete = () => {
             color: $neutral-color-800;
             margin-bottom: 8px;
             font-size: 15px;
-            // 🏆 關鍵：讓留言能顯示換行並強制斷詞
             white-space: pre-wrap;
             word-break: break-all;
         }

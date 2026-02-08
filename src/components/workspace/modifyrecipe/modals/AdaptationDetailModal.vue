@@ -212,10 +212,12 @@ const handleGoToEdit = () => {
                                 <span class="badge">改編版本</span>
                             </div>
                             <div class="action-group">
+                                <!-- <pre>{{ recipe.user_email }}</pre> -->
                                 <AuthorInfo
                                     :name="isOwner ? (authStore.user?.user_name || authStore.user?.name) : (recipe.author_name || 'Recimo 用戶')"
-                                    :handle="`user_${recipe.author_id || recipe.user_id || 'unknown'}`"
-                                    :time="recipe.recipe_created_at || '剛剛'" />
+                                    :handle="isOwner ? (authStore.user?.user_email) : (recipe.user_email || `user_${recipe.author_id}`)"
+                                    :time="recipe.recipe_created_at || '剛剛'"
+                                    :avatar-url="isOwner ? (authStore.user?.user_url || authStore.user?.avatarUrl) : (recipe.author_image || recipe.user_url)" />
                                 <button v-if="isOwner" class="btn-delete-adaptation" @click="isDeleteModalOpen = true">
                                     <i-material-symbols-delete-outline-rounded class="mr-4" />刪除改編
                                 </button>

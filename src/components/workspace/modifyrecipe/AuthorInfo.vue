@@ -1,12 +1,13 @@
 <template>
     <div class="user-info-box">
         <div class="user-avatar-circle" :style="avatarStyle">
-            {{ name?.charAt(0).toUpperCase() }}
+            <img v-if="avatarUrl" :src="parsePublicFile(avatarUrl)" class="avatar-img" />
+            <span v-else>{{ name?.charAt(0).toUpperCase() }}</span>
         </div>
         <div class="user-text-meta">
             <div class="user-name">{{ name }}</div>
             <div class="user-sub">
-                @{{ handle }}<span v-if="time"> • {{ time }}</span>
+                @{{ displayHandle }}<span v-if="time"> • {{ time }}</span>
             </div>
         </div>
     </div>
@@ -14,16 +15,31 @@
 
 <script setup>
 import { computed } from 'vue';
+import { parsePublicFile } from '@/utils/parseFile';
 
-// 1. 定義接收的資料 (Props)
 const props = defineProps({
     name: { type: String, default: 'Recimo官方' },
-    handle: { type: String, default: 'recimo' },
-    time: { type: String, default: '' }
+    handle: { type: String, default: 'recimo' }, // 這裡之後傳入 email
+    time: { type: String, default: '' },
+    avatarUrl: { type: String, default: null }
 });
 
-// 2. 把頭貼顏色邏輯搬進來
+/**
+ * 🏆 核心邏輯：把 email 前綴當成帳號
+ * 如果 handle 包含 '@'，則取 '@' 之前的字串
+ */
+const displayHandle = computed(() => {
+    if (!props.handle) return 'user';
+    if (props.handle.includes('@')) {
+        return props.handle.split('@')[0];
+    }
+    return props.handle;
+});
+
 const avatarStyle = computed(() => {
+    if (props.avatarUrl) {
+        return { backgroundColor: 'transparent', border: 'none' };
+    }
     const safeName = props.name || 'User';
     const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
     const charCodeSum = safeName.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
@@ -54,15 +70,21 @@ const avatarStyle = computed(() => {
         font-size: 15px;
         border: 1px solid rgba(0, 0, 0, 0.05);
         flex-shrink: 0;
+        overflow: hidden;
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     }
 
     .user-text-meta {
         text-align: left;
 
-        /* 這裡預設靠左，如果你原本頁面要靠右，可以在父組件蓋掉它 */
         .user-name {
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             color: $neutral-color-800;
             font-size: 15px;
         }
