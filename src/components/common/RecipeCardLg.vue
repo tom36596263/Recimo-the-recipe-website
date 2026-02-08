@@ -9,6 +9,7 @@ import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFo
 import BaseTag from '@/components/common/BaseTag.vue';
 import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
 import LikeButton from '@/components/common/LikeButton.vue'
+import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
 
 import IconLocalFireDepartment from '~icons/material-symbols/Local-Fire-Department-outline';
 import IconramenDining from '~icons/material-symbols/Ramen-Dining-outline';
@@ -111,10 +112,8 @@ const handleHeartClick = (e) => {
 
         <footer>
             <div class="personal-info">
-                <div class="personal-img">
-                    <img :src="LogoBlack" alt="Recimo Logo">
-                </div>
-                <p class="p-p1">Recimo</p>
+                <AuthorInfo v-if="!isPreviewMode && recipe" :name="recipe.author_name"
+            :handle="`user_${recipe.author.id}`" :time="recipe.created_at" />
                 <div @click.prevent.stop>
                     <LikeButton :initial-likes="recipe.author.likes || 0"
                         @update:liked="(val) => handleLikeChange(val, item)" />
@@ -219,6 +218,7 @@ const handleHeartClick = (e) => {
         .personal-info {
             display: flex;
             align-items: center;
+            gap: 6px;
 
             .p-p1 {
                 margin-right: 6px;
