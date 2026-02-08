@@ -1,11 +1,16 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { phpApi } from '@/utils/publicApi';
+import { useRoute, useRouter } from 'vue-router';
 
 import SearchBanner from '@/components/site/search/SearchBanner.vue';
 import SearchResultCard from '@/components/site/search/SearchResultCard.vue';
 import EmptyState from '@/components/site/RecipeOverview/NoResult.vue';
 import PageBtn from '@/components/common/PageBtn.vue';
+
+
+const route = useRoute();
+const router = useRouter();
 
 // 1. 定義響應式變數
 const recipes = ref([]);
@@ -18,28 +23,6 @@ const currentPage = ref(1);
 const pageSize = 5;
 const isLoading = ref(true);
 
-// 2. 取得搜尋結果的函式 (整合後端)
-// const fetchSearchResults = async (keyword = '') => {
-//     isLoading.value = true;
-//     try {
-//         const [resRecipes,resProducts, resRecipeTags, resTags ] = await Promise.all([
-//             publicApi.get('data/recipe/recipes.json'),
-//             publicApi.get('data/mall/products.json'),
-//             publicApi.get('data/recipe/recipe_tag.json'),
-//             publicApi.get('data/recipe/tags.json')
-//         ]);
-//         recipes.value = resRecipes.data;
-//         products.value = resProducts.data;
-//         recipeTags.value = resRecipeTags.data;
-//         tags.value = resTags.data;
-//         console.log(products.value);
-//     } catch (err) {
-//         console.error("搜尋載入失敗:", err);
-//         recipes.value = [];
-//     } finally {
-//         isLoading.value = false;
-//     }
-// };
 const fetchSearchResults = async (keyword = '') => {
     isLoading.value = true;
     try {
@@ -58,10 +41,28 @@ const fetchSearchResults = async (keyword = '') => {
         isLoading.value = false;
     }
 };
-
-// 3. 生命週期
+watch(
+  () => route.query.q,
+  (newVal) => {
+    // 1. 同步輸入框內容 (這會透過 v-model 傳給 SearchBanner -> SearchBar)
+    searchQuery.value = newVal || '';
+    
+    // 2. 重新抓取 API 資料
+    fetchSearchResults(newVal || '');
+    
+    // 3. 回到分頁第一頁
+    currentPage.value = 1;
+  }
+);
 onMounted(() => {
-    fetchSearchResults(); 
+    // 關鍵：從網址抓取 q 參數
+    const keywordFromUrl = route.query.q || '';
+    
+    // 這裡一定要賦值，SearchBanner 的 v-model 才會抓到這個值並顯示在輸入框
+    searchQuery.value = keywordFromUrl; 
+    
+    // 執行 API 請求
+    fetchSearchResults(keywordFromUrl); 
 });
 
 // // 4. 監聽搜尋關鍵字：當使用者輸入時，重新向後端要資料
@@ -70,14 +71,22 @@ onMounted(() => {
 //     fetchSearchResults(newVal); 
 // });
 // 3. 監聽搜尋關鍵字
+// watch(searchQuery, (newVal) => {
+//     currentPage.value = 1;
+//     fetchSearchResults(newVal); // 當子組件更新 v-model，這裡會被觸發
+//     router.replace({ query: { ...route.query, q: newVal || undefined } });
+// }, { immediate: false }); // 初始由 onMounted 執行第一次
 watch(searchQuery, (newVal) => {
     currentPage.value = 1;
-    fetchSearchResults(newVal); // 當子組件更新 v-model，這裡會被觸發
-}, { immediate: false }); // 初始由 onMounted 執行第一次
-
-onMounted(() => {
-    fetchSearchResults(); 
+    fetchSearchResults(newVal); // 這裡會根據新標籤重新抓 API
+    
+    // 同步更新網址 (選用，但建議加上，這樣重新整理才不會跳掉)
+    router.replace({ query: { q: newVal || undefined } });
 });
+
+// onMounted(() => {
+//     fetchSearchResults(); 
+// });
 
 // 5. 計算屬性
 const filteredRecipes = computed(() => {
