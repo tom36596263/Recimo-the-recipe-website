@@ -1,5 +1,5 @@
 // 通知 API 服務
-import { phpApi } from './phpApi';
+import { phpApi } from '@/utils/publicApi';
 
 /**
  * 獲取用戶的通知列表
@@ -37,7 +37,8 @@ export const getUnreadCount = (userId) => {
  * @returns {Promise}
  */
 export const markAsRead = (notificationId) => {
-    return phpApi.patch('/social/notifications.php', {
+    return phpApi.post('/social/notifications.php', {
+        action: 'mark_read',
         notification_id: notificationId,
         is_read: 1
     });
@@ -49,7 +50,8 @@ export const markAsRead = (notificationId) => {
  * @returns {Promise}
  */
 export const markAllAsRead = (userId) => {
-    return phpApi.patch('/social/notifications.php', {
+    return phpApi.post('/social/notifications.php', {
+        action: 'mark_all_read',
         receiver_id: userId,
         mark_all: 1
     });
@@ -61,10 +63,9 @@ export const markAllAsRead = (userId) => {
  * @returns {Promise}
  */
 export const deleteNotification = (notificationId) => {
-    return phpApi.delete('/social/notifications.php', {
-        data: {
-            notification_id: notificationId
-        }
+    return phpApi.post('/social/notifications.php', {
+        action: 'delete',
+        notification_id: notificationId
     });
 };
 
