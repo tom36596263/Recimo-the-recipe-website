@@ -107,7 +107,8 @@ const fetchRecipes = async () => {
                 },
                 author: {
                     name: 'Recimo',
-                    likes: recipe.recipe_like_count
+                    likes: recipe.recipe_like_count,
+                    id: recipe.author_id
                 }
             };
         });

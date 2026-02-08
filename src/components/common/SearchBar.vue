@@ -1,4 +1,9 @@
 <script setup>
+    import { ref } from 'vue';
+    import { useRouter } from 'vue-router';
+
+    const router = useRouter();
+
     import { computed } from 'vue'
     const model = defineModel({ type: String, default: '' });
 
@@ -9,7 +14,7 @@
         },
         size: {
             type: String,
-            default: 'sm',
+            default: 'sm', 
             validator: (value) => ['sm', 'lg'].includes(value)
         },
         maxWidth: {
@@ -17,7 +22,15 @@
             default: ''
         }
     });
-
+    const handleSearch = () => {
+        if (!keyword.value.trim()) return;
+        // 轉跳到搜尋頁面，並透過 query 傳遞關鍵字
+        router.push({
+            path: '/search', // 假設這是你的搜尋好料理頁面路徑
+            query: { q: model.value }
+        });
+        model.value = ''; // 清空輸入框（可選）
+    };
     const emit = defineEmits(['search']);
 
     const searchClasses = computed(() => [

@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
+import LogoWhite from '@/assets/images/site/Recimo-logo-white.svg'
 import BaseBtn from '@/components/common/BaseBtn.vue'
 import IconList from 'virtual:icons/material-symbols/List'
 import IconAdd from 'virtual:icons/material-symbols/Add'
@@ -139,7 +140,7 @@ const handleLogout = () => {
             <div class="more-menu-panel">
                 <div class="panel-header">
                     <router-link to="/">
-                        <img :src="$parsePublicFile('img/site/Recimo-logo-white.svg')" alt="logo" class="logo">
+                        <img :src="LogoWhite" alt="Recimo Logo">
                     </router-link>
                     <BaseBtn v-if="authStore.isLoggedIn" title="登出" height="30" @click="confirmLogout" />
                 </div>

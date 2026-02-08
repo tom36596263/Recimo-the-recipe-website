@@ -15,51 +15,56 @@ const props = defineProps({
 const emit = defineEmits(['close', 'select', 'uploaded']);
 const closePanel = () => { emit("close") };
 
-// --- 處理使用者上傳的封面圖片 ---
 const fileInput = ref(null);
 
-// 觸發隱藏的 file input
 const triggerUpload = () => {
-    fileInput.value.click();
+    if (fileInput.value) {
+        fileInput.value.click();
+    }
 };
 
-// 處理檔案選擇與上傳
 const onFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
     formData.append('cover_image', file);
-    formData.append('plan_id', props.planId);
-    formData.append('user_id', authStore.userId);
+    // 轉型為字串傳送，確保後端接收正確
+    formData.append('plan_id', String(props.planId));
+    formData.append('user_id', String(authStore.userId));
 
     try {
-        // ✅ 修正：移除第二個參數後的 { headers: ... }
-        const res = await phpApi.post('mealplans/upload_plan_cover.php', formData);
+        // 🟢 關鍵點：顯式設定 Content-Type 為 undefined
+        // 這會移除預設的 application/json，讓瀏覽器自動生成 multipart/form-data boundary
+        const res = await phpApi.post('mealplans/upload_plan_cover.php', formData, {
+            headers: {
+                'Content-Type': undefined
+            }
+        });
 
         if (res.data.success) {
-            // 通知父層更新路徑
             emit('uploaded', res.data.url);
             emit('close');
         } else {
-            // 這裡可以幫助除錯：顯示後端回傳的錯誤
-            console.error('後端錯誤：', res.data.error, res.data.debug);
-            alert('上傳失敗：' + res.data.error);
+            console.error('後端錯誤:', res.data);
+            alert('上傳失敗: ' + (res.data.error || '未知錯誤'));
         }
     } catch (err) {
         console.error('上傳請求失敗', err);
+        // 顯示更詳細的錯誤資訊
+        const msg = err.response?.data?.error || err.message;
+        alert('網路錯誤：' + msg);
+    } finally {
+        e.target.value = ''; // 清空 input 確保可重複選取
     }
 };
 
 const selectTemplate = (item) => {
     emit('select', { type: 1, id: item.cover_template_id });
-    emit('close');
 };
 
-// 選擇已上傳的圖片
 const selectCustom = () => {
-    emit('select', { type: 2, id: null }); // type 2 代表使用 custom_cover_url
-    emit('close');
+    emit('select', { type: 2, id: null });
 };
 </script>
 

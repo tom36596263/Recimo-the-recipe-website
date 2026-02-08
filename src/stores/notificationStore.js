@@ -20,14 +20,14 @@ export const useNotificationStore = defineStore('notification', {
          * 未讀通知列表
          */
         unreadNotifications: (state) => {
-            return state.notifications.filter(n => !n.is_read);
+            return state.notifications.filter(n => n.is_read == 0 || n.is_read === false);
         },
 
         /**
          * 已讀通知列表
          */
         readNotifications: (state) => {
-            return state.notifications.filter(n => n.is_read);
+            return state.notifications.filter(n => n.is_read == 1 || n.is_read === true);
         },
 
         /**
@@ -104,7 +104,7 @@ export const useNotificationStore = defineStore('notification', {
                     const notification = this.notifications.find(
                         n => n.notification_id === notificationId
                     );
-                    if (notification && !notification.is_read) {
+                    if (notification && (notification.is_read == 0 || notification.is_read === false)) {
                         notification.is_read = 1;
                         this.unreadCount = Math.max(0, this.unreadCount - 1);
                     }
@@ -148,7 +148,7 @@ export const useNotificationStore = defineStore('notification', {
          */
         addNotification(notification) {
             this.notifications.unshift(notification);
-            if (!notification.is_read) {
+            if (notification.is_read == 0 || notification.is_read === false) {
                 this.unreadCount++;
             }
         },

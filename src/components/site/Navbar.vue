@@ -6,6 +6,7 @@ import BaseBtn from '@/components/common/BaseBtn.vue'
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
+import LogoWhite from '@/assets/images/site/Recimo-logo-white.svg'
 
 const { proxy } = getCurrentInstance(); // 取得全域方法代理
 
@@ -133,7 +134,7 @@ const userAvatar = computed(() => {
                             </div>
                             <div class="side-menu-only">
                                 <router-link to="/">
-                                    <img :src="$parsePublicFile('img/site/Recimo-logo-white.svg')" alt="logo">
+                                    <img :src="LogoWhite" alt="Recimo Logo">
                                 </router-link>
 
                                 <BaseBtn v-if="authStore.isLoggedIn" title="登出" height="30" @click="handleLogout" />

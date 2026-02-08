@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { phpApi } from '@/utils/phpApi.js';
+import ReportSuccessModal from '@/components/workspace/recipedetail/modals/ReportSuccessModal.vue';
 
 const props = defineProps({
     modelValue: Boolean,
@@ -20,6 +21,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'submit']);
 const authStore = useAuthStore();
+const isSuccessOpen = ref(false);
 
 const displayAuthor = computed(() => {
     if (props.targetData.author_id === 1 || props.targetData.author_id === "1") {
@@ -74,9 +76,11 @@ const handleSubmit = async () => {
     try {
         const response = await phpApi.post('social/submit_report.php', payload);
         if (response.data.status === 'success') {
-            alert('感謝您的檢舉，我們會盡快審核該食譜。');
+            emit('update:modelValue', false); // 關閉檢舉輸入框
+            isSuccessOpen.value = true;      // 打開成功提示
+
             emit('submit', response.data);
-            handleClose();
+            reportNote.value = ''; // 重置內容
         } else {
             alert('檢舉失敗：' + (response.data.message || '請稍後再試'));
         }
@@ -144,6 +148,7 @@ const getImageUrl = (url) => {
             </div>
         </div>
     </Teleport>
+    <ReportSuccessModal :isOpen="isSuccessOpen" @close="isSuccessOpen = false" />
 </template>
 
 <style scoped lang="scss">

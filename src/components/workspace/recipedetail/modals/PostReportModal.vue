@@ -2,8 +2,9 @@
 import { ref } from 'vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
 import { phpApi } from '@/utils/phpApi.js';
-// 🏆 1. 建議引入 authStore 來抓 ID，這比直接抓 localStorage 穩
 import { useAuthStore } from '@/stores/authStore';
+// 🏆 1. 引入成功燈箱
+import ReportSuccessModal from '@/components/workspace/recipedetail/modals/ReportSuccessModal.vue';
 
 const authStore = useAuthStore();
 
@@ -27,6 +28,9 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'success']);
 
+// 🏆 2. 控制成功燈箱開關
+const isSuccessOpen = ref(false);
+
 const reasons = [
     '內容侵權 (盜圖或盜文)',
     '垃圾訊息 / 廣告',
@@ -35,7 +39,6 @@ const reasons = [
     '其他原因'
 ];
 
-// 🏆 修正：確保 selectedReason 只宣告一次
 const selectedReason = ref('內容侵權 (盜圖或盜文)');
 const reportNote = ref('');
 
@@ -45,11 +48,9 @@ const handleClose = () => {
 };
 
 const handleSubmit = async () => {
-    // 🏆 2. 修改 ID 抓取邏輯：優先從 Store 拿，拿不到再試 localStorage 不同的 Key
     const reporterId = authStore.user?.id ||
         authStore.user?.user_id ||
-        localStorage.getItem('user_id') ||
-        localStorage.getItem('id');
+        localStorage.getItem('user_id');
 
     if (!reporterId) {
         alert("系統偵測不到登入資訊，請嘗試重新登入。");
@@ -65,25 +66,22 @@ const handleSubmit = async () => {
     };
 
     try {
-        // 🏆 3. 發送請求 (請確認後端 phpApi.js 的 baseURL 包含到 api/ 這一層)
         const response = await phpApi.post('social/submit_report.php', payload);
         const result = response.data;
 
         if (result.status === 'success') {
-            alert("感謝您的檢舉！我們將會盡快審核該內容。");
+            // 🏆 3. 拔掉 alert，切換燈箱
+            emit('update:modelValue', false); // 關閉檢舉框
+            isSuccessOpen.value = true;      // 開啟成功框
+
             reportNote.value = '';
             emit('success');
-            emit('update:modelValue', false);
         } else {
             alert("檢舉失敗：" + result.message);
         }
     } catch (error) {
         console.error('API Error:', error);
-        // 🏆 4. 針對「連線失敗」給出更具體的提示
-        const msg = error.code === 'ERR_NETWORK'
-            ? "連線失敗：請檢查 MAMP 是否開啟，或 API 網址是否正確。"
-            : "伺服器錯誤，請稍後再試。";
-        alert(msg);
+        alert("伺服器錯誤，請稍後再試。");
     }
 };
 </script>
@@ -92,9 +90,7 @@ const handleSubmit = async () => {
     <Teleport to="body">
         <div v-if="modelValue" class="black-mask" @click.self="handleClose">
             <div class="modal-card">
-                <button class="close-x" @click="handleClose" aria-label="關閉">
-                    ×
-                </button>
+                <button class="close-x" @click="handleClose" aria-label="關閉">×</button>
 
                 <div class="modal-header">
                     <div class="modal-title zh-h4-bold">
@@ -108,11 +104,9 @@ const handleSubmit = async () => {
                         <div class="photo-fixed">
                             <img :src="commentData.image || 'https://via.placeholder.com/150'" alt="預覽內容" />
                         </div>
-
                         <div class="text-scroll-area">
                             <p class="comment-text p-p2">{{ commentData.content }}</p>
                         </div>
-
                         <div class="user-meta p-p3">
                             @{{ commentData.userName }} · {{ commentData.time }}
                         </div>
@@ -135,12 +129,14 @@ const handleSubmit = async () => {
                     </div>
 
                     <div class="btn-group">
-                        <BaseBtn title="取消" variant="outline" height="0" class="w-auto" @click="handleClose" />
-                        <BaseBtn title="送出檢舉" @click="handleSubmit" class="w-auto" />
+                        <BaseBtn title="取消" variant="outline" height="40" width="100%" @click="handleClose" />
+                        <BaseBtn title="送出檢舉" height="40" width="100%" @click="handleSubmit" />
                     </div>
                 </div>
             </div>
         </div>
+
+        <ReportSuccessModal :isOpen="isSuccessOpen" @close="isSuccessOpen = false" />
     </Teleport>
 </template>
 

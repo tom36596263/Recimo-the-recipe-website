@@ -94,7 +94,8 @@ const fetchFavoriteRecipes = async () => {
                         : ''),
             author: {
                 name: fav.user_name || fav.author_name || 'Recimo',
-                likes: fav.recipe_like_count || fav.likes || fav.like_count || 0
+                likes: fav.recipe_like_count || fav.likes || fav.like_count || 0,
+                id: fav.author_id // 假設回傳有作者 ID
             }
         }));
         totalFavoriteCount.value = favoritesData.length;

@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/authStore'; // 🏆 獲取登入資訊
 import { phpApi } from '@/utils/phpApi.js';     // 🏆 使用封裝好的 Axios 實體
+// 🏆 關鍵修改：改為引入你剛才大改過的 ReportSuccessModal
+import ReportSuccessModal from '@/components/workspace/recipedetail/modals/ReportSuccessModal.vue';
 
 const props = defineProps({
     modelValue: Boolean,
@@ -26,11 +28,11 @@ const reasons = [
     '色情或不當內容',
     '不實資訊',
     '其他原因'
-];;
-
+];
 
 const selectedReason = ref('垃圾訊息 / 廣告');
 const reportNote = ref('');
+const isSuccessOpen = ref(false); // 🏆 控制成功燈箱開關
 
 // 關閉燈箱並重置
 const handleClose = () => {
@@ -69,8 +71,13 @@ const handleSubmit = async () => {
 
         // Axios 自動解析 JSON 資料在 response.data 中
         if (response.data.status === 'success') {
-            alert("感謝您的檢舉！為了維護優質的社群分享品質，我們將會盡快審核該內容。謝謝您與我們共同守護美食社群！");
-            handleClose();
+            // 🏆 關閉目前的檢舉燈箱，並開啟成功燈箱
+            emit('update:modelValue', false);
+            isSuccessOpen.value = true;
+
+            // 重置內容
+            reportNote.value = '';
+            selectedReason.value = '垃圾訊息 / 廣告';
         } else {
             alert("檢舉失敗：" + (response.data.message || "伺服器忙碌中"));
         }
@@ -124,11 +131,12 @@ const handleSubmit = async () => {
                 </div>
             </div>
         </div>
+
+        <ReportSuccessModal :isOpen="isSuccessOpen" @close="isSuccessOpen = false" />
     </Teleport>
 </template>
 
 <style scoped lang="scss">
-// ... 你原本的 SCSS 樣式程式碼 (保持不變)
 .black-mask {
     position: fixed;
     inset: 0;
