@@ -5,6 +5,8 @@ import PostReportModal from '@/components/workspace/recipedetail/modals/PostRepo
 import CookSnapUploadModal from '@/components/workspace/recipedetail/modals/CookSnapUploadModal.vue'
 // 🏆 引入成功燈箱
 import SnapFinishedSuccessModal from '@/components/workspace/recipedetail/modals/SnapFinishedSuccessModal.vue'
+// 🏆 引入基礎燈箱
+import BaseModal from '@/components/BaseModal.vue'
 
 const props = defineProps({
   list: {
@@ -34,11 +36,22 @@ const isOwner = (photoUserId) => {
   return currentUserId && Number(currentUserId) === Number(photoUserId)
 }
 
-// --- 刪除點擊處理 ---
+// --- 🏆 刪除確認燈箱與提示邏輯 ---
+const isDeleteModalOpen = ref(false)
+const photoIdToDelete = ref(null)
+const isToastShow = ref(false) // 🏆 控制刪除成功提示
+
 const onDeleteClick = (id) => {
-  if (confirm('確定要刪除這張作品照嗎？（此動作無法復原）')) {
-    emit('delete-snap', id)
+  photoIdToDelete.value = id
+  isDeleteModalOpen.value = true
+}
+
+const handleConfirmDelete = () => {
+  if (photoIdToDelete.value) {
+    emit('delete-snap', photoIdToDelete.value); // 只負責通知父元件刪除
   }
+  isDeleteModalOpen.value = false;
+  photoIdToDelete.value = null;
 }
 
 // --- 檢舉彈窗邏輯 ---
@@ -92,6 +105,8 @@ const scrollWall = (direction) => {
 
 <template>
   <div class="recipe-result-container">
+    
+
     <div class="result-header">
       <div class="upload-trigger-area" @click="handleUploadClick">
         <div class="upload-card">
@@ -142,6 +157,15 @@ const scrollWall = (direction) => {
 
     <Teleport to="body">
       <SnapFinishedSuccessModal :isOpen="isSuccessModalOpen" @close="isSuccessModalOpen = false" />
+
+      <BaseModal :isOpen="isDeleteModalOpen" type="info" iconClass="fa-regular fa-trash-can" title="確定要刪除這張作品照嗎？"
+        @close="isDeleteModalOpen = false">
+        <p class="p-p2">刪除後將無法還原，請確認是否繼續操作。</p>
+        <template #actions>
+          <button class="btn-solid" @click="handleConfirmDelete">確定刪除</button>
+          <button class="btn-outline" @click="isDeleteModalOpen = false">取消</button>
+        </template>
+      </BaseModal>
     </Teleport>
 
     <PostReportModal v-model="isReportModalOpen" targetType="gallery" :commentData="selectedPhotoData"
@@ -152,6 +176,7 @@ const scrollWall = (direction) => {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
+
 
 .delete-icon-wrapper {
   position: absolute;

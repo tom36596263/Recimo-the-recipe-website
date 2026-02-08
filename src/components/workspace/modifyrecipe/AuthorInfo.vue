@@ -1,29 +1,48 @@
 <template>
-    <div class="user-info-box">
-        <div class="user-avatar-circle" :style="avatarStyle">
-            {{ name?.charAt(0).toUpperCase() }}
-        </div>
-        <div class="user-text-meta">
-            <div class="user-name">{{ name }}</div>
-            <div class="user-sub">
-                @{{ handle }}<span v-if="time"> • {{ time }}</span>
+    <router-link :to="`/workspace/user/${userId}`" class="user-info-box-link">
+        <div class="user-info-box">
+            <div class="user-avatar-circle" :style="avatarStyle">
+                <img v-if="avatarUrl" :src="parsePublicFile(avatarUrl)" class="avatar-img" />
+                <span v-else>{{ name?.charAt(0).toUpperCase() }}</span>
+            </div>
+            <div class="user-text-meta">
+                <div class="user-name">{{ name }}</div>
+                <div class="user-sub">
+                    @{{ displayHandle }}<span v-if="time"> • {{ time }}</span>
+                </div>
             </div>
         </div>
-    </div>
+    </router-link>
 </template>
 
 <script setup>
 import { computed } from 'vue';
+import { parsePublicFile } from '@/utils/parseFile';
 
-// 1. 定義接收的資料 (Props)
 const props = defineProps({
+    userId: { type: [Number, String], required: true },
     name: { type: String, default: 'Recimo官方' },
     handle: { type: String, default: 'recimo' },
-    time: { type: String, default: '' }
+    time: { type: String, default: '' },
+    avatarUrl: { type: String, default: null }
 });
 
-// 2. 把頭貼顏色邏輯搬進來
+/**
+ * 🏆 核心邏輯：把 email 前綴當成帳號
+ * 如果 handle 包含 '@'，則取 '@' 之前的字串
+ */
+const displayHandle = computed(() => {
+    if (!props.handle) return 'user';
+    if (props.handle.includes('@')) {
+        return props.handle.split('@')[0];
+    }
+    return props.handle;
+});
+
 const avatarStyle = computed(() => {
+    if (props.avatarUrl) {
+        return { backgroundColor: 'transparent', border: 'none' };
+    }
     const safeName = props.name || 'User';
     const brandingColors = ['#74D09C', '#FFCB82', '#8FEF60', '#F7F766', '#FF8686', '#90C6FF'];
     const charCodeSum = safeName.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
@@ -54,15 +73,21 @@ const avatarStyle = computed(() => {
         font-size: 15px;
         border: 1px solid rgba(0, 0, 0, 0.05);
         flex-shrink: 0;
+        overflow: hidden;
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     }
 
     .user-text-meta {
         text-align: left;
 
-        /* 這裡預設靠左，如果你原本頁面要靠右，可以在父組件蓋掉它 */
         .user-name {
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             color: $neutral-color-800;
             font-size: 15px;
         }
@@ -72,5 +97,22 @@ const avatarStyle = computed(() => {
             color: $neutral-color-400;
         }
     }
+}
+
+/* 針對包裝組件的 router-link 進行樣式重置 */
+.user-info-box-link {
+    text-decoration: none !important; // 強制去掉底線
+    color: inherit !important; // 強制繼承原本的文字顏色
+    display: inline-block; // 確保寬度正確
+
+    &:hover {
+        opacity: 0.8; // 增加回饋感
+    }
+}
+
+/* 確保全域 a 標籤在組件內不顯示底線 */
+a {
+    text-decoration: none;
+    color: inherit;
 }
 </style>
