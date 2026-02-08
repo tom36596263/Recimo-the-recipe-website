@@ -131,6 +131,7 @@ const goToProductDetail = () => {
     .search-card {
         flex-direction: column;
         align-items: stretch;
+        text-align: center;
         border-bottom: none;
         margin-bottom: 30px;
 

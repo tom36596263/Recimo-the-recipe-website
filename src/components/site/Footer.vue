@@ -7,6 +7,14 @@
 
     const router = useRouter();
 
+    const onSearchTrigger = (val) => {
+        if (!val.trim()) return;
+        router.push({
+            path: '/search', 
+            query: { q: val }
+        });
+    };
+
     // 篩選出 Default 佈局下的子路由
     const navItems = computed(() => {
     // 直接拿取所有路由，篩選出 layout 為 default 且 meta.showInMenu 為 true 的項目
@@ -34,13 +42,13 @@
                 <router-link 
                 v-for="item in navItems" 
                 :key="item.path" 
-                :to="item.path"
+                :to="item.path" 
                 class="p-p1">
                 {{ item.title }}
                 </router-link>
             </div>
             <div class="col-3 col-lg-12">
-                <SearchBar />
+                <SearchBar @search="val => router.push({ path: '/search', query: { q: val } })" />
             </div>
             <div class="col-9 col-lg-12 info-group">
                 <div class="info">

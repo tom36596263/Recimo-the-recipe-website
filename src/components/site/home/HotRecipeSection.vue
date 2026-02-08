@@ -69,7 +69,8 @@ onMounted(async () => {
                     },
                     author: {
                         name: recipe.author_name || 'Recimo', // 如果 SQL 有 join 到作者名
-                        likes: recipe.recipe_like_count
+                        likes: recipe.recipe_like_count,
+                        id: recipe.author_id // 如果 SQL 有 join 到作者 ID
                     }
                 };
             });

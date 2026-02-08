@@ -66,8 +66,8 @@ const closePanel = () => {
  * @param {Object} notification - 通知物件
  */
 const handleNotificationClick = async (notification) => {
-    // 標記為已讀
-    if (!notification.is_read) {
+    // 標記為已讀（嚴格判定：0 或 "0" 都視為未讀）
+    if (notification.is_read == 0 || notification.is_read === false) {
         await notificationStore.markAsRead(notification.notification_id);
     }
 
@@ -157,7 +157,8 @@ defineExpose({
             <!-- 通知項目 -->
             <div v-else-if="notifications.length > 0">
                 <div v-for="notification in notifications" :key="notification.notification_id" class="notification-item"
-                    :class="{ 'unread': !notification.is_read }" @click.stop="handleNotificationClick(notification)">
+                    :class="{ 'unread': notification.is_read == 0 || notification.is_read === false }"
+                    @click.stop="handleNotificationClick(notification)">
                     <!-- 類型指示器 -->
                     <div class="notification-indicator"
                         :style="{ backgroundColor: getNotificationColor(notification.notification_type) }"></div>
@@ -175,7 +176,7 @@ defineExpose({
                     </div>
 
                     <!-- 未讀標記 -->
-                    <div v-if="!notification.is_read" class="unread-dot"></div>
+                    <div v-if="notification.is_read == 0 || notification.is_read === false" class="unread-dot"></div>
                 </div>
             </div>
 

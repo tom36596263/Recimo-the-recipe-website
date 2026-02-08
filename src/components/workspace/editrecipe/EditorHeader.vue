@@ -110,16 +110,33 @@ const handleCoverUpload = (e) => {
   reader.readAsDataURL(file);
 };
 
+// watch(
+//   () => props.modelValue.steps,
+//   (newSteps) => {
+//     if (!props.isEditing) return; // 只有編輯模式才自動計算
+    
+//     const newSum = newSteps?.reduce((sum, s) => sum + (Number(s.time) || 0), 0) || 0;
+    
+//     // 如果用戶還沒手動輸入時間，或者手動輸入為 0，則自動帶入加總
+//     if (!props.modelValue.totalTime || props.modelValue.totalTime === 0) {
+//       updateField('totalTime', newSum);
+//     }
+//   },
+//   { deep: true }
+// );
 watch(
   () => props.modelValue.steps,
   (newSteps) => {
-    if (!props.isEditing) return; // 只有編輯模式才自動計算
-    
+    if (!props.isEditing) return;
+
     const newSum = newSteps?.reduce((sum, s) => sum + (Number(s.time) || 0), 0) || 0;
-    
-    // 如果用戶還沒手動輸入時間，或者手動輸入為 0，則自動帶入加總
-    if (!props.modelValue.totalTime || props.modelValue.totalTime === 0) {
-      updateField('totalTime', newSum);
+
+    // ✨ 修正點：加上數值判斷，避免數值沒變卻一直 emit 新物件
+    if (newSum !== props.modelValue.totalTime) {
+      // 如果用戶沒輸入或為0，才自動填入
+      if (!props.modelValue.totalTime || props.modelValue.totalTime === 0) {
+        updateField('totalTime', newSum);
+      }
     }
   },
   { deep: true }

@@ -49,9 +49,9 @@ const userName = computed(() => authStore.user?.name || authStore.user?.user_nam
 const userAvatar = computed(() => {
     // 直接從 authStore.user 取得，確保響應式更新
     const url = authStore.user?.image || authStore.user?.user_url || authStore.user?.avatar;
-    
+
     console.log('🖼️ WorkspaceTopBar 計算頭像 URL:', url);
-    
+
     if (!url) return proxy.$parsePublicFile('img/site/None_avatar.svg');
     if (/^https?:\/\/|^data:image/.test(url)) return url;
     const cleanPath = url.startsWith('/') ? url.substring(1) : url;
@@ -109,10 +109,11 @@ const cartTotal = computed(() => cartStore.totalCount);
                         <NotificationPanel ref="notificationPanelRef" :show="showNotifications"
                             @close="closeNotifications" />
                     </div>
-
-                    <div class="setting">
-                        <i-material-symbols-Settings-outline />
-                    </div>
+                    <router-link to="settings" class="settings-btn">
+                        <div class="setting">
+                            <i-material-symbols-Settings-outline />
+                        </div>
+                    </router-link>
                 </div>
             </div>
         </div>
@@ -165,7 +166,8 @@ const cartTotal = computed(() => cartStore.totalCount);
         align-items: center;
         margin-right: 20px;
 
-        .cart-btn {
+        .cart-btn,
+        .settings-btn {
             color: $primary-color-700;
             font-size: 24px;
             text-decoration: none;

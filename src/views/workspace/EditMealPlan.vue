@@ -126,7 +126,6 @@ const handleUpdatePlanInfo = async (newInfo) => {
     return `${y}-${m}-${day}`;
   };
 
-  // 🔴 關鍵：確保這三個變數絕對不會變成 null
   const updatedStart = formatDate(newInfo.start) || planData.value.start_date;
   const updatedEnd = formatDate(newInfo.end) || planData.value.end_date;
   const updatedTitle = (newInfo.title !== undefined) ? newInfo.title : planData.value.title;
@@ -298,7 +297,6 @@ const handleBatchUpdateTargetKcal = async (newKcal) => {
       alert('更新失敗：' + res.data.error);
     }
   } catch (err) {
-    // 🔴 除錯點 3：顯示更詳細的錯誤
     console.error('批量更新請求出錯：', err.response?.data || err.message);
     alert('網路請求失敗，請檢查控制台');
   }
@@ -312,10 +310,17 @@ const closePanel = () => { showPanel.value = false; };
 
 // 模板與日期更新邏輯 ...
 const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
+  // 🟢 如果是上傳圖片 (isUpload 為 true)
   if (isUpload) {
-    // 🔴 關鍵：必須重新賦值一個新物件 {}，不要只改屬性
-    planData.value = { ...updatedData };
-    console.log('上傳成功，畫面已同步更新');
+    console.log('收到上傳更新，路徑:', updatedData.custom_cover_url);
+
+    // 💡 強制賦予一個全新的物件，觸發 Vue 重新渲染
+    planData.value = {
+      ...planData.value,          // 保留舊有資料 (id, title 等)
+      cover_type: 2,              // 強制設為自定義類型
+      cover_template_id: null,    // 清空模板 ID
+      custom_cover_url: updatedData.custom_cover_url // 更新圖片路徑
+    };
     return;
   }
 
@@ -331,7 +336,7 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
   try {
     const res = await phpApi.post('mealplans/update_plan_cover.php', payload);
     if (res.data.success) {
-      planData.value = { ...updatedData }; // 🔴 同樣要使用展開運算子
+      planData.value = { ...updatedData };
     }
   } catch (err) {
     console.error('更新失敗', err);

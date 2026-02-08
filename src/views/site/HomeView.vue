@@ -6,6 +6,7 @@ import Service from '@/components/site/home/ServiceSection.vue';
 import HotRecipe from '@/components/site/home/HotRecipeSection.vue';
 import FindRecipe from '@/components/site/home/FindRecipeSection.vue';
 import ProductRmd from '@/components/mall/ProductRmd.vue';
+import { parsePublicFile } from '@/utils/parseFile';
 </script>
 
 <template>
@@ -25,9 +26,9 @@ import ProductRmd from '@/components/mall/ProductRmd.vue';
                 <About />
             </div>
         </div>
-        <img :src="$parsePublicFile('img/remove-bg-ingredients/1.png')" alt="番茄" class="home-ingredient1">
-        <img :src="$parsePublicFile('img/remove-bg-ingredients/15.png')" alt="檸檬" class="home-ingredient15">
-        <img :src="$parsePublicFile('img/remove-bg-ingredients/20.png')" alt="花椰菜" class="home-ingredient20">
+        <img :src="parsePublicFile('img/remove-bg-ingredients/1.png')" alt="番茄" class="home-ingredient1">
+        <img :src="parsePublicFile('img/remove-bg-ingredients/15.png')" alt="檸檬" class="home-ingredient15">
+        <img :src="parsePublicFile('img/remove-bg-ingredients/20.png')" alt="花椰菜" class="home-ingredient20">
     </section>
     <section class="about-feature-bg">
         <div class="container">

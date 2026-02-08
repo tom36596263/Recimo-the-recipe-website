@@ -1085,7 +1085,7 @@ CREATE TABLE `meal_plans` (
   `title` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `cover_type` tinyint(4) NOT NULL COMMENT '0:系統自動合成, 1:官方預設, 2:使用者上傳',
   `custom_cover_url` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `cover_template_id` int(11) NOT NULL,
+  `cover_template_id` int(11) DEFAULT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
   `created_at` datetime NOT NULL

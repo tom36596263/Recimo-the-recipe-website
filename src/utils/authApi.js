@@ -6,7 +6,7 @@ export const base = import.meta.env.BASE_URL
 // 建立實例
 const authApi = axios.create({
     baseURL: base,
-    timeout: 5000
+    timeout: 15000
 })
 
 // 請求攔截器：自動加上 token
