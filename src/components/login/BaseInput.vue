@@ -9,6 +9,11 @@ defineExpose({
     }
 });
 
+// 防止屬性自動掛到最外層 div，改由我們手動 v-bind 給 input
+defineOptions({
+    inheritAttrs: false
+});
+
 const model = defineModel({ type: String, default: '' });
 
 const props = defineProps({
@@ -67,7 +72,7 @@ const inputClasses = computed(() => ({
 
         <div class="input-field-wrapper">
             <input ref="inputRef" v-model="model" :type="type" :class="inputClasses" :placeholder="placeholder"
-                @blur="emit('blur')" @keydown.enter.prevent="$emit('enter-press')"
+                @blur="emit('blur')" @keydown.enter.prevent="$emit('enter-press')" v-bind="$attrs"
                 :autocomplete="$attrs.autocomplete" />
 
             <div class="suffix-icon">

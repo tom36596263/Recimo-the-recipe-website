@@ -149,7 +149,7 @@ const handleLogout = () => {
                         <span class="p-p1">{{ item.title }}</span>
                     </router-link>
                     <router-link to="settings" class="panel-link">
-                        <p class="p-p1">會員設定</p>
+                        <p class="p-p1">會員中心</p>
                     </router-link>
                 </div>
             </div>
