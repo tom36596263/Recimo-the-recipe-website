@@ -394,7 +394,17 @@ const handleAvatarChange = (event) => {
         padding: 0 16px;
     }
 
+    .avatar-wrapper {
+        width: 100px;
+        height: 100px;
+    }
+
     .avatar-image {
+        width: 100px;
+        height: 100px;
+    }
+
+    .avatar-overlay {
         width: 100px;
         height: 100px;
     }

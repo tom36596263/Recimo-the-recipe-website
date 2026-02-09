@@ -794,7 +794,7 @@ watch(() => route.name, async (newName, oldName) => {
     padding: 20px 24px;
     background: $neutral-color-white;
     position: relative;
-    z-index: 10;
+    z-index: 0;
 }
 
 .avatar {
