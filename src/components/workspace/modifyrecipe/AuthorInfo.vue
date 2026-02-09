@@ -20,9 +20,10 @@ import { computed } from 'vue';
 import { parsePublicFile } from '@/utils/parseFile';
 
 const props = defineProps({
-    userId: { type: [Number, String], required: true },
+    // 🏆 修改點：取消 required，給預設值 0
+    userId: { type: [Number, String], default: 0 },
     name: { type: String, default: 'Recimo官方' },
-    handle: { type: String, default: '' }, // 預設改為空，方便判斷
+    handle: { type: String, default: '' },
     time: { type: String, default: '' },
     avatarUrl: { type: String, default: null }
 });
