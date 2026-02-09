@@ -324,35 +324,21 @@ const onModalSubmit = (data) => {
     border-bottom: $primary-color-400 1px solid;
     border-top: $primary-color-100 8px solid;
     margin: 24px 0;
-    padding: 24px 20px;
-
-    p {
-        padding: 0;
-        margin-top: 12px;
-        line-height: 2.1;
-        color: $neutral-color-800;
-        width: 100%;
-        white-space: pre-wrap;
-    }
-}
-
-.recipe-description {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    min-height: 120px;
-    border-bottom: $primary-color-400 1px solid;
-    border-top: $primary-color-100 8px solid;
-    margin: 24px 0;
-    padding: 32px 20px 24px 20px;
+    padding: 32px 20px 24px 20px; // 使用較大的 padding 設定
 
     p {
         margin-top: 20px;
         line-height: 2;
         color: $neutral-color-800;
         letter-spacing: 0.5px;
-    }
+        width: 100%;
 
+        // ✨ 最關鍵的這一行：保留原始換行符號並允許自動換行
+        white-space: pre-wrap;
+
+        // ✨ 選配：如果你的文字包含很長的網址或無空格英文，可以加上這行防止破版
+        word-break: break-word;
+    }
 
     .recipe-tags-container {
         display: flex;
@@ -367,9 +353,9 @@ const onModalSubmit = (data) => {
             font-size: 13px;
             border: 1px solid transparent;
             transition: 0.3s;
-
         }
-    }
+    
+}
 
     @media screen and (max-width: 810px) {
         gap: 8px;
