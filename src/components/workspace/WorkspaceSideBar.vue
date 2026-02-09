@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
 import LogoWhite from '@/assets/images/site/Recimo-logo-white.svg'
@@ -90,6 +90,12 @@ const handleLogout = () => {
     // closeMenu();       // 關閉手機版選單
     router.push('/');     // 跳轉回首頁
 };
+watch(
+    () => route.path,
+    () => {
+        closeMore();
+    }
+);
 
 </script>
 <template>
