@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick, watch } from 'vue';
+import { ref, computed, nextTick, watch, onUnmounted } from 'vue';
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
 const authStore = useAuthStore();
@@ -20,7 +20,6 @@ import { phpApi, base } from '@/utils/publicApi.js';
 // 用來執行動作
 import { useRouter } from 'vue-router';
 const router = useRouter();
-
 // 第三方登入(GOOGLE)
 import { useTokenClient } from "vue3-google-signin";
 
@@ -178,6 +177,26 @@ const onCaptchaVerified = (success) => {
 // ==========================================
 // 登入：送出邏輯
 // ==========================================
+// 忘記密碼
+const handleForgotPassword = async () => {
+  forgotTouched.value = true;
+  if (forgotEmailMessage.value) return;
+
+  try {
+    const response = await phpApi.post('auth/forgot-password.php', {
+      email: forgotEmail.value
+    });
+
+    if (response.data.status === 'success') {
+      alert('重設密碼信件已發送至您的信箱');
+      resetForgotForm();
+    } else {
+      alert(response.data.message || '發送失敗');
+    }
+  } catch (error) {
+    alert('伺服器連線異常，請稍後再試');
+  }
+};
 const handleLogin = async () => {
   // 觸發所有欄位的 touched 狀態，錯誤由紅字顯示
   touched.value.login.email = true;
@@ -245,6 +264,7 @@ const handleLogin = async () => {
 // 重置登入表單
 const captchaKey = ref(0);
 const resetLoginForm = () => {
+  forgotStep.value = 0;
   // 1. 清空輸入資料
   loginData.value = {
     email: '',
@@ -303,7 +323,7 @@ const handleRegister = async () => {
     }
   } catch (error) {
     // console.error('API 連線失敗:', error);
-    alert('伺服器連線異常');
+    alert('伺服器連線異常，請稍後再試');
   }
 };
 
@@ -342,6 +362,11 @@ const isVisible = ref(true);
 
 // 只要頁面一切換，就清空「對方」的資料
 watch(isRegister, (newVal) => {
+  // 無論切到哪，都先把忘記密碼的進度歸零並清空資料
+  forgotStep.value = 0;
+  forgotData.value = { email: '', code: '', password: '', confirmPassword: '' };
+  forgotTouched.value = false;
+  if (interval) clearInterval(interval); // 停止倒數計時器
   if (newVal) {
     // 切換到註冊 -> 清空登入表單
     resetLoginForm();
@@ -395,7 +420,7 @@ const { login } = useTokenClient({
 
 // 接收 token
 const handleGoogleSuccess = async (response) => {
-  // console.log('Google Response:', response); // 檢查有沒有 response.access_token
+  console.log('Google Response:', response); // 檢查有沒有 response.access_token
   try {
     // 發送 access_token 到後端
     const res = await phpApi.post('auth/google-login.php', {
@@ -501,8 +526,251 @@ const sendFBTokenToBackend = async (accessToken) => {
     }
   } catch (error) {
     // console.error('FB API Error:', error);
-    alert('FB 伺服器連線異常');
+    alert('FB 伺服器連線異常，請稍後再試');
   }
+};
+
+// ==========================================
+// 忘記密碼
+// ==========================================
+// 宣告所有彈窗相關的狀態 (ref)
+const isModalOpen = ref(false);
+const modalConfig = ref({
+  type: 'info',
+  iconClass: 'fa-solid fa-circle-info',
+  title: '',
+  description: ''
+});
+
+// 定義彈窗工具函式
+// 確保它在所有 API 函式之前被定義
+const showAlert = (title, description = '', type = 'info', icon = 'fa-solid fa-circle-info') => {
+  modalConfig.value = {
+    title,
+    description,
+    type,
+    iconClass: icon,
+  };
+  isModalOpen.value = true;
+};
+
+// 定義其他資料狀態
+const forgotData = ref({
+  email: '',
+  code: '',
+  password: '',
+  confirmPassword: ''
+});
+// 控制是否顯示忘記密碼介面
+const isForgotPassword = ref(false);
+const forgotEmail = ref('');
+const forgotTouched = ref(false);
+
+// 重設密碼的眼睛切換邏輯
+const showForgotPwd = ref(false);
+
+// 驗證 Email 格式
+const forgotEmailMessage = computed(() => {
+  if (!forgotTouched.value) return '';
+  if (!forgotEmail.value) return '* 此欄為必填';
+  if (!/^\S+@\S+\.\S+$/.test(forgotEmail.value)) return '* email 格式錯誤';
+  return '';
+});
+
+const forgotEmailStatus = computed(() =>
+  forgotTouched.value ? (forgotEmailMessage.value ? 'error' : 'success') : ''
+);
+
+// 重置忘記密碼表單
+const resetForgotForm = () => {
+  isForgotPassword.value = false;
+  forgotEmail.value = '';
+  forgotTouched.value = false;
+};
+
+// 密碼重設
+// 忘記密碼流程控制：0 (登入), 1 (填 Email), 2 (填驗證碼), 3 (設新密碼)
+const forgotStep = ref(0);
+
+// 驗證碼倒數計時
+const timer = ref(150);
+let interval = null;
+
+const startTimer = () => {
+  timer.value = 150;
+  if (interval) clearInterval(interval);
+  interval = setInterval(() => {
+    if (timer.value > 0) timer.value--;
+    else clearInterval(interval);
+  }, 1000);
+};
+
+onUnmounted(() => {
+  if (interval) clearInterval(interval);
+});
+
+// 彈窗控制
+const showForgotFail = ref(false);
+const showResetSuccess = ref(false);
+
+// 密碼規則 (複用註冊的規則邏輯)
+const forgotPwdRules = computed(() => {
+  const pwd = forgotData.value.password;
+  return {
+    length: pwd.length >= 8,
+    hasUpper: /[A-Z]/.test(pwd),
+    hasLower: /[a-z]/.test(pwd),
+  };
+});
+
+const resetForgotEmailOnly = () => {
+  forgotData.value.email = '';
+  forgotTouched.value = false;
+  loginErrorMessage.value = '';
+};
+
+// 步驟跳轉
+// 步驟 1: 送出 Email
+const sendForgotEmail = async () => {
+  try {
+    const res = await phpApi.post('auth/send-reset-code.php', {
+      email: forgotData.value.email
+    });
+
+    if (res.data.status === 'success') {
+      showAlert('驗證碼已寄出', '請至您的電子信箱收信', 'success', 'fa-solid fa-check');
+      setTimeout(() => {
+        isModalOpen.value = false;
+        forgotStep.value = 2; // 跳轉到輸入驗證碼畫面
+        startTimer();        // 開始倒數
+      }, 2000);
+
+      // 直接在 F12 的 Console 看到驗證碼
+      console.log('【測試模式】您的驗證碼是：', res.data.debug_code);
+
+    } else {
+      loginErrorMessage.value = res.data.message;
+      showForgotFail.value = true;
+    }
+  } catch (error) {
+    // console.error('發送失敗：', error);
+  }
+};
+
+// 步驟 2: 驗證驗證碼
+const verifyCode = async () => {
+  if (!forgotData.value.code) {
+    // alert('請輸入驗證碼');
+    showAlert('請輸入驗證碼', '驗證碼欄位不能為空', 'danger', 'fa-solid fa-exclamation');
+    return;
+  }
+
+  try {
+    const res = await phpApi.post('auth/verify-reset-code.php', {
+      email: forgotData.value.email,
+      code: forgotData.value.code
+    });
+
+    if (res.data.status === 'success') {
+      showAlert('驗證成功', '請設定您的新密碼', 'success', 'fa-solid fa-check');
+      setTimeout(() => {
+        isModalOpen.value = false;
+        forgotStep.value = 3; // 2秒後關閉並跳轉到設定新密碼
+      }, 2000);
+    } else {
+      // alert(res.data.message || '驗證碼錯誤或已失效');
+      showAlert('驗證失敗', res.data.message || '驗證碼錯誤或已失效', 'danger', 'fa-solid fa-exclamation');
+    }
+  } catch (error) {
+    alert('伺服器連線異常，請稍後再試');
+  }
+};
+
+// 步驟 3: 更新密碼
+const handleResetPassword = async () => {
+  // 前端檢查
+  if (!forgotPwdRules.value.length || !forgotPwdRules.value.hasUpper || !forgotPwdRules.value.hasLower) {
+    // alert('新密碼格式不符規定');
+    showAlert('格式不符', '新密碼格式不符規定，請檢查大小寫與長度', 'danger', 'fa-solid fa-exclamation');
+    return;
+  }
+  if (forgotData.value.password !== forgotData.value.confirmPassword) {
+    // alert('兩次密碼輸入不一致');
+    showAlert('輸入不一致', '兩次密碼輸入不一致', 'danger', 'fa-solid fa-exclamation');
+    return;
+  }
+
+  try {
+    const res = await phpApi.post('auth/reset-password.php', {
+      email: forgotData.value.email,
+      new_password: forgotData.value.password
+    });
+
+    if (res.data.status === 'success') {
+      // 顯示成功的彈窗 (或 Toast 提示)
+      showResetSuccess.value = true;
+
+      setTimeout(() => {
+        closeResetSuccess();
+      }, 2000);
+
+    } else {
+      // 這裡處理後端傳回的具體錯誤 (例如新舊密碼相同)
+      // alert(res.data.message || '重設失敗，請重新嘗試');
+      showAlert('重設失敗', res.data.message || '請重新嘗試', 'danger', 'fa-solid fa-exclamation');
+    }
+  } catch (error) {
+    // 這裡處理網路錯誤或 PHP 崩潰導致的非法請求
+    // alert('系統錯誤，請確認驗證狀態是否過期');
+    showAlert('系統錯誤', '請確認驗證狀態是否過期', 'danger', 'fa-solid fa-exclamation');
+    // console.error('Reset Error:', error);
+  }
+};
+
+// ==========================================
+// 重新發送驗證碼邏輯
+// ==========================================
+const isResending = ref(false); // 防止重複點擊
+
+const resendCode = async () => {
+  if (timer.value > 0 || isResending.value) return; // 時間還沒到或正在發送中就攔截
+
+  isResending.value = true;
+  try {
+    const res = await phpApi.post('auth/send-reset-code.php', {
+      email: forgotData.value.email
+    });
+
+    if (res.data.status === 'success') {
+      // 發送成功後重置計時器
+      startTimer();
+      // alert('驗證碼已重新發送');
+      showAlert('發送成功', '驗證碼已重新發送到您的信箱', 'success', 'fa-solid fa-check');
+      setTimeout(() => { isModalOpen.value = false; }, 2000);
+      // 確保測試模式能看到新代碼
+      console.log('【測試模式】重新發送的驗證碼是：', res.data.debug_code);
+    } else {
+      // alert(res.data.message || '發送失敗');
+      showAlert('發送失敗', res.data.message || '請稍後再試', 'danger', 'fa-solid fa-exclamation');
+    }
+  } catch (error) {
+    alert('伺服器連線異常，請稍後再試');
+  } finally {
+    isResending.value = false;
+  }
+};
+
+// 重設成功
+const closeResetSuccess = () => {
+  showResetSuccess.value = false;
+  forgotStep.value = 0; // 回到登入頁
+  isRegister.value = false; // 確保在登入頁面
+
+  // 自動填好剛剛重設的 Email
+  loginData.value.email = forgotData.value.email;
+
+  // 清空忘記密碼的暫存資料
+  forgotData.value = { email: '', code: '', password: '', confirmPassword: '' };
 };
 </script>
 
@@ -531,45 +799,144 @@ const sendFBTokenToBackend = async (accessToken) => {
                         會員登入
                   ========================================== -->
             <div class="login-section">
-              <h1 class="zh-h3 auth-form__title">會員登入</h1>
-              <form @submit.prevent="handleLogin">
-                <div class="auth-form">
-                  <BaseInput ref="loginEmailRef" v-model="loginData.email" label="電子信箱" placeholder="請輸入電子信箱"
-                    autocomplete="email" :status="loginStatus.email" :message="loginMessage.email"
-                    @blur="touched.login.email = true" @enter-press="focusInput(loginPasswordRef)" class="tight-gap" />
-                  <BaseInput ref="loginPasswordRef" v-model="loginData.password" label="密碼" placeholder="請輸入密碼"
-                    autocomplete="current-password" :type="showLoginPassword ? 'text' : 'password'"
-                    :status="loginStatus.password" :message="loginMessage.password"
-                    @blur="touched.login.password = true" @enter-press="focusInput(captchaRef)" class="tight-gap">
-                    <!-- <template #label-right>
-                            <a href="#" class="forgot-password-link">忘記密碼</a>
-                          </template> -->
-                    <template #suffix>
-                      <button type="button" @click="showLoginPassword = !showLoginPassword" class="icon-btn"
-                        tabindex="-1">
-                        <IconEyeClose v-if="showLoginPassword" />
-                        <IconEyeOpen v-else />
-                      </button>
-                    </template>
-                  </BaseInput>
-                  <CaptchaInput :key="captchaKey" ref="captchaRef" v-model="loginForm.captchaInput"
-                    @verified="onCaptchaVerified" @enter-press="handleLogin" class="tight-gap" />
-                  <div class="login-options">
-                    <BaseBtn title=" 登入" variant="solid" @click="handleLogin" :width="244" :height="50"
-                      class="login-btn" />
-                    <p class="auth-form__divider">更多登入方式</p>
-                    <div class="social-login">
-                      <img src="@/assets/images/login/google.svg" @click="login" alt="Google Login" />
-                      <!-- <GoogleLogin :callback="handleGoogleSuccess" popup-type="CODE">
-                      </GoogleLogin> -->
-                      <img src="@/assets/images/login/fb.svg" @click="handleFBLogin" alt="FB Login" />
-                      <img src="@/assets/images/login/line.svg" alt="Line Login" @click="handleLineLogin"
-                        class="line-btn" />
-                    </div>
-                    <p class="mobile-switch-text" @click="isRegister = true">還不是會員嗎？快前往註冊吧~</p>
+              <!-- 忘記密碼 -->
+              <button class="close-btn" @click="handleClose">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+
+              <div v-if="forgotStep > 0">
+                <div v-if="forgotStep === 1">
+                  <h1 class="zh-h3 auth-form__title" @click="forgotEmailStatus">忘記密碼</h1>
+                  <div class="auth-form">
+                    <BaseInput v-model="forgotData.email" label="電子信箱" placeholder="請輸入您的電子信箱" class="tight-gap"
+                      :status="forgotEmailStatus" :message="forgotEmailMessage" />
+                    <BaseBtn title="傳送驗證碼" variant="solid" @click="sendForgotEmail" :width="244" :height="50"
+                      class="m-auto" />
+                    <p class="mobile-switch-text" @click="forgotStep = 0">返回登入</p>
                   </div>
                 </div>
-              </form>
+
+                <div v-else-if="forgotStep === 2">
+                  <h1 class="zh-h3 auth-form__title">忘記密碼</h1>
+                  <div class="auth-form">
+                    <p class="p-p3 text-center" style="margin-bottom: 15px;">
+                      已發送驗證碼至<br>
+                      <strong>{{ forgotData.email }}</strong>
+                    </p>
+
+                    <BaseInput v-model="forgotData.code" label="驗證碼" placeholder="請輸入驗證碼" class="tight-gap" />
+
+                    <div class="resend-wrapper" style="align-self: flex-end; margin-top: 5px;">
+                      <p v-if="timer > 0" class="p-p3" style="color: #e74c3c;">
+                        驗證碼將於 {{ timer }} 秒後失效
+                      </p>
+                      <a v-else href="#" class="p-p3 resend-link" @click.prevent="resendCode">
+                        {{ isResending ? '發送中...' : '重新發送驗證碼' }}
+                      </a>
+                    </div>
+
+                    <div class="row w-100" style="gap: 10px; justify-content: center; margin-top: 20px;">
+                      <BaseBtn title="返回上一步" variant="outline" @click="forgotStep = 1" :width="120" />
+                      <BaseBtn title="下一步" variant="solid" @click="verifyCode" :width="120" />
+                    </div>
+
+                    <a href="/benefits" class="p-p3 m-auto"
+                      style="margin-top: 20px; text-decoration: underline; color: #666;">
+                      嘗試多次仍無法收到驗證碼？可聯繫客服
+                    </a>
+                  </div>
+                </div>
+
+                <div v-else-if="forgotStep === 3">
+                  <h1 class="zh-h3 auth-form__title">重設密碼</h1>
+                  <div class="auth-form">
+                    <BaseInput v-model="forgotData.password" :type="showForgotPwd ? 'text' : 'password'" label="新密碼"
+                      class="tight-gap">
+                      <template #suffix>
+                        <button type="button" @click="showForgotPwd = !showForgotPwd" class="icon-btn">
+                          <IconEyeClose v-if="showForgotPwd" />
+                          <IconEyeOpen v-else />
+                        </button>
+                      </template>
+                    </BaseInput>
+
+                    <div class="password-requirements" style="width: 100%; margin-bottom: 10px;">
+                      <ul>
+                        <li class="p-p3" :class="{ 'met': forgotPwdRules.length }">
+                          <i
+                            :class="forgotPwdRules.length ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
+                          至少含八個字元
+                        </li>
+                        <li class="p-p3" :class="{ 'met': forgotPwdRules.hasUpper }">
+                          <i
+                            :class="forgotPwdRules.hasUpper ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
+                          含一大寫英文字母
+                        </li>
+                        <li class="p-p3" :class="{ 'met': forgotPwdRules.hasLower }">
+                          <i
+                            :class="forgotPwdRules.hasLower ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'"></i>
+                          含一小寫英文字母
+                        </li>
+                      </ul>
+                    </div>
+
+                    <BaseInput v-model="forgotData.confirmPassword" :type="showForgotPwd ? 'text' : 'password'"
+                      label="確認密碼" class="tight-gap">
+                      <template #suffix>
+                        <button type="button" @click="showForgotPwd = !showForgotPwd" class="icon-btn">
+                        </button>
+                      </template>
+                    </BaseInput>
+
+                    <BaseBtn title="完成重設" variant="solid" @click="handleResetPassword" :width="244" :height="50"
+                      class="m-auto" />
+                  </div>
+                </div>
+              </div>
+
+              <div v-else>
+                <!-- 會員登入 -->
+                <h1 class="zh-h3 auth-form__title">會員登入</h1>
+                <form @submit.prevent="handleLogin">
+                  <div class="auth-form">
+                    <BaseInput ref="loginEmailRef" v-model="loginData.email" label="電子信箱" placeholder="請輸入電子信箱"
+                      autocomplete="email" :status="loginStatus.email" :message="loginMessage.email"
+                      @blur="touched.login.email = true" @enter-press="focusInput(loginPasswordRef)"
+                      class="tight-gap" />
+                    <BaseInput ref="loginPasswordRef" v-model="loginData.password" label="密碼" placeholder="請輸入密碼"
+                      autocomplete="current-password" :type="showLoginPassword ? 'text' : 'password'"
+                      :status="loginStatus.password" :message="loginMessage.password"
+                      @blur="touched.login.password = true" @enter-press="focusInput(captchaRef)" class="tight-gap">
+                      <template #label-right>
+                        <a href="#" class="forgot-password-link" @click.prevent="forgotStep = 1">忘記密碼</a>
+                      </template>
+                      <template #suffix>
+                        <button type="button" @click="showLoginPassword = !showLoginPassword" class="icon-btn"
+                          tabindex="-1">
+                          <IconEyeClose v-if="showLoginPassword" />
+                          <IconEyeOpen v-else />
+                        </button>
+                      </template>
+                    </BaseInput>
+                    <CaptchaInput :key="captchaKey" ref="captchaRef" v-model="loginForm.captchaInput"
+                      @verified="onCaptchaVerified" @enter-press="handleLogin" class="tight-gap" />
+                    <div class="login-options">
+                      <BaseBtn title=" 登入" variant="solid" @click="handleLogin" :width="244" :height="50"
+                        class="login-btn" />
+                      <p class="auth-form__divider">更多登入方式</p>
+                      <div class="social-login">
+                        <img src="@/assets/images/login/google.svg" @click="login" alt="Google Login" />
+                        <!-- <GoogleLogin :callback="handleGoogleSuccess" popup-type="CODE">
+                      </GoogleLogin> -->
+                        <img src="@/assets/images/login/fb.svg" @click="handleFBLogin" alt="FB Login" />
+                        <img src="@/assets/images/login/line.svg" alt="Line Login" @click="handleLineLogin"
+                          class="line-btn" />
+                      </div>
+                      <p class="mobile-switch-text" @click="isRegister = true">還不是會員嗎？快前往註冊吧~</p>
+                    </div>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
 
@@ -627,7 +994,8 @@ const sendFBTokenToBackend = async (accessToken) => {
                     :type="showRegisterPassword ? 'text' : 'password'" :status="registerStatus.confirmPassword"
                     :message="registerMessage.confirmPassword" @blur="touched.register.confirmPassword = true"
                     @enter-press="handleRegister" class="tight-gap" />
-                  <BaseBtn title="註冊" variant="solid" @click="handleRegister" :width="244" :height="50" />
+                  <BaseBtn title="註冊" variant="solid" @click="handleRegister" :width="244" :height="50"
+                    class="m-auto" />
                   <p class="mobile-switch-text" @click="isRegister = false">已有帳號嗎？前往登入吧~</p>
                 </div>
               </form>
@@ -682,7 +1050,7 @@ const sendFBTokenToBackend = async (accessToken) => {
     :description="loginErrorMessage" @close="showLoginFail = false">
     <template #actions>
       <button class="btn-solid" @click="showLoginFail = false; resetLoginForm()">重新登入</button>
-      <!-- <button class="btn-outline" @click="/* 導向忘記密碼邏輯 */">忘記密碼</button> -->
+      <button class="btn-outline" @click="showLoginFail = false; forgotStep = 1">忘記密碼</button>
     </template>
   </BaseModal>
 
@@ -696,6 +1064,21 @@ const sendFBTokenToBackend = async (accessToken) => {
       <button class="btn-solid" @click="showRegisterFail = false">返回修改</button>
     </template>
   </BaseModal>
+
+  <BaseModal :isOpen="showForgotFail" type="danger" title="失敗" description="此信箱尚未註冊" iconClass="fa-solid fa-exclamation"
+    @close="showForgotFail = false">
+    <template #actions>
+      <button class="btn-solid" @click="showForgotFail = false; isRegister = true">前往註冊</button>
+      <button class="btn-outline" @click="showForgotFail = false; resetForgotEmailOnly()">重新填寫信箱</button>
+    </template>
+  </BaseModal>
+
+  <BaseModal :isOpen="showResetSuccess" type="success" iconClass="fa-solid fa-check" title="密碼重設成功"
+    description="將為您跳轉至登入畫面" @close="showResetSuccess = false">
+  </BaseModal>
+
+  <BaseModal :isOpen="isModalOpen" :type="modalConfig.type" :title="modalConfig.title"
+    :iconClass="modalConfig.iconClass" :description="modalConfig.description" @close="isModalOpen = false" />
 </template>
 
 <style lang="scss" scoped>
@@ -728,7 +1111,6 @@ const sendFBTokenToBackend = async (accessToken) => {
   // margin: 20px 0;
   display: flex;
   flex-direction: column; // 讓內容由上往下排
-  align-items: center; // 讓所有子元素水平置中**
   width: 100%; // 確保容器撐滿寬度
 }
 
@@ -743,14 +1125,22 @@ const sendFBTokenToBackend = async (accessToken) => {
 .base-input-container.tight-gap {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin: 5px 0;
+}
+
+:deep(.tight-gap) {
+  margin-bottom: 10px !important;
+  margin-top: 4px;
+
+  /* 強制覆蓋組件內部的預設間距 */
+  input {
+    margin-top: 4px;
+  }
 }
 
 //標題
 .auth-form__title {
   text-align: center;
-  margin: 10px 0;
+  margin: 20px 0;
 }
 
 // 忘記密碼
@@ -960,7 +1350,7 @@ const sendFBTokenToBackend = async (accessToken) => {
     justify-content: center; // 垂直置中
 
     @media screen and (max-width: 1024px) {
-      padding: 20px;
+      padding: 20px 30px;
     }
 
     &--left {
@@ -1141,28 +1531,57 @@ const sendFBTokenToBackend = async (accessToken) => {
 }
 
 .password-requirements {
-  width: 100%;
-  margin-top: -10px; // 稍微往上靠攏 input
-  margin-bottom: 5px;
-  padding-left: 5px;
+  margin-bottom: 10px;
 
-  .requirements-title {
-    color: $neutral-color-700;
-  }
+  ul {
+    list-style: none;
+    padding: 0;
 
-  li {
-    display: flex;
-    align-items: center;
-    color: #ff5252; // 預設紅色（未通過）
-    transition: color 0.3s ease;
+    li {
+      color: $secondary-color-danger-700; // 預設灰色
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.3s ease;
 
-    i {
-      font-size: 12px;
+      i {
+        font-size: 12px;
+      }
+
+      &.met {
+        color: $secondary-color-success-700; // 達成條件變綠色
+      }
     }
-
-    &.met {
-      color: #4caf50; // 通過後變綠色
-    }
   }
+}
+
+// 重新發送驗證碼
+.resend-link {
+  color: #3498db; // 使用品牌藍色
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #2980b9;
+  }
+}
+
+// 如果正在發送中，讓它看起來不能點
+.resend-link.loading {
+  color: #999;
+  pointer-events: none;
+  text-decoration: none;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.m-auto {
+  display: block; // 必須是 block 元素 margin auto 才會生效
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
 }
 </style>
