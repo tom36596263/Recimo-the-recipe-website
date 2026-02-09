@@ -3,7 +3,6 @@ import { markRaw, computed, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
-import { parsePublicFile } from '@/utils/parseFile';
 import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
 
 import BaseTag from '@/components/common/BaseTag.vue';
@@ -89,7 +88,7 @@ const handleHeartClick = (e) => {
 <template>
     <div class="recipe-card-lg">
         <header class="card-header">
-            <img :src="parsePublicFile(recipe.image_url)" alt="recipe.recipe_name">
+            <img :src="(recipe.image_url)" alt="recipe.recipe_name">
         </header>
 
         <div class="card-body">
@@ -116,8 +115,7 @@ const handleHeartClick = (e) => {
 
         <footer>
             <div class="personal-info">
-                <AuthorInfo v-if="recipe" 
-                    :user-id="recipe.author?.id || 0"
+                <AuthorInfo v-if="recipe" :user-id="recipe.author?.id || 0"
                     :name="recipe.author_name || recipe.author?.name || 'Recimo'"
                     :handle="recipe.author?.handle || `user_${recipe.author?.id || 0}`"
                     :avatar-url="recipe.user_url || ''" />

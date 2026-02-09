@@ -83,6 +83,7 @@ async function loadRecipeData(recipeId) {
             title: main.recipe_title,
             description: main.recipe_description || main.recipe_descreption || '暫無簡介',
             coverImg: parsePublicFile(main.recipe_image_url),
+            coverImg2: main.recipe_image_url,
             servings: Number(main.recipe_servings || 2)
         };
 
@@ -344,12 +345,12 @@ watch(() => route.params.id, (newId) => {
 
     .info-content {
         padding-left: 32px;
-    
+
         p {
-                white-space: pre-wrap; // 🏆 關鍵：保留原始換行
-                word-break: break-word; // 防止長英文或網址撐破容器
-                line-height: 1.6; // 建議加上行高，閱讀比較舒服
-            }
+            white-space: pre-wrap; // 🏆 關鍵：保留原始換行
+            word-break: break-word; // 防止長英文或網址撐破容器
+            line-height: 1.6; // 建議加上行高，閱讀比較舒服
+        }
     }
 }
 
