@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { phpApi } from '@/utils/phpApi.js';
 import ReportSuccessModal from '@/components/workspace/recipedetail/modals/ReportSuccessModal.vue';
 
+// RecipeReportModal.vue 裡的 props 定義
 const props = defineProps({
     modelValue: Boolean,
     targetData: {
@@ -11,7 +12,7 @@ const props = defineProps({
         default: () => ({
             recipe_id: null,
             title: '載入中...',
-            userName: '未知作者',
+            author_name: '未知作者', // 修正這裡的 Key 名稱
             time: '',
             image: '',
             author_id: null
@@ -24,16 +25,22 @@ const authStore = useAuthStore();
 const isSuccessOpen = ref(false);
 
 const displayAuthor = computed(() => {
+    // 1. 如果是官方帳號
     if (props.targetData.author_id === 1 || props.targetData.author_id === "1") {
         return 'Recimo 官方';
     }
-    if (props.targetData.userName && props.targetData.userName !== '未知作者') {
+
+    // 2. 優先使用父層傳入的作者名稱
+    if (props.targetData.author_name) {
+        return props.targetData.author_name;
+    }
+
+    // 3. 備案（處理舊代碼可能傳入的 userName）
+    if (props.targetData.userName) {
         return props.targetData.userName;
     }
-    if (authStore.user && authStore.user.user_name) {
-        return authStore.user.user_name;
-    }
-    return '未知作者';
+
+    return '未知作者'; // 刪除會去抓 authStore.user 的那幾行
 });
 
 const reasons = [

@@ -77,8 +77,8 @@ const goToDetail = () => {
         </div>
         <footer>
             <div class="personal-info">
-                <AuthorInfo v-if="!isPreviewMode && recipe" :name="recipe.author_name"
-            :handle="`user_${recipe.author.id}`" :time="recipe.created_at" />
+                <AuthorInfo v-if="recipe" :name="recipe.author_name || recipe.author?.name || 'Recimo User'"
+                    :handle="recipe.author?.id ? `user_${recipe.author.id}` : 'recimo'" :time="recipe.created_at" />
             </div>
         </footer>
         <AddToFolderModal v-model="showAddToFolderModal" :commentData="{}" :recipe-id="recipeId"

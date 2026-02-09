@@ -147,11 +147,19 @@ const ingredientsData = computed(() => {
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
-    let rawImg = r.adaptation_image_url || r.coverImg || r.recipe_image_url || '';
+
+    // 🏆 優化圖片抓取順序，優先使用 recipe 直接層級的路徑
+    let rawImg = r.recipe_image_url || r.adaptation_image_url || r.coverImg || '';
+
+    // 判斷是否需要 parsePublicFile
+    const processedImg = (rawImg && (rawImg.includes('http') || rawImg.startsWith('data:')))
+        ? rawImg
+        : (rawImg ? parsePublicFile(rawImg) : '');
+
     return {
         id: getCleanId(r.recipe_id || r.id),
         title: r.adaptation_title || r.recipe_title || r.title || '未命名食譜',
-        image: rawImg.includes('http') || rawImg.startsWith('data:') ? rawImg : parsePublicFile(rawImg),
+        image: processedImg, // 確保這裡是處理過的完整 URL
         description: r.recipe_description || r.description || '暫無詳細說明',
         difficulty: r.recipe_difficulty || r.difficulty || 1,
         tags: r.tags || [],
@@ -243,8 +251,13 @@ const handleGoToEdit = () => {
                 </div>
 
                 <Teleport to="body">
-                    <RecipeReportModal v-if="isReportModalOpen" v-model="isReportModalOpen"
-                        :targetData="{ recipe_id: introData?.id, title: introData?.title }" @submit="onReportSubmit" />
+                    <RecipeReportModal v-if="isReportModalOpen && introData" v-model="isReportModalOpen" :targetData="{
+                        recipe_id: introData.id,
+                        title: introData.title,
+                        image: introData.image,
+                        // 🏆 這裡傳的是 author_name
+                        author_name: recipe.author_name || recipe.user_name || 'Recimo 用戶'
+                    }" @submit="onReportSubmit" />
                     <BaseModal :isOpen="isDeleteModalOpen" type="info" iconClass="fa-regular fa-trash-can"
                         title="確定要刪除您的改編版本嗎？" @close="isDeleteModalOpen = false">
                         <template #default>
