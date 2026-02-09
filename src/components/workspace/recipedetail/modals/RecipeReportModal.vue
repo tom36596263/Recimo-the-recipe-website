@@ -1,10 +1,9 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, getCurrentInstance } from 'vue'; // 🏆 新增 getCurrentInstance
 import { useAuthStore } from '@/stores/authStore';
 import { phpApi } from '@/utils/phpApi.js';
 import ReportSuccessModal from '@/components/workspace/recipedetail/modals/ReportSuccessModal.vue';
 
-// RecipeReportModal.vue 裡的 props 定義
 const props = defineProps({
     modelValue: Boolean,
     targetData: {
@@ -12,7 +11,7 @@ const props = defineProps({
         default: () => ({
             recipe_id: null,
             title: '載入中...',
-            author_name: '未知作者', // 修正這裡的 Key 名稱
+            author_name: '未知作者',
             time: '',
             image: '',
             author_id: null
@@ -24,32 +23,32 @@ const emit = defineEmits(['update:modelValue', 'submit']);
 const authStore = useAuthStore();
 const isSuccessOpen = ref(false);
 
+// 🏆 處理圖片路徑
+const instance = getCurrentInstance();
+const $parseFile = instance?.proxy?.$parseFile;
+const formatImageUrl = (url) => {
+    if (!url) return 'https://via.placeholder.com/150?text=No+Image';
+    if (url.match(/^(http|data|blob)/)) return url;
+    const cleanPath = url.replace(/^\//, '');
+    return $parseFile ? $parseFile(cleanPath) : `http://localhost:8888/${cleanPath}`;
+};
+
 const displayAuthor = computed(() => {
-    // 1. 如果是官方帳號
-    if (props.targetData.author_id === 1 || props.targetData.author_id === "1") {
-        return 'Recimo 官方';
-    }
-
-    // 2. 優先使用父層傳入的作者名稱
-    if (props.targetData.author_name) {
-        return props.targetData.author_name;
-    }
-
-    // 3. 備案（處理舊代碼可能傳入的 userName）
-    if (props.targetData.userName) {
-        return props.targetData.userName;
-    }
-
-    return '未知作者'; // 刪除會去抓 authStore.user 的那幾行
+    if (props.targetData.author_id === 1 || props.targetData.author_id === "1") return 'Recimo 官方';
+    return props.targetData.author_name || props.targetData.userName || '未知作者';
 });
 
-const reasons = [
-    '內容侵權 (盜圖或盜文)',
-    '垃圾訊息 / 廣告',
-    '不實資訊 / 錯誤的食譜步驟',
-    '仇恨或不當言論',
-    '其他原因'
-];
+// 🏆 定義原因對應表 (對應 PHP 的 1~5)
+const reasonMap = {
+    '垃圾訊息 / 廣告': '1',
+    '仇恨或攻擊言論': '2',
+    '色情或不當內容': '3',
+    '不實資訊 / 錯誤的食譜步驟': '4',
+    '內容侵權 (盜圖或盜文)': '5',
+    '其他原因': '0'
+};
+
+const reasons = Object.keys(reasonMap).filter(key => key !== '其他原因').concat(['其他原因']);
 const selectedReason = ref('內容侵權 (盜圖或盜文)');
 const reportNote = ref('');
 
@@ -68,38 +67,36 @@ const handleSubmit = async () => {
     }
 
     if (!targetId) {
-        alert("程式錯誤：找不到食譜 ID，請聯繫管理員");
+        alert("找不到食譜 ID");
         return;
     }
 
+    // 🏆 封裝要傳給後端的資料
     const payload = {
         reporter_id: reporterId,
         target_type: 'recipe',
         target_id: targetId,
-        reason: selectedReason.value,
-        note: reportNote.value
+        report_type: reasonMap[selectedReason.value] || '0', // 轉為數字代碼
+        report_reason: reportNote.value // 補充說明
     };
 
     try {
+        // 🏆 請確認你的 API 路徑。如果 social/submit_report.php 不存在，
+        // 則需要與後端溝通是否統一寫在 others/report_manage.php
         const response = await phpApi.post('social/submit_report.php', payload);
-        if (response.data.status === 'success') {
-            emit('update:modelValue', false); // 關閉檢舉輸入框
-            isSuccessOpen.value = true;      // 打開成功提示
 
+        if (response.data.success || response.data.status === 'success') {
+            emit('update:modelValue', false);
+            isSuccessOpen.value = true;
             emit('submit', response.data);
-            reportNote.value = ''; // 重置內容
+            reportNote.value = '';
         } else {
-            alert('檢舉失敗：' + (response.data.message || '請稍後再試'));
+            alert('檢舉失敗：' + (response.data.message || '伺服器錯誤'));
         }
     } catch (error) {
         console.error("API Error:", error);
-        alert('連線伺服器失敗，請檢查網路狀況。');
+        alert('連線伺服器失敗');
     }
-};
-
-const getImageUrl = (url) => {
-    if (!url) return 'https://via.placeholder.com/150?text=No+Image';
-    return url;
 };
 </script>
 
@@ -107,7 +104,7 @@ const getImageUrl = (url) => {
     <Teleport to="body">
         <div v-if="modelValue" class="black-mask" @click.self="handleClose">
             <div class="modal-card">
-                <button class="close-x" @click="handleClose" aria-label="關閉">×</button>
+                <button class="close-x" @click="handleClose">×</button>
 
                 <div class="modal-header">
                     <div class="modal-title zh-h4-bold ">檢舉這道食譜</div>
@@ -117,7 +114,7 @@ const getImageUrl = (url) => {
                 <div class="report-content custom-scrollbar">
                     <div class="comment-box photo-mode">
                         <div class="photo-fixed">
-                            <img :src="getImageUrl(targetData.image)"
+                            <img :src="formatImageUrl(targetData.image)"
                                 @error="(e) => e.target.src = 'https://via.placeholder.com/150?text=Load+Error'"
                                 alt="食譜封面" />
                         </div>
