@@ -204,6 +204,10 @@ const handleUpdateAccount = async () => {
         if (response.data.status === 'success') {
             // alert('更新成功！');
             showAlert('更新成功！', '', 'success', 'fa-solid fa-check');
+            // 設定 2 秒後自動關閉彈窗
+            setTimeout(() => {
+                isModalOpen.value = false;
+            }, 2000);
             // 更新成功後，清空前端的密碼輸入框，避免下次重複送出舊密碼
             accountData.value.user_password = '';
             accountData.value.confirm_password = '';
@@ -215,6 +219,7 @@ const handleUpdateAccount = async () => {
         } else if (response.data.status === 'info') {
             // alert('資料沒有變動喔！');
             showAlert('資料沒有變動喔！', 'info');
+            setTimeout(() => { isModalOpen.value = false; }, 2000);
         } else {
             // alert(response.data.message);
             showAlert(response.data.message || '更新失敗', 'danger', 'fa-solid fa-exclamation');
@@ -329,7 +334,7 @@ const handleUpdateAccount = async () => {
                         <div class="title">{{ val }}</div>
                         <div class="desc">💡 如有其他使用者{{ key === 'sharing' ? '分享您的食譜' : key === 'comments' ? '在您的食譜下留言' :
                             '對您的食譜按讚'
-                            }}，則傳送通知給您</div>
+                        }}，則傳送通知給您</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" v-model="settings.notifications[key]" disabled>
