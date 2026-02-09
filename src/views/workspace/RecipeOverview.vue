@@ -2,7 +2,6 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { phpApi } from '@/utils/publicApi'
 import { useRouter } from 'vue-router'
-import recimoAvatar from '@/assets/images/recipe/Recimo_avatar.svg'
 
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue'
 import FilterSection from '@/components/site/RecipeOverview/FilterSection.vue'
@@ -69,7 +68,7 @@ const fetchRecipes = async () => {
                     : [];
 
                 // 圖片路徑校正
-                let finalImgUrl = recipe.recipe_image_url;
+                let finalImgUrl = recipe.recipe_image_url || recipe.recipe_image || recipe.image_url || recipe.main_image;
 
                 if (finalImgUrl && !finalImgUrl.startsWith('http')) {
                     // 1. 確保 base 結尾有斜線
@@ -80,6 +79,15 @@ const fetchRecipes = async () => {
                     // 3. 組合：這會產生 http://localhost:8888/recimo_api/img/recipes/...
                     finalImgUrl = `${safeBase}${safePath}`;
                 }
+
+                // 處理作者頭像路徑
+                let finalAvatarUrl = recipe.author_image || recipe.author_avatar || recipe.user_avatar || recipe.avatar_url || recipe.user_image || '';
+                if (finalAvatarUrl && !finalAvatarUrl.startsWith('http')) {
+                    const safeBase = apiBase.endsWith('/') ? apiBase : `${apiBase}/`;
+                    const safePath = finalAvatarUrl.startsWith('/') ? finalAvatarUrl.substring(1) : finalAvatarUrl;
+                    finalAvatarUrl = `${safeBase}${safePath}`;
+                }
+
                 return {
                     id: recipe.recipe_id,
                     recipe_name: recipe.recipe_title,
@@ -99,12 +107,13 @@ const fetchRecipes = async () => {
                         })()
                     },
                     author: {
-                        name: 'Recimo',
+                        name: recipe.author_name || recipe.user_name || 'Recimo',
                         likes: recipe.recipe_like_count,
-                        id: recipe.author_id
+                        id: recipe.author_id || recipe.user_id || 0,
+                        handle: recipe.author_email || recipe.user_email || `user_${recipe.author_id || 0}`
                     },
-                    author_name: 'Recimo',
-                    user_url: recimoAvatar
+                    author_name: recipe.author_name || recipe.user_name || 'Recimo',
+                    user_url: finalAvatarUrl
                 };
             });
 

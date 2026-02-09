@@ -144,7 +144,7 @@ const handleSaveProfile = async (updatedData) => {
             if (isOwnProfile.value && data.data) {
                 const finalUpdate = {};
                 // 檢查各種可能的欄位名稱
-                const serverAvatarUrl = data.data.user_url || data.data.avatar_url || data.avatar_url;
+                const serverAvatarUrl = data.data.author_image || data.data.user_url || data.data.avatar_url || data.avatar_url;
                 if (serverAvatarUrl) {
                     finalUpdate.user_url = serverAvatarUrl;
                     authStore.updateUserInfo(finalUpdate);
@@ -278,7 +278,7 @@ const loadProfile = async () => {
         userProfile.value = {
             username: data.user_name || '訪客',
             role: data.user_bio || '無內容',
-            avatar: getImageUrl(data.user_url),
+            avatar: getImageUrl(data.author_image || data.author_avatar || data.user_url || data.user_avatar || data.avatar_url),
             coverImage: getImageUrl(data.user_cover_image),
             isFollowing: data.is_following || false,  // 追蹤狀態
             stats: {
@@ -292,7 +292,7 @@ const loadProfile = async () => {
         if (isOwnProfile.value && authStore.user) {
             authStore.user.user_name = data.user_name;
             authStore.user.user_bio = data.user_bio;
-            authStore.user.user_url = data.user_url;
+            authStore.user.user_url = data.author_image || data.author_avatar || data.user_url || data.user_avatar || data.avatar_url;
         }
 
     } catch (err) {
@@ -337,7 +337,7 @@ const loadMyRecipes = async () => {
                 id: recipe.user_id || 0
             },
             author_name: recipe.user_name || userProfile.value.username,
-            user_url: getImageUrl(recipe.user_url || userProfile.value.avatar)
+            user_url: getImageUrl(recipe.author_image || recipe.author_avatar || recipe.user_url || recipe.user_avatar || userProfile.value.avatar)
         }));
 
     } catch (err) {
@@ -383,7 +383,7 @@ const searchUsers = async () => {
             searchResults.value = data.map(user => ({
                 id: user.user_id,
                 name: user.user_name,
-                avatar: getImageUrl(user.user_url),
+                avatar: getImageUrl(user.author_image || user.author_avatar || user.user_url || user.user_avatar || user.avatar_url),
                 bio: user.user_bio || '無內容',
                 recipes: user.recipe_count || 0,
                 followers: user.follower_count || 0,
@@ -424,7 +424,7 @@ const loadFollowingList = async () => {
             followingList.value = data.map(user => ({
                 id: user.id,
                 name: user.name,
-                avatar: getImageUrl(user.avatar),
+                avatar: getImageUrl(user.author_image || user.author_avatar || user.user_url || user.avatar || user.user_avatar || user.avatar_url),
                 bio: user.bio,
                 recipes: user.recipes,
                 followers: user.followers,
@@ -455,7 +455,7 @@ const loadFollowersList = async () => {
             followersList.value = data.map(user => ({
                 id: user.id,
                 name: user.name,
-                avatar: getImageUrl(user.avatar),
+                avatar: getImageUrl(user.author_image || user.author_avatar || user.user_url || user.avatar || user.user_avatar || user.avatar_url),
                 bio: user.bio,
                 recipes: user.recipes,
                 followers: user.followers,
