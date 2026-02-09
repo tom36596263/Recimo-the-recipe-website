@@ -130,8 +130,8 @@ const saveEditFolder = async () => {
             await fetchFolders();
             cancelEditFolder();
             showModal('資料夾名稱修改成功！', 'success');
-            // 通知父組件資料夾已更新
-            emit('submit', { updated: true, type: 'folder' });
+            // 通知父組件資料夾已更新（但不關閉彈窗）
+            // emit('submit', { updated: true, type: 'folder' });
         } else {
             showModal(data.message || '修改失敗', 'danger');
         }
@@ -171,8 +171,8 @@ const deleteFolder = (folder) => {
                     await fetchFolders();
                     if (selectedFolderId.value === folder.id) selectedFolderId.value = null;
                     showModal('資料夾刪除成功！', 'success');
-                    // 通知父組件資料夾已更新
-                    emit('submit', { updated: true, type: 'folder' });
+                    // 通知父組件資料夾已更新（但不關閉彈窗）
+                    // emit('submit', { updated: true, type: 'folder' });
                 } else {
                     showModal(data.message || '刪除失敗', 'danger');
                 }
@@ -279,8 +279,8 @@ const handleAddFolder = async () => {
             }
             newFolderName.value = '';
             showModal('資料夾新增成功！', 'success');
-            // 通知父組件資料夾已更新
-            emit('submit', { updated: true, type: 'folder' });
+            // 通知父組件資料夾已更新（但不關閉彈窗）
+            // emit('submit', { updated: true, type: 'folder' });
         } else {
             showModal(data.message || '新增失敗', 'danger');
         }
