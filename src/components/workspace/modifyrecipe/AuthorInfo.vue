@@ -2,7 +2,7 @@
     <router-link :to="`/workspace/user/${userId}`" class="user-info-box-link">
         <div class="user-info-box">
             <div class="user-avatar-circle" :style="avatarStyle">
-                <img v-if="avatarUrl" :src="parsePublicFile(avatarUrl)" class="avatar-img" />
+                <img v-if="avatarUrl" :src="computedAvatarUrl" class="avatar-img" />
                 <span v-else>{{ name?.charAt(0).toUpperCase() }}</span>
             </div>
             <div class="user-text-meta">
@@ -53,6 +53,24 @@ const displayHandle = computed(() => {
 
     // 4. 最後的最後，顯示 recimo 或 user
     return 'recimo';
+});
+
+/**
+ * 處理頭像 URL，支援：
+ * 1. 已處理的絕對路徑（以 / 開頭，如 Vite 處理的 assets 圖片）
+ * 2. 完整的 HTTP URL
+ * 3. 相對路徑（需要用 parsePublicFile 處理）
+ */
+const computedAvatarUrl = computed(() => {
+    if (!props.avatarUrl) return '';
+    
+    // 如果以 / 或 http 開頭，表示已經是處理過的路徑
+    if (props.avatarUrl.startsWith('/') || props.avatarUrl.startsWith('http')) {
+        return props.avatarUrl;
+    }
+    
+    // 否則使用 parsePublicFile 處理
+    return parsePublicFile(props.avatarUrl);
 });
 
 const avatarStyle = computed(() => {

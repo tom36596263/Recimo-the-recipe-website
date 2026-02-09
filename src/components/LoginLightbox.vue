@@ -463,20 +463,20 @@ const handleGoogleSuccess = async (response) => {
 // LINE 登入跳轉函式
 // ==========================================
 const handleLineLogin = () => {
-  // 在跳轉前，先把當前頁面路徑存入 LocalStorage
-  // 如果想去特定頁面，可以存 router.currentRoute.value.fullPath
   localStorage.setItem('pendingPath', window.location.pathname);
-
   const clientID = '2009040716';
-  const origin = window.location.origin;
-  const redirectUri = encodeURIComponent(`${origin}/auth/callback`);
+
+  // 判斷當前是否在正式環境
+  const isProd = window.location.hostname === 'tibamef2e.com';
+
+  // 強制設定正式環境的 Redirect URI
+  const redirectUri = isProd
+    ? encodeURIComponent('https://tibamef2e.com/cjd102/g2/recimo/')
+    : encodeURIComponent(window.location.origin + '/');
+
   const state = Math.random().toString(36).substring(7);
-
-  const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientID}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid%20email`;
-
-  window.location.href = lineAuthUrl;
+  window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientID}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid%20email`;
 };
-
 // ==========================================
 // Facebook 登入處理
 // ==========================================
@@ -537,14 +537,14 @@ const sendFBTokenToBackend = async (accessToken) => {
 const isModalOpen = ref(false);
 const modalConfig = ref({
   type: 'info',
-  iconClass: 'fa-solid fa-circle-info',
+  iconClass: 'fa-solid fa-exclamation',
   title: '',
   description: ''
 });
 
 // 定義彈窗工具函式
 // 確保它在所有 API 函式之前被定義
-const showAlert = (title, description = '', type = 'info', icon = 'fa-solid fa-circle-info') => {
+const showAlert = (title, description = '', type = 'info', icon = 'fa-solid fa-exclamation') => {
   modalConfig.value = {
     title,
     description,
@@ -638,19 +638,22 @@ const sendForgotEmail = async () => {
     });
 
     if (res.data.status === 'success') {
+      // 這裡加上自動填入，開發時方便
+      if (res.data.debug_code) {
+        forgotData.value.code = res.data.debug_code;
+        console.log('【測試模式】自動填入驗證碼：', res.data.debug_code);
+      }
+
       showAlert('驗證碼已寄出', '請至您的電子信箱收信', 'success', 'fa-solid fa-check');
+
       setTimeout(() => {
         isModalOpen.value = false;
         forgotStep.value = 2; // 跳轉到輸入驗證碼畫面
         startTimer();        // 開始倒數
       }, 2000);
 
-      // 直接在 F12 的 Console 看到驗證碼
-      console.log('【測試模式】您的驗證碼是：', res.data.debug_code);
-
     } else {
-      loginErrorMessage.value = res.data.message;
-      showForgotFail.value = true;
+      showAlert('發送失敗', res.data.message, 'danger');
     }
   } catch (error) {
     // console.error('發送失敗：', error);

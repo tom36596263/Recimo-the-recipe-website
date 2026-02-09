@@ -81,8 +81,9 @@ const fetchFavoriteRecipes = async () => {
         const resFavorites = await phpApi.get(`social/favorites.php`, { params: { user_id: userId.value } });
         const favoritesData = Array.isArray(resFavorites.data.favorites) ? resFavorites.data.favorites : [];
         favoriteRecipes.value = favoritesData.slice(0, 4).map(fav => ({
+            ...fav,
             id: fav.recipe_id,
-            recipe_name: fav.recipe_title || fav.recipe_name || fav.title || '',
+            recipe_name: fav.recipe_title || fav.recipe_name || fav.title || '未命名食譜',
             image_url: fav.recipe_image_url
                 ? (fav.recipe_image_url.startsWith('http')
                     ? fav.recipe_image_url
@@ -95,12 +96,11 @@ const fetchFavoriteRecipes = async () => {
             author: {
                 name: fav.user_name || fav.author_name || 'Recimo',
                 likes: fav.recipe_like_count || fav.likes || fav.like_count || 0,
-                id: fav.author_id // 假設回傳有作者 ID
+                id: fav.author_id || fav.user_id || 0
             }
         }));
         totalFavoriteCount.value = favoritesData.length;
     } catch (e) {
-        console.error('獲取收藏食譜失敗:', e);
         favoriteRecipes.value = [];
         totalFavoriteCount.value = 0;
     }
@@ -128,35 +128,30 @@ onMounted(async () => {
             if (userId.value) {
                 await favoritesStore.fetchFavorites(userId.value);
             }
-            // console.log(userId.value);
 
             // 個人食譜：改為串接 myreipe_get.php，使用 userId 當參數，最多顯示四個
             if (userId.value) {
                 try {
-                    console.log('11');
-                    
                     const resMyRecipes = await phpApi.get(`personal/myrecipe_get.php`, { params: { user_id: userId.value } });
                     // 假設回傳為陣列
                     const myRecipesData = Array.isArray(resMyRecipes.data) ? resMyRecipes.data : [];
                     personalRecipes.value = myRecipesData.slice(0, 4).map(recipe => ({
+                        ...recipe,
                         id: recipe.recipe_id,
-                        recipe_name: recipe.recipe_title,
+                        recipe_name: recipe.recipe_title || '未命名食譜',
                         image_url: recipe.recipe_image_url && recipe.recipe_image_url.startsWith('http')
                             ? recipe.recipe_image_url
                             : recipe.recipe_image_url
                                 ? parsePublicFile(recipe.recipe_image_url)
                                 : '',
-                        // 若有標籤資料可用 getRecipeTags，否則可略過
-                        // tags: recipe.tags || ['未分類'],
                         author: {
                             name: recipe.user_name || 'Recimo',
-                            likes: recipe.recipe_like_count || 0
+                            likes: recipe.recipe_like_count || 0,
+                            id: recipe.user_id || recipe.author_id || 0
                         }
                     }));
                     totalPersonalCount.value = myRecipesData.length;
                 } catch (e) {
-                    console.log(e);
-
                     personalRecipes.value = [];
                     totalPersonalCount.value = 0;
                 }
@@ -177,8 +172,9 @@ onMounted(async () => {
                     recentRecipes.value = historyData.slice(0, 4).map(item => {
                         const recipe = item.recipe_detail || {};
                         return {
+                            ...recipe,
                             id: recipe.recipe_id,
-                            recipe_name: recipe.recipe_title || recipe.recipe_name || recipe.title || '',
+                            recipe_name: recipe.recipe_title || recipe.recipe_name || recipe.title || '未命名食譜',
                             image_url: recipe.recipe_image_url
                                 ? (recipe.recipe_image_url.startsWith('http')
                                     ? recipe.recipe_image_url
@@ -190,7 +186,8 @@ onMounted(async () => {
                                         : ''),
                             author: {
                                 name: recipe.user_name || recipe.author_name || 'Recimo',
-                                likes: recipe.recipe_like_count || recipe.likes || recipe.like_count || 0
+                                likes: recipe.recipe_like_count || recipe.likes || recipe.like_count || 0,
+                                id: recipe.user_id || recipe.author_id || 0
                             }
                         }
                     });
@@ -205,7 +202,6 @@ onMounted(async () => {
             }
 
         } catch (e) {
-            console.error('解析 user 資料失敗:', e);
             userId.value = null;
         }
     }
