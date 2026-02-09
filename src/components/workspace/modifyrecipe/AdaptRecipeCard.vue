@@ -288,4 +288,6 @@ const handleUploadImage = () => {
         }
     }
 }
+
+
 </style>

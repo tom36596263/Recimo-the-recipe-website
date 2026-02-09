@@ -39,11 +39,12 @@ const isOwner = computed(() => {
 });
 
 const isReportModalOpen = ref(false);
+const isReportSuccessOpen = ref(false); // 🏆 檢舉成功狀態
 const isDeleteModalOpen = ref(false);
 
 const onReportSubmit = (reportForm) => {
     isReportModalOpen.value = false;
-    alert('感謝您的回饋，我們已收到針對此改編版本的檢舉。');
+    isReportSuccessOpen.value = true; // 🏆 開啟成功燈箱
 };
 
 const handleToggleLike = () => {
@@ -80,9 +81,8 @@ const confirmDelete = async () => {
             });
 
             if (res.data.success) {
-                // 🏆 關閉小確認窗 -> 觸發父層刪除(顯示Toast) -> 關閉此燈箱
                 isDeleteModalOpen.value = false;
-                emit('delete-recipe', rawId); // 這裡傳 rawId 確保父層 variantItems 找得到
+                emit('delete-recipe', rawId);
                 closeModal();
             } else {
                 alert('刪除失敗：' + (res.data.message || '未知錯誤'));
@@ -92,7 +92,6 @@ const confirmDelete = async () => {
             alert('連線伺服器失敗');
         }
     } else {
-        // 本地資料刪除
         isDeleteModalOpen.value = false;
         emit('delete-recipe', rawId);
         closeModal();
@@ -147,11 +146,7 @@ const ingredientsData = computed(() => {
 const introData = computed(() => {
     if (!props.recipe) return null;
     const r = props.recipe;
-
-    // 🏆 優化圖片抓取順序，優先使用 recipe 直接層級的路徑
     let rawImg = r.recipe_image_url || r.adaptation_image_url || r.coverImg || '';
-
-    // 判斷是否需要 parsePublicFile
     const processedImg = (rawImg && (rawImg.includes('http') || rawImg.startsWith('data:')))
         ? rawImg
         : (rawImg ? parsePublicFile(rawImg) : '');
@@ -159,7 +154,7 @@ const introData = computed(() => {
     return {
         id: getCleanId(r.recipe_id || r.id),
         title: r.adaptation_title || r.recipe_title || r.title || '未命名食譜',
-        image: processedImg, // 確保這裡是處理過的完整 URL
+        image: processedImg,
         description: r.recipe_description || r.description || '暫無詳細說明',
         difficulty: r.recipe_difficulty || r.difficulty || 1,
         tags: r.tags || [],
@@ -220,7 +215,6 @@ const handleGoToEdit = () => {
                                 <span class="badge">改編版本</span>
                             </div>
                             <div class="action-group">
-                                <!-- <pre>{{ recipe.user_email }}</pre> -->
                                 <AuthorInfo
                                     :user-id="isOwner ? (authStore.user?.id || authStore.user?.user_id) : recipe.author_id"
                                     :name="isOwner ? (authStore.user?.user_name || authStore.user?.name) : (recipe.author_name || 'Recimo 用戶')"
@@ -255,17 +249,41 @@ const handleGoToEdit = () => {
                         recipe_id: introData.id,
                         title: introData.title,
                         image: introData.image,
-                        // 🏆 這裡傳的是 author_name
                         author_name: recipe.author_name || recipe.user_name || 'Recimo 用戶'
                     }" @submit="onReportSubmit" />
+
+                    <BaseModal :isOpen="isReportSuccessOpen" type="success" iconClass="fa-solid fa-circle-check"
+                        title="檢舉已成功送出！" @close="isReportSuccessOpen = false">
+                        <template #default>
+                            <div style="margin-top: 8px; margin-bottom: 8px; text-align: center;">
+                                <p class="p-p2" style="color: #666;">感謝您的回饋，我們已收到針對此改編版本的檢舉。<br>管理團隊將會盡快審核並處理。</p>
+                            </div>
+                        </template>
+
+                        <template #actions>
+                            <div
+                                style="display: flex; width: 100%; justify-content: center; margin-top: 25px; margin-bottom: 5px;">
+                                <BaseBtn title="太好了！" variant="solid" style="width: 130px;"
+                                    @click="isReportSuccessOpen = false" />
+                            </div>
+                        </template>
+                    </BaseModal>
+
                     <BaseModal :isOpen="isDeleteModalOpen" type="info" iconClass="fa-regular fa-trash-can"
                         title="確定要刪除您的改編版本嗎？" @close="isDeleteModalOpen = false">
                         <template #default>
-                            <p>此操作將無法復原，您將永久失去這份紀錄。</p>
+                            <div style="margin-top: 8px; margin-bottom: 8px; text-align: center;">
+                                <p class="p-p2" style="color: #666;">此操作將無法復原，您將永久失去這份紀錄。</p>
+                            </div>
                         </template>
+
                         <template #actions>
-                            <button class="btn-solid" @click="confirmDelete">確定刪除</button>
-                            <button class="btn-outline" @click="isDeleteModalOpen = false">取消</button>
+                            <div
+                                style="display: flex; gap: 16px; width: 100%; justify-content: center; align-items: center; margin-top: 25px; margin-bottom: 5px;">
+                                <BaseBtn title="確定刪除" variant="solid" style="width: 130px;" @click="confirmDelete" />
+                                <BaseBtn title="取消" variant="outline" style="width: 130px;"
+                                    @click="isDeleteModalOpen = false" />
+                            </div>
                         </template>
                     </BaseModal>
                 </Teleport>
@@ -273,8 +291,6 @@ const handleGoToEdit = () => {
         </div>
     </Transition>
 </template>
-
-
 
 <style lang="scss" scoped>
 @import '@/assets/scss/abstracts/_color.scss';
@@ -429,7 +445,6 @@ const handleGoToEdit = () => {
     align-items: center;
     gap: 12px;
     z-index: 100;
-
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -679,6 +694,58 @@ const handleGoToEdit = () => {
             @media screen and (max-width: 809px) {
                 border-left-color: $accent-color-700;
             }
+        }
+    }
+}
+
+/* 使用 :deep 穿透並鎖定 .modal-card.success 結構 */
+:deep(.modal-card.success) {
+    /* 1. 關鍵：增加底部 padding，確保按鈕有生存空間 */
+    padding: 40px 24px 40px !important;
+
+    /* 2. 關鍵：不要設定固定高度，讓內容決定高度 */
+    height: auto !important;
+    min-height: 280px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* 讓內容垂直置中 */
+
+    /* 針對按鈕容器的微調 */
+    .modal-actions,
+    .modal-footer {
+        margin-top: 24px;
+        /* 增加文字與按鈕之間的間距 */
+        margin-bottom: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+
+        .base-btn {
+            /* 讓按鈕不要貼底 */
+            margin-bottom: 0;
+            transform: translateY(-5px);
+            /* 輕微往上提昇視覺重心 */
+        }
+    }
+
+}
+
+/* 針對「刪除確認」燈箱的同步修正 */
+:deep(.modal-card.info) {
+    max-width: 420px;
+
+    .modal-icon {
+        color: #ff4d4f;
+    }
+
+    .base-btn.variant-solid {
+        background-color: #ff4d4f !important;
+
+        &:hover {
+            background-color: #d9363e !important;
         }
     }
 }

@@ -57,6 +57,31 @@ const commentList = ref([]);
 
 const cookSnapRef = ref(null);
 
+// 控制刪除確認燈箱
+const isDeleteConfirmOpen = ref(false);
+const deleteTargetId = ref(null); // 用來暫存要刪除的 ID
+
+// 真正的刪除 API 執行
+const handleActualDelete = async () => {
+  const cleanId = String(rawRecipe.value.recipe_id).replace(/[^\d]/g, '');
+
+  try {
+    const res = await phpApi.post('recipes/recipe_adaptation_delete.php', {
+      recipe_id: cleanId,
+      user_id: authStore.user?.id || authStore.user?.user_id
+    });
+
+    if (res.data.success) {
+      isDeleteConfirmOpen.value = false; // 關閉燈箱
+      onDeleteSuccess(cleanId); // 執行原本的跳轉邏輯
+    } else {
+      alert('刪除失敗：' + res.data.message);
+    }
+  } catch (err) {
+    console.error('刪除出錯:', err);
+  }
+};
+
 // --- 核心抓取邏輯 ---
 const fetchData = async (quiet = false) => {
   if (!quiet) isLoading.value = true;
@@ -736,12 +761,28 @@ watch(
             ✨ 正在預覽您的食譜草稿
           </div>
 
-          <DeleteAdaptationBtn
-            v-if="isMyRecipe && !isPreviewMode"
-            :recipe-id="rawRecipe.recipe_id"
-            :is-db-data="true"
-            @success="onDeleteSuccess"
-          />
+          <DeleteAdaptationBtn v-if="isMyRecipe && !isPreviewMode" :recipe-id="rawRecipe.recipe_id" :is-db-data="true"
+            @click="isDeleteConfirmOpen = true" />
+
+            <Teleport to="body">
+            <BaseModal :is-open="isDeleteConfirmOpen" type="info" icon-class="fa-regular fa-trash-can"
+              title="確定要刪除您的食譜嗎？" description="此操作將無法復原，您將失去這份編輯紀錄。" @close="isDeleteConfirmOpen = false">
+              <template #actions>
+                <div style="
+    display: flex; 
+    gap: 16px; 
+    width: 100%; 
+    justify-content: center; 
+    align-items: center; 
+    margin-top: 15px; 
+    margin-bottom: 10px;
+  ">
+                  <BaseBtn title="確定刪除" variant="solid" style="width: 130px;" @click="handleActualDelete" />
+                  <BaseBtn title="取消" variant="outline" style="width: 130px;" @click="isDeleteConfirmOpen = false" />
+                </div>
+              </template>
+            </BaseModal>
+          </Teleport>
 
           <div v-if="!isPreviewMode" class="adapt-btn-wrapper">
             <router-link

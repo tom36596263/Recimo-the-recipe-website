@@ -156,18 +156,27 @@ const scrollWall = (direction) => {
     </div>
 
     <Teleport to="body">
-      <SnapFinishedSuccessModal :isOpen="isSuccessModalOpen" @close="isSuccessModalOpen = false" />
-
       <BaseModal :isOpen="isDeleteModalOpen" type="info" iconClass="fa-regular fa-trash-can" title="確定要刪除這張作品照嗎？"
         @close="isDeleteModalOpen = false">
-        <p class="p-p2">刪除後將無法還原，請確認是否繼續操作。</p>
+        <div style="margin-top: 8px; margin-bottom: 8px; color: #666;">
+          <p class="p-p2">刪除後將無法還原，請確認是否繼續操作。</p>
+        </div>
+
         <template #actions>
-          <button class="btn-solid" @click="handleConfirmDelete">確定刪除</button>
-          <button class="btn-outline" @click="isDeleteModalOpen = false">取消</button>
+          <div style="
+        display: flex; 
+        gap: 16px; 
+        width: 100%; 
+        justify-content: center; 
+        margin-top: 25px; 
+        margin-bottom: 5px;
+      ">
+            <BaseBtn title="確定刪除" variant="solid" style="width: 130px;" @click="handleConfirmDelete" />
+            <BaseBtn title="取消" variant="outline" style="width: 130px;" @click="isDeleteModalOpen = false" />
+          </div>
         </template>
       </BaseModal>
     </Teleport>
-
     <PostReportModal v-model="isReportModalOpen" targetType="gallery" :commentData="selectedPhotoData"
       @success="onReportSubmit" />
     <CookSnapUploadModal v-model="isUploadModalOpen" @submit="onUploadSubmit" />

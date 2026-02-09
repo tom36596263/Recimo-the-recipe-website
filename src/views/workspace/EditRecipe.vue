@@ -11,6 +11,7 @@ import EditorHeader from '@/components/workspace/editrecipe/EditorHeader.vue';
 import IngredientEditor from '@/components/workspace/editrecipe/IngredientEditor.vue';
 import StepEditor from '@/components/workspace/editrecipe/StepEditor.vue';
 import TagModal from '@/components/workspace/editrecipe/modals/TagModal.vue';
+import RecipePublishedModal from '@/components/workspace/recipedetail/modals/RecipePublishedModal.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -23,6 +24,7 @@ const isPublished = ref(true);
 const ingredientsMasterList = ref([]);
 const tagsMasterList = ref([]);
 const isTagModalOpen = ref(false);
+const showPublishedModal = ref(false);
 
 const recipeForm = ref({
   recipe_id: null,
@@ -268,15 +270,8 @@ const publishToDb = async () => {
     const response = await phpApi.post(apiUrl, payload);
 
     if (response.data && response.data.success) {
-      const msg = recipeForm.value.recipe_id ? '🎉 食譜已更新！' : '🎉 感謝分享！改編版本已正式發布。';
-      alert(msg);
-
-      if (isAdaptModeActive.value) {
-        const parentId = recipeForm.value.parent_recipe_id;
-        router.push(`/workspace/modify-recipe/${parentId}`);
-      } else {
-        router.push('/workspace/my-recipes');
-      }
+      showPublishedModal.value = true;
+      // 🏆 移除此處 router.push，交由 Modal 的 @close 處理
     } else {
       alert(`發布失敗：${response.data?.message || '資料庫寫入失敗'}`);
     }
@@ -337,7 +332,7 @@ const publishNewRecipeToDb = async () => {
       servings: Number(recipeForm.value.recipe_servings) || 1, // PHP 期待 $input['servings']
       // status: isPublished.value ? 1 : 0,
       status: 1,
-      
+
       // 食材處理 (修正 Key 名稱)
       ingredients: recipeForm.value.ingredients.map(ing => ({
         id: (typeof ing.id === 'string' && ing.id.startsWith('id')) ? null : Number(ing.id),
@@ -345,7 +340,7 @@ const publishNewRecipeToDb = async () => {
         unit: ing.unit || '',             // PHP 期待 $ing['unit']
         note: ing.note || ''              // PHP 期待 $ing['note']
       })),
-      
+
       steps: processedSteps,
       tags: recipeForm.value.tags.map(t => t.tag_id) // 這是食譜總標籤
     };
@@ -356,8 +351,8 @@ const publishNewRecipeToDb = async () => {
     const response = await phpApi.post('recipes/recipe_post.php', payload);
 
     if (response.data && response.data.success) {
-      alert('🎉 食譜儲存成功！');
-      router.push('/workspace/my-recipes');
+      showPublishedModal.value = true;
+      // 🏆 移除此處 router.push，交由 Modal 的 @close 處理
     } else {
       alert(`儲存失敗：${response.data?.message || '未知錯誤'}`);
     }
@@ -478,6 +473,10 @@ provide('isEditing', isEditing);
       </footer>
     </main>
     <TagModal v-model="isTagModalOpen" :selected-list="recipeForm.tags" @add-multiple="handleAddTags" />
+    <RecipePublishedModal :is-open="showPublishedModal"
+      :mode="route.query.action === 'adapt' ? 'fork' : (recipeForm.recipe_id ? 'update' : 'create')" @close="isAdaptModeActive
+        ? router.push(`/workspace/modify-recipe/${recipeForm.parent_recipe_id}`)
+        : router.push('/workspace/my-recipes')" />
   </div>
 </template>
 
