@@ -514,6 +514,13 @@ watch(() => route.params.id, (newId) => {
     }
 }
 
+.stat-tag {
+    padding: 10px;
+    display: inline-block;
+    border-radius: 10px;
+    background-color: $primary-color-100
+}
+
 .local-delete-btn {
     position: absolute;
     top: -10px;
