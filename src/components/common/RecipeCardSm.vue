@@ -68,7 +68,7 @@ const goToDetail = () => {
                 <i-material-symbols-Favorite v-if="isFavorited" style="color: #e74c3c" />
                 <i-material-symbols-Favorite-outline v-else />
             </div>
-            <img :src="recipe.image_url" alt="recipe.recipe_name">
+            <img :src="recipe.image_url" :alt="recipe.recipe_name">
         </header>
         <div class="card-body">
             <div class="title">
@@ -77,8 +77,11 @@ const goToDetail = () => {
         </div>
         <footer>
             <div class="personal-info">
-                <AuthorInfo v-if="!isPreviewMode && recipe" :name="recipe.author_name"
-            :handle="`user_${recipe.author.id}`" :time="recipe.created_at" />
+                <AuthorInfo v-if="recipe" 
+                    :user-id="recipe.author?.id || 0"
+                    :name="recipe.author_name || recipe.author?.name || 'Recimo'"
+                    :handle="recipe.author?.handle || `user_${recipe.author?.id || 0}`"
+                    :avatar-url="recipe.user_url || ''" />
             </div>
         </footer>
         <AddToFolderModal v-model="showAddToFolderModal" :commentData="{}" :recipe-id="recipeId"

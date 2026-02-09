@@ -6,6 +6,7 @@ import { useAuthGuard } from '@/composables/useAuthGuard'
 import BaseBtn from '@/components/common/BaseBtn.vue';
 import { useFavoritesStore } from '@/stores/favoritesStore';
 import { useAuthStore } from '@/stores/authStore';
+import recimoAvatar from '@/assets/images/recipe/Recimo_avatar.svg'
 
 import RecipeCardLg from '@/components/common/RecipeCardLg.vue'
 import FilterSection from '@/components/site/RecipeOverview/FilterSection.vue'
@@ -59,9 +60,6 @@ const fetchRecipes = async () => {
             }
         });
         
-        // 偵錯用：確認 API 回傳的原始資料
-        console.log('API 原始回應：', response.data);
-
     if (response.data && response.data.status === 'success') {
         const recipeData = response.data.data;
         const apiBase = phpApi.defaults.baseURL;
@@ -109,24 +107,18 @@ const fetchRecipes = async () => {
                     name: 'Recimo',
                     likes: recipe.recipe_like_count,
                     id: recipe.author_id
-                }
+                },
+                author_name: 'Recimo',
+                user_url: recimoAvatar
             };
         });
         
-        console.log('成功轉換並存入 allRecipe！', allRecipe.value);
-
         } else {
         // 處理 PHP 回傳 status: "error" 的情況
-        console.error('PHP 邏輯錯誤:', response.data.message);
         }
 
     } catch (error) {
         // 3. API 連線失敗或伺服器錯誤 (如 404, 500)
-        console.error('API 連線失敗:', error);
-        if (error.response) {
-        console.log('錯誤狀態碼:', error.response.status);
-        console.log('錯誤內容:', error.response.data);
-        }
     }
 };
 
@@ -268,7 +260,6 @@ const clearIngredientFilter = () => {
 
 };
 const openKitchen = () => {
-    console.log("父層收到訊號了！準備打開燈箱..."); // 加入這行
     showCook.value = true;
 }
 

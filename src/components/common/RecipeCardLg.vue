@@ -56,7 +56,6 @@ const recipeInfo = computed(() => [
 ]);
 
 const handleLikeChange = (isLiked, item) => {
-    console.log(`用戶對 ${item.userName} 的留言點讚狀態：`, isLiked);
     // 這裡可以呼叫 API 更新後端數據
 };
 
@@ -117,8 +116,11 @@ const handleHeartClick = (e) => {
 
         <footer>
             <div class="personal-info">
-                <AuthorInfo v-if="!isPreviewMode && recipe" :name="recipe.author_name"
-            :handle="`user_${recipe.author.id}`" :time="recipe.created_at" />
+                <AuthorInfo v-if="recipe" 
+                    :user-id="recipe.author?.id || 0"
+                    :name="recipe.author_name || recipe.author?.name || 'Recimo'"
+                    :handle="recipe.author?.handle || `user_${recipe.author?.id || 0}`"
+                    :avatar-url="recipe.user_url || ''" />
                 <div @click.prevent.stop>
                     <LikeButton :initial-likes="recipe.author.likes || 0"
                         @update:liked="(val) => handleLikeChange(val, item)" />

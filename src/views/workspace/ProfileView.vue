@@ -117,7 +117,6 @@ const handleSaveProfile = async (updatedData) => {
             if (updatedData.avatar) immediateUpdate.user_url = updatedData.avatar;
             
             authStore.updateUserInfo(immediateUpdate);
-            console.log('🚀 立即更新頭像預覽到全域 Store');
         }
 
         const formData = new FormData();
@@ -149,7 +148,6 @@ const handleSaveProfile = async (updatedData) => {
                 if (serverAvatarUrl) {
                     finalUpdate.user_url = serverAvatarUrl;
                     authStore.updateUserInfo(finalUpdate);
-                    console.log('✅ 已更新為伺服器正式頭像 URL:', serverAvatarUrl);
                 }
             }
             
@@ -158,7 +156,6 @@ const handleSaveProfile = async (updatedData) => {
             showEditModal.value = false;
         }
     } catch (err) {
-        console.error('更新個人資料失敗:', err);
         alert('更新失敗，請稍後再試');
     }
 };
@@ -255,8 +252,6 @@ const toggleFollow = async (userId) => {
             }
         }
     } catch (err) {
-        console.error('追蹤操作失敗:', err);
-        console.error('錯誤詳情:', err.response?.data || err.message);
         alert('操作失敗，請稍後再試');
     }
 };
@@ -266,7 +261,6 @@ const toggleFollow = async (userId) => {
  */
 const loadProfile = async () => {
     if (!targetUserId.value) {
-        console.warn('使用者 ID 無效');
         return;
     }
 
@@ -303,8 +297,6 @@ const loadProfile = async () => {
 
     } catch (err) {
         notFound.value = true;
-        console.error('載入個人資料失敗:', err);
-        console.error('錯誤詳情:', err.response?.data || err.message);
     }
 };
 
@@ -313,7 +305,6 @@ const loadProfile = async () => {
  */
 const loadMyRecipes = async () => {
     if (!targetUserId.value) {
-        console.warn('使用者 ID 無效');
         error.value = '無效的使用者';
         return;
     }
@@ -330,27 +321,26 @@ const loadMyRecipes = async () => {
         }
 
         if (!Array.isArray(data)) {
-            console.error('API 回傳格式錯誤，預期陣列但收到:', typeof data, data);
             recipes.value = [];
             return;
         }
 
         // 轉換食譜資料格式
         recipes.value = data.map(recipe => ({
+            ...recipe,
             id: recipe.recipe_id,
             recipe_name: recipe.recipe_title,
             image_url: getImageUrl(recipe.recipe_image_url),
-            tags: [recipe.recipe_type || '未分類'],
             author: {
                 name: recipe.user_name || userProfile.value.username,
-                likes: recipe.recipe_like_count || 0
+                likes: recipe.recipe_like_count || 0,
+                id: recipe.user_id || 0
             },
-            _raw: recipe
+            author_name: recipe.user_name || userProfile.value.username,
+            user_url: getImageUrl(recipe.user_url || userProfile.value.avatar)
         }));
 
     } catch (err) {
-        console.error('載入食譜失敗:', err);
-        console.error('錯誤詳情:', err.response?.data || err.message);
         error.value = '載入食譜失敗，請稍後再試';
         recipes.value = [];
     } finally {
@@ -403,7 +393,6 @@ const searchUsers = async () => {
             searchResults.value = [];
         }
     } catch (err) {
-        console.error('搜尋使用者失敗:', err);
         alert('搜尋失敗，請稍後再試');
         searchResults.value = [];
     } finally {
@@ -442,15 +431,9 @@ const loadFollowingList = async () => {
                 isFollowing: user.isFollowing
             }));
         } else {
-            console.warn('追蹤列表回傳格式錯誤，預期陣列但收到:', typeof data, data);
             followingList.value = [];
         }
     } catch (err) {
-        console.error('載入追蹤列表失敗:', err);
-        console.error('錯誤狀態碼:', err.response?.status);
-        console.error('錯誤訊息:', err.response?.data);
-        console.error('請求 URL:', err.config?.url);
-        console.error('完整錯誤:', err.message);
         followingList.value = [];
     } finally {
         isLoadingFollows.value = false;
@@ -479,15 +462,9 @@ const loadFollowersList = async () => {
                 isFollowing: user.isFollowing
             }));
         } else {
-            console.warn('粉絲列表回傳格式錯誤，預期陣列但收到:', typeof data, data);
             followersList.value = [];
         }
     } catch (err) {
-        console.error('載入粉絲列表失敗:', err);
-        console.error('錯誤狀態碼:', err.response?.status);
-        console.error('錯誤訊息:', err.response?.data);
-        console.error('請求 URL:', err.config?.url);
-        console.error('完整錯誤:', err.message);
         followersList.value = [];
     } finally {
         isLoadingFollows.value = false;
