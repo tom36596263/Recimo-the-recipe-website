@@ -125,7 +125,7 @@ onMounted(async () => {
     let userId;
     try {
         const userObj = JSON.parse(userStr);
-        userId = userObj.id;
+        userId = userObj.user_id;
     } catch (e) {
         userId = null;
         return;

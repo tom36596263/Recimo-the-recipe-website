@@ -24,6 +24,9 @@ const props = defineProps({
 
 const router = useRouter();
 
+// 定義向父組件發出的事件
+const emit = defineEmits(['favoriteUpdated']);
+
 const goToDetail = () => {
     router.push({
         name: 'workspace-recipe-detail',
@@ -71,6 +74,8 @@ const handleModalSubmit = () => {
     if (userId.value) {
         favoritesStore.refetchFavorites(userId.value);
     }
+    // 通知父組件收藏已更新
+    emit('favoriteUpdated');
 };
 
 const handleHeartClick = (e) => {
