@@ -12,7 +12,7 @@ export const parsePublicFile = (imgURL, isStatic = false) => {
 
     if (isStatic) {
         // 處理前端 public 路徑
-        return `${publicBase}/${imgURL}`.replace(/\/+/g, '/');
+        return `${fileBase}/${imgURL}`.replace(/\/+/g, '/');
     }
 
     // 處理後端 PHP 圖片路徑
