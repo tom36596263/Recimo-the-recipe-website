@@ -81,14 +81,15 @@ const handleUploadImage = () => {
         <footer>
             <div class="personal-info-wrapper">
                 <div @click.stop>
-                    <AuthorInfo
-                        :user-id="isOwner ? (authStore.user?.id || authStore.user?.user_id) : (recipe.author_id || recipe.author?.author_id)"
-                        :name="isOwner ? (authStore.user?.user_name || authStore.user?.name) : ((recipe.author && typeof recipe.author === 'object') ? (recipe.author.author_name || recipe.author.name) : (recipe.author_name || recipe.author || 'Recimo User'))"
-                        :handle="isOwner
-                            ? (authStore.user?.user_email || authStore.user?.email)
-                            : (recipe.user_email || recipe.author?.user_email || recipe.author?.email || `user_${recipe.author_id}`)"
-                        :time="recipe.created_at"
-                        :avatar-url="isOwner ? (authStore.user?.user_url || authStore.user?.avatarUrl) : (recipe.author?.author_image || recipe.author_image)" />
+                   <AuthorInfo :user-id="isOwner
+                        ? (authStore.user?.id || authStore.user?.user_id)
+                        : (recipe.author?.author_id || recipe.author_id)" :name="isOwner
+            ? (authStore.user?.user_name || authStore.user?.name)
+            : (recipe.author?.author_name || recipe.author_name || 'Recimo User')" :handle="isOwner
+            ? (authStore.user?.user_email || authStore.user?.email)
+            : (recipe.author?.user_email || recipe.user_email || 'recimo')" :time="recipe.created_at" :avatar-url="isOwner
+            ? (authStore.user?.user_url || authStore.user?.avatarUrl)
+            : (recipe.author?.author_image || recipe.author_image)" />
                 </div>
 
                 <div @click.prevent.stop>

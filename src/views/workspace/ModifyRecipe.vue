@@ -251,12 +251,7 @@ watch(() => route.params.id, (newId) => {
                     }" @click="openAdaptDetail(item)">
 
                     <div class="card-wrapper" style="position: relative; height: 100%;">
-                        <AdaptRecipeCard class="demo-readonly-card" :recipe="{
-                            adaptation_title: item.adaptation_title,
-                            title: item.title,
-                            adaptation_note: item.adaptation_note || item.summary,
-                            coverImg: item.coverImg
-                        }" :readonly="true" />
+                        <AdaptRecipeCard class="demo-readonly-card" :recipe="item" :readonly="true" />
 
                         <button v-if="item.is_mine" class="local-delete-btn" title="刪除此改編版本"
                             @click.stop="deleteLocalRecipe(item.id)">
