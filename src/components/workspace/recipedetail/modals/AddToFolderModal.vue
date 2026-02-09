@@ -4,6 +4,7 @@ import { ref, computed } from 'vue';
 import { phpApi } from '@/utils/phpApi';
 import { useAuthStore } from '@/stores/authStore';
 import { useRoute } from 'vue-router';
+import BaseModal from '@/components/BaseModal.vue';
 
 const route = useRoute();
 const props = defineProps({
@@ -42,6 +43,70 @@ const loading = ref(false);
 const isEditFolders = ref(false);
 const editFolderName = ref('');
 const editingFolderId = ref(null);
+
+// BaseModal 控制
+const modalConfig = ref({
+    isOpen: false,
+    type: 'info',
+    iconClass: 'fa-solid fa-circle-info',
+    title: '',
+    description: ''
+});
+
+const showModal = (message, type = 'info') => {
+    const iconMap = {
+        success: 'fa-solid fa-circle-check',
+        danger: 'fa-solid fa-circle-exclamation',
+        info: 'fa-solid fa-circle-info'
+    };
+    modalConfig.value = {
+        isOpen: true,
+        type,
+        iconClass: iconMap[type] || iconMap.info,
+        title: message,
+        description: ''
+    };
+    
+    // success 類型自動關閉
+    if (type === 'success') {
+        setTimeout(() => {
+            closeModalAlert();
+        }, 1500);
+    }
+};
+
+const closeModalAlert = () => {
+    modalConfig.value.isOpen = false;
+};
+
+// 確認框配置
+const confirmConfig = ref({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: null
+});
+
+const showConfirm = (title, description, onConfirm) => {
+    confirmConfig.value = {
+        isOpen: true,
+        title,
+        description,
+        onConfirm
+    };
+};
+
+const handleConfirm = async () => {
+    if (confirmConfig.value.onConfirm) {
+        await confirmConfig.value.onConfirm();
+    }
+    closeConfirm();
+};
+
+const closeConfirm = () => {
+    confirmConfig.value.isOpen = false;
+    confirmConfig.value.onConfirm = null;
+};
 // 編輯資料夾名稱
 const startEditFolder = (folder) => {
     editingFolderId.value = folder.id;
@@ -64,48 +129,61 @@ const saveEditFolder = async () => {
         if (data.success) {
             await fetchFolders();
             cancelEditFolder();
+            showModal('資料夾名稱修改成功！', 'success');
+            // 通知父組件資料夾已更新
+            emit('submit', { updated: true, type: 'folder' });
         } else {
-            alert(data.message || '修改失敗');
+            showModal(data.message || '修改失敗', 'danger');
         }
     } catch (e) {
-        alert('修改資料夾失敗');
+        showModal('修改資料夾失敗', 'danger');
     } finally {
         loading.value = false;
     }
 };
 
 // 刪除資料夾
-const deleteFolder = async (folder) => {
+const deleteFolder = (folder) => {
     // ...existing code...
     if (!folder || !folder.id) {
-        alert('資料夾ID不存在');
+        showModal('資料夾ID不存在', 'danger');
         return;
     }
-    if (!confirm(`確定要刪除「${folder.name}」資料夾？`)) return;
-    loading.value = true;
-    try {
-        const payload = new URLSearchParams();
-        payload.append('favorites_folder_id', folder.id);
-        // ...existing code...
-        const { data } = await phpApi.delete('/personal/fav_folders.php', {
-            data: payload.toString(),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+    
+    // 使用 BaseModal 顯示確認框
+    showConfirm(
+        `確定要刪除「${folder.name}」資料夾？`,
+        '',
+        async () => {
+            loading.value = true;
+            try {
+                const payload = new URLSearchParams();
+                payload.append('favorites_folder_id', folder.id);
+                // ...existing code...
+                const { data } = await phpApi.delete('/personal/fav_folders.php', {
+                    data: payload.toString(),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+                // ...existing code...
+                if (data.success) {
+                    await fetchFolders();
+                    if (selectedFolderId.value === folder.id) selectedFolderId.value = null;
+                    showModal('資料夾刪除成功！', 'success');
+                    // 通知父組件資料夾已更新
+                    emit('submit', { updated: true, type: 'folder' });
+                } else {
+                    showModal(data.message || '刪除失敗', 'danger');
+                }
+            } catch (e) {
+                console.error('刪除錯誤：', e);
+                showModal('刪除資料夾失敗', 'danger');
+            } finally {
+                loading.value = false;
             }
-        });
-        // ...existing code...
-        if (data.success) {
-            await fetchFolders();
-            if (selectedFolderId.value === folder.id) selectedFolderId.value = null;
-        } else {
-            alert(data.message || '刪除失敗');
         }
-    } catch (e) {
-        console.error('刪除錯誤：', e);
-        alert('刪除資料夾失敗');
-    } finally {
-        loading.value = false;
-    }
+    );
 };
 
 // 取得目前登入者 userId
@@ -180,10 +258,10 @@ const handleClose = () => {
 
 
 // 2. 新增分類邏輯（呼叫 API）
-const MAX_FOLDERS = 12;
+const MAX_FOLDERS = 6;
 const handleAddFolder = async () => {
     if (folders.value.length >= MAX_FOLDERS) {
-        alert('最多只能建立12個資料夾');
+        showModal(`最多只能建立${MAX_FOLDERS}個資料夾`, 'info');
         return;
     }
     if (!newFolderName.value.trim() || !userId.value) return;
@@ -200,11 +278,14 @@ const handleAddFolder = async () => {
                 selectedFolderId.value = Number(data.favorites_folder_id);
             }
             newFolderName.value = '';
+            showModal('資料夾新增成功！', 'success');
+            // 通知父組件資料夾已更新
+            emit('submit', { updated: true, type: 'folder' });
         } else {
-            alert(data.message || '新增失敗');
+            showModal(data.message || '新增失敗', 'danger');
         }
     } catch (e) {
-        alert('新增資料夾失敗');
+        showModal('新增資料夾失敗', 'danger');
     } finally {
         loading.value = false;
     }
@@ -244,7 +325,7 @@ const fetchFavoriteInfo = async () => {
 
 const handleSubmit = async () => {
     if (!userId.value || !recipeId.value) {
-        alert('缺少 userId 或 recipeId');
+        showModal('缺少 userId 或 recipeId', 'danger');
         return;
     }
     const folderId = selectedFolderId.value || null;
@@ -257,16 +338,16 @@ const handleSubmit = async () => {
             form.append('action', 'remove');
             const { data } = await phpApi.post('/social/favorites.php', form);
             if (data.success) {
-                alert('已取消收藏');
+                showModal('已取消收藏', 'success');
                 await fetchFavoriteInfo(); // 強制刷新
                 await fetchFolders(); // 更新資料夾數量
                 emit('submit', { updated: true });
                 handleClose();
             } else {
-                alert(data.message || '取消收藏失敗');
+                showModal(data.message || '取消收藏失敗', 'danger');
             }
         } catch (e) {
-            alert('取消收藏失敗');
+            showModal('取消收藏失敗', 'danger');
         }
         return;
     }
@@ -281,16 +362,16 @@ const handleSubmit = async () => {
         try {
             const { data } = await phpApi.post('/social/favorites.php', form);
             if (data.success) {
-                alert('已加入收藏');
+                showModal('已加入收藏', 'success');
                 await fetchFavoriteInfo(); // 強制刷新
                 await fetchFolders(); // 更新資料夾數量
                 emit('submit', { updated: true });
                 handleClose();
             } else {
-                alert(data.message || '加入收藏失敗');
+                showModal(data.message || '加入收藏失敗', 'danger');
             }
         } catch (e) {
-            alert('加入收藏失敗');
+            showModal('加入收藏失敗', 'danger');
         }
     } else {
         // 已加入，執行移動資料夾
@@ -304,16 +385,16 @@ const handleSubmit = async () => {
             }
             const { data } = await phpApi.patch('/social/favorites.php', payload);
             if (data.success) {
-                alert('已更換收藏資料夾');
+                showModal('已更換收藏資料夾', 'success');
                 await fetchFavoriteInfo(); // 強制刷新
                 await fetchFolders(); // 更新資料夾數量
                 emit('submit', { updated: true });
                 handleClose();
             } else {
-                alert(data.message || '更換失敗');
+                showModal(data.message || '更換失敗', 'danger');
             }
         } catch (e) {
-            alert('更換收藏失敗');
+            showModal('更換收藏失敗', 'danger');
         }
     }
 };
@@ -330,13 +411,13 @@ const moveFavoriteToFolder = async (favoriteId, targetFolderId) => {
         }
         const { data } = await phpApi.patch('/social/favorites.php', payload);
         if (data.success) {
-            alert('已移動收藏到新資料夾');
+            showModal('已移動收藏到新資料夾', 'success');
             // 可在此刷新收藏清單
         } else {
-            alert(data.message || '移動失敗');
+            showModal(data.message || '移動失敗', 'danger');
         }
     } catch (e) {
-        alert('移動收藏失敗');
+        showModal('移動收藏失敗', 'danger');
     }
 };
 
@@ -415,6 +496,23 @@ const submitButtonText = computed(() => {
                 </div>
             </div>
         </div>
+
+        <!-- BaseModal 提示彈窗 -->
+        <BaseModal :isOpen="modalConfig.isOpen" :type="modalConfig.type" :iconClass="modalConfig.iconClass"
+            :title="modalConfig.title" :description="modalConfig.description" @close="closeModalAlert">
+            <template #actions v-if="modalConfig.type !== 'success'">
+                <BaseBtn title="確定" height="40" @click="closeModalAlert" />
+            </template>
+        </BaseModal>
+
+        <!-- BaseModal 確認彈窗 -->
+        <BaseModal :isOpen="confirmConfig.isOpen" type="danger" iconClass="fa-solid fa-triangle-exclamation"
+            :title="confirmConfig.title" :description="confirmConfig.description" @close="closeConfirm">
+            <template #actions>
+                <BaseBtn title="取消" variant="outline" height="40" @click="closeConfirm" />
+                <BaseBtn title="確定" height="40" @click="handleConfirm" />
+            </template>
+        </BaseModal>
     </Teleport>
 </template>
 
