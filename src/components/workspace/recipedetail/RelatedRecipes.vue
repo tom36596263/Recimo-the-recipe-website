@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, watch, nextTick } from 'vue';
-import { publicApi } from '@/utils/publicApi';
+import { phpApi } from '@/utils/publicApi';
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
 
 // Swiper 相關
@@ -40,57 +40,50 @@ const formatImg = (rawPath) => {
     return `${base}${cleanPath}`;
 };
 
+
 const fetchRelated = async () => {
     isLoading.value = true;
     isReady.value = false;
 
     try {
-        // 1. 直接抓取全站食譜資料 (不再從 detail API 拿 adaptations)
-        // 假設你的全站 API 是 recipes.json 或其他的 PHP 接口
-        const res = await publicApi.get('data/recipe/recipes.json');
+        // 🏆 關鍵修正：改用 phpApi，這樣 baseURL 就會是 localhost:8888/...
+        const res = await phpApi.get('recipes/all_recipe_get.php');
 
-        // 2. 處理資料與格式對齊
-        const allRecipes = res.data || [];
+        // 檢查 API 是否成功回傳 JSON
+        if (res.data && res.data.status === 'success') {
+            const allRecipes = res.data.data || [];
 
-        const cleanedData = allRecipes.map(r => {
-            const rawImg = r.recipe_image_url || r.recipe_cover_image || '';
-            const finalImg = formatImg(rawImg);
+            const cleanedData = allRecipes.map(r => {
+                const finalImg = formatImg(r.recipe_image_url || r.recipe_cover_image || '');
+                const authorImg = formatImg(r.author_image || r.user_avatar || '');
+                const authorName = r.author_name || r.user_name || 'Recimo User';
 
-            // 統一作者名稱來源
-            const authorName = r.author_name || r.user_name || 'Recimo User';
+                return {
+                    ...r,
+                    id: r.recipe_id,
+                    recipe_name: r.recipe_title || '美味食譜',
+                    image_url: finalImg,
+                    user_url: authorImg, // 🏆 餵給 RecipeCardSm 的關鍵欄位
+                    author_name: authorName,
+                    author: {
+                        id: r.author_id || r.user_id || 0,
+                        name: authorName,
+                        handle: r.user_email ? r.user_email.split('@')[0] : (r.user_name || 'user'),
+                        image: authorImg
+                    }
+                };
+            });
 
-            return {
-                ...r,
-                id: r.recipe_id,
-                recipe_name: r.recipe_title || '美味食譜',
-                image_url: finalImg,
-
-                // 🏆 對齊小卡片需求，解決 "Recimo User" 問題
-                author_name: authorName,
-                author: {
-                    id: r.author_id || r.user_id,
-                    name: authorName,
-                    image: r.author_image || r.user_avatar || '',
-                    likes: r.likes || 0
-                },
-                // created_at: r.recipe_created_at || r.created_at || '2024-01-01'
-            };
-        });
-
-        // 3. 過濾邏輯
-        relatedList.value = cleanedData
-            .filter(r => {
-                // A. 排除掉目前正在看的這篇
-                const isNotCurrent = Number(r.id) !== Number(props.currentId);
-
-                // B. 排除掉「屬於改編」的食譜 (如果 parent_recipe_id 有值且不為 0，就是改編)
-                const isNotAdapted = !r.parent_recipe_id || Number(r.parent_recipe_id) === 0;
-
-                return isNotCurrent && isNotAdapted;
-            })
-            // 4. 隨機亂序並取前 8 筆
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 8);
+            // 過濾邏輯 (排除目前頁面與改編食譜)
+            relatedList.value = cleanedData
+                .filter(r => {
+                    const isNotCurrent = Number(r.id) !== Number(props.currentId);
+                    const isNotAdapted = !r.parent_recipe_id || Number(r.parent_recipe_id) === 0;
+                    return isNotCurrent && isNotAdapted;
+                })
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 8);
+        }
 
         await nextTick();
         isReady.value = true;
@@ -101,6 +94,7 @@ const fetchRelated = async () => {
         isLoading.value = false;
     }
 };
+
 onMounted(fetchRelated);
 watch(() => props.currentId, fetchRelated);
 
