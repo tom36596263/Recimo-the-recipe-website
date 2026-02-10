@@ -265,8 +265,11 @@ watch(
 
       <div class="row-description">
         <textarea v-if="isEditing" :value="modelValue.description"
-          @input="updateField('description', $event.target.value)" class="desc-textarea p-p2"
-          placeholder="請輸入詳細說明..."></textarea>
+          @input="updateField('description', $event.target.value)" class="desc-textarea p-p2" placeholder="請輸入詳細說明..."
+          maxlength="255"></textarea>
+        <div v-if="isEditing" class="text-end" style="font-size: 12px; color: #999;">
+          {{ modelValue.description?.length || 0 }} / 255
+        </div>
       </div>
     </div>
   </section>
