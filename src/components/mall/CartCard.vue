@@ -5,6 +5,8 @@ import { useCartStore } from '@/stores/cartStore';
 import BaseModal from '@/components/BaseModal.vue';
 // icon
 import IconDelete from '~icons/material-symbols/delete-outline';
+// 圖片路徑
+import { parsePublicFile } from '@/utils/parseFile';
 
 // ==========================================
 // 接收父元件傳過來的商品資料
@@ -82,12 +84,17 @@ const subtotal = computed(() => {
 // 圖片路徑處理
 // ==========================================
 const productImage = computed(() => {
-    // 優先使用從資料庫抓到的單一字串路徑
     const imgUrl = props.item.product_image || props.item.image_url;
 
     if (imgUrl) {
-        // 使用你 main.js 定義的全域解析函式
-        return proxy.$parsePublicFile(imgUrl);
+        let finalPath = proxy.$parsePublicFile(imgUrl);
+
+        // 偵錯：如果路徑中含有 cjd102/g2/ 但沒有 recimo，就補上去
+        if (finalPath.includes('cjd102/g2/') && !finalPath.includes('cjd102/g2/recimo/')) {
+            finalPath = finalPath.replace('cjd102/g2/', 'cjd102/g2/recimo/');
+        }
+
+        return finalPath;
     }
     return `${import.meta.env.BASE_URL}images/default-placeholder.png`;
 });
