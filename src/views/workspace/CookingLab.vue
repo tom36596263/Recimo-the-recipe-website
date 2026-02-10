@@ -1,10 +1,9 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { phpApi } from '@/utils/publicApi';
 import { useAuthStore } from '@/stores/authStore';
 import { parsePublicFile } from '@/utils/parseFile';
 
-// 引入拆分後的子元件
 import CookingFocusStat from '@/components/workspace/cookinglab/CookingFocusStat.vue';
 import CookingRhythmChart from '@/components/workspace/cookinglab/CookingRhythmChart.vue';
 import IngredientAnalysisCard from '@/components/workspace/cookinglab/IngredientAnalysisCard.vue';
@@ -12,8 +11,6 @@ import CookedRecipeGrid from '@/components/workspace/cookinglab/CookedRecipeGrid
 import LogHistoryModal from '@/components/workspace/cookinglab/LogHistoryModal.vue';
 
 const authStore = useAuthStore();
-
-// ========== 狀態管理 ==========
 
 const cookingStats = ref({
     totalHours: 0,
@@ -24,52 +21,67 @@ const cookingStats = ref({
 
 const cookedRecipes = ref([]);
 const isRecipesLoading = ref(true);
-
 const showLogModal = ref(false);
 const selectedRecipeLogs = ref([]);
 const selectedRecipeInfo = ref({});
 
-// ========== API 請求邏輯 ==========
+const currentYear = new Date().getFullYear();
+const currentMonth = new Date().getMonth() + 1;
 
-// 獲取使用者所有的烹飪統計資料
+const selectedYear = ref(currentYear);
+const selectedMonth = ref(currentMonth);
+
+const yearOptions = [currentYear, currentYear - 1];
+const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
+
+// 計算日期範圍：永遠是該月份的第一天到最後一天
+const dateRange = computed(() => {
+    const y = selectedYear.value;
+    const m = selectedMonth.value;
+
+    const fmt = (d) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const firstDay = new Date(y, m - 1, 1);
+    const lastDay = new Date(y, m, 0); // 下個月第0天 = 本月最後一天
+
+    return {
+        start: fmt(firstDay),
+        end: fmt(lastDay)
+    };
+});
+
 const fetchDashboardData = async () => {
-
-    const userId = 2; // 強制寫死測試
-    console.log('Fetching Dashboard for User:', userId);
-
-    console.log('Fetching Dashboard for User:', userId);
+    const userId = authStore.userId || 2;
+    const { start, end } = dateRange.value;
 
     try {
-        const res = await phpApi.get(`log/get_dashboard_stats.php?user_id=${userId}`);
+        const res = await phpApi.get(`log/get_dashboard_stats.php?user_id=${userId}&start_date=${start}&end_date=${end}`);
         if (res.data.status === 'success') {
             const data = res.data;
-
             const totalMins = data.total_minutes ? Number(data.total_minutes) : 0;
 
             cookingStats.value = {
                 totalHours: totalMins,
                 totalLogs: data.total_logs || 0,
-                rhythmData: {
-                    weekly: data.rhythm_data.weekly || {},
-                    monthly: data.rhythm_data.monthly || {}
-                },
-                topIngredients: data.top_ingredients.map(ing => ({
+                rhythmData: data.rhythm_data || {},
+                topIngredients: (data.top_ingredients || []).map(ing => ({
                     ...ing,
                     image: parsePublicFile(ing.image)
                 }))
             };
-            console.log('Stats Updated:', cookingStats.value); // Debug 用
         }
     } catch (error) {
         console.error('獲取統計數據失敗', error);
     }
 };
 
-// 獲取製作過的食譜列表
 const fetchCookedRecipes = async () => {
-    // 🟢 優化：同樣使用 store 的 userId
     const userId = authStore.userId || 2;
-
     isRecipesLoading.value = true;
     try {
         const res = await phpApi.get(`log/get_user_cooked_recipes.php?user_id=${userId}`);
@@ -83,10 +95,9 @@ const fetchCookedRecipes = async () => {
     }
 };
 
-// 開啟日誌燈箱
 const handleOpenHistory = async (recipe) => {
     selectedRecipeInfo.value = recipe;
-    const userId = authStore.userId || 2; // 保持 ID 邏輯一致
+    const userId = authStore.userId || 2;
 
     try {
         const res = await phpApi.get(`log/get_recipe_logs.php?recipe_id=${recipe.recipe_id}&user_id=${userId}`);
@@ -100,7 +111,11 @@ const handleOpenHistory = async (recipe) => {
     }
 };
 
-// ========== 生命週期 ==========
+// 只要年或月改變，就重新抓資料
+watch([selectedYear, selectedMonth], () => {
+    fetchDashboardData();
+});
+
 onMounted(() => {
     fetchDashboardData();
     fetchCookedRecipes();
@@ -113,14 +128,14 @@ onMounted(() => {
             <div class="row">
                 <div class="col-12 header-area">
                     <h2 class="zh-h2 page-title">烹飪實驗室</h2>
-
                     <CookingFocusStat :total-minutes="Number(cookingStats.totalHours)" />
                 </div>
             </div>
 
             <div class="row main-content">
                 <div class="col-9 col-lg-12 left-section">
-                    <CookingRhythmChart :rhythm-data="cookingStats.rhythmData" />
+                    <CookingRhythmChart :rhythm-data="cookingStats.rhythmData" v-model:year="selectedYear"
+                        v-model:month="selectedMonth" :year-options="yearOptions" :month-options="monthOptions" />
                 </div>
 
                 <div class="col-3 col-lg-12 right-section">
@@ -172,7 +187,6 @@ onMounted(() => {
     flex-direction: column;
 }
 
-/* 響應式調整 */
 @media screen and (max-width: 810px) {
     .cooking-lab-page {
         padding: 24px 0 60px;

@@ -45,19 +45,15 @@ const recipeImage = computed(() => {
     background: $neutral-color-white;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     transition: all 0.3s ease;
     cursor: pointer;
     height: 100%;
     display: flex;
     flex-direction: column;
-    border: 1px solid transparent;
+    border: 1px solid $neutral-color-100;
+
 
     &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        border-color: $primary-color-100;
-
         .card-image img {
             transform: scale(1.05);
         }

@@ -30,7 +30,7 @@ const fetchSearchResults = async (keyword = '') => {
         const response = await phpApi.get('recipes/search_get.php', {
             params: { keyword: keyword }
         });
-        
+        console.log("API 回傳資料:", response.data);
         if (response.data.status === 'success') {
             allResults.value = response.data.data;
         }
@@ -171,6 +171,12 @@ const handleEmptyAction = (action) => {
         </div>
     </div>
     <div class="container">
+        <div v-if="isLoading" class="row">
+            <div class="col-12 loading-state">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="zh-h5">正在載入好料理中...</p>
+            </div>
+        </div>
         <div v-if="allResults.length > 0" class="row">
             <div class="col-12 result-title">
                 <h3 class="zh-h3" v-if="searchQuery">「{{searchQuery}}」搜尋結果</h3>
@@ -216,6 +222,25 @@ const handleEmptyAction = (action) => {
 </template>
 
 <style lang="scss" scoped>
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px; // 撐開一點空間，避免頁面跳動
+        gap: 16px;
+        color: $primary-color-700; // 假設你有這個變數
+        
+        p {
+            animation: pulse 1.5s infinite; // 增加一個簡單的呼吸燈效果
+        }
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.5; }
+        50% { opacity: 1; }
+        100% { opacity: 0.5; }
+    }
     .page-btn{
         margin: 30px auto;
     }
