@@ -20,12 +20,32 @@ const orderItems = computed(() => {
 });
 const formatImageUrl = (rawImage) => {
   if (!rawImage) return '';
-  //如果已經是 http 開頭（PHP 已拼好），直接回傳
-  if (typeof rawImage === 'string' && rawImage.startsWith('http')) return rawImage;
+
+  // 1. 定義正確的圖片網域 (不含 api 字眼)
+  // 如果是本地開發(localhost)，用本地路徑；如果是線上，用線上路徑
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+  // 本地端對應你的 XAMPP/MAMP 路徑 (請依你的實際狀況調整，例如 http://localhost:8888/recimo)
+  // 線上端則是 tibamef2e.com...
+  const imgBaseUrl = isLocal
+    ? 'http://localhost:8888/recimo_api' // 這裡依照你本地圖片存放的位置設定
+    : 'https://tibamef2e.com/cjd102/g2/recimo';
+
+  // 2. 處理已經是 http 開頭的網址 (修正錯誤的 /api 路徑)
+  if (typeof rawImage === 'string' && rawImage.startsWith('http')) {
+    // 🚑 急救包：如果網址裡面不小心包含了 /api/img，把它替換掉
+    // 這會把 .../api/img/... 修正回 .../recimo/img/... (或是直接拿掉 api)
+    if (rawImage.includes('/api/img')) {
+      return rawImage.replace('/api/img', '/recimo/img').replace('/recimo/recimo', '/recimo');
+      // 上面這行有點暴力，更保險的做法是直接替換網域部分：
+      // return rawImage.replace('/api/', '/'); 
+    }
+    return rawImage;
+  }
 
   let relativePath = rawImage;
 
-  // 處理資料庫原始 JSON 格式 (例如: [{"image_url":"..."}])
+  // 3. 處理 JSON 格式 (資料庫有時候會存 JSON)
   if (typeof rawImage === 'string' && (rawImage.startsWith('[') || rawImage.startsWith('{'))) {
     try {
       const parsed = JSON.parse(rawImage);
@@ -36,13 +56,13 @@ const formatImageUrl = (rawImage) => {
     } catch (e) { console.warn('JSON parse error', e); }
   }
 
-  //如果 PHP 回傳的是相對路徑（例如 img/mall/xxx.jpg）
-  // 我們應該拼接「當前環境」的 API Base URL，而不是寫死 localhost
+  // 4. 拼接相對路徑 (這是最重要的一步)
   if (relativePath && !relativePath.startsWith('http')) {
-    // 這裡建議使用 phpApi 的配置路徑，或者維持相對路徑讓組件處理
+    // 移除開頭多餘的 public/ 或 /
     const cleanPath = relativePath.replace(/^public\//, '').replace(/^\/+/, '');
-    // 假設你的 phpApi.defaults.baseURL 是正確的環境網址
-    return `${phpApi.defaults.baseURL}/${cleanPath}`.replace(/([^:]\/)\/+/g, "$1");
+
+    // 直接拼接正確的 imgBaseUrl，不再依賴 phpApi
+    return `${imgBaseUrl}/${cleanPath}`;
   }
 
   return relativePath;
