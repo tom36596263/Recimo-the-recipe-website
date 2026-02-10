@@ -27,7 +27,7 @@ const pageSize = 6
 //新增
 const searchIngredientIds = ref([]);
 const searchIngredientNames = ref([]);
-
+const isLoading = ref(true);
 const activeFilters = ref({
     time: "全部",
     difficulty: "全部",
@@ -122,6 +122,8 @@ const fetchRecipes = async () => {
 
     } catch (error) {
         // 3. API 連線失敗或伺服器錯誤 (如 404, 500)
+    }finally {
+        isLoading.value = false;
     }
 };
 
@@ -302,21 +304,28 @@ const handleCardClick = (id) => {
     <section class="container recipe-cards-section">
     </section>
     <section class="container recipe-cards-section">
-        <div v-if="recipes.length > 0" class="row">
-            <div v-for="item in recipes" :key="item.id" @click.prevent="handleCardClick(item.id)"
-                class="col-4 col-md-12 recipe-cards">
-                <RecipeCardLg :recipe="item" class="recipe-card" />
+        <div v-if="isLoading" class="row">
+            <div class="col-12 loading-state">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="zh-h5">正在載入食譜中...</p>
             </div>
         </div>
-        <div v-else class="row">
-            <div class="no-result col-12">
-                <EmptyState title="找不到符合條件的食譜" description="推薦您前往「靈感廚房」用食材找食譜喔!" :buttons="[
-                    { title: '查看所有食譜', variant: 'outline', emit: 'recipes' }
-
-                ]" @button-click="handleEmptyAction" />
+        <template v-else>
+            <div v-if="recipes.length > 0" class="row">
+                <div v-for="item in recipes" :key="item.id" @click.prevent="handleCardClick(item.id)"
+                    class="col-4 col-md-12 recipe-cards">
+                    <RecipeCardLg :recipe="item" class="recipe-card" />
+                </div>
             </div>
-        </div>
+            <div v-else class="row">
+                <div class="no-result col-12">
+                    <EmptyState title="找不到符合條件的食譜" description="推薦您前往「靈感廚房」用食材找食譜喔!" :buttons="[
+                        { title: '查看所有食譜', variant: 'outline', emit: 'recipes' }
 
+                    ]" @button-click="handleEmptyAction" />
+                </div>
+            </div>
+        </template>
     </section>
 
     <section v-if="recipes.length > 0" class="container page-btn">
@@ -336,6 +345,25 @@ const handleCardClick = (id) => {
 </template>
 
 <style lang="scss" scoped>
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px; // 撐開一點空間，避免頁面跳動
+    gap: 16px;
+    color: $primary-color-700; // 假設你有這個變數
+    
+    p {
+        animation: pulse 1.5s infinite; // 增加一個簡單的呼吸燈效果
+    }
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
 .filter-content {
     margin-top: 40px;
 }
