@@ -630,6 +630,10 @@ const isSnapSuccessOpen = ref(false); // 🏆 補上這一行！
 const handlePostSnap = async (payload) => {
   if (!authStore.user) return alert('請先登入');
 
+  console.log('--- 上傳身分檢查 ---');
+  console.log('authStore.user 內容:', authStore.user);
+  console.log('嘗試抓取的 userId:', authStore.user.user_id || authStore.user.id);
+
   const userId = authStore.user.user_id || authStore.user.id;
   const recipeId = route.params.id;
 
