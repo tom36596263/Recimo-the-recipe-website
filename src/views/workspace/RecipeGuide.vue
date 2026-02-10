@@ -1,24 +1,27 @@
 <script setup>
-import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
-import { useRoute } from 'vue-router';
-import { publicApi } from '@/utils/publicApi';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { phpApi } from '@/utils/publicApi';
+import { useCookingStore } from '@/stores/useCookingStore';
 import GuideStepCard from '@/components/workspace/recipeguide/GuideStepCard.vue';
 import StepContentCard from '@/components/workspace/recipeguide/StepContentCard.vue';
 import AllIngredientsModal from '@/components/workspace/recipeguide/modals/AllIngredientsModal.vue';
 import CompleteStepCard from '@/components/workspace/recipeguide/CompleteStepCard.vue';
 
+const router = useRouter();
 const route = useRoute();
+const cookingStore = useCookingStore();
 const recipeId = computed(() => Number(route.params.id));
 
 const foundRecipe = ref({});
 const allSteps = ref([]);
-const stepIngredientItems = ref([]);
-const recipeIngredients = ref([]);
-const recipeIngredientItems = ref([]);
+const fetchedRecipeIngredients = ref([]);
+const fetchedStepIngredients = ref([]);
 const stepNotes = ref({});
 
 const stepTimers = ref({});
 const viewingStepIndex = ref(0);
+const guideStartTime = ref(Date.now());
 
 const timeToSeconds = (timeStr) => {
     if (!timeStr) return 0;
@@ -34,68 +37,44 @@ const secondsToMinSec = (totalSeconds) => {
 
 const fetchData = async () => {
     try {
-        const [recipesRes, stepsRes, stepItemsRes, ingredientsRes, recipeItemsRes] = await Promise.all([
-            publicApi.get('data/recipe/recipes.json'),
-            publicApi.get('data/recipe/steps.json'),
-            publicApi.get('data/recipe/step_ingredients.json'),
-            publicApi.get('data/recipe/ingredients.json'),
-            publicApi.get('data/recipe/recipe_ingredient.json')
-        ]);
+        const response = await phpApi.get(`guide/get_guide_details.php?id=${recipeId.value}`);
 
-        foundRecipe.value = recipesRes.data.find(r => r.recipe_id === recipeId.value) || {};
-        allSteps.value = stepsRes.data.filter(step => step.recipe_id === recipeId.value);
+        if (response.data.status === 'success') {
+            const data = response.data;
 
-        allSteps.value.forEach(step => {
-            stepTimers.value[step.step_id] = {
-                timeLeft: timeToSeconds(step.step_total_time),
-                isTimerRunning: false,
-                intervalId: null,
-                isFinished: false
-            };
-        });
+            foundRecipe.value = data.recipe || {};
+            allSteps.value = data.steps || [];
 
-        recipeIngredientItems.value = recipeItemsRes.data;
-        const recipeIngredientIds = recipeIngredientItems.value
-            .filter(item => item.recipe_id === recipeId.value)
-            .map(i => i.ingredient_id);
-        recipeIngredients.value = ingredientsRes.data.filter(i => recipeIngredientIds.includes(i.ingredient_id));
-        stepIngredientItems.value = stepItemsRes.data.filter(item => allSteps.value.map(s => s.step_id).includes(item.step_id));
+            allSteps.value.forEach(step => {
+                stepTimers.value[step.step_id] = {
+                    timeLeft: timeToSeconds(step.step_total_time),
+                    isTimerRunning: false,
+                    intervalId: null,
+                    isFinished: false
+                };
+            });
 
+            fetchedRecipeIngredients.value = data.recipe_ingredients || [];
+            fetchedStepIngredients.value = data.step_ingredients || [];
+        }
     } catch (error) {
-        console.error('資料讀取失敗', error.message);
+        console.error(error.message);
     }
 };
 
 onMounted(fetchData);
 
 const currentRecipeIngredients = computed(() => {
-    const items = recipeIngredientItems.value.filter(item => item.recipe_id === recipeId.value);
-
-    return items.map(item => {
-        const detail = recipeIngredients.value.find(i => i.ingredient_id === item.ingredient_id);
-        return {
-            ...item,
-            ingredient_name: detail ? detail.ingredient_name : '未知食材'
-        };
-    });
+    return fetchedRecipeIngredients.value;
 });
+
+const currentStepData = computed(() => allSteps.value[viewingStepIndex.value] || {});
 
 const currentStepIngredients = computed(() => {
     const stepId = currentStepData.value.step_id;
     if (!stepId) return [];
-
-    const items = stepIngredientItems.value.filter(item => item.step_id === stepId);
-
-    return items.map(item => {
-        const detail = recipeIngredients.value.find(i => i.ingredient_id === item.ingredient_id);
-        return {
-            ...item,
-            ingredient_name: detail ? detail.ingredient_name : '未知食材'
-        };
-    });
+    return fetchedStepIngredients.value.filter(item => item.step_id === stepId);
 });
-
-const currentStepData = computed(() => allSteps.value[viewingStepIndex.value] || {});
 
 const formatTime = computed(() => {
     const stepId = currentStepData.value.step_id;
@@ -124,7 +103,7 @@ const toggleTimer = () => {
 
     if (timer.isFinished) {
         timer.isFinished = false;
-        timer.timeLeft = timeToSeconds(currentStepData.value.step_total_time); // 回歸初始時間
+        timer.timeLeft = timeToSeconds(currentStepData.value.step_total_time);
         return;
     }
 
@@ -163,6 +142,30 @@ const handleFileUpload = (event) => {
     if (file && currentStepData.value.step_id) {
         noteImages.value[currentStepData.value.step_id] = URL.createObjectURL(file);
     }
+};
+
+const handleFinishGuide = () => {
+    const durationMs = Date.now() - guideStartTime.value;
+    const durationMinutes = Math.floor(durationMs / 1000 / 60);
+    const actualTime = durationMinutes > 0 ? durationMinutes : 1;
+
+    const totalEstimateSeconds = allSteps.value.reduce((sum, step) => {
+        return sum + timeToSeconds(step.step_total_time);
+    }, 0);
+    const estimateTimeMinutes = Math.ceil(totalEstimateSeconds / 60);
+
+    cookingStore.setLogData(
+        recipeId.value,
+        stepNotes.value,
+        noteImages.value,
+        actualTime,
+        estimateTimeMinutes
+    );
+
+    router.push({
+        name: 'create-cooking-log',
+        params: { recipeId: recipeId.value }
+    });
 };
 </script>
 
@@ -219,7 +222,9 @@ const handleFileUpload = (event) => {
                             :is-finished="stepTimers[step.step_id]?.isFinished"
                             :active-time="secondsToMinSec(stepTimers[step.step_id]?.timeLeft || 0)"
                             @click="changeStep(index)" />
-                        <CompleteStepCard :recipe-id="recipeId" :step-notes="stepNotes" :note-images="noteImages" />
+
+                        <CompleteStepCard :recipe-id="recipeId" :step-notes="stepNotes" :note-images="noteImages"
+                            @finish="handleFinishGuide" />
                     </div>
                 </div>
             </aside>
@@ -234,7 +239,6 @@ const handleFileUpload = (event) => {
     flex-wrap: nowrap;
     gap: 20px;
 
-    // main-content區
     &__main-content {
         display: flex;
         flex-direction: column;
@@ -278,7 +282,6 @@ const handleFileUpload = (event) => {
         display: block;
     }
 
-    // sidebar區
     &__sidebar {
         background-color: $neutral-color-100;
         height: auto;

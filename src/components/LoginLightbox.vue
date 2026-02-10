@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick, watch, onUnmounted } from 'vue';
+import { ref, computed, nextTick, watch, onUnmounted, onMounted } from 'vue';
 // 引用 Pinia Store (權限狀態管理)
 import { useAuthStore } from '@/stores/authStore';
 const authStore = useAuthStore();
@@ -593,17 +593,57 @@ const resetForgotForm = () => {
 const forgotStep = ref(0);
 
 // 驗證碼倒數計時
-const timer = ref(150);
+const timer = ref(0); // 剩餘秒數
+let endTime = null;   // 預計結束的時間戳記
 let interval = null;
 
 const startTimer = () => {
-  timer.value = 150;
-  if (interval) clearInterval(interval);
+  // 1. 強制清除舊的計時器，避免兩個 setInterval 同時執行
+  if (interval) {
+    clearInterval(interval);
+    interval = null;
+  }
+
+  // 2. 設定新的結束時間 (150秒後)
+  const duration = 150;
+  endTime = Date.now() + duration * 1000;
+
+  // 3. 立即存入 localStorage 覆蓋舊資料
+  localStorage.setItem('reset_password_expiry', endTime);
+
+  // 4. 先手動更新一次畫面，避免「跳秒」感
+  timer.value = duration;
+
+  // 5. 啟動計時
   interval = setInterval(() => {
-    if (timer.value > 0) timer.value--;
-    else clearInterval(interval);
+    const now = Date.now();
+    const remaining = Math.round((endTime - now) / 1000);
+
+    if (remaining <= 0) {
+      timer.value = 0;
+      clearInterval(interval);
+      interval = null;
+      localStorage.removeItem('reset_password_expiry');
+    } else {
+      timer.value = remaining;
+    }
   }, 1000);
 };
+
+// 在 onMounted 時檢查是否還有沒跑完的計時
+onMounted(() => {
+  const savedEndTime = localStorage.getItem('reset_password_expiry');
+  if (savedEndTime) {
+    const now = Date.now();
+    const remaining = Math.round((savedEndTime - now) / 1000);
+    if (remaining > 0) {
+      endTime = parseInt(savedEndTime);
+      startTimer(); // 自動重新啟動
+    } else {
+      localStorage.removeItem('reset_password_expiry');
+    }
+  }
+});
 
 onUnmounted(() => {
   if (interval) clearInterval(interval);
@@ -658,6 +698,22 @@ const sendForgotEmail = async () => {
   } catch (error) {
     // console.error('發送失敗：', error);
   }
+};
+
+// 返回上一步清空計時器
+const handleBackToStep1 = () => {
+  // 1. 回到填寫 Email 的步驟
+  forgotStep.value = 1;
+
+  // 2. 徹底停止並清除計時器
+  if (interval) {
+    clearInterval(interval);
+    interval = null;
+  }
+
+  // 3. 重置相關狀態與暫存
+  timer.value = 0;
+  localStorage.removeItem('reset_password_expiry');
 };
 
 // 步驟 2: 驗證驗證碼
@@ -736,7 +792,7 @@ const handleResetPassword = async () => {
 const isResending = ref(false); // 防止重複點擊
 
 const resendCode = async () => {
-  if (timer.value > 0 || isResending.value) return; // 時間還沒到或正在發送中就攔截
+  if (timer.value > 0 || isResending.value) return;
 
   isResending.value = true;
   try {
@@ -745,19 +801,19 @@ const resendCode = async () => {
     });
 
     if (res.data.status === 'success') {
-      // 發送成功後重置計時器
+      // 更新驗證碼資料
+      if (res.data.debug_code) {
+        forgotData.value.code = res.data.debug_code; // 這裡一定要更新！
+        console.log('【測試模式】新驗證碼：', res.data.debug_code);
+      }
+
+      showAlert('發送成功', '新驗證碼已寄出', 'success', 'fa-solid fa-check');
       startTimer();
-      // alert('驗證碼已重新發送');
-      showAlert('發送成功', '驗證碼已重新發送到您的信箱', 'success', 'fa-solid fa-check');
-      setTimeout(() => { isModalOpen.value = false; }, 2000);
-      // 確保測試模式能看到新代碼
-      console.log('【測試模式】重新發送的驗證碼是：', res.data.debug_code);
     } else {
-      // alert(res.data.message || '發送失敗');
-      showAlert('發送失敗', res.data.message || '請稍後再試', 'danger', 'fa-solid fa-exclamation');
+      showAlert('發送失敗', res.data.message, 'danger');
     }
   } catch (error) {
-    alert('伺服器連線異常，請稍後再試');
+    showAlert('錯誤', '網路連線異常', 'danger');
   } finally {
     isResending.value = false;
   }
@@ -839,14 +895,14 @@ const closeResetSuccess = () => {
                     </div>
 
                     <div class="row w-100" style="gap: 10px; justify-content: center; margin-top: 20px;">
-                      <BaseBtn title="返回上一步" variant="outline" @click="forgotStep = 1" :width="120" />
+                      <BaseBtn title="返回上一步" variant="outline" @click="handleBackToStep1" :width="120" />
                       <BaseBtn title="下一步" variant="solid" @click="verifyCode" :width="120" />
                     </div>
 
-                    <a href="/benefits" class="p-p3 m-auto"
+                    <router-link to="/benefits" @click="handleClose" class="p-p3 m-auto"
                       style="margin-top: 20px; text-decoration: underline; color: #666;">
                       嘗試多次仍無法收到驗證碼？可聯繫客服
-                    </a>
+                    </router-link>
                   </div>
                 </div>
 
