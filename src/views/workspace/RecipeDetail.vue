@@ -100,6 +100,8 @@ const fetchData = async (quiet = false) => {
         const resIngMaster = await publicApi.get('data/recipe/ingredients.json');
         const masterIng = resIngMaster.data || [];
 
+        const basePeople = Number(preview.recipe_servings || 1);
+
         // 份數捕獲：與編輯頁傳過來的 key 對齊
         const previewServings = Math.max(1, Number(preview.recipe_servings || 1));
 
@@ -112,7 +114,7 @@ const fetchData = async (quiet = false) => {
           recipe_image_url: preview.recipe_cover_image, // 對齊編輯頁傳來的 key
           recipe_difficulty: Number(preview.recipe_difficulty || 1),
           recipe_total_time: preview.recipe_total_time || '0:30',
-          recipe_servings: previewServings, // 用於 computed 裡的 originalServings 計算
+          recipe_servings: preview.recipe_servings,
           recipe_likes: 0,
           author_name: authStore.user?.user_name || '您的預覽',
           tags: preview.recipe_tags || [],
@@ -215,7 +217,7 @@ const fetchData = async (quiet = false) => {
       );
 
       servings.value = 1; // 強制預設顯示為 1 份 (即整份食譜)
-    }
+    } 
 
     // --- 3. 處理成品照 ---
     if (resG.data && resG.data.success) {
@@ -629,6 +631,10 @@ const isSnapSuccessOpen = ref(false); // 🏆 補上這一行！
 
 const handlePostSnap = async (payload) => {
   if (!authStore.user) return alert('請先登入');
+
+  console.log('--- 上傳身分檢查 ---');
+  console.log('authStore.user 內容:', authStore.user);
+  console.log('嘗試抓取的 userId:', authStore.user.user_id || authStore.user.id);
 
   const userId = authStore.user.user_id || authStore.user.id;
   const recipeId = route.params.id;

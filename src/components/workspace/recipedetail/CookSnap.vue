@@ -87,7 +87,12 @@ const handleUploadClick = () => {
 }
 
 const onUploadSubmit = (data) => {
-  console.log('CookSnap.vue 轉發資料:', data)
+  // 🏆 診斷：看看現在登入者的 ID 到底是哪一個？
+  console.log('--- 上傳身分檢查 ---')
+  console.log('authStore.user 完整內容:', authStore.user)
+  console.log('嘗試抓取的 user_id:', authStore.user?.user_id)
+  console.log('嘗試抓取的 id:', authStore.user?.id)
+
   emit('post-snap', {
     note: data.note || '',
     image: data.image

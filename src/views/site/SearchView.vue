@@ -14,7 +14,6 @@ const router = useRouter();
 
 // 1. 定義響應式變數
 const recipes = ref([]);
-// const products = ref([]);
 const recipeTags = ref([]);
 const tags = ref([]);
 const allResults = ref([]); // 儲存從後端取得的所有搜尋結果
@@ -30,7 +29,6 @@ const fetchSearchResults = async (keyword = '') => {
         const response = await phpApi.get('recipes/search_get.php', {
             params: { keyword: keyword }
         });
-        console.log("API 回傳資料:", response.data);
         if (response.data.status === 'success') {
             allResults.value = response.data.data;
         }
@@ -65,17 +63,6 @@ onMounted(() => {
     fetchSearchResults(keywordFromUrl); 
 });
 
-// // 4. 監聽搜尋關鍵字：當使用者輸入時，重新向後端要資料
-// watch(searchQuery, (newVal) => {
-//     currentPage.value = 1;
-//     fetchSearchResults(newVal); 
-// });
-// 3. 監聽搜尋關鍵字
-// watch(searchQuery, (newVal) => {
-//     currentPage.value = 1;
-//     fetchSearchResults(newVal); // 當子組件更新 v-model，這裡會被觸發
-//     router.replace({ query: { ...route.query, q: newVal || undefined } });
-// }, { immediate: false }); // 初始由 onMounted 執行第一次
 watch(searchQuery, (newVal) => {
     currentPage.value = 1;
     fetchSearchResults(newVal); // 這裡會根據新標籤重新抓 API
@@ -84,44 +71,6 @@ watch(searchQuery, (newVal) => {
     router.replace({ query: { q: newVal || undefined } });
 });
 
-// onMounted(() => {
-//     fetchSearchResults(); 
-// });
-
-// 5. 計算屬性
-const filteredRecipes = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase();
-    if(!query) return recipes.value;
-
-    const matchTagIds = tags.value
-    .filter(t => t.tag_name.toLowerCase()
-    .includes(query))
-    .map(t => t.tag_id);
-
-    return recipes.value.filter(recipe => {
-        const titleMatch = recipe.recipe_title.toLowerCase().includes(query);
-        const tagMatch = recipeTags.value.some(rt => 
-            rt.recipe_id === recipe.recipe_id && matchTagIds.includes(rt.tag_id)
-        );
-        return titleMatch || tagMatch;
-    });
-});
-// const displayCounts = computed(() => {
-//     const currentResults = filteredRecipes.value; // 取得目前過濾後的食譜
-    
-//     return {
-//         recipes: currentResults.length,
-//         // 統一判斷邏輯：確保 linked_product_id 有值（非 null/undefined/0/空字串）
-//         products: currentResults.filter(recipe => !!recipe.linked_product_id).length
-//     };
-// });
-// 5. 計算屬性 (因為後端已經濾過了，這裡直接處理分頁與統計)
-// const displayCounts = computed(() => {
-//     return {
-//         recipes: allResults.value.filter(i => i.source_type === 'recipe').length,
-//         products: allResults.value.filter(i => i.source_type === 'product').length
-//     };
-// });
 const displayCounts = computed(() => {
     const total = allResults.value.length;
     // 有 product_id 的才算料理包筆數
@@ -131,17 +80,11 @@ const displayCounts = computed(() => {
         products: hasProductCount
     };
 });
-// const totalPages = computed(() => {
-//     return Math.ceil(filteredRecipes.value.length / pageSize) || 1;
-// });
+
 const totalPages = computed(() => {
     return Math.ceil(allResults.value.length / pageSize) || 1;
 });
 
-// const paginateRecipes = computed(() => {
-//     const start = (currentPage.value - 1) * pageSize;
-//     return filteredRecipes.value.slice(start, start + pageSize);
-// });
 const paginateRecipes = computed(() => {
     const start = (currentPage.value - 1) * pageSize;
     return allResults.value.slice(start, start + pageSize);

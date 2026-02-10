@@ -82,7 +82,7 @@ export const useRecipeStore = defineStore('recipeEditor', {
                 recipe_total_time: formattedTime,
 
                 // 🏆 關鍵補齊：詳情頁縮放功能必須依賴這個欄位
-                recipe_servings: Number(form.recipe_servings || form.servings || 1),
+                recipe_servings: Number(form.servings || 1),
 
                 totalTime: totalMinutes,
                 recipe_kcal_per_100g: Math.round(totalKcal),
