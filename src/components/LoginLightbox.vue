@@ -463,13 +463,16 @@ const handleGoogleSuccess = async (response) => {
 // LINE 登入跳轉函式
 // ==========================================
 const handleLineLogin = () => {
-  localStorage.setItem('pendingPath', window.location.pathname);
+  // 不管目前在哪，登入成功後一律指定去 workspace
+  // 存入的路徑，App.vue 會拿去判斷
+  localStorage.setItem('pendingPath', '/workspace');
+
   const clientID = '2009040716';
 
   // 判斷當前是否在正式環境
   const isProd = window.location.hostname === 'tibamef2e.com';
 
-  // 強制設定正式環境的 Redirect URI
+  // 正式環境的 Redirect URI (LINE 授權後會跳回首頁)
   const redirectUri = isProd
     ? encodeURIComponent('https://tibamef2e.com/cjd102/g2/recimo/')
     : encodeURIComponent(window.location.origin + '/');
