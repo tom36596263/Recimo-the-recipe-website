@@ -114,7 +114,7 @@ const fetchData = async (quiet = false) => {
           recipe_image_url: preview.recipe_cover_image, // 對齊編輯頁傳來的 key
           recipe_difficulty: Number(preview.recipe_difficulty || 1),
           recipe_total_time: preview.recipe_total_time || '0:30',
-          recipe_servings: preview.recipe_servings,
+          recipe_servings: Number(preview.recipe_servings || 1),
           recipe_likes: 0,
           author_name: authStore.user?.user_name || '您的預覽',
           tags: preview.recipe_tags || [],
@@ -910,9 +910,14 @@ watch(
     </div>
   </div>
 
+  <div class="recipe-container-root" v-if="!isLoading && (rawRecipe || isPreviewMode)"
+    :class="{ 'preview-padding': isPreviewMode }">
+  </div>
+
   <div v-else-if="isLoading" class="loading-state">
     <p>正在為您準備食譜資料...</p>
   </div>
+
   <div v-else class="error-state">
     <p>抱歉，找不到該食譜資料 (ID: {{ route.params.id }})。</p>
     <router-link to="/">返回首頁</router-link>
