@@ -18,8 +18,6 @@ const emit = defineEmits(['click']);
 const handleAdd = () => {
     emit('click', props.recipe);
 };
-
-
 </script>
 
 <template>
@@ -31,12 +29,13 @@ const handleAdd = () => {
         <div class="card-body">
             <div class="title">
                 <h4 class="zh-h4">{{ recipe.recipe_title }}</h4>
-
             </div>
 
             <div class="tag-group">
-                <BaseTag :text="`${recipe.recipe_kcal_per_100g} kcal`" />
-                <BaseTag :text="`${recipe.recipe_protein_per_100g} P`" />
+                <BaseTag :text="`${parseInt(recipe.recipe_kcal_per_100g)} kcal`" />
+
+                <BaseTag :text="`${recipe.recipe_servings || 1} 人份`" />
+
                 <BaseTag :text="`難度：${recipe.recipe_difficulty}`" />
             </div>
         </div>

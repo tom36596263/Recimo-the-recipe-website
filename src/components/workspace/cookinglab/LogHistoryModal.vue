@@ -33,10 +33,14 @@ const formatTime = (timeString) => {
 };
 
 const recipeImage = computed(() => {
-    if (!props.recipe.image_url) return '';
-    return props.recipe.image_url.startsWith('http')
-        ? props.recipe.image_url
-        : parsePublicFile(props.recipe.image_url);
+    // 🟢 修改：優先抓 recipe_image_url，如果沒有才抓 image_url
+    const rawPath = props.recipe.recipe_image_url || props.recipe.image_url;
+
+    if (!rawPath) return ''; // 如果都沒有，回傳空字串 (或預設圖)
+
+    return rawPath.startsWith('http')
+        ? rawPath
+        : parsePublicFile(rawPath);
 });
 
 // 處理日誌圖片
@@ -59,7 +63,7 @@ const getLogImage = (url) => {
                         <div class="recipe-cover">
                             <img :src="recipeImage" :alt="recipe.recipe_name" />
                         </div>
-                        <h3 class="recipe-title">{{ recipe.recipe_name }}</h3>
+                        <h3 class="recipe-title">{{ recipe.recipe_title }}</h3>
 
                         <div class="stat-box">
                             <div class="label">累計製作</div>

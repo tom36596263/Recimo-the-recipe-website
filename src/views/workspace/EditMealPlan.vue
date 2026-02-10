@@ -32,7 +32,6 @@ const selectedDate = ref(null);
 
 // --- API 請求函數 ---
 const fetchData = async () => {
-  // 先判斷是否有登入
   if (!authStore.userId) {
     authStore.openLoginAlert();
     return;
@@ -88,38 +87,25 @@ const datelist = computed(() => {
   return list;
 });
 
-// ------ 處理從 RecipePicker 傳來的切換日期請求 -------
 const handleDateChangeRequest = (newDate) => {
   if (!planData.value.start_date || !planData.value.end_date) return;
-
-  // 1. 建立邊界檢查 (確保不會切換到計畫範圍外)
   const start = new Date(planData.value.start_date);
   const end = new Date(planData.value.end_date);
-
-  // 💡 將時間部分歸零，確保比對時只看日期
   start.setHours(0, 0, 0, 0);
   end.setHours(0, 0, 0, 0);
   newDate.setHours(0, 0, 0, 0);
 
-  // 2. 如果新日期在範圍內，更新 selectedDate，這會驅動 RecipePicker 更新內容
   if (newDate >= start && newDate <= end) {
     selectedDate.value = newDate;
-  } else {
-    console.warn('已到達計畫日期的邊界，無法繼續切換');
   }
 };
 
-// --- 計畫資訊變更（含標題與日期範圍） ---
 const handleUpdatePlanInfo = async (newInfo) => {
-  // 1. 強化版日期格式化：避免重複轉換導致的 Invalid Date
   const formatDate = (date) => {
     if (!date) return null;
-    // 如果已經是 YYYY-MM-DD 字串，直接回傳，不要再進 new Date()
     if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
-
     const d = new Date(date);
-    if (isNaN(d.getTime())) return null; // 檢查是否為有效日期
-
+    if (isNaN(d.getTime())) return null;
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -130,63 +116,39 @@ const handleUpdatePlanInfo = async (newInfo) => {
   const updatedEnd = formatDate(newInfo.end) || planData.value.end_date;
   const updatedTitle = (newInfo.title !== undefined) ? newInfo.title : planData.value.title;
 
-  // 如果標題為空，不執行更新
   if (!updatedTitle.trim()) return;
 
   try {
     const res = await phpApi.post('mealplans/update_plan_info.php', {
-      plan_id: Number(planId.value), // 確保是數字
-      user_id: Number(authStore.userId), // 確保是數字
+      plan_id: Number(planId.value),
+      user_id: Number(authStore.userId),
       title: updatedTitle,
       start_date: updatedStart,
       end_date: updatedEnd
     });
 
     if (res.data.success) {
-      // ✅ 成功才更新本地狀態
-      // 使用展開運算子確保響應式完整
-      planData.value = {
-        ...planData.value,
-        title: updatedTitle,
-        start_date: updatedStart,
-        end_date: updatedEnd
-      };
-      console.log('資料庫更新成功');
-    } else {
-      console.error('後端回報更新失敗:', res.data.error);
-      alert('更新失敗：' + (res.data.error || '原因未知'));
+      planData.value = { ...planData.value, title: updatedTitle, start_date: updatedStart, end_date: updatedEnd };
     }
   } catch (err) {
     console.error('網路請求出錯:', err.message);
   }
 };
 
-// 預設方案套用
 const handleApplyTemplate = async (templateId) => {
   if (!confirm('套用方案將會清空目前已安排的食譜，確定要執行嗎？')) return;
-
   try {
-    // 1. 呼叫後端一鍵處理 API
     const res = await phpApi.post('mealplans/apply_template.php', {
       plan_id: planId.value,
       template_id: templateId,
       user_id: authStore.userId
     });
-
-    if (res.data.success) {
-      // 2. 套用成功後，直接重新執行 fetchData 重新撈取所有資料
-      // 這樣 planData (新日期) 和 mealPlanItems (新食譜) 就會同步更新到最新狀態
-      await fetchData();
-
-      console.log('方案套用成功！天數與食譜已同步更新');
-    }
+    if (res.data.success) await fetchData();
   } catch (err) {
     console.error('套用方案失敗：', err.message);
-    alert('套用失敗，請確認模板資料正確性');
   }
 };
 
-// 以日期抓備餐計畫明細
 const getItemsByDate = (date) => {
   const dateStr = date.toISOString().split('T')[0];
   return mealPlanItems.value
@@ -197,7 +159,6 @@ const getItemsByDate = (date) => {
     });
 };
 
-// 處理「新增食譜」事件
 const handleAddRecipe = async (payload) => {
   try {
     const res = await phpApi.post('mealplans/add_meal_item.php', {
@@ -206,7 +167,6 @@ const handleAddRecipe = async (payload) => {
       date: payload.date,
       meal_type: payload.meal_type
     });
-
     if (res.data.success) {
       const itemsRes = await phpApi.get(`mealplans/get_plan_items.php?plan_id=${planId.value}`);
       mealPlanItems.value = itemsRes.data;
@@ -216,128 +176,76 @@ const handleAddRecipe = async (payload) => {
   }
 };
 
-// 處理「刪除食譜」事件
 const handleRemoveRecipe = async (itemId) => {
-  // if (!confirm('確定要移除這道食譜嗎？')) return;
-
   try {
     const res = await phpApi.post('mealplans/remove_meal_item.php', {
       item_id: itemId,
       user_id: authStore.userId
     });
-
     if (res.data.success) {
       const index = mealPlanItems.value.findIndex(item => item.item_id === itemId);
-      if (index !== -1) {
-        mealPlanItems.value.splice(index, 1);
-      }
+      if (index !== -1) mealPlanItems.value.splice(index, 1);
     }
   } catch (err) {
     console.error('刪除失敗：', err.message);
   }
 };
 
-//處理子元件傳上來的目標熱量
-// 當前選中日期的目標熱量
 const currentDayTargetKcal = computed(() => {
-  if (!selectedDate.value) return 2000; // 週視圖模式預設
-
+  if (!selectedDate.value) return 2000;
   const dateStr = selectedDate.value.toISOString().split('T')[0];
   const found = dailyTargets.value.find(t => t.target_date === dateStr);
-
-  // 如果資料庫有設定就用設定值，沒有就給預設 2000
   return found ? Number(found.target_kcal) : 2000;
-})
+});
 
 const updateTargetKcal = async (newKcal) => {
   if (!selectedDate.value || !planId.value) return;
-
   const dateStr = selectedDate.value.toISOString().split('T')[0];
-
   try {
-    // 1. 呼叫 PHP API (你寫好的 update_daily_target.php)
     await phpApi.post('mealplans/update_daily_target.php', {
       plan_id: planId.value,
       user_id: authStore.userId,
       date: dateStr,
       target_kcal: newKcal
     });
-
-    // 2. 同步更新本地 dailyTargets 陣列，這樣畫面（如圖表）才會立刻變
     const index = dailyTargets.value.findIndex(t => t.target_date === dateStr);
-    if (index !== -1) {
-      dailyTargets.value[index].target_kcal = newKcal;
-    } else {
-      dailyTargets.value.push({ target_date: dateStr, target_kcal: newKcal });
-    }
+    if (index !== -1) dailyTargets.value[index].target_kcal = newKcal;
+    else dailyTargets.value.push({ target_date: dateStr, target_kcal: newKcal });
   } catch (err) {
     console.error('更新熱量目標失敗：', err.message);
   }
 };
 
-// 批量更新目標熱量
 const handleBatchUpdateTargetKcal = async (newKcal) => {
-  console.log('準備批量更新，熱量：', newKcal);
-
   try {
     const res = await phpApi.post('mealplans/batch_update_daily_targets.php', {
       plan_id: planId.value,
       user_id: authStore.userId,
       target_kcal: newKcal
     });
-
-    console.log('API 回傳結果：', res.data);
-
     if (res.data.success) {
-      // 重新抓取資料
       const targetsRes = await phpApi.get(`mealplans/get_daily_targets.php?plan_id=${planId.value}`);
       dailyTargets.value = targetsRes.data || [];
-      console.log('全計畫熱量目標已同步至前端');
-    } else {
-      alert('更新失敗：' + res.data.error);
     }
   } catch (err) {
-    console.error('批量更新請求出錯：', err.response?.data || err.message);
-    alert('網路請求失敗，請檢查控制台');
+    console.error('批量更新請求出錯：', err.message);
   }
 };
 
-// UI 切換方法保持不變 ...
 const handleDateSelect = (date) => { selectedDate.value = date; };
 const closeDetail = () => { selectedDate.value = null; };
 const openPanel = () => { showPanel.value = true; };
 const closePanel = () => { showPanel.value = false; };
 
-// 模板與日期更新邏輯 ...
 const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
-  // 🟢 如果是上傳圖片 (isUpload 為 true)
   if (isUpload) {
-    console.log('收到上傳更新，路徑:', updatedData.custom_cover_url);
-
-    // 💡 強制賦予一個全新的物件，觸發 Vue 重新渲染
-    planData.value = {
-      ...planData.value,          // 保留舊有資料 (id, title 等)
-      cover_type: 2,              // 強制設為自定義類型
-      cover_template_id: null,    // 清空模板 ID
-      custom_cover_url: updatedData.custom_cover_url // 更新圖片路徑
-    };
+    planData.value = { ...planData.value, cover_type: 2, cover_template_id: null, custom_cover_url: updatedData.custom_cover_url };
     return;
   }
-
-  // 藍色區塊（切換模板 API）保持不變 ...
-  const payload = {
-    plan_id: planId.value,
-    user_id: authStore.userId,
-    cover_type: updatedData.cover_type,
-    cover_template_id: updatedData.cover_template_id,
-    custom_cover_url: updatedData.custom_cover_url
-  };
-
+  const payload = { plan_id: planId.value, user_id: authStore.userId, cover_type: updatedData.cover_type, cover_template_id: updatedData.cover_template_id, custom_cover_url: updatedData.custom_cover_url };
   try {
     const res = await phpApi.post('mealplans/update_plan_cover.php', payload);
-    if (res.data.success) {
-      planData.value = { ...updatedData };
-    }
+    if (res.data.success) planData.value = { ...updatedData };
   } catch (err) {
     console.error('更新失敗', err);
   }
@@ -354,7 +262,6 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
           </button>
           <h2 class="plan-title">{{ planData.title || '讀取中...' }}</h2>
         </div>
-
         <div class="btn-bar__info-btn" @click="openPanel">
           <i-material-symbols-info-i />
         </div>
@@ -362,10 +269,12 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
 
       <Transition name="fade-scale" mode="out-in">
         <div v-if="!selectedDate" key="week" class="meal-plan-container col-12">
-          <ColumnTitle />
-          <div class="meal-plan-container__columns">
-            <DayColumn v-for="date in datelist" :key="date.getTime()" :current-date="date" :items="getItemsByDate(date)"
-              @click="handleDateSelect(date)" />
+          <div class="meal-plan-scroll-wrapper">
+            <ColumnTitle class="sticky-column" />
+            <div class="meal-plan-container__columns">
+              <DayColumn v-for="date in datelist" :key="date.getTime()" :current-date="date"
+                :items="getItemsByDate(date)" @click="handleDateSelect(date)" />
+            </div>
           </div>
         </div>
 
@@ -433,6 +342,10 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
       font-weight: bold;
       color: $primary-color-800;
       margin: 0;
+
+      @media (max-width: 390px) {
+        font-size: 1rem;
+      }
     }
   }
 
@@ -456,44 +369,52 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
 }
 
 .meal-plan-container {
-  display: flex;
-  gap: 10px;
   min-width: 0;
+}
 
-  &__columns {
-    flex-grow: 1;
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 12px;
-    overflow-x: auto;
-    padding-bottom: 10px;
+.meal-plan-scroll-wrapper {
+  display: flex;
+  position: relative;
+  overflow: hidden; // 避免外層溢出
+}
 
-    :deep(.day-column) {
-      flex-shrink: 0;
-    }
+.sticky-column {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background-color: $neutral-color-white;
 
-    // 1. 設定捲軸「寬度」(垂直時) 或「高度」(水平時)
-    &::-webkit-scrollbar {
-      height: 15px;
-    }
+}
 
-    // 2. 捲軸軌道 (背景)
-    &::-webkit-scrollbar-track {
-      background: transparent;
-      border-radius: 5px;
-    }
+.meal-plan-container__columns {
+  flex-grow: 1;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
 
-    // 3. 捲軸本體 (Thumb)
-    &::-webkit-scrollbar-thumb {
-      background-color: $neutral-color-400;
-      border-radius: 5px;
-      border: 2px solid transparent;
-      background-clip: content-box;
-      transition: background-color 0.3s;
+  :deep(.day-column) {
+    flex-shrink: 0;
+  }
 
-      &:hover {
-        background-color: $accent-color-400;
-      }
+  &::-webkit-scrollbar {
+    height: 12px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $neutral-color-400;
+    border-radius: 10px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+
+    &:hover {
+      background-color: $accent-color-400;
     }
   }
 }
@@ -508,9 +429,7 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
   z-index: 998;
 }
 
-/* --- 動畫特效 --- */
-
-// 右側面板滑入滑出
+/* 動畫 */
 .slide-fade-enter-active,
 .slide-fade-leave-active {
   transition: transform 0.4s ease, opacity 0.4s ease;
@@ -522,7 +441,6 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
   opacity: 0;
 }
 
-// 遮罩淡入淡出
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -533,7 +451,6 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
   opacity: 0;
 }
 
-// 週視圖與編輯器切換縮放
 .fade-scale-enter-active,
 .fade-scale-leave-active {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
