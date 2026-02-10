@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： localhost:8889
--- 產生時間： 2026-02-05 06:57:57
+-- 產生時間： 2026-02-10 01:17:20
 -- 伺服器版本： 5.7.24
 -- PHP 版本： 8.3.1
 
@@ -198,6 +198,33 @@ CREATE TABLE `favorites_folders` (
   `folder_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- 資料表結構 `follows`
+--
+
+CREATE TABLE `follows` (
+  `follow_id` int(11) NOT NULL,
+  `follower_id` int(11) NOT NULL COMMENT '追蹤者 ID',
+  `followed_id` int(11) NOT NULL COMMENT '被追蹤者 ID',
+  `followed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '追蹤時間'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='使用者追蹤關係表';
+
+--
+-- 傾印資料表的資料 `follows`
+--
+
+INSERT INTO `follows` (`follow_id`, `follower_id`, `followed_id`, `followed_at`) VALUES
+(1, 4, 1, '2026-01-15 10:30:00'),
+(2, 4, 3, '2026-01-16 14:20:00'),
+(3, 4, 5, '2026-01-17 09:15:00'),
+(4, 4, 6, '2026-01-18 16:45:00'),
+(5, 3, 4, '2026-01-19 11:00:00'),
+(6, 5, 4, '2026-01-20 13:30:00'),
+(7, 1, 4, '2026-01-21 15:00:00'),
+(8, 6, 4, '2026-01-22 10:20:00');
 
 -- --------------------------------------------------------
 
@@ -1088,7 +1115,7 @@ CREATE TABLE `meal_plans` (
   `cover_template_id` int(11) DEFAULT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
-  `created_at` datetime NOT NULL
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -1096,13 +1123,13 @@ CREATE TABLE `meal_plans` (
 --
 
 INSERT INTO `meal_plans` (`plan_id`, `user_id`, `source_template_id`, `title`, `cover_type`, `custom_cover_url`, `cover_template_id`, `start_date`, `end_date`, `created_at`) VALUES
-(1, 2, NULL, '健康均衡三日自煮計畫', 1, NULL, 12, '2026-01-19', '2026-01-21', '2026-01-18 20:30:00'),
-(2, 2, NULL, '活力輕食三日自煮計畫', 1, NULL, 11, '2026-01-22', '2026-01-24', '2026-01-21 10:00:00'),
-(3, 2, NULL, '春節團圓年菜五日計畫', 1, NULL, 7, '2026-02-16', '2026-02-20', '2026-01-22 08:30:00'),
-(4, 2, NULL, '環球味蕾：從浪漫歐陸到經典台韓六日饗宴', 1, NULL, 4, '2026-02-10', '2026-02-15', '2026-01-28 20:30:00'),
-(5, 2, NULL, '2026 丙午馬年：除夕至初二團圓年菜計畫', 1, NULL, 5, '2026-02-16', '2026-02-18', '2026-01-28 20:35:00'),
-(6, 2, NULL, '春意盎然：三月山林露營三日計畫', 1, NULL, 1, '2026-03-13', '2026-03-15', '2026-01-28 20:43:00'),
-(7, 2, NULL, '520 浪漫食光：情侶專屬奢華饗宴計畫', 1, NULL, 9, '2026-05-19', '2026-05-21', '2026-01-28 20:50:00');
+(1, 2, NULL, '健康均衡三日自煮計畫', 1, NULL, 12, '2026-01-19', '2026-01-21', '2026-01-18 12:30:00'),
+(2, 2, NULL, '活力輕食三日自煮計畫', 1, NULL, 11, '2026-01-22', '2026-01-24', '2026-01-21 02:00:00'),
+(3, 2, NULL, '春節團圓年菜五日計畫', 1, NULL, 7, '2026-02-16', '2026-02-20', '2026-01-22 00:30:00'),
+(4, 2, NULL, '環球味蕾：從浪漫歐陸到經典台韓六日饗宴', 1, NULL, 4, '2026-02-10', '2026-02-15', '2026-01-28 12:30:00'),
+(5, 2, NULL, '2026 丙午馬年：除夕至初二團圓年菜計畫', 1, NULL, 5, '2026-02-16', '2026-02-18', '2026-01-28 12:35:00'),
+(6, 2, NULL, '春意盎然：三月山林露營三日計畫', 1, NULL, 1, '2026-03-13', '2026-03-15', '2026-01-28 12:43:00'),
+(7, 2, NULL, '520 浪漫食光：情侶專屬奢華饗宴計畫', 1, NULL, 9, '2026-05-19', '2026-05-21', '2026-01-28 12:50:00');
 
 -- --------------------------------------------------------
 
@@ -1323,19 +1350,20 @@ CREATE TABLE `meal_plan_templates` (
   `description` text COLLATE utf8_unicode_ci NOT NULL,
   `cover_template_id` int(11) NOT NULL,
   `total_days` int(11) NOT NULL,
-  `created_at` datetime NOT NULL
+  `created_at` datetime NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- 傾印資料表的資料 `meal_plan_templates`
 --
 
-INSERT INTO `meal_plan_templates` (`template_id`, `title`, `description`, `cover_template_id`, `total_days`, `created_at`) VALUES
-(1, '高效健身：高蛋白三日增肌減脂計畫', '專為健身族群與體態管理者規劃。本計畫核心在於高蛋白質攝取與適量複合碳水化合物的平衡，利用舒肥、清蒸與香煎等低油烹調方式，確保攝取純淨營養的同時，也能享受多國風味的料理體驗。', 1, 3, '2026-01-28 21:00:00'),
-(2, '韓流食尚：經典韓式熱門料理五日計畫', '集結韓國街頭與家庭最受歡迎的靈魂料理。從火辣過癮的部隊鍋、辣炒年糕，到香甜誘人的蜂蜜炸雞與石鍋拌飯，讓您連續五天沉浸在道地的韓式味覺饗宴中。', 2, 5, '2026-01-28 21:10:00'),
-(3, '異國甜點盛宴：午茶時光精選五日計畫', '專為甜點控打造的環球甜點之旅。包含日式舒芙蕾、法式可麗露、蒙布朗以及抹茶熔岩蛋糕，每日精選兩款經典甜點組合，在家也能享受精品等級的下午茶時光。', 3, 5, '2026-01-28 21:15:00'),
-(4, '家常溫馨味：精選中式熱炒三日計畫', '嚴選最下飯的台式與川式經典家常菜。包含三杯雞、客家小炒、麻婆豆腐等熱炒店必點料理，搭配溫潤的藥膳雞湯或排骨湯，呈現最溫暖、最具飽足感的日常餐桌。', 4, 3, '2026-01-28 21:20:00'),
-(5, '西洋約會夜：精選義法排餐三日計畫', '打造居家儀式感的首選模板。涵蓋肋眼牛排、松露燉飯、瑪格麗特披薩等義法餐廳經典，從前菜沙拉到主餐湯品皆完美搭配，適合慶祝或浪漫約會使用。', 5, 3, '2026-01-28 21:25:00');
+INSERT INTO `meal_plan_templates` (`template_id`, `title`, `description`, `cover_template_id`, `total_days`, `created_at`, `is_active`) VALUES
+(1, '高效健身：高蛋白三日增肌減脂計畫', '專為健身族群與體態管理者規劃。本計畫核心在於高蛋白質攝取與適量複合碳水化合物的平衡，利用舒肥、清蒸與香煎等低油烹調方式，確保攝取純淨營養的同時，也能享受多國風味的料理體驗。', 1, 3, '2026-01-28 21:00:00', 0),
+(2, '韓流食尚：經典韓式熱門料理五日計畫', '集結韓國街頭與家庭最受歡迎的靈魂料理。從火辣過癮的部隊鍋、辣炒年糕，到香甜誘人的蜂蜜炸雞與石鍋拌飯，讓您連續五天沉浸在道地的韓式味覺饗宴中。', 2, 5, '2026-01-28 21:10:00', 0),
+(3, '異國甜點盛宴：午茶時光精選五日計畫', '專為甜點控打造的環球甜點之旅。包含日式舒芙蕾、法式可麗露、蒙布朗以及抹茶熔岩蛋糕，每日精選兩款經典甜點組合，在家也能享受精品等級的下午茶時光。', 3, 5, '2026-01-28 21:15:00', 0),
+(4, '家常溫馨味：精選中式熱炒三日計畫', '嚴選最下飯的台式與川式經典家常菜。包含三杯雞、客家小炒、麻婆豆腐等熱炒店必點料理，搭配溫潤的藥膳雞湯或排骨湯，呈現最溫暖、最具飽足感的日常餐桌。', 4, 3, '2026-01-28 21:20:00', 0),
+(5, '西洋約會夜：精選義法排餐三日計畫', '打造居家儀式感的首選模板。涵蓋肋眼牛排、松露燉飯、瑪格麗特披薩等義法餐廳經典，從前菜沙拉到主餐湯品皆完美搭配，適合慶祝或浪漫約會使用。', 5, 3, '2026-01-28 21:25:00', 0);
 
 -- --------------------------------------------------------
 
@@ -2853,9 +2881,9 @@ CREATE TABLE `reported_comments` (
 --
 
 INSERT INTO `reported_comments` (`reported_comment_id`, `comment_id`, `reporter_id`, `report_type`, `report_reason`, `status`, `handler_id`, `reported_at`, `update_at`) VALUES
-(1, 12, 2, 3, '在留言區發送加 LINE 領紅包的訊息，明顯是詐騙資訊。', 0, NULL, '2024-01-17 09:00:00', NULL),
-(3, 60, 8, 1, '評論包含侮辱性字眼（髒話）並無端攻擊食譜作者。', 0, NULL, '2024-04-05 15:20:00', NULL),
-(5, 4, 7, 4, '惡意辱罵作者抄襲但未提供任何具體理由，純屬挑釁。', 1, 2, '2024-01-06 10:15:00', '2024-01-06 11:00:00');
+(1, 12, 2, 1, '在留言區發送加 LINE 領紅包的訊息，明顯是詐騙資訊。', 0, NULL, '2024-01-17 09:00:00', NULL),
+(3, 60, 8, 2, '評論包含侮辱性字眼（髒話）並無端攻擊食譜作者。', 0, NULL, '2024-04-05 15:20:00', NULL),
+(5, 4, 7, 2, '惡意辱罵作者抄襲但未提供任何具體理由，純屬挑釁。', 1, 2, '2024-01-06 10:15:00', '2024-01-06 11:00:00');
 
 -- --------------------------------------------------------
 
@@ -4197,6 +4225,8 @@ CREATE TABLE `users` (
   `user_password` varchar(255) NOT NULL,
   `user_startdate` datetime NOT NULL,
   `user_url` varchar(255) DEFAULT NULL,
+  `user_bio` text COMMENT '個人簡介',
+  `user_cover_image` varchar(255) DEFAULT NULL COMMENT '封面圖片',
   `is_verified` tinyint(1) NOT NULL,
   `is_active` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -4205,16 +4235,16 @@ CREATE TABLE `users` (
 -- 傾印資料表的資料 `users`
 --
 
-INSERT INTO `users` (`user_id`, `line_id`, `user_name`, `user_email`, `user_phone`, `user_address`, `user_password`, `user_startdate`, `user_url`, `is_verified`, `is_active`) VALUES
-(1, NULL, 'Recimo官方', 'recimo@gmail.com', '0912345678', '桃園市中壢區復興路46號8樓', '$2y$10$otAwsO50/9KXW.zuGNNyq.jatOZXDKHuVTzftlT6.on86I/UIOe0a', '2025-12-09 00:00:00', 'img/site/Recimo_avatar.svg', 1, 1),
-(2, NULL, '小R(測試人員)', 'admin@test.com', '0923456789', '桃園市中壢區復興路46號9樓', '$2y$10$e5pwotJLcuxX6kyFPJRfaO.bK0OqzpCI1065Yi/a3TY6nbpNM2BNu', '2020-01-22 22:25:00', NULL, 1, 1),
-(3, NULL, 'tom', 'tom@gmail.com', '0934567890', '桃園市中壢區復興路46號8樓', '$2y$10$e5pwotJLcuxX6kyFPJRfaO.bK0OqzpCI1065Yi/a3TY6nbpNM2BNu', '2026-01-27 19:30:00', 'img/site/T_avatar.svg', 1, 1),
-(4, NULL, 'wei', 'wei@gmail.com', '0945678901', '桃園市中壢區復興路46號8樓', '$2y$10$e5pwotJLcuxX6kyFPJRfaO.bK0OqzpCI1065Yi/a3TY6nbpNM2BNu', '2026-01-27 19:30:00', 'img/site/W_avatar.svg', 1, 1),
-(5, NULL, 'HelenKuo', 'helenKuo@gmail.com', '0956789012', '桃園市中壢區復興路46號8樓', '$2y$10$C55GYF.6P9q256PmvqRUqeQPJ5rwKUiC7DWhsP3WkHfwS.ORx93vO', '2026-01-27 19:30:00', 'img/site/H_avatar.svg', 1, 1),
-(6, NULL, 'pei', 'pei@gmail.com', '0911111111', '桃園市中壢區復興路46號8樓', '$2y$10$1iCtREvd63kWjolzfW2ByOmx09DrqkZgFpje1.K7bjNYrMf3fCxUC', '2026-01-23 16:20:00', 'img/site/P_avatar.svg', 1, 1),
-(7, NULL, 'yutung', 'yutung@gmail.com', '0922222222', '桃園市中壢區復興路46號8樓', '$2y$10$fXS3wuKIFX/IEfJBarvGLe9fsJTiekTxvCuHtR3dRnLEmpo.5ZfEy', '2026-01-27 19:30:00', 'img/site/yutung_avatar.svg', 1, 1),
-(8, NULL, 'Hsu', 'hsu@test.com', '0933333333', '桃園市中壢區復興路46號8樓', '$2y$10$e5pwotJLcuxX6kyFPJRfaO.bK0OqzpCI1065Yi/a3TY6nbpNM2BNu', '2026-01-27 19:30:00', 'img/site/H_avatar.svg', 1, 1),
-(9, NULL, '小小R(測試停用)', '123@test.com', '0900000000', '桃園市中壢區復興路46號9樓', '$2y$10$e5pwotJLcuxX6kyFPJRfaO.bK0OqzpCI1065Yi/a3TY6nbpNM2BNu', '2026-01-27 20:00:00', NULL, 1, 0);
+INSERT INTO `users` (`user_id`, `line_id`, `user_name`, `user_email`, `user_phone`, `user_address`, `user_password`, `user_startdate`, `user_url`, `user_bio`, `user_cover_image`, `is_verified`, `is_active`) VALUES
+(1, NULL, 'Recimo官方', 'recimo@gmail.com', '0912345678', '桃園市中壢區復興路46號8樓', '$2y$10$otAwsO50/9KXW.zuGNNyq.jatOZXDKHuVTzftlT6.on86I/UIOe0a', '2025-12-09 00:00:00', 'img/site/Recimo_avatar.svg', 'Recimo 官方帳號，為您提供最優質的食譜', 'img/profile/2.png', 1, 1),
+(2, NULL, '小R(測試人員)', 'admin@test.com', '0923456789', '桃園市中壢區復興路46號9樓', '$2y$10$e5pwotJLcuxX6kyFPJRfaO.bK0OqzpCI1065Yi/a3TY6nbpNM2BNu', '2020-01-22 22:25:00', NULL, NULL, NULL, 1, 1),
+(3, NULL, 'tom', 'tom@gmail.com', '0934567890', '桃園市中壢區復興路46號8樓', '$2y$10$e5pwotJLcuxX6kyFPJRfaO.bK0OqzpCI1065Yi/a3TY6nbpNM2BNu', '2026-01-27 19:30:00', 'img/site/T_avatar.svg', NULL, NULL, 1, 1),
+(4, NULL, 'wei', 'wei@gmail.com', '0945678901', '桃園市中壢區復興路46號8樓', '$2y$10$e5pwotJLcuxX6kyFPJRfaO.bK0OqzpCI1065Yi/a3TY6nbpNM2BNu', '2026-01-27 19:30:00', 'img/site/W_avatar.svg', '美食愛好者，熱愛烹飪與分享', 'img/profile/2.png', 1, 1),
+(5, NULL, 'HelenKuo', 'helenKuo@gmail.com', '0956789012', '桃園市中壢區復興路46號8樓', '$2y$10$C55GYF.6P9q256PmvqRUqeQPJ5rwKUiC7DWhsP3WkHfwS.ORx93vO', '2026-01-27 19:30:00', 'img/site/H_avatar.svg', NULL, NULL, 1, 1),
+(6, NULL, 'pei', 'pei@gmail.com', '0911111111', '桃園市中壢區復興路46號8樓', '$2y$10$1iCtREvd63kWjolzfW2ByOmx09DrqkZgFpje1.K7bjNYrMf3fCxUC', '2026-01-23 16:20:00', 'img/site/P_avatar.svg', NULL, NULL, 1, 1),
+(7, NULL, 'yutung', 'yutung@gmail.com', '0922222222', '桃園市中壢區復興路46號8樓', '$2y$10$fXS3wuKIFX/IEfJBarvGLe9fsJTiekTxvCuHtR3dRnLEmpo.5ZfEy', '2026-01-27 19:30:00', 'img/site/yutung_avatar.svg', NULL, NULL, 1, 1),
+(8, NULL, 'Hsu', 'hsu@test.com', '0933333333', '桃園市中壢區復興路46號8樓', '$2y$10$e5pwotJLcuxX6kyFPJRfaO.bK0OqzpCI1065Yi/a3TY6nbpNM2BNu', '2026-01-27 19:30:00', 'img/site/H_avatar.svg', NULL, NULL, 1, 1),
+(9, NULL, '小小R(測試停用)', '123@test.com', '0900000000', '桃園市中壢區復興路46號9樓', '$2y$10$e5pwotJLcuxX6kyFPJRfaO.bK0OqzpCI1065Yi/a3TY6nbpNM2BNu', '2026-01-27 20:00:00', NULL, NULL, NULL, 1, 0);
 
 --
 -- 已傾印資料表的索引
@@ -4282,6 +4312,15 @@ ALTER TABLE `favorites_folders`
   ADD KEY `fk_favorites_folders_creator` (`creator_id`);
 
 --
+-- 資料表索引 `follows`
+--
+ALTER TABLE `follows`
+  ADD PRIMARY KEY (`follow_id`),
+  ADD UNIQUE KEY `unique_follow` (`follower_id`,`followed_id`),
+  ADD KEY `idx_follower` (`follower_id`),
+  ADD KEY `idx_followed` (`followed_id`);
+
+--
 -- 資料表索引 `ingredients`
 --
 ALTER TABLE `ingredients`
@@ -4323,6 +4362,7 @@ ALTER TABLE `meal_plan_cover_template`
 --
 ALTER TABLE `meal_plan_daily_targets`
   ADD PRIMARY KEY (`daily_target_id`),
+  ADD UNIQUE KEY `unique_plan_date` (`plan_id`,`target_date`),
   ADD KEY `fk_target_plan` (`plan_id`);
 
 --
@@ -4558,6 +4598,12 @@ ALTER TABLE `favorites_folders`
   MODIFY `favorites_folder_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- 使用資料表自動遞增(AUTO_INCREMENT) `follows`
+--
+ALTER TABLE `follows`
+  MODIFY `follow_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
 -- 使用資料表自動遞增(AUTO_INCREMENT) `ingredients`
 --
 ALTER TABLE `ingredients`
@@ -4615,7 +4661,7 @@ ALTER TABLE `meal_plan_templates`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `meal_plan_template_items`
 --
 ALTER TABLE `meal_plan_template_items`
-  MODIFY `template_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `notifications`
@@ -4777,18 +4823,25 @@ ALTER TABLE `favorites_folders`
   ADD CONSTRAINT `fk_favorites_folders_creator` FOREIGN KEY (`creator_id`) REFERENCES `users` (`user_id`);
 
 --
+-- 資料表的限制式 `follows`
+--
+ALTER TABLE `follows`
+  ADD CONSTRAINT `fk_followed` FOREIGN KEY (`followed_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_follower` FOREIGN KEY (`follower_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+--
 -- 資料表的限制式 `log_ingredients`
 --
 ALTER TABLE `log_ingredients`
   ADD CONSTRAINT `fk_log_ingredients_ingredient` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredients` (`ingredient_id`),
-  ADD CONSTRAINT `fk_log_ingredients_log` FOREIGN KEY (`cooking_log_id`) REFERENCES `cooking_logs` (`cooking_log_id`);
+  ADD CONSTRAINT `fk_log_ingredients_log` FOREIGN KEY (`cooking_log_id`) REFERENCES `cooking_logs` (`cooking_log_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- 資料表的限制式 `log_step_note`
 --
 ALTER TABLE `log_step_note`
   ADD CONSTRAINT `fk_log_step_log` FOREIGN KEY (`cooking_log_id`) REFERENCES `cooking_logs` (`cooking_log_id`),
-  ADD CONSTRAINT `fk_log_step_step` FOREIGN KEY (`step_id`) REFERENCES `steps` (`step_id`);
+  ADD CONSTRAINT `fk_log_step_step` FOREIGN KEY (`step_id`) REFERENCES `steps` (`step_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- 資料表的限制式 `meal_plans`
