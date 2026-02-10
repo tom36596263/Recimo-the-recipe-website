@@ -14,6 +14,7 @@ const router = useRouter();
 const allRecipe = ref([])
 const currentPage = ref(1)
 const pageSize = 8
+const isLoading = ref(true);
 //新增
 const searchIngredientIds = ref([]);
 const searchIngredientNames = ref([]);
@@ -116,8 +117,9 @@ const fetchRecipes = async () => {
         }
 
     } catch (error) {
-        console.error('取得食譜列表失敗:', error);
-        allRecipe.value = [];
+        // 3. API 連線失敗或伺服器錯誤 (如 404, 500)
+    } finally {
+        isLoading.value = false;
     }
 };
 
@@ -259,6 +261,7 @@ const handleCardClick = (id) => {
 
 <template>
     <section class="container filter-content">
+
         <div class="row">
             <FilterSection v-model="activeFilters" @open-kitchen="openKitchen" />
         </div>
@@ -280,20 +283,30 @@ const handleCardClick = (id) => {
         <Cook v-if="showCook" @close="showCook = false" @cook-finish="handleCookFinish" />
     </section>
     <section class="container recipe-cards-section">
-        <div v-if="recipes.length > 0" class="row">
-            <div v-for="item in recipes" :key="item.id"
-                :to="{ name: 'workspace-recipe-detail', params: { id: item.id } }" class="col-3 col-lg-6 recipe-cards">
-                <RecipeCardSm :recipe="item" class="recipe-card" />
+        <div v-if="isLoading" class="row">
+            <div class="col-12 loading-state">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="zh-h5">正在載入食譜中...</p>
             </div>
         </div>
-        <div v-else class="row">
-            <div class="no-result col-12">
-                <EmptyState title="找不到符合條件的食譜" description="推薦您前往「靈感廚房」用食材找食譜喔!" :buttons="[
-                    { title: '查看所有食譜', variant: 'outline', emit: 'recipes' },
-                    // { title: '前往靈感廚房', variant: 'outline', emit: 'go-kitchen' }
-                ]" @button-click="handleEmptyAction" />
+        <template v-else>
+            <div v-if="recipes.length > 0" class="row">
+                <div v-for="item in recipes" :key="item.id"
+                    :to="{ name: 'workspace-recipe-detail', params: { id: item.id } }"
+                    class="col-3 col-lg-6 recipe-cards">
+                    <RecipeCardSm :recipe="item" class="recipe-card" />
+                </div>
             </div>
-        </div>
+            <div v-else class="row">
+                <div class="no-result col-12">
+                    <EmptyState title="找不到符合條件的食譜" description="推薦您前往「靈感廚房」用食材找食譜喔!" :buttons="[
+                        { title: '查看所有食譜', variant: 'outline', emit: 'recipes' },
+                        // { title: '前往靈感廚房', variant: 'outline', emit: 'go-kitchen' }
+                    ]" @button-click="handleEmptyAction" />
+                </div>
+            </div>
+        </template>
+
     </section>
 
     <section class="container page-btn">
@@ -306,6 +319,34 @@ const handleCardClick = (id) => {
 </template>
 
 <style lang="scss" scoped>
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px; // 撐開一點空間，避免頁面跳動
+    gap: 16px;
+    color: $primary-color-700; // 假設你有這個變數
+
+    p {
+        animation: pulse 1.5s infinite; // 增加一個簡單的呼吸燈效果
+    }
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.5;
+    }
+}
+
 .filter-content {
     margin-top: 40px;
 }

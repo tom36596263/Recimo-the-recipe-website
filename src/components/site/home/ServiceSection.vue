@@ -28,7 +28,9 @@
     const slideTo = (index) => {
         swiperInstance.value?.slideTo(index);
     };
-
+const getImageUrl = (name) => {
+    return new URL(`../../../assets/images/site/${name}`, import.meta.url).href;
+};
 </script>
 
 <template>
