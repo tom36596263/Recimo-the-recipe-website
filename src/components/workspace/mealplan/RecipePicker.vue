@@ -39,8 +39,15 @@ const currentTotalKcal = computed(() => {
     return Math.round(
         props.currentItems.reduce((sum, item) => {
             const recipe = item.detail || {};
+
+            // 取得食譜總熱量 (若無則為 0)
             const totalKcal = Number(recipe.recipe_kcal_per_100g) || 0;
-            const servings = Number(recipe.recipe_servings) || 1;
+
+            // 取得食譜份數 (若無或 <= 0 則預設為 1，避免除以零)
+            let servings = Number(recipe.recipe_servings);
+            if (!servings || servings <= 0) servings = 1;
+
+            // 累加：總熱量 / 份數 = 單人份熱量
             return sum + (totalKcal / servings);
         }, 0)
     );
