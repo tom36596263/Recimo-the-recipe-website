@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router'; // 1. 補上 useRoute
-import { publicApi } from '@/utils/publicApi';     // 2. 補上 publicApi (路徑請依你專案調整)
+import { useRoute, useRouter } from 'vue-router';
+import { phpApi } from '@/utils/publicApi';
 import { useCookingStore } from '@/stores/useCookingStore';
 
 import LogTime from '../../components/workspace/cookinglog/LogTime.vue';
@@ -13,23 +13,100 @@ const route = useRoute();
 const router = useRouter();
 const cookingStore = useCookingStore();
 
-const recipeId = Number(route.params.id);
+const recipeId = Number(route.params.recipeId);
 const allSteps = ref([]);
+
+// 🟢 修正 1：補上難度對照表，否則 saveAndGoLab 會報錯
+const difficultyMap = {
+    '簡單': 1,
+    '中等': 2,
+    '困難': 3
+};
 
 const fetchData = async () => {
     try {
-        const res = await publicApi.get('data/recipe/steps.json');
-        allSteps.value = res.data.filter(step => step.recipe_id === recipeId);
+        const response = await phpApi.get(`guide/get_guide_details.php?id=${recipeId}`);
+        if (response.data.status === 'success') {
+            allSteps.value = response.data.steps || [];
+        }
     } catch (error) {
         console.error('抓取步驟失敗:', error);
     }
 };
 
-const saveAndGoLab = () => {
-    router.push({ name: 'cooking-lab' });
+const handleMainImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        cookingStore.tempLogData.mainImage = URL.createObjectURL(file);
+        // 確保 Store 有存入檔案物件
+        cookingStore.tempLogData.mainImageFile = file;
+    }
+};
+
+const saveAndGoLab = async () => {
+    try {
+        const formData = new FormData();
+
+        // 1. 基本資料
+        formData.append('recipe_id', recipeId);
+        formData.append('user_id', 1); // ⚠️ 正式上線記得改為動態 user_id
+
+        // 時間轉換
+        const hours = Math.floor(cookingStore.tempLogData.totalTime / 60);
+        const mins = cookingStore.tempLogData.totalTime % 60;
+        const timeStr = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
+        formData.append('actual_time', timeStr);
+
+        formData.append('satisfaction_rating', cookingStore.tempLogData.rating);
+
+        // 難度轉換 (現在 difficultyMap 存在了，這裡不會報錯)
+        const skillVal = difficultyMap[cookingStore.tempLogData.skillDifficulty] || 1;
+        const processVal = difficultyMap[cookingStore.tempLogData.processDifficulty] || 1;
+        formData.append('technique_rating', skillVal);
+        formData.append('complexity_rating', processVal);
+
+        formData.append('log_summary', cookingStore.tempLogData.summary || '');
+
+        // 2. 主圖檔案
+        if (cookingStore.tempLogData.mainImageFile) {
+            formData.append('main_image', cookingStore.tempLogData.mainImageFile);
+        }
+
+        // 3. 步驟筆記
+        formData.append('step_notes', JSON.stringify(cookingStore.tempLogData.stepNotes));
+
+        // 4. 步驟圖片
+        // ⚠️ 請確保 LogStepcard 有正確寫入 noteImageFiles
+        if (cookingStore.tempLogData.noteImageFiles) {
+            for (const [stepId, file] of Object.entries(cookingStore.tempLogData.noteImageFiles)) {
+                // formData key 必須與後端 PHP 接收的一致 (step_image_ID)
+                formData.append(`step_image_${stepId}`, file);
+            }
+        }
+
+        const response = await phpApi.post('log/create_log.php', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+
+        if (response.data.status === 'success') {
+            // alert('儲存成功！');
+            router.push({ name: 'cooking-lab' });
+        } else {
+            alert('儲存失敗：' + response.data.message);
+        }
+
+    } catch (error) {
+        console.error('API Error:', error);
+        alert('系統錯誤，請稍後再試');
+    }
 };
 
 onMounted(async () => {
+    if (!recipeId) {
+        alert('無效的食譜連結');
+        router.push({ name: 'my-recipes' });
+        return;
+    }
     await fetchData();
 });
 </script>
@@ -42,16 +119,21 @@ onMounted(async () => {
 
         <div class="log__body row">
             <div class="log__upload col-10">
-                <label for="file-upload" class="log__upload-text">
-                    <p>點擊上傳圖片</p>
+                <label for="file-upload" class="log__upload-label">
+                    <img v-if="cookingStore.tempLogData.mainImage" :src="cookingStore.tempLogData.mainImage"
+                        class="preview-img" />
+                    <div v-else class="upload-placeholder">
+                        <p>點擊上傳圖片</p>
+                    </div>
                 </label>
 
-                <input type="file" id="file-upload" accept="image/*" style="display: none;">
+                <input type="file" id="file-upload" accept="image/*" style="display: none;"
+                    @change="handleMainImageUpload">
             </div>
 
             <div class="log__dashboard col-10">
                 <LogTime />
-                <LogRating />
+                <LogRating v-model="cookingStore.tempLogData.rating" />
                 <LogDifficulty />
             </div>
 
@@ -61,8 +143,9 @@ onMounted(async () => {
                     筆記回顧
                 </div>
                 <LogStepcard v-for="(step, index) in allSteps" :key="step.step_id" :order="index + 1"
-                    :initialNote="cookingStore.tempLogData.stepNotes[step.step_id]"
-                    :initialImage="cookingStore.tempLogData.noteImages[step.step_id]" />
+                    :step-id="step.step_id" :initialNote="cookingStore.tempLogData.stepNotes[step.step_id]"
+                    :initialImage="cookingStore.tempLogData.noteImages[step.step_id]"
+                    :description="step.step_description" />
             </div>
 
             <div class="log__summary col-10">
@@ -70,14 +153,14 @@ onMounted(async () => {
                     <i-material-symbols-edit-document />
                     心得回顧
                 </div>
-                <input type="text" class="log__summary-text" placeholder="點擊添加筆記...">
+                <textarea v-model="cookingStore.tempLogData.summary" class="log__summary-text"
+                    placeholder="點擊添加筆記..."></textarea>
             </div>
         </div>
 
         <div class="log__footer row">
             <div class="log__btn-wrapper col-10">
-
-                <div class="log__back-btn p-p1">
+                <div class="log__back-btn p-p1" @click="router.go(-1)">
                     返回步驟播放
                 </div>
                 <div class="log__finished-btn p-p1" @click="saveAndGoLab">
@@ -121,16 +204,37 @@ onMounted(async () => {
         height: 200px;
         border-radius: 10px;
         border: 1px dashed $neutral-color-400;
+        overflow: hidden;
+        position: relative;
+        background-color: #fff;
+        padding: 0;
 
-    }
+        .log__upload-label {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
 
-    &__upload-text {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
+        .preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .upload-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: $neutral-color-400;
+
+            p {
+                margin: 0;
+            }
+        }
     }
 
     &__dashboard {
@@ -179,7 +283,6 @@ onMounted(async () => {
         justify-content: flex-end;
         gap: 10px;
     }
-
 
     &__back-btn,
     &__finished-btn {

@@ -166,14 +166,20 @@ const routes = [
         }
       },
       {
-        path: 'cooking-log/:id',
-        name: 'cooking-log',
+        path: 'cooking-log/create/:recipeId',
+        name: 'create-cooking-log',
         component: () => import('@/views/workspace/CookingLog.vue'),
         meta: {
           title: '烹飪日誌',
           layout: 'workspace',
           requiresAuth: true
         }
+      },
+      {
+        path: 'cooking-log/view/:logId',
+        name: 'view-cooking-log',
+        component: () => import('@/views/workspace/CookingLog.vue'),
+        meta: { title: '烹飪日誌詳情', layout: 'workspace', requiresAuth: true }
       },
       {
         path: 'plan',

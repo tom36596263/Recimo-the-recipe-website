@@ -1,22 +1,11 @@
 <script setup>
-import { computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useCookingStore } from '@/stores/useCookingStore';
-
-const props = defineProps({
-    recipeId: Number,
-    stepNotes: Object,
-    noteImages: Object
-});
-
-const router = useRouter();
-const cookingStore = useCookingStore();
+// 這裡不需要引入 store 或 router 了，讓元件保持純粹
+const emit = defineEmits(['finish']);
 
 const handleComplete = () => {
-    // 1. 打包資料到 Store
-    cookingStore.setLogData(props.recipeId, props.stepNotes, props.noteImages);
-    // 2. 執行跳轉
-    router.push(`/workspace/cooking-log/${props.recipeId}`);
+    // 只要通知父層 (RecipeGuide.vue) 說：「我點擊完成了」
+    // 剩下的計算時間、存入 Store、跳轉頁面，都交給父層處理
+    emit('finish');
 };
 </script>
 
