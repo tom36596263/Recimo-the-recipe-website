@@ -910,9 +910,9 @@ watch(
     </div>
   </div>
 
-  <div class="recipe-container-root" v-if="!isLoading && (rawRecipe || isPreviewMode)"
+  <!-- <div class="recipe-container-root" v-if="!isLoading && (rawRecipe || isPreviewMode)"
     :class="{ 'preview-padding': isPreviewMode }">
-  </div>
+  </div> -->
 
   <div v-else-if="isLoading" class="loading-state">
     <p>正在為您準備食譜資料...</p>
