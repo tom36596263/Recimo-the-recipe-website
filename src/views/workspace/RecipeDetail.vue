@@ -95,68 +95,77 @@ const fetchData = async (quiet = false) => {
     const preview = recipeStore.previewData;
 
     if (preview) {
+      let masterIng = [];
+
+      // 🏆 第一步：嘗試抓取母表，失敗也沒關係
       try {
-        // 同步抓取食材母表以校正營養係數 (保留你原本這段邏輯)
         const resIngMaster = await publicApi.get('data/recipe/ingredients.json');
-        const masterIng = resIngMaster.data || [];
-
-        const basePeople = Number(preview.recipe_servings || 1);
-
-        // 份數捕獲：與編輯頁傳過來的 key 對齊
-        const previewServings = Math.max(1, Number(preview.recipe_servings || 1));
-
-        // 【關鍵修正】映射為與正式 API 格式完全一致的 rawRecipe
-        rawRecipe.value = {
-          ...preview,
-          recipe_id: 0,
-          recipe_title: preview.recipe_title || '未命名食譜',
-          recipe_description: preview.recipe_description || '',
-          recipe_image_url: preview.recipe_cover_image, // 對齊編輯頁傳來的 key
-          recipe_difficulty: Number(preview.recipe_difficulty || 1),
-          recipe_total_time: preview.recipe_total_time || '0:30',
-          recipe_servings: Number(preview.recipe_servings || 1),
-          recipe_likes: 0,
-          author_name: authStore.user?.user_name || '您的預覽',
-          tags: preview.recipe_tags || [],
-          created_at: '',
-        };
-
-        // 處理食材 (保持你原本的 amount 運算，但確保 Key 對齊)
-        rawIngredients.value = (preview.ingredients || []).map((ing) => {
-          const name = (ing.ingredient_name || '').trim();
-          const master = masterIng.find((m) => String(m.ingredient_name).trim() === name);
-          const unit = ing.unit_name || master?.unit_name || '份';
-          const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(unit.toLowerCase());
-
-          return {
-            ...ing,
-            ingredient_name: name,
-            amount: Number(ing.amount || 0), // 保持原始數值，由 computed 處理份數縮放
-            unit_name: unit,
-            gram_conversion: isWeightUnit ? 1 : Number(ing.gram_conversion || master?.gram_conversion || 1),
-            kcal_per_100g: Number(ing.kcal_per_100g || master?.kcal_per_100g || 0),
-            protein_per_100g: Number(ing.protein_per_100g || master?.protein_per_100g || 0),
-            fat_per_100g: Number(ing.fat_per_100g || master?.fat_per_100g || 0),
-            carbs_per_100g: Number(ing.carbs_per_100g || master?.carbs_per_100g || 0)
-          };
-        });
-
-        // 處理步驟
-        rawSteps.value = (preview.steps || []).map((s, idx) => ({
-          ...s,
-          step_order: s.step_order || idx + 1
-        })).sort((a, b) => Number(a.step_order) - Number(b.step_order));
-
-        // 設為 1 份顯示模式
-        servings.value = 1;
-
-        if (!quiet) isLoading.value = false;
-        return;
+        masterIng = resIngMaster.data || [];
+        console.log('✅ 成功載入母表');
       } catch (err) {
-        console.error('預覽資料解析失敗:', err);
+        console.error('❌ 母表 JSON 載入失敗:', err);
       }
-    }
-  }
+
+      // 🏆 第二步：映射基本資訊
+      rawRecipe.value = {
+        ...preview,
+        recipe_id: 0,
+        recipe_title: preview.recipe_title || '未命名食譜',
+        recipe_description: preview.recipe_description || '',
+        recipe_image_url: preview.recipe_cover_image,
+        recipe_difficulty: Number(preview.recipe_difficulty || 1),
+        recipe_total_time: preview.recipe_total_time || '0:30',
+        recipe_servings: Number(preview.recipe_servings || 1),
+        author_name: authStore.user?.user_name || '您的預覽',
+        tags: preview.recipe_tags || [],
+        created_at: '',
+      };
+
+      // 🏆 第三步：處理食材 (確保 finalConversion 正確寫入)
+      rawIngredients.value = (preview.ingredients || []).map((ing) => {
+        const name = (ing.ingredient_name || '').trim();
+        const master = masterIng.find((m) => String(m.ingredient_name).trim() === name);
+
+        const unit = ing.unit_name || master?.unit_name || '份';
+        const isWeightUnit = ['g', '克', 'ml', '毫升'].includes(unit.toLowerCase());
+
+        // 計算保險轉換率
+        const finalConversion = isWeightUnit ? 1 :
+          (Number(master?.gram_conversion) || Number(ing.gram_conversion) || Number(ing.conversion) || 1);
+
+        console.log(`🔍 [${name}] 轉換率: ${finalConversion}`);
+
+        return {
+          ...ing,
+          ingredient_name: name,
+          amount: Number(ing.amount || 0),
+          unit_name: unit,
+          gram_conversion: finalConversion, // 🏆 這裡一定要用變數
+          kcal_per_100g: Number(master?.kcal_per_100g || ing.kcal_per_100g || 0),
+          protein_per_100g: Number(master?.protein_per_100g || ing.protein_per_100g || 0),
+          fat_per_100g: Number(master?.fat_per_100g || ing.fat_per_100g || 0),
+          carbs_per_100g: Number(master?.carbs_per_100g || ing.carbs_per_100g || 0)
+        };
+      });
+
+      // 🏆 第四步：處理步驟
+      rawSteps.value = (preview.steps || []).map((s, idx) => ({
+        ...s,
+        step_order: s.step_order || idx + 1
+      })).sort((a, b) => Number(a.step_order) - Number(b.step_order));
+
+      servings.value = 1;
+      if (!quiet) isLoading.value = false;
+      return; // 🏁 預覽結束，跳出 fetchData
+    } // 這裡結束 if (preview)
+  } // 這裡結束 if (isPreviewMode)
+  
+  //     } catch (err) {
+  //       console.error('食材母表載入失敗，將使用編輯器傳入的數值', err);
+  //       var masterIng = []; // 即使失敗也給空陣列，避免 map 中斷
+  //     }
+  //   }
+  // }
   const currentUid = authStore.user?.user_id || authStore.user?.id || 0;
 
   // --- 2. 正式模式：從伺服器抓取資料 ---
