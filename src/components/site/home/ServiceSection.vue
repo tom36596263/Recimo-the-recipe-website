@@ -18,7 +18,7 @@
         { title: '備餐計畫', fileName: 'home-service-section-2-plan.png' },
         { title: '食譜步驟', fileName: 'home-service-section-3-step.png' },
     ];
-
+    
     const setSwiperRef = (swiper) => {
         swiperInstance.value = swiper;
     };
@@ -65,13 +65,12 @@
         @swiper="setSwiperRef"
         >
         <swiper-slide v-for="(item, index) in services" :key="index">
-            
             <div class="img-container">
-                <img 
-                    :src="parsePublicFile(`img/site/${item.fileName}`, true)" 
-                    :alt="item.title" 
-                    class="service-img" 
-                />
+            <img 
+                :src="getImageUrl(item.fileName)" 
+                :alt="item.title" 
+                class="service-img" 
+            />
             </div>
         </swiper-slide>
     </swiper>
