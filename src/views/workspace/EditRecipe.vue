@@ -341,10 +341,13 @@ const publishNewRecipeToDb = async () => {
         note: ing.note || ''              // PHP 期待 $ing['note']
       })),
 
+      
+
       steps: processedSteps,
       tags: recipeForm.value.tags.map(t => t.tag_id) // 這是食譜總標籤
     };
 
+    console.log("確認份數值:", payload.servings);
     console.log('發送至後端的 Payload:', payload);
 
     // 4. 發送請求

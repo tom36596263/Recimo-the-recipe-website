@@ -76,8 +76,10 @@ const handleSubmit = async () => {
         reporter_id: reporterId,
         target_type: 'recipe',
         target_id: targetId,
-        report_type: reasonMap[selectedReason.value] || '0', // 轉為數字代碼
-        report_reason: reportNote.value // 補充說明
+        // PHP 需要的是文字標籤來做 type_map 轉換
+        reason: selectedReason.value,
+        // PHP 接收端叫做 note
+        note: reportNote.value
     };
 
     try {

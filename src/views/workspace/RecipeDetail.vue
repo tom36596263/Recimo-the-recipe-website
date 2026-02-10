@@ -100,6 +100,8 @@ const fetchData = async (quiet = false) => {
         const resIngMaster = await publicApi.get('data/recipe/ingredients.json');
         const masterIng = resIngMaster.data || [];
 
+        const basePeople = Number(preview.recipe_servings || 1);
+
         // 份數捕獲：與編輯頁傳過來的 key 對齊
         const previewServings = Math.max(1, Number(preview.recipe_servings || 1));
 
@@ -112,7 +114,7 @@ const fetchData = async (quiet = false) => {
           recipe_image_url: preview.recipe_cover_image, // 對齊編輯頁傳來的 key
           recipe_difficulty: Number(preview.recipe_difficulty || 1),
           recipe_total_time: preview.recipe_total_time || '0:30',
-          recipe_servings: previewServings, // 用於 computed 裡的 originalServings 計算
+          recipe_servings: preview.recipe_servings,
           recipe_likes: 0,
           author_name: authStore.user?.user_name || '您的預覽',
           tags: preview.recipe_tags || [],

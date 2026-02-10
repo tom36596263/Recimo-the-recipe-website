@@ -225,7 +225,7 @@ watch(
               {{ n <= modelValue.difficulty ? '★' : '☆' }} </span>
           </div>
         </div>
-        <div v-if="!isAdaptMode" class="meta-item">
+        <!-- <div v-if="!isAdaptMode" class="meta-item">
           <span class="label">份量：</span>
           <template v-if="isEditing">
             <input type="number" class="inline-input servings-input" :value="modelValue.servings"
@@ -233,6 +233,15 @@ watch(
             <span class="unit">人份</span>
           </template>
           <span v-else class="value">{{ modelValue.servings || 0 }} 人份</span>
+        </div> -->
+        <div v-if="!isAdaptMode" class="meta-item">
+          <span class="label">份量：</span>
+          <template v-if="isEditing">
+            <input type="number" class="inline-input servings-input" :value="modelValue.recipe_servings"
+              @input="updateField('recipe_servings', Number($event.target.value))" placeholder="2" min="1" max="20" />
+            <span class="unit">人份</span>
+          </template>
+          <span v-else class="value">{{ modelValue.recipe_servings || 0 }} 人份</span>
         </div>
       </div>
 

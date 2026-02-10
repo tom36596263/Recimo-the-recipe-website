@@ -97,8 +97,16 @@ const fetchRecipes = async () => {
                     nutritional_info: {
                         calories: `${Math.round(recipe.recipe_kcal_per_100g || 0)}kcal`,
                         serving_size: recipe.recipe_servings,
+                        // 修正後的 cooking_time 處理
                         cooking_time: (() => {
-                            const timeParts = recipe.recipe_total_time.split(':'); // [HH, mm, ss]
+                            // 💡 安全檢查：如果沒時間或是格式不對，回傳 0 分鐘
+                            if (!recipe.recipe_total_time || typeof recipe.recipe_total_time !== 'string') {
+                                return '0分鐘';
+                            }
+
+                            const timeParts = recipe.recipe_total_time.split(':');
+                            if (timeParts.length < 2) return '0分鐘'; // 確保至少有時和分
+
                             const hours = parseInt(timeParts[0]) || 0;
                             const minutes = parseInt(timeParts[1]) || 0;
                             const totalMinutes = hours * 60 + minutes;
