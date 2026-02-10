@@ -40,7 +40,7 @@ const currentData = computed(() => {
 
 // 計算總數
 const currentTotal = computed(() => {
-    return Object.values(currentData.value).reduce((sum, val) => sum + val, 0);
+    return Object.values(currentData.value).reduce((sum, val) => sum + Number(val), 0);
 });
 
 // Chart.js 數據配置
@@ -62,6 +62,39 @@ const chartData = computed(() => ({
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: {
+        // 全域預設動畫時間 (作為備案)
+        duration: 1000,
+        easing: 'easeOutQuart'
+    },
+    animations: {
+        // 1. 強制 X 軸位置「瞬間」到位 (無動畫)
+        x: {
+            duration: 0
+        },
+        // 2. 強制 寬度「瞬間」到位 (無動畫)
+        width: {
+            duration: 0
+        },
+        // 3. 強制 顏色「瞬間」到位 (無淡入淡出，讓視覺專注在長高)
+        colors: {
+            duration: 0
+        },
+        // 4. 唯一允許的動畫：Y 軸高度
+        y: {
+            duration: 1000,
+            easing: 'easeOutQuart',
+            // 動態取得 Y 軸 0 的位置，確保從底部長出來
+            from: (ctx) => {
+                if (ctx.type === 'data') {
+                    const scale = ctx.chart.scales.y;
+                    if (scale) {
+                        return scale.getPixelForValue(0);
+                    }
+                }
+            }
+        }
+    },
     plugins: {
         legend: { display: false },
         tooltip: {
@@ -75,7 +108,7 @@ const chartOptions = {
     scales: {
         y: {
             beginAtZero: true,
-            ticks: { stepSize: 5, font: { size: 12 } },
+            ticks: { stepSize: 1, font: { size: 12 } },
             grid: { color: 'rgba(0, 0, 0, 0.05)' }
         },
         x: {
@@ -86,23 +119,32 @@ const chartOptions = {
 };
 
 // 數字動畫
-const animateNumber = (target, endValue) => {
-    const startValue = target.value;
+const animateNumber = (targetRef, endValue) => {
+    // 確保起始值與結束值都是數字
+    const startValue = Number(targetRef.value) || 0;
+    const finalValue = Number(endValue) || 0;
+
+    if (startValue === finalValue) return;
+
     const duration = 800;
     const startTime = performance.now();
 
     const animate = (currentTime) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        const easeProgress = 1 - Math.pow(1 - progress, 4); // easeOutQuart
+        const easeProgress = 1 - Math.pow(1 - progress, 4);
 
-        target.value = Math.round(startValue + (endValue - startValue) * easeProgress);
+        // 這裡確保運算結果是數字
+        targetRef.value = Math.round(startValue + (finalValue - startValue) * easeProgress);
 
-        if (progress < 1) requestAnimationFrame(animate);
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            targetRef.value = finalValue; // 確保最後精準
+        }
     };
     requestAnimationFrame(animate);
 };
-
 // 監聽總數變化觸發動畫
 watch(currentTotal, (newVal) => {
     animateNumber(animatedCount, newVal);
@@ -146,7 +188,7 @@ watch(currentTotal, (newVal) => {
     background: $neutral-color-white;
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -206,7 +248,7 @@ watch(currentTotal, (newVal) => {
     }
 
     .stat-card {
-        background: linear-gradient(135deg, $neutral-color-white 0%, $primary-color-100 100%);
+        background: $primary-color-100;
         border: 1px solid $primary-color-100;
         border-radius: 16px;
         padding: 20px;
@@ -214,11 +256,6 @@ watch(currentTotal, (newVal) => {
         flex: 1;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         transition: transform 0.2s;
-
-        &:hover {
-            transform: translateY(-2px);
-            border-color: $primary-color-400;
-        }
 
         .stat-title {
             font-size: 14px;

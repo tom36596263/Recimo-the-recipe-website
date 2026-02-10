@@ -39,13 +39,14 @@ const formattedTime = computed(() => {
 .focus-stat-card {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     background: linear-gradient(135deg, $primary-color-800 0%, $primary-color-700 100%);
     color: white;
     padding: 16px 24px;
     border-radius: 12px;
     gap: 16px;
-    box-shadow: 0 4px 12px rgba($primary-color-800, 0.2);
-    min-width: 280px;
+    // min-width: 280px;
+    width: 100%;
 
     .icon-wrapper {
         background: rgba(255, 255, 255, 0.2);

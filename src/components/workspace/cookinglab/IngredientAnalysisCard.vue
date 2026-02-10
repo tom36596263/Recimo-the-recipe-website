@@ -77,6 +77,12 @@ const doughnutOptions = {
 
 <template>
     <div class="ingredient-lab-card">
+
+        <div class="soul-mate" v-if="topIngredients.length">
+            <p class="soul-label">本月你的靈魂伴侶</p>
+            <p class="soul-value">{{ soulIngredients }}</p>
+        </div>
+
         <h4 class="zh-h4 card-title">常用食材 Top5</h4>
 
         <div class="top-ingredients" v-if="topIngredients.length">
@@ -92,20 +98,15 @@ const doughnutOptions = {
         <div class="doughnut-wrapper" v-if="topIngredients.length">
             <Doughnut :data="doughnutData" :options="doughnutOptions" />
         </div>
-
-        <div class="soul-mate" v-if="topIngredients.length">
-            <p class="soul-label">本月你的靈魂伴侶</p>
-            <p class="soul-value">{{ soulIngredients }}</p>
-        </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
 .ingredient-lab-card {
-    background: linear-gradient(135deg, $primary-color-100 0%, $neutral-color-white 100%);
+    background: $primary-color-100;
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -113,7 +114,7 @@ const doughnutOptions = {
 
     .card-title {
         color: $neutral-color-800;
-        margin-bottom: 20px;
+        margin: 20px 0;
         font-size: 18px;
     }
 
@@ -121,7 +122,7 @@ const doughnutOptions = {
         display: flex;
         justify-content: center;
         gap: 12px;
-        margin-bottom: 24px;
+        // margin-bottom: 24px;
         flex-wrap: wrap;
     }
 
@@ -132,7 +133,7 @@ const doughnutOptions = {
         border-radius: 12px;
         background: $neutral-color-white;
         padding: 8px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        // box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         transition: transform 0.2s;
 
         &:hover {
@@ -171,8 +172,8 @@ const doughnutOptions = {
     }
 
     .soul-mate {
-        padding-top: 20px;
-        border-top: 1px solid rgba($neutral-color-400, 0.2);
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba($neutral-color-400, 0.2);
 
         .soul-label {
             font-size: 13px;

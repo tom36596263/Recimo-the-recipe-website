@@ -74,7 +74,7 @@ watch(() => props.recipes, () => {
     background: $neutral-color-white;
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     min-height: 400px;
 
     .section-title {
@@ -83,18 +83,6 @@ watch(() => props.recipes, () => {
         font-size: 20px;
         position: relative;
         padding-left: 12px;
-
-        &::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 20px;
-            background-color: $primary-color-700;
-            border-radius: 2px;
-        }
     }
 
     .loading-state,
