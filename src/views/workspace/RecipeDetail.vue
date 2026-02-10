@@ -215,7 +215,7 @@ const fetchData = async (quiet = false) => {
       );
 
       servings.value = 1; // 強制預設顯示為 1 份 (即整份食譜)
-    }
+    } 
 
     // --- 3. 處理成品照 ---
     if (resG.data && resG.data.success) {
