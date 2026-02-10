@@ -3,12 +3,12 @@ import { markRaw, computed, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
-import { parsePublicFile } from '@/utils/parseFile';
 import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
 
 import BaseTag from '@/components/common/BaseTag.vue';
 import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
 import LikeButton from '@/components/common/LikeButton.vue'
+import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
 
 import IconLocalFireDepartment from '~icons/material-symbols/Local-Fire-Department-outline';
 import IconramenDining from '~icons/material-symbols/Ramen-Dining-outline';
@@ -22,6 +22,9 @@ const props = defineProps({
 });
 
 const router = useRouter();
+
+// 定義向父組件發出的事件
+const emit = defineEmits(['favoriteUpdated']);
 
 const goToDetail = () => {
     router.push({
@@ -52,7 +55,6 @@ const recipeInfo = computed(() => [
 ]);
 
 const handleLikeChange = (isLiked, item) => {
-    console.log(`用戶對 ${item.userName} 的留言點讚狀態：`, isLiked);
     // 這裡可以呼叫 API 更新後端數據
 };
 
@@ -70,6 +72,8 @@ const handleModalSubmit = () => {
     if (userId.value) {
         favoritesStore.refetchFavorites(userId.value);
     }
+    // 通知父組件收藏已更新
+    emit('favoriteUpdated');
 };
 
 const handleHeartClick = (e) => {
@@ -84,7 +88,7 @@ const handleHeartClick = (e) => {
 <template>
     <div class="recipe-card-lg">
         <header class="card-header">
-            <img :src="parsePublicFile(recipe.image_url)" alt="recipe.recipe_name">
+            <img :src="(recipe.image_url)" alt="recipe.recipe_name">
         </header>
 
         <div class="card-body">
@@ -111,10 +115,10 @@ const handleHeartClick = (e) => {
 
         <footer>
             <div class="personal-info">
-                <div class="personal-img">
-                    <img :src="LogoBlack" alt="Recimo Logo">
-                </div>
-                <p class="p-p1">Recimo</p>
+                <AuthorInfo v-if="recipe" :user-id="recipe.author?.id || 0"
+                    :name="recipe.author_name || recipe.author?.name || 'Recimo'"
+                    :handle="recipe.author?.handle || `user_${recipe.author?.id || 0}`"
+                    :avatar-url="recipe.user_url || ''" />
                 <div @click.prevent.stop>
                     <LikeButton :initial-likes="recipe.author.likes || 0"
                         @update:liked="(val) => handleLikeChange(val, item)" />
@@ -219,6 +223,7 @@ const handleHeartClick = (e) => {
         .personal-info {
             display: flex;
             align-items: center;
+            gap: 6px;
 
             .p-p1 {
                 margin-right: 6px;

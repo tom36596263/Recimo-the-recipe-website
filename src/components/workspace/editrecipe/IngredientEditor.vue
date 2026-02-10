@@ -53,20 +53,15 @@ const handleAddMultiple = (items) => {
         const isDuplicate = props.ingredients.some(ing => ing.name === item.ingredient_name);
 
         if (!isDuplicate) {
-            props.ingredients.push({
-                // ✅ 關鍵修改：優先使用燈箱傳過來的正確 ingredient_id
-                // 只有在真的找不到 ID 的極端情況下才產生隨機字串作為 Key
+            newIngredients.push({
                 id: item.ingredient_id || ('id' + Date.now() + Math.floor(Math.random() * 1000)),
-
                 name: item.ingredient_name,
                 amount: '',
                 unit: item.unit_name || '',
                 note: '',
-                fromDB: true, // 標記它是從資料庫（或 JSON）抓出來的
+                fromDB: true, 
                 isInvalid: false,
                 color_tag: null,
-
-                // 營養成分也一併帶入，方便後續計算
                 kcal_per_100g: item.kcal_per_100g || 0,
                 protein_per_100g: item.protein_per_100g || 0,
                 fat_per_100g: item.fat_per_100g || 0,

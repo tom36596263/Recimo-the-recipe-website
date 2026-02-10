@@ -7,6 +7,7 @@
     import { phpApi } from '@/utils/publicApi'
     import { useFavoritesStore } from '@/stores/favoritesStore';
     import { useAuthStore } from '@/stores/authStore';
+    import { parsePublicFile } from '@/utils/parseFile';
 
     const { runWithAuth } = useAuthGuard();
     const router = useRouter();
@@ -56,6 +57,13 @@ onMounted(async () => {
                 // 範例："素食,家常菜" -> ["素食", "家常菜"]
                 const recipeTagsNames = recipe.tag_names ? recipe.tag_names.split(',') : [];
 
+                // 3. 【關鍵修正】處理作者頭像路徑
+                // 先找出 API 回傳的欄位，如果都沒有則給 null
+                const rawAvatar = recipe.user_url || recipe.author_image || recipe.user_image || recipe.avatar_url;
+                
+                // 直接交給 parsePublicFile 處理拼接與預設值
+                const finalAvatarUrl = parsePublicFile(rawAvatar);
+
                 return {
                     id: recipe.recipe_id,
                     recipe_name: recipe.recipe_title,
@@ -69,55 +77,14 @@ onMounted(async () => {
                     },
                     author: {
                         name: recipe.author_name || 'Recimo', // 如果 SQL 有 join 到作者名
-                        likes: recipe.recipe_like_count
-                    }
+                        likes: recipe.recipe_like_count,
+                        id: recipe.author_id // 如果 SQL 有 join 到作者 ID
+                    },
+                    author_name: recipe.author_name || recipe.user_name || 'Recimo',
+                    user_url: finalAvatarUrl
                 };
             });
         }
-        // const recipeData = res.data;
-        // const recipeTagsData = res.data.recipe_tags || [];
-        // const tagsData = res.data.tags || [];
-
-        // const tagMap = {};
-        // tagsData.forEach(tag => {
-        //     tagMap[tag.tag_id] = tag.tag_name;
-        // });
-
-        // const randomRecipes = [...recipeData]
-        // .sort(() => Math.random() - 0.5)
-        // .slice(0, 3);
-
-        // const base = import.meta.env.BASE_URL;
-        // recipes.value = randomRecipes.map(recipe => {
-
-        //     const matchedTagIds = recipeTagsData
-        //         .filter(rt => rt.recipe_id === recipe.recipe_id)
-        //         .map(rt => rt.tag_id);
-
-        //     // 透過 tagMap 轉換成 tag_name 陣列
-        //     const recipeTagsNames = matchedTagIds.map(id => tagMap[id]).filter(Boolean);
-        //     const timeParts = recipe.recipe_total_time.split(':');
-        //     const hours = parseInt(timeParts[0]);
-        //     const minutes = parseInt(timeParts[1]);
-        //     const displayTime = hours > 0 ? `${hours * 60 + minutes}分鐘` : `${minutes}分鐘`;
-
-        //     return {
-        //         id: recipe.recipe_id,
-        //         recipe_name: recipe.recipe_title,
-        //         difficulty: recipe.recipe_difficulty,
-        //         image_url: recipe.recipe_image_url,
-        //         tags: recipeTagsNames,
-        //         nutritional_info: {
-        //             calories: `${Math.round(recipe.recipe_kcal_per_100g)}kcal`,
-        //             serving_size: recipe.recipe_servings,
-        //             cooking_time: displayTime
-        //         },
-        //         author: {
-        //             name: 'Recimo',
-        //             likes: recipe.recipe_like_count
-        //         }
-        //     };
-        // });
     } catch (error) {
         console.error('載入資料失敗:', error);
     }

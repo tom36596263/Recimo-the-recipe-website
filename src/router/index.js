@@ -52,17 +52,6 @@ const routes = [
         component: () => import('@/views/site/RecipeOverview.vue'),
         meta: { layout: 'default', title: '食譜總覽', breadcrumb: '食譜總覽', showInMenu: true, }
       },
-      // {
-      //   path: '/mall',
-      //   component: () => import('@/views/site/MallView.vue'),
-      //   meta: { layout: 'default', title: 'Recimo商城', breadcrumb: 'Recimo商城', showInMenu: true }
-      // },
-      // {
-      //   path: '/mall/:id',
-      //   name: 'product-detail',
-      //   component: () => import('@/views/site/ProductDetail.vue'),
-      //   meta: { layout: 'default', breadcrumb: '載入中...', showInMenu: true }
-      // },
       {
         path: '/mall',
         component: () => import('@/views/site/MallView.vue'),
@@ -88,13 +77,6 @@ const routes = [
         name: 'cart',
         component: () => import('@/views/site/CartView.vue'),
         meta: { layout: 'default', title: '我的購物車', breadcrumb: '我的購物車' }
-      },
-      // === 新增 LINE 登入回呼路由 ===
-      {
-        path: '/auth/callback',
-        name: 'line-callback',
-        component: () => import('@/views/site/AuthCallbackView.vue'),
-        meta: { layout: 'default', title: '登入中', breadcrumb: 'LINE 登入' }
       },
       {
         path: '/checkout',

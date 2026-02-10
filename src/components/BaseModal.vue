@@ -90,4 +90,9 @@ const closeModal = () => {
     display: block;
   }
 }
+
+.modal-card.danger:not(:has(.btn-group)) {
+  height: auto;
+  min-height: 203px;
+}
 </style>

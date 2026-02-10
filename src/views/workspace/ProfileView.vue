@@ -117,7 +117,6 @@ const handleSaveProfile = async (updatedData) => {
             if (updatedData.avatar) immediateUpdate.user_url = updatedData.avatar;
             
             authStore.updateUserInfo(immediateUpdate);
-            console.log('🚀 立即更新頭像預覽到全域 Store');
         }
 
         const formData = new FormData();
@@ -145,11 +144,10 @@ const handleSaveProfile = async (updatedData) => {
             if (isOwnProfile.value && data.data) {
                 const finalUpdate = {};
                 // 檢查各種可能的欄位名稱
-                const serverAvatarUrl = data.data.user_url || data.data.avatar_url || data.avatar_url;
+                const serverAvatarUrl = data.data.author_image || data.data.user_url || data.data.avatar_url || data.avatar_url;
                 if (serverAvatarUrl) {
                     finalUpdate.user_url = serverAvatarUrl;
                     authStore.updateUserInfo(finalUpdate);
-                    console.log('✅ 已更新為伺服器正式頭像 URL:', serverAvatarUrl);
                 }
             }
             
@@ -158,7 +156,6 @@ const handleSaveProfile = async (updatedData) => {
             showEditModal.value = false;
         }
     } catch (err) {
-        console.error('更新個人資料失敗:', err);
         alert('更新失敗，請稍後再試');
     }
 };
@@ -255,8 +252,6 @@ const toggleFollow = async (userId) => {
             }
         }
     } catch (err) {
-        console.error('追蹤操作失敗:', err);
-        console.error('錯誤詳情:', err.response?.data || err.message);
         alert('操作失敗，請稍後再試');
     }
 };
@@ -266,7 +261,6 @@ const toggleFollow = async (userId) => {
  */
 const loadProfile = async () => {
     if (!targetUserId.value) {
-        console.warn('使用者 ID 無效');
         return;
     }
 
@@ -284,7 +278,7 @@ const loadProfile = async () => {
         userProfile.value = {
             username: data.user_name || '訪客',
             role: data.user_bio || '無內容',
-            avatar: getImageUrl(data.user_url),
+            avatar: getImageUrl(data.author_image || data.author_avatar || data.user_url || data.user_avatar || data.avatar_url),
             coverImage: getImageUrl(data.user_cover_image),
             isFollowing: data.is_following || false,  // 追蹤狀態
             stats: {
@@ -298,13 +292,11 @@ const loadProfile = async () => {
         if (isOwnProfile.value && authStore.user) {
             authStore.user.user_name = data.user_name;
             authStore.user.user_bio = data.user_bio;
-            authStore.user.user_url = data.user_url;
+            authStore.user.user_url = data.author_image || data.author_avatar || data.user_url || data.user_avatar || data.avatar_url;
         }
 
     } catch (err) {
         notFound.value = true;
-        console.error('載入個人資料失敗:', err);
-        console.error('錯誤詳情:', err.response?.data || err.message);
     }
 };
 
@@ -313,7 +305,6 @@ const loadProfile = async () => {
  */
 const loadMyRecipes = async () => {
     if (!targetUserId.value) {
-        console.warn('使用者 ID 無效');
         error.value = '無效的使用者';
         return;
     }
@@ -330,27 +321,26 @@ const loadMyRecipes = async () => {
         }
 
         if (!Array.isArray(data)) {
-            console.error('API 回傳格式錯誤，預期陣列但收到:', typeof data, data);
             recipes.value = [];
             return;
         }
 
         // 轉換食譜資料格式
         recipes.value = data.map(recipe => ({
+            ...recipe,
             id: recipe.recipe_id,
             recipe_name: recipe.recipe_title,
             image_url: getImageUrl(recipe.recipe_image_url),
-            tags: [recipe.recipe_type || '未分類'],
             author: {
                 name: recipe.user_name || userProfile.value.username,
-                likes: recipe.recipe_like_count || 0
+                likes: recipe.recipe_like_count || 0,
+                id: recipe.user_id || 0
             },
-            _raw: recipe
+            author_name: recipe.user_name || userProfile.value.username,
+            user_url: getImageUrl(recipe.author_image || recipe.author_avatar || recipe.user_url || recipe.user_avatar || userProfile.value.avatar)
         }));
 
     } catch (err) {
-        console.error('載入食譜失敗:', err);
-        console.error('錯誤詳情:', err.response?.data || err.message);
         error.value = '載入食譜失敗，請稍後再試';
         recipes.value = [];
     } finally {
@@ -393,7 +383,7 @@ const searchUsers = async () => {
             searchResults.value = data.map(user => ({
                 id: user.user_id,
                 name: user.user_name,
-                avatar: getImageUrl(user.user_url),
+                avatar: getImageUrl(user.author_image || user.author_avatar || user.user_url || user.user_avatar || user.avatar_url),
                 bio: user.user_bio || '無內容',
                 recipes: user.recipe_count || 0,
                 followers: user.follower_count || 0,
@@ -403,7 +393,6 @@ const searchUsers = async () => {
             searchResults.value = [];
         }
     } catch (err) {
-        console.error('搜尋使用者失敗:', err);
         alert('搜尋失敗，請稍後再試');
         searchResults.value = [];
     } finally {
@@ -435,22 +424,16 @@ const loadFollowingList = async () => {
             followingList.value = data.map(user => ({
                 id: user.id,
                 name: user.name,
-                avatar: getImageUrl(user.avatar),
+                avatar: getImageUrl(user.author_image || user.author_avatar || user.user_url || user.avatar || user.user_avatar || user.avatar_url),
                 bio: user.bio,
                 recipes: user.recipes,
                 followers: user.followers,
                 isFollowing: user.isFollowing
             }));
         } else {
-            console.warn('追蹤列表回傳格式錯誤，預期陣列但收到:', typeof data, data);
             followingList.value = [];
         }
     } catch (err) {
-        console.error('載入追蹤列表失敗:', err);
-        console.error('錯誤狀態碼:', err.response?.status);
-        console.error('錯誤訊息:', err.response?.data);
-        console.error('請求 URL:', err.config?.url);
-        console.error('完整錯誤:', err.message);
         followingList.value = [];
     } finally {
         isLoadingFollows.value = false;
@@ -472,22 +455,16 @@ const loadFollowersList = async () => {
             followersList.value = data.map(user => ({
                 id: user.id,
                 name: user.name,
-                avatar: getImageUrl(user.avatar),
+                avatar: getImageUrl(user.author_image || user.author_avatar || user.user_url || user.avatar || user.user_avatar || user.avatar_url),
                 bio: user.bio,
                 recipes: user.recipes,
                 followers: user.followers,
                 isFollowing: user.isFollowing
             }));
         } else {
-            console.warn('粉絲列表回傳格式錯誤，預期陣列但收到:', typeof data, data);
             followersList.value = [];
         }
     } catch (err) {
-        console.error('載入粉絲列表失敗:', err);
-        console.error('錯誤狀態碼:', err.response?.status);
-        console.error('錯誤訊息:', err.response?.data);
-        console.error('請求 URL:', err.config?.url);
-        console.error('完整錯誤:', err.message);
         followersList.value = [];
     } finally {
         isLoadingFollows.value = false;
@@ -817,7 +794,7 @@ watch(() => route.name, async (newName, oldName) => {
     padding: 20px 24px;
     background: $neutral-color-white;
     position: relative;
-    z-index: 10;
+    z-index: 0;
 }
 
 .avatar {

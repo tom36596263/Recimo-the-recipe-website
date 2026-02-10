@@ -29,6 +29,7 @@ onMounted(() => {
 });
 const handleTagClick = (tagName) => {
     emit('update:modelValue', tagName);
+    emit('search', tagName);
 }
 </script>
 
@@ -48,6 +49,7 @@ const handleTagClick = (tagName) => {
                 <SearchBar
                     :modelValue="modelValue"
                     @update:modelValue="val => emit('update:modelValue', val)"
+                    @search="val => emit('update:modelValue', val)"
                     placeholder="輸入關鍵字尋找好料理..." 
                     maxWidth="100%"
                 />

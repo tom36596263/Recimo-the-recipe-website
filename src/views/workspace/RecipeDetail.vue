@@ -57,9 +57,34 @@ const commentList = ref([]);
 
 const cookSnapRef = ref(null);
 
+// 控制刪除確認燈箱
+const isDeleteConfirmOpen = ref(false);
+const deleteTargetId = ref(null); // 用來暫存要刪除的 ID
+
+// 真正的刪除 API 執行
+const handleActualDelete = async () => {
+  const cleanId = String(rawRecipe.value.recipe_id).replace(/[^\d]/g, '');
+
+  try {
+    const res = await phpApi.post('recipes/recipe_adaptation_delete.php', {
+      recipe_id: cleanId,
+      user_id: authStore.user?.id || authStore.user?.user_id
+    });
+
+    if (res.data.success) {
+      isDeleteConfirmOpen.value = false; // 關閉燈箱
+      onDeleteSuccess(cleanId); // 執行原本的跳轉邏輯
+    } else {
+      alert('刪除失敗：' + res.data.message);
+    }
+  } catch (err) {
+    console.error('刪除出錯:', err);
+  }
+};
+
 // --- 核心抓取邏輯 ---
-const fetchData = async () => {
-  isLoading.value = true;
+const fetchData = async (quiet = false) => {
+  if (!quiet) isLoading.value = true;
   console.log('🔍 [路由偵錯] route.params:', route.params);
   const recipeId = Number(route.params.id);
   console.log('🔍 [路由偵錯] 轉換後的 recipeId:', recipeId);
@@ -123,7 +148,7 @@ const fetchData = async () => {
         // 設為 1 份顯示模式
         servings.value = 1;
 
-        isLoading.value = false;
+        if (!quiet) isLoading.value = false;
         return;
       } catch (err) {
         console.error('預覽資料解析失敗:', err);
@@ -243,7 +268,7 @@ const fetchData = async () => {
           userId: c.user_id,
           // 這裡要對齊 PHP 回傳的欄位名稱
           userName: c.userName || 'Recimo用戶',
-          handle: `user_${c.user_id}`,
+          handle: c.handle ? c.handle : `user_${c.user_id}`,
           // 這裡建議對齊你組件用的變數名稱
           userAvatar: getSmartImageUrl(c.user_avatar),
           content: c.comment_text,
@@ -256,7 +281,7 @@ const fetchData = async () => {
   } catch (err) {
     console.error('正式資料抓取失敗:', err);
   } finally {
-    isLoading.value = false;
+    if (!quiet) isLoading.value = false;
   }
 };
 
@@ -531,6 +556,7 @@ const toggleWorkspaceTopBar = (show) => {
   if (topBar) topBar.style.display = show ? '' : 'none';
 };
 
+// --- 修改 handlePostComment ---
 const handlePostComment = async (content) => {
   if (!authStore.user) return alert('請先登入');
   if (!content || !content.trim()) return;
@@ -543,8 +569,16 @@ const handlePostComment = async (content) => {
       content: content
     };
     const response = await phpApi.post('social/comment.php', payload);
-    if (response.data.success) fetchData();
-    else alert('失敗：' + response.data.message);
+    if (response.data.success) {
+      await fetchData(true); // 靜默刷新資料
+
+      // 🏆 觸發黑條提示
+      commentToastMsg.value = '留言已成功發佈';
+      isCommentToastShow.value = true;
+      setTimeout(() => { isCommentToastShow.value = false; }, 3000);
+    } else {
+      alert('失敗：' + response.data.message);
+    }
   } catch (err) {
     alert('發佈失敗，請稍後再試');
   }
@@ -568,17 +602,21 @@ const handleLikeComment = async (commentId, type) => {
   }
 };
 
+// --- 修改 handleDeleteComment ---
 const handleDeleteComment = async (commentId) => {
   if (!authStore.user) return alert('請先登入');
-  if (!confirm('確定要刪除這則留言嗎？')) return;
   const userId = authStore.user.user_id || authStore.user.id;
   try {
     const response = await phpApi.delete(`social/comment.php`, {
       params: { comment_id: commentId, user_id: userId }
     });
     if (response.data.success) {
-      alert('留言已刪除');
-      fetchData();
+      await fetchData(true); // 靜默刷新資料
+
+      // 🏆 觸發黑條提示
+      commentToastMsg.value = '留言已成功移除';
+      isCommentToastShow.value = true;
+      setTimeout(() => { isCommentToastShow.value = false; }, 3000);
     } else {
       alert('刪除失敗：' + (response.data.message || '未知錯誤'));
     }
@@ -620,7 +658,7 @@ const handlePostSnap = async (payload) => {
 
         // 💡 重點：我們先手動把新照片「推」進 list，讓畫面立刻有感
         // 而不是直接 fetchData() 導致組件重刷
-        await fetchData();
+        await fetchData(true);
       }
     } else {
       alert('上傳失敗：' + response.data.message);
@@ -630,24 +668,32 @@ const handlePostSnap = async (payload) => {
   }
 };
 
+const isDeleteToastShow = ref(false); // 控制刪除提示
+const isCommentToastShow = ref(false); // 🏆 控制留言提示開關
+const commentToastMsg = ref('');       // 🏆 儲存留言提示文字
+
 const handleDeleteSnap = async (galleryId) => {
   const userId = authStore.user?.user_id || authStore.user?.id;
 
   try {
-    // 🏆 注意：這裡改用 .delete() 或是傳參數給 gallery.php
     const response = await phpApi.delete('social/gallery.php', {
-      data: {
-        gallery_id: galleryId,
-        user_id: userId
-      }
+      data: { gallery_id: galleryId, user_id: userId }
     });
 
     if (response.data.success) {
-      alert(response.data.message);
-      fetchData(); // 重新整理列表
+      // 1. 先悄悄刷新後台數據
+      await fetchData(true);
+
+      // 2. 數據刷新完後，再顯示 Toast，這樣它就不會被 isLoading 蓋掉
+      isDeleteToastShow.value = true;
+
+      // 3. 3秒後消失
+      setTimeout(() => {
+        isDeleteToastShow.value = false;
+      }, 3000);
     }
   } catch (err) {
-    console.error('刪除請求失敗', err);
+    console.error('刪除失敗', err);
   }
 };
 
@@ -707,19 +753,36 @@ watch(
         </div>
 
         <div class="meta-wrapper">
-          <AuthorInfo v-if="!isPreviewMode && rawRecipe" :name="rawRecipe.author_name"
-            :handle="`user_${rawRecipe.author_id}`" :time="rawRecipe.created_at" />
+          <AuthorInfo v-if="!isPreviewMode && rawRecipe" :user-id="rawRecipe.author_id" :name="rawRecipe.author_name"
+            :handle="rawRecipe.user_email || `user_${rawRecipe.author_id}`" :time="rawRecipe.created_at"
+            :avatar-url="rawRecipe.author_image" />
 
           <div v-else-if="isPreviewMode" class="preview-badge">
             ✨ 正在預覽您的食譜草稿
           </div>
 
-          <DeleteAdaptationBtn
-            v-if="isMyRecipe && !isPreviewMode"
-            :recipe-id="rawRecipe.recipe_id"
-            :is-db-data="true"
-            @success="onDeleteSuccess"
-          />
+          <DeleteAdaptationBtn v-if="isMyRecipe && !isPreviewMode" :recipe-id="rawRecipe.recipe_id" :is-db-data="true"
+            @click="isDeleteConfirmOpen = true" />
+
+            <Teleport to="body">
+            <BaseModal :is-open="isDeleteConfirmOpen" type="info" icon-class="fa-regular fa-trash-can"
+              title="確定要刪除您的食譜嗎？" description="此操作將無法復原，您將失去這份編輯紀錄。" @close="isDeleteConfirmOpen = false">
+              <template #actions>
+                <div style="
+    display: flex; 
+    gap: 16px; 
+    width: 100%; 
+    justify-content: center; 
+    align-items: center; 
+    margin-top: 15px; 
+    margin-bottom: 10px;
+  ">
+                  <BaseBtn title="確定刪除" variant="solid" style="width: 130px;" @click="handleActualDelete" />
+                  <BaseBtn title="取消" variant="outline" style="width: 130px;" @click="isDeleteConfirmOpen = false" />
+                </div>
+              </template>
+            </BaseModal>
+          </Teleport>
 
           <div v-if="!isPreviewMode" class="adapt-btn-wrapper">
             <router-link
@@ -877,6 +940,34 @@ watch(
   </div>
   <Teleport to="body">
     <SnapFinishedSuccessModal :isOpen="isSnapSuccessOpen" @close="isSnapSuccessOpen = false" />
+  </Teleport>
+
+  <Teleport to="body">
+    <Transition name="toast">
+      <div v-if="isDeleteToastShow" class="delete-toast">
+        <i-material-symbols-check-circle-rounded class="toast-icon" />
+        <span>作品已成功移除</span>
+      </div>
+    </Transition>
+
+    <Teleport to="body">
+      <Transition name="toast">
+        <div v-if="isCommentToastShow" class="delete-toast">
+          <i-material-symbols-check-circle-rounded class="toast-icon" />
+          <span>{{ commentToastMsg }}</span>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <Teleport to="body">
+      <Transition name="toast">
+        <div v-if="isDeleteToastShow" class="delete-toast">
+          <i-material-symbols-check-circle-rounded class="toast-icon" />
+          <span>作品已成功移除</span>
+        </div>
+      </Transition>
+    </Teleport>
+
   </Teleport>
 
 </template>
@@ -1480,6 +1571,37 @@ watch(
     }
   }
 
+    /* 父層的 style */
+    .global-delete-toast {
+      position: fixed;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20000;
+      /* 確保絕對最高 */
+      background-color: #323232;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      pointer-events: none;
+    }
+  
+    .toast-enter-active,
+    .toast-leave-active {
+      transition: all 0.4s ease;
+    }
+  
+    .toast-enter-from,
+    .toast-leave-to {
+      opacity: 0;
+      transform: translate(-50%, -40px);
+    }
+
+
   // 滑鼠移入時顯示
   &:hover {
     &::before {
@@ -1562,5 +1684,44 @@ watch(
       }
     }
   }
+}
+
+/* 貼在 RecipeDetail.vue 的 style 裡面 */
+/* 覆蓋掉剛才的測試樣式 */
+.delete-toast {
+  position: fixed !important;
+  top: 60px !important;
+  /* 稍微往下移一點 */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 999999 !important;
+
+  background-color: #2c3e50 !important;
+  /* 深藍灰，比較高級 */
+  color: #ffffff !important;
+  padding: 12px 28px !important;
+  border-radius: 50px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+.toast-icon {
+  color: #2ecc71 !important;
+  /* 亮綠色勾勾 */
+  font-size: 20px !important;
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -40px);
 }
 </style>

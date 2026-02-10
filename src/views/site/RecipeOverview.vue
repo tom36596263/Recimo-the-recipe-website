@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { phpApi } from '@/utils/publicApi'
+import { parsePublicFile } from '@/utils/parseFile';
+
 import { useRouter } from 'vue-router'
 import { useAuthGuard } from '@/composables/useAuthGuard'
 import BaseBtn from '@/components/common/BaseBtn.vue';
@@ -58,74 +60,68 @@ const fetchRecipes = async () => {
                 ingredients: searchIngredientIds.value.join(',') // 轉為 "1,2,3"
             }
         });
-        
-        // 偵錯用：確認 API 回傳的原始資料
-        console.log('API 原始回應：', response.data);
 
-    if (response.data && response.data.status === 'success') {
-        const recipeData = response.data.data;
-        const apiBase = phpApi.defaults.baseURL;
-        // const imgBase = apiBase.replace('/api/', '/');
+        if (response.data && response.data.status === 'success') {
+            const recipeData = response.data.data;
+            // 2. 處理資料格式轉換
+            allRecipe.value = recipeData.map(recipe => {
+                // SQL 字串轉陣列處理
+                const recipeTagsNames = recipe.tag_names ? recipe.tag_names.split(',') : [];
+                const matchedIngredients = recipe.ingredient_ids
+                    ? recipe.ingredient_ids.split(',').map(Number)
+                    : [];
 
-        // 2. 處理資料格式轉換
-        allRecipe.value = recipeData.map(recipe => {
-            // SQL 字串轉陣列處理
-            const recipeTagsNames = recipe.tag_names ? recipe.tag_names.split(',') : [];
-            const matchedIngredients = recipe.ingredient_ids 
-            ? recipe.ingredient_ids.split(',').map(Number) 
-            : [];
+                // 圖片路徑校正
+                let finalImgUrl = recipe.recipe_image_url || recipe.recipe_image || recipe.image_url || recipe.main_image;
 
-            // 圖片路徑校正
-            let finalImgUrl = recipe.recipe_image_url;
-                
                 if (finalImgUrl && !finalImgUrl.startsWith('http')) {
-                    // 1. 確保 base 結尾有斜線
-                    const safeBase = apiBase.endsWith('/') ? apiBase : `${apiBase}/`;
                     // 2. 確保 path 開頭沒有斜線
                     const safePath = finalImgUrl.startsWith('/') ? finalImgUrl.substring(1) : finalImgUrl;
-                    
-                    // 3. 組合：這會產生 http://localhost:8888/recimo_api/img/recipes/...
-                    finalImgUrl = `${safeBase}${safePath}`;
+                    finalImgUrl = parsePublicFile(safePath);
                 }
-            return {
-                id: recipe.recipe_id,
-                recipe_name: recipe.recipe_title,
-                difficulty: recipe.recipe_difficulty,
-                image_url: finalImgUrl,
-                tags: recipeTagsNames,
-                ingredient_ids: matchedIngredients,
-                nutritional_info: {
-                    calories: `${Math.round(recipe.recipe_kcal_per_100g || 0)}kcal`,
-                    serving_size: recipe.recipe_servings,
-                    cooking_time: (() => {
+
+                // 處理作者頭像路徑
+                let finalAvatarUrl = recipe.author_image || recipe.author_avatar || recipe.user_avatar || recipe.avatar_url || recipe.user_image || '';
+                if (finalAvatarUrl && !finalAvatarUrl.startsWith('http')) {
+                    const safePath = finalAvatarUrl.startsWith('/') ? finalAvatarUrl.substring(1) : finalAvatarUrl;
+                    finalAvatarUrl = parsePublicFile(safePath);
+                }
+
+                return {
+                    id: recipe.recipe_id,
+                    recipe_name: recipe.recipe_title,
+                    difficulty: recipe.recipe_difficulty,
+                    image_url: finalImgUrl,
+                    tags: recipeTagsNames,
+                    ingredient_ids: matchedIngredients,
+                    nutritional_info: {
+                        calories: `${Math.round(recipe.recipe_kcal_per_100g || 0)}kcal`,
+                        serving_size: recipe.recipe_servings,
+                        cooking_time: (() => {
                             const timeParts = recipe.recipe_total_time.split(':'); // [HH, mm, ss]
                             const hours = parseInt(timeParts[0]) || 0;
                             const minutes = parseInt(timeParts[1]) || 0;
                             const totalMinutes = hours * 60 + minutes;
                             return `${totalMinutes}分鐘`;
                         })()
-                },
-                author: {
-                    name: 'Recimo',
-                    likes: recipe.recipe_like_count
-                }
-            };
-        });
-        
-        console.log('成功轉換並存入 allRecipe！', allRecipe.value);
+                    },
+                    author: {
+                        name: recipe.author_name || recipe.user_name || 'Recimo',
+                        likes: recipe.recipe_like_count,
+                        id: recipe.author_id || recipe.user_id || 0,
+                        handle: recipe.author_email || recipe.user_email || `user_${recipe.author_id || 0}`
+                    },
+                    author_name: recipe.author_name || recipe.user_name || 'Recimo',
+                    user_url: finalAvatarUrl
+                };
+            });
 
         } else {
-        // 處理 PHP 回傳 status: "error" 的情況
-        console.error('PHP 邏輯錯誤:', response.data.message);
+            // 處理 PHP 回傳 status: "error" 的情況
         }
 
     } catch (error) {
         // 3. API 連線失敗或伺服器錯誤 (如 404, 500)
-        console.error('API 連線失敗:', error);
-        if (error.response) {
-        console.log('錯誤狀態碼:', error.response.status);
-        console.log('錯誤內容:', error.response.data);
-        }
     }
 };
 
@@ -267,7 +263,6 @@ const clearIngredientFilter = () => {
 
 };
 const openKitchen = () => {
-    console.log("父層收到訊號了！準備打開燈箱..."); // 加入這行
     showCook.value = true;
 }
 

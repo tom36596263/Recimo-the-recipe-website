@@ -13,7 +13,7 @@ function selectRecipe(recipe) {
         selectedRecipe.value = recipe;
     }
 }
-import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
+import { ref, onMounted, computed, watch, onUnmounted, nextTick } from 'vue';
 import { phpApi, publicApi } from '@/utils/publicApi';
 import { parsePublicFile } from '@/utils/parseFile'
 import RecipeCardSm from '@/components/common/RecipeCardSm.vue';
@@ -21,6 +21,7 @@ import RecipePreviewCard from '@/components/common/RecipePreviewCard.vue';
 import BaseTag from '@/components/common/BaseTag.vue';
 import PageBtn from '@/components/common/PageBtn.vue';
 import BaseBtn from '@/components/common/BaseBtn.vue';
+import BaseModal from '@/components/BaseModal.vue';
 import { useFavoritesStore } from '@/stores/favoritesStore';
 
 // ========== 狀態管理 ==========
@@ -49,12 +50,76 @@ const folders = ref([]);
 const selectedFolderId = ref(null); // null 代表「全部」
 const newFolderName = ref('');
 const loading = ref(false);
-const MAX_FOLDERS = 12;
+const MAX_FOLDERS = 6;
 
 // 編輯資料夾狀態
 const isEditMode = ref(false);
 const editFolderName = ref('');
 const editingFolderId = ref(null);
+
+// BaseModal 控制
+const modalConfig = ref({
+    isOpen: false,
+    type: 'info',
+    iconClass: 'fa-solid fa-circle-info',
+    title: '',
+    description: ''
+});
+
+const showModal = (message, type = 'info') => {
+    const iconMap = {
+        success: 'fa-solid fa-circle-check',
+        danger: 'fa-solid fa-circle-exclamation',
+        info: 'fa-solid fa-circle-info'
+    };
+    modalConfig.value = {
+        isOpen: true,
+        type,
+        iconClass: iconMap[type] || iconMap.info,
+        title: message,
+        description: ''
+    };
+    
+    // success 類型自動關閉
+    if (type === 'success') {
+        setTimeout(() => {
+            closeModalAlert();
+        }, 1500);
+    }
+};
+
+const closeModalAlert = () => {
+    modalConfig.value.isOpen = false;
+};
+
+// 確認框配置
+const confirmConfig = ref({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: null
+});
+
+const showConfirm = (title, description, onConfirm) => {
+    confirmConfig.value = {
+        isOpen: true,
+        title,
+        description,
+        onConfirm
+    };
+};
+
+const handleConfirm = async () => {
+    if (confirmConfig.value.onConfirm) {
+        await confirmConfig.value.onConfirm();
+    }
+    closeConfirm();
+};
+
+const closeConfirm = () => {
+    confirmConfig.value.isOpen = false;
+    confirmConfig.value.onConfirm = null;
+};
 
 // ========== 分頁設置 ==========
 // 當前頁碼
@@ -119,7 +184,8 @@ const fetchFolders = async () => {
                 }
             });
 
-            folders.value = foldersRes.data.folders.map(f => {
+            // 使用全新的陣列並等待 nextTick 確保觸發響應式更新
+            const newFolders = foldersRes.data.folders.map(f => {
                 const folderId = Number(f.favorites_folder_id);
                 return {
                     id: folderId,
@@ -127,50 +193,49 @@ const fetchFolders = async () => {
                     count: folderCounts[folderId] || 0
                 };
             });
+            
+            folders.value = newFolders;
+            await nextTick();
         }
     } catch (e) {
-        console.error('取得資料夾失敗:', e);
+        // Error handled silently
     }
 };
 
 // 新增資料夾
 const handleAddFolder = async () => {
     if (folders.value.length >= MAX_FOLDERS) {
-        alert('最多只能建立12個資料夾');
+        showModal(`最多只能建立${MAX_FOLDERS}個資料夾`, 'info');
         return;
     }
+    
     if (!newFolderName.value.trim() || !userId.value) {
-        console.log('新增資料夾驗證失敗:', { newFolderName: newFolderName.value, userId: userId.value });
         return;
     }
+    
     loading.value = true;
     try {
         const form = new FormData();
         form.append('creator_id', userId.value);
         form.append('folder_name', newFolderName.value.trim());
 
-        console.log('準備新增資料夾:', {
-            creator_id: userId.value,
-            folder_name: newFolderName.value.trim()
-        });
-
         const { data } = await phpApi.post('/personal/fav_folders.php', form, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         });
-        console.log('新增資料夾回應:', data);
 
         if (data.success) {
-            await fetchFolders();
             newFolderName.value = '';
-            alert('資料夾新增成功！');
+            // 確保資料載入完成再顯示提示
+            await fetchFolders();
+            await nextTick();
+            showModal('資料夾新增成功！', 'success');
         } else {
-            alert(data.message || '新增失敗');
+            showModal(data.message || '新增失敗', 'danger');
         }
     } catch (e) {
-        console.error('新增資料夾錯誤:', e);
-        alert('新增資料夾失敗: ' + (e.response?.data?.message || e.message));
+        showModal('新增資料夾失敗: ' + (e.response?.data?.message || e.message), 'danger');
     } finally {
         loading.value = false;
     }
@@ -180,6 +245,14 @@ const handleAddFolder = async () => {
 const selectFolder = (folderId) => {
     selectedFolderId.value = folderId;
     currentPage.value = 1; // 切換資料夾時重置頁碼
+    // 換資料夾時自動 focus 第一個食譜（大螢幕）
+    setTimeout(() => {
+        if (filteredRecipes.value.length > 0 && window.innerWidth > 1024) {
+            selectedRecipe.value = filteredRecipes.value[0];
+        } else {
+            selectedRecipe.value = null;
+        }
+    }, 0);
 };
 
 // 編輯資料夾名稱
@@ -194,60 +267,80 @@ const cancelEditFolder = () => {
 };
 
 const saveEditFolder = async () => {
-    if (!editFolderName.value.trim() || !editingFolderId.value) return;
+    if (!editFolderName.value.trim() || !editingFolderId.value) {
+        return;
+    }
+    
     loading.value = true;
     try {
         const payload = new URLSearchParams();
         payload.append('favorites_folder_id', editingFolderId.value);
         payload.append('folder_name', editFolderName.value.trim());
+        
         const { data } = await phpApi.patch('/personal/fav_folders.php', payload);
+        
         if (data.success) {
-            await fetchFolders();
             cancelEditFolder();
+            // 確保資料載入完成再顯示提示
+            await fetchFolders();
+            await nextTick();
+            showModal('資料夾名稱修改成功！', 'success');
         } else {
-            alert(data.message || '修改失敗');
+            showModal(data.message || '修改失敗', 'danger');
         }
     } catch (e) {
-        alert('修改資料夾失敗');
+        showModal('修改資料夾失敗', 'danger');
     } finally {
         loading.value = false;
     }
 };
 
 // 刪除資料夾
-const deleteFolder = async (folder) => {
+const deleteFolder = (folder) => {
     if (!folder || !folder.id) {
-        alert('資料夾ID不存在');
+        showModal('資料夾ID不存在', 'danger');
         return;
     }
-    if (!confirm(`確定要刪除「${folder.name}」資料夾？資料夾內的收藏也會一併刪除。`)) return;
-    loading.value = true;
-    try {
-        const payload = new URLSearchParams();
-        payload.append('favorites_folder_id', folder.id);
-        const { data } = await phpApi.delete('/personal/fav_folders.php', {
-            data: payload.toString(),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+    
+    // 使用 BaseModal 顯示確認框
+    showConfirm(
+        `確定要刪除「${folder.name}」資料夾？`,
+        '資料夾內的收藏也會一併刪除。',
+        async () => {
+            loading.value = true;
+            try {
+                const payload = new URLSearchParams();
+                payload.append('favorites_folder_id', folder.id);
+                
+                const { data } = await phpApi.delete('/personal/fav_folders.php', {
+                    data: payload.toString(),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+                
+                if (data.success) {
+                    // 如果刪除的是當前選中的資料夾，切換回「全部」
+                    if (selectedFolderId.value === folder.id) {
+                        selectedFolderId.value = null;
+                    }
+                    // 確保所有資料載入完成再顯示提示
+                    await Promise.all([
+                        fetchFolders(),
+                        loadFavorites()
+                    ]);
+                    await nextTick();
+                    showModal('資料夾刪除成功！', 'success');
+                } else {
+                    showModal(data.message || '刪除失敗', 'danger');
+                }
+            } catch (e) {
+                showModal('刪除資料夾失敗', 'danger');
+            } finally {
+                loading.value = false;
             }
-        });
-        if (data.success) {
-            await fetchFolders();
-            // 如果刪除的是當前選中的資料夾，切換回「全部」
-            if (selectedFolderId.value === folder.id) {
-                selectedFolderId.value = null;
-            }
-            // 重新載入收藏列表
-            await loadFavorites();
-        } else {
-            alert(data.message || '刪除失敗');
         }
-    } catch (e) {
-        console.error('刪除錯誤：', e);
-        alert('刪除資料夾失敗');
-    } finally {
-        loading.value = false;
-    }
+    );
 };
 
 // ========== 事件處理 ==========
@@ -287,11 +380,18 @@ const loadFavorites = async () => {
         }
     } catch (error) {
         allRecipes.value = [];
-        console.error('載入收藏資料失敗:', error);
     }
 };
 
 // 選擇食譜（點擊卡片時觸發）
+const handleFavoriteUpdated = async () => {
+    // 當收藏更新時，重新載入資料夾列表和收藏列表
+    await Promise.all([
+        fetchFolders(),
+        loadFavorites()
+    ]);
+};
+
 onMounted(async () => {
     // 監聽視窗大小變化
     const handleResize = () => {
@@ -308,7 +408,7 @@ onMounted(async () => {
     if (!userStr) return;
     try {
         const userObj = JSON.parse(userStr);
-        userId.value = userObj.id;
+        userId.value = userObj.user_id;
     } catch (e) {
         userId.value = null;
         return;
@@ -429,14 +529,14 @@ watch(currentPage, () => {
             </div>
 
             <!-- 有食譜時顯示列表 -->
-            <div v-if="allRecipes.length > 0" class="row">
+            <div v-if="filteredRecipes.length > 0" class="row">
                 <!-- 左側食譜列表 -->
                 <div class="col-8 col-lg-12">
                     <div class="recipe-grid">
                         <div v-for="recipe in currentPageRecipes" :key="recipe.id" class="recipe-card-wrapper"
                             :class="{ 'active': selectedRecipe?.id === recipe.id && windowWidth > 1024 }"
                             @click="selectRecipe(recipe)">
-                            <RecipeCardSm :recipe="recipe" :disable-navigation="true" />
+                            <RecipeCardSm :recipe="recipe" :disable-navigation="true" @favoriteUpdated="handleFavoriteUpdated" />
                         </div>
                     </div>
                 </div>
@@ -452,8 +552,15 @@ watch(currentPage, () => {
                 <div class="col-12">
                     <div class="empty-state">
                         <i class="fa-regular fa-heart"></i>
-                        <h3 class="empty-title">還沒有收藏任何食譜</h3>
-                        <p class="empty-text">發現喜歡的食譜時，點擊愛心收藏起來吧！</p>
+                        <h3 class="empty-title">
+                            {{ selectedFolderId === null ? '還沒有收藏任何食譜' : '這個資料夾還沒有食譜' }}
+                        </h3>
+                        <p class="empty-text">
+                            {{ selectedFolderId === null 
+                                ? '發現喜歡的食譜時，點擊愛心收藏起來吧！' 
+                                : '快去探索食譜並加入這個資料夾吧！' 
+                            }}
+                        </p>
                         <BaseBtn title="探索食譜" variant="solid" :height="40" href="/workspace/recipes" />
                     </div>
                 </div>
@@ -461,7 +568,7 @@ watch(currentPage, () => {
         </section>
 
         <!-- 分頁（只在有食譜時顯示） -->
-        <section v-if="allRecipes.length > 0" class="container page-btn-section">
+        <section v-if="filteredRecipes.length > 0" class="container page-btn-section">
             <div class="row">
                 <div class="col-12">
                     <PageBtn :current-page="currentPage" :total-pages="totalPages" @update:page="handlePageChange" />
@@ -482,6 +589,23 @@ watch(currentPage, () => {
                 </div>
             </div>
         </div>
+
+        <!-- BaseModal 提示彈窗 -->
+        <BaseModal :isOpen="modalConfig.isOpen" :type="modalConfig.type" :iconClass="modalConfig.iconClass"
+            :title="modalConfig.title" :description="modalConfig.description" @close="closeModalAlert">
+            <template #actions v-if="modalConfig.type !== 'success'">
+                <BaseBtn title="確定" height="40" @click="closeModalAlert" />
+            </template>
+        </BaseModal>
+
+        <!-- BaseModal 確認彈窗 -->
+        <BaseModal :isOpen="confirmConfig.isOpen" type="danger" iconClass="fa-solid fa-triangle-exclamation"
+            :title="confirmConfig.title" :description="confirmConfig.description" @close="closeConfirm">
+            <template #actions>
+                <BaseBtn title="取消" variant="outline" height="40" @click="closeConfirm" />
+                <BaseBtn title="確定" height="40" @click="handleConfirm" />
+            </template>
+        </BaseModal>
     </Teleport>
 </template>
 

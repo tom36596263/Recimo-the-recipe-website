@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
+import LogoWhite from '@/assets/images/site/Recimo-logo-white.svg'
 import BaseBtn from '@/components/common/BaseBtn.vue'
 import IconList from 'virtual:icons/material-symbols/List'
 import IconAdd from 'virtual:icons/material-symbols/Add'
@@ -89,6 +90,12 @@ const handleLogout = () => {
     // closeMenu();       // 關閉手機版選單
     router.push('/');     // 跳轉回首頁
 };
+watch(
+    () => route.path,
+    () => {
+        closeMore();
+    }
+);
 
 </script>
 <template>
@@ -139,7 +146,7 @@ const handleLogout = () => {
             <div class="more-menu-panel">
                 <div class="panel-header">
                     <router-link to="/">
-                        <img :src="$parsePublicFile('img/site/Recimo-logo-white.svg')" alt="logo" class="logo">
+                        <img :src="LogoWhite" alt="Recimo Logo">
                     </router-link>
                     <BaseBtn v-if="authStore.isLoggedIn" title="登出" height="30" @click="confirmLogout" />
                 </div>
@@ -149,7 +156,7 @@ const handleLogout = () => {
                         <span class="p-p1">{{ item.title }}</span>
                     </router-link>
                     <router-link to="settings" class="panel-link">
-                        <p class="p-p1">會員設定</p>
+                        <p class="p-p1">會員中心</p>
                     </router-link>
                 </div>
             </div>

@@ -45,53 +45,62 @@ const fetchRelated = async () => {
     isReady.value = false;
 
     try {
-        // 注意：這裡抓的是 recipes.json 靜態檔，請確保裡面的資料有 parent_recipe_id 欄位
+        // 1. 直接抓取全站食譜資料 (不再從 detail API 拿 adaptations)
+        // 假設你的全站 API 是 recipes.json 或其他的 PHP 接口
         const res = await publicApi.get('data/recipe/recipes.json');
 
-        const cleanedData = res.data.map(r => {
+        // 2. 處理資料與格式對齊
+        const allRecipes = res.data || [];
+
+        const cleanedData = allRecipes.map(r => {
             const rawImg = r.recipe_image_url || r.recipe_cover_image || '';
             const finalImg = formatImg(rawImg);
+
+            // 統一作者名稱來源
+            const authorName = r.author_name || r.user_name || 'Recimo User';
 
             return {
                 ...r,
                 id: r.recipe_id,
                 recipe_name: r.recipe_title || '美味食譜',
                 image_url: finalImg,
-                cover_image: finalImg,
+
+                // 🏆 對齊小卡片需求，解決 "Recimo User" 問題
+                author_name: authorName,
                 author: {
-                    name: r.author_name || '作者',
+                    id: r.author_id || r.user_id,
+                    name: authorName,
+                    image: r.author_image || r.user_avatar || '',
                     likes: r.likes || 0
-                }
+                },
+                // created_at: r.recipe_created_at || r.created_at || '2024-01-01'
             };
         });
 
+        // 3. 過濾邏輯
         relatedList.value = cleanedData
             .filter(r => {
-                // 1. 排除目前正在看的這篇
+                // A. 排除掉目前正在看的這篇
                 const isNotCurrent = Number(r.id) !== Number(props.currentId);
 
-                // 2. 🏆 判斷是否為「改編食譜」
-                // 根據父頁面邏輯：parent_recipe_id 有值（且不為0）就是改編
-                const isAdapted = r.parent_recipe_id && Number(r.parent_recipe_id) !== 0;
+                // B. 排除掉「屬於改編」的食譜 (如果 parent_recipe_id 有值且不為 0，就是改編)
+                const isNotAdapted = !r.parent_recipe_id || Number(r.parent_recipe_id) === 0;
 
-                // 3. 決定是否保留：如果要求排除改編，則必須非改編才能通過
-                const isEligible = props.excludeAdapted ? !isAdapted : true;
-
-                return isNotCurrent && isEligible;
+                return isNotCurrent && isNotAdapted;
             })
-            .sort(() => 0.5 - Math.random()) // 隨機排序
-            .slice(0, 8); // 取前 8 筆
+            // 4. 隨機亂序並取前 8 筆
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 8);
 
         await nextTick();
         isReady.value = true;
 
     } catch (err) {
-        console.error('資料抓取失敗:', err);
+        console.error('推薦食譜抓取失敗:', err);
     } finally {
         isLoading.value = false;
     }
 };
-
 onMounted(fetchRelated);
 watch(() => props.currentId, fetchRelated);
 

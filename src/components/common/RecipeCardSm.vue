@@ -4,7 +4,7 @@ import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
 import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
-import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
+import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
 
 const props = defineProps({
     recipe: {
@@ -20,6 +20,8 @@ const props = defineProps({
 
 const router = useRouter();
 
+// 定義向父組件發出的事件
+const emit = defineEmits(['favoriteUpdated']);
 
 const authStore = useAuthStore();
 const showAddToFolderModal = ref(false);
@@ -34,6 +36,8 @@ const handleModalSubmit = () => {
     if (userId.value) {
         favoritesStore.refetchFavorites(userId.value);
     }
+    // 通知父組件收藏已更新
+    emit('favoriteUpdated');
 };
 
 const handleHeartClick = (e) => {
@@ -64,7 +68,7 @@ const goToDetail = () => {
                 <i-material-symbols-Favorite v-if="isFavorited" style="color: #e74c3c" />
                 <i-material-symbols-Favorite-outline v-else />
             </div>
-            <img :src="recipe.image_url" alt="recipe.recipe_name">
+            <img :src="recipe.image_url" :alt="recipe.recipe_name">
         </header>
         <div class="card-body">
             <div class="title">
@@ -73,10 +77,11 @@ const goToDetail = () => {
         </div>
         <footer>
             <div class="personal-info">
-                <div class="personal-img">
-                    <img :src="LogoBlack" alt="recipe.recipe_name">
-                </div>
-                <p class="p-p1">Recimo</p>
+                <AuthorInfo v-if="recipe" 
+                    :user-id="recipe.author?.id || 0"
+                    :name="recipe.author_name || recipe.author?.name || 'Recimo'"
+                    :handle="recipe.author?.handle || `user_${recipe.author?.id || 0}`"
+                    :avatar-url="recipe.user_url || ''" />
             </div>
         </footer>
         <AddToFolderModal v-model="showAddToFolderModal" :commentData="{}" :recipe-id="recipeId"
