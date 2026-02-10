@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue'; // 移除 watch，因為沒有要監聽日期
 import { phpApi } from '@/utils/publicApi';
 import { useAuthStore } from '@/stores/authStore';
 import { parsePublicFile } from '@/utils/parseFile';
@@ -16,7 +16,8 @@ const cookingStats = ref({
     totalHours: 0,
     totalLogs: 0,
     rhythmData: {},
-    topIngredients: []
+    topIngredients: [],
+    favoriteStyle: ''
 });
 
 const cookedRecipes = ref([]);
@@ -25,54 +26,55 @@ const showLogModal = ref(false);
 const selectedRecipeLogs = ref([]);
 const selectedRecipeInfo = ref({});
 
-const currentYear = new Date().getFullYear();
-const currentMonth = new Date().getMonth() + 1;
-
-const selectedYear = ref(currentYear);
-const selectedMonth = ref(currentMonth);
-
-const yearOptions = [currentYear, currentYear - 1];
-const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
-
-// 計算日期範圍：永遠是該月份的第一天到最後一天
-const dateRange = computed(() => {
-    const y = selectedYear.value;
-    const m = selectedMonth.value;
-
-    const fmt = (d) => {
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
-    const firstDay = new Date(y, m - 1, 1);
-    const lastDay = new Date(y, m, 0); // 下個月第0天 = 本月最後一天
-
-    return {
-        start: fmt(firstDay),
-        end: fmt(lastDay)
-    };
-});
-
 const fetchDashboardData = async () => {
     const userId = authStore.userId || 2;
-    const { start, end } = dateRange.value;
 
     try {
-        const res = await phpApi.get(`log/get_dashboard_stats.php?user_id=${userId}&start_date=${start}&end_date=${end}`);
+        // 您目前的 PHP 預設查本月，若要查全部，可能需要修改 PHP 或傳入更早的 start_date
+        // 這裡暫時維持預設 (查本月)
+        const res = await phpApi.get(`log/get_dashboard_stats.php?user_id=${userId}`);
+
         if (res.data.status === 'success') {
             const data = res.data;
             const totalMins = data.total_minutes ? Number(data.total_minutes) : 0;
 
+            // 處理 rhythmData (確保是物件)
+            // 如果後端回傳空陣列 []，要轉成 {}
+            const rawRhythm = (Array.isArray(data.rhythm_data) && data.rhythm_data.length === 0)
+                ? {}
+                : (data.rhythm_data || {});
+
+            console.log('Rhythm Data:', rawRhythm); // Debug: 看看後端到底回傳什麼
+
+            // --- 計算最常烹飪的風格 (Favorite Style) ---
+            let topStyle = '尚無數據';
+
+            // 因為 PHP 現在回傳的是扁平結構 { "中式": 1, ... }
+            // 所以直接用 rawRhythm 即可
+            const entries = Object.entries(rawRhythm);
+
+            // 過濾掉非數值的值 (防呆)
+            const validEntries = entries.filter(([key, val]) => typeof val === 'number');
+
+            if (validEntries.length > 0) {
+                // 排序：次數由大到小
+                validEntries.sort((a, b) => b[1] - a[1]);
+                // 取第一名的 Key
+                topStyle = validEntries[0][0];
+            } else {
+                console.warn('沒有有效的風格數據可供排序');
+            }
+            // ----------------------------------------
+
             cookingStats.value = {
                 totalHours: totalMins,
                 totalLogs: data.total_logs || 0,
-                rhythmData: data.rhythm_data || {},
+                rhythmData: rawRhythm,
                 topIngredients: (data.top_ingredients || []).map(ing => ({
                     ...ing,
                     image: parsePublicFile(ing.image)
-                }))
+                })),
+                favoriteStyle: topStyle
             };
         }
     } catch (error) {
@@ -111,11 +113,6 @@ const handleOpenHistory = async (recipe) => {
     }
 };
 
-// 只要年或月改變，就重新抓資料
-watch([selectedYear, selectedMonth], () => {
-    fetchDashboardData();
-});
-
 onMounted(() => {
     fetchDashboardData();
     fetchCookedRecipes();
@@ -128,14 +125,15 @@ onMounted(() => {
             <div class="row">
                 <div class="col-12 header-area">
                     <h2 class="zh-h2 page-title">烹飪實驗室</h2>
-                    <CookingFocusStat :total-minutes="Number(cookingStats.totalHours)" />
+
+                    <CookingFocusStat :total-minutes="Number(cookingStats.totalHours)"
+                        :total-logs="cookingStats.totalLogs" :top-tag="cookingStats.favoriteStyle" />
                 </div>
             </div>
 
             <div class="row main-content">
                 <div class="col-9 col-lg-12 left-section">
-                    <CookingRhythmChart :rhythm-data="cookingStats.rhythmData" v-model:year="selectedYear"
-                        v-model:month="selectedMonth" :year-options="yearOptions" :month-options="monthOptions" />
+                    <CookingRhythmChart :rhythm-data="cookingStats.rhythmData" />
                 </div>
 
                 <div class="col-3 col-lg-12 right-section">

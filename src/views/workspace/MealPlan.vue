@@ -13,7 +13,6 @@ const isLoading = ref(true);
 
 // --- 核心功能：從 PHP 撈取資料 ---
 const fetchPlans = async () => {
-  // 檢查是否有登入 ID
   if (!authStore.userId) {
     isLoading.value = false;
     return;
@@ -34,7 +33,6 @@ const fetchPlans = async () => {
 };
 
 onMounted(fetchPlans);
-
 
 // --- 篩選Tag ---
 const filterStatus = ref('');
@@ -79,8 +77,7 @@ const handleCreatePlan = async (data) => {
   }
 };
 
-// ---  刪除與複製功能的處理函式 ---
-// 處理刪除
+// --- 處理刪除 ---
 const onPlanDelete = async (id) => {
   if (!confirm('確定要刪除這個計畫嗎？此動作無法復原。')) return;
 
@@ -91,7 +88,6 @@ const onPlanDelete = async (id) => {
     });
 
     if (res.data.success) {
-      // 本地直接過濾掉，不用重新 fetch 整個頁面更流暢
       plans.value = plans.value.filter(p => p.plan_id !== id);
     }
   } catch (err) {
@@ -99,7 +95,7 @@ const onPlanDelete = async (id) => {
   }
 };
 
-// 處理複製 (逻辑類似 handleApplyTemplate，但改為整份複製)
+// --- 處理複製 ---
 const onPlanCopy = async (id) => {
   try {
     const res = await phpApi.post('mealplans/duplicate_plan.php', {
@@ -108,7 +104,7 @@ const onPlanCopy = async (id) => {
     });
 
     if (res.data.success) {
-      fetchPlans(); // 複製後重新撈取清單
+      fetchPlans();
       alert('計畫已成功複製！');
     }
   } catch (err) {
@@ -120,7 +116,7 @@ const onPlanCopy = async (id) => {
 <template>
   <div class="overview container">
     <div class="overview__header row">
-      <div class="overview__tag-wrapper col-6">
+      <div class="overview__tag-wrapper col-6 col-md-12">
         <div class="status-tag upcoming" :class="{ 'is-selected': filterStatus === 'upcoming' }"
           @click="filterStatus = filterStatus === 'upcoming' ? null : 'upcoming'">未開始</div>
         <div class="status-tag active" :class="{ 'is-selected': filterStatus === 'active' }"
@@ -134,7 +130,7 @@ const onPlanCopy = async (id) => {
 
     <div v-else class="overview__plan-grid row">
 
-      <div class="col-3 overview__card" @click="showCreateModal = true">
+      <div class="col-3 col-lg-4 col-md-6 col-sm-12 overview__card" @click="showCreateModal = true">
         <div class="overview__empty-card">
           <i class="fa-solid fa-plus"></i>
           <p class="p-p1">創建計畫</p>
@@ -143,11 +139,11 @@ const onPlanCopy = async (id) => {
 
       <CreatePlanModal v-model="showCreateModal" @create="handleCreatePlan" />
 
-      <div v-for="plan in filteredPlans" :key="plan.plan_id" class="col-3 overview__card">
+      <div v-for="plan in filteredPlans" :key="plan.plan_id" class="col-3 col-lg-4 col-md-6 col-sm-12 overview__card">
         <PlanFileCard :plan="plan" :cover-templates="coverTemplates" @delete="onPlanDelete" @copy="onPlanCopy" />
       </div>
 
-      <div v-if="filteredPlans.length === 0" class="col-9 p-p1 text-muted">
+      <div v-if="filteredPlans.length === 0" class="col-9 col-md-12 p-p1 text-muted">
         目前沒有符合此狀態的計畫。
       </div>
     </div>
@@ -155,6 +151,27 @@ const onPlanCopy = async (id) => {
 </template>
 
 <style lang="scss" scoped>
+/* 🔴 強制修正 Grid 系統 RWD */
+
+/* 1. 當螢幕小於 810px 時，強制改為 50% (兩欄) */
+@media screen and (max-width: 810px) {
+  .overview__card {
+    width: 50% !important;
+    max-width: 50% !important;
+    flex: 0 0 50% !important;
+  }
+}
+
+/* 2. 當螢幕小於 390px 時，強制改為 100% (一欄) */
+/* 注意：這個要在 810px 的設定之後，才能覆蓋它 */
+@media screen and (max-width: 390px) {
+  .overview__card {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+}
+
 .overview {
   padding: 20px 0;
 
@@ -167,8 +184,18 @@ const onPlanCopy = async (id) => {
 
   &__tag-wrapper {
     display: flex;
-    // justify-content: space-between;
     gap: 10px;
+
+    // RWD: 手機版可以左右滑動標籤
+    @media (max-width: 810px) {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding-bottom: 5px;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
 
     .status-tag {
       background-color: $neutral-color-100;
@@ -181,6 +208,7 @@ const onPlanCopy = async (id) => {
       cursor: pointer;
       transition: all 0.2s ease;
       border: 1px solid transparent;
+      white-space: nowrap;
 
       &:hover {
         background-color: $accent-color-100;
@@ -247,13 +275,10 @@ const onPlanCopy = async (id) => {
       background-color: $primary-color-100;
       border-color: $primary-color-400;
 
-      // color: $primary-color-800;
       i {
         color: $primary-color-800;
       }
     }
   }
-
-
 }
 </style>

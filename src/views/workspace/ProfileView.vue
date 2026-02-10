@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
 import { phpApi } from '@/utils/publicApi';
 import { useAuthStore } from '@/stores/authStore';
 import { useRoute, useRouter } from 'vue-router';
@@ -67,7 +67,12 @@ const userProfile = ref({
 });
 
 // 食譜資料
-const recipes = ref([]);
+const allRecipes = ref([]); // 儲存所有食譜
+const displayedCount = ref(8); // 目前顯示的食譜數量
+const loadingMore = ref(false); // 是否正在載入更多
+const RECIPES_PER_PAGE = 8; // 每次載入的數量
+const loadMoreTrigger = ref(null); // 載入觸發器元素
+const observer = ref(null); // Intersection Observer 實例
 
 // 追蹤和粉絲資料
 const followingList = ref([]);
@@ -316,17 +321,17 @@ const loadMyRecipes = async () => {
         const { data } = await phpApi.get(`personal/myrecipe_get.php?user_id=${targetUserId.value}`);
 
         if (!data) {
-            recipes.value = [];
+            allRecipes.value = [];
             return;
         }
 
         if (!Array.isArray(data)) {
-            recipes.value = [];
+            allRecipes.value = [];
             return;
         }
 
-        // 轉換食譜資料格式
-        recipes.value = data.map(recipe => ({
+        // 轉換食譜資料格式並儲存所有食譜
+        allRecipes.value = data.map(recipe => ({
             ...recipe,
             id: recipe.recipe_id,
             recipe_name: recipe.recipe_title,
@@ -340,9 +345,12 @@ const loadMyRecipes = async () => {
             user_url: getImageUrl(recipe.author_image || recipe.author_avatar || recipe.user_url || recipe.user_avatar || userProfile.value.avatar)
         }));
 
+        // 重置顯示數量（不超過實際數量）
+        displayedCount.value = Math.min(RECIPES_PER_PAGE, allRecipes.value.length);
+
     } catch (err) {
         error.value = '載入食譜失敗，請稍後再試';
-        recipes.value = [];
+        allRecipes.value = [];
     } finally {
         isLoading.value = false;
     }
@@ -471,9 +479,66 @@ const loadFollowersList = async () => {
     }
 };
 
-// 只顯示前 8 筆食譜
+/**
+ * 載入更多食譜
+ */
+const loadMoreRecipes = () => {
+    if (loadingMore.value || displayedCount.value >= allRecipes.value.length) {
+        return;
+    }
+
+    loadingMore.value = true;
+    
+    setTimeout(() => {
+        const newCount = Math.min(
+            displayedCount.value + RECIPES_PER_PAGE,
+            allRecipes.value.length
+        );
+        displayedCount.value = newCount;
+        loadingMore.value = false;
+    }, 300);
+};
+
+/**
+ * 設置 Intersection Observer 監聽載入觸發器
+ */
+const setupIntersectionObserver = () => {
+    // 清理舊的 observer
+    if (observer.value) {
+        observer.value.disconnect();
+    }
+    
+    // 創建新的 observer
+    observer.value = new IntersectionObserver(
+        (entries) => {
+            entries.forEach(entry => {
+                // 當觸發器進入視口且還有更多內容時載入
+                if (entry.isIntersecting && !loadingMore.value && hasMore.value) {
+                    loadMoreRecipes();
+                }
+            });
+        },
+        {
+            root: null,
+            rootMargin: '200px',
+            threshold: 0.1
+        }
+    );
+    
+    // 開始觀察觸發器元素
+    if (loadMoreTrigger.value) {
+        observer.value.observe(loadMoreTrigger.value);
+    }
+};
+
+// 顯示的食譜（根據 displayedCount 切片）
 const displayedRecipes = computed(() => {
-    return recipes.value.slice(0, 8);
+    return allRecipes.value.slice(0, displayedCount.value);
+});
+
+// 是否還有更多食譜可載入
+const hasMore = computed(() => {
+    return displayedCount.value < allRecipes.value.length;
 });
 
 // ==================== 生命週期 ====================
@@ -485,6 +550,17 @@ onMounted(async () => {
 
     await loadProfile();
     await loadMyRecipes();
+
+    // 等待 DOM 更新後設置 observer
+    await new Promise(resolve => setTimeout(resolve, 100));
+    setupIntersectionObserver();
+});
+
+onUnmounted(() => {
+    // 清理 observer
+    if (observer.value) {
+        observer.value.disconnect();
+    }
 });
 
 // 監聽登入狀態變化
@@ -504,6 +580,7 @@ watch(() => props.userId, async (newUserId, oldUserId) => {
     hasSearched.value = false;
     searchQuery.value = '';
     activeTab.value = 'recipes';
+    displayedCount.value = RECIPES_PER_PAGE; // 重置顯示數量
 
     await loadProfile();
     await loadMyRecipes();
@@ -519,10 +596,27 @@ watch(() => route.name, async (newName, oldName) => {
         hasSearched.value = false;
         searchQuery.value = '';
         activeTab.value = 'recipes';
+        displayedCount.value = RECIPES_PER_PAGE; // 重置顯示數量
 
         await loadProfile();
         await loadMyRecipes();
     }
+});
+
+// 監聽頁籤切換
+watch(activeTab, async (newTab) => {
+    if (newTab === 'recipes') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // 重新設置 observer
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setupIntersectionObserver();
+    }
+});
+
+// 監聽 displayedCount 變化，重新設置 observer
+watch(displayedCount, async () => {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    setupIntersectionObserver();
 });
 </script>
 
@@ -616,6 +710,19 @@ watch(() => route.name, async (newName, oldName) => {
                     </template>
                     <div v-else class="empty-state" style="width:100%;text-align:center;padding:48px 0;">
                         <p class="zh-body">目前沒有個人食譜</p>
+                    </div>
+
+                    <!-- 載入更多指示器 -->
+                    <div 
+                        v-if="displayedRecipes.length > 0" 
+                        ref="loadMoreTrigger"
+                        class="load-more-indicator" 
+                        style="width:100%;text-align:center;padding:24px 0;">
+                        <p v-if="loadingMore" class="zh-body" style="color: #3E8D60;">載入中...</p>
+                        <template v-else-if="hasMore">
+                            <p class="zh-body" style="color: #868686; margin-bottom: 12px;">向下滾動載入更多</p>
+                        </template>
+                        <p v-else class="zh-body" style="color: #868686;">已顯示全部 {{ allRecipes.length }} 個食譜</p>
                     </div>
                 </div>
 
@@ -1036,6 +1143,15 @@ watch(() => route.name, async (newName, oldName) => {
 //         }
 //     }
 // }
+
+/* ==================== 載入更多指示器 ==================== */
+.load-more-indicator {
+    margin-top: 16px;
+    
+    p {
+        font-size: 14px;
+    }
+}
 
 /* ==================== 過渡效果 ==================== */
 .user-list-container {

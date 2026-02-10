@@ -111,7 +111,7 @@ const statusColor = computed(() => {
 
         .used-time {
             height: 15px;
-            border-radius: 50%;
+            border-radius: 99999px;
             position: absolute;
             left: 0;
             top: 2px;

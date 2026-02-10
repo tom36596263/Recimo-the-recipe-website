@@ -11,12 +11,17 @@ const props = defineProps({
 
 const emit = defineEmits(['click']);
 
-// 處理圖片路徑 (相容完整 URL 或相對路徑)
+// 處理圖片路徑
 const recipeImage = computed(() => {
-    if (!props.recipe.image_url) return '';
-    return props.recipe.image_url.startsWith('http')
-        ? props.recipe.image_url
-        : parsePublicFile(props.recipe.image_url);
+    // 🟢 修正：優先抓取 recipe_image_url (資料庫原始欄位)，如果沒有才抓 image_url
+    const rawPath = props.recipe.recipe_image_url || props.recipe.image_url;
+
+    if (!rawPath) return ''; // 如果都沒有，回傳空字串 (或預設圖路徑)
+
+    // 判斷是否為完整網址
+    return rawPath.startsWith('http')
+        ? rawPath
+        : parsePublicFile(rawPath);
 });
 </script>
 
@@ -30,7 +35,7 @@ const recipeImage = computed(() => {
             </div>
         </div>
         <div class="card-content">
-            <h5 class="recipe-name">{{ recipe.recipe_name }}</h5>
+            <h5 class="recipe-name">{{ recipe.recipe_title }}</h5>
             <div class="card-footer">
                 <span class="last-date" v-if="recipe.last_cooked_at">
                     最近：{{ new Date(recipe.last_cooked_at).toLocaleDateString() }}
@@ -41,6 +46,7 @@ const recipeImage = computed(() => {
 </template>
 
 <style lang="scss" scoped>
+/* 樣式保持不變 */
 .cooked-recipe-card {
     background: $neutral-color-white;
     border-radius: 12px;
@@ -52,8 +58,10 @@ const recipeImage = computed(() => {
     flex-direction: column;
     border: 1px solid $neutral-color-100;
 
-
     &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba($neutral-color-black, 0.08);
+
         .card-image img {
             transform: scale(1.05);
         }
@@ -62,7 +70,6 @@ const recipeImage = computed(() => {
     .card-image {
         width: 100%;
         padding-top: 75%;
-        /* 4:3 Aspect Ratio */
         position: relative;
         overflow: hidden;
 

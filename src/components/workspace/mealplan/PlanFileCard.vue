@@ -24,14 +24,17 @@ const router = useRouter();
 
 // --- 計算最終要顯示的封面路徑 ---
 const activeCoverUrl = computed(() => {
+    const type = Number(props.plan.cover_type);
+
     // 1. 如果是使用者上傳 (type 2)
-    if (props.plan.cover_type === 2 && props.plan.custom_cover_url) {
+    if (type === 2 && props.plan.custom_cover_url) {
         return parsePublicFile(props.plan.custom_cover_url);
     }
 
     // 2. 如果是官方預設 (type 1)
-    if (props.plan.cover_type === 1) {
+    if (type === 1) {
         const target = props.coverTemplates.find(
+            // 這裡您原本寫得很好，已經有加 Number()，所以 id 比對沒問題
             (t) => Number(t.cover_template_id) === Number(props.plan.cover_template_id)
         );
         return target ? parsePublicFile(target.template_url) : '';
@@ -40,7 +43,6 @@ const activeCoverUrl = computed(() => {
     // 3. 預設圖 (避免空白)
     return 'https://placehold.jp/24/2e6f4a/ffffff/300x150.png?text=No+Cover';
 });
-
 // --- 核心邏輯：判斷計畫狀態 ---
 const statusInfo = computed(() => {
     const now = new Date();
