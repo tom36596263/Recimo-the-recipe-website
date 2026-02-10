@@ -910,9 +910,9 @@ watch(
     </div>
   </div>
 
-  <!-- <div class="recipe-container-root" v-if="!isLoading && (rawRecipe || isPreviewMode)"
+  <div class="recipe-container-root" v-if="!isLoading && (rawRecipe || isPreviewMode)"
     :class="{ 'preview-padding': isPreviewMode }">
-  </div> -->
+  </div>
 
   <div v-else-if="isLoading" class="loading-state">
     <p>正在為您準備食譜資料...</p>
@@ -1086,11 +1086,11 @@ watch(
 
 .recipe-container-root {
   background-color: $neutral-color-white;
-  min-height: 100vh;
-  padding: 0 0 100px 0;
+  // min-height: 100vh;
+  padding: 0 0 40px 0;
 
   &.preview-padding {
-    padding-top: 90px;
+    // padding-top: 90px;
 
     @media screen and (max-width: 768px) {
       padding-top: 0px;
