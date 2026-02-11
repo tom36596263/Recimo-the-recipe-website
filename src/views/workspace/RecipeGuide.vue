@@ -171,7 +171,7 @@ const handleFinishGuide = () => {
 </script>
 
 <template>
-    <div class="container">
+    <div class="container desktop-wrapper">
         <div class="guide row">
             <div class="guide__main-content col-9">
                 <h2 class="guide__recipe-title zh-h2">
@@ -231,10 +231,63 @@ const handleFinishGuide = () => {
             </aside>
         </div>
     </div>
-    <AllIngredientsModal v-show="ingredientModalIsOpen" @noshow="toggleModal" :list="currentRecipeIngredients" />
+
+    <Teleport to="body">
+        <div class="mobile-portrait-overlay">
+            <div class="orientation-content">
+                <img :src="rotatePhoneImg" alt="請旋轉手機" class="rotate-img" />
+            </div>
+        </div>
+
+        <div class="mobile-landscape-fullscreen">
+            <div class="mobile-top-nav">
+                <div class="step-scroll-area">
+                    <div class="nav-step-item" v-for="(step, index) in allSteps" :key="step.step_id"
+                        :class="{ 'is-active': index === viewingStepIndex }" @click="changeStep(index)">
+                        <span class="step-label">step</span>
+                        <span class="step-num">{{ index + 1 }}</span>
+                    </div>
+                </div>
+                <button class="mobile-all-ing-btn" @click="toggleModal">全部食材</button>
+            </div>
+
+            <div class="mobile-main-area">
+                <div class="mobile-step-content">
+                    <StepContentCard :step="currentStepData" :ingredients="currentStepIngredients" />
+                </div>
+
+                <div class="mobile-sidebar">
+                    <div class="mobile-timer-card">
+                        <div class="time-display">{{ formatTime }}</div>
+                        <button class="start-btn" @click="toggleTimer">
+                            {{ stepTimers[currentStepData.step_id]?.isFinished ? '確定' : (isCurrentViewingTimerRunning ?
+                                '暫停' : '開始') }}
+                        </button>
+                    </div>
+
+                    <div class="mobile-note-card">
+                        <div class="note-tabs">
+                            <div class="tab active">筆記</div>
+                            <div class="tab" @click="triggerUpload">照片</div>
+                        </div>
+                        <textarea v-if="currentStepData.step_id" v-model="stepNotes[currentStepData.step_id]"
+                            class="note-textarea" placeholder="輸入筆記..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Teleport>
+
+    <Teleport to="body">
+        <AllIngredientsModal v-show="ingredientModalIsOpen" @noshow="toggleModal" :list="currentRecipeIngredients" />
+    </Teleport>
 </template>
 
 <style lang="scss" scoped>
+.desktop-wrapper {
+    display: block;
+}
+
 .guide {
     display: flex;
     flex-wrap: nowrap;
@@ -390,6 +443,242 @@ const handleFinishGuide = () => {
                 background-color: $accent-color-400;
             }
         }
+    }
+
+    @media screen and (max-width: 810px) {
+        .desktop-wrapper {
+            display: none !important;
+        }
+    }
+}
+</style>
+
+<style lang="scss">
+.mobile-portrait-overlay {
+    display: none;
+}
+
+.mobile-landscape-fullscreen {
+    display: none;
+}
+
+@media screen and (max-width: 810px) {
+    @media (orientation: portrait) {
+        .mobile-portrait-overlay {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: white;
+            z-index: 2147483647;
+            justify-content: center;
+            align-items: center;
+
+            .orientation-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+
+                .rotate-img {
+                    width: 60%;
+                    max-width: 250px;
+                    animation: rotatePhone 2s ease-in-out infinite;
+                }
+            }
+        }
+    }
+
+    @media (orientation: landscape) {
+        .mobile-landscape-fullscreen {
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #fafafa;
+            z-index: 2147483647;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .mobile-top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 50px;
+            margin-bottom: 12px;
+
+            .step-scroll-area {
+                display: flex;
+                overflow-x: auto;
+                gap: 8px;
+                flex: 1;
+                margin-right: 16px;
+                padding-bottom: 4px;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+
+                .nav-step-item {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 4px 16px;
+                    border-radius: 8px;
+                    color: #999;
+                    cursor: pointer;
+
+                    .step-label {
+                        font-size: 10px;
+                        line-height: 1;
+                    }
+
+                    .step-num {
+                        font-size: 18px;
+                        font-weight: bold;
+                        line-height: 1.2;
+                    }
+
+                    &.is-active {
+                        background-color: #e8f5e9;
+                        color: #2e7d32;
+                    }
+                }
+            }
+
+            .mobile-all-ing-btn {
+                background: transparent;
+                border: 1px solid #2e7d32;
+                color: #2e7d32;
+                border-radius: 20px;
+                padding: 6px 16px;
+                font-size: 14px;
+                white-space: nowrap;
+            }
+        }
+
+        .mobile-main-area {
+            display: flex;
+            flex-direction: row;
+            gap: 16px;
+            height: calc(100vh - 74px);
+        }
+
+        .mobile-step-content {
+            flex: 2;
+            height: 100%;
+            overflow-y: auto;
+
+            &::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 4px;
+            }
+        }
+
+        .mobile-sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: 100%;
+        }
+
+        .mobile-timer-card {
+            background-color: #e8f5e9;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            flex: 1;
+
+            .time-display {
+                font-size: 36px;
+                font-weight: bold;
+                color: #333;
+                margin-bottom: 12px;
+            }
+
+            .start-btn {
+                background-color: #2e7d32;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 8px 24px;
+                font-size: 16px;
+                cursor: pointer;
+            }
+        }
+
+        .mobile-note-card {
+            background-color: #2e7d32;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+
+            .note-tabs {
+                display: flex;
+                background-color: rgba(255, 255, 255, 0.1);
+
+                .tab {
+                    flex: 1;
+                    text-align: center;
+                    padding: 8px 0;
+                    color: white;
+                    font-size: 13px;
+                    opacity: 0.7;
+                    cursor: pointer;
+
+                    &.active {
+                        opacity: 1;
+                        font-weight: bold;
+                        background-color: rgba(255, 255, 255, 0.2);
+                    }
+                }
+            }
+
+            .note-textarea {
+                flex: 1;
+                margin: 0;
+                border: none;
+                background-color: white;
+                padding: 12px;
+                font-size: 14px;
+                resize: none;
+
+                &:focus {
+                    outline: none;
+                }
+            }
+        }
+    }
+}
+
+@keyframes rotatePhone {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(-90deg);
+    }
+
+    100% {
+        transform: rotate(-90deg);
     }
 }
 </style>
