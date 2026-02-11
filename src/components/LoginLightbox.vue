@@ -1503,6 +1503,7 @@ const closeResetSuccess = () => {
   text-decoration: underline;
   cursor: pointer;
   font-size: 14px;
+  text-align: center;
 }
 
 @media screen and (max-width: 810px) {
