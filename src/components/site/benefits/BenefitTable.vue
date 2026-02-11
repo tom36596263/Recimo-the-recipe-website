@@ -13,6 +13,8 @@ const benefitData = [
     { name: '我的烹飪實驗室', guest: '', member: 'check' },
     { name: '備餐計畫', guest: '', member: 'check' },
 ];
+
+const aboutUrl = `${import.meta.env.VITE_BASE}about`.replace(/\/+/g, '/');
 </script>
 
 <template>
@@ -44,7 +46,7 @@ const benefitData = [
 
     <!-- 新增 wrapper -->
     <div class="btn-wrapper">
-        <CircleBtn title="查看功能介紹" type="green" href="./about" class="more-btn" />
+        <CircleBtn title="查看功能介紹" type="green" :href="aboutUrl" class="more-btn" />
     </div>
 </template>
 
