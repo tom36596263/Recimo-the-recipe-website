@@ -32,17 +32,21 @@ const formatImageUrl = (rawImage) => {
 
   // 處理已經是 http 開頭的網址
   if (typeof rawImage === 'string' && rawImage.startsWith('http')) {
-    // 如果資料庫存的是舊的 recimo 路徑，把它換成 api
-    // 這段寫得很正確，會把 https://.../recimo/img/... 變成 https://.../api/img/...
-    if (rawImage.includes('/recimo/img')) {
-      return rawImage.replace('/recimo/img', '/api/img');
+
+    // 🚑 強力修正：只要是線上的網址，且包含 /recimo/，就強制換成 /api/
+    if (rawImage.includes('tibamef2e.com') && rawImage.includes('/recimo/')) {
+      const fixedImage = rawImage.replace('/recimo/', '/api/');
+      // 在 Console 印出修正紀錄，方便您檢查
+      console.log(`修正圖片路徑: ${rawImage} -> ${fixedImage}`);
+      return fixedImage;
     }
+
     return rawImage;
   }
 
   let relativePath = rawImage;
 
-  //  處理 JSON 格式
+  // 3. 處理 JSON 格式
   if (typeof rawImage === 'string' && (rawImage.startsWith('[') || rawImage.startsWith('{'))) {
     try {
       const parsed = JSON.parse(rawImage);
@@ -53,11 +57,9 @@ const formatImageUrl = (rawImage) => {
     } catch (e) { console.warn('JSON parse error', e); }
   }
 
-  //拼接相對路徑
+  // 4. 拼接相對路徑
   if (relativePath && !relativePath.startsWith('http')) {
-    // 移除開頭可能多餘的符號
     const cleanPath = relativePath.replace(/^public\//, '').replace(/^\/+/, '');
-
     // 結果會是: .../api/ + img/mall/PROD-007_01.jpg
     return `${imgBaseUrl}/${cleanPath}`;
   }
