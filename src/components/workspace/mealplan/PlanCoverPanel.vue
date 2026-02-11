@@ -29,13 +29,10 @@ const onFileChange = async (e) => {
 
     const formData = new FormData();
     formData.append('cover_image', file);
-    // 轉型為字串傳送，確保後端接收正確
     formData.append('plan_id', String(props.planId));
     formData.append('user_id', String(authStore.userId));
 
     try {
-        // 🟢 關鍵點：顯式設定 Content-Type 為 undefined
-        // 這會移除預設的 application/json，讓瀏覽器自動生成 multipart/form-data boundary
         const res = await phpApi.post('mealplans/upload_plan_cover.php', formData, {
             headers: {
                 'Content-Type': undefined
@@ -81,12 +78,13 @@ const selectCustom = () => {
 
                         <div v-if="currentCustomUrl" class="cover-card cover-card--uploaded" @click="selectCustom">
                             <img :src="parsePublicFile(currentCustomUrl)" alt="Custom Cover" />
-                            <div class="cover-card__name">我的圖片</div>
+                            <div class="cover-card__name p-p1">我的圖片</div>
                         </div>
 
                         <div v-for="item in templates" :key="item.cover_template_id" class="cover-card"
                             @click="selectTemplate(item)">
                             <img :src="parsePublicFile(item.template_url)" />
+                            <div class="cover-card__name p-p1">{{ item.template_name }}</div>
                         </div>
                     </div>
                 </div>
@@ -161,18 +159,19 @@ const selectCustom = () => {
         position: absolute;
         bottom: 0;
         width: 100%;
+        height: 100%;
         background: rgba($neutral-color-black, 0.4);
-        color: #fff;
-        font-size: 12px;
-        text-align: center;
+        color: $neutral-color-white;
+        // text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         padding: 2px 0;
         opacity: 0;
         transition: 0.3s;
     }
 
     &:hover {
-        border-color: $primary-color-400;
-
         .cover-card__name {
             opacity: 1;
         }

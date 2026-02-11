@@ -83,6 +83,24 @@ const displayTime = computed(() => {
         }
     }
 
+    &:hover {
+        border-color: $accent-color-800;
+        background-color: $accent-color-100;
+
+        :deep(.step-order) {
+            background-color: $neutral-color-white;
+            color: $accent-color-700;
+        }
+
+        .step-card__text {
+            color: $accent-color-700;
+        }
+
+        .step-card__time {
+            color: $accent-color-700;
+        }
+    }
+
     &__time {
         display: flex;
         align-items: center;
@@ -99,6 +117,8 @@ const displayTime = computed(() => {
         }
     }
 
+
+
     &.is-active {
         border-color: $secondary-color-info-700;
         background-color: $secondary-color-info-200;
@@ -110,6 +130,14 @@ const displayTime = computed(() => {
             span {
                 color: $secondary-color-info-700;
             }
+        }
+
+        .step-card__text {
+            color: $secondary-color-info-700;
+        }
+
+        .step-card__time {
+            color: $secondary-color-info-700;
         }
     }
 }

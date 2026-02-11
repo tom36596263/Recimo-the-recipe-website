@@ -30,7 +30,7 @@ const mealSlots = ref([
   text-align: center;
   gap: 4px;
   flex-shrink: 0;
-
+  margin-right: 10px;
 
   &__date,
   &__slot {

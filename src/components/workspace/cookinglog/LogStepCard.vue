@@ -11,9 +11,10 @@ const props = defineProps({
     description: String
 });
 
+const emit = defineEmits(['open-desc']);
+
 const cookingStore = useCookingStore();
 const localImage = ref(props.initialImage);
-const showDescriptionModal = ref(false);
 
 const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -21,6 +22,12 @@ const handleFileChange = (event) => {
         const url = URL.createObjectURL(file);
         localImage.value = url;
         cookingStore.tempLogData.noteImages[props.stepId] = url;
+
+
+        if (!cookingStore.tempLogData.noteImageFiles) {
+            cookingStore.tempLogData.noteImageFiles = {};
+        }
+        cookingStore.tempLogData.noteImageFiles[props.stepId] = file;
     }
 };
 
@@ -29,18 +36,16 @@ const handleNoteInput = (event) => {
 };
 
 const openModal = () => {
-    console.log('Open Modal Triggered!'); // 🟢 Debug: 確認點擊有觸發
-    showDescriptionModal.value = true;
-};
-
-const closeModal = () => {
-    showDescriptionModal.value = false;
+    emit('open-desc', {
+        order: props.order,
+        description: props.description
+    });
 };
 </script>
 
 <template>
     <div class="card">
-        <div class="step-btn-wrapper" @click="openModal">
+        <div class="step-btn-wrapper" @click.stop="openModal">
             <StepOrder :order="order" />
         </div>
 
@@ -60,22 +65,6 @@ const closeModal = () => {
                 </label>
             </div>
         </div>
-
-        <Teleport to="body">
-            <div v-if="showDescriptionModal" class="modal-overlay" @click.self="closeModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <span class="modal-title zh-h3-bold">步驟 {{ order }} 說明</span>
-                        <button class="close-btn" @click="closeModal">
-                            <i-material-symbols-close />
-                        </button>
-                    </div>
-                    <div class="modal-body p-p1">
-                        {{ description || '此步驟沒有詳細說明。' }}
-                    </div>
-                </div>
-            </div>
-        </Teleport>
     </div>
 </template>
 
@@ -84,23 +73,15 @@ const closeModal = () => {
     display: flex;
     gap: 5px;
 
-    /* 🟢 為 wrapper 加入樣式，讓它看起來像可點擊的按鈕 */
-    .step-btn-wrapper {
-        cursor: pointer;
-        transition: transform 0.1s;
+    // .step-btn-wrapper {
+    //     cursor: pointer;
+    //     transition: transform 0.3s;
+    //     flex-shrink: 0;
 
-        /* 避免被壓縮 */
-        flex-shrink: 0;
-
-        &:active {
-            transform: scale(0.95);
-        }
-
-        /* 讓滑鼠移過去有提示 */
-        &:hover {
-            opacity: 0.9;
-        }
-    }
+    //     &:hover {
+    //         scale: 1.1;
+    //     }
+    // }
 
     &__note-wrapper {
         display: flex;
@@ -111,7 +92,7 @@ const closeModal = () => {
         padding: 5px 10px;
         border-radius: 10px;
         gap: 10px;
-        border: 1px solid $primary-color-800;
+        border: 1px solid $neutral-color-400;
     }
 
     &__note-text {
@@ -156,73 +137,6 @@ const closeModal = () => {
             align-items: center;
             justify-content: center;
         }
-    }
-}
-
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-.modal-content {
-    background-color: white;
-    width: 90%;
-    max-width: 400px;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    position: relative;
-    animation: fadeIn 0.3s ease;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-
-    .modal-title {
-        color: $primary-color-800;
-    }
-
-    .close-btn {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        color: $neutral-color-400;
-
-        &:hover {
-            color: $primary-color-800;
-        }
-    }
-}
-
-.modal-body {
-    color: $neutral-color-800;
-    line-height: 1.6;
-    white-space: pre-wrap;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
     }
 }
 </style>

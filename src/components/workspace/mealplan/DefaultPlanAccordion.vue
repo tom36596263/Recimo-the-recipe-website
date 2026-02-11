@@ -49,6 +49,12 @@ const selectPlan = (id) => {
   color: $primary-color-800;
   border-top: 1px solid $neutral-color-100;
   border-bottom: 1px solid $neutral-color-100;
+  max-height: 400px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &__header {
     display: flex;
@@ -88,7 +94,7 @@ const selectPlan = (id) => {
 .plan-card {
   border-radius: 8px;
   padding: 16px;
-  background-color: $primary-color-100;
+  background-color: $neutral-color-100;
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
 

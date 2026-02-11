@@ -46,10 +46,12 @@ const activeCoverUrl = computed(() => {
 // --- 核心邏輯：判斷計畫狀態 ---
 const statusInfo = computed(() => {
     const now = new Date();
-    now.setHours(0, 0, 0, 0); // 歸零時間，只比日期
+    now.setHours(0, 0, 0, 0);
 
     const start = new Date(props.plan.start_date);
+    start.setHours(0, 0, 0, 0);
     const end = new Date(props.plan.end_date);
+    end.setHours(0, 0, 0, 0);
 
     if (now < start) {
         return { text: '未開始', class: 'upcoming' };

@@ -24,6 +24,5 @@ defineProps({
     border: 1px solid $primary-color-800;
     border-radius: 10px;
     flex-shrink: 0;
-    cursor: pointer;
 }
 </style>
