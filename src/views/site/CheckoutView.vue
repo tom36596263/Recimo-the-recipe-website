@@ -18,34 +18,27 @@ const orderItems = computed(() => {
     product_image: formatImageUrl(item.product_image || item.image)
   }));
 });
+// 圖片處理函式 (修正後的版本)
 const formatImageUrl = (rawImage) => {
   if (!rawImage) return '';
 
-  // 1. 定義正確的圖片網域 (不含 api 字眼)
-  // 如果是本地開發(localhost)，用本地路徑；如果是線上，用線上路徑
+  // 1. 定義正確的圖片網域
   const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-  // 本地端對應你的 XAMPP/MAMP 路徑 (請依你的實際狀況調整，例如 http://localhost:8888/recimo)
-  // 線上端則是 tibamef2e.com...
-  const imgBaseUrl = isLocal
-    ? 'http://localhost:8888/recimo_api' // 這裡依照你本地圖片存放的位置設定
-    : 'https://tibamef2e.com/cjd102/g2/recimo';
 
-  // 2. 處理已經是 http 開頭的網址 (修正錯誤的 /api 路徑)
+  const imgBaseUrl = isLocal
+    ? 'http://localhost:8888/recimo_api'
+    : 'https://tibamef2e.com/cjd102/g2/api';
+
+  // 處理已經是 http 開頭的網址
   if (typeof rawImage === 'string' && rawImage.startsWith('http')) {
-    // 🚑 急救包：如果網址裡面不小心包含了 /api/img，把它替換掉
-    // 這會把 .../api/img/... 修正回 .../recimo/img/... (或是直接拿掉 api)
-    if (rawImage.includes('/api/img')) {
-      return rawImage.replace('/api/img', '/recimo/img').replace('/recimo/recimo', '/recimo');
-      // 上面這行有點暴力，更保險的做法是直接替換網域部分：
-      // return rawImage.replace('/api/', '/'); 
-    }
+    // 這裡不做任何取代，直接回傳
     return rawImage;
   }
 
   let relativePath = rawImage;
 
-  // 3. 處理 JSON 格式 (資料庫有時候會存 JSON)
+  //  處理 JSON 格式
   if (typeof rawImage === 'string' && (rawImage.startsWith('[') || rawImage.startsWith('{'))) {
     try {
       const parsed = JSON.parse(rawImage);
@@ -56,12 +49,12 @@ const formatImageUrl = (rawImage) => {
     } catch (e) { console.warn('JSON parse error', e); }
   }
 
-  // 4. 拼接相對路徑 (這是最重要的一步)
+  //拼接相對路徑
   if (relativePath && !relativePath.startsWith('http')) {
-    // 移除開頭多餘的 public/ 或 /
+    // 移除開頭可能多餘的符號
     const cleanPath = relativePath.replace(/^public\//, '').replace(/^\/+/, '');
 
-    // 直接拼接正確的 imgBaseUrl，不再依賴 phpApi
+    // 結果會是: .../api/ + img/mall/PROD-007_01.jpg
     return `${imgBaseUrl}/${cleanPath}`;
   }
 
