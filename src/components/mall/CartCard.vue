@@ -89,11 +89,6 @@ const productImage = computed(() => {
     if (imgUrl) {
         let finalPath = proxy.$parsePublicFile(imgUrl);
 
-        // 偵錯：如果路徑中含有 cjd102/g2/ 但沒有 recimo，就補上去
-        if (finalPath.includes('cjd102/g2/') && !finalPath.includes('cjd102/g2/recimo/')) {
-            finalPath = finalPath.replace('cjd102/g2/', 'cjd102/g2/recimo/');
-        }
-
         return finalPath;
     }
     return `${import.meta.env.BASE_URL}images/default-placeholder.png`;

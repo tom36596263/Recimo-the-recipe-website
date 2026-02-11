@@ -44,7 +44,7 @@ const benefitData = [
 
     <!-- 新增 wrapper -->
     <div class="btn-wrapper">
-        <CircleBtn title="查看功能介紹" type="green" href="/about" class="more-btn" />
+        <CircleBtn title="查看功能介紹" type="green" href="./about" class="more-btn" />
     </div>
 </template>
 
