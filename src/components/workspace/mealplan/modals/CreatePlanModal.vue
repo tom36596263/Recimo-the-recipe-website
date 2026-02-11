@@ -37,18 +37,18 @@ const handleConfirm = () => {
                 <h3 class="zh-h4-bold">開始新的備餐計畫</h3>
 
                 <div class="field">
-                    <label>計畫名稱</label>
-                    <input v-model="newPlan.title" type="text" placeholder="例如：健康均衡三日計畫" />
+                    <label class="p-p1">計畫名稱</label>
+                    <input v-model="newPlan.title" type="text" placeholder="例如：健康三日計畫" class="p-p1" />
                 </div>
 
                 <div class="field">
-                    <label>選擇日期範圍</label>
+                    <label class="p-p1">選擇日期範圍</label>
                     <VDatePicker v-model.range="newPlan.range" color="green" />
                 </div>
 
                 <div class="actions">
-                    <button class="cancel-btn" @click="handleClose">取消</button>
-                    <button class="confirm-btn" @click="handleConfirm">建立計畫</button>
+                    <button class="cancel-btn p-p1" @click="handleClose">取消</button>
+                    <button class="confirm-btn p-p1" @click="handleConfirm">建立計畫</button>
                 </div>
             </div>
         </div>
@@ -80,34 +80,41 @@ const handleConfirm = () => {
     background: #fff;
     padding: 30px;
     border-radius: 20px;
-    width: 310px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
 
     h3 {
         color: $primary-color-700;
-        margin-bottom: 20px;
+        margin: auto;
     }
 
     .field {
-        margin-bottom: 20px;
 
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
+            // font-weight: bold;
         }
     }
 
     input {
         width: 100%;
         padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background-color: $neutral-color-100;
+
+        &:focus {
+            outline: none;
+            border-color: $primary-color-700;
+            background-color: $neutral-color-white;
+        }
     }
 
     .actions {
         display: flex;
         gap: 10px;
-        margin-top: 20px;
 
         button {
             flex: 1;
@@ -119,11 +126,20 @@ const handleConfirm = () => {
 
         .confirm-btn {
             background: $primary-color-700;
-            color: #fff;
+            color: $neutral-color-white;
+
+            &:hover {
+                background-color: $accent-color-700;
+            }
         }
 
         .cancel-btn {
-            background: #eee;
+            background: $neutral-color-100;
+
+            &:hover {
+                background-color: $neutral-color-400;
+                color: $neutral-color-white;
+            }
         }
     }
 }

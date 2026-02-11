@@ -133,7 +133,7 @@ onMounted(() => {
 
             <div class="row main-content">
                 <div class="col-9 col-lg-12 left-section">
-                    <CookingRhythmChart :rhythm-data="cookingStats.rhythmData" />
+                    <CookingRhythmChart :rhythm-data="cookingStats.rhythmData" :total-logs="cookingStats.totalLogs" />
                 </div>
 
                 <div class="col-3 col-lg-12 right-section">

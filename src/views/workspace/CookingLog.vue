@@ -8,6 +8,10 @@ import LogTime from '../../components/workspace/cookinglog/LogTime.vue';
 import LogRating from '../../components/workspace/cookinglog/LogRating.vue';
 import LogDifficulty from '../../components/workspace/cookinglog/LogDifficulty.vue';
 import LogStepcard from '../../components/workspace/cookinglog/LogStepcard.vue';
+// 🟢 1. 引入 Modal
+import StepDescriptionModal from '../../components/workspace/cookinglog/StepDescriptionModal.vue';
+import { useAuthStore } from '@/stores/authStore';
+const authStore = useAuthStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -16,7 +20,6 @@ const cookingStore = useCookingStore();
 const recipeId = Number(route.params.recipeId);
 const allSteps = ref([]);
 
-// 🟢 修正 1：補上難度對照表，否則 saveAndGoLab 會報錯
 const difficultyMap = {
     '簡單': 1,
     '中等': 2,
@@ -38,7 +41,6 @@ const handleMainImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
         cookingStore.tempLogData.mainImage = URL.createObjectURL(file);
-        // 確保 Store 有存入檔案物件
         cookingStore.tempLogData.mainImageFile = file;
     }
 };
@@ -47,49 +49,52 @@ const saveAndGoLab = async () => {
     try {
         const formData = new FormData();
 
-        // 1. 基本資料
+        // --- 1. 基本資料 ---
         formData.append('recipe_id', recipeId);
-        formData.append('user_id', 1); // ⚠️ 正式上線記得改為動態 user_id
 
-        // 時間轉換
-        const hours = Math.floor(cookingStore.tempLogData.totalTime / 60);
-        const mins = cookingStore.tempLogData.totalTime % 60;
+        // 🟢 關鍵修正：動態取得 user_id，不要寫死為 1
+        // (需確保在 script 頂部有宣告 const authStore = useAuthStore(); )
+        const currentUserId = authStore.userId || 1;
+        formData.append('user_id', currentUserId);
+
+        // --- 2. 時間轉換 ---
+        const totalTime = Number(cookingStore.tempLogData.totalTime) || 0;
+        const hours = Math.floor(totalTime / 60);
+        const mins = totalTime % 60;
         const timeStr = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
         formData.append('actual_time', timeStr);
 
+        // --- 3. 評分與難度轉換 ---
         formData.append('satisfaction_rating', cookingStore.tempLogData.rating);
-
-        // 難度轉換 (現在 difficultyMap 存在了，這裡不會報錯)
         const skillVal = difficultyMap[cookingStore.tempLogData.skillDifficulty] || 1;
         const processVal = difficultyMap[cookingStore.tempLogData.processDifficulty] || 1;
         formData.append('technique_rating', skillVal);
         formData.append('complexity_rating', processVal);
 
+        // --- 4. 心得總結與主圖 ---
         formData.append('log_summary', cookingStore.tempLogData.summary || '');
-
-        // 2. 主圖檔案
         if (cookingStore.tempLogData.mainImageFile) {
             formData.append('main_image', cookingStore.tempLogData.mainImageFile);
         }
 
-        // 3. 步驟筆記
+        // --- 5. 步驟筆記與步驟圖片 ---
         formData.append('step_notes', JSON.stringify(cookingStore.tempLogData.stepNotes));
-
-        // 4. 步驟圖片
-        // ⚠️ 請確保 LogStepcard 有正確寫入 noteImageFiles
         if (cookingStore.tempLogData.noteImageFiles) {
             for (const [stepId, file] of Object.entries(cookingStore.tempLogData.noteImageFiles)) {
-                // formData key 必須與後端 PHP 接收的一致 (step_image_ID)
                 formData.append(`step_image_${stepId}`, file);
             }
         }
 
+        // --- 6. 發送 API 請求 ---
         const response = await phpApi.post('log/create_log.php', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
 
         if (response.data.status === 'success') {
-            // alert('儲存成功！');
+            // 🟢 呼叫 store 裡的清空函式，把剛剛暫存的圖片、筆記、時間全部洗掉
+            cookingStore.resetLogData();
+
+            // 跳轉至烹飪實驗室
             router.push({ name: 'cooking-lab' });
         } else {
             alert('儲存失敗：' + response.data.message);
@@ -109,6 +114,17 @@ onMounted(async () => {
     }
     await fetchData();
 });
+
+// 🟢 2. Modal 控制狀態
+const isModalOpen = ref(false);
+const currentModalData = ref({ order: 1, description: '' });
+
+// 🟢 3. 處理子元件傳來的開啟請求
+const handleOpenDescModal = (data) => {
+    console.log("CookingLog 收到開啟 Modal 請求，資料為:", data); // 確認資料有傳遞過來
+    currentModalData.value = data;
+    isModalOpen.value = true;
+};
 </script>
 
 <template>
@@ -126,7 +142,6 @@ onMounted(async () => {
                         <p>點擊上傳圖片</p>
                     </div>
                 </label>
-
                 <input type="file" id="file-upload" accept="image/*" style="display: none;"
                     @change="handleMainImageUpload">
             </div>
@@ -144,8 +159,8 @@ onMounted(async () => {
                 </div>
                 <LogStepcard v-for="(step, index) in allSteps" :key="step.step_id" :order="index + 1"
                     :step-id="step.step_id" :initialNote="cookingStore.tempLogData.stepNotes[step.step_id]"
-                    :initialImage="cookingStore.tempLogData.noteImages[step.step_id]"
-                    :description="step.step_description" />
+                    :initialImage="cookingStore.tempLogData.noteImages[step.step_id]" :description="step.step_content"
+                    @open-desc="handleOpenDescModal" />
             </div>
 
             <div class="log__summary col-10">
@@ -168,6 +183,9 @@ onMounted(async () => {
                 </div>
             </div>
         </div>
+
+        <StepDescriptionModal :is-open="isModalOpen" :order="currentModalData.order"
+            :description="currentModalData.description" @close="isModalOpen = false" />
     </div>
 </template>
 
@@ -290,16 +308,29 @@ onMounted(async () => {
         padding: 5px 10px;
         border-radius: 10px;
         cursor: pointer;
+
+
     }
 
     &__back-btn {
         background-color: $neutral-color-white;
         border: 1px solid $primary-color-800;
+
+        &:hover {
+            background-color: $accent-color-100;
+            border-color: $accent-color-800;
+            color: $accent-color-700;
+        }
     }
 
     &__finished-btn {
         background-color: $primary-color-800;
         color: $neutral-color-white;
+
+        &:hover {
+            background-color: $accent-color-700;
+            color: $neutral-color-white;
+        }
     }
 }
 </style>

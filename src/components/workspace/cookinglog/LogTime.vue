@@ -81,9 +81,8 @@ const statusColor = computed(() => {
     &__title {
         display: flex;
         align-items: center;
-        color: $neutral-color-800;
+        color: $primary-color-800;
         gap: 4px;
-        /* 微調圖示間距 */
     }
 
     &__total-time {

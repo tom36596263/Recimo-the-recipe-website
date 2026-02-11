@@ -70,7 +70,7 @@ const dateTabsData = computed(() => {
 });
 // --- 2. 狀態：當前選中的頁籤 ID ---
 const activeTabId = ref(1);
-// --- 3. 核心邏輯：計算「當前選中日期」的營養總和 (保持不變) ---
+// --- 3. 核心邏輯：計算「當前選中日期」的營養總 ---
 const currentNutritionData = computed(() => {
   const activeTab = dateTabsData.value.find(tab => tab.id === activeTabId.value);
   if (!activeTab) return { calories: 0, protein: 0, carbs: 0, starch: 0, fat: 0 };
@@ -80,13 +80,29 @@ const currentNutritionData = computed(() => {
   );
 
   return todaysItems.reduce((acc, item) => {
-    const recipe = props.allRecipes.find(r => Number(r.recipe_id) === Number(item.recipe_id));
-    if (recipe) {
-      acc.calories += Number(recipe.recipe_kcal_per_100g) || 0;
-      acc.protein += Number(recipe.recipe_protein_per_100g) || 0;
-      acc.carbs += Number(recipe.recipe_carbs_per_100g) || 0;
-      acc.fat += Number(recipe.recipe_fat_per_100g) || 0;
-      acc.starch += (Number(recipe.recipe_carbs_per_100g) * 0.7) || 0;
+    // 1. 取得全域食譜資訊 (為了拿 蛋白質/碳水/脂肪，因為 item.detail 裡沒有這些)
+    const globalRecipe = props.allRecipes.find(r => Number(r.recipe_id) === Number(item.recipe_id));
+
+    // 2. 取得 item.detail (為了拿 份數/熱量，這跟 RecipePicker 用的是同一個來源，最準)
+    const detail = item.detail || {};
+
+    if (globalRecipe) {
+      // 🟢 優先使用 detail 的份數 (API 有回傳)，沒有才用 globalRecipe 的
+      let servings = Number(detail.recipe_servings);
+      if (!servings) servings = Number(globalRecipe.recipe_servings);
+
+      // 防呆
+      if (!servings || servings <= 0) servings = 1;
+
+      // 🟢 優先使用 detail 的熱量，確保跟卡片顯示的一樣
+      const kcal = detail.recipe_kcal_per_100g ? Number(detail.recipe_kcal_per_100g) : Number(globalRecipe.recipe_kcal_per_100g);
+
+      // 計算 (營養素都要除以份數)
+      acc.calories += (kcal || 0) / servings;
+      acc.protein += (Number(globalRecipe.recipe_protein_per_100g) || 0) / servings;
+      acc.carbs += (Number(globalRecipe.recipe_carbs_per_100g) || 0) / servings;
+      acc.fat += (Number(globalRecipe.recipe_fat_per_100g) || 0) / servings;
+      acc.starch += ((Number(globalRecipe.recipe_carbs_per_100g) * 0.7) || 0) / servings;
     }
     return acc;
   }, { calories: 0, protein: 0, carbs: 0, starch: 0, fat: 0 });
@@ -238,6 +254,13 @@ const closePanel = () => { emit('close'); };
   z-index: 999;
   box-shadow: -5px 0 15px rgba($neutral-color-black, 0.1);
 
+  @media (max-width: 810px) {
+    width: 100vw;
+    max-width: 510px;
+    min-width: 385px;
+    padding-bottom: 80px;
+  }
+
   &__header {
     display: flex;
     justify-content: space-between;
@@ -304,20 +327,19 @@ const closePanel = () => { emit('close'); };
     .cover-img {
       width: 100%;
       height: 100%;
-      object-fit: cover; // 🔴 確保圖片填滿但不變形
+      object-fit: cover;
       display: block;
     }
 
-    // 圖片上的半透明遮罩
     .cover-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.2); // 淡淡的黑影
+      background: rgba($neutral-color-black, 0.3);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      color: #fff;
+      color: $neutral-color-white;
       opacity: 0;
       transition: 0.3s;
 
@@ -373,12 +395,9 @@ const closePanel = () => { emit('close'); };
   }
 
   &::-webkit-scrollbar {
-    width: 6px;
+    display: none;
   }
 
-  &::-webkit-scrollbar-thumb {
-    background-color: $neutral-color-100;
-    border-radius: 10px;
-  }
+
 }
 </style>

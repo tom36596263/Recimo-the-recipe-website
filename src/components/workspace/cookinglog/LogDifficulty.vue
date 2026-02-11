@@ -61,22 +61,18 @@ const setProcess = (level) => { processLevel.value = level; };
     background-color: $neutral-color-white;
     border-radius: 10px;
     padding: 20px 20px;
-    /*稍微調整padding讓內容置中*/
     display: flex;
     flex-direction: column;
     justify-content: center;
-    /* 垂直置中內容 */
-    gap: 12px;
-    /* 增加行距 */
+    gap: 5px;
     margin-right: -10px;
     border: 1px solid $primary-color-800;
 
     &__title {
         display: flex;
         align-items: center;
-        color: $neutral-color-800;
+        color: $primary-color-800;
         gap: 4px;
-        margin-bottom: 5px;
     }
 
     &__row {
@@ -87,7 +83,6 @@ const setProcess = (level) => { processLevel.value = level; };
 
     &__label {
         width: 70px;
-        /* 固定標籤寬度 */
         flex-shrink: 0;
     }
 
@@ -95,12 +90,9 @@ const setProcess = (level) => { processLevel.value = level; };
         flex: 1;
         display: flex;
         justify-content: space-between;
-        background-color: #F0F5F2;
-        /* $primary-color-100 的替代色碼，或直接用變數 */
+        background-color: $neutral-color-100;
         border-radius: 20px;
-        /* 圓角更明顯 */
         padding: 2px;
-        /* 內距 */
 
         .option-btn {
             flex: 1;
@@ -113,15 +105,15 @@ const setProcess = (level) => { processLevel.value = level; };
             transition: all 0.2s ease;
 
             &:hover {
-                background-color: rgba($primary-color-800, 0.1);
+                background-color: $primary-color-100;
+                color: $primary-color-400;
             }
 
-            /* 被選中的樣式 */
             &.is-active {
-                background-color: $primary-color-800;
+                background-color: $primary-color-700;
                 color: $neutral-color-white;
                 font-weight: bold;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 2px 4px rgba($neutral-color-black, 0.3);
             }
         }
     }

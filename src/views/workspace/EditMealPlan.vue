@@ -7,6 +7,7 @@ import DayColumn from '@/components/workspace/mealplan/DayColumn.vue';
 import ColumnTitle from '@/components/workspace/mealplan/ColumnTitle.vue';
 import PlanPanel from '@/components/workspace/mealplan/PlanPanel.vue';
 import RecipePicker from '@/components/workspace/mealplan/RecipePicker.vue';
+import BaseModal from '@/components/BaseModal.vue';
 
 // --- 登入狀態處理 ---
 const authStore = useAuthStore();
@@ -135,22 +136,47 @@ const handleUpdatePlanInfo = async (newInfo) => {
   }
 };
 
-const handleApplyTemplate = async (templateId) => {
-  if (!confirm('套用方案將會清空目前已安排的食譜，確定要執行嗎？')) return;
+// ------ 處理套用方案的彈窗邏輯 ------
+const showApplyConfirmModal = ref(false); // 控制確認彈窗
+const showApplySuccessModal = ref(false); // 控制成功彈窗
+const pendingTemplateId = ref(null);      // 暫存要套用的模板 ID
+
+// 🟢 步驟 1: 觸發按鈕時，只打開確認彈窗
+const handleApplyTemplateRequest = (templateId) => {
+  pendingTemplateId.value = templateId;
+  showApplyConfirmModal.value = true;
+};
+
+// 🟢 步驟 2: 使用者點擊彈窗的「確認」後，執行 API
+const confirmApplyTemplate = async () => {
+  if (!pendingTemplateId.value) return;
+
   try {
     const res = await phpApi.post('mealplans/apply_template.php', {
       plan_id: planId.value,
-      template_id: templateId,
+      template_id: pendingTemplateId.value,
       user_id: authStore.userId
     });
-    if (res.data.success) await fetchData();
+
+    if (res.data.success) {
+      await fetchData(); // 重新抓取資料
+
+      // 關閉確認彈窗，開啟成功彈窗
+      showApplyConfirmModal.value = false;
+      showApplySuccessModal.value = true;
+    }
   } catch (err) {
     console.error('套用方案失敗：', err.message);
+    alert('套用失敗，請稍後再試'); // 錯誤處理保留簡單 alert 或另外做錯誤彈窗
   }
 };
 
 const getItemsByDate = (date) => {
-  const dateStr = date.toISOString().split('T')[0];
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const dateStr = `${y}-${m}-${d}`;
+
   return mealPlanItems.value
     .filter(item => item.planned_date.includes(dateStr))
     .map(item => {
@@ -290,13 +316,24 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
     <Transition name="slide-fade">
       <PlanPanel v-if="showPanel" :target-calories="currentDayTargetKcal" :plan-data="planData"
         :meal-plan-items="mealPlanItems" :all-recipes="allRecipes" :initial-date="selectedDate"
-        :meal-templates="mealTemplates" :cover-templates="coverTemplates" @apply-template="handleApplyTemplate"
+        :meal-templates="mealTemplates" :cover-templates="coverTemplates" @apply-template="handleApplyTemplateRequest"
         @update-plan-info="handleUpdatePlanInfo" @update-plan="handleUpdatePlanCover" @close="closePanel" />
     </Transition>
 
     <Transition name="fade">
       <div v-if="showPanel" class="panel-overlay" @click="closePanel"></div>
     </Transition>
+
+    <BaseModal :is-open="showApplyConfirmModal" type="info" icon-class="fa-solid fa-triangle-exclamation" title="確認套用方案"
+      description="套用方案將會清空目前已安排的食譜，確定要執行嗎？" @close="showApplyConfirmModal = false">
+      <template #actions>
+        <button class="modal-btn cancel" @click="showApplyConfirmModal = false">取消</button>
+        <button class="modal-btn confirm" @click="confirmApplyTemplate">確認套用</button>
+      </template>
+    </BaseModal>
+
+    <BaseModal :is-open="showApplySuccessModal" type="success" icon-class="fa-solid fa-circle-check" title="套用成功"
+      description="天數與食譜已同步更新！" @close="showApplySuccessModal = false" />
   </main>
 </template>
 
@@ -356,9 +393,10 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: $primary-color-100;
+    background-color: $neutral-color-100;
     color: $primary-color-800;
     cursor: pointer;
+    flex-shrink: 0;
 
     &:hover {
       background-color: $accent-color-100;
@@ -370,6 +408,7 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
 
 .meal-plan-container {
   min-width: 0;
+  padding: 0;
 }
 
 .meal-plan-scroll-wrapper {
@@ -474,5 +513,33 @@ const handleUpdatePlanCover = async (updatedData, isUpload = false) => {
 
 .meal-detail-view {
   animation: fadeIn 0.4s ease;
+}
+
+.modal-btn {
+  padding: 8px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+
+  &.cancel {
+    background-color: $neutral-color-100;
+    color: $neutral-color-800;
+
+    &:hover {
+      background-color: $neutral-color-400;
+      color: $neutral-color-white;
+    }
+  }
+
+  &.confirm {
+    background-color: $secondary-color-info-700;
+    color: $neutral-color-white;
+
+    &:hover {
+      background-color: $secondary-color-info-400;
+    }
+  }
 }
 </style>

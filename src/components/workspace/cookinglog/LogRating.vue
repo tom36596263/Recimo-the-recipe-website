@@ -24,7 +24,7 @@ const setRating = (star) => {
         </div>
 
         <div class="rating__score zh-h3-bold">
-            {{ modelValue }}/5
+            {{ modelValue }}星級
         </div>
 
         <div class="rating__stars p-p1">
@@ -48,15 +48,12 @@ const setRating = (star) => {
     &__title {
         display: flex;
         align-items: center;
-        color: $neutral-color-800;
+        color: $primary-color-800;
         gap: 4px;
-        /* 微調圖示與文字間距 */
     }
 
     &__score {
         color: $neutral-color-black;
-        margin: 10px 0;
-        /* 增加一點間距讓版面不擁擠 */
     }
 
     &__stars {
@@ -65,17 +62,16 @@ const setRating = (star) => {
         cursor: pointer;
         display: flex;
         gap: 2px;
-        /* 星星之間的間距 */
 
         .star-icon {
             transition: color 0.2s ease, transform 0.1s;
 
-            /* 滑鼠經過時的效果 (選擇性) */
             &:hover {
                 transform: scale(1.1);
+                color: $secondary-color-warning-400;
+
             }
 
-            /* 核心：當星星被激活 (is-active) 時，變成黃色 */
             &.is-active {
                 color: $secondary-color-warning-700;
             }

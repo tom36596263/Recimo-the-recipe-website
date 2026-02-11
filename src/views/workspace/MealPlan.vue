@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
 import CreatePlanModal from '@/components/workspace/mealplan/modals/CreatePlanModal.vue';
 import PlanFileCard from '@/components/workspace/mealplan/PlanFileCard.vue';
+import BaseModal from '@/components/BaseModal.vue';
 
 const authStore = useAuthStore();
 const plans = ref([]);
@@ -40,7 +41,9 @@ const getPlanStatus = (plan) => {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   const start = new Date(plan.start_date);
+  start.setHours(0, 0, 0, 0);
   const end = new Date(plan.end_date);
+  start.setHours(0, 0, 0, 0);
 
   if (now < start) return 'upcoming';
   if (now >= start && now <= end) return 'active';
@@ -77,18 +80,32 @@ const handleCreatePlan = async (data) => {
   }
 };
 
+// --- 彈窗狀態管理 ---
+const showDeleteModal = ref(false);
+const deleteTargetId = ref(null);
+const showCopyModal = ref(false);
+
 // --- 處理刪除 ---
-const onPlanDelete = async (id) => {
-  if (!confirm('確定要刪除這個計畫嗎？此動作無法復原。')) return;
+// --- 1. 點擊刪除按鈕時，只負責開啟彈窗 ---
+const onPlanDelete = (id) => {
+  deleteTargetId.value = id;   // 記錄要刪除誰
+  showDeleteModal.value = true; // 開啟彈窗
+};
+
+// --- 2. 使用者在彈窗按「確認」後，才真正執行刪除 ---
+const confirmDelete = async () => {
+  if (!deleteTargetId.value) return;
 
   try {
     const res = await phpApi.post('mealplans/delete_plan.php', {
-      plan_id: id,
+      plan_id: deleteTargetId.value,
       user_id: authStore.userId
     });
 
     if (res.data.success) {
-      plans.value = plans.value.filter(p => p.plan_id !== id);
+      plans.value = plans.value.filter(p => p.plan_id !== deleteTargetId.value);
+      showDeleteModal.value = false;
+      deleteTargetId.value = null;
     }
   } catch (err) {
     console.error('刪除失敗', err);
@@ -105,7 +122,7 @@ const onPlanCopy = async (id) => {
 
     if (res.data.success) {
       fetchPlans();
-      alert('計畫已成功複製！');
+      showCopyModal.value = true;
     }
   } catch (err) {
     console.error('複製失敗', err);
@@ -147,6 +164,16 @@ const onPlanCopy = async (id) => {
         目前沒有符合此狀態的計畫。
       </div>
     </div>
+    <BaseModal :is-open="showDeleteModal" type="danger" icon-class="fa-solid fa-triangle-exclamation" title="確認刪除"
+      description="確定要刪除這個計畫嗎？此動作無法復原。" @close="showDeleteModal = false">
+      <template #actions>
+        <button class="modal-btn cancel" @click="showDeleteModal = false">取消</button>
+        <button class="modal-btn confirm" @click="confirmDelete">確認刪除</button>
+      </template>
+    </BaseModal>
+
+    <BaseModal :is-open="showCopyModal" type="success" icon-class="fa-solid fa-circle-check" title="複製成功"
+      description="計畫已成功複製！" @close="showCopyModal = false" />
   </div>
 </template>
 
@@ -277,6 +304,34 @@ const onPlanCopy = async (id) => {
 
       i {
         color: $primary-color-800;
+      }
+    }
+  }
+
+  .modal-btn {
+    padding: 8px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+
+    &.cancel {
+      background-color: $neutral-color-100;
+      color: $neutral-color-800;
+
+      &:hover {
+        background-color: $neutral-color-400;
+        color: $neutral-color-white;
+      }
+    }
+
+    &.confirm {
+      background-color: $secondary-color-danger-700;
+      color: white;
+
+      &:hover {
+        background-color: $secondary-color-danger-400;
       }
     }
   }

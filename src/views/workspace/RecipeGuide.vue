@@ -7,6 +7,7 @@ import GuideStepCard from '@/components/workspace/recipeguide/GuideStepCard.vue'
 import StepContentCard from '@/components/workspace/recipeguide/StepContentCard.vue';
 import AllIngredientsModal from '@/components/workspace/recipeguide/modals/AllIngredientsModal.vue';
 import CompleteStepCard from '@/components/workspace/recipeguide/CompleteStepCard.vue';
+import rotatePhoneImg from '@/assets/images/guide/mobile-portrait.png';
 
 const router = useRouter();
 const route = useRoute();
@@ -262,17 +263,28 @@ const handleFinishGuide = () => {
         border-radius: 10px;
         border: 1px solid $neutral-color-400;
         padding: 20px;
+
+        &:focus {
+            outline: none;
+            border-color: $primary-color-800;
+        }
     }
 
     &__img-upload {
         width: 200px;
         height: 200px;
-        border: 1px solid $neutral-color-400;
+        border: 1px dashed $neutral-color-400;
         border-radius: 10px;
         display: flex;
         justify-content: center;
         align-items: center;
         overflow: hidden;
+        cursor: pointer;
+
+        &:hover {
+            border-color: $primary-color-800;
+            background-color: $neutral-color-100;
+        }
     }
 
     .preview-img {
@@ -318,6 +330,11 @@ const handleFinishGuide = () => {
         color: $neutral-color-white;
         cursor: pointer;
         border: none;
+
+        &:hover {
+            background-color: $accent-color-700;
+            color: $neutral-color-white;
+        }
     }
 
     &__tab-header {
@@ -342,6 +359,12 @@ const handleFinishGuide = () => {
         width: 94px;
         height: 30px;
         cursor: pointer;
+
+        &:hover {
+            background-color: $accent-color-100;
+            color: $accent-color-700;
+            border-color: $accent-color-800;
+        }
     }
 
     &__tab-area {
@@ -362,6 +385,10 @@ const handleFinishGuide = () => {
         &::-webkit-scrollbar-thumb {
             background-color: $neutral-color-400;
             border-radius: 10px;
+
+            &:hover {
+                background-color: $accent-color-400;
+            }
         }
     }
 }

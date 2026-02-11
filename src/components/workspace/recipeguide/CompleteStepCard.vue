@@ -38,11 +38,6 @@ const handleComplete = () => {
     transition: transform 0.2s ease, background-color 0.2s ease;
     flex-shrink: 0;
 
-    &:hover {
-        background-color: $primary-color-400;
-        transform: translateY(-3px);
-    }
-
     &__icon {
         width: 40px;
         height: 40px;
@@ -75,6 +70,32 @@ const handleComplete = () => {
         color: $neutral-color-700;
         font-size: 1.2rem;
         opacity: 0.7;
+    }
+
+    &:hover {
+        background-color: $accent-color-100;
+        transform: translateY(-3px);
+
+        .complete-card__icon {
+            background-color: $neutral-color-white;
+            color: $accent-color-700;
+        }
+
+        .complete-card__text {
+            span:first-child {
+                color: $accent-color-800;
+
+            }
+
+            span:last-child {
+                color: $accent-color-700;
+
+            }
+        }
+
+        .complete-card__arrow {
+            color: $accent-color-800;
+        }
     }
 }
 </style>
