@@ -25,14 +25,18 @@ const formatImageUrl = (rawImage) => {
   // 1. 定義正確的圖片網域
   const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-
+  // 線上環境使用 recimo_api
   const imgBaseUrl = isLocal
     ? 'http://localhost:8888/recimo_api'
     : 'https://tibamef2e.com/cjd102/g2/api';
 
   // 處理已經是 http 開頭的網址
   if (typeof rawImage === 'string' && rawImage.startsWith('http')) {
-    // 這裡不做任何取代，直接回傳
+    // 如果資料庫存的是舊的 recimo 路徑，把它換成 api
+    // 這段寫得很正確，會把 https://.../recimo/img/... 變成 https://.../api/img/...
+    if (rawImage.includes('/recimo/img')) {
+      return rawImage.replace('/recimo/img', '/api/img');
+    }
     return rawImage;
   }
 
