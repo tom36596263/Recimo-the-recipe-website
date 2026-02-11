@@ -14,7 +14,7 @@ const isOverTime = computed(() => actualTime.value > estimateTime.value);
 // 3. 計算差異百分比
 const diffPercentage = computed(() => {
     const diff = actualTime.value - estimateTime.value;
-    const percent = (diff / estimateTime.value) * 100;
+    const percent = 100 + (diff / estimateTime.value) * 100;
     if (percent > 0) {
         return `+${percent.toFixed(1)}%`;
     } else {
