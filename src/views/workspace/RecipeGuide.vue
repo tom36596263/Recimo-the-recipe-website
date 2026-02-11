@@ -24,6 +24,8 @@ const stepTimers = ref({});
 const viewingStepIndex = ref(0);
 const guideStartTime = ref(Date.now());
 
+const activeMobileTab = ref('note');
+
 const timeToSeconds = (timeStr) => {
     if (!timeStr) return 0;
     const [hrs, mins, secs] = timeStr.split(':').map(Number);
@@ -248,7 +250,10 @@ const handleFinishGuide = () => {
                         <span class="step-num">{{ index + 1 }}</span>
                     </div>
                 </div>
-                <button class="mobile-all-ing-btn" @click="toggleModal">全部食材</button>
+                <div class="mobile-nav-actions">
+                    <button class="mobile-all-ing-btn" @click="toggleModal">全部食材</button>
+                    <button class="mobile-finish-btn" @click="handleFinishGuide">完成烹飪</button>
+                </div>
             </div>
 
             <div class="mobile-main-area">
@@ -267,11 +272,21 @@ const handleFinishGuide = () => {
 
                     <div class="mobile-note-card">
                         <div class="note-tabs">
-                            <div class="tab active">筆記</div>
-                            <div class="tab" @click="triggerUpload">照片</div>
+                            <div class="tab" :class="{ active: activeMobileTab === 'note' }"
+                                @click="activeMobileTab = 'note'">筆記</div>
+                            <div class="tab" :class="{ active: activeMobileTab === 'photo' }"
+                                @click="activeMobileTab = 'photo'">照片</div>
                         </div>
-                        <textarea v-if="currentStepData.step_id" v-model="stepNotes[currentStepData.step_id]"
-                            class="note-textarea" placeholder="輸入筆記..."></textarea>
+                        <textarea v-if="activeMobileTab === 'note' && currentStepData.step_id"
+                            v-model="stepNotes[currentStepData.step_id]" class="note-textarea"
+                            placeholder="輸入筆記..."></textarea>
+
+                        <div v-if="activeMobileTab === 'photo' && currentStepData.step_id" class="mobile-photo-area"
+                            @click="triggerUpload">
+                            <img v-if="noteImages[currentStepData.step_id]" :src="noteImages[currentStepData.step_id]"
+                                class="preview-img">
+                            <span v-else>點擊上傳圖片</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -351,6 +366,7 @@ const handleFinishGuide = () => {
         background-color: $neutral-color-100;
         height: auto;
         max-height: 760px;
+        min-width: 230px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -445,7 +461,7 @@ const handleFinishGuide = () => {
         }
     }
 
-    @media screen and (max-width: 810px) {
+    @media screen and (max-width: 1024px) {
         .desktop-wrapper {
             display: none !important;
         }
@@ -462,7 +478,7 @@ const handleFinishGuide = () => {
     display: none;
 }
 
-@media screen and (max-width: 810px) {
+@media screen and (max-width: 1024px) {
     @media (orientation: portrait) {
         .mobile-portrait-overlay {
             display: flex;
@@ -553,6 +569,11 @@ const handleFinishGuide = () => {
                 }
             }
 
+            .mobile-nav-actions {
+                display: flex;
+                gap: 10px;
+            }
+
             .mobile-all-ing-btn {
                 background: transparent;
                 border: 1px solid #2e7d32;
@@ -561,6 +582,17 @@ const handleFinishGuide = () => {
                 padding: 6px 16px;
                 font-size: 14px;
                 white-space: nowrap;
+            }
+
+            .mobile-finish-btn {
+                background: #2e7d32;
+                border: 1px solid #2e7d32;
+                color: white;
+                border-radius: 20px;
+                padding: 6px 16px;
+                font-size: 14px;
+                white-space: nowrap;
+                cursor: pointer;
             }
         }
 
@@ -662,6 +694,23 @@ const handleFinishGuide = () => {
 
                 &:focus {
                     outline: none;
+                }
+            }
+
+            .mobile-photo-area {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: white;
+                color: #999;
+                cursor: pointer;
+                overflow: hidden;
+
+                .preview-img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
                 }
             }
         }
