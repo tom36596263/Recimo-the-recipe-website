@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { phpApi } from '@/utils/publicApi';
 import { useCookingStore } from '@/stores/useCookingStore';
 import { useAuthStore } from '@/stores/authStore';
-import { parsePublicFile } from '@/utils/parseFile'; // 🟢 引入解析圖片路徑工具
+import { parsePublicFile } from '@/utils/parseFile';
 
 import LogTime from '../../components/workspace/cookinglog/LogTime.vue';
 import LogRating from '../../components/workspace/cookinglog/LogRating.vue';
@@ -12,15 +12,17 @@ import LogDifficulty from '../../components/workspace/cookinglog/LogDifficulty.v
 import LogStepcard from '../../components/workspace/cookinglog/LogStepcard.vue';
 import StepDescriptionModal from '../../components/workspace/cookinglog/StepDescriptionModal.vue';
 
+// 🟢 引入旋轉提示圖
+import rotateToPortraitImg from '@/assets/images/guide/mobile-landscape.png';
+
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 const cookingStore = useCookingStore();
 
-// 🟢 模式判定
 const recipeId = Number(route.params.recipeId);
-const logId = Number(route.params.logId); // 取得路徑中的 logId
-const isViewMode = computed(() => !!logId); // 是否為查看模式
+const logId = Number(route.params.logId);
+const isViewMode = computed(() => !!logId);
 
 const allSteps = ref([]);
 
@@ -30,14 +32,12 @@ const difficultyMap = {
     '困難': 3
 };
 
-// 🟢 反向難度對照表 (用於查看模式將數字轉回標籤)
 const reverseDifficultyMap = {
     1: '簡單',
     2: '中等',
     3: '困難'
 };
 
-// ⚪ 建立模式：抓取食譜步驟
 const fetchRecipeData = async () => {
     try {
         const response = await phpApi.get(`guide/get_guide_details.php?id=${recipeId}`);
@@ -49,38 +49,31 @@ const fetchRecipeData = async () => {
     }
 };
 
-// 🟢 查看模式：抓取日誌詳細資料
 const fetchLogDetail = async () => {
     try {
         const response = await phpApi.get(`log/get_log_details.php?log_id=${logId}`);
         if (response.data.status === 'success') {
             const { main, steps } = response.data.data;
 
-            // 1. 填充主表資訊到 Store (讓 LogTime, LogRating 等元件能顯示)
             cookingStore.tempLogData.rating = Number(main.satisfaction_rating);
             cookingStore.tempLogData.summary = main.log_summary;
             cookingStore.tempLogData.skillDifficulty = reverseDifficultyMap[main.technique_rating];
             cookingStore.tempLogData.processDifficulty = reverseDifficultyMap[main.complexity_rating];
 
-            // 處理時間 (將 HH:MM:SS 轉回分鐘數給 LogTime)
             const [h, m] = main.actual_time.split(':');
             cookingStore.tempLogData.totalTime = (parseInt(h) * 60) + parseInt(m);
 
-            // 處理主圖
             if (main.log_image_url) {
                 cookingStore.tempLogData.mainImage = parsePublicFile(main.log_image_url);
             }
 
-            // 2. 處理步驟與筆記
-            // 我們需要將日誌中的步驟資料轉化為渲染所需的 allSteps 格式
             allSteps.value = steps.map(s => ({
                 step_id: s.step_id,
                 step_order: s.step_order,
                 step_title: s.step_title,
-                step_content: s.step_note // 將日誌備註對應到描述
+                step_content: s.step_note
             }));
 
-            // 填充筆記內容與圖片到 Store 供 LogStepcard 顯示
             steps.forEach(s => {
                 cookingStore.tempLogData.stepNotes[s.step_id] = s.step_note;
                 if (s.step_image_url) {
@@ -94,7 +87,7 @@ const fetchLogDetail = async () => {
 };
 
 const handleMainImageUpload = (event) => {
-    if (isViewMode.value) return; // 查看模式禁止上傳
+    if (isViewMode.value) return;
     const file = event.target.files[0];
     if (file) {
         cookingStore.tempLogData.mainImage = URL.createObjectURL(file);
@@ -235,10 +228,17 @@ const handleOpenDescModal = (data) => {
         <StepDescriptionModal :is-open="isModalOpen" :order="currentModalData.order"
             :description="currentModalData.description" @close="isModalOpen = false" />
     </div>
+
+    <Teleport to="body">
+        <div class="orientation-reminder">
+            <div class="reminder-content">
+                <img :src="rotateToPortraitImg" alt="請旋轉手機至直向" class="rotate-img" />
+            </div>
+        </div>
+    </Teleport>
 </template>
 
 <style lang="scss" scoped>
-/* 原有樣式保持不變 */
 .log {
     display: flex;
     flex-direction: column;
@@ -338,7 +338,6 @@ const handleOpenDescModal = (data) => {
             box-shadow: none;
         }
 
-        // 唯讀狀態樣式
         &:read-only {
             background-color: transparent;
             cursor: default;
@@ -384,6 +383,82 @@ const handleOpenDescModal = (data) => {
             background-color: $accent-color-700;
             color: $neutral-color-white;
         }
+    }
+}
+
+/* 🟢 RWD: 810px 以下修正對齊 */
+@media screen and (max-width: 1024px) {
+    .col-10 {
+        width: 92%;
+        flex: 0 0 92%;
+    }
+
+    .log {
+        &__body {
+            padding: 20px 0;
+        }
+
+        &__dashboard {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        &__btn-wrapper {
+            justify-content: center;
+            width: 100%;
+
+            &>* {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    }
+}
+</style>
+
+<style lang="scss">
+.orientation-reminder {
+    display: none;
+}
+
+@media screen and (max-width: 1024px) and (orientation: landscape) {
+    .orientation-reminder {
+        display: flex !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(255, 255, 255, 0.98);
+        z-index: 2147483647;
+        justify-content: center;
+        align-items: center;
+
+        .reminder-content {
+            text-align: center;
+
+            .rotate-img {
+                width: 70%;
+                max-width: 280px;
+                animation: rotateIcon 2s infinite ease-in-out;
+            }
+        }
+    }
+}
+
+@keyframes rotateIcon {
+    0% {
+        transform: rotate(-90deg);
+    }
+
+    50% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
     }
 }
 </style>

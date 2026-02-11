@@ -670,15 +670,15 @@ const handleFinishGuide = () => {
 
 @keyframes rotatePhone {
     0% {
-        transform: rotate(0deg);
+        transform: rotate(90deg);
     }
 
     50% {
-        transform: rotate(-90deg);
+        transform: rotate(0deg);
     }
 
     100% {
-        transform: rotate(-90deg);
+        transform: rotate(0deg);
     }
 }
 </style>

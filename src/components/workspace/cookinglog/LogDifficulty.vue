@@ -68,6 +68,10 @@ const setProcess = (level) => { processLevel.value = level; };
     margin-right: -10px;
     border: 1px solid $primary-color-800;
 
+    @media screen and (max-width: 1024px) {
+        width: 100%;
+    }
+
     &__title {
         display: flex;
         align-items: center;

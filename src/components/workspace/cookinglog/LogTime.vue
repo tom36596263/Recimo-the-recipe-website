@@ -75,8 +75,12 @@ const statusColor = computed(() => {
     background-color: $neutral-color-white;
     border-radius: 10px;
     padding: 30px 20px;
-    margin-left: -10px;
+    // margin-left: -10px;
     border: 1px solid $primary-color-800;
+
+    @media screen and (max-width: 1024px) {
+        width: 100%;
+    }
 
     &__title {
         display: flex;

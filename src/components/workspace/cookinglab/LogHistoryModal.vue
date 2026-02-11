@@ -113,7 +113,7 @@ const getLogImage = (url) => {
                                                 <span class="tag difficulty">流程: {{
                                                     getDifficultyLabel(log.complexity_rating) }}</span>
                                                 <span class="tag skill">技法: {{ getDifficultyLabel(log.technique_rating)
-                                                    }}</span>
+                                                }}</span>
                                             </div>
                                         </div>
                                     </div>
