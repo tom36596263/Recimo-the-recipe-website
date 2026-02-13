@@ -61,7 +61,8 @@ const fetchRecipes = async () => {
             // 2. 處理資料格式轉換
             allRecipe.value = recipeData.map(recipe => {
                 // SQL 字串轉陣列處理
-                const recipeTagsNames = recipe.tag_names ? recipe.tag_names.split(',') : [];
+                // const recipeTagsNames = recipe.tag_names ? recipe.tag_names.split(',') : [];
+                const finalTags = Array.isArray(recipe.tags) ? recipe.tags : [];
                 const matchedIngredients = recipe.ingredient_ids
                     ? recipe.ingredient_ids.split(',').map(Number)
                     : [];
@@ -84,8 +85,8 @@ const fetchRecipes = async () => {
                     id: recipe.recipe_id,
                     recipe_name: recipe.recipe_title,
                     difficulty: recipe.recipe_difficulty,
-                    image_url: finalImgUrl, // 使用處理後的完整路徑
-                    tags: recipeTagsNames,
+                    image_url: finalImgUrl, // 使用處理後的完整路徑 
+                    tags: finalTags,
                     ingredient_ids: matchedIngredients,
                     nutritional_info: {
                         calories: `${Math.round(recipe.recipe_kcal_per_100g || 0)}kcal`,
