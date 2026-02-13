@@ -101,6 +101,12 @@ watch(() => props.recipes, () => {
         opacity: 0.5;
     }
 
+    .recipe-grid {
+        display: flex;
+        flex-wrap: wrap;
+        // gap: 2px;
+    }
+
     .pagination-wrapper {
         display: flex;
         justify-content: center;

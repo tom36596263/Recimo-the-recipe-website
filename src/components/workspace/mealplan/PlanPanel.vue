@@ -116,7 +116,7 @@ const currentRecipes = computed(() => {
   );
   const uniqueRecipesMap = new Map();
   todaysItems.forEach(item => {
-    const recipe = props.allRecipes.find(r => r.recipe_id === item.recipe_id);
+    const recipe = props.allRecipes.find(r => Number(r.recipe_id) === Number(item.recipe_id));
     if (recipe && !uniqueRecipesMap.has(recipe.recipe_id)) {
       uniqueRecipesMap.set(recipe.recipe_id, recipe);
     }

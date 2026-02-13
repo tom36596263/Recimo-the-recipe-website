@@ -14,7 +14,7 @@ const isOverTime = computed(() => actualTime.value > estimateTime.value);
 // 3. 計算差異百分比
 const diffPercentage = computed(() => {
     const diff = actualTime.value - estimateTime.value;
-    const percent = (diff / estimateTime.value) * 100;
+    const percent = 100 + (diff / estimateTime.value) * 100;
     if (percent > 0) {
         return `+${percent.toFixed(1)}%`;
     } else {
@@ -75,8 +75,12 @@ const statusColor = computed(() => {
     background-color: $neutral-color-white;
     border-radius: 10px;
     padding: 30px 20px;
-    margin-left: -10px;
+    // margin-left: -10px;
     border: 1px solid $primary-color-800;
+
+    @media screen and (max-width: 1024px) {
+        width: 100%;
+    }
 
     &__title {
         display: flex;
