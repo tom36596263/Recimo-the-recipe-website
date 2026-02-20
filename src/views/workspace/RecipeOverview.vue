@@ -61,7 +61,8 @@ const fetchRecipes = async () => {
             // 2. 處理資料格式轉換
             allRecipe.value = recipeData.map(recipe => {
                 // SQL 字串轉陣列處理
-                const recipeTagsNames = recipe.tag_names ? recipe.tag_names.split(',') : [];
+                // const recipeTagsNames = recipe.tag_names ? recipe.tag_names.split(',') : [];
+                const finalTags = Array.isArray(recipe.tags) ? recipe.tags : [];
                 const matchedIngredients = recipe.ingredient_ids
                     ? recipe.ingredient_ids.split(',').map(Number)
                     : [];
@@ -84,8 +85,8 @@ const fetchRecipes = async () => {
                     id: recipe.recipe_id,
                     recipe_name: recipe.recipe_title,
                     difficulty: recipe.recipe_difficulty,
-                    image_url: finalImgUrl, // 使用處理後的完整路徑
-                    tags: recipeTagsNames,
+                    image_url: finalImgUrl, // 使用處理後的完整路徑 
+                    tags: finalTags,
                     ingredient_ids: matchedIngredients,
                     nutritional_info: {
                         calories: `${Math.round(recipe.recipe_kcal_per_100g || 0)}kcal`,
@@ -127,62 +128,6 @@ const fetchRecipes = async () => {
 onMounted(() => {
     fetchRecipes();
 });
-
-
-// const filteredRecipes = computed(() => {
-//     return allRecipe.value.filter(recipe => {
-//         const timeValue = parseInt(recipe.nutritional_info.cooking_time);
-//         const timeMatch = activeFilters.value.time === "全部" || (
-//             (activeFilters.value.time === "15分鐘內" && timeValue <= 15) ||
-//             (activeFilters.value.time === "15-30分鐘" && timeValue > 15 && timeValue <= 30) ||
-//             (activeFilters.value.time === "30-60分鐘" && timeValue > 30 && timeValue <= 60) ||
-//             (activeFilters.value.time === "1小時以上" && timeValue > 60 && timeValue <= 180) ||
-//             (activeFilters.value.time === "慢火長燉" && timeValue > 180)
-//         );
-
-//         const selectedDiff = activeFilters.value.difficulty;
-//         const d = recipe.difficulty;
-
-//         let difficultyMatch = false;
-//         if (selectedDiff === "全部") {
-//             difficultyMatch = true;
-//         } else if (selectedDiff === "廚藝新手") {
-//             difficultyMatch = (d >= 1 && d < 2);
-//         } else if (selectedDiff === "基礎實作") {
-//             difficultyMatch = (d >= 2 && d < 3);
-//         } else if (selectedDiff === "進階挑戰") {
-//             difficultyMatch = (d >= 3 && d < 4);
-//         } else if (selectedDiff === "職人等級") {
-//             difficultyMatch = (d >= 4 && d <= 5);
-//         }
-
-//         const portionMatch = activeFilters.value.mealPortions == "全部" || (
-//             (activeFilters.value.mealPortions === "1人獨享" && recipe.nutritional_info.serving_size === 1) ||
-//             (activeFilters.value.mealPortions === "2人世界" && recipe.nutritional_info.serving_size === 2) ||
-//             (activeFilters.value.mealPortions === "3-4人家庭" && recipe.nutritional_info.serving_size >= 3 && recipe.nutritional_info.serving_size <= 4) ||
-//             (activeFilters.value.mealPortions === "6人以上聚會" && recipe.nutritional_info.serving_size >= 6)
-//         );
-
-//         const kcalValue = parseInt(recipe.nutritional_info.calories);
-//         const kcalMatch = activeFilters.value.kcal === "全部" || (
-//             (activeFilters.value.kcal === "100kcal(輕食)" && kcalValue < 100) ||
-//             (activeFilters.value.kcal === "150-300kcal(均衡)" && kcalValue > 150 && kcalValue <= 300) ||
-//             (activeFilters.value.kcal === "300kcal以上(豐盛)" && kcalValue > 300)
-//         );
-
-//         //新增
-//         let ingredientMatch = true;
-//         if (searchIngredientIds.value.length > 0) {
-//             // 使用 Array.prototype.some()：只要有一個符合就回傳 true
-//             ingredientMatch = searchIngredientIds.value.some(searchId =>
-//                 recipe.ingredient_ids.includes(searchId)
-//             );
-//         }
-
-//         return timeMatch && difficultyMatch && portionMatch && kcalMatch && ingredientMatch;
-//     });
-// });
-
 // 計算總頁數
 
 const totalPages = computed(() => {
@@ -300,8 +245,7 @@ const handleCardClick = (id) => {
             <div v-else class="row">
                 <div class="no-result col-12">
                     <EmptyState title="找不到符合條件的食譜" description="推薦您前往「靈感廚房」用食材找食譜喔!" :buttons="[
-                        { title: '查看所有食譜', variant: 'outline', emit: 'recipes' },
-                        // { title: '前往靈感廚房', variant: 'outline', emit: 'go-kitchen' }
+                        { title: '查看所有食譜', variant: 'outline', emit: 'recipes' }
                     ]" @button-click="handleEmptyAction" />
                 </div>
             </div>

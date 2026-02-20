@@ -41,7 +41,8 @@
 <style lang="scss" scoped>
     .empty-content{
         text-align: center;
-        margin: 30px 0 60px 0;
+        margin: 80px 0 450px 0;
+
         .p-p1{
             margin-bottom: 12px;
         }
