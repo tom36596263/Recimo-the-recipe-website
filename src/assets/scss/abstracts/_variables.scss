@@ -1,0 +1,14 @@
+// --- 形狀與尺寸定義 ---
+$radius-base: 10px; // 一般 Input 的圓角
+$radius-pill: 50px; // 搜尋框的圓角 (Pill shape)
+
+// --- 高度定義 ---
+$height-base: 40px; // 一般表單高度
+$height-search-sm: 40px; // 小搜尋框
+$height-search-lg: 60px; // 大搜尋框
+
+// 設定按鈕寬度變數
+$btn-width-full: 100%;
+
+//側邊欄寬度
+$sidebar-width: 250px;

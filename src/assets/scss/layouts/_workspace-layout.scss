@@ -1,0 +1,25 @@
+@use "../abstracts/color";
+@use "../abstracts/variables";
+
+
+.workspace-layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden; // 防止外層出現捲軸
+
+    // // 側邊欄固定寬度
+    .sidebar {
+        width: variables.$sidebar-width;
+        background: color.$primary-color-100;
+        display: flex;
+        flex-direction: column;
+        padding: 24px;
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: color.$primary-color-800;
+            margin-bottom: 2rem;
+        }
+    }
+}

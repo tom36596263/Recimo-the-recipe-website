@@ -1,0 +1,76 @@
+@use 'sass:math';
+// 基礎設定
+$grid-columns: 12;
+$gutter: 20px; // 左右各 10px
+$container-max-width: 1440px;
+
+// 斷點設定 (根據你的原代碼數值)
+$breakpoints: (
+  'sm': 390px,
+  'md': 810px,
+  'lg': 1024px,
+  'xl': 1320px,
+  'xxl': 1440px
+);
+
+.container {
+  margin: auto;
+  max-width: $container-max-width;
+  padding: 0 ($gutter * 0.5);
+  width: 100%;
+}
+
+@media screen and (max-width: 1440px) {
+  .container {
+    max-width: 95%;
+  }
+  // 在小於 1440px 時，左右留白保持彈性
+}
+@media screen and (max-width: 1200px) {
+  .container {
+    max-width: 98%;
+  }
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -($gutter * 0.5);
+  margin-left: -($gutter * 0.5);
+}
+
+//所有欄位共通樣式
+[class*='col-'],
+.col {
+  padding: 0 ($gutter * 0.5);
+  box-sizing: border-box;
+}
+
+//生成通用格線
+@for $i from 1 through $grid-columns {
+  .col-#{$i} {
+    width: math.percentage(math.div($i, $grid-columns));
+  }
+}
+
+@each $key, $val in $breakpoints {
+  @media screen and (max-width: $val) {
+    .container {
+      // 1. 定義一個局部變數來存放寬度
+      $container-w: 95%;
+
+      // 2. 使用標準 @if 指令進行判斷
+      @if $key == 'lg' {
+        $container-w: 98%;
+      }
+
+      max-width: $container-w;
+    }
+
+    @for $i from 1 through $grid-columns {
+      .col-#{$key}-#{$i} {
+        width: math.percentage(math.div($i, $grid-columns));
+      }
+    }
+  }
+}

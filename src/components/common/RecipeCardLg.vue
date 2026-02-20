@@ -1,0 +1,296 @@
+<script setup>
+import { markRaw, computed, ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+import { useFavoritesStore } from '@/stores/favoritesStore';
+import AddToFolderModal from '@/components/workspace/recipedetail/modals/AddToFolderModal.vue';
+
+import BaseTag from '@/components/common/BaseTag.vue';
+import LogoBlack from '@/assets/images/site/Recimo-logo-black.svg'
+import LikeButton from '@/components/common/LikeButton.vue'
+import AuthorInfo from '@/components/workspace/modifyrecipe/AuthorInfo.vue';
+
+import IconLocalFireDepartment from '~icons/material-symbols/Local-Fire-Department-outline';
+import IconramenDining from '~icons/material-symbols/Ramen-Dining-outline';
+import IconAlarm from '~icons/material-symbols/Alarm-outline';
+
+const props = defineProps({
+    recipe: {
+        type: Object,
+        required: true
+    }
+});
+
+const router = useRouter();
+
+// 定義向父組件發出的事件
+const emit = defineEmits(['favoriteUpdated']);
+
+const goToDetail = () => {
+    router.push({
+        name: 'workspace-recipe-detail',
+        params: { id: props.recipe.id }
+    });
+};
+
+const recipeInfo = computed(() => [
+    {
+        icon: markRaw(IconLocalFireDepartment),
+        label: '熱量',
+        value: props.recipe.nutritional_info.calories.replace('kcal', ''),
+        unit: 'kcal'
+    },
+    {
+        icon: markRaw(IconramenDining),
+        label: '份量',
+        value: props.recipe.nutritional_info.serving_size,
+        unit: '人份'
+    },
+    {
+        icon: markRaw(IconAlarm),
+        label: '製作時間',
+        value: props.recipe.nutritional_info.cooking_time.replace('分鐘', ''),
+        unit: '分鐘'
+    }
+]);
+
+const handleLikeChange = (isLiked, item) => {
+    // 這裡可以呼叫 API 更新後端數據
+};
+
+// 收藏功能
+const authStore = useAuthStore();
+const showAddToFolderModal = ref(false);
+const recipeId = computed(() => props.recipe.id);
+const favoritesStore = useFavoritesStore();
+const userId = computed(() => authStore.user?.id || authStore.user?.user_id || null);
+const isFavorited = computed(() => favoritesStore.isFavorited(recipeId.value));
+
+// 彈窗關閉時自動刷新收藏狀態
+const handleModalSubmit = () => {
+    showAddToFolderModal.value = false;
+    if (userId.value) {
+        favoritesStore.refetchFavorites(userId.value);
+    }
+    // 通知父組件收藏已更新
+    emit('favoriteUpdated');
+};
+
+const handleHeartClick = (e) => {
+    e.stopPropagation();
+    if (!authStore.user) {
+        authStore.isLoginLightboxOpen = true;
+        return;
+    }
+    showAddToFolderModal.value = true;
+};
+</script>
+<template>
+    <div class="recipe-card-lg">
+        <header class="card-header">
+            <img :src="(recipe.image_url)" alt="recipe.recipe_name">
+        </header>
+
+        <div class="card-body">
+            <div class="title">
+                <h3 class="zh-h3">{{ recipe.recipe_name }}</h3>
+                <!-- 收藏按鈕，根據收藏狀態顯示激活 -->
+                <div style="cursor: pointer;" @click.prevent.stop="handleHeartClick">
+                    <i-material-symbols-Favorite v-if="isFavorited" style="color: #e74c3c" />
+                    <i-material-symbols-Favorite-outline v-else />
+                </div>
+            </div>
+            <div class="tag">
+                <BaseTag v-for="tag in recipe.tags" :key="tag" :text="tag" />
+            </div>
+            <div class="recipe-info">
+                <div v-for="(item, index) in recipeInfo" :key="index" class="recipe-info-item p-p3">
+                    <span class="label">
+                        <component :is="item.icon" />{{ item.label }}
+                    </span>
+                    <span class="value en-h2">{{ item.value }}<span class="p-p1">{{ item.unit }}</span></span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="personal-info">
+                <AuthorInfo v-if="recipe" :user-id="recipe.author?.id || 0"
+                    :name="recipe.author_name || recipe.author?.name || 'Recimo'"
+                    :handle="recipe.author?.handle || `user_${recipe.author?.id || 0}`"
+                    :avatar-url="recipe.user_url || ''" />
+                <div @click.prevent.stop>
+                    <LikeButton :initial-likes="recipe.author.likes || 0"
+                        @update:liked="(val) => handleLikeChange(val, item)" />
+                </div>
+
+            </div>
+
+            <!-- <div class="btn-group">
+                <BaseBtn title="食譜詳情" variant="solid" height="30" @click="goToDetail" class="btn" />
+            </div> -->
+
+        </footer>
+        <AddToFolderModal v-model="showAddToFolderModal" :commentData="{}" :recipe-id="recipeId"
+            @submit="handleModalSubmit" />
+    </div>
+</template>
+<style lang="scss" scoped>
+.recipe-card-lg {
+    border: 1px solid $neutral-color-400;
+    border-radius: $radius-base;
+    overflow: hidden;
+    background-color: $neutral-color-white;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba($neutral-color-black, 0.08);
+        border-color: $primary-color-400;
+    }
+
+    .card-header {
+        overflow: hidden;
+        height: 320px;
+        width: 100%;
+
+        img {
+            width: fit-content;
+            object-fit: cover;
+            display: block;
+            width: 100%;
+            height: 100%;
+            transition: .3s ease;
+
+            &:hover {
+                scale: 1.1;
+            }
+        }
+    }
+
+    .card-body {
+        padding: 16px;
+
+        .title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            color: $primary-color-700;
+        }
+
+        .icon-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .tag {
+            display: flex;
+            gap: 6px;
+        }
+
+        .recipe-info {
+            display: flex;
+            justify-content: space-around;
+            background-color: $neutral-color-100;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: $radius-base;
+
+            .recipe-info-item {
+                text-align: center;
+
+                .label {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-bottom: 6px;
+                }
+            }
+        }
+    }
+
+    footer {
+        padding: 0 16px 16px 16px;
+        justify-content: space-between;
+        display: flex;
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .personal-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            .p-p1 {
+                margin-right: 6px;
+            }
+
+            .en-h3 {
+                margin-left: 6px;
+            }
+        }
+
+        .personal-img {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            border-radius: $radius-pill;
+            border: 1px solid $neutral-color-700;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+
+            img {
+                width: 20px;
+
+            }
+        }
+    }
+}
+
+.title {
+    position: relative;
+
+    .favorite-animate {
+        animation: heart-bounce 0.4s;
+    }
+}
+
+@keyframes heart-bounce {
+    0% {
+        transform: scale(1);
+    }
+
+    30% {
+        transform: scale(1.3);
+    }
+
+    60% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@media screen and (max-width: 1300px) {
+    .recipe-card-lg {
+        footer {
+            .btn {
+                width: 85px;
+            }
+        }
+
+        // .btn-group{
+        //     .btn{
+        //         width: 100px;
+        //     }
+        // }
+    }
+}
+</style>

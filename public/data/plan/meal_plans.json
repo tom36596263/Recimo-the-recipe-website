@@ -1,0 +1,87 @@
+[
+  {
+    "plan_id": 1,
+    "user_id": 2,
+    "source_template_id": null,
+    "title": "健康均衡三日自煮計畫",
+    "cover_type": 1,
+    "custom_cover_url": null,
+    "cover_template_id": 12,
+    "start_date": "2026-01-19",
+    "end_date": "2026-01-21",
+    "created_at": "2026-01-18 20:30:00"
+  },
+  {
+    "plan_id": 2,
+    "user_id": 2,
+    "source_template_id": null,
+    "title": "活力輕食三日自煮計畫",
+    "cover_type": 1,
+    "custom_cover_url": null,
+    "cover_template_id": 11,
+    "start_date": "2026-01-22",
+    "end_date": "2026-01-24",
+    "created_at": "2026-01-21 10:00:00"
+  },
+  {
+    "plan_id": 3,
+    "user_id": 2,
+    "source_template_id": null,
+    "title": "春節團圓年菜五日計畫",
+    "cover_type": 1,
+    "custom_cover_url": null,
+    "cover_template_id": 7,
+    "start_date": "2026-02-16",
+    "end_date": "2026-02-20",
+    "created_at": "2026-01-22 08:30:00"
+  },
+
+  {
+    "plan_id": 4,
+    "user_id": 2,
+    "source_template_id": null,
+    "title": "環球味蕾：從浪漫歐陸到經典台韓六日饗宴",
+    "cover_type": 1,
+    "custom_cover_url": null,
+    "cover_template_id": 4,
+    "start_date": "2026-02-10",
+    "end_date": "2026-02-15",
+    "created_at": "2026-01-28 20:30:00"
+  },
+  {
+    "plan_id": 5,
+    "user_id": 2,
+    "source_template_id": null,
+    "title": "2026 丙午馬年：除夕至初二團圓年菜計畫",
+    "cover_type": 1,
+    "custom_cover_url": null,
+    "cover_template_id": 5,
+    "start_date": "2026-02-16",
+    "end_date": "2026-02-18",
+    "created_at": "2026-01-28 20:35:00"
+  },
+  {
+    "plan_id": 6,
+    "user_id": 2,
+    "source_template_id": null,
+    "title": "春意盎然：三月山林露營三日計畫",
+    "cover_type": 1,
+    "custom_cover_url": null,
+    "cover_template_id": 1,
+    "start_date": "2026-03-13",
+    "end_date": "2026-03-15",
+    "created_at": "2026-01-28 20:43:00"
+  },
+  {
+    "plan_id": 7,
+    "user_id": 2,
+    "source_template_id": null,
+    "title": "520 浪漫食光：情侶專屬奢華饗宴計畫",
+    "cover_type": 1,
+    "custom_cover_url": null,
+    "cover_template_id": 9,
+    "start_date": "2026-05-19",
+    "end_date": "2026-05-21",
+    "created_at": "2026-01-28 20:50:00"
+  }
+]

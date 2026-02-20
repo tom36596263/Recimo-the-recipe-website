@@ -1,0 +1,161 @@
+@use "color";
+@use "font";
+@use "variables";
+
+// //中文標題
+// @mixin heading-zh($min-size, $max-size, $font-weight: 400) {
+//   font-family: $font-family-zh;
+//   line-height: $lh-standard;
+//   letter-spacing: $ls-heading-zh;
+//   font-weight: $font-weight;
+//   font-size: unquote('clamp(#{$min-size}, 2vw, #{$max-size})');
+// }
+
+// //英文標題
+// @mixin heading-en($min-size, $max-size, $font-weight: 400) {
+//   font-family: $font-family-en;
+//   line-height: $lh-standard;
+//   letter-spacing: $ls-heading-en;
+// }
+
+// //內文
+// @mixin text-style($size, $line-height: $lh-standard) {
+//   font-size: $size;
+//   line-height: $line-height;
+//   letter-spacing: $ls-body;
+//   font-family: $font-family-zh;
+// }
+// 中文標題 Mixin
+@mixin heading-zh($min-size, $max-size, $weight: 400) {
+  font-family: font.$font-family-zh;
+  font-weight: $weight;
+  line-height: font.$lh-heading;
+  letter-spacing: font.$ls-heading-zh;
+  font-size: clamp(#{$min-size}, #{font.get-fluid-val($min-size, $max-size)}, #{$max-size});
+}
+
+// 英文標題 Mixin
+@mixin heading-en($min-size, $max-size, $weight: 400) {
+  font-family: font.$font-family-en;
+  font-weight: $weight;
+  line-height: font.$lh-heading;
+  font-size: clamp(#{$min-size}, #{font.get-fluid-val($min-size, $max-size)}, #{$max-size});
+}
+
+// 內文 Mixin (內文通常不建議縮放太劇烈，所以簡化處理)
+@mixin text-style($size, $line-height: font.$lh-standard) {
+  font-size: $size;
+  line-height: $line-height;
+  letter-spacing: font.$ls-body;
+  font-family: font.$font-family-zh;
+}
+
+
+// 一般表單輸入框樣式
+@mixin input-style(
+  $width: 100%,
+  $radius: variables.$radius-base,
+  $border-color: color.$neutral-color-400,
+  $height: variables.$height-base
+) {
+  display: block;
+  width: $width;
+  height: $height;
+  padding: 8px 12px;
+  font-size: 16px;
+  color: color.$neutral-color-black;
+  background-color: color.$neutral-color-white;
+  border: 1px solid $border-color;
+  border-radius: $radius;
+  outline: none;
+  transition: all 0.3s ease;
+
+  &::placeholder {
+    color: color.$neutral-color-700;
+  }
+
+  &:focus {
+    border-color: color.$neutral-color-black;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    background-color: color.$neutral-color-100; // 建議加上禁用背景色
+  }
+}
+
+// 表單狀態呈現 (錯誤/正確)
+@mixin input-status($color) {
+  border-color: $color;
+
+  // &:focus {
+  //   box-shadow: 0 0 0 2px rgba($color, 0.2);
+  // }
+
+  & + .input-message {
+    color: color.$neutral-color-black;
+    display: block;
+  }
+}
+
+//tag
+@mixin tag-base(
+  // 1. 尺寸參數
+  $height,
+  // 必填：高度
+  $font-size,
+  // 必填：字體大小
+  $width: auto,
+  // 選填：寬度 (預設內容撐開)
+  $padding-x: 12px,
+
+  // 選填：左右內距 (防止文字貼邊)
+  // 2. 顏色參數 (預設用變數)
+  $bg-color: color.$primary-color-100,
+  $text-color: color.$neutral-color-800,
+  $radius: 10px
+) {
+  // --- 結構設定 ---
+  display: inline-flex;
+  align-items: center; // 垂直置中 (關鍵)
+  justify-content: center; // 水平置中
+
+  // --- 尺寸設定 ---
+  width: $width;
+  height: $height; // 由這裡控制高度
+  padding: 0 $padding-x; // 上下0，只留左右距離
+
+  // --- 外觀設定 ---
+  background-color: $bg-color;
+  color: $text-color;
+  font-size: $font-size;
+  border-radius: $radius;
+  font-weight: 500;
+  line-height: 1; // 避免行高影響垂直置中
+  white-space: nowrap; // 防止換行
+  transition: all 0.3s ease;
+
+  // --- Icon 微調 (讓 Icon 跟文字對齊) ---
+  i,
+  span {
+    margin-right: 4px;
+    font-size: 1.5em; // 跟隨字體大小
+    display: inline-block;
+  }
+}
+
+
+//sidebar btn
+@mixin nav-item-state($default-color, $hover-color, $active-color){
+  color: $default-color;
+  transition: color 0.2s ease;
+  &:hover{
+    color: $hover-color;
+  }
+  &.is-active{
+    color: $active-color;
+    &:hover {
+      color: $hover-color;
+    }
+  }
+}

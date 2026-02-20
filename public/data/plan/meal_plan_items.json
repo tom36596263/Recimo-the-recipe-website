@@ -1,0 +1,797 @@
+[
+  {
+    "item_id": 1,
+    "plan_id": 1,
+    "recipe_id": 11,
+    "planned_date": "2026-01-19 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 2,
+    "plan_id": 1,
+    "recipe_id": 8,
+    "planned_date": "2026-01-19 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 3,
+    "plan_id": 1,
+    "recipe_id": 4,
+    "planned_date": "2026-01-19 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 4,
+    "plan_id": 1,
+    "recipe_id": 9,
+    "planned_date": "2026-01-19 18:00:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 5,
+    "plan_id": 1,
+    "recipe_id": 6,
+    "planned_date": "2026-01-20 08:30:00",
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 6,
+    "plan_id": 1,
+    "recipe_id": 12,
+    "planned_date": "2026-01-20 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 7,
+    "plan_id": 1,
+    "recipe_id": 15,
+    "planned_date": "2026-01-20 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 8,
+    "plan_id": 1,
+    "recipe_id": 3,
+    "planned_date": "2026-01-20 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 9,
+    "plan_id": 1,
+    "recipe_id": 17,
+    "planned_date": "2026-01-20 18:00:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 10,
+    "plan_id": 1,
+    "recipe_id": 16,
+    "planned_date": "2026-01-21 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 11,
+    "plan_id": 1,
+    "recipe_id": 14,
+    "planned_date": "2026-01-21 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 12,
+    "plan_id": 1,
+    "recipe_id": 5,
+    "planned_date": "2026-01-21 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 13,
+    "plan_id": 1,
+    "recipe_id": 2,
+    "planned_date": "2026-01-21 18:00:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 14,
+    "plan_id": 2,
+    "recipe_id": 11,
+    "planned_date": "2026-01-22 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 15,
+    "plan_id": 2,
+    "recipe_id": 20,
+    "planned_date": "2026-01-22 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 16,
+    "plan_id": 2,
+    "recipe_id": 34,
+    "planned_date": "2026-01-23 08:30:00",
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 17,
+    "plan_id": 2,
+    "recipe_id": 15,
+    "planned_date": "2026-01-23 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 18,
+    "plan_id": 2,
+    "recipe_id": 14,
+    "planned_date": "2026-01-23 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 19,
+    "plan_id": 2,
+    "recipe_id": 12,
+    "planned_date": "2026-01-24 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 20,
+    "plan_id": 2,
+    "recipe_id": 24,
+    "planned_date": "2026-01-24 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 21,
+    "plan_id": 3,
+    "recipe_id": 27,
+    "planned_date": "2026-02-16 18:30:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 22,
+    "plan_id": 3,
+    "recipe_id": 28,
+    "planned_date": "2026-02-16 18:30:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 23,
+    "plan_id": 3,
+    "recipe_id": 31,
+    "planned_date": "2026-02-16 18:30:00",
+    "meal_type": 2,
+    "sort_order": 3
+  },
+  {
+    "item_id": 24,
+    "plan_id": 3,
+    "recipe_id": 33,
+    "planned_date": "2026-02-16 20:00:00",
+    "meal_type": 2,
+    "sort_order": 4
+  },
+  {
+    "item_id": 25,
+    "plan_id": 3,
+    "recipe_id": 16,
+    "planned_date": "2026-02-17 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 26,
+    "plan_id": 3,
+    "recipe_id": 26,
+    "planned_date": "2026-02-17 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 27,
+    "plan_id": 3,
+    "recipe_id": 30,
+    "planned_date": "2026-02-18 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 28,
+    "plan_id": 3,
+    "recipe_id": 3,
+    "planned_date": "2026-02-18 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 29,
+    "plan_id": 3,
+    "recipe_id": 10,
+    "planned_date": "2026-02-18 18:00:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 30,
+    "plan_id": 3,
+    "recipe_id": 35,
+    "planned_date": "2026-02-19 15:00:00",
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 31,
+    "plan_id": 3,
+    "recipe_id": 29,
+    "planned_date": "2026-02-19 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 32,
+    "plan_id": 3,
+    "recipe_id": 24,
+    "planned_date": "2026-02-20 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 33,
+    "plan_id": 3,
+    "recipe_id": 36,
+    "planned_date": "2026-02-20 18:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 34,
+    "plan_id": 4,
+    "recipe_id": 21,
+    "planned_date": "2026-02-10 18:30:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 35,
+    "plan_id": 4,
+    "recipe_id": 9,
+    "planned_date": "2026-02-10 18:30:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 36,
+    "plan_id": 4,
+    "recipe_id": 40,
+    "planned_date": "2026-02-10 20:00:00",
+    "meal_type": 2,
+    "sort_order": 3
+  },
+
+  {
+    "item_id": 37,
+    "plan_id": 4,
+    "recipe_id": 69,
+    "planned_date": "2026-02-11 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 38,
+    "plan_id": 4,
+    "recipe_id": 55,
+    "planned_date": "2026-02-11 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 39,
+    "plan_id": 4,
+    "recipe_id": 26,
+    "planned_date": "2026-02-11 18:30:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 40,
+    "plan_id": 4,
+    "recipe_id": 66,
+    "planned_date": "2026-02-11 18:30:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 41,
+    "plan_id": 4,
+    "recipe_id": 54,
+    "planned_date": "2026-02-11 18:30:00",
+    "meal_type": 2,
+    "sort_order": 3
+  },
+
+  {
+    "item_id": 42,
+    "plan_id": 4,
+    "recipe_id": 52,
+    "planned_date": "2026-02-12 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 43,
+    "plan_id": 4,
+    "recipe_id": 51,
+    "planned_date": "2026-02-12 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 44,
+    "plan_id": 4,
+    "recipe_id": 53,
+    "planned_date": "2026-02-12 18:30:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 45,
+    "plan_id": 4,
+    "recipe_id": 49,
+    "planned_date": "2026-02-12 18:30:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+
+  {
+    "item_id": 46,
+    "plan_id": 4,
+    "recipe_id": 62,
+    "planned_date": "2026-02-13 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 47,
+    "plan_id": 4,
+    "recipe_id": 10,
+    "planned_date": "2026-02-13 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 48,
+    "plan_id": 4,
+    "recipe_id": 63,
+    "planned_date": "2026-02-13 19:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 49,
+    "plan_id": 4,
+    "recipe_id": 22,
+    "planned_date": "2026-02-13 19:00:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 50,
+    "plan_id": 4,
+    "recipe_id": 38,
+    "planned_date": "2026-02-13 21:00:00",
+    "meal_type": 2,
+    "sort_order": 3
+  },
+
+  {
+    "item_id": 51,
+    "plan_id": 4,
+    "recipe_id": 6,
+    "planned_date": "2026-02-14 09:00:00",
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 52,
+    "plan_id": 4,
+    "recipe_id": 64,
+    "planned_date": "2026-02-14 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 53,
+    "plan_id": 4,
+    "recipe_id": 61,
+    "planned_date": "2026-02-14 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 54,
+    "plan_id": 4,
+    "recipe_id": 65,
+    "planned_date": "2026-02-14 19:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 55,
+    "plan_id": 4,
+    "recipe_id": 42,
+    "planned_date": "2026-02-14 20:30:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 56,
+    "plan_id": 4,
+    "recipe_id": 41,
+    "planned_date": "2026-02-14 20:30:00",
+    "meal_type": 2,
+    "sort_order": 3
+  },
+
+  {
+    "item_id": 57,
+    "plan_id": 4,
+    "recipe_id": 32,
+    "planned_date": "2026-02-15 10:00:00",
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 58,
+    "plan_id": 4,
+    "recipe_id": 59,
+    "planned_date": "2026-02-15 12:30:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 59,
+    "plan_id": 4,
+    "recipe_id": 70,
+    "planned_date": "2026-02-15 12:30:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 60,
+    "plan_id": 4,
+    "recipe_id": 1,
+    "planned_date": "2026-02-15 18:30:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 61,
+    "plan_id": 4,
+    "recipe_id": 74,
+    "planned_date": "2026-02-15 20:00:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 62,
+    "plan_id": 5,
+    "recipe_id": 27,
+    "planned_date": "2026-02-16 18:30:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 63,
+    "plan_id": 5,
+    "recipe_id": 28,
+    "planned_date": "2026-02-16 18:30:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 64,
+    "plan_id": 5,
+    "recipe_id": 30,
+    "planned_date": "2026-02-16 18:30:00",
+    "meal_type": 2,
+    "sort_order": 3
+  },
+  {
+    "item_id": 65,
+    "plan_id": 5,
+    "recipe_id": 31,
+    "planned_date": "2026-02-16 18:30:00",
+    "meal_type": 2,
+    "sort_order": 4
+  },
+  {
+    "item_id": 66,
+    "plan_id": 5,
+    "recipe_id": 33,
+    "planned_date": "2026-02-16 20:30:00",
+    "meal_type": 2,
+    "sort_order": 5
+  },
+
+  {
+    "item_id": 67,
+    "plan_id": 5,
+    "recipe_id": 68,
+    "planned_date": "2026-02-17 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 68,
+    "plan_id": 5,
+    "recipe_id": 14,
+    "planned_date": "2026-02-17 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 69,
+    "plan_id": 5,
+    "recipe_id": 26,
+    "planned_date": "2026-02-17 18:30:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 70,
+    "plan_id": 5,
+    "recipe_id": 66,
+    "planned_date": "2026-02-17 18:30:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 71,
+    "plan_id": 5,
+    "recipe_id": 55,
+    "planned_date": "2026-02-17 18:30:00",
+    "meal_type": 2,
+    "sort_order": 3
+  },
+
+  {
+    "item_id": 72,
+    "plan_id": 5,
+    "recipe_id": 65,
+    "planned_date": "2026-02-18 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 73,
+    "plan_id": 5,
+    "recipe_id": 62,
+    "planned_date": "2026-02-18 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 74,
+    "plan_id": 5,
+    "recipe_id": 59,
+    "planned_date": "2026-02-18 18:30:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 75,
+    "plan_id": 5,
+    "recipe_id": 10,
+    "planned_date": "2026-02-18 18:30:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 76,
+    "plan_id": 5,
+    "recipe_id": 56,
+    "planned_date": "2026-02-18 18:30:00",
+    "meal_type": 2,
+    "sort_order": 3
+  },
+  {
+    "item_id": 77,
+    "plan_id": 5,
+    "recipe_id": 41,
+    "planned_date": "2026-02-18 20:30:00",
+    "meal_type": 2,
+    "sort_order": 4
+  },
+  {
+    "item_id": 78,
+    "plan_id": 6,
+    "recipe_id": 1,
+    "planned_date": "2026-03-13 18:30:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 79,
+    "plan_id": 6,
+    "recipe_id": 23,
+    "planned_date": "2026-03-13 18:30:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+
+  {
+    "item_id": 80,
+    "plan_id": 6,
+    "recipe_id": 6,
+    "planned_date": "2026-03-14 09:00:00",
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 81,
+    "plan_id": 6,
+    "recipe_id": 62,
+    "planned_date": "2026-03-14 12:30:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 82,
+    "plan_id": 6,
+    "recipe_id": 60,
+    "planned_date": "2026-03-14 12:30:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 83,
+    "plan_id": 6,
+    "recipe_id": 50,
+    "planned_date": "2026-03-14 18:30:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+
+  {
+    "item_id": 84,
+    "plan_id": 6,
+    "recipe_id": 34,
+    "planned_date": "2026-03-15 08:30:00",
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 85,
+    "plan_id": 6,
+    "recipe_id": 45,
+    "planned_date": "2026-03-15 08:30:00",
+    "meal_type": 0,
+    "sort_order": 2
+  },
+  {
+    "item_id": 86,
+    "plan_id": 6,
+    "recipe_id": 7,
+    "planned_date": "2026-03-15 12:30:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 87,
+    "plan_id": 6,
+    "recipe_id": 68,
+    "planned_date": "2026-03-15 12:30:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 88,
+    "plan_id": 7,
+    "recipe_id": 72,
+    "planned_date": "2026-05-19 18:30:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 89,
+    "plan_id": 7,
+    "recipe_id": 23,
+    "planned_date": "2026-05-19 18:30:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+
+  {
+    "item_id": 90,
+    "plan_id": 7,
+    "recipe_id": 62,
+    "planned_date": "2026-05-20 12:00:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 91,
+    "plan_id": 7,
+    "recipe_id": 24,
+    "planned_date": "2026-05-20 12:00:00",
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 92,
+    "plan_id": 7,
+    "recipe_id": 63,
+    "planned_date": "2026-05-20 19:00:00",
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 93,
+    "plan_id": 7,
+    "recipe_id": 22,
+    "planned_date": "2026-05-20 19:00:00",
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 94,
+    "plan_id": 7,
+    "recipe_id": 9,
+    "planned_date": "2026-05-20 19:00:00",
+    "meal_type": 2,
+    "sort_order": 3
+  },
+  {
+    "item_id": 95,
+    "plan_id": 7,
+    "recipe_id": 74,
+    "planned_date": "2026-05-20 21:00:00",
+    "meal_type": 2,
+    "sort_order": 4
+  },
+
+  {
+    "item_id": 96,
+    "plan_id": 7,
+    "recipe_id": 32,
+    "planned_date": "2026-05-21 10:00:00",
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 97,
+    "plan_id": 7,
+    "recipe_id": 64,
+    "planned_date": "2026-05-21 12:30:00",
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 98,
+    "plan_id": 7,
+    "recipe_id": 15,
+    "planned_date": "2026-05-21 12:30:00",
+    "meal_type": 1,
+    "sort_order": 2
+  }
+]

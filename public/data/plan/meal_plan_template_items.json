@@ -1,0 +1,399 @@
+[
+  {
+    "item_id": 1,
+    "template_id": 1,
+    "recipe_id": 11,
+    "day_number": 1,
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 2,
+    "template_id": 1,
+    "recipe_id": 8,
+    "day_number": 1,
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 3,
+    "template_id": 1,
+    "recipe_id": 15,
+    "day_number": 1,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 4,
+    "template_id": 1,
+    "recipe_id": 58,
+    "day_number": 1,
+    "meal_type": 2,
+    "sort_order": 2
+  },
+
+  {
+    "item_id": 5,
+    "template_id": 1,
+    "recipe_id": 45,
+    "day_number": 2,
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 6,
+    "template_id": 1,
+    "recipe_id": 12,
+    "day_number": 2,
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 7,
+    "template_id": 1,
+    "recipe_id": 55,
+    "day_number": 2,
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 8,
+    "template_id": 1,
+    "recipe_id": 14,
+    "day_number": 2,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+
+  {
+    "item_id": 9,
+    "template_id": 1,
+    "recipe_id": 34,
+    "day_number": 3,
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 10,
+    "template_id": 1,
+    "recipe_id": 62,
+    "day_number": 3,
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 11,
+    "template_id": 1,
+    "recipe_id": 10,
+    "day_number": 3,
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 12,
+    "template_id": 1,
+    "recipe_id": 20,
+    "day_number": 3,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 13,
+    "template_id": 1,
+    "recipe_id": 54,
+    "day_number": 3,
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 14,
+    "template_id": 2,
+    "recipe_id": 52,
+    "day_number": 1,
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 15,
+    "template_id": 2,
+    "recipe_id": 51,
+    "day_number": 1,
+    "meal_type": 1,
+    "sort_order": 2
+  },
+  {
+    "item_id": 16,
+    "template_id": 2,
+    "recipe_id": 49,
+    "day_number": 2,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 17,
+    "template_id": 2,
+    "recipe_id": 53,
+    "day_number": 2,
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 18,
+    "template_id": 2,
+    "recipe_id": 50,
+    "day_number": 3,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 19,
+    "template_id": 2,
+    "recipe_id": 17,
+    "day_number": 4,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 20,
+    "template_id": 2,
+    "recipe_id": 51,
+    "day_number": 4,
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 21,
+    "template_id": 2,
+    "recipe_id": 52,
+    "day_number": 5,
+    "meal_type": 1,
+    "sort_order": 1
+  },
+
+  {
+    "item_id": 22,
+    "template_id": 3,
+    "recipe_id": 32,
+    "day_number": 1,
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 23,
+    "template_id": 3,
+    "recipe_id": 35,
+    "day_number": 1,
+    "meal_type": 0,
+    "sort_order": 2
+  },
+  {
+    "item_id": 24,
+    "template_id": 3,
+    "recipe_id": 33,
+    "day_number": 2,
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 25,
+    "template_id": 3,
+    "recipe_id": 34,
+    "day_number": 2,
+    "meal_type": 0,
+    "sort_order": 2
+  },
+  {
+    "item_id": 26,
+    "template_id": 3,
+    "recipe_id": 2,
+    "day_number": 3,
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 27,
+    "template_id": 3,
+    "recipe_id": 38,
+    "day_number": 3,
+    "meal_type": 0,
+    "sort_order": 2
+  },
+  {
+    "item_id": 28,
+    "template_id": 3,
+    "recipe_id": 40,
+    "day_number": 4,
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 29,
+    "template_id": 3,
+    "recipe_id": 42,
+    "day_number": 4,
+    "meal_type": 0,
+    "sort_order": 2
+  },
+  {
+    "item_id": 30,
+    "template_id": 3,
+    "recipe_id": 41,
+    "day_number": 5,
+    "meal_type": 0,
+    "sort_order": 1
+  },
+  {
+    "item_id": 31,
+    "template_id": 3,
+    "recipe_id": 43,
+    "day_number": 5,
+    "meal_type": 0,
+    "sort_order": 2
+  },
+
+  {
+    "item_id": 32,
+    "template_id": 4,
+    "recipe_id": 26,
+    "day_number": 1,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 33,
+    "template_id": 4,
+    "recipe_id": 66,
+    "day_number": 1,
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 34,
+    "template_id": 4,
+    "recipe_id": 55,
+    "day_number": 1,
+    "meal_type": 2,
+    "sort_order": 3
+  },
+  {
+    "item_id": 35,
+    "template_id": 4,
+    "recipe_id": 30,
+    "day_number": 2,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 36,
+    "template_id": 4,
+    "recipe_id": 28,
+    "day_number": 2,
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 37,
+    "template_id": 4,
+    "recipe_id": 31,
+    "day_number": 2,
+    "meal_type": 2,
+    "sort_order": 3
+  },
+  {
+    "item_id": 38,
+    "template_id": 4,
+    "recipe_id": 3,
+    "day_number": 3,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 39,
+    "template_id": 4,
+    "recipe_id": 29,
+    "day_number": 3,
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 40,
+    "template_id": 4,
+    "recipe_id": 56,
+    "day_number": 3,
+    "meal_type": 2,
+    "sort_order": 3
+  },
+
+  {
+    "item_id": 41,
+    "template_id": 5,
+    "recipe_id": 1,
+    "day_number": 1,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 42,
+    "template_id": 5,
+    "recipe_id": 23,
+    "day_number": 1,
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 43,
+    "template_id": 5,
+    "recipe_id": 9,
+    "day_number": 1,
+    "meal_type": 2,
+    "sort_order": 3
+  },
+  {
+    "item_id": 44,
+    "template_id": 5,
+    "recipe_id": 62,
+    "day_number": 2,
+    "meal_type": 1,
+    "sort_order": 1
+  },
+  {
+    "item_id": 45,
+    "template_id": 5,
+    "recipe_id": 4,
+    "day_number": 2,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 46,
+    "template_id": 5,
+    "recipe_id": 25,
+    "day_number": 2,
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 47,
+    "template_id": 5,
+    "recipe_id": 63,
+    "day_number": 3,
+    "meal_type": 2,
+    "sort_order": 1
+  },
+  {
+    "item_id": 48,
+    "template_id": 5,
+    "recipe_id": 22,
+    "day_number": 3,
+    "meal_type": 2,
+    "sort_order": 2
+  },
+  {
+    "item_id": 49,
+    "template_id": 5,
+    "recipe_id": 24,
+    "day_number": 3,
+    "meal_type": 2,
+    "sort_order": 3
+  }
+]

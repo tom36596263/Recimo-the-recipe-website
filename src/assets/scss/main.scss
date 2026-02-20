@@ -1,0 +1,148 @@
+// 引入變數
+@use "sass:list";
+@use 'abstracts/variables';
+@use 'abstracts/font';
+@use 'abstracts/color';
+
+// 函式庫
+@use 'abstracts/mixins';
+
+// 組件
+@use 'components-scss/input';
+@use 'components-scss/btn';
+@use 'components-scss/pagination';
+@use 'components-scss/modal';
+
+// 版面配置
+@use 'layouts/grid';
+@use 'layouts/default-layout';
+@use 'layouts/workspace-layout';
+@use 'layouts/share-layout';
+
+// 此檔案用於存放全域css
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: color.$neutral-color-white;
+  color: color.$neutral-color-800;
+  overflow-x: hidden;
+}
+
+//中文標題迴圈
+$heading-config-zh: (
+  'h1': (
+    1.75rem,
+    3rem,
+    400
+  ),
+  'h1-bold': (
+    1.75rem,
+    3rem,
+    700
+  ),
+  'h2': (
+    1.5rem,
+    1.75rem,
+    400
+  ),
+  'h2-bold': (
+    1.5rem,
+    1.75rem,
+    700
+  ),
+  'h3': (
+    1.25rem,
+    1.5rem,
+    400
+  ),
+  'h3-bold': (
+    1.25rem,
+    1.5rem,
+    700
+  ),
+  'h4': (
+    1.125rem,
+    1.25rem,
+    400
+  ),
+  'h4-bold': (
+    1.125rem,
+    1.25rem,
+    700
+  ),
+  'h5': (
+    0.875rem,
+    1.125rem,
+    400
+  ),
+  'h5-bold': (
+    0.875rem,
+    1.125rem,
+    700
+  )
+);
+@each $name, $values in $heading-config-zh {
+  $min: list.nth($values, 1);
+  $max: list.nth($values, 2);
+  $weight: list.nth($values, 3);
+
+  .zh-#{$name} {
+    @include mixins.heading-zh($min, $max, $weight);
+  }
+}
+
+// 英文標題迴圈
+$heading-config-en: (
+  'h1': (
+    1.875rem,
+    1.875rem,
+    400
+  ),
+  'h1-bold': (
+    1.875rem,
+    1.875rem,
+    700
+  ),
+  'h2': (
+    1.5rem,
+    1.5rem,
+    400
+  ),
+  'h2-bold': (
+    1.5rem,
+    1.5rem,
+    700
+  ),
+  'h3': (
+    1rem,
+    1rem,
+    400
+  ),
+  'h3-bold': (
+    1rem,
+    1rem,
+    700
+  )
+);
+@each $name, $values in $heading-config-en {
+  $min: list.nth($values, 1);
+  $max: list.nth($values, 2);
+  $weight: list.nth($values, 3);
+
+  .en-#{$name} {
+    @include mixins.heading-en($min, $max, $weight);
+  }
+}
+
+//內文
+.p-p1 {
+  @include mixins.text-style(1rem, font.$lh-body);
+}
+
+.p-p2 {
+  @include mixins.text-style(0.875rem);
+}
+
+.p-p3 {
+  @include mixins.text-style(0.75rem);
+}

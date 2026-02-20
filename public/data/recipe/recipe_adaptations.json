@@ -1,0 +1,554 @@
+[
+  {
+    "adaptation_id": 1,
+    "parent_recipe_id": 1,
+    "child_recipe_id": 11,
+    "adaptation_title": "瑪格麗特風舒肥雞",
+    "adaptation_note": "餅皮換成雞胸，減醣健身首選。",
+    "adaptation_image_url": "/img/adaptation/1/1.jpg"
+  },
+  {
+    "adaptation_id": 2,
+    "parent_recipe_id": 1,
+    "child_recipe_id": 21,
+    "adaptation_title": "披薩風味義大利肉醬",
+    "adaptation_note": "披薩香料融入肉醬，風味更清爽。",
+    "adaptation_image_url": "/img/adaptation/1/2.jpg"
+  },
+  {
+    "adaptation_id": 65,
+    "parent_recipe_id": 1,
+    "child_recipe_id": 30,
+    "adaptation_title": "披薩風客家小炒",
+    "adaptation_note": "臘腸與起司取代魷魚",
+    "adaptation_image_url": "/img/adaptation/1/3.jpg"
+  },
+  {
+    "adaptation_id": 3,
+    "parent_recipe_id": 2,
+    "child_recipe_id": 32,
+    "adaptation_title": "抹茶舒芙蕾鬆餅",
+    "adaptation_note": "蓬鬆舒芙蕾淋上濃厚抹茶醬。",
+    "adaptation_image_url": "/img/adaptation/2/1.jpg"
+  },
+  {
+    "adaptation_id": 4,
+    "parent_recipe_id": 2,
+    "child_recipe_id": 18,
+    "adaptation_title": "奶香抹茶咖哩醬",
+    "adaptation_note": "抹茶苦甜結合鮮奶油，濃郁醇厚。",
+    "adaptation_image_url": "/img/adaptation/2/2.jpg"
+  },
+  {
+    "adaptation_id": 66,
+    "parent_recipe_id": 2,
+    "child_recipe_id": 16,
+    "adaptation_title": "抹茶壽喜燒牛丼",
+    "adaptation_note": "抹茶粉化解牛脂膩感，尾韻帶茶香。",
+    "adaptation_image_url": "/img/adaptation/2/3.jpg"
+  },
+  {
+    "adaptation_id": 5,
+    "parent_recipe_id": 3,
+    "child_recipe_id": 17,
+    "adaptation_title": "韓風宮保豬肉",
+    "adaptation_note": "宮保爆香法結合泡菜，酸辣脆口。",
+    "adaptation_image_url": "/img/adaptation/3/1.jpg"
+  },
+  {
+    "adaptation_id": 6,
+    "parent_recipe_id": 3,
+    "child_recipe_id": 26,
+    "adaptation_title": "三杯宮保雞",
+    "adaptation_note": "九層塔香氣結合宮保，極致下飯。",
+    "adaptation_image_url": "/img/adaptation/3/2.jpg"
+  },
+  {
+    "adaptation_id": 67,
+    "parent_recipe_id": 3,
+    "child_recipe_id": 1,
+    "adaptation_title": "宮保雞丁披薩",
+    "adaptation_note": "經典川菜化身披薩配料，香辣脆口。",
+    "adaptation_image_url": "/img/adaptation/3/3.jpg"
+  },
+  {
+    "adaptation_id": 7,
+    "parent_recipe_id": 4,
+    "child_recipe_id": 22,
+    "adaptation_title": "松露野菇燉飯版",
+    "adaptation_note": "保留松露奶醬，麵條換成燉飯。",
+    "adaptation_image_url": "/img/adaptation/4/1.jpg"
+  },
+  {
+    "adaptation_id": 8,
+    "parent_recipe_id": 4,
+    "child_recipe_id": 9,
+    "adaptation_title": "松露風味洋蔥濃湯",
+    "adaptation_note": "松露奶醬加入焦糖洋蔥熬成濃湯。",
+    "adaptation_image_url": "/img/adaptation/4/2.jpg"
+  },
+  {
+    "adaptation_id": 68,
+    "parent_recipe_id": 4,
+    "child_recipe_id": 31,
+    "adaptation_title": "松露藥膳雞湯",
+    "adaptation_note": "法式松露與漢方藥材結合",
+    "adaptation_image_url": "/img/adaptation/4/3.jpg"
+  },
+  {
+    "adaptation_id": 9,
+    "parent_recipe_id": 5,
+    "child_recipe_id": 18,
+    "adaptation_title": "泰式奶香白咖哩",
+    "adaptation_note": "青咖哩結合鮮奶油，辛辣且溫潤。",
+    "adaptation_image_url": "/img/adaptation/5/1.jpg"
+  },
+  {
+    "adaptation_id": 10,
+    "parent_recipe_id": 5,
+    "child_recipe_id": 15,
+    "adaptation_title": "青咖哩紙包魚",
+    "adaptation_note": "青咖哩基底紙包魚，鎖住辛香味。",
+    "adaptation_image_url": "/img/adaptation/5/2.jpg"
+  },
+  {
+    "adaptation_id": 69,
+    "parent_recipe_id": 5,
+    "child_recipe_id": 21,
+    "adaptation_title": "青咖哩肉醬麵",
+    "adaptation_note": "東南亞辛香料結合義式肉醬。",
+    "adaptation_image_url": "/img/adaptation/5/3.jpg"
+  },
+  {
+    "adaptation_id": 11,
+    "parent_recipe_id": 6,
+    "child_recipe_id": 10,
+    "adaptation_title": "荷蘭醬蒜香烤大蝦",
+    "adaptation_note": "烤大蝦淋上經典荷蘭醬，層次濃縮。",
+    "adaptation_image_url": "/img/adaptation/6/1.jpg"
+  },
+  {
+    "adaptation_id": 12,
+    "parent_recipe_id": 6,
+    "child_recipe_id": 32,
+    "adaptation_title": "班尼迪克舒芙蕾",
+    "adaptation_note": "馬芬換成鹹味舒芙蕾，口感極輕盈。",
+    "adaptation_image_url": "/img/adaptation/6/2.jpg"
+  },
+  {
+    "adaptation_id": 13,
+    "parent_recipe_id": 7,
+    "child_recipe_id": 19,
+    "adaptation_title": "豚骨味噌燒肉",
+    "adaptation_note": "豚骨湯結合味噌，製成濃厚醃醬。",
+    "adaptation_image_url": "/img/adaptation/7/1.jpg"
+  },
+  {
+    "adaptation_id": 14,
+    "parent_recipe_id": 7,
+    "child_recipe_id": 27,
+    "adaptation_title": "叉燒紅燒肉進化",
+    "adaptation_note": "低溫烹調結合炒糖色，軟糯入味。",
+    "adaptation_image_url": "/img/adaptation/7/2.jpg"
+  },
+  {
+    "adaptation_id": 15,
+    "parent_recipe_id": 8,
+    "child_recipe_id": 14,
+    "adaptation_title": "鷹嘴豆豆腐漢堡排",
+    "adaptation_note": "混入鷹嘴豆泥，增加香氣與營養。",
+    "adaptation_image_url": "/img/adaptation/8/1.jpg"
+  },
+  {
+    "adaptation_id": 16,
+    "parent_recipe_id": 8,
+    "child_recipe_id": 29,
+    "adaptation_title": "豆泥版麻婆豆腐",
+    "adaptation_note": "豆泥取代勾芡，健康且香氣更濃。",
+    "adaptation_image_url": "/img/adaptation/8/2.jpg"
+  },
+  {
+    "adaptation_id": 17,
+    "parent_recipe_id": 9,
+    "child_recipe_id": 16,
+    "adaptation_title": "洋蔥濃湯風牛丼",
+    "adaptation_note": "焦糖洋蔥取代砂糖，風味更深邃。",
+    "adaptation_image_url": "/img/adaptation/9/1.jpg"
+  },
+  {
+    "adaptation_id": 18,
+    "parent_recipe_id": 9,
+    "child_recipe_id": 27,
+    "adaptation_title": "焦糖洋蔥紅燒肉",
+    "adaptation_note": "洋蔥酵素軟化肉質，增加自然甜。",
+    "adaptation_image_url": "/img/adaptation/9/2.jpg"
+  },
+  {
+    "adaptation_id": 19,
+    "parent_recipe_id": 10,
+    "child_recipe_id": 24,
+    "adaptation_title": "蒜香烤蝦義大利麵",
+    "adaptation_note": "蒜香蝦油爆香，鮮味全面升級。",
+    "adaptation_image_url": "/img/adaptation/10/1.jpg"
+  },
+  {
+    "adaptation_id": 20,
+    "parent_recipe_id": 10,
+    "child_recipe_id": 28,
+    "adaptation_title": "檸檬蒜香清蒸魚",
+    "adaptation_note": "改為清蒸做法，保留鱸魚原味。",
+    "adaptation_image_url": "/img/adaptation/10/2.jpg"
+  },
+  {
+    "adaptation_id": 21,
+    "parent_recipe_id": 11,
+    "child_recipe_id": 3,
+    "adaptation_title": "舒肥版宮保雞丁",
+    "adaptation_note": "舒肥後快炒，肉質極嫩且多汁。",
+    "adaptation_image_url": "/img/adaptation/11/1.jpg"
+  },
+  {
+    "adaptation_id": 22,
+    "parent_recipe_id": 11,
+    "child_recipe_id": 13,
+    "adaptation_title": "蒜香舒肥雞肉沙拉",
+    "adaptation_note": "濃厚蒜醬搭配舒肥雞，輕盈飽足。",
+    "adaptation_image_url": "/img/adaptation/11/2.jpg"
+  },
+  {
+    "adaptation_id": 23,
+    "parent_recipe_id": 12,
+    "child_recipe_id": 20,
+    "adaptation_title": "照燒鮭魚糙米飯",
+    "adaptation_note": "鮭魚刷上照燒醬，米飯更入味。",
+    "adaptation_image_url": "/img/adaptation/12/1.jpg"
+  },
+  {
+    "adaptation_id": 24,
+    "parent_recipe_id": 12,
+    "child_recipe_id": 28,
+    "adaptation_title": "蔥油鮭魚便當",
+    "adaptation_note": "淋上滾燙蔥油，激發鮭魚香氣。",
+    "adaptation_image_url": "/img/adaptation/12/2.jpg"
+  },
+  {
+    "adaptation_id": 25,
+    "parent_recipe_id": 13,
+    "child_recipe_id": 17,
+    "adaptation_title": "韓式蒜香毛豆豬",
+    "adaptation_note": "加入泡菜酸度，平衡豬排油脂。",
+    "adaptation_image_url": "/img/adaptation/13/1.jpg"
+  },
+  {
+    "adaptation_id": 26,
+    "parent_recipe_id": 13,
+    "child_recipe_id": 30,
+    "adaptation_title": "毛豆版客家小炒",
+    "adaptation_note": "豬排切絲配毛豆，口感豐富。",
+    "adaptation_image_url": "/img/adaptation/13/2.jpg"
+  },
+  {
+    "adaptation_id": 27,
+    "parent_recipe_id": 14,
+    "child_recipe_id": 4,
+    "adaptation_title": "松露奶醬豆腐排",
+    "adaptation_note": "淋上松露奶醬，升級精緻西餐。",
+    "adaptation_image_url": "/img/adaptation/14/1.jpg"
+  },
+  {
+    "adaptation_id": 28,
+    "parent_recipe_id": 14,
+    "child_recipe_id": 29,
+    "adaptation_title": "豆腐排版麻婆料理",
+    "adaptation_note": "豆腐排結合麻婆醬，辛香入味。",
+    "adaptation_image_url": "/img/adaptation/14/2.jpg"
+  },
+  {
+    "adaptation_id": 29,
+    "parent_recipe_id": 15,
+    "child_recipe_id": 24,
+    "adaptation_title": "紙包白酒蛤蜊魚",
+    "adaptation_note": "魚汁與白酒蒸熟麵條，極其鮮美。",
+    "adaptation_image_url": "/img/adaptation/15/1.jpg"
+  },
+  {
+    "adaptation_id": 30,
+    "parent_recipe_id": 15,
+    "child_recipe_id": 10,
+    "adaptation_title": "蒜香紙包蝦拼盤",
+    "adaptation_note": "蒜香與魚蝦密封烘烤，海味加倍。",
+    "adaptation_image_url": "/img/adaptation/15/2.jpg"
+  },
+  {
+    "adaptation_id": 31,
+    "parent_recipe_id": 16,
+    "child_recipe_id": 21,
+    "adaptation_title": "壽喜燒風肉醬麵",
+    "adaptation_note": "壽喜燒甜味肉醬，驚喜日式風格。",
+    "adaptation_image_url": "/img/adaptation/16/1.jpg"
+  },
+  {
+    "adaptation_id": 32,
+    "parent_recipe_id": 16,
+    "child_recipe_id": 19,
+    "adaptation_title": "薑汁壽喜燒豬丼",
+    "adaptation_note": "加入薑泥調味，融合兩種經典風味。",
+    "adaptation_image_url": "/img/adaptation/16/2.jpg"
+  },
+  {
+    "adaptation_id": 33,
+    "parent_recipe_id": 17,
+    "child_recipe_id": 26,
+    "adaptation_title": "三杯泡菜雞",
+    "adaptation_note": "泡菜酸辣帶入三杯雞，香氣奇特。",
+    "adaptation_image_url": "/img/adaptation/17/1.jpg"
+  },
+  {
+    "adaptation_id": 34,
+    "parent_recipe_id": 17,
+    "child_recipe_id": 29,
+    "adaptation_title": "韓式麻婆豆腐",
+    "adaptation_note": "泡菜汁增添果酸，清爽解膩。",
+    "adaptation_image_url": "/img/adaptation/17/2.jpg"
+  },
+  {
+    "adaptation_id": 35,
+    "parent_recipe_id": 18,
+    "child_recipe_id": 22,
+    "adaptation_title": "奶香咖哩燉飯",
+    "adaptation_note": "咖哩濃稠度作基底，米粒一體。",
+    "adaptation_image_url": "/img/adaptation/18/1.jpg"
+  },
+  {
+    "adaptation_id": 36,
+    "parent_recipe_id": 18,
+    "child_recipe_id": 7,
+    "adaptation_title": "北海道咖哩拉麵",
+    "adaptation_note": "咖哩溶入豚骨湯，復刻經典風味。",
+    "adaptation_image_url": "/img/adaptation/18/2.jpg"
+  },
+  {
+    "adaptation_id": 37,
+    "parent_recipe_id": 19,
+    "child_recipe_id": 13,
+    "adaptation_title": "味噌薑汁嫩豬排",
+    "adaptation_note": "味噌酵素分解，肉質更軟嫩。",
+    "adaptation_image_url": "/img/adaptation/19/1.jpg"
+  },
+  {
+    "adaptation_id": 38,
+    "parent_recipe_id": 19,
+    "child_recipe_id": 30,
+    "adaptation_title": "薑汁燒肉風客家炒",
+    "adaptation_note": "味噌薑汁結合五花，和風感十足。",
+    "adaptation_image_url": "/img/adaptation/19/2.jpg"
+  },
+  {
+    "adaptation_id": 39,
+    "parent_recipe_id": 20,
+    "child_recipe_id": 1,
+    "adaptation_title": "和風照燒鮭魚披薩",
+    "adaptation_note": "照燒鮭魚舖上披薩，風味獨特。",
+    "adaptation_image_url": "/img/adaptation/20/1.jpg"
+  },
+  {
+    "adaptation_id": 40,
+    "parent_recipe_id": 20,
+    "child_recipe_id": 12,
+    "adaptation_title": "照燒鮭魚輕食餐",
+    "adaptation_note": "高纖低GI餐盒，營養均衡。",
+    "adaptation_image_url": "/img/adaptation/20/2.jpg"
+  },
+  {
+    "adaptation_id": 41,
+    "parent_recipe_id": 21,
+    "child_recipe_id": 27,
+    "adaptation_title": "肉醬風味紅燒肉",
+    "adaptation_note": "番茄糊結合醬油，模仿肉醬基底。",
+    "adaptation_image_url": "/img/adaptation/21/1.jpg"
+  },
+  {
+    "adaptation_id": 42,
+    "parent_recipe_id": 21,
+    "child_recipe_id": 16,
+    "adaptation_title": "日式肉醬牛丼",
+    "adaptation_note": "壽喜燒汁翻炒，變身日式蓋飯。",
+    "adaptation_image_url": "/img/adaptation/21/2.jpg"
+  },
+  {
+    "adaptation_id": 43,
+    "parent_recipe_id": 22,
+    "child_recipe_id": 8,
+    "adaptation_title": "松露豆泥溫沙拉",
+    "adaptation_note": "松露結合豆泥，口感細滑軟綿。",
+    "adaptation_image_url": "/img/adaptation/22/1.jpg"
+  },
+  {
+    "adaptation_id": 44,
+    "parent_recipe_id": 22,
+    "child_recipe_id": 32,
+    "adaptation_title": "松露風味舒芙蕾",
+    "adaptation_note": "松露奶油拌入蛋糊，鹹甜轉化。",
+    "adaptation_image_url": "/img/adaptation/22/2.jpg"
+  },
+  {
+    "adaptation_id": 45,
+    "parent_recipe_id": 23,
+    "child_recipe_id": 3,
+    "adaptation_title": "紐奧良風宮保雞",
+    "adaptation_note": "美式香料加乾辣椒，混血川味。",
+    "adaptation_image_url": "/img/adaptation/23/1.jpg"
+  },
+  {
+    "adaptation_id": 46,
+    "parent_recipe_id": 23,
+    "child_recipe_id": 17,
+    "adaptation_title": "紐奧良泡菜烤肉",
+    "adaptation_note": "烤翅醬汁結合泡菜，辣上加辣。",
+    "adaptation_image_url": "/img/adaptation/23/2.jpg"
+  },
+  {
+    "adaptation_id": 47,
+    "parent_recipe_id": 24,
+    "child_recipe_id": 28,
+    "adaptation_title": "白酒蒜香清蒸魚",
+    "adaptation_note": "地中海風味清蒸，鎖住鮮味。",
+    "adaptation_image_url": "/img/adaptation/24/1.jpg"
+  },
+  {
+    "adaptation_id": 48,
+    "parent_recipe_id": 24,
+    "child_recipe_id": 10,
+    "adaptation_title": "白酒蛤蜊烤大蝦",
+    "adaptation_note": "白酒中和蝦腥味，鮮味疊加。",
+    "adaptation_image_url": "/img/adaptation/24/2.jpg"
+  },
+  {
+    "adaptation_id": 49,
+    "parent_recipe_id": 25,
+    "child_recipe_id": 6,
+    "adaptation_title": "卡波納拉風水波蛋",
+    "adaptation_note": "蛋奶醬技術製作，濃縮淋醬。",
+    "adaptation_image_url": "/img/adaptation/25/1.jpg"
+  },
+  {
+    "adaptation_id": 50,
+    "parent_recipe_id": 25,
+    "child_recipe_id": 22,
+    "adaptation_title": "培根奶油起司燉飯",
+    "adaptation_note": "蛋黃乳化邏輯，口感更紮實。",
+    "adaptation_image_url": "/img/adaptation/25/2.jpg"
+  },
+  {
+    "adaptation_id": 51,
+    "parent_recipe_id": 26,
+    "child_recipe_id": 13,
+    "adaptation_title": "三杯蒜香豬排",
+    "adaptation_note": "收乾技術處裡豬排，色澤鮮綠。",
+    "adaptation_image_url": "/img/adaptation/26/1.jpg"
+  },
+  {
+    "adaptation_id": 52,
+    "parent_recipe_id": 26,
+    "child_recipe_id": 31,
+    "adaptation_title": "三杯麻油雞湯",
+    "adaptation_note": "焦香不收汁，變身濃厚麻油雞。",
+    "adaptation_image_url": "/img/adaptation/26/2.jpg"
+  },
+  {
+    "adaptation_id": 53,
+    "parent_recipe_id": 27,
+    "child_recipe_id": 16,
+    "adaptation_title": "紅燒肉醬牛丼",
+    "adaptation_note": "老滷汁入牛丼，賦予陳年深度。",
+    "adaptation_image_url": "/img/adaptation/27/1.jpg"
+  },
+  {
+    "adaptation_id": 54,
+    "parent_recipe_id": 27,
+    "child_recipe_id": 30,
+    "adaptation_title": "紅燒五花客家小炒",
+    "adaptation_note": "熟紅燒肉回鍋，省時且入口即化。",
+    "adaptation_image_url": "/img/adaptation/27/2.jpg"
+  },
+  {
+    "adaptation_id": 55,
+    "parent_recipe_id": 28,
+    "child_recipe_id": 15,
+    "adaptation_title": "蔥油紙包魚片",
+    "adaptation_note": "法式技術鎖住台式蔥油香。",
+    "adaptation_image_url": "/img/adaptation/28/1.jpg"
+  },
+  {
+    "adaptation_id": 56,
+    "parent_recipe_id": 28,
+    "child_recipe_id": 24,
+    "adaptation_title": "蔥油白酒鮮魚麵",
+    "adaptation_note": "魚汁與白酒蒸熟麵條，極其鮮美。",
+    "adaptation_image_url": "/img/adaptation/28/2.jpg"
+  },
+  {
+    "adaptation_id": 57,
+    "parent_recipe_id": 29,
+    "child_recipe_id": 14,
+    "adaptation_title": "麻婆豆腐漢堡排",
+    "adaptation_note": "豆腐排揉碎翻炒，肉感十足。",
+    "adaptation_image_url": "/img/adaptation/29/1.jpg"
+  },
+  {
+    "adaptation_id": 58,
+    "parent_recipe_id": 29,
+    "child_recipe_id": 21,
+    "adaptation_title": "麻辣波隆那肉醬",
+    "adaptation_note": "經典肉醬川味化，麻香有層次。",
+    "adaptation_image_url": "/img/adaptation/29/2.jpg"
+  },
+  {
+    "adaptation_id": 59,
+    "parent_recipe_id": 30,
+    "child_recipe_id": 3,
+    "adaptation_title": "宮保風客家小炒",
+    "adaptation_note": "客家菜結合宮保，嗆辣過癮。",
+    "adaptation_image_url": "/img/adaptation/30/1.jpg"
+  },
+  {
+    "adaptation_id": 60,
+    "parent_recipe_id": 30,
+    "child_recipe_id": 17,
+    "adaptation_title": "韓式泡菜小炒",
+    "adaptation_note": "豆乾換泡菜，油脂感完美平衡。",
+    "adaptation_image_url": "/img/adaptation/30/2.jpg"
+  },
+  {
+    "adaptation_id": 61,
+    "parent_recipe_id": 31,
+    "child_recipe_id": 11,
+    "adaptation_title": "藥膳舒肥雞胸餐",
+    "adaptation_note": "低溫熟成吸飽精華，補氣首選。",
+    "adaptation_image_url": "/img/adaptation/31/1.jpg"
+  },
+  {
+    "adaptation_id": 62,
+    "parent_recipe_id": 31,
+    "child_recipe_id": 18,
+    "adaptation_title": "藥膳奶香咖哩",
+    "adaptation_note": "藥材結合咖哩，層次豐富。",
+    "adaptation_image_url": "/img/adaptation/31/2.jpg"
+  },
+  {
+    "adaptation_id": 63,
+    "parent_recipe_id": 32,
+    "child_recipe_id": 2,
+    "adaptation_title": "舒芙蕾熔岩蛋糕",
+    "adaptation_note": "蓬鬆外層包裹流心，口感極致。",
+    "adaptation_image_url": "/img/adaptation/32/1.jpg"
+  },
+  {
+    "adaptation_id": 64,
+    "parent_recipe_id": 32,
+    "child_recipe_id": 6,
+    "adaptation_title": "鹹味舒芙蕾班尼迪克",
+    "adaptation_note": "減糖鬆餅淋荷蘭醬，高級早餐。",
+    "adaptation_image_url": "/img/adaptation/32/2.jpg"
+  }
+]

@@ -1,0 +1,163 @@
+<script setup>
+import { computed } from 'vue';
+import { useRouter } from 'vue-router'
+import { useAuthGuard } from '@/composables/useAuthGuard';
+import { parsePublicFile } from '@/utils/parseFile';
+
+import BaseTag from '@/components/common/BaseTag.vue';
+import BaseBtn from '@/components/common/BaseBtn.vue';
+
+const { runWithAuth } = useAuthGuard();
+const router = useRouter();
+
+const props = defineProps({
+    // 後端回傳的單一物件 (包含 display_title, display_image, product_id 等)
+    recipe: { type: Object, default: () => ({}) },
+    recipeTags: {
+        type: Array,
+        default: () => []
+    }
+});
+
+// 1. 判定邏輯：看 product_id 是否存在 (後端 SQL 給的是 product_id)
+const hasProduct = computed(() => !!props.recipe?.product_id);
+
+// 2. 圖片路徑邏輯：優先使用後端給的 display_image
+const recipeImagePath = computed(() => {
+    if (props.recipe?.display_image) {
+        return props.recipe.display_image;
+    }
+    // 預設路徑備案
+    return `img/recipes/${props.recipe?.recipe_id}/cover.png`;
+});
+
+// 3. 標題與描述 (直接使用計算屬性，避免在模板寫複雜邏輯)
+const displayTitle = computed(() => props.recipe?.display_title || '無標題');
+const displayDescription = computed(() => props.recipe?.display_description || '');
+
+// 4. 導向邏輯
+const goToRecipeDetail = () => {
+    runWithAuth(() => {
+        router.push({ name: 'workspace-recipe-detail', params: { id: props.recipe.recipe_id } });
+    });
+};
+
+const goToProductDetail = () => {
+    if (!hasProduct.value) return;
+    router.push({ name: 'product-detail', params: { id: props.recipe.product_id } });
+};
+</script>
+
+<template>
+    <div class="search-card">
+        <div class="recipe-img">
+            <img :src="parsePublicFile(recipeImagePath)" :alt="displayTitle" />
+        </div>
+        <div class="recipe-info">
+            <div class="title">
+                <h4 class="zh-h3">{{ displayTitle }}</h4>
+                <div class="tags-group">
+                    <BaseTag v-for="(tag, index) in recipeTags" :key="index" :text="tag.tag_name" class="tag-item" />
+                </div>
+                <p class="p-p2">{{ displayDescription }}</p>
+            </div>
+            <div class="btn-group">
+                <BaseBtn title="食譜詳情" variant="solid" @click="goToRecipeDetail" />
+                <BaseBtn title="料理包詳情" :variant="hasProduct ? 'solid' : 'outline'" :disabled="!hasProduct"
+                    @click="goToProductDetail" />
+            </div>
+        </div>
+    </div>
+</template>
+
+<style lang="scss" scoped>
+.search-card {
+    display: flex;
+
+    padding: 20px 0;
+    border-bottom: 1px solid $neutral-color-400;
+    width: 100%;
+
+    .recipe-img {
+        height: 160px;
+        min-width: 200px;
+        border-radius: $radius-base;
+        overflow: hidden;
+        margin-right: 20px;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    .recipe-info {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+
+
+        .title {
+            margin-right: 30px;
+
+            .tags-group {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin: 8px 0;
+            }
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+}
+
+@media screen and (max-width: 810px) {}
+
+@media screen and (max-width: 810px) {
+    .search-card {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        border-bottom: none;
+        margin-bottom: 30px;
+
+        .recipe-img {
+            width: 100%;
+            height: 200px;
+            margin-right: 0;
+            margin-bottom: 16px;
+        }
+
+        .recipe-info {
+            flex-direction: column;
+
+            .title {
+                margin-right: 0;
+
+                .zh-h3 {
+                    font-size: 1.25rem;
+                }
+
+                .p-p2 {
+                    display: none;
+                }
+            }
+
+            .btn-group {
+                display: flex;
+                gap: 10px;
+                margin-top: 16px;
+                flex-direction: row;
+            }
+        }
+    }
+}
+</style>

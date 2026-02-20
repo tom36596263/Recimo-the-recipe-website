@@ -1,0 +1,110 @@
+[
+  {
+    "user_id": 1,
+    "user_name": "Recimo官方",
+    "user_email": "recimo@gmail.com",
+    "user_phone": "0912345678",
+    "user_address": "桃園市中壢區復興路46號8樓",
+    "user_password": "G2Recimo",
+    "user_startdate": "2025-12-09 00:00:00",
+    "user_url": "img/site/Recimo_avatar.svg",
+    "is_verified": true,
+    "is_active": true
+  },
+  {
+    "user_id": 2,
+    "user_name": "小R(測試人員)",
+    "user_email": "admin@test.com",
+    "user_phone": "0923456789",
+    "user_address": "桃園市中壢區復興路46號9樓",
+    "user_password": "123456",
+    "user_startdate": "2020-01-22 22:25:00",
+    "user_url": null,
+    "is_verified": true,
+    "is_active": true
+  },
+  {
+    "user_id": 3,
+    "user_name": "tom",
+    "user_email": "tom@gmail.com",
+    "user_phone": "0934567890",
+    "user_address": "桃園市中壢區復興路46號8樓",
+    "user_password": "123456",
+    "user_startdate": "2026-01-27 19:30:00",
+    "user_url": "img/site/T_avatar.svg",
+    "is_verified": true,
+    "is_active": true
+  },
+  {
+    "user_id": 4,
+    "user_name": "wei",
+    "user_email": "wei@gmail.com",
+    "user_phone": "0945678901",
+    "user_address": "桃園市中壢區復興路46號8樓",
+    "user_password": "123456",
+    "user_startdate": "2026-01-27 19:30:00",
+    "user_url": "img/site/W_avatar.svg",
+    "is_verified": false,
+    "is_active": true
+  },
+  {
+    "user_id": 5,
+    "user_name": "HelenKuo",
+    "user_email": "helenKuo@gmail.com",
+    "user_phone": "0956789012",
+    "user_address": "桃園市中壢區復興路46號8樓",
+    "user_password": "888888",
+    "user_startdate": "2026-01-27 19:30:00",
+    "user_url": "img/site/H_avatar.svg",
+    "is_verified": true,
+    "is_active": true
+  },
+  {
+    "user_id": 6,
+    "user_name": "pei",
+    "user_email": "pei@gmail.com",
+    "user_phone": "0911111111",
+    "user_address": "桃園市中壢區復興路46號8樓",
+    "user_password": "Aa111111",
+    "user_startdate": "2026-01-23 16:20:00",
+    "user_url": "img/site/P_avatar.svg",
+    "is_verified": true,
+    "is_active": true
+  },
+  {
+    "user_id": 7,
+    "user_name": "yutung",
+    "user_email": "yutung@gmail.com",
+    "user_phone": "0922222222",
+    "user_address": "桃園市中壢區復興路46號8樓",
+    "user_password": "yutung123",
+    "user_startdate": "2026-01-27 19:30:00",
+    "user_url": "img/site/yutung_avatar.svg",
+    "is_verified": true,
+    "is_active": true
+  },
+  {
+    "user_id": 8,
+    "user_name": "Hsu",
+    "user_email": "hsu@test.com",
+    "user_phone": "0933333333",
+    "user_address": "桃園市中壢區復興路46號8樓",
+    "user_password": "123456",
+    "user_startdate": "2026-01-27 19:30:00",
+    "user_url": "img/site/H_avatar.svg",
+    "is_verified": true,
+    "is_active": true
+  },
+  {
+    "user_id": 9,
+    "user_name": "小小R(測試停用)",
+    "user_email": "123@test.com",
+    "user_phone": "0900000000",
+    "user_address": "桃園市中壢區復興路46號9樓",
+    "user_password": "123456",
+    "user_startdate": "2026-01-27 20:00:00",
+    "user_url": null,
+    "is_verified": true,
+    "is_active": false
+  }
+]

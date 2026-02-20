@@ -1,0 +1,21 @@
+{
+  "Recimo Vue Component": {
+    "prefix": "v-recimo",
+    "body": [
+      "<script setup>",
+      "import { ref, computed, onMounted } from 'vue';",
+      "",
+      "</script>",
+      "",
+      "<template>",
+      "  <div class=\"$1\">",
+      "    $0",
+      "  </div>",
+      "</template>",
+      "",
+      "<style lang=\"scss\" scoped>",
+      "</style>"
+    ],
+    "description": "快速生成 Recimo Vue 模板"
+  }
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "cover_template_id": 1,
+    "template_url": "img/plan-covers/template/1.svg",
+    "template_name": "山林風景"
+  },
+  {
+    "cover_template_id": 2,
+    "template_url": "img/plan-covers/template/2.svg",
+    "template_name": "野炊時光"
+  },
+  {
+    "cover_template_id": 3,
+    "template_url": "img/plan-covers/template/3.svg",
+    "template_name": "露營趣"
+  },
+  {
+    "cover_template_id": 4,
+    "template_url": "img/plan-covers/template/4.svg",
+    "template_name": "戶外野餐"
+  },
+  {
+    "cover_template_id": 5,
+    "template_url": "img/plan-covers/template/5.svg",
+    "template_name": "燒烤派對"
+  },
+  {
+    "cover_template_id": 6,
+    "template_url": "img/plan-covers/template/6.svg",
+    "template_name": "美式速食"
+  },
+  {
+    "cover_template_id": 7,
+    "template_url": "img/plan-covers/template/7.svg",
+    "template_name": "麵食主義"
+  },
+  {
+    "cover_template_id": 8,
+    "template_url": "img/plan-covers/template/8.svg",
+    "template_name": "慶祝派對"
+  },
+  {
+    "cover_template_id": 9,
+    "template_url": "img/plan-covers/template/9.svg",
+    "template_name": "精選排餐"
+  },
+  {
+    "cover_template_id": 10,
+    "template_url": "img/plan-covers/template/10.svg",
+    "template_name": "咖啡午茶"
+  },
+  {
+    "cover_template_id": 11,
+    "template_url": "img/plan-covers/template/11.svg",
+    "template_name": "手作烘焙"
+  },
+  {
+    "cover_template_id": 12,
+    "template_url": "img/plan-covers/template/12.svg",
+    "template_name": "健身飲食"
+  }
+]
