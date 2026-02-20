@@ -14,7 +14,9 @@ const emit = defineEmits(['noshow']);
         <div class="modal" @click.stop>
             <div class="modal__header">
                 <span class="modal__title p-p2">全部食材清單</span>
-                <span class="modal__close-btn p-p2" @click="emit('noshow')"><i-material-symbols-close /></span>
+                <span class="modal__close-btn p-p2" @click="emit('noshow')">
+                    <i-material-symbols-close />
+                </span>
             </div>
 
             <div class="table">
@@ -34,13 +36,13 @@ const emit = defineEmits(['noshow']);
             </div>
         </div>
     </div>
-
 </template>
 
 <style lang="scss" scoped>
 .overlay {
     position: fixed;
-    z-index: 999;
+    /* 🟢 修改：將層級提高到比手機版畫面 (9999) 還高 */
+    z-index: 10000;
     top: 0;
     left: 0;
     width: 100vw;
@@ -58,23 +60,39 @@ const emit = defineEmits(['noshow']);
     min-height: 50%;
     max-height: 60%;
     background-color: $neutral-color-white;
-    z-index: 1000;
-    position: fixed;
+    position: relative;
+    /* z-index 需要定位屬性 */
     border-radius: 10px;
     padding: 20px;
-    display: flex; // 若父容器只有單純加上高度而沒有給flex配置，就算有設定至少50%的高度，子物件預設會認為「展示完整內容」比「服從父層高度」重要，因而撐破父容器
+    display: flex;
     flex-direction: column;
     gap: 10px;
+
+    /* 🟢 新增手機版優化 */
+    @media screen and (max-width: 810px) and (orientation: landscape) {
+        width: 80%;
+        /* 寬度稍微縮小，避免貼邊 */
+        height: 90%;
+        /* 高度拉高，因為手機橫向高度有限 */
+        max-height: 90%;
+        /* 允許佔用更多垂直空間 */
+        padding: 15px;
+        /* 減少內距 */
+    }
 
     &__header {
         width: 100%;
         display: flex;
         justify-content: space-between;
+        align-items: center;
+        /* 確保垂直置中 */
     }
 
     &__title {
         color: $primary-color-800;
         text-align: center;
+        font-weight: bold;
+        /* 增加標題辨識度 */
     }
 
     &__close-btn {
@@ -82,6 +100,10 @@ const emit = defineEmits(['noshow']);
         display: flex;
         justify-content: center;
         align-items: center;
+        font-size: 1.2rem;
+        /*稍微放大關閉按鈕*/
+        padding: 5px;
+        /* 增加點擊範圍 */
     }
 
     // ----表格----
@@ -96,6 +118,8 @@ const emit = defineEmits(['noshow']);
         flex-direction: column;
         flex: 1;
         min-height: 0;
+        border: 1px solid $neutral-color-100;
+        /* 增加邊框讓表格更清晰 */
 
         // 表格共同樣式
         &__header,
@@ -103,12 +127,23 @@ const emit = defineEmits(['noshow']);
             display: flex;
             align-items: center;
             padding: 12px 20px;
+
+            /* 手機版減少內距以容納更多內容 */
+            @media screen and (max-width: 810px) {
+                padding: 10px 12px;
+            }
         }
 
         .cell {
             min-width: 0;
             word-break: break-all;
             overflow-wrap: break-word;
+            font-size: 1rem;
+
+            /* 手機版縮小字體 */
+            @media screen and (max-width: 810px) {
+                font-size: 0.9rem;
+            }
 
             &.name {
                 flex: $flex-name;
@@ -134,9 +169,9 @@ const emit = defineEmits(['noshow']);
 
             .cell {
                 color: $neutral-color-white;
-                white-space: nowrap; // 強制文字在一行內顯示
-                text-overflow: ellipsis; // 超出部分顯示 ...
-                overflow: hidden; // 隱藏超出的部分
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
             }
         }
 
@@ -145,6 +180,8 @@ const emit = defineEmits(['noshow']);
             flex: 1;
             overflow-y: auto;
             min-height: 0;
+            background-color: #fff;
+            /* 確保背景色 */
 
             &::-webkit-scrollbar {
                 width: 6px;
@@ -181,12 +218,14 @@ const emit = defineEmits(['noshow']);
                 &.note {
                     color: $neutral-color-black;
                     font-size: 0.9rem;
+
+                    /* 手機版備註字體再小一點 */
+                    @media screen and (max-width: 810px) {
+                        font-size: 0.8rem;
+                    }
                 }
             }
         }
-
     }
-
-
 }
 </style>

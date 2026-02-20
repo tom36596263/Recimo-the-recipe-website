@@ -488,7 +488,7 @@ const handleFinishGuide = () => {
             width: 100vw;
             height: 100vh;
             background-color: white;
-            z-index: 2147483647;
+            z-index: 9999;
             justify-content: center;
             align-items: center;
 
@@ -516,7 +516,7 @@ const handleFinishGuide = () => {
             width: 100vw;
             height: 100vh;
             background-color: #fafafa;
-            z-index: 2147483647;
+            z-index: 9999;
             padding: 12px 20px;
             box-sizing: border-box;
             overflow: hidden;
@@ -624,6 +624,7 @@ const handleFinishGuide = () => {
             flex-direction: column;
             gap: 12px;
             height: 100%;
+            max-height: 360px;
         }
 
         .mobile-timer-card {
@@ -661,6 +662,7 @@ const handleFinishGuide = () => {
             flex-direction: column;
             flex: 1;
             overflow: hidden;
+            // max-height: 130px;
 
             .note-tabs {
                 display: flex;

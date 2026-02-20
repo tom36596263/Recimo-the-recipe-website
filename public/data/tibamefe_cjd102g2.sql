@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： localhost:8889
--- 產生時間： 2026-02-10 04:32:14
+-- 產生時間： 2026-02-12 10:16:50
 -- 伺服器版本： 5.7.24
 -- PHP 版本： 8.3.1
 
@@ -77,6 +77,13 @@ CREATE TABLE `browsing_history` (
   `recipe_id` int(11) NOT NULL,
   `viewed_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- 傾印資料表的資料 `browsing_history`
+--
+
+INSERT INTO `browsing_history` (`browsing_history_id`, `user_id`, `recipe_id`, `viewed_at`) VALUES
+(1, 2, 68, '2026-02-12 17:43:32');
 
 -- --------------------------------------------------------
 
@@ -1031,73 +1038,73 @@ INSERT INTO `log_step_note` (`log_step_note_id`, `cooking_log_id`, `step_id`, `s
 (47, 7, 5, '新鮮莫札瑞拉起司真的不一樣，奶香味超濃。', 'img/logs/u8/log_7/steps/5.png'),
 (48, 7, 6, '石板預熱了 40 分鐘，餅皮放上去瞬間就蓬起來了。', 'img/logs/u8/log_7/steps/6.png'),
 (49, 7, 7, '最後淋上初榨橄欖油，那種油亮的色澤非常完美。', 'img/logs/u8/log_7/steps/7.png'),
-(50, 8, 15, '確實醃漬了20分鐘，雞肉丁看起來吸收了醬汁，變得很有彈性。', 'img/logs/u2/log_8/steps/15.png'),
-(51, 8, 16, '滑油的速度要快，表面一變色就撈起來，這樣最後口感才不會乾柴。', 'img/logs/u2/log_8/steps/16.png'),
-(52, 8, 17, '小火煸炒乾辣椒時香氣超迷人，顏色變深但不能焦掉。', 'img/logs/u2/log_8/steps/17.png'),
-(53, 8, 18, '薑片跟蒜末一入鍋，川菜那種濃郁的辛香味就出來了。', 'img/logs/u2/log_8/steps/18.png'),
-(54, 8, 19, '大火翻炒時動作要快，讓糖跟醬油均勻包裹住雞丁。', 'img/logs/u2/log_8/steps/19.png'),
-(55, 8, 20, '芡汁不能太多，只要讓醬汁呈現透亮的掛糊狀就好。', 'img/logs/u2/log_8/steps/20.png'),
-(56, 8, 21, '花生最後一刻才撒入，確實保持了極致的酥脆口感！', 'img/logs/u2/log_8/steps/21.png'),
-(57, 9, 8, '隔水加熱時要注意碗底不要碰到水，以免巧克力過熱變質。', 'img/logs/u2/log_9/steps/8.png'),
-(58, 9, 9, '打發到體積明顯變大且顏色泛白，這樣蛋糕口感才會輕盈。', 'img/logs/u2/log_9/steps/9.png'),
-(59, 9, 10, '抹茶粉容易結塊，過篩這個步驟絕對不能省。', 'img/logs/u2/log_9/steps/10.png'),
-(60, 9, 11, '混合時動作要輕，避免消泡，麵糊顏色呈現非常漂亮的深綠色。', 'img/logs/u2/log_9/steps/11.png'),
-(61, 9, 12, '模具內壁塗完奶油後，我還灑了一點點薄麵粉確保脫模順利。', 'img/logs/u2/log_9/steps/12.png'),
-(62, 9, 13, '我的烤箱火力較強，烤到第8分鐘邊緣固定、中心微晃就趕快出爐了。', 'img/logs/u2/log_9/steps/13.png'),
-(63, 9, 14, '稍微放涼再脫模，蛋糕形狀很完整，灑上抹茶粉裝飾後質感滿分。', 'img/logs/u2/log_9/steps/14.png'),
-(64, 10, 28, '雞腿肉切得大小均勻，茄子切完後先泡水防止變黑。', 'img/logs/u2/log_10/steps/28.png'),
-(65, 10, 29, '炒咖哩醬時火不能太大，看到綠色的油脂冒出來就表示香氣開了。', 'img/logs/u2/log_10/steps/29.png'),
-(66, 10, 30, '分次加椰奶真的有差，醬汁完全沒有分離，非常乳化。', 'img/logs/u2/log_10/steps/30.png'),
-(67, 10, 31, '檸檬葉撕開後香氣更濃，雞肉煮到剛好轉白保持嫩度。', 'img/logs/u2/log_10/steps/31.png'),
-(68, 10, 32, '小火燉煮15分鐘後茄子完全入味，魚露跟椰糖比例抓得剛好。', 'img/logs/u2/log_10/steps/32.png'),
-(69, 10, 33, '最後撒入的泰式羅勒是靈魂，拌勻馬上起鍋，香氣最清新。', 'img/logs/u2/log_10/steps/33.png'),
-(70, 11, 22, '寬麵真的要提前一分鐘撈起來，因為後面還要進鍋煮。', 'img/logs/u2/log_11/steps/22.png'),
-(71, 11, 23, '奶油融化得很快，蒜末要小心不要炒焦。', 'img/logs/u2/log_11/steps/23.png'),
-(72, 11, 24, '菇類縮水很多，要炒到邊緣微焦才有那種香氣。', 'img/logs/u2/log_11/steps/24.png'),
-(73, 11, 25, '加入煮麵水後醬汁變得很亮，乳化效果很好。', 'img/logs/u2/log_11/steps/25.png'),
-(74, 11, 26, '松露醬一放進去，整個廚房都是香的！', 'img/logs/u2/log_11/steps/26.png'),
-(75, 11, 27, '起司粉撒下去後醬汁瞬間變濃稠，效果驚人。', 'img/logs/u2/log_11/steps/27.png'),
-(76, 12, 22, '這次準時8分鐘撈起，麵芯的口感剛好。', 'img/logs/u2/log_12/steps/22.png'),
-(77, 12, 23, '熟練了，同時開兩爐作業也沒問題。', 'img/logs/u2/log_12/steps/23.png'),
-(78, 12, 24, '這次菇類炒得更焦一點，風味更集中。', 'img/logs/u2/log_12/steps/24.png'),
-(79, 12, 25, '鮮奶油與水的比例抓得很準。', 'img/logs/u2/log_12/steps/25.png'),
-(80, 12, 26, '這款黑松露醬真的很超值，掛糊效果極佳。', 'img/logs/u2/log_12/steps/26.png'),
-(81, 12, 27, '黑胡椒多撒了一點，層次感更棒。', 'img/logs/u2/log_12/steps/27.png'),
-(82, 13, 58, '腸泥有點難挑，要很有耐心。', 'img/logs/u2/log_13/steps/58.png'),
-(83, 13, 59, '蒜末要確實抹進蝦背裡。', 'img/logs/u2/log_13/steps/59.png'),
-(84, 13, 60, '擺盤時檸檬片放上去後顏色很好看。', 'img/logs/u2/log_13/steps/60.png'),
-(85, 13, 61, '守在烤箱前看著蝦子變紅很有趣。', 'img/logs/u2/log_13/steps/61.png'),
-(86, 13, 62, '新鮮巴西里碎末讓香味提升不少。', 'img/logs/u2/log_13/steps/62.png'),
-(87, 14, 58, '這次用牙籤處理得比上次順手多了。', 'img/logs/u2/log_14/steps/58.png'),
-(88, 14, 59, '多放了兩顆大蒜，味道更香。', 'img/logs/u2/log_14/steps/59.png'),
-(89, 14, 60, '奶油塊放多一點點，烤出來的湯汁很鮮。', 'img/logs/u2/log_14/steps/60.png'),
-(90, 14, 61, '烤了15分鐘，熟度剛好。', 'img/logs/u2/log_14/steps/61.png'),
-(91, 14, 62, '檸檬汁要在趁熱時淋上去。', 'img/logs/u2/log_14/steps/62.png'),
-(92, 15, 58, '備料工作進度飛快。', 'img/logs/u2/log_15/steps/58.png'),
-(93, 15, 59, '醃漬時間控制在剛好15分鐘。', 'img/logs/u2/log_15/steps/59.png'),
-(94, 15, 60, '擺放整齊後拍照很漂亮。', 'img/logs/u2/log_15/steps/60.png'),
-(95, 15, 61, '改用180度烤13分鐘，口感更脆彈。', 'img/logs/u2/log_15/steps/61.png'),
-(96, 15, 62, '這次巴西里切得很細，層次感很好。', 'img/logs/u2/log_15/steps/62.png'),
-(97, 16, 58, '一次處理十幾隻蝦也很輕鬆。', 'img/logs/u2/log_16/steps/58.png'),
-(98, 16, 59, '胡椒粉我多加了一些，帶點辛香。', 'img/logs/u2/log_16/steps/59.png'),
-(99, 16, 60, '準備入烤箱，視覺滿分。', 'img/logs/u2/log_16/steps/60.png'),
-(100, 16, 61, '時間掌控爐火純青。', 'img/logs/u2/log_16/steps/61.png'),
-(101, 16, 62, '完美收尾，上桌秒殺。', 'img/logs/u2/log_16/steps/62.png'),
-(102, 17, 151, '冷水下鍋確實煮出很多浮沫，洗乾淨後肉塊看起來乾淨很多。', 'img/logs/u2/log_17/steps/151.png'),
-(103, 17, 152, '乾煸的時候要小心噴油，豬油釋出的香氣很重。', 'img/logs/u2/log_17/steps/152.png'),
-(104, 17, 153, '糖色炒得有點淡，下次火可以稍微再大一點點點。', 'img/logs/u2/log_17/steps/153.png'),
-(105, 17, 154, '小火燉煮了50分鐘，肉塊已經軟了。', 'img/logs/u2/log_17/steps/154.png'),
-(106, 17, 155, '收汁的時候不敢開太大火，結果花了不少時間才變黏稠。', 'img/logs/u2/log_17/steps/155.png'),
-(107, 18, 151, '這次薑片放多了一點點去腥。', 'img/logs/u2/log_18/steps/151.png'),
-(108, 18, 152, '肉塊煸到微焦金黃，味道層次比較多。', 'img/logs/u2/log_18/steps/152.png'),
-(109, 18, 153, '糖色成功！琥珀色的光澤很誘人。', 'img/logs/u2/log_18/steps/153.png'),
-(110, 18, 154, '這次蓋鍋蓋燜得很徹底，肉質更入味。', 'img/logs/u2/log_18/steps/154.png'),
-(111, 18, 155, '大火收汁後的亮澤度比起上次好太多了。', 'img/logs/u2/log_18/steps/155.png'),
-(112, 19, 151, '動作熟練，備料時間縮短不少。', 'img/logs/u2/log_19/steps/151.png'),
-(113, 19, 152, '煸出的豬油倒出來一點，避免整體太油膩。', 'img/logs/u2/log_19/steps/152.png'),
-(114, 19, 153, '精準掌控上色時機，辛香料爆得很香。', 'img/logs/u2/log_19/steps/153.png'),
-(115, 19, 154, '燉煮時間剛好60分鐘，入口即化。', 'img/logs/u2/log_19/steps/154.png'),
-(116, 19, 155, '完美收官，醬汁緊緊裹住每塊肉。', 'img/logs/u2/log_19/steps/155.png');
+(50, 8, 15, '確實醃漬了20分鐘，雞肉丁看起來吸收了醬汁，變得很有彈性。', 'img/logs/u2/log_8/steps/1.png'),
+(51, 8, 16, '滑油的速度要快，表面一變色就撈起來，這樣最後口感才不會乾柴。', 'img/logs/u2/log_8/steps/2.png'),
+(52, 8, 17, '小火煸炒乾辣椒時香氣超迷人，顏色變深但不能焦掉。', 'img/logs/u2/log_8/steps/3.png'),
+(53, 8, 18, '薑片跟蒜末一入鍋，川菜那種濃郁的辛香味就出來了。', 'img/logs/u2/log_8/steps/4.png'),
+(54, 8, 19, '大火翻炒時動作要快，讓糖跟醬油均勻包裹住雞丁。', 'img/logs/u2/log_8/steps/5.png'),
+(55, 8, 20, '芡汁不能太多，只要讓醬汁呈現透亮的掛糊狀就好。', 'img/logs/u2/log_8/steps/6.png'),
+(56, 8, 21, '花生最後一刻才撒入，確實保持了極致的酥脆口感！', 'img/logs/u2/log_8/steps/7.png'),
+(57, 9, 8, '隔水加熱時要注意碗底不要碰到水，以免巧克力過熱變質。', 'img/logs/u2/log_9/steps/1.png'),
+(58, 9, 9, '打發到體積明顯變大且顏色泛白，這樣蛋糕口感才會輕盈。', 'img/logs/u2/log_9/steps/2.png'),
+(59, 9, 10, '抹茶粉容易結塊，過篩這個步驟絕對不能省。', 'img/logs/u2/log_9/steps/3.png'),
+(60, 9, 11, '混合時動作要輕，避免消泡，麵糊顏色呈現非常漂亮的深綠色。', 'img/logs/u2/log_9/steps/4.png'),
+(61, 9, 12, '模具內壁塗完奶油後，我還灑了一點點薄麵粉確保脫模順利。', 'img/logs/u2/log_9/steps/5.png'),
+(62, 9, 13, '我的烤箱火力較強，烤到第8分鐘邊緣固定、中心微晃就趕快出爐了。', 'img/logs/u2/log_9/steps/6.png'),
+(63, 9, 14, '稍微放涼再脫模，蛋糕形狀很完整，灑上抹茶粉裝飾後質感滿分。', 'img/logs/u2/log_9/steps/7.png'),
+(64, 10, 28, '雞腿肉切得大小均勻，茄子切完後先泡水防止變黑。', 'img/logs/u2/log_10/steps/1.png'),
+(65, 10, 29, '炒咖哩醬時火不能太大，看到綠色的油脂冒出來就表示香氣開了。', 'img/logs/u2/log_10/steps/2.png'),
+(66, 10, 30, '分次加椰奶真的有差，醬汁完全沒有分離，非常乳化。', 'img/logs/u2/log_10/steps/3.png'),
+(67, 10, 31, '檸檬葉撕開後香氣更濃，雞肉煮到剛好轉白保持嫩度。', 'img/logs/u2/log_10/steps/4.png'),
+(68, 10, 32, '小火燉煮15分鐘後茄子完全入味，魚露跟椰糖比例抓得剛好。', 'img/logs/u2/log_10/steps/5.png'),
+(69, 10, 33, '最後撒入的泰式羅勒是靈魂，拌勻馬上起鍋，香氣最清新。', 'img/logs/u2/log_10/steps/6.png'),
+(70, 11, 22, '寬麵真的要提前一分鐘撈起來，因為後面還要進鍋煮。', 'img/logs/u2/log_11/steps/1.png'),
+(71, 11, 23, '奶油融化得很快，蒜末要小心不要炒焦。', 'img/logs/u2/log_11/steps/2.png'),
+(72, 11, 24, '菇類縮水很多，要炒到邊緣微焦才有那種香氣。', 'img/logs/u2/log_11/steps/3.png'),
+(73, 11, 25, '加入煮麵水後醬汁變得很亮，乳化效果很好。', 'img/logs/u2/log_11/steps/4.png'),
+(74, 11, 26, '松露醬一放進去，整個廚房都是香的！', 'img/logs/u2/log_11/steps/5.png'),
+(75, 11, 27, '起司粉撒下去後醬汁瞬間變濃稠，效果驚人。', 'img/logs/u2/log_11/steps/6.png'),
+(76, 12, 22, '這次準時8分鐘撈起，麵芯的口感剛好。', 'img/logs/u2/log_12/steps/1.png'),
+(77, 12, 23, '熟練了，同時開兩爐作業也沒問題。', 'img/logs/u2/log_12/steps/2.png'),
+(78, 12, 24, '這次菇類炒得更焦一點，風味更集中。', 'img/logs/u2/log_12/steps/3.png'),
+(79, 12, 25, '鮮奶油與水的比例抓得很準。', 'img/logs/u2/log_12/steps/4.png'),
+(80, 12, 26, '這款黑松露醬真的很超值，掛糊效果極佳。', 'img/logs/u2/log_12/steps/5.png'),
+(81, 12, 27, '黑胡椒多撒了一點，層次感更棒。', 'img/logs/u2/log_12/steps/6.png'),
+(82, 13, 58, '腸泥有點難挑，要很有耐心。', 'img/logs/u2/log_13/steps/1.png'),
+(83, 13, 59, '蒜末要確實抹進蝦背裡。', 'img/logs/u2/log_13/steps/2.png'),
+(84, 13, 60, '擺盤時檸檬片放上去後顏色很好看。', 'img/logs/u2/log_13/steps/3.png'),
+(85, 13, 61, '守在烤箱前看著蝦子變紅很有趣。', 'img/logs/u2/log_13/steps/4.png'),
+(86, 13, 62, '新鮮巴西里碎末讓香味提升不少。', 'img/logs/u2/log_13/steps/5.png'),
+(87, 14, 58, '這次用牙籤處理得比上次順手多了。', 'img/logs/u2/log_14/steps/1.png'),
+(88, 14, 59, '多放了兩顆大蒜，味道更香。', 'img/logs/u2/log_14/steps/2.png'),
+(89, 14, 60, '奶油塊放多一點點，烤出來的湯汁很鮮。', 'img/logs/u2/log_14/steps/3.png'),
+(90, 14, 61, '烤了15分鐘，熟度剛好。', 'img/logs/u2/log_14/steps/4.png'),
+(91, 14, 62, '檸檬汁要在趁熱時淋上去。', 'img/logs/u2/log_14/steps/5.png'),
+(92, 15, 58, '備料工作進度飛快。', 'img/logs/u2/log_15/steps/1.png'),
+(93, 15, 59, '醃漬時間控制在剛好15分鐘。', 'img/logs/u2/log_15/steps/2.png'),
+(94, 15, 60, '擺放整齊後拍照很漂亮。', 'img/logs/u2/log_15/steps/3.png'),
+(95, 15, 61, '改用180度烤13分鐘，口感更脆彈。', 'img/logs/u2/log_15/steps/4.png'),
+(96, 15, 62, '這次巴西里切得很細，層次感很好。', 'img/logs/u2/log_15/steps/5.png'),
+(97, 16, 58, '一次處理十幾隻蝦也很輕鬆。', 'img/logs/u2/log_16/steps/1.png'),
+(98, 16, 59, '胡椒粉我多加了一些，帶點辛香。', 'img/logs/u2/log_16/steps/2.png'),
+(99, 16, 60, '準備入烤箱，視覺滿分。', 'img/logs/u2/log_16/steps/3.png'),
+(100, 16, 61, '時間掌控爐火純青。', 'img/logs/u2/log_16/steps/4.png'),
+(101, 16, 62, '完美收尾，上桌秒殺。', 'img/logs/u2/log_16/steps/5.png'),
+(102, 17, 151, '冷水下鍋確實煮出很多浮沫，洗乾淨後肉塊看起來乾淨很多。', 'img/logs/u2/log_17/steps/1.png'),
+(103, 17, 152, '乾煸的時候要小心噴油，豬油釋出的香氣很重。', 'img/logs/u2/log_17/steps/2.png'),
+(104, 17, 153, '糖色炒得有點淡，下次火可以稍微再大一點點點。', 'img/logs/u2/log_17/steps/3.png'),
+(105, 17, 154, '小火燉煮了50分鐘，肉塊已經軟了。', 'img/logs/u2/log_17/steps/4.png'),
+(106, 17, 155, '收汁的時候不敢開太大火，結果花了不少時間才變黏稠。', 'img/logs/u2/log_17/steps/5.png'),
+(107, 18, 151, '這次薑片放多了一點點去腥。', 'img/logs/u2/log_18/steps/1.png'),
+(108, 18, 152, '肉塊煸到微焦金黃，味道層次比較多。', 'img/logs/u2/log_18/steps/2.png'),
+(109, 18, 153, '糖色成功！琥珀色的光澤很誘人。', 'img/logs/u2/log_18/steps/3.png'),
+(110, 18, 154, '這次蓋鍋蓋燜得很徹底，肉質更入味。', 'img/logs/u2/log_18/steps/4.png'),
+(111, 18, 155, '大火收汁後的亮澤度比起上次好太多了。', 'img/logs/u2/log_18/steps/5.png'),
+(112, 19, 151, '動作熟練，備料時間縮短不少。', 'img/logs/u2/log_19/steps/1.png'),
+(113, 19, 152, '煸出的豬油倒出來一點，避免整體太油膩。', 'img/logs/u2/log_19/steps/2.png'),
+(114, 19, 153, '精準掌控上色時機，辛香料爆得很香。', 'img/logs/u2/log_19/steps/3.png'),
+(115, 19, 154, '燉煮時間剛好60分鐘，入口即化。', 'img/logs/u2/log_19/steps/4.png'),
+(116, 19, 155, '完美收官，醬汁緊緊裹住每塊肉。', 'img/logs/u2/log_19/steps/5.png');
 
 -- --------------------------------------------------------
 
@@ -4567,7 +4574,7 @@ ALTER TABLE `announcement`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `browsing_history`
 --
 ALTER TABLE `browsing_history`
-  MODIFY `browsing_history_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `browsing_history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `carts`
