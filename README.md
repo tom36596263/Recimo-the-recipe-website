@@ -1,5 +1,2 @@
-# Vue 3 + Vite
-
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
-
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+### <img width="40" alt="image" src="https://tibamef2e.com/cjd102/g2/api/img/site/Recimo_avatar.svg" /> [小組專題] Recimo-食譜筆記網站
+**[🔗 Demo](https://tibamef2e.com/cjd102/g2/) | [🎬 影片演示](https://www.youtube.com/watch?v=Ti9WaaihIWA) | [專案簡報](https://drive.google.com/file/d/1JSVifu9X9QTcAMhD43dmvcUeuZNUT-qP/view) | [📄 系統文件](https://drive.google.com/file/d/1KFBa0OSVV8k4k5qAoByQz0BYtJy0y0Xz/view)**
