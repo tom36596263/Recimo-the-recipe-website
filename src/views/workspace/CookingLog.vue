@@ -63,6 +63,19 @@ const fetchLogDetail = async () => {
             const [h, m] = main.actual_time.split(':');
             cookingStore.tempLogData.totalTime = (parseInt(h) * 60) + parseInt(m);
 
+            let estimateMins = 0;
+            if (main.recipe_total_time) {
+                const [rh, rm] = main.recipe_total_time.split(':');
+                estimateMins = (parseInt(rh) * 60) + parseInt(rm);
+            } else {
+                const totalEstimateSeconds = steps.reduce((sum, step) => {
+                    return sum + timeToSeconds(step.step_total_time);
+                }, 0);
+                estimateMins = Math.ceil(totalEstimateSeconds / 60);
+            }
+
+            cookingStore.tempLogData.estimatedTime = estimateMins;
+
             if (main.log_image_url) {
                 cookingStore.tempLogData.mainImage = parsePublicFile(main.log_image_url);
             }
@@ -74,15 +87,20 @@ const fetchLogDetail = async () => {
                 step_content: s.step_note
             }));
 
+            cookingStore.tempLogData.stepNotes = {};
+            cookingStore.tempLogData.noteImages = {};
+
             steps.forEach(s => {
-                cookingStore.tempLogData.stepNotes[s.step_id] = s.step_note;
+                if (s.step_note) {
+                    cookingStore.tempLogData.stepNotes[s.step_id] = s.step_note;
+                }
                 if (s.step_image_url) {
                     cookingStore.tempLogData.noteImages[s.step_id] = parsePublicFile(s.step_image_url);
                 }
             });
         }
     } catch (error) {
-        console.error('抓取日誌詳情失敗:', error);
+        console.error(error);
     }
 };
 
