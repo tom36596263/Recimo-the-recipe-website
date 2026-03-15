@@ -81,6 +81,7 @@ const goToProductDetail = () => {
     .recipe-img {
         height: 160px;
         min-width: 200px;
+        max-width: 240px;
         border-radius: $radius-base;
         overflow: hidden;
         margin-right: 20px;
@@ -119,8 +120,6 @@ const goToProductDetail = () => {
     }
 }
 
-@media screen and (max-width: 810px) {}
-
 @media screen and (max-width: 810px) {
     .search-card {
         flex-direction: column;
@@ -130,7 +129,7 @@ const goToProductDetail = () => {
         margin-bottom: 30px;
 
         .recipe-img {
-            width: 100%;
+            max-width: 100%;
             height: 200px;
             margin-right: 0;
             margin-bottom: 16px;

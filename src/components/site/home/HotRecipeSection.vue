@@ -9,6 +9,25 @@ import { useFavoritesStore } from '@/stores/favoritesStore';
 import { useAuthStore } from '@/stores/authStore';
 import { parsePublicFile } from '@/utils/parseFile';
 
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import 'swiper/css';
+import 'swiper/css/free-mode';
+import { FreeMode } from 'swiper/modules';
+
+const modules = [FreeMode];
+
+// 設定滑動斷點 (小於 1024px 開啟滑動)
+const swiperBreakpoints = {
+    0: {
+        slidesPerView: 1.1, // 手機看到 1.1 張
+        spaceBetween: 15
+    },
+    768: {
+        slidesPerView: 2.2, // 平板看到 2.2 張
+        spaceBetween: 20
+    }
+};
+
 const { runWithAuth } = useAuthGuard();
 const router = useRouter();
 const recipes = ref([])
@@ -88,9 +107,21 @@ onMounted(async () => {
         <h2 class="zh-h2">熱門食譜推薦</h2>
         <h2 class="en-h3">Hot Recipe</h2>
     </div>
-    <div v-for="item in recipes" :key="item.id" @click.prevent="handleCardClick(item.id)"
-        class="col-4 col-md-12 recipe-cards">
-        <RecipeCardLg :recipe="item" class="recipe-card" />
+    <div class="row desktop-view">
+        <div v-for="item in recipes" :key="item.id" @click.prevent="handleCardClick(item.id)"
+            class="col-4 recipe-cards">
+            <RecipeCardLg :recipe="item" class="recipe-card" />
+        </div>
+    </div>
+
+    <div class="mobile-view swiper-container-custom">
+        <swiper :breakpoints="swiperBreakpoints" :modules="modules" :freeMode="true" class="mySwiper">
+            <swiper-slide v-for="item in recipes" :key="item.id" @click="handleCardClick(item.id)">
+                <div class="recipe-cards">
+                    <RecipeCardLg :recipe="item" class="recipe-card" />
+                </div>
+            </swiper-slide>
+        </swiper>
     </div>
     <div class="col-12 more-recipe-btn">
         <router-link to="/recipes">
@@ -124,9 +155,46 @@ onMounted(async () => {
     margin-top: 30px;
 }
 
-@media screen and (max-width: 810px) {
-    .hotrecipe-card {
-        margin-bottom: 20px;
+.desktop-view {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.mobile-view {
+    display: none; // 預設隱藏
+    width: 100%;
+}
+
+.recipe-cards {
+    text-decoration: none;
+    color: $neutral-color-800;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: transform 0.3s;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
+}
+
+// RWD 轉換
+@media (max-width: 1024px) {
+    .desktop-view {
+        display: none; // 隱藏網格排版
+    }
+
+    .mobile-view {
+        display: block; // 顯示 Swiper 滑動
+        padding: 0 15px; // 側邊留一點內距
+    }
+
+    .recipe-cards {
+        margin-bottom: 0; // 滑動模式下不需要底部邊距
+    }
+
+    .swiper {
+        overflow: visible; // 讓左右卡片露出時不會被切掉（視需求決定）
     }
 }
 </style>
